@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0466e80cca5d145cc93a9627ab4fe154, type: 3}
+  m_Name: planetMissionOfferEntryConfig_03
+  m_EditorClassIdentifier: Data::PlanetMissionOfferEntryConfig
+  id: planetMissionOfferEntryConfig_03
+  displayName: planetMissionOfferEntryConfig_03
+  description: planetMissionOfferEntryConfig_03
+  icon: {fileID: 0}
+  missionTemplateConfig: {fileID: 11400000, guid: 7ba1bb27f35b140288cd445169b3bafd, type: 2}
+  weight: 1
+  isEnabled: 1

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61e4e3a1f3ba341afa5fd1c82762d657, type: 3}
+  m_Name: test_planet_borealis_03
+  m_EditorClassIdentifier: Data::PlanetConfig
+  id: test_planet_borealis_03
+  displayName: Borealis 03
+  description: Remote colony world on the edge of settled space
+  icon: {fileID: 0}
+  planetType: 1
+  isInhabited: 1
+  systemId: system_helios_01
+  planetOrbit: {fileID: 11400000, guid: 93cff9a87fbca4b57b71662cc2156bf9, type: 2}
+  missionPool: {fileID: 0}
+  encounterProfile: {fileID: 0}
+  marketProfile: {fileID: 11400000, guid: 2dc1cc107807a4680943bbabd83cdd64, type: 2}
+  planetMissionConfig: {fileID: 11400000, guid: b7d1304359405465aae5a6f05bafecf3, type: 2}
+  planetSprite: {fileID: 21300000, guid: af14a17089f3d4062a5e53588cd5987d, type: 3}
+  backgroundSprite: {fileID: 0}

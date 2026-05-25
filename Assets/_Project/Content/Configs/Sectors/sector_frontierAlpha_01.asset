@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1414ae258b9df42bb8ece460f398de7e, type: 3}
+  m_Name: sector_frontierAlpha_01
+  m_EditorClassIdentifier: Data::SectorConfig
+  id: sector_frontierAlpha_01
+  displayName: Frontier Alpha
+  description: 
+  icon: {fileID: 0}
+  systems:
+  - {fileID: 11400000, guid: 1bd02b7a49afc49c2b8c18d930dfcb4a, type: 2}
+  - {fileID: 11400000, guid: 1ffbbb1516f9d4486af06558ca31375d, type: 2}
+  - {fileID: 11400000, guid: 799c3952b8c554e49b7895d5687c63d5, type: 2}
+  - {fileID: 11400000, guid: 7bf9d183ca0954eacb83e0432f2fb1e2, type: 2}
+  - {fileID: 11400000, guid: 97987aba3483740e79ce3182774035dd, type: 2}
+  startingSystem: {fileID: 11400000, guid: 1ffbbb1516f9d4486af06558ca31375d, type: 2}
+  startingPlanet: {fileID: 11400000, guid: b04f0b0971a5b4e45bcf426b63d0c39d, type: 2}

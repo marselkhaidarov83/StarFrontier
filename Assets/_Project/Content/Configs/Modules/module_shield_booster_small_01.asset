@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc38d22568337498da514ef1b95c82e3, type: 3}
+  m_Name: module_shield_booster_small_01
+  m_EditorClassIdentifier: Data::ModuleConfig
+  id: module_shield_booster_small_01
+  displayName: Small Shield Booster
+  description: Active defensive module that restores shield strength
+  icon: {fileID: 21300000, guid: 792aaa9ae5be148728c59421c52393f2, type: 3}
+  moduleType: 0
+  activationType: 1
+  slotType: 0
+  activeEffectType: 1
+  statType: 1
+  flatBonus: 25
+  percentBonus: 0
+  cooldown: 8
+  energyCost: 20
+  statModifiers:
+  - statType: 1
+    modifierType: 0
+    value: 20

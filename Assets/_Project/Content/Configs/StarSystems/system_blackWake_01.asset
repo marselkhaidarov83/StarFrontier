@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: system_blackWake_01
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_blackWake_01
+  displayName: Black Wake
+  description: 
+  icon: {fileID: 21300000, guid: 2f47503ef4cdc4d9f9d978c6f81cb950, type: 3}
+  economyType: 0
+  dangerLevel: 1
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems:
+  - linkedSystem: {fileID: 11400000, guid: 799c3952b8c554e49b7895d5687c63d5, type: 2}
+    parsecDistance: 1
+    exitPoint: {x: 0, y: 0, z: -2}
+    entryPoint: {x: 0, y: 0, z: -2}
+    sprite: {fileID: 0}
+    size: 50
+  - linkedSystem: {fileID: 11400000, guid: 97987aba3483740e79ce3182774035dd, type: 2}
+    parsecDistance: 2
+    exitPoint: {x: 0, y: 0, z: -2}
+    entryPoint: {x: 0, y: 0, z: -2}
+    sprite: {fileID: 0}
+    size: 50
+  - linkedSystem: {fileID: 11400000, guid: 5d9b8ebf2cbec4fb18ec7cdb91136463, type: 2}
+    parsecDistance: 3
+    exitPoint: {x: 0, y: 0, z: -2}
+    entryPoint: {x: 0, y: 0, z: -2}
+    sprite: {fileID: 0}
+    size: 50
+  missionTags: 
+  mapPosition: {x: -500, y: -840, z: 0}

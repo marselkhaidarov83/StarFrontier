@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 535f865655d64484c93a265bcc225b94, type: 3}
+  m_Name: enemy_chaser
+  m_EditorClassIdentifier: Data::EnemyConfig
+  id: enemy_chaser
+  displayName: Pirate Chaser
+  description: 
+  icon: {fileID: 21300000, guid: 1e0b7c4a31fab4817af0773a7bf5e650, type: 3}
+  baseHull: 30
+  baseShield: 0
+  baseEnergy: 20
+  baseSpeed: 35
+  archetype: 0
+  weaponConfig: {fileID: 11400000, guid: 106ae8e8b101b4c4abbb1fb21e0a6779, type: 2}
+  creditReward: 25
+  xpReward: 5
+  dangerTier: 1
+  combatSprite: {fileID: 21300000, guid: 7b83f75e6042c45c4ad4fa313be160ef, type: 3}

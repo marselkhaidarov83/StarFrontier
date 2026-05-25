@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61e4e3a1f3ba341afa5fd1c82762d657, type: 3}
+  m_Name: planet_cinderMine_01
+  m_EditorClassIdentifier: Data::PlanetConfig
+  id: planet_cinderMine_01
+  displayName: Cinder Mine
+  description: Harsh industrial mining planet rich in raw ore
+  icon: {fileID: 0}
+  planetType: 2
+  isInhabited: 1
+  systemId: system_helios_01
+  planetOrbit: {fileID: 11400000, guid: eb9159aa927ab4640b97e560f53559ab, type: 2}
+  missionPool: {fileID: 0}
+  encounterProfile: {fileID: 0}
+  marketProfile: {fileID: 11400000, guid: ca5e830c7249349bcbb4a89787d29d1e, type: 2}
+  planetMissionConfig: {fileID: 11400000, guid: 15934af5646614da99f9142f53a2635f, type: 2}
+  planetSprite: {fileID: 21300000, guid: 66c7d873126484f448577acf1ab540a9, type: 3}
+  backgroundSprite: {fileID: 0}

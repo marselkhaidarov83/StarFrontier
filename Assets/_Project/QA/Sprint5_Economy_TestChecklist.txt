@@ -1,0 +1,72 @@
+# Sprint 5 Economy Test Checklist
+
+## CargoInventory
+- [ ] Add item
+- [ ] Remove item
+- [ ] Cannot exceed cargo capacity
+- [ ] Cannot remove more than owned
+- [ ] Save/load preserves cargo
+
+## Economy / PriceCalculator
+- [ ] Buy price is valid
+- [ ] Sell price is valid
+- [ ] Sell price is lower than buy price
+- [ ] Prices differ between systems
+- [ ] No zero or negative prices
+
+## Buy Flow
+- [ ] Successful buy
+- [ ] Not enough credits
+- [ ] Not enough cargo space
+- [ ] Invalid item
+- [ ] Invalid quantity
+
+## Sell Flow
+- [ ] Successful sell
+- [ ] Item not owned
+- [ ] Not enough quantity
+- [ ] Invalid item
+- [ ] Invalid quantity
+
+## Refuel Flow
+- [ ] Successful refuel
+- [ ] Fuel already full
+- [ ] Not enough credits
+- [ ] Travel blocked with empty fuel
+- [ ] Travel works after refuel
+
+## Repair Flow
+- [ ] Successful repair
+- [ ] Hull already full
+- [ ] Not enough credits
+- [ ] Hull updates correctly
+- [ ] Save/load preserves hull
+
+## Market UI
+- [ ] Market opens
+- [ ] List builds correctly
+- [ ] Buy button works
+- [ ] Sell button works
+- [ ] Refuel button works
+- [ ] Repair button works
+- [ ] Header values refresh correctly
+- [ ] Back button works
+- [ ] No NullReferenceException
+
+## Save / Load
+- [ ] Credits persist
+- [ ] Cargo persists
+- [ ] Fuel persists
+- [ ] Hull persists
+- [ ] System persists
+
+## Full Regression
+- [ ] Open market
+- [ ] Buy item
+- [ ] Sell item
+- [ ] Refuel
+- [ ] Repair
+- [ ] Travel
+- [ ] Save
+- [ ] Load
+- [ ] Re-open market

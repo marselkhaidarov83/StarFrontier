@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 535f865655d64484c93a265bcc225b94, type: 3}
+  m_Name: enemy_pirate_heavy_01
+  m_EditorClassIdentifier: Data::EnemyConfig
+  id: enemy_pirate_heavy_01
+  displayName: Pirate Heavy
+  description: Heavily armored pirate ship built for sustained pressure and durability
+  icon: {fileID: 21300000, guid: bbaadedb1f9da445e90faaf282a6ed5f, type: 3}
+  baseHull: 150
+  baseShield: 90
+  baseEnergy: 110
+  baseSpeed: 3.6
+  archetype: 2
+  weaponConfig: {fileID: 11400000, guid: c7adcdc4429044cdeb0c491af8387737, type: 2}
+  creditReward: 90
+  xpReward: 30
+  dangerTier: 3
+  combatSprite: {fileID: 21300000, guid: 72211b5bfcffe45dabcfe0580de75f44, type: 3}

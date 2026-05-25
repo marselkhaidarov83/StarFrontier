@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1c95fd5b8a864c38b2d962145d7e31e, type: 3}
+  m_Name: item_industrial_parts_01
+  m_EditorClassIdentifier: Data::ItemConfig
+  id: item_industrial_parts_01
+  displayName: Industrial Parts
+  description: Machinery parts and mechanical components for production systems
+  icon: {fileID: 21300000, guid: c9b59589d28774ca596eb80a1b83c015, type: 3}
+  itemCategory: 6
+  basePrice: 40
+  cargoSize: 2
+  rarity: 0
+  isLegal: 1

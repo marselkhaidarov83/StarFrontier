@@ -1,0 +1,8 @@
+﻿<Solution>
+  <Project Path="Data.csproj" />
+  <Project Path="Core.csproj" />
+  <Project Path="Tools.csproj" />
+  <Project Path="Presentation.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+</Solution>

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1c95fd5b8a864c38b2d962145d7e31e, type: 3}
+  m_Name: item_tech_components_01
+  m_EditorClassIdentifier: Data::ItemConfig
+  id: item_tech_components_01
+  displayName: Tech Components
+  description: Advanced components used in high-tech manufacturing and maintenance
+  icon: {fileID: 21300000, guid: f53c99628d51c470a83e61c9f58d9af0, type: 3}
+  itemCategory: 8
+  basePrice: 70
+  cargoSize: 1
+  rarity: 2
+  isLegal: 1

@@ -1,0 +1,395 @@
+{\rtf1\ansi\ansicpg1251\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # STAR FRONTIER \'97 Graphics Standard v1\
+\
+## 1. Purpose\
+This document defines the technical graphic standards for the STAR FRONTIER project.\
+It is used to keep all art, UI and placeholder assets consistent across the project.\
+\
+The standard applies to:\
+- UI\
+- ships\
+- planets\
+- enemies\
+- items\
+- modules\
+- weapons\
+- backgrounds\
+- effects\
+- placeholder content\
+- prototype content\
+\
+---\
+\
+## 2. Platform and screen orientation\
+Project target:\
+- Android\
+- portrait orientation only\
+\
+All UI and graphic assets must be created with vertical mobile screen readability in mind.\
+\
+Reference UI resolution:\
+- 1080 x 1920\
+\
+Main rule:\
+- readability first\
+- silhouette first\
+- contrast first\
+- decoration second\
+\
+---\
+\
+## 3. General file rules\
+\
+### 3.1 Allowed file formats\
+Use:\
+- PNG for UI, icons, sprites, transparent assets\
+- optional PSD/source files outside Unity project if needed\
+\
+Do not use for final in-project runtime assets:\
+- JPG for UI icons\
+- random mixed formats for the same asset category\
+\
+### 3.2 Background transparency\
+Use transparent background for:\
+- icons\
+- ships\
+- planets\
+- items\
+- modules\
+- weapons\
+- most VFX sprites\
+- UI buttons and panels if layered in UI\
+\
+Use non-transparent background only for:\
+- full-screen backgrounds\
+- baked splash or full-frame scene art\
+\
+---\
+\
+## 4. Naming convention\
+\
+### 4.1 General rule\
+All asset names use:\
+- lowercase\
+- underscore separator\
+- English only\
+- no spaces\
+- no random suffixes like final_final_2\
+\
+### 4.2 Naming pattern\
+category_subject_variant_type\
+\
+Examples:\
+- ui_btn_primary_normal\
+- ui_btn_primary_disabled\
+- ui_panel_base\
+- ship_scout_icon\
+- ship_scout_combat\
+- ship_trader_icon\
+- planet_mining_01\
+- weapon_pulse_laser_icon\
+- module_shield_booster_icon\
+- item_med_supplies_icon\
+- bg_space_meta_01\
+- bg_space_combat_01\
+\
+### 4.3 Prefix recommendations\
+Use these prefixes:\
+\
+UI:\
+- ui_\
+\
+Ships:\
+- ship_\
+\
+Planets:\
+- planet_\
+\
+Enemies:\
+- enemy_\
+\
+Weapons:\
+- weapon_\
+\
+Modules:\
+- module_\
+\
+Items:\
+- item_\
+\
+Backgrounds:\
+- bg_\
+\
+Effects:\
+- fx_\
+\
+---\
+\
+## 5. Naming-to-code consistency\
+Whenever possible, asset naming should match config logic and ScriptableObject naming.\
+\
+Examples:\
+- ship_scout icon goes with ship_scout config\
+- weapon_pulse_laser icon goes with weapon_pulse_laser config\
+- planet_mining_01 visual may be used by mining-type planets\
+\
+This reduces mistakes in:\
+- config assignment\
+- prefab setup\
+- validator checks\
+- future generators\
+\
+---\
+\
+## 6. Size standards\
+\
+### 6.1 UI icons\
+Small UI icon:\
+- 128 x 128\
+\
+Standard UI icon:\
+- 256 x 256\
+\
+### 6.2 Buttons\
+Recommended button source size:\
+- from 256 x 96 and above\
+- large menu buttons may use 512 x 128 or 512 x 160\
+\
+### 6.3 Panels\
+Panel source size:\
+- depends on layout\
+- prefer 512+ width sources for clean slicing\
+\
+### 6.4 Ship assets\
+Ship UI icon:\
+- 256 x 256\
+\
+Ship combat sprite:\
+- 512 x 512\
+\
+### 6.5 Planet assets\
+Planet icon:\
+- 256 x 256 if needed\
+\
+Planet main sprite:\
+- 512 x 512\
+\
+### 6.6 Item / weapon / module icons\
+Default:\
+- 256 x 256\
+\
+### 6.7 Backgrounds\
+Portrait background target:\
+- 1080 x 1920\
+or higher portrait ratio source if needed\
+\
+---\
+\
+## 7. Pivot rules\
+\
+### 7.1 Default pivot\
+Use center pivot for:\
+- icons\
+- planets\
+- ships\
+- enemies\
+- most gameplay sprites\
+\
+### 7.2 UI pivot\
+Use center pivot for:\
+- most buttons\
+- slot frames\
+- icons\
+\
+Use custom pivot only when layout specifically requires it:\
+- bars\
+- edge-attached decorative panels\
+- sliced UI corners\
+\
+### 7.3 Important rule\
+Do not mix pivots randomly inside one asset category.\
+\
+---\
+\
+## 8. Unity import presets\
+\
+### 8.1 For UI sprites\
+Texture Type:\
+- Sprite (2D and UI)\
+\
+Sprite Mode:\
+- Single unless slicing is needed\
+\
+Mesh Type:\
+- Full Rect\
+\
+Compression:\
+- moderate / project-approved mobile setting\
+\
+Generate Mip Maps:\
+- off for UI\
+\
+Filter Mode:\
+- Bilinear by default unless pixel style is intended\
+\
+### 8.2 For world/gameplay sprites\
+Texture Type:\
+- Sprite (2D and UI)\
+\
+Sprite Mode:\
+- Single unless atlas/sheet use is required\
+\
+Mesh Type:\
+- Tight or Full Rect depending on visual result\
+- use Full Rect when layout or bounds consistency matters\
+\
+Compression:\
+- moderate mobile-friendly\
+\
+### 8.3 For full-screen backgrounds\
+Texture Type:\
+- Sprite (2D and UI) if used in UI Image\
+or appropriate type if pipeline changes later\
+\
+Compression:\
+- mobile friendly\
+- avoid over-heavy imports\
+\
+---\
+\
+## 9. Sprite slicing rules\
+\
+Use slicing only when needed.\
+\
+### 9.1 Slice these asset types if needed\
+- scalable UI panels\
+- window frames\
+- button backgrounds\
+- modular UI frames\
+\
+### 9.2 Do not slice by default\
+Do not slice:\
+- standard icons\
+- planets\
+- ships\
+- items\
+- modules\
+- weapon icons\
+\
+### 9.3 Rule for sliced UI\
+All scalable UI assets must preserve corners and border readability on portrait screens.\
+\
+---\
+\
+## 10. Readability rules for mobile portrait\
+\
+### 10.1 Main principle\
+If the asset looks good only in large preview but becomes unreadable on phone size, it fails the standard.\
+\
+### 10.2 Required visual priorities\
+- large readable silhouette\
+- strong contrast\
+- minimal visual noise\
+- important state differences visible immediately\
+\
+### 10.3 States that must be clearly distinguishable\
+For UI buttons and controls:\
+- normal\
+- selected\
+- disabled\
+- warning if used later\
+\
+### 10.4 Text and icon relation\
+Icons and UI elements must not overpower or bury text.\
+Buttons must remain readable with short labels.\
+\
+---\
+\
+## 11. Category-specific rules\
+\
+### 11.1 UI\
+Use unified visual language:\
+- same corner treatment\
+- same panel logic\
+- same shadow logic if any\
+- same highlight logic for selected state\
+\
+### 11.2 Ships\
+Each ship role must be visually distinct by silhouette:\
+- scout = lighter / faster silhouette\
+- frigate = heavier combat silhouette\
+- trader = bulkier cargo silhouette\
+\
+### 11.3 Planets\
+Planet role must be readable by color and surface cues:\
+- inhabited hub\
+- frontier\
+- mining\
+- industrial\
+- science\
+- dead / uninhabited\
+\
+### 11.4 Items, modules, weapons\
+One icon = one clear visual idea.\
+Avoid clutter and tiny details.\
+\
+---\
+\
+## 12. Placeholder and prototype assets\
+Placeholder assets must still follow:\
+- naming convention\
+- pivot convention\
+- format rules\
+- size standards where possible\
+\
+Even temporary assets must be organized as if they are part of a real production pipeline.\
+\
+---\
+\
+## 13. Folder structure alignment\
+Assets should be placed in category folders:\
+\
+- Assets/Art/UI\
+- Assets/Art/Ships\
+- Assets/Art/Planets\
+- Assets/Art/Enemies\
+- Assets/Art/Weapons\
+- Assets/Art/Modules\
+- Assets/Art/Items\
+- Assets/Art/Backgrounds\
+- Assets/Art/Effects\
+\
+Recommended optional subfolders:\
+- Icons\
+- Combat\
+- Placeholders\
+- HUD\
+- Buttons\
+- Panels\
+- Windows\
+\
+---\
+\
+## 14. Validation checklist for every new asset\
+Before importing or approving a graphic asset, check:\
+\
+- correct file name\
+- correct category folder\
+- correct format\
+- correct background transparency\
+- correct pivot\
+- correct size\
+- readable on mobile portrait\
+- matches category visual language\
+\
+---\
+\
+## 15. Final rule\
+If an asset violates readability, naming or import consistency, fix it before large-scale integration.\
+Consistency is more important than isolated visual polish at prototype stage.}

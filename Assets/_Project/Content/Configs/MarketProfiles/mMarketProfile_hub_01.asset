@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17636ef3b01a7427eaea4d4bedd0666e, type: 3}
+  m_Name: mMarketProfile_hub_01
+  m_EditorClassIdentifier: Data::MarketProfileConfig
+  id: mMarketProfile_hub_01
+  displayName: Central Hub Market
+  description: Balanced prices and broad assortment
+  icon: {fileID: 0}
+  specialization: 0
+  items:
+  - ItemConfig: {fileID: 11400000, guid: 03007b53fda4544a8ad4c6fcfeaa20a7, type: 2}
+    Quantity: 0
+    BuyMultiplier: 1
+    SellMultiplier: 0.5
+    IsAvailable: 1
+  - ItemConfig: {fileID: 11400000, guid: 428d2c88302a6432292246d686d3aa33, type: 2}
+    Quantity: 0
+    BuyMultiplier: 1
+    SellMultiplier: 0.55
+    IsAvailable: 1
+  - ItemConfig: {fileID: 11400000, guid: c18106c37564547fcaa292fec4fe5866, type: 2}
+    Quantity: 0
+    BuyMultiplier: 1
+    SellMultiplier: 0.5
+    IsAvailable: 1
+  - ItemConfig: {fileID: 11400000, guid: 38f03f17eab5743eaad34c18070ada8e, type: 2}
+    Quantity: 0
+    BuyMultiplier: 1
+    SellMultiplier: 0.8
+    IsAvailable: 1

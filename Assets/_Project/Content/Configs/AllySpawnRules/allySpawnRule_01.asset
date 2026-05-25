@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2af2369609ace40fda949980018bc489, type: 3}
+  m_Name: allySpawnRule_01
+  m_EditorClassIdentifier: Data::AllySpawnRuleConfig
+  id: allySpawnRule_01
+  displayName: allySpawnRule_01
+  description: 
+  icon: {fileID: 0}
+  allyConfig: {fileID: 11400000, guid: e024229b9939c4a90929c3bd2cfacf38, type: 2}
+  minCount: 2
+  maxCount: 5
+  spawnIntervalSeconds: 60
+  behaviorWeights:
+  - behaviorType: 23
+    weight: 30
+  - behaviorType: 20
+    weight: 55
+  - behaviorType: 21
+    weight: 14
+  - behaviorType: 11
+    weight: 1
+  engageEnemiesWeight: 100

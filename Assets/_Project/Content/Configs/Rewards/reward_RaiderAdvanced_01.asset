@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 935fd24c011e24ffdbc4be4e4caf4be3, type: 3}
+  m_Name: reward_RaiderAdvanced_01
+  m_EditorClassIdentifier: Data::RewardConfig
+  id: reward_RaiderAdvanced_01
+  displayName: 
+  description: 
+  icon: {fileID: 0}
+  creditsMin: 120
+  creditsMax: 250
+  itemDrops:
+  - Item: {fileID: 11400000, guid: 38f03f17eab5743eaad34c18070ada8e, type: 2}
+    Chance: 0.4
+    MinAmount: 1
+    MaxAmount: 3
+  - Item: {fileID: 11400000, guid: 1ad3f906422f1487db63326c84bb636d, type: 2}
+    Chance: 0.35
+    MinAmount: 1
+    MaxAmount: 2
+  - Item: {fileID: 11400000, guid: 03007b53fda4544a8ad4c6fcfeaa20a7, type: 2}
+    Chance: 0.2
+    MinAmount: 1
+    MaxAmount: 1

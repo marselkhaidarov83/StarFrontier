@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5955481474fd47e39c365ae6eb9d60e, type: 3}
+  m_Name: ship_frigate_01
+  m_EditorClassIdentifier: Data::ShipConfig
+  id: ship_frigate_01
+  displayName: Frigate
+  description: Balanced combat ship with improved durability
+  icon: {fileID: 21300000, guid: d08a25a3e3cc543c481f0a6a5edddef0, type: 3}
+  baseHull: 160
+  baseShield: 120
+  baseEnergy: 120
+  baseEnergyRegen: 10
+  baseSpeed: 50
+  baseAcceleration: 5.5
+  baseTurnRate: 95
+  baseCargoCapacity: 40
+  weaponSlotCount: 2
+  moduleSlotCount: 2
+  combatSprite: {fileID: 21300000, guid: 04f744d6b4627417f8239723840890e2, type: 3}

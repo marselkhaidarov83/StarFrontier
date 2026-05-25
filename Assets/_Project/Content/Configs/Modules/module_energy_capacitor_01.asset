@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc38d22568337498da514ef1b95c82e3, type: 3}
+  m_Name: module_energy_capacitor_01
+  m_EditorClassIdentifier: Data::ModuleConfig
+  id: module_energy_capacitor_01
+  displayName: Energy Capacitor
+  description: Passive energy module that increases maximum ship energy
+  icon: {fileID: 21300000, guid: 3bd9a86d1c4e14a939757d2127969c24, type: 3}
+  moduleType: 1
+  activationType: 0
+  slotType: 0
+  activeEffectType: 0
+  statType: 2
+  flatBonus: 30
+  percentBonus: 0
+  cooldown: 0
+  energyCost: 0
+  statModifiers:
+  - statType: 4
+    modifierType: 0
+    value: 1

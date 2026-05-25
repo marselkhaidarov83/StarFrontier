@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51a9e2cd2123d4c87882793e01ef9aac, type: 3}
+  m_Name: sun_yellow_01
+  m_EditorClassIdentifier: Data::SunConfig
+  id: sun_yellow_01
+  displayName: Sun
+  description: 
+  icon: {fileID: 21300000, guid: fa1f94410859e47509233af6e24bce73, type: 3}
+  sunSprite: {fileID: 21300000, guid: 215e1224bf1e346d084ef5949ca9c6d0, type: 3}
+  visualSize: 65
+  localOffset: {x: 0, y: 0}

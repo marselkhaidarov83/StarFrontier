@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: system_vesta_forge_01
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_vesta_forge_01
+  displayName: Vesta Forge
+  description: system_vesta_forge_01
+  icon: {fileID: 0}
+  economyType: 1
+  dangerLevel: 2
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems:
+  - linkedSystem: {fileID: 11400000, guid: 62d8f47103b7c4e26b1d851015b703a5, type: 2}
+    parsecDistance: 1
+    exitPoint: {x: 0, y: 0, z: -2}
+    entryPoint: {x: 0, y: 0, z: -2}
+    sprite: {fileID: 0}
+  - linkedSystem: {fileID: 11400000, guid: 092347aa480324109a5f47ae00985aa3, type: 2}
+    parsecDistance: 2
+    exitPoint: {x: 0, y: 0, z: -2}
+    entryPoint: {x: 0, y: 0, z: -2}
+    sprite: {fileID: 0}
+  - linkedSystem: {fileID: 11400000, guid: 8365a353287974e0babf0bfbdfce46c3, type: 2}
+    parsecDistance: 3
+    exitPoint: {x: 0, y: 0, z: -2}
+    entryPoint: {x: 0, y: 0, z: -2}
+    sprite: {fileID: 0}
+  missionTags: 060000000000000002000000
+  mapPosition: {x: 500, y: -400, z: 0}

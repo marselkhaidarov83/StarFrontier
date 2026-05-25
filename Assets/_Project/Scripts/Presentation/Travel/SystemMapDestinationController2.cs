@@ -1,0 +1,244 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
+{
+    [Header("Click Sources")]
+    [SerializeField] private SystemMapClickArea2 mapClickArea;
+    [SerializeField] private List<PlanetSelectableView> planetViews = new();
+
+    public void SetSelectableViews(List<PlanetSelectableView> views)
+    {
+        LogCustom("SetSelectableViews");
+        planetViews = views;
+        LogCustom("planetViews.Count = " + planetViews.Count);
+        Unsubscribe();
+        LogCustom("Unsubscribe");
+        Subscribe();
+        LogCustom("Subscribe");
+    }
+
+    [Header("Visuals")]
+    [SerializeField] private SystemDestinationMarkerController2 markerController;
+
+    [Header("Actions")]
+    [SerializeField] private Button flyButton;
+
+    private SimpleEventBus _simpleEventBus;
+    private ISystemTravelService _systemTravelService;
+    private IOrbitalMotionService _orbitalMotionService;
+    private IGameTimeService _gameTimeService;
+
+    private PlanetSelectableView _selectedPlanetView;
+
+    private void Start()
+    {
+        LogCustom("Start");
+
+        _simpleEventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
+        _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
+        _gameTimeService = Bootstrapper.Instance.ServiceRegistry.Get<IGameTimeService>();
+
+        if (_simpleEventBus == null)
+            Debug.LogError("[SystemMapDestinationController2] _simpleEventBus not found.");
+
+        if (_systemTravelService == null)
+            Debug.LogError("[SystemMapDestinationController2] ISystemTravelService not found.");
+
+        if (_orbitalMotionService == null)
+            Debug.LogError("[SystemMapDestinationController2] IOrbitalMotionService not found.");
+
+        if (_gameTimeService == null)
+            Debug.LogError("[SystemMapDestinationController2] IGameTimeService not found.");
+
+        Subscribe();
+        SetFlyButtonActive(false);
+    }
+
+    private void Update()
+    {
+        UpdateMovingPlanetDestinationMarker();
+    }
+
+    private void OnDestroy()
+    {
+        Unsubscribe();
+    }
+
+    private void Subscribe()
+    {
+        if (mapClickArea != null)
+            mapClickArea.EmptyMapClicked += OnEmptyMapClicked;
+
+        if (flyButton != null)
+            flyButton.onClick.AddListener(OnFlyClicked);
+
+        if (_simpleEventBus != null)
+        {
+            _simpleEventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
+            _simpleEventBus.Subscribe<PlanetSelectedEvent>(OnPlanetSelected);
+        }
+    }
+
+    private void Unsubscribe()
+    {
+        if (mapClickArea != null)
+            mapClickArea.EmptyMapClicked -= OnEmptyMapClicked;
+
+        if (flyButton != null)
+            flyButton.onClick.RemoveListener(OnFlyClicked);
+
+        if (_simpleEventBus != null)
+        {
+            _simpleEventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
+            _simpleEventBus.Unsubscribe<PlanetSelectedEvent>(OnPlanetSelected);
+        }
+    }
+
+    // private void OnPlanetClicked(PlanetSelectableView planetView)
+    // {
+    //     Debug.Log($"[SystemMapDestinationController2] Planet clicked");
+    //     if (_systemTravelService == null || planetView == null)
+    //         return;
+
+    //     PlanetConfig planetData = planetView.Planet;
+    //     Debug.Log($"[SystemMapDestinationController2] Planet clicked: {planetData.Id}");
+
+    //     if (planetData == null)
+    //         return;
+
+    //     _selectedPlanetView = planetView;
+
+    //     _systemTravelService.SetPlanetDestination(planetData);
+
+    //     Vector3 position = GetPlanetCurrentPosition(planetData);
+    //     markerController.ShowPlanetDestination(position);
+
+    //     SetFlyButtonActive(true);
+
+    //     Debug.Log($"[SystemMapDestinationController2] Planet selected: {planetData.Id}");
+    // }
+
+    private void OnPlanetSelected(PlanetSelectedEvent evt)
+    {
+        LogCustom($"Planet clicked");
+        if (_systemTravelService == null)
+            return;
+
+        PlanetConfig planetData = evt.Planet;
+        LogCustom($"Planet clicked: {planetData.Id}");
+
+        if (planetData == null)
+            return;
+
+        foreach (PlanetSelectableView view in planetViews)
+            if (view.Planet.Id == planetData.Id)
+            {
+                _selectedPlanetView = view;
+                break;
+            }
+        // _selectedPlanetView = planetView;
+
+        _systemTravelService.SetPlanetDestination(planetData);
+
+        Vector3 position = GetPlanetCurrentPosition(planetData);
+        LogCustom("position = " + position);
+        markerController.ShowPlanetDestination(position, planetData);
+
+        SetFlyButtonActive(true);
+
+        LogCustom($"LogCustomPlanet selected: {planetData.Id}");
+    }
+
+    private void OnEmptyMapClicked(Vector3 mapPosition)
+    {
+        if (_systemTravelService == null)
+            return;
+
+        _selectedPlanetView = null;
+
+        _systemTravelService.SetMapPointDestination(mapPosition);
+        markerController.ShowMapPointDestination(mapPosition);
+
+        SetFlyButtonActive(true);
+
+        LogCustom($"LogCustomMap point selected: {mapPosition}");
+    }
+
+    private void OnExitMapChanged(ExitMapChangedEvent evt)
+    {
+        StarSystemLink link = evt.StarSystemLink;
+        LogCustom("OnExitMapChanged.StarSystemLink = " + link.LinkedSystem.DisplayName);
+
+        _selectedPlanetView = null;
+
+        _systemTravelService.SetSystemExitDestination(link);
+
+        markerController.ShowSystemExitDestination(link);
+
+        SetFlyButtonActive(true);
+    }
+
+    // private void OnSystemExitClicked(SystemExitNodeView exitMarker)
+    // {
+    //     // Debug.Log("[SystemMapDestinationController2.]");
+
+    //     if (_systemTravelService == null || exitMarker == null)
+    //         return;
+
+    //     StarSystemLink link = exitMarker.SystemLink;
+
+    //     _selectedPlanetView = null;
+
+    //     _systemTravelService.SetSystemExitDestination(link);
+
+    //     markerController.ShowSystemExitDestination(link.ExitPoint);
+
+    //     SetFlyButtonActive(true);
+    // }
+
+    private void OnFlyClicked()
+    {
+        if (_systemTravelService == null)
+            return;
+
+        _systemTravelService.StartTravel();
+        SetFlyButtonActive(false);
+    }
+
+    private void UpdateMovingPlanetDestinationMarker()
+    {
+        if (_selectedPlanetView == null)
+            return;
+
+        if (_systemTravelService == null)
+            return;
+
+        if (_systemTravelService.State.Status == SystemTravelStatus.Flying)
+            return;
+
+        PlanetConfig planetData = _selectedPlanetView.Planet;
+
+        if (planetData == null)
+            return;
+
+        Vector3 position = GetPlanetCurrentPosition(planetData);
+        markerController.ShowPlanetDestination(position, planetData);
+    }
+
+    private Vector3 GetPlanetCurrentPosition(PlanetConfig planetData)
+    {
+        if (_orbitalMotionService == null || _gameTimeService == null || planetData == null)
+            return Vector3.zero;
+
+        return _orbitalMotionService.GetPlanetCurrentPosition(planetData.PlanetOrbit);
+    }
+
+    private void SetFlyButtonActive(bool active)
+    {
+        if (flyButton != null)
+            flyButton.interactable = active;
+    }
+}

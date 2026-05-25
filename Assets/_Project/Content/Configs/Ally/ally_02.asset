@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d7741405179f43cebeecaadac0987e8, type: 3}
+  m_Name: ally_02
+  m_EditorClassIdentifier: Data::AllyConfig
+  id: ally_02
+  displayName: Allied Patrol 02
+  description: 
+  icon: {fileID: 21300000, guid: c5a5fac1fc8b647a798384ca872560e2, type: 3}
+  baseHull: 50
+  baseShield: 20
+  baseEnergy: 50
+  baseSpeed: 50
+  weaponConfig: {fileID: 11400000, guid: 106ae8e8b101b4c4abbb1fb21e0a6779, type: 2}
+  mapSprite: {fileID: 21300000, guid: bb501432dfcda41e8b2fb1d33754d338, type: 3}

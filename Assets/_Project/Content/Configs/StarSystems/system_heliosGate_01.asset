@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: system_heliosGate_01
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_heliosGate_01
+  displayName: Helios Gate
+  description: 
+  icon: {fileID: 21300000, guid: 8ee55e2b0a1ff42e995cdb72bd7710e1, type: 3}
+  economyType: 0
+  dangerLevel: 1
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: b04f0b0971a5b4e45bcf426b63d0c39d, type: 2}
+  - {fileID: 11400000, guid: a9db92a8a4e874c86b84d3f0b008c46c, type: 2}
+  - {fileID: 11400000, guid: fd979253cf1af4cba9623823ecf31771, type: 2}
+  - {fileID: 11400000, guid: a5aeec15e729a45409908734cef6ede6, type: 2}
+  - {fileID: 11400000, guid: 3c7028fad95d04ba78542f3f7ef170b7, type: 2}
+  linkedSystems:
+  - linkedSystem: {fileID: 11400000, guid: 85f6de5a929834e65a365b67795ed337, type: 2}
+    parsecDistance: 1
+    exitPoint: {x: 480, y: 0, z: -2}
+    entryPoint: {x: -480, y: 0, z: -2}
+    sprite: {fileID: 0}
+    size: 50
+  missionTags: 
+  mapPosition: {x: 250, y: -720, z: 0}
+  systemPopulation: {fileID: 11400000, guid: 09492a3b91c4c4d6e8a3db4404f65d5b, type: 2}
