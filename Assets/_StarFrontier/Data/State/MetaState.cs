@@ -1,7 +1,7 @@
 using System;
 
 [Serializable]
-public sealed class MetaState
+public sealed class MetaStateU
 {
     public int saveVersion = 1;
     public string createdAtUtc;
