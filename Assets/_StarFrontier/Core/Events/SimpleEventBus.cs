@@ -2,69 +2,77 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace StarFrontier.Core.Events
+public sealed class SimpleEventBus
 {
-    public sealed class SimpleEventBus
+    private readonly Dictionary<Type, Delegate> _handlersByEventType = new();
+
+    public void Subscribe<TEvent>(Action<TEvent> handler)
     {
-        private readonly Dictionary<Type, Delegate> _handlers = new();
-
-        public void Subscribe<TEvent>(Action<TEvent> handler)
+        if (handler == null)
         {
-            var type = typeof(TEvent);
-
-            if (_handlers.TryGetValue(type, out var existing))
-            {
-                _handlers[type] = Delegate.Combine(existing, handler);
-            }
-            else
-            {
-                _handlers[type] = handler;
-            }
+            Debug.LogWarning($"SimpleEventBus: null handler for {typeof(TEvent).Name} skipped.");
+            return;
         }
 
-        public void Unsubscribe<TEvent>(Action<TEvent> handler)
+        var eventType = typeof(TEvent);
+
+        if (_handlersByEventType.TryGetValue(eventType, out var existingHandler))
         {
-            var type = typeof(TEvent);
+            _handlersByEventType[eventType] = Delegate.Combine(existingHandler, handler);
+        }
+        else
+        {
+            _handlersByEventType[eventType] = handler;
+        }
+    }
 
-            if (!_handlers.TryGetValue(type, out var existing))
-            {
-                return;
-            }
-
-            var updated = Delegate.Remove(existing, handler);
-
-            if (updated == null)
-            {
-                _handlers.Remove(type);
-            }
-            else
-            {
-                _handlers[type] = updated;
-            }
+    public void Unsubscribe<TEvent>(Action<TEvent> handler)
+    {
+        if (handler == null)
+        {
+            return;
         }
 
-        public void Publish<TEvent>(TEvent eventData)
+        var eventType = typeof(TEvent);
+
+        if (!_handlersByEventType.TryGetValue(eventType, out var existingHandler))
         {
-            var type = typeof(TEvent);
-
-            if (!_handlers.TryGetValue(type, out var handler))
-            {
-                return;
-            }
-
-            try
-            {
-                ((Action<TEvent>)handler)?.Invoke(eventData);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"SimpleEventBus: error while publishing {type.Name}: {exception}");
-            }
+            return;
         }
 
-        public void Clear()
+        var updatedHandler = Delegate.Remove(existingHandler, handler);
+
+        if (updatedHandler == null)
         {
-            _handlers.Clear();
+            _handlersByEventType.Remove(eventType);
         }
+        else
+        {
+            _handlersByEventType[eventType] = updatedHandler;
+        }
+    }
+
+    public void Publish<TEvent>(TEvent eventData)
+    {
+        var eventType = typeof(TEvent);
+
+        if (!_handlersByEventType.TryGetValue(eventType, out var handler))
+        {
+            return;
+        }
+
+        try
+        {
+            ((Action<TEvent>)handler)?.Invoke(eventData);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"SimpleEventBus: error while publishing {eventType.Name}: {exception}");
+        }
+    }
+
+    public void Clear()
+    {
+        _handlersByEventType.Clear();
     }
 }

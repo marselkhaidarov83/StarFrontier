@@ -2,49 +2,72 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace StarFrontier.Core.Services
+public sealed class ServiceRegistry
 {
-    public sealed class ServiceRegistry
+    private readonly Dictionary<Type, object> _services = new();
+
+    public void Register<T>(T service) where T : class
     {
-        private readonly Dictionary<Type, object> _services = new();
+        var type = typeof(T);
 
-        public void Register<T>(T service) where T : class
+        if (service == null)
         {
-            if (service == null)
-            {
-                Debug.LogError($"ServiceRegistry: cannot register null service {typeof(T).Name}");
-                return;
-            }
-
-            _services[typeof(T)] = service;
+            Debug.LogError($"ServiceRegistry: cannot register null service {type.Name}");
+            return;
         }
 
-        public T Get<T>() where T : class
+        if (_services.ContainsKey(type))
         {
-            if (_services.TryGetValue(typeof(T), out var service))
-            {
-                return service as T;
-            }
-
-            Debug.LogError($"ServiceRegistry: service {typeof(T).Name} not found.");
-            return null;
+            Debug.LogWarning($"ServiceRegistry: service {type.Name} already registered. It will be replaced.");
         }
 
-        public bool TryGet<T>(out T service) where T : class
-        {
-            if (_services.TryGetValue(typeof(T), out var rawService))
-            {
-                service = rawService as T;
-                return service != null;
-            }
+        _services[type] = service;
+    }
 
-            service = null;
-            return false;
+    public T Get<T>() where T : class
+    {
+        var type = typeof(T);
+
+        if (_services.TryGetValue(type, out var service))
+        {
+            return service as T;
         }
 
-        public void Clear()
+        Debug.LogError($"ServiceRegistry: service {type.Name} not found.");
+        return null;
+    }
+
+    public bool TryGet<T>(out T service) where T : class
+    {
+        var type = typeof(T);
+
+        if (_services.TryGetValue(type, out var rawService))
         {
-            _services.Clear();
+            service = rawService as T;
+            return service != null;
         }
+
+        service = null;
+        return false;
+    }
+
+    public bool Has<T>() where T : class
+    {
+        return _services.ContainsKey(typeof(T));
+    }
+
+    public void Unregister<T>() where T : class
+    {
+        var type = typeof(T);
+
+        if (_services.ContainsKey(type))
+        {
+            _services.Remove(type);
+        }
+    }
+
+    public void Clear()
+    {
+        _services.Clear();
     }
 }
