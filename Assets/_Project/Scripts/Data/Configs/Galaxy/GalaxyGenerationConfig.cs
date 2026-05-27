@@ -2,7 +2,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "GalaxyGenerationConfig",
-    menuName = "Star Frontier/Galaxy/Galaxy Generation Config")]
+    menuName = "StarFrontier/Galaxy/Galaxy Generation Config")]
 public class GalaxyGenerationConfig : ScriptableObject
 {
     [Header("Galaxy Structure")]

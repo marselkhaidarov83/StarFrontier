@@ -3,7 +3,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SectorConfig", menuName = "StarFrontier/Configs/Sector")]
 public class SectorConfig : BaseConfig
 {
-    
+    public int Order;
+    public bool UnlockedAtStart;
+
     [Header("World Structure")]
     [SerializeField] private StarSystemConfig[] systems;
     [SerializeField] private StarSystemConfig startingSystem;

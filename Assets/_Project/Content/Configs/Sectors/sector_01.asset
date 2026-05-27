@@ -10,12 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1414ae258b9df42bb8ece460f398de7e, type: 3}
-  m_Name: sector_frontierAlpha_01
+  m_Name: sector_01
   m_EditorClassIdentifier: Data::SectorConfig
-  id: sector_frontierAlpha_01
-  displayName: Frontier Alpha
+  id: sector_01
+  displayName: Frontier Sector
   description: 
   icon: {fileID: 0}
+  Order: 1
+  UnlockedAtStart: 1
   systems:
   - {fileID: 11400000, guid: 1bd02b7a49afc49c2b8c18d930dfcb4a, type: 2}
   - {fileID: 11400000, guid: 1ffbbb1516f9d4486af06558ca31375d, type: 2}
