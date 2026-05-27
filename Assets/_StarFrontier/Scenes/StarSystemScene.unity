@@ -318,6 +318,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &228078197
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 228078199}
+  - component: {fileID: 228078198}
+  m_Layer: 0
+  m_Name: LegacyMigrationValidator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &228078198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228078197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb3c257cb66c14bff85aa8bba1df4e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LegacyMigrationValidator
+--- !u!4 &228078199
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228078197}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 14.96}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &344734499
 GameObject:
   m_ObjectHideFlags: 0
@@ -1266,55 +1310,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 778813232}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &780457260
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 780457262}
-  - component: {fileID: 780457261}
-  m_Layer: 0
-  m_Name: DebugHudView
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &780457261
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 780457260}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0487db78f16f480fa422ded75f939fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DebugHudView
-  infoText: {fileID: 4671214382064479936}
-  manualTickButton: {fileID: 4671214382064479935}
-  saveButton: {fileID: 4671214382064479934}
-  loadButton: {fileID: 1295880370}
-  resetSaveButton: {fileID: 4671214382064479933}
---- !u!4 &780457262
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 780457260}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 540, y: 960, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &805425377
 GameObject:
   m_ObjectHideFlags: 0
@@ -1691,17 +1686,6 @@ Transform:
   - {fileID: 758849578}
   m_Father: {fileID: 4157428}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1295880370 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9067636946480379708, guid: 802bd0fc4861641dea85d916b3091470, type: 3}
-  m_PrefabInstance: {fileID: 2653279335942629151}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &1309277672
 GameObject:
   m_ObjectHideFlags: 0
@@ -2802,50 +2786,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 802bd0fc4861641dea85d916b3091470, type: 3}
---- !u!114 &4671214382064479933 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5653778216278393944, guid: 802bd0fc4861641dea85d916b3091470, type: 3}
-  m_PrefabInstance: {fileID: 2653279335942629151}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
---- !u!114 &4671214382064479934 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5367823490701232052, guid: 802bd0fc4861641dea85d916b3091470, type: 3}
-  m_PrefabInstance: {fileID: 2653279335942629151}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
---- !u!114 &4671214382064479935 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1226246614154406133, guid: 802bd0fc4861641dea85d916b3091470, type: 3}
-  m_PrefabInstance: {fileID: 2653279335942629151}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
---- !u!114 &4671214382064479936 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8259693166750986921, guid: 802bd0fc4861641dea85d916b3091470, type: 3}
-  m_PrefabInstance: {fileID: 2653279335942629151}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2854,4 +2794,4 @@ SceneRoots:
   - {fileID: 114733858}
   - {fileID: 665292841}
   - {fileID: 805425380}
-  - {fileID: 780457262}
+  - {fileID: 228078199}
