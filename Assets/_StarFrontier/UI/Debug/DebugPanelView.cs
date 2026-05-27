@@ -34,9 +34,9 @@ public sealed class DebugPanelView : MonoBehaviour
 
     private void ResetSave()
     {
-        _saveService.DeleteSave();
-        _gameStateService.SetState(new SaveValidator().CreateNewState());
-        Refresh();
+        // _saveService.DeleteSave();
+        // _gameStateService.SetState(new SaveValidator().CreateNewState());
+        // Refresh();
     }
 
     private void ManualTick()
