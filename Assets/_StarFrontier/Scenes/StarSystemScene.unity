@@ -327,26 +327,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 228078199}
-  - component: {fileID: 228078198}
+  - component: {fileID: 228078200}
   m_Layer: 0
-  m_Name: LegacyMigrationValidator
+  m_Name: Sprint1FinalValidator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &228078198
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 228078197}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb3c257cb66c14bff85aa8bba1df4e40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LegacyMigrationValidator
 --- !u!4 &228078199
 Transform:
   m_ObjectHideFlags: 0
@@ -362,6 +350,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &228078200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228078197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99fde74d0c7ae4d2cb883b570b903e61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sprint1FinalValidator
 --- !u!1 &344734499
 GameObject:
   m_ObjectHideFlags: 0
