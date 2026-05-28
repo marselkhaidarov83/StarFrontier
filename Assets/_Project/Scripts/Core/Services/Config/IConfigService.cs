@@ -34,4 +34,5 @@ public interface IConfigService
     GameBootstrapConfig GameBootstrapConfig { get; }
     SaveConfig SaveConfig { get; }
     DebugConfig DebugConfig { get; }
+    GalaxyConfig GalaxyConfig { get; }
 }

@@ -17,4 +17,10 @@ public class CustomService
         if (IsDebug())
             Debug.Log($"{GetType().Name}.{methodName}: {message}");
     }
+
+    protected void LogCustomError(string message, [CallerMemberName] string methodName = "")
+    {
+        // if (IsDebug())
+            Debug.LogError($"{GetType().Name}.{methodName}: {message}");
+    }
 }

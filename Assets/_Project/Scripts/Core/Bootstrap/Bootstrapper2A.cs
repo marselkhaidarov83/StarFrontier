@@ -9,6 +9,8 @@ public sealed class Bootstrapper2A : CustomMonoBehaviour
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private DebugConfig debugConfig;
 
+    [SerializeField] private GalaxyConfig galaxyConfig;
+
     public IServiceRegistry ServiceRegistry;
     private IGameStateMachine _gameStateMachine;
     private ISaveService _saveService;
@@ -68,9 +70,12 @@ public sealed class Bootstrapper2A : CustomMonoBehaviour
             new ConfigService(
                     gameBootstrapConfig,
                     saveConfig,
-                    debugConfig
+                    debugConfig,
+                    galaxyConfig
                     ));
-
+        
+        RegisterService<IStarSystemService, StarSystemService>();
+        RegisterService<RouteService, RouteService>();
         RegisterService<ISceneService, SceneService>();
         // RegisterService<IInventoryService, InventoryService>();
         // RegisterService<ISystemEncounterService, SystemEncounterService>();
