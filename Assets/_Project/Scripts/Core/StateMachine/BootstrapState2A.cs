@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class BootstrapState : CustomService, IGameState
+public class BootstrapState2A : CustomService, IGameState
 {
     private readonly INewGameService _newGameService;
 
-    public BootstrapState()
+    public BootstrapState2A()
     {
-        _newGameService = Bootstrapper.Instance.ServiceRegistry.Get<INewGameService>();
+        _newGameService = Bootstrapper2A.Instance.ServiceRegistry.Get<INewGameService>();
         LogCustom("NewGameService = " + _newGameService);
     }
 

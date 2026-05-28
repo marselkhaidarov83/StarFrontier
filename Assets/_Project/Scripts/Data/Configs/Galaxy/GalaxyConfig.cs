@@ -9,6 +9,5 @@ public class GalaxyConfig : ScriptableObject
     public string StartSystemId = "system_01_01";
 
     public List<SectorConfig> Sectors = new();
-    public List<StarSystemConfig> Systems = new();
     public List<RouteConfig> Routes = new();
 }

@@ -8,7 +8,8 @@ public class CustomService
 
     protected bool IsDebug()
     {
-        return (_debugEnabled || Bootstrapper.Instance.GlobalDebugEnabled) && !_debugStop;
+        // return (_debugEnabled || Bootstrapper.Instance.GlobalDebugEnabled) && !_debugStop;
+        return (_debugEnabled || Bootstrapper2A.Instance.GlobalDebugEnabled) && !_debugStop;
     }
 
     protected void LogCustom(string message, [CallerMemberName] string methodName = "")
