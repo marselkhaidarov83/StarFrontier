@@ -14,6 +14,4 @@ public class SaveData
     public GameSettingsData Settings = new();
     public SystemEncounterSaveData SystemEncounter = new();
     public SystemNpcSimulationSaveData SystemNpcSimulation = new();
-
-    public GameState GameState;
 }

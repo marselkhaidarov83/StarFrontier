@@ -31,7 +31,6 @@ public sealed class ConfigService : IConfigService
     public GameBootstrapConfig GameBootstrapConfig { get; }
     public SaveConfig SaveConfig { get; }
     public DebugConfig DebugConfig { get; }
-    public GalaxyConfig GalaxyConfig { get; }
 
     private readonly IGameSessionService gameSessionService;
 
@@ -64,14 +63,12 @@ public sealed class ConfigService : IConfigService
 
     public ConfigService(GameBootstrapConfig gameBootstrapConfig,
                         SaveConfig saveConfig,
-                        DebugConfig debugConfig,
-                        GalaxyConfig galaxyConfig)
+                        DebugConfig debugConfig)
     {
 
         GameBootstrapConfig = gameBootstrapConfig;
         SaveConfig = saveConfig;
         DebugConfig = debugConfig;
-        GalaxyConfig = galaxyConfig;
         // gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
     }
 
