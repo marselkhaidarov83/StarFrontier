@@ -2768,7 +2768,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: SafeAreaRoot
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1517255820244942907, guid: 802bd0fc4861641dea85d916b3091470, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
