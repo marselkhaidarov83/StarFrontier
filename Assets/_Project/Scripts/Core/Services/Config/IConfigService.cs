@@ -30,8 +30,4 @@ public interface IConfigService
 
     IReadOnlyList<WeaponConfig> GetAllWeapons();
     WeaponConfig GetWeaponConfigById(string weaponId);
-
-    GameBootstrapConfig GameBootstrapConfig { get; }
-    SaveConfig SaveConfig { get; }
-    DebugConfig DebugConfig { get; }
 }

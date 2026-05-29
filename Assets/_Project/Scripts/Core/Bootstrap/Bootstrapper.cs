@@ -51,7 +51,8 @@ public class Bootstrapper : CustomMonoBehaviour
     private void InitializeServiceRegistry()
     {
         ServiceRegistry = new ServiceRegistry();
-        LogCustom("ServiceRegistry created");        
+        if (IsDebug())
+            Debug.Log("ServiceRegistry created");        
     }
 
     private void InitializeStateMachine()
@@ -81,7 +82,8 @@ public class Bootstrapper : CustomMonoBehaviour
                     modules,
                     weapons)
         );
-        LogCustom("ConfigService registered");
+        if (IsDebug())
+            Debug.Log("ConfigService registered");
 
         RegisterService<ISceneService, SceneService>();
         RegisterService<IInventoryService, InventoryService>();

@@ -5,26 +5,29 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
+    path: Assets/_Project/Scenes/qwe.unity
+    guid: 941107ba8a5d34fa2adb661c4daf4766
+  - enabled: 0
     path: Assets/_Project/Scenes/MainMenuScene.unity
     guid: 60eea121480f24183b76b754c3919aca
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/MetaScene.unity
     guid: a436cbe30ca6348be803daad2d6f0b6e
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/CombatScene.unity
     guid: decde98478092474cb2692ceac6df240
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/TestScene.unity
     guid: d2a0594bc92c14ff0b5d7f7a85a60ab7
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/SettingsScene.unity
     guid: 0a74d54a08b514ad1afad5f109c24841
   - enabled: 1
-    path: Assets/_Project/Scenes/2A_BootScene.unity
+    path: Assets/_StarFrontier/Scenes/BootScene.unity
     guid: 40d42b74c3bd841488315ffdeb17ea7a
   - enabled: 1
-    path: Assets/_Project/Scenes/2A_StarSystemScene.unity
+    path: Assets/_StarFrontier/Scenes/StarSystemScene.unity
     guid: 7d8abd1f667224f419da0f481b04a316
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 311fcd18462cc4cafb69f773cda97cf4, type: 2}

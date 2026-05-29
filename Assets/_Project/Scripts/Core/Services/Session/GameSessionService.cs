@@ -8,6 +8,10 @@ public class GameSessionService : IGameSessionService
 
     private ISystemTravelService _systemTravelService;
 
+    // public GameSessionService(SaveRoot saveRoot)
+    // {
+    //     CurrentSave = saveRoot;
+    // }
 
     public GameSessionService()
     {
@@ -27,8 +31,8 @@ public class GameSessionService : IGameSessionService
 
     private void InitializeSystemTravelService()
     {
-        // _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
-        // _systemTravelService.State.SetCurrentPosition(CurrentSave.PlayerProfile.SystemMapShipPosition);
+        _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
+        _systemTravelService.State.SetCurrentPosition(CurrentSave.PlayerProfile.SystemMapShipPosition);
     }
 
     public void ClearSession()

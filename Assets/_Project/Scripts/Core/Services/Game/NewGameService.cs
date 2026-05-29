@@ -19,11 +19,11 @@ public class NewGameService : CustomService, INewGameService
     public void StartNewGame()
     {
         var _continue = false;
-        if (_continueGameService.CanContinue())
-        {
-            LogCustom("CanContinue = true");
-            _continue = _continueGameService.ContinueGame();
-        }
+        // if (_continueGameService.CanContinue())
+        // {
+        //     LogCustom("CanContinue = true");
+        //     _continue = _continueGameService.ContinueGame();
+        // }
         
         if (!_continue)
         {

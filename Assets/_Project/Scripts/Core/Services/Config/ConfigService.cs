@@ -28,10 +28,6 @@ public sealed class ConfigService : IConfigService
     private readonly List<WeaponConfig> _weapons;
     private readonly Dictionary<string, WeaponConfig> _weaponsById;
 
-    public GameBootstrapConfig GameBootstrapConfig { get; }
-    public SaveConfig SaveConfig { get; }
-    public DebugConfig DebugConfig { get; }
-
     private readonly IGameSessionService gameSessionService;
 
     public ConfigService(IEnumerable<StarSystemConfig> starSystems,
@@ -61,17 +57,6 @@ public sealed class ConfigService : IConfigService
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
     }
 
-    public ConfigService(GameBootstrapConfig gameBootstrapConfig,
-                        SaveConfig saveConfig,
-                        DebugConfig debugConfig)
-    {
-
-        GameBootstrapConfig = gameBootstrapConfig;
-        SaveConfig = saveConfig;
-        DebugConfig = debugConfig;
-        // gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-    }
-
     public StarSystemLink GetCurrentStarSystemLink(string targetSystemId)
     {
         StarSystemConfig starSystemConfig = GetCurrentSystemConfig();
@@ -92,8 +77,8 @@ public sealed class ConfigService : IConfigService
         if (configs == null)
             throw new ArgumentNullException(nameof(configs));
 
-        targetList = new();
-        targetById = new(StringComparer.Ordinal);
+        targetList = new ();
+        targetById = new (StringComparer.Ordinal);        
 
         foreach (var config in configs)
         {
