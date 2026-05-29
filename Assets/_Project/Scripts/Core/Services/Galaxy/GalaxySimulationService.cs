@@ -1,14 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GalaxySimulationService : CustomService, IGalaxySimulationService
+public class GalaxySimulationService : IGalaxySimulationService
 {
+    public GalaxySimulationService()
+    {
+        IGameSessionService gameSessionService  = Bootstrapper2A.Instance.ServiceRegistry.Get<IGameSessionService>();
+        IConfigService configService = Bootstrapper2A.Instance.ServiceRegistry.Get<IConfigService>();
+    }
+
     public GalaxyState CreateGalaxyState(GalaxyConfig config)
     {
-        LogCustom("");
         if (config == null)
         {
-            LogCustomError("GalaxySimulationService: GalaxyConfig is null.");
+            Debug.LogError("GalaxySimulationService: GalaxyConfig is null.");
             return new GalaxyState();
         }
 
@@ -29,7 +34,6 @@ public class GalaxySimulationService : CustomService, IGalaxySimulationService
 
     private void CreateSectorStates(GalaxyConfig config, GalaxyState state)
     {
-        LogCustom("config.Sectors.Count = " + config.Sectors.Count);
         foreach (var sectorConfig in config.Sectors)
         {
             if (sectorConfig == null)
@@ -49,7 +53,6 @@ public class GalaxySimulationService : CustomService, IGalaxySimulationService
 
     private void CreateStarSystemStates(GalaxyConfig config, GalaxyState state)
     {
-        LogCustom("config.Sectors.Count = " + config.Sectors.Count);
         foreach (var sectorConfig in config.Sectors)
         {
             if (sectorConfig == null)
@@ -58,7 +61,6 @@ public class GalaxySimulationService : CustomService, IGalaxySimulationService
             if (sectorConfig.Systems == null)
                 continue;
 
-            LogCustom("sectorConfig.Systems.Length = " + sectorConfig.Systems.Length);
             foreach (var systemConfig in sectorConfig.Systems)
             {
                 if (systemConfig == null)
@@ -81,7 +83,6 @@ public class GalaxySimulationService : CustomService, IGalaxySimulationService
 
     private void CreateRouteStates(GalaxyConfig config, GalaxyState state)
     {
-        LogCustom("config.Routes.Count = " + config.Routes.Count);
         foreach (var routeConfig in config.Routes)
         {
             if (routeConfig == null)

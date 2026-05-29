@@ -7,7 +7,6 @@ public class SceneService : ISceneService
     private const string MAIN_MENU_SCENE = "MainMenuScene";
     private const string META_SCENE = "MetaScene";
     private const string META_SCENE_2A = "2A_StarSystemScene";
-    private const string GALAXY_SCENE_2A = "2A_GalaxyMapScene";
     private const string COMBAT_SCENE = "CombatScene";
     private bool _debugEnabled;
 
@@ -42,13 +41,6 @@ public class SceneService : ISceneService
         if (_debugEnabled)
             Debug.Log("LoadMeta started");
         LoadScene(META_SCENE_2A);
-    }
-
-    public void LoadGalaxy2A()
-    {
-        if (_debugEnabled)
-            Debug.Log("LoadGalaxy started");
-        LoadScene(GALAXY_SCENE_2A);
     }
 
     public void LoadCombat()
