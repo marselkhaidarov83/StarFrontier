@@ -15,9 +15,9 @@ public sealed class SaveSystemTester : MonoBehaviour
         }
 
         var validator = new SaveValidator(
-            defaultSaveVersion: saveConfig.saveVersion,
-            defaultPlayerName: "Captain",
-            defaultSystemId: "system_start_01"
+            // defaultSaveVersion: saveConfig.saveVersion,
+            // defaultPlayerName: "Captain",
+            // defaultSystemId: "system_start_01"
         );
 
         _saveService = new SaveServiceU(saveConfig, validator);

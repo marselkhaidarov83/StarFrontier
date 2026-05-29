@@ -13,7 +13,6 @@ public sealed class GameBootstrapper : MonoBehaviour
     {
         if (_instance != null)
         {
-            Debug.LogWarning("GameBootstrapper: duplicate bootstrapper found. Destroying duplicate.");
             Destroy(gameObject);
             return;
         }
@@ -31,82 +30,33 @@ public sealed class GameBootstrapper : MonoBehaviour
 
     private void Bootstrap()
     {
-        Debug.Log("GameBootstrapper: bootstrap started.");
-
-        var serviceRegistry = new ServiceRegistry();
-        Services = serviceRegistry;
+        var registry = new ServiceRegistry();
+        Services = registry;
 
         var eventBus = new SimpleEventBus();
 
         var configService = new ConfigService();
         configService.Load();
 
-        if (!configService.IsLoaded)
-        {
-            Debug.LogError("GameBootstrapper: ConfigService failed to load configs. Bootstrap stopped.");
-            return;
-        }
-
         var tickService = new TickService();
         _tickService = tickService;
 
-        var saveValidator = new SaveValidator(
-            defaultSaveVersion: configService.SaveConfig.saveVersion,
-            defaultPlayerName: configService.BootstrapConfig.defaultPlayerName,
-            defaultSystemId: configService.BootstrapConfig.defaultSystemId
-        );
-
-        var saveService = new SaveServiceU(
-            config: configService.SaveConfig,
-            validator: saveValidator
-        );
-
-        GameState loadedState = saveService.Load();
+        var saveValidator = new SaveValidator();
+        var saveService = new SaveServiceU(configService.SaveConfig, saveValidator);
 
         var gameStateService = new GameStateService();
-        gameStateService.SetState(loadedState);
+        var gameState = saveService.Load();
+        gameStateService.SetState(gameState);
 
-        serviceRegistry.Register(serviceRegistry);
-        serviceRegistry.Register(eventBus);
-        serviceRegistry.Register(configService);
-        serviceRegistry.Register(tickService);
-        serviceRegistry.Register(saveService);
-        serviceRegistry.Register(gameStateService);
+        registry.Register(registry);
+        registry.Register(eventBus);
+        registry.Register(configService);
+        registry.Register(tickService);
+        registry.Register(saveService);
+        registry.Register(gameStateService);
 
         tickService.Start();
 
-        Debug.Log("GameBootstrapper: services registered successfully.");
-        Debug.Log($"GameBootstrapper: current system = {gameStateService.State.player.currentSystemId}");
-        Debug.Log($"GameBootstrapper: total ticks = {gameStateService.State.meta.totalTicks}");
-
-        LoadStartScene(configService);
-    }
-
-    private void LoadStartScene(ConfigService configService)
-    {
-        string sceneName = configService.BootstrapConfig.startGameSceneName;
-
-        if (string.IsNullOrWhiteSpace(sceneName))
-        {
-            Debug.LogError("GameBootstrapper: start scene name is empty.");
-            return;
-        }
-
-        Debug.Log($"GameBootstrapper: loading scene {sceneName}.");
-        SceneManager.LoadScene(sceneName);
-    }
-
-    private void OnDestroy()
-    {
-        if (_instance != this)
-        {
-            return;
-        }
-
-        _tickService?.Stop();
-        Services?.Clear();
-
-        Services = null;
-        _instance = null;
+        SceneManager.LoadScene(configService.BootstrapConfig.startGameSceneName);
     }
 }

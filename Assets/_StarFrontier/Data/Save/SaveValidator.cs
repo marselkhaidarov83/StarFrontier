@@ -6,16 +6,6 @@ public sealed class SaveValidator
     private readonly string _defaultPlayerName = "Captain";
     private readonly string _defaultSystemId = "system_start_01";
 
-    public SaveValidator(
-                int defaultSaveVersion,
-                string defaultPlayerName,
-                string defaultSystemId)
-    {
-        _defaultSaveVersion = defaultSaveVersion;
-        _defaultPlayerName = defaultPlayerName;
-        _defaultSystemId = defaultSystemId;
-    }
-
     public GameState CreateNewState()
     {
         var now = DateTime.UtcNow.ToString("O");
@@ -82,7 +72,7 @@ public sealed class SaveValidator
         {
             state.currentSystem.systemId = state.player.currentSystemId;
         }
-
+        
         return state;
     }
 }
