@@ -7,8 +7,6 @@ public sealed class TickService
 
     public bool IsRunning { get; private set; }
 
-    public int RegisteredCount => _tickables.Count;
-
     public void Register(ITickable tickable)
     {
         if (tickable == null)
@@ -19,7 +17,6 @@ public sealed class TickService
 
         if (_tickables.Contains(tickable))
         {
-            Debug.LogWarning($"TickService: tickable {tickable.GetType().Name} already registered.");
             return;
         }
 
@@ -28,11 +25,6 @@ public sealed class TickService
 
     public void Unregister(ITickable tickable)
     {
-        if (tickable == null)
-        {
-            return;
-        }
-
         _tickables.Remove(tickable);
     }
 
@@ -57,10 +49,5 @@ public sealed class TickService
         {
             _tickables[i].Tick(deltaTime);
         }
-    }
-
-    public void Clear()
-    {
-        _tickables.Clear();
     }
 }

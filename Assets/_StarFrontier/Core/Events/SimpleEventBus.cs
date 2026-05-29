@@ -2,77 +2,69 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class SimpleEventBus
+namespace StarFrontier.Core.Events
 {
-    private readonly Dictionary<Type, Delegate> _handlersByEventType = new();
-
-    public void Subscribe<TEvent>(Action<TEvent> handler)
+    public sealed class SimpleEventBus
     {
-        if (handler == null)
+        private readonly Dictionary<Type, Delegate> _handlers = new();
+
+        public void Subscribe<TEvent>(Action<TEvent> handler)
         {
-            Debug.LogWarning($"SimpleEventBus: null handler for {typeof(TEvent).Name} skipped.");
-            return;
+            var type = typeof(TEvent);
+
+            if (_handlers.TryGetValue(type, out var existing))
+            {
+                _handlers[type] = Delegate.Combine(existing, handler);
+            }
+            else
+            {
+                _handlers[type] = handler;
+            }
         }
 
-        var eventType = typeof(TEvent);
-
-        if (_handlersByEventType.TryGetValue(eventType, out var existingHandler))
+        public void Unsubscribe<TEvent>(Action<TEvent> handler)
         {
-            _handlersByEventType[eventType] = Delegate.Combine(existingHandler, handler);
-        }
-        else
-        {
-            _handlersByEventType[eventType] = handler;
-        }
-    }
+            var type = typeof(TEvent);
 
-    public void Unsubscribe<TEvent>(Action<TEvent> handler)
-    {
-        if (handler == null)
-        {
-            return;
-        }
+            if (!_handlers.TryGetValue(type, out var existing))
+            {
+                return;
+            }
 
-        var eventType = typeof(TEvent);
+            var updated = Delegate.Remove(existing, handler);
 
-        if (!_handlersByEventType.TryGetValue(eventType, out var existingHandler))
-        {
-            return;
+            if (updated == null)
+            {
+                _handlers.Remove(type);
+            }
+            else
+            {
+                _handlers[type] = updated;
+            }
         }
 
-        var updatedHandler = Delegate.Remove(existingHandler, handler);
-
-        if (updatedHandler == null)
+        public void Publish<TEvent>(TEvent eventData)
         {
-            _handlersByEventType.Remove(eventType);
-        }
-        else
-        {
-            _handlersByEventType[eventType] = updatedHandler;
-        }
-    }
+            var type = typeof(TEvent);
 
-    public void Publish<TEvent>(TEvent eventData)
-    {
-        var eventType = typeof(TEvent);
+            if (!_handlers.TryGetValue(type, out var handler))
+            {
+                return;
+            }
 
-        if (!_handlersByEventType.TryGetValue(eventType, out var handler))
-        {
-            return;
+            try
+            {
+                ((Action<TEvent>)handler)?.Invoke(eventData);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"SimpleEventBus: error while publishing {type.Name}: {exception}");
+            }
         }
 
-        try
+        public void Clear()
         {
-            ((Action<TEvent>)handler)?.Invoke(eventData);
+            _handlers.Clear();
         }
-        catch (Exception exception)
-        {
-            Debug.LogError($"SimpleEventBus: error while publishing {eventType.Name}: {exception}");
-        }
-    }
-
-    public void Clear()
-    {
-        _handlersByEventType.Clear();
     }
 }
