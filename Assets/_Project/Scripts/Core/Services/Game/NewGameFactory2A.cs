@@ -1,13 +1,25 @@
 using System.Collections.Generic;
+using UnityEngine;
 
-public sealed class NewGameFactory2A
+public sealed class NewGameFactory2A : CustomService
 {
+    private GalaxyConfig _galaxyConfig;
+
+    public NewGameFactory2A()
+    {
+        _galaxyConfig = Bootstrapper2A.Instance.ServiceRegistry.Get<IConfigService>().GalaxyConfig;
+    }
+
     public SaveData CreateNewGame()
     {
-        return new SaveData
+        SaveData saveData = new SaveData
         {
-            PlayerProfile = CreatePlayerProfile()
+            PlayerProfile = CreatePlayerProfile(),
+            GameState = new ()
         };
+
+        EnsureGalaxyState(saveData.GameState);
+        return saveData;
     }
 
     private PlayerProfileData CreatePlayerProfile()
@@ -49,5 +61,23 @@ public sealed class NewGameFactory2A
                 }
             }
         };
+    }
+
+    public void EnsureGalaxyState(GameState gameState)
+    {
+        if (gameState == null)
+        {
+            Debug.LogError("SaveService: GameState is null. Cannot ensure GalaxyState.");
+            return;
+        }
+
+        LogCustom("gameState.Galaxy = " + gameState.Galaxy);
+        if (gameState.Galaxy != null)
+            return;
+
+        var galaxySimulationService = new GalaxySimulationService();
+        gameState.Galaxy = galaxySimulationService.CreateGalaxyState(_galaxyConfig);
+
+        LogCustom("GalaxyState was missing and has been created from GalaxyConfig.");
     }
 }

@@ -26,6 +26,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/2A_StarSystemScene.unity
     guid: 7d8abd1f667224f419da0f481b04a316
+  - enabled: 1
+    path: Assets/_Project/Scenes/2A_GalaxyMapScene.unity
+    guid: 6a86238b093f1492a9e68c4128c33ad2
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 311fcd18462cc4cafb69f773cda97cf4, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
