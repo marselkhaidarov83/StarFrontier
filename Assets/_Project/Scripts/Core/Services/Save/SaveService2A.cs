@@ -2,12 +2,11 @@ using System;
 using System.IO;
 using UnityEngine;
 
-public sealed class SaveService2A : CustomService, ISaveService
+public sealed class SaveService2A : ISaveService
 {
     private float _autosaveIntervalSeconds = 60f;
     private float autosaveTimer = 0f;
     private readonly SaveConfig _config;
-    private readonly GalaxyConfig _galaxyConfig;
 
     private IGameSessionService _gameSessionService;
 
@@ -18,7 +17,6 @@ public sealed class SaveService2A : CustomService, ISaveService
         _gameSessionService = Bootstrapper2A.Instance.ServiceRegistry.Get<IGameSessionService>();
 
         IConfigService configService = Bootstrapper2A.Instance.ServiceRegistry.Get<IConfigService>();
-        _galaxyConfig = configService.GalaxyConfig;
         _config = configService.SaveConfig;
     }
 
@@ -26,6 +24,7 @@ public sealed class SaveService2A : CustomService, ISaveService
     {
         enabledSave = enable;
     }
+
 
     public SaveData Load()
     {
@@ -45,39 +44,17 @@ public sealed class SaveService2A : CustomService, ISaveService
             if (save == null)
             {
                 Debug.LogError("SaveServiceU: loaded save is null.");
-                LogCustom($"save loaded from backup");
-                save = TryLoadBackup();
+                return TryLoadBackup();
             }
-            else
-                LogCustom($"save loaded from {path}");
 
-            EnsureGalaxyState(save.GameState);
+            Debug.Log($"SaveServiceU: save loaded from {path}");
             return save;
         }
         catch (Exception exception)
         {
-            Debug.LogError($"failed to load save. Error: {exception.Message}");
-            SaveData save = TryLoadBackup();
-            EnsureGalaxyState(save.GameState);
-            return save;
+            Debug.LogError($"SaveServiceU: failed to load save. Error: {exception.Message}");
+            return TryLoadBackup();
         }
-    }
-
-    public void EnsureGalaxyState(GameState gameState)
-    {
-        if (gameState == null)
-        {
-            Debug.LogError("SaveService: GameState is null. Cannot ensure GalaxyState.");
-            return;
-        }
-
-        if (gameState.Galaxy != null)
-            return;
-
-        var galaxySimulationService = new GalaxySimulationService();
-        gameState.Galaxy = galaxySimulationService.CreateGalaxyState(_galaxyConfig);
-
-        LogCustom("GalaxyState was missing and has been created from GalaxyConfig.");
     }
 
     public void Save()
@@ -89,7 +66,7 @@ public sealed class SaveService2A : CustomService, ISaveService
     {
         if (save == null)
         {
-            LogCustomError("SaveServiceU: cannot save null SaveData.");
+            Debug.LogError("SaveServiceU: cannot save null SaveData.");
             return;
         }
 
@@ -102,11 +79,11 @@ public sealed class SaveService2A : CustomService, ISaveService
             var json = JsonUtility.ToJson(save, true);
             File.WriteAllText(path, json);
 
-            LogCustom($"save written to {path}");
+            Debug.Log($"SaveServiceU: save written to {path}");
         }
         catch (Exception exception)
         {
-            LogCustomError($"failed to save. Error: {exception.Message}");
+            Debug.LogError($"SaveServiceU: failed to save. Error: {exception.Message}");
         }
     }
 
