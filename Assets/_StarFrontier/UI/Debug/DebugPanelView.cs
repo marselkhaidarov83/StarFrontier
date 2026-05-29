@@ -10,14 +10,14 @@ public sealed class DebugPanelView : MonoBehaviour
     [SerializeField] private TMP_Text systemText;
 
     private GameStateService _gameStateService;
-    private SaveServiceU _saveService;
+    private SaveService _saveService;
 
     private void Start()
     {
         var registry = GameBootstrapper.Services;
 
         _gameStateService = registry.Get<GameStateService>();
-        _saveService = registry.Get<SaveServiceU>();
+        _saveService = registry.Get<SaveService>();
 
         saveButton.onClick.AddListener(Save);
         resetSaveButton.onClick.AddListener(ResetSave);

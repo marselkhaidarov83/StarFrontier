@@ -42,7 +42,7 @@ public sealed class GameBootstrapper : MonoBehaviour
         _tickService = tickService;
 
         var saveValidator = new SaveValidator();
-        var saveService = new SaveServiceU(configService.SaveConfig, saveValidator);
+        var saveService = new SaveService(configService.SaveConfig, saveValidator);
 
         var gameStateService = new GameStateService();
         var gameState = saveService.Load();
