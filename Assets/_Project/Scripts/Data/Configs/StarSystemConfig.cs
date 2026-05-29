@@ -6,7 +6,7 @@ public class StarSystemConfig : BaseConfig
 {
     [Header("System Data")]
     [SerializeField] private SystemEconomyType economyType;
-    [SerializeField][Range(1, 5)] private int dangerLevel = 1;
+    [SerializeField] [Range(1, 5)] private int dangerLevel = 1;
 
     [Header("World Structure")]
     [SerializeField] private SunConfig sun;
@@ -22,18 +22,11 @@ public class StarSystemConfig : BaseConfig
     [Header("Npc")]
     [SerializeField] private SystemPopulationConfig systemPopulation;
 
-    public string SectorId;
-    public bool DiscoveredAtStart;
-    public bool UnlockedAtStart;
-    public bool CapturedAtStart;
-
-    public int StartThreatLevel;
-
     public SystemEconomyType EconomyType => economyType;
     public int DangerLevel => dangerLevel;
     public SunConfig Sun => sun;
     public PlanetConfig[] PlanetRefs => planetRefs;
-    public PlanetConfig[] PlanetInhabited() { return planetRefs.Where(p => p.IsInhabited).ToArray(); }
+    public PlanetConfig[] PlanetInhabited() { return planetRefs.Where(p => p.IsInhabited).ToArray();}
     public StarSystemLink[] LinkedSystems => linkedSystems;
 
     public MissionTag[] MissionTags => missionTags;

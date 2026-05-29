@@ -35,8 +35,3 @@ MonoBehaviour:
   missionTags: 
   mapPosition: {x: 250, y: -720, z: 0}
   systemPopulation: {fileID: 11400000, guid: 09492a3b91c4c4d6e8a3db4404f65d5b, type: 2}
-  SectorId: 
-  DiscoveredAtStart: 1
-  UnlockedAtStart: 1
-  CapturedAtStart: 0
-  StartThreatLevel: 1

@@ -41,9 +41,3 @@ MonoBehaviour:
     size: 50
   missionTags: 
   mapPosition: {x: -500, y: -840, z: 0}
-  systemPopulation: {fileID: 0}
-  SectorId: 
-  DiscoveredAtStart: 1
-  UnlockedAtStart: 1
-  CapturedAtStart: 0
-  StartThreatLevel: 0

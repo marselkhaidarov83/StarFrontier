@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "StarFrontier/Base/Debug Config")]
+[CreateAssetMenu(menuName = "Star Frontier/Config/Debug Config")]
 public sealed class DebugConfig : ScriptableObject
 {
     [Header("Debug")]

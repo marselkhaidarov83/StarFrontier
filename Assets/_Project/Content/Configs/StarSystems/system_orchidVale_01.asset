@@ -26,18 +26,10 @@ MonoBehaviour:
     exitPoint: {x: 0, y: 0, z: -2}
     entryPoint: {x: 0, y: 0, z: -2}
     sprite: {fileID: 0}
-    size: 50
   - linkedSystem: {fileID: 11400000, guid: 1bd02b7a49afc49c2b8c18d930dfcb4a, type: 2}
     parsecDistance: 2
     exitPoint: {x: 0, y: 0, z: -2}
     entryPoint: {x: 0, y: 0, z: -2}
     sprite: {fileID: 0}
-    size: 50
   missionTags: 
   mapPosition: {x: -500, y: -400, z: 0}
-  systemPopulation: {fileID: 0}
-  SectorId: 
-  DiscoveredAtStart: 0
-  UnlockedAtStart: 0
-  CapturedAtStart: 0
-  StartThreatLevel: 2

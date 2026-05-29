@@ -31,24 +31,15 @@ MonoBehaviour:
     exitPoint: {x: 0, y: 0, z: 0}
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
-    size: 50
   - linkedSystem: {fileID: 11400000, guid: 97987aba3483740e79ce3182774035dd, type: 2}
     parsecDistance: 3
     exitPoint: {x: 0, y: 0, z: -2}
     entryPoint: {x: 0, y: 0, z: -2}
     sprite: {fileID: 0}
-    size: 50
   - linkedSystem: {fileID: 11400000, guid: 85f6de5a929834e65a365b67795ed337, type: 2}
     parsecDistance: 2
     exitPoint: {x: 0, y: 0, z: -2}
     entryPoint: {x: 0, y: 0, z: -2}
     sprite: {fileID: 0}
-    size: 50
   missionTags: 
   mapPosition: {x: 500, y: -570, z: 0}
-  systemPopulation: {fileID: 0}
-  SectorId: 
-  DiscoveredAtStart: 0
-  UnlockedAtStart: 0
-  CapturedAtStart: 1
-  StartThreatLevel: 3

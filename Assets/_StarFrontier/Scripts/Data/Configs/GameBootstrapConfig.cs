@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "StarFrontier/Base/Game Bootstrap Config")]
+[CreateAssetMenu(menuName = "Star Frontier/Config/Game Bootstrap Config")]
 public sealed class GameBootstrapConfig : ScriptableObject
 {
     [Header("Scenes")]
