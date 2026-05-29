@@ -8,7 +8,7 @@ public sealed class SaveValidator
 
         return new GameState
         {
-            meta = new MetaStateU
+            meta = new MetaState
             {
                 saveVersion = 1,
                 createdAtUtc = now,
@@ -35,7 +35,7 @@ public sealed class SaveValidator
             return CreateNewState();
         }
 
-        state.meta ??= new MetaStateU();
+        state.meta ??= new MetaState();
         state.player ??= new PlayerState();
         state.currentSystem ??= new StarSystemRuntimeState();
 
