@@ -168,7 +168,8 @@ MonoBehaviour:
   gameBootstrapConfig: {fileID: 11400000, guid: 9e57b6d1aa72749abae4dad70daa8f6c, type: 2}
   saveConfig: {fileID: 11400000, guid: 321a9cb5da4e44b7fb0a498573bd2921, type: 2}
   debugConfig: {fileID: 11400000, guid: f67373049e83c42dbb132e810c244ba7, type: 2}
-  _globalDebugEnabled: 0
+  galaxyConfig: {fileID: 11400000, guid: 20c0677ad2f23451ab23b6a321d57d88, type: 2}
+  _globalDebugEnabled: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

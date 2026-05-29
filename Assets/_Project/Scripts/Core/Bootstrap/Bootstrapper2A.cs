@@ -75,7 +75,7 @@ public sealed class Bootstrapper2A : CustomMonoBehaviour
                     ));
         
         RegisterService<IStarSystemService, StarSystemService>();
-        RegisterService<RouteService, RouteService>();
+        RegisterService<IRouteService, RouteService>();
         RegisterService<ISceneService, SceneService>();
         // RegisterService<IInventoryService, InventoryService>();
         // RegisterService<ISystemEncounterService, SystemEncounterService>();

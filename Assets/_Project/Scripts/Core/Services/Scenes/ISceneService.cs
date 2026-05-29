@@ -6,5 +6,6 @@ public interface ISceneService
     void LoadMainMenu();
     void LoadMeta();
     void LoadMeta2A();
+    void LoadGalaxy2A();
     void LoadCombat();
 }
