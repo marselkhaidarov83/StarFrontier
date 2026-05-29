@@ -1,8 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GalaxySimulationService
+public class GalaxySimulationService : IGalaxySimulationService
 {
+    public GalaxySimulationService()
+    {
+        IGameSessionService gameSessionService  = Bootstrapper2A.Instance.ServiceRegistry.Get<IGameSessionService>();
+        IConfigService configService = Bootstrapper2A.Instance.ServiceRegistry.Get<IConfigService>();
+    }
+
     public GalaxyState CreateGalaxyState(GalaxyConfig config)
     {
         if (config == null)
