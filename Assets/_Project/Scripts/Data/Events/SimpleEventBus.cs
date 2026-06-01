@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class SimpleEventBus
 {
@@ -42,5 +43,16 @@ public sealed class SimpleEventBus
         {
             ((Action<T>)handler)?.Invoke(eventData);
         }
+    }
+
+    public bool HasListeners<TEvent>()
+    {
+        return _handlers.ContainsKey(typeof(TEvent));
+    }
+
+    public void Clear()
+    {
+        _handlers.Clear();
+        Debug.Log("[SimpleEventBus] Cleared all listeners");
     }
 }

@@ -62,7 +62,7 @@ public sealed class SystemTransitionController : CustomMonoBehaviour
         if (IsDebug())
             Debug.Log($"[SystemTransitionService] Clicked system: {evt.TargetSystemId}");
 
-        var currentSystemId = _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId;
+        var currentSystemId = _gameSessionService.State.Player.CurrentSystemId;
 
         if (string.Equals(currentSystemId, evt.TargetSystemId, StringComparison.Ordinal))
         {

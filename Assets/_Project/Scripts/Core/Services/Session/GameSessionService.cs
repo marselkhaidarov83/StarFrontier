@@ -2,41 +2,36 @@ using UnityEngine;
 
 public class GameSessionService : IGameSessionService
 {
-    public SaveData CurrentSave { get; private set; }
+    public GameState State { get; private set; }
 
-    public bool HasActiveSession => CurrentSave != null;
+    public bool HasActiveSession => State != null;
 
     private ISystemTravelService _systemTravelService;
-
-    // public GameSessionService(SaveRoot saveRoot)
-    // {
-    //     CurrentSave = saveRoot;
-    // }
 
     public GameSessionService()
     {
     }
 
-    public void StartNewSession(SaveData saveRoot)
+    public void StartNewSession(GameState state)
     {
-        CurrentSave = saveRoot;
+        State = state;
         InitializeSystemTravelService();
     }
 
-    public void LoadSession(SaveData saveRoot)
+    public void LoadSession(GameState state)
     {
-        CurrentSave = saveRoot;
+        State = state;
         InitializeSystemTravelService();
     }
 
     private void InitializeSystemTravelService()
     {
         _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
-        _systemTravelService.State.SetCurrentPosition(CurrentSave.PlayerProfile.SystemMapShipPosition);
+        _systemTravelService.State.SetCurrentPosition(State.Player.SystemMapShipPosition);
     }
 
     public void ClearSession()
     {
-        CurrentSave = null;
+        State = null;
     }
 }

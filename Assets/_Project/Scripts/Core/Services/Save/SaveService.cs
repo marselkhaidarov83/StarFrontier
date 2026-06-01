@@ -10,6 +10,7 @@ public class SaveService : ISaveService
     private float autosaveTimer = 0f;
     private bool hasUnsavedChanges;
 
+    private readonly IConfigService _configService;
     private SimpleEventBus eventBus;
     private IGameSessionService gameSessionService;
     private ISystemEncounterSaveService _systemEncounterSaveService;
@@ -19,7 +20,9 @@ public class SaveService : ISaveService
 
     public SaveService()
     {
-        _autosaveIntervalSeconds = Bootstrapper.Instance.AutosaveIntervalSeconds;
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        _autosaveIntervalSeconds = _configService.SaveConfig.AutosaveIntervalSeconds;
+
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         _systemEncounterSaveService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterSaveService>();
@@ -50,17 +53,17 @@ public class SaveService : ISaveService
 
     public void Save()
     {
-        Save(gameSessionService?.CurrentSave);
+        Save(gameSessionService?.State);
     }
 
-    public void Save(SaveData saveRoot)
+    public void Save(GameState saveRoot)
     {
         if (saveRoot == null)
             return;
 
         enabledSave = false;
-        saveRoot.SaveVersion++;
-        saveRoot.LastSavedUtc = DateTime.UtcNow.ToString();
+        saveRoot.Meta.SaveVersion++;
+        saveRoot.Meta.LastSaveUtc = DateTime.UtcNow.Ticks;
 
         saveRoot.SystemNpcSimulation = _systemNpcSimulationSaveService.Capture();
         saveRoot.SystemEncounter = _systemEncounterSaveService.Capture();
@@ -77,9 +80,9 @@ public class SaveService : ISaveService
         enabledSave = true;
     }
 
-    private SaveData DictionaryToList(SaveData saveRoot)
+    private GameState DictionaryToList(GameState saveRoot)
     {
-        saveRoot.MissionBlock.OffersByPlanet_List = new ();
+        saveRoot.MissionBlock.OffersByPlanet_List = new();
         foreach (var pair in saveRoot.MissionBlock.OffersByPlanet)
         {
             pair.Value.PlanetId = pair.Key;
@@ -101,9 +104,9 @@ public class SaveService : ISaveService
             Save();
             Debug.Log("SaveService: Periodic autosave completed.");
         }
-    }    
+    }
 
-    public SaveData Load()
+    public GameState Load()
     {
         string path = GetFullPath();
 
@@ -116,7 +119,7 @@ public class SaveService : ISaveService
         try
         {
             string json = File.ReadAllText(path);
-            SaveData save = JsonUtility.FromJson<SaveData>(json);
+            GameState save = JsonUtility.FromJson<GameState>(json);
 
             save = DictionaryFromList(save);
             _systemEncounterSaveService.Restore(save.SystemEncounter);
@@ -131,9 +134,9 @@ public class SaveService : ISaveService
         }
     }
 
-    private SaveData DictionaryFromList(SaveData saveRoot)
+    private GameState DictionaryFromList(GameState saveRoot)
     {
-        saveRoot.MissionBlock.OffersByPlanet = new ();
+        saveRoot.MissionBlock.OffersByPlanet = new();
         foreach (PlanetOfferedMissionData item in saveRoot.MissionBlock.OffersByPlanet_List)
             saveRoot.MissionBlock.OffersByPlanet.Add(item.PlanetId, item);
 

@@ -1,181 +1,181 @@
-    public class RefuelService : IRefuelService
+public class RefuelService : IRefuelService
+{
+    private readonly IGameSessionService _gameSessionService;
+    private readonly SimpleEventBus eventBus;
+    private readonly IRefuelCostProvider refuelCostProvider;
+
+    private const int FuelUnitPrice = 10;
+
+    public RefuelService()
     {
-        private readonly IGameSessionService _gameSessionService;
-        private readonly SimpleEventBus eventBus;
-        private readonly IRefuelCostProvider refuelCostProvider;
+        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+        eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        refuelCostProvider = new RefuelCostProvider(FuelUnitPrice);
+    }
 
-        private const int FuelUnitPrice = 10;
+    public int GetFuelUnitPrice()
+    {
+        return refuelCostProvider.GetCostPerFuelUnit();
+    }
 
-        public RefuelService()
-        {
-            _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-            eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-            refuelCostProvider = new RefuelCostProvider(FuelUnitPrice);
-        }
+    public bool CanRefuel(int fuelCount)
+    {
+        // if (!_availabilityProvider.IsRefuelAvailable())
+        //     return false;
 
-        public int GetFuelUnitPrice()
-        {
-            return refuelCostProvider.GetCostPerFuelUnit();
-        }
+        PlayerState player = _gameSessionService.State.Player;
 
-        public bool CanRefuel(int fuelCount)
-        {
-            // if (!_availabilityProvider.IsRefuelAvailable())
-            //     return false;
+        if (player.PlayerShipState.GetActiveShip().CurrentFuel + fuelCount >
+                    player.PlayerShipState.GetActiveShip().FuelCapacity)
+            return false;
 
-            PlayerProfileData player = _gameSessionService.CurrentSave.PlayerProfile;
+        int cost = refuelCostProvider.GetCostPerFuelUnit();
+        if (player.Credits < cost)
+            return false;
 
-            if (player.PlayerShipState.GetActiveShip().CurrentFuel + fuelCount >
-                        player.PlayerShipState.GetActiveShip().FuelCapacity)
-                return false;
+        return true;
+    }
 
-            int cost = refuelCostProvider.GetCostPerFuelUnit();
-            if (player.Credits < cost)
-                return false;
+    public RefuelResult RefuelToFull()
+    {
+        PlayerState playerProfile = _gameSessionService.State.Player;
+        int missingFuel = playerProfile.PlayerShipState.GetActiveShip().FuelCapacity - playerProfile.PlayerShipState.GetActiveShip().CurrentFuel;
 
-            return true;
-        }
+        return Refuel(missingFuel);
 
-        public RefuelResult RefuelToFull()
-        {
-            PlayerProfileData playerProfile = _gameSessionService.CurrentSave.PlayerProfile;
-            int missingFuel = playerProfile.PlayerShipState.GetActiveShip().FuelCapacity - playerProfile.PlayerShipState.GetActiveShip().CurrentFuel;
+        // if (playerProfile == null)
+        // {
+        //     return RefuelResult.Create(
+        //         RefuelResultType.MissingPlayerProfile,
+        //         0,
+        //         0,
+        //         0,
+        //         0);
+        // }
 
-            return Refuel(missingFuel);
+        // if (playerProfile.CurrentShipRuntimeData.FuelCapacity <= 0)
+        // {
+        //     return RefuelResult.Create(
+        //         RefuelResultType.InvalidFuelCapacity,
+        //         0,
+        //         0,
+        //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
+        //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
+        // }
 
-            // if (playerProfile == null)
-            // {
-            //     return RefuelResult.Create(
-            //         RefuelResultType.MissingPlayerProfile,
-            //         0,
-            //         0,
-            //         0,
-            //         0);
-            // }
+        // // if (FuelUnitPrice <= 0)
+        // // {
+        // //     return RefuelResult.Create(
+        // //         RefuelResultType.InvalidFuelPrice,
+        // //         0,
+        // //         0,
+        // //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
+        // //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
+        // // }
 
-            // if (playerProfile.CurrentShipRuntimeData.FuelCapacity <= 0)
-            // {
-            //     return RefuelResult.Create(
-            //         RefuelResultType.InvalidFuelCapacity,
-            //         0,
-            //         0,
-            //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
-            //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
-            // }
+        // if (playerProfile.CurrentShipRuntimeData.CurrentFuel >= playerProfile.CurrentShipRuntimeData.FuelCapacity)
+        // {
+        //     return RefuelResult.Create(
+        //         RefuelResultType.FuelAlreadyFull,
+        //         0,
+        //         0,
+        //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
+        //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
+        // }
 
-            // // if (FuelUnitPrice <= 0)
-            // // {
-            // //     return RefuelResult.Create(
-            // //         RefuelResultType.InvalidFuelPrice,
-            // //         0,
-            // //         0,
-            // //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
-            // //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
-            // // }
+        // int missingFuel = playerProfile.CurrentShipRuntimeData.FuelCapacity - playerProfile.CurrentShipRuntimeData.CurrentFuel;
+        // int totalPrice = missingFuel * refuelCostProvider.GetCostPerFuelUnit();
 
-            // if (playerProfile.CurrentShipRuntimeData.CurrentFuel >= playerProfile.CurrentShipRuntimeData.FuelCapacity)
-            // {
-            //     return RefuelResult.Create(
-            //         RefuelResultType.FuelAlreadyFull,
-            //         0,
-            //         0,
-            //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
-            //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
-            // }
+        // if (playerProfile.Credits < totalPrice)
+        // {
+        //     return RefuelResult.Create(
+        //         RefuelResultType.NotEnoughCredits,
+        //         0,
+        //         totalPrice,
+        //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
+        //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
+        // }
 
-            // int missingFuel = playerProfile.CurrentShipRuntimeData.FuelCapacity - playerProfile.CurrentShipRuntimeData.CurrentFuel;
-            // int totalPrice = missingFuel * refuelCostProvider.GetCostPerFuelUnit();
+        // playerProfile.Credits -= totalPrice;
+        // playerProfile.CurrentShipRuntimeData.CurrentFuel = playerProfile.CurrentShipRuntimeData.FuelCapacity;
 
-            // if (playerProfile.Credits < totalPrice)
-            // {
-            //     return RefuelResult.Create(
-            //         RefuelResultType.NotEnoughCredits,
-            //         0,
-            //         totalPrice,
-            //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
-            //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
-            // }
-
-            // playerProfile.Credits -= totalPrice;
-            // playerProfile.CurrentShipRuntimeData.CurrentFuel = playerProfile.CurrentShipRuntimeData.FuelCapacity;
-
-            // eventBus.Publish(new FuelChangedEvent(playerProfile.CurrentShipRuntimeData.CurrentFuel)); 
-            // return RefuelResult.Create(
-            //     RefuelResultType.Success,
-            //     missingFuel,
-            //     totalPrice,
-            //     playerProfile.CurrentShipRuntimeData.CurrentFuel,
-            //     playerProfile.CurrentShipRuntimeData.FuelCapacity);
-        }
+        // eventBus.Publish(new FuelChangedEvent(playerProfile.CurrentShipRuntimeData.CurrentFuel)); 
+        // return RefuelResult.Create(
+        //     RefuelResultType.Success,
+        //     missingFuel,
+        //     totalPrice,
+        //     playerProfile.CurrentShipRuntimeData.CurrentFuel,
+        //     playerProfile.CurrentShipRuntimeData.FuelCapacity);
+    }
 
     public RefuelResult Refuel(int fuelCount)
+    {
+        PlayerState playerProfile = _gameSessionService.State.Player;
+        if (playerProfile == null)
         {
-            PlayerProfileData playerProfile = _gameSessionService.CurrentSave.PlayerProfile;
-            if (playerProfile == null)
-            {
-                return RefuelResult.Create(
-                    RefuelResultType.MissingPlayerProfile,
-                    0,
-                    0,
-                    0,
-                    0);
-            }
-
-            if (playerProfile.PlayerShipState.GetActiveShip().FuelCapacity <= 0)
-            {
-                return RefuelResult.Create(
-                    RefuelResultType.InvalidFuelCapacity,
-                    0,
-                    0,
-                    playerProfile.PlayerShipState.GetActiveShip().CurrentFuel,
-                    playerProfile.PlayerShipState.GetActiveShip().FuelCapacity);
-            }
-
-            // if (FuelUnitPrice <= 0)
-            // {
-            //     return RefuelResult.Create(
-            //         RefuelResultType.InvalidFuelPrice,
-            //         0,
-            //         0,
-            //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
-            //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
-            // }
-
-            if (playerProfile.PlayerShipState.GetActiveShip().CurrentFuel >= playerProfile.PlayerShipState.GetActiveShip().FuelCapacity)
-            {
-                return RefuelResult.Create(
-                    RefuelResultType.FuelAlreadyFull,
-                    0,
-                    0,
-                    playerProfile.PlayerShipState.GetActiveShip().CurrentFuel,
-                    playerProfile.PlayerShipState.GetActiveShip().FuelCapacity);
-            }
-
-            int totalPrice = fuelCount * refuelCostProvider.GetCostPerFuelUnit();
-
-            if (playerProfile.Credits < totalPrice)
-            {
-                return RefuelResult.Create(
-                    RefuelResultType.NotEnoughCredits,
-                    0,
-                    totalPrice,
-                    playerProfile.PlayerShipState.GetActiveShip().CurrentFuel,
-                    playerProfile.PlayerShipState.GetActiveShip().FuelCapacity);
-            }
-
-            playerProfile.Credits -= totalPrice;
-            playerProfile.PlayerShipState.GetActiveShip().CurrentFuel += fuelCount;
-
-            eventBus.Publish(new FuelChangedEvent(playerProfile.PlayerShipState.GetActiveShip().CurrentFuel)); 
-            eventBus.Publish(new CreditsChangedEvent(playerProfile.Credits)); 
-
-            eventBus.Publish(new SaveNeedEvent());
-
             return RefuelResult.Create(
-                RefuelResultType.Success,
-                fuelCount,
+                RefuelResultType.MissingPlayerProfile,
+                0,
+                0,
+                0,
+                0);
+        }
+
+        if (playerProfile.PlayerShipState.GetActiveShip().FuelCapacity <= 0)
+        {
+            return RefuelResult.Create(
+                RefuelResultType.InvalidFuelCapacity,
+                0,
+                0,
+                playerProfile.PlayerShipState.GetActiveShip().CurrentFuel,
+                playerProfile.PlayerShipState.GetActiveShip().FuelCapacity);
+        }
+
+        // if (FuelUnitPrice <= 0)
+        // {
+        //     return RefuelResult.Create(
+        //         RefuelResultType.InvalidFuelPrice,
+        //         0,
+        //         0,
+        //         playerProfile.CurrentShipRuntimeData.CurrentFuel,
+        //         playerProfile.CurrentShipRuntimeData.FuelCapacity);
+        // }
+
+        if (playerProfile.PlayerShipState.GetActiveShip().CurrentFuel >= playerProfile.PlayerShipState.GetActiveShip().FuelCapacity)
+        {
+            return RefuelResult.Create(
+                RefuelResultType.FuelAlreadyFull,
+                0,
+                0,
+                playerProfile.PlayerShipState.GetActiveShip().CurrentFuel,
+                playerProfile.PlayerShipState.GetActiveShip().FuelCapacity);
+        }
+
+        int totalPrice = fuelCount * refuelCostProvider.GetCostPerFuelUnit();
+
+        if (playerProfile.Credits < totalPrice)
+        {
+            return RefuelResult.Create(
+                RefuelResultType.NotEnoughCredits,
+                0,
                 totalPrice,
                 playerProfile.PlayerShipState.GetActiveShip().CurrentFuel,
                 playerProfile.PlayerShipState.GetActiveShip().FuelCapacity);
-        }        
+        }
+
+        playerProfile.Credits -= totalPrice;
+        playerProfile.PlayerShipState.GetActiveShip().CurrentFuel += fuelCount;
+
+        eventBus.Publish(new FuelChangedEvent(playerProfile.PlayerShipState.GetActiveShip().CurrentFuel));
+        eventBus.Publish(new CreditsChangedEvent(playerProfile.Credits));
+
+        eventBus.Publish(new SaveNeedEvent());
+
+        return RefuelResult.Create(
+            RefuelResultType.Success,
+            fuelCount,
+            totalPrice,
+            playerProfile.PlayerShipState.GetActiveShip().CurrentFuel,
+            playerProfile.PlayerShipState.GetActiveShip().FuelCapacity);
     }
+}

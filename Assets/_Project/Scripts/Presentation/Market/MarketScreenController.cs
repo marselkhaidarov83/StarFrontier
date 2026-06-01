@@ -67,7 +67,7 @@ public class MarketScreenController : CustomMonoBehaviour
 
         simpleEventBus.Unsubscribe<MarketEnteredEvent>(OnMarketEntered);
         simpleEventBus.Unsubscribe<CargoChangedEvent>(OnCargoChanged);
-    }  
+    }
 
     private void OnMarketEntered(MarketEnteredEvent evt)
     {
@@ -77,7 +77,7 @@ public class MarketScreenController : CustomMonoBehaviour
     private void OnCargoChanged(CargoChangedEvent evt)
     {
         RefreshHeader();
-    }    
+    }
 
     // private void Awake()
     // {
@@ -105,21 +105,21 @@ public class MarketScreenController : CustomMonoBehaviour
             return;
         }
 
-        if (_gameSessionService.CurrentSave == null)
+        if (_gameSessionService.State == null)
         {
             if (IsDebug())
                 Debug.Log("MarketScreenController | _gameSessionService.CurrentSave is null");
             return;
         }
 
-        if (_gameSessionService.CurrentSave.PlayerProfile == null)
+        if (_gameSessionService.State.Player == null)
         {
             if (IsDebug())
                 Debug.Log("MarketScreenController | _gameSessionService.CurrentSave.PlayerProfile is null");
             return;
         }
 
-        PlayerProfileData playerProfile = _gameSessionService.CurrentSave.PlayerProfile;
+        PlayerState playerProfile = _gameSessionService.State.Player;
         // if (playerProfile == null)
         // {
         //     if (cargoText != null) cargoText.text = 
@@ -134,7 +134,7 @@ public class MarketScreenController : CustomMonoBehaviour
             int max = playerProfile.PlayerShipState.GetActiveShip().CargoCapacity;
 
             cargoText.text = $"Cargo: {used} / {max}";
-        }        
+        }
 
         if (IsDebug())
             Debug.Log("[MarketScreenController] header refreshed");
@@ -148,7 +148,7 @@ public class MarketScreenController : CustomMonoBehaviour
         {
             if (IsDebug())
                 Debug.LogError("[MarketScreenController] MarketItemsProvider is null.");
-            return;            
+            return;
         }
         IReadOnlyList<MarketItemEntry> items = _marketItemsProvider.GetAvailableItems();
 

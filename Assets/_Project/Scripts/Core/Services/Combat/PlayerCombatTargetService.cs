@@ -17,10 +17,10 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
 
     public bool IsPlayerAvailableInSystem(string systemId)
     {
-        if (_gameSessionService?.CurrentSave?.PlayerProfile == null)
+        if (_gameSessionService?.State?.Player == null)
             return false;
 
-        PlayerProfileData profile = _gameSessionService.CurrentSave.PlayerProfile;
+        PlayerState profile = _gameSessionService.State.Player;
 
         if (profile.CurrentSystemId != systemId)
             return false;
@@ -42,10 +42,10 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
 
     public Vector3 GetPlayerPosition()
     {
-        if (_gameSessionService?.CurrentSave?.PlayerProfile == null)
+        if (_gameSessionService?.State?.Player == null)
             return Vector3.zero;
 
-        Vector3 position = _gameSessionService.CurrentSave.PlayerProfile.SystemMapShipPosition;
+        Vector3 position = _gameSessionService.State.Player.SystemMapShipPosition;
         position.z = 0f;
 
         return position;
@@ -111,14 +111,15 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             Debug.Log("[PlayerCombatTargetService] Player ship destroyed by NPC.");
         }
 
-        _saveService.Save();
+        _eventBus.Publish(new SaveNeedEvent());
+        // _saveService.Save();
     }
 
     private ShipRuntimeData GetActiveShip()
     {
-        if (_gameSessionService?.CurrentSave?.PlayerProfile == null)
+        if (_gameSessionService?.State?.Player == null)
             return null;
 
-        return _gameSessionService.CurrentSave.PlayerProfile.GetActiveShip();
+        return _gameSessionService.State.Player.GetActiveShip();
     }
 }

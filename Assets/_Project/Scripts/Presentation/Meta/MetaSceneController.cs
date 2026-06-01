@@ -66,8 +66,8 @@ public class MetaSceneController : CustomMonoBehaviour
         if (refuelRoot != null)
             refuelRoot.SetActive(false);
 
-        var currentPlanetId = gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId;
-        var currentSystemId = gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId;
+        var currentPlanetId = gameSessionService.State.Player.CurrentPlanetId;
+        var currentSystemId = gameSessionService.State.Player.CurrentSystemId;
 
         if (currentPlanetId != null && currentPlanetId != "")
         {

@@ -128,7 +128,8 @@ public class GalaxyMapController2 : CustomMonoBehaviour
         galaxyMapRoot?.SetActive(true);
         Refresh();
 
-        saveService.Save();
+        eventBus.Publish(new SaveNeedEvent());
+        // saveService.Save();
     }
 
     private void OnSystemEntered(SystemEnteredEvent evt)
@@ -153,7 +154,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
         if (IsDebug())
             Debug.Log($"[GalaxyMapController2] Clicked system: {targetSystemId}");
 
-        var currentSystemId = gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId;
+        var currentSystemId = gameSessionService.State.Player.CurrentSystemId;
 
         if (string.Equals(currentSystemId, targetSystemId, StringComparison.Ordinal))
         {

@@ -134,13 +134,13 @@ using UnityEngine.UI;
             case MissionType.Delivery:
             case MissionType.Elimination:
                 doneButton.gameObject.SetActive(
-                    mission.TargetPlanetId == gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId &&
+                    mission.TargetPlanetId == gameSessionService.State.Player.CurrentPlanetId &&
                     mission.Status == MissionStatus.ReadyToComplete);
                 break;
             case MissionType.Recon:
                 doneButton.gameObject.SetActive(
-                    mission.TargetPlanetId == gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId &&
-                    mission.TargetSystemId == gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId &&
+                    mission.TargetPlanetId == gameSessionService.State.Player.CurrentPlanetId &&
+                    mission.TargetSystemId == gameSessionService.State.Player.CurrentSystemId &&
                     mission.Status == MissionStatus.ReadyToComplete);
                 break;
         }

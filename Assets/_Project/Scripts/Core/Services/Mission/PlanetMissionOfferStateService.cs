@@ -15,7 +15,7 @@ public class PlanetMissionOfferStateService : IPlanetMissionOfferStateService
         if (string.IsNullOrWhiteSpace(planetId))
             return null;
 
-        _gameSessionService.CurrentSave.MissionBlock.OffersByPlanet.TryGetValue(planetId, out PlanetOfferedMissionData offer);
+        _gameSessionService.State.MissionBlock.OffersByPlanet.TryGetValue(planetId, out PlanetOfferedMissionData offer);
         return offer;
     }
 
@@ -24,7 +24,7 @@ public class PlanetMissionOfferStateService : IPlanetMissionOfferStateService
         if (offer == null || string.IsNullOrWhiteSpace(offer.PlanetId))
             return;
 
-        _gameSessionService.CurrentSave.MissionBlock.OffersByPlanet[offer.PlanetId] = offer;
+        _gameSessionService.State.MissionBlock.OffersByPlanet[offer.PlanetId] = offer;
     }
 
     public void ClearOffer(string planetId)
@@ -32,16 +32,16 @@ public class PlanetMissionOfferStateService : IPlanetMissionOfferStateService
         if (string.IsNullOrWhiteSpace(planetId))
             return;
 
-        _gameSessionService.CurrentSave.MissionBlock.OffersByPlanet.Remove(planetId);
+        _gameSessionService.State.MissionBlock.OffersByPlanet.Remove(planetId);
     }
 
     public IReadOnlyDictionary<string, PlanetOfferedMissionData> GetAllOffers()
     {
-        return _gameSessionService.CurrentSave.MissionBlock.OffersByPlanet;
+        return _gameSessionService.State.MissionBlock.OffersByPlanet;
     }
 
     public void ClearAll()
     {
-        _gameSessionService.CurrentSave.MissionBlock.OffersByPlanet.Clear();
+        _gameSessionService.State.MissionBlock.OffersByPlanet.Clear();
     }
 }

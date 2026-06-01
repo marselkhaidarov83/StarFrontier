@@ -220,6 +220,6 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
         if (_gameSessionService == null)
             return string.Empty;
 
-        return _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId;
+        return _gameSessionService.State.Player.CurrentSystemId;
     }
 }

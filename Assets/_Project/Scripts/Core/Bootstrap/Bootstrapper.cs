@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class Bootstrapper : CustomMonoBehaviour
 {
+    [Header("Game")]
+    [SerializeField] private GameConfig gameConfig;
+    [SerializeField] private DebugConfig debugConfig;
+    [SerializeField] private SaveConfig saveConfig;
+
+    [Header("Data")]
     [SerializeField] private List<StarSystemConfig> starSystems;
     [SerializeField] private List<ShipConfig> ships;
     [SerializeField] private List<EnemyConfig> enemies;
@@ -13,11 +19,8 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private List<ModuleConfig> modules;
     [SerializeField] private List<WeaponConfig> weapons;
     [SerializeField] private List<ItemConfig> items;
-    
-    [SerializeField] public int MaxAcceptedMissionCount = 3;
-    [SerializeField] private float _autosaveIntervalSeconds = 60f;
 
-    public float AutosaveIntervalSeconds => _autosaveIntervalSeconds;
+    [SerializeField] public int MaxAcceptedMissionCount = 3;
 
     public static Bootstrapper Instance;
     public IServiceRegistry ServiceRegistry;
@@ -52,7 +55,7 @@ public class Bootstrapper : CustomMonoBehaviour
     {
         ServiceRegistry = new ServiceRegistry();
         if (IsDebug())
-            Debug.Log("ServiceRegistry created");        
+            Debug.Log("ServiceRegistry created");
     }
 
     private void InitializeStateMachine()
@@ -64,12 +67,14 @@ public class Bootstrapper : CustomMonoBehaviour
     {
         RegisterService<SimpleEventBus, SimpleEventBus>();
         RegisterService<IGameSessionService, GameSessionService>();
-            
+
         List<PlanetConfig> planets = new List<PlanetConfig>();
         foreach (StarSystemConfig config in starSystems)
             planets.AddRange(config.PlanetRefs);
-        ServiceRegistry.Register<IConfigService>(
-            new ConfigService(
+        ServiceRegistry.Register<IConfigService>(new ConfigService(
+                    gameConfig,
+                    debugConfig,
+                    saveConfig,
                     starSystems,
                     planets,
                     items,
@@ -80,8 +85,7 @@ public class Bootstrapper : CustomMonoBehaviour
                     pirates,
                     pirateGroupSpawnRules,
                     modules,
-                    weapons)
-        );
+                    weapons));
         if (IsDebug())
             Debug.Log("ConfigService registered");
 
@@ -108,7 +112,8 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<ISystemNpcBehaviorService, SystemNpcBehaviorService>();
         RegisterService<IGalaxyNpcBehaviorService, GalaxyNpcBehaviorService>();
         RegisterService<ISystemNpcSimulationSaveService, SystemNpcSimulationSaveService>();
-        _saveService = RegisterService<ISaveService, SaveService>();
+        // _saveService = RegisterService<ISaveService, SaveService>();
+        _saveService = RegisterService<ISaveService, SaveService2>();
         RegisterService<IPlayerCombatTargetService, PlayerCombatTargetService>();
         RegisterService<ISystemNpcMovementRouteService, SystemNpcMovementRouteService>();
         RegisterService<ISystemNpcMovementService, SystemNpcMovementService>();
@@ -126,7 +131,7 @@ public class Bootstrapper : CustomMonoBehaviour
         _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();
     }
 
-    private TInterface RegisterService<TInterface, TImplementation>() 
+    private TInterface RegisterService<TInterface, TImplementation>()
             where TImplementation : TInterface, new()
     {
         var service = new TImplementation();
@@ -150,5 +155,25 @@ public class Bootstrapper : CustomMonoBehaviour
 
         _saveService?.Tick(deltaTime);
         _gameTimeService?.Tick(deltaTime);
-    }    
+    }
+
+    private void OnApplicationPause(bool pause)
+    {
+        if (!pause)
+            return;
+
+        if (saveConfig != null && saveConfig.AutoSaveOnPause)
+            SaveCurrentGame("app_pause");
+    }
+
+    private void OnApplicationQuit()
+    {
+        if (saveConfig != null && saveConfig.AutoSaveOnQuit)
+            SaveCurrentGame("app_quit");
+    }
+
+    public void SaveCurrentGame(string reason = "manual")
+    {
+        _saveService.Save();
+    }
 }

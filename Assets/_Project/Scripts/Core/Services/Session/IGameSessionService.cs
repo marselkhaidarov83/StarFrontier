@@ -1,9 +1,9 @@
 public interface IGameSessionService
 {
-    SaveData CurrentSave { get; }
+    GameState State { get; }
     bool HasActiveSession { get; }
 
-    void StartNewSession(SaveData saveRoot);
-    void LoadSession(SaveData saveRoot);
+    void StartNewSession(GameState state);
+    void LoadSession(GameState state);
     void ClearSession();
 }

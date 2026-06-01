@@ -19,11 +19,11 @@ public class NewGameService : CustomService, INewGameService
     public void StartNewGame()
     {
         var _continue = false;
-        // if (_continueGameService.CanContinue())
-        // {
-        //     LogCustom("CanContinue = true");
-        //     _continue = _continueGameService.ContinueGame();
-        // }
+        if (_continueGameService.CanContinue())
+        {
+            LogCustom("CanContinue = true");
+            _continue = _continueGameService.ContinueGame();
+        }
         
         if (!_continue)
         {
@@ -32,8 +32,8 @@ public class NewGameService : CustomService, INewGameService
             var save = _newGameFactory.CreateNewGame();
             LogCustom("New game created");
 
-            LogCustom($"[NewGame] Active ship: {save.PlayerProfile.PlayerShipState.ActiveShipId}");
-            LogCustom($"[NewGame] Owned ships count: {save.PlayerProfile.PlayerShipState.OwnedShips.Count}");
+            LogCustom($"[NewGame] Active ship: {save.Player.PlayerShipState.ActiveShipId}");
+            LogCustom($"[NewGame] Owned ships count: {save.Player.PlayerShipState.OwnedShips.Count}");
 
             _gameSessionService.StartNewSession(save);
             LogCustom("New session started");

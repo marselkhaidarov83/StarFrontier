@@ -444,6 +444,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::Bootstrapper
   _debugEnabled: 0
   _debugStop: 1
+  gameConfig: {fileID: 11400000, guid: f76b09e1774ab45c7a1c5e6e6af8934e, type: 2}
+  debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
+  saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
   starSystems:
   - {fileID: 11400000, guid: 5d9b8ebf2cbec4fb18ec7cdb91136463, type: 2}
   - {fileID: 11400000, guid: 62d8f47103b7c4e26b1d851015b703a5, type: 2}

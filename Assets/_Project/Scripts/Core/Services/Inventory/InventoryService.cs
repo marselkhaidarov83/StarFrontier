@@ -20,7 +20,7 @@ using System.Linq;
 
         public IReadOnlyList<RuntimeCargoEntryData> GetItems()
         {
-            return gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries;
+            return gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries;
         }
 
         public int GetItemCount(string itemId)
@@ -29,7 +29,7 @@ using System.Linq;
                 return 0;
 
             RuntimeCargoEntryData entry = 
-                gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries.FirstOrDefault((x => x.ItemId == itemId));
+                gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries.FirstOrDefault((x => x.ItemId == itemId));
 
             return entry != null ? entry.Quantity : 0;
         }
@@ -39,7 +39,7 @@ using System.Linq;
             int total = 0;
 
             foreach (RuntimeCargoEntryData entry in 
-                    gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries)
+                    gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries)
             {
                 if (entry == null || string.IsNullOrWhiteSpace(entry.ItemId) || entry.Quantity <= 0)
                     continue;
@@ -53,7 +53,7 @@ using System.Linq;
 
         public int GetMaxCargo()
         {
-            return gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().CargoCapacity;
+            return gameSessionService.State.Player.PlayerShipState.GetActiveShip().CargoCapacity;
         }
 
         public int GetFreeCargo()
@@ -82,7 +82,7 @@ using System.Linq;
 
             // InventoryEntry existingEntry = _inventoryState.CargoItems.FirstOrDefault(x => x.ItemId == itemId);
             RuntimeCargoEntryData existingEntry = 
-                gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries.FirstOrDefault((x => x.ItemId == itemId));
+                gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries.FirstOrDefault((x => x.ItemId == itemId));
 
             if (existingEntry != null)
             {
@@ -90,7 +90,7 @@ using System.Linq;
             }
             else
             {
-                gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries.Add
+                gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries.Add
                     (new RuntimeCargoEntryData(itemId, quantity));
                 // _inventoryState.CargoItems.Add(new InventoryEntry(itemId, quantity));
             }
@@ -106,7 +106,7 @@ using System.Linq;
 
             // InventoryEntry existingEntry = _inventoryState.CargoItems.FirstOrDefault(x => x.ItemId == itemId);
             RuntimeCargoEntryData existingEntry = 
-                gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries.FirstOrDefault((x => x.ItemId == itemId));
+                gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries.FirstOrDefault((x => x.ItemId == itemId));
 
             if (existingEntry == null)
                 return false;
@@ -118,7 +118,7 @@ using System.Linq;
 
             if (existingEntry.Quantity <= 0)
             {
-                gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries.Remove(existingEntry);
+                gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries.Remove(existingEntry);
                 // _inventoryState.CargoItems.Remove(existingEntry);
             }
 
@@ -128,7 +128,7 @@ using System.Linq;
 
         public void Clear()
         {
-            gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo.entries.Clear();
+            gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.entries.Clear();
             // _inventoryState.CargoItems.Clear();
             PublishCargoChanged();
         }

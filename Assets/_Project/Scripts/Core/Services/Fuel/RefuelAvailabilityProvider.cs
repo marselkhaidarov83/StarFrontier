@@ -11,7 +11,7 @@ public class PlanetRefuelAvailabilityProvider : IRefuelAvailabilityProvider
 
     public bool IsRefuelAvailable()
     {
-        var planet = configService.GetPlanetConfigById(gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId);
+        var planet = configService.GetPlanetConfigById(gameSessionService.State.Player.CurrentPlanetId);
 
         if (planet == null)
             return false;

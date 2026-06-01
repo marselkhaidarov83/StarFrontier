@@ -2,6 +2,10 @@ using System.Collections.Generic;
 
 public interface IConfigService
 {
+    GameConfig GameConfig { get; }
+    DebugConfig DebugConfig { get; }
+    SaveConfig SaveConfig { get; }
+
     StarSystemLink GetCurrentStarSystemLink(string targetSystemId);
     bool ContainsStarSystem(string systemId);
     IReadOnlyList<StarSystemConfig> GetAllStarSystems();
