@@ -148,36 +148,6 @@ public class MapCameraController : MonoBehaviour
         transform.position += move;
     }
 
-    private void HandleTouchDrag2()
-    {
-        var touches = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches;
-
-        if (touches.Count != 1)
-            return;
-
-        var touch = touches[0];
-
-        if (touch.phase == UnityEngine.InputSystem.TouchPhase.Began)
-        {
-            dragOriginWorld = GetWorldPoint(touch.screenPosition);
-            isDragging = true;
-        }
-
-        if (touch.phase == UnityEngine.InputSystem.TouchPhase.Ended ||
-            touch.phase == UnityEngine.InputSystem.TouchPhase.Canceled)
-        {
-            isDragging = false;
-        }
-
-        if (touch.phase == UnityEngine.InputSystem.TouchPhase.Moved && isDragging)
-        {
-            Vector3 currentWorld = GetWorldPoint(touch.screenPosition);
-            Vector3 difference = dragOriginWorld - currentWorld;
-
-            transform.position += difference;
-        }
-    }
-
     private void HandleTouchZoom()
     {
         var touches = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches;
@@ -211,33 +181,6 @@ public class MapCameraController : MonoBehaviour
             touchZoomSpeed
         );
 
-        cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minZoom, maxZoom);
-    }
-
-    private void HandleTouchZoom2()
-    {
-        var touches = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches;
-
-        if (touches.Count != 2)
-            return;
-
-        isDragging = false;
-
-        var touch1 = touches[0];
-        var touch2 = touches[1];
-
-        Vector2 touch1Current = touch1.screenPosition;
-        Vector2 touch2Current = touch2.screenPosition;
-
-        Vector2 touch1Previous = touch1Current - touch1.delta;
-        Vector2 touch2Previous = touch2Current - touch2.delta;
-
-        float previousDistance = Vector2.Distance(touch1Previous, touch2Previous);
-        float currentDistance = Vector2.Distance(touch1Current, touch2Current);
-
-        float distanceDelta = currentDistance - previousDistance;
-
-        cam.orthographicSize -= distanceDelta * touchZoomSpeed;
         cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minZoom, maxZoom);
     }
 
