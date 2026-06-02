@@ -10,6 +10,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private readonly IGalaxyPopulationService _galaxyPopulationService;
     private readonly IGalaxyNpcMovementService _galaxyNpcMovementService;
     private readonly IGalaxyNpcCombatService _galaxyNpcCombatService;
+    private readonly ISaveService _saveService;
     private int _previousTick = 0;
 
     public GameTimeState State { get; }
@@ -28,6 +29,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _galaxyPopulationService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyPopulationService>();
         _galaxyNpcMovementService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcMovementService>();
         _galaxyNpcCombatService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcCombatService>();
+        _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
         State = new GameTimeState();
     }
 
@@ -56,6 +58,8 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
     public void Tick(float deltaTime)
     {
+        TickSaveServices(deltaTime);
+
         // Делаем, чтобы могли додвигаться шаг
         if (State.IsPaused && State.Accumulator == 0)
             return;
@@ -82,6 +86,11 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         // Делаем, чтобы могли додвигаться шаг
         if (State.IsPaused)
             State.Accumulator = 0;
+    }
+
+    private void TickSaveServices(float deltaTime)
+    {
+        _saveService.Tick(deltaTime);
     }
 
     private void TickAllServices(float deltaTime)

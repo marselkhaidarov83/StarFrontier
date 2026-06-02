@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: enemyGroupSpawnRule_01
   description: 
   icon: {fileID: 0}
-  spawnIntervalSeconds: 180
+  spawnIntervalSeconds: 15
   maxAliveGroupsFromThisRule: 1
   enemies:
   - enemyConfig: {fileID: 11400000, guid: be0e705b4443b4f0cb89672d320f93b3, type: 2}

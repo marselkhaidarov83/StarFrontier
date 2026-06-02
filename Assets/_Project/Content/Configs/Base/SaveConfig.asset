@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dc02b931a0f64ac6bfd6d04d763042e, type: 3}
   m_Name: SaveConfig
   m_EditorClassIdentifier: Data::SaveConfig
-  saveFileName: save_starfrontier.json
-  backupFileName: save_starfrontier_backup.json
-  saveVersion: 1
-  createBackupBeforeSave: 1
-  autoSaveOnPause: 1
-  autoSaveOnQuit: 1
+  SaveFileName: save_star_frontier.json
+  BackupFileName: save_star_frontier_backup.json
+  SaveVersion: 1
+  AutosaveIntervalSeconds: 60
+  CreateBackupBeforeSave: 1
+  AutoSaveOnPause: 1
+  AutoSaveOnQuit: 1

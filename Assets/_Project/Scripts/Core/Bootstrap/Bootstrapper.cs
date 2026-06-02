@@ -153,7 +153,7 @@ public class Bootstrapper : CustomMonoBehaviour
     {
         float deltaTime = Time.deltaTime;
 
-        _saveService?.Tick(deltaTime);
+        // _saveService?.Tick(deltaTime);
         _gameTimeService?.Tick(deltaTime);
     }
 
