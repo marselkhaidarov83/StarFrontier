@@ -5,5 +5,7 @@ public interface ISceneService
     void LoadBootstrap();
     void LoadMainMenu();
     void LoadMeta();
+    void LoadGalaxy();
+    void LoadSystem();
     void LoadCombat();
 }

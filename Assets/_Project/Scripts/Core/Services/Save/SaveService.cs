@@ -56,7 +56,7 @@ public class SaveService : ISaveService
         Save(gameSessionService?.State);
     }
 
-    public void Save(GameState saveRoot)
+    public void Save(GameRuntimeState saveRoot)
     {
         if (saveRoot == null)
             return;
@@ -80,7 +80,7 @@ public class SaveService : ISaveService
         enabledSave = true;
     }
 
-    private GameState DictionaryToList(GameState saveRoot)
+    private GameRuntimeState DictionaryToList(GameRuntimeState saveRoot)
     {
         saveRoot.MissionBlock.OffersByPlanet_List = new();
         foreach (var pair in saveRoot.MissionBlock.OffersByPlanet)
@@ -106,7 +106,7 @@ public class SaveService : ISaveService
         }
     }
 
-    public GameState Load()
+    public GameRuntimeState Load()
     {
         string path = GetFullPath();
 
@@ -119,7 +119,7 @@ public class SaveService : ISaveService
         try
         {
             string json = File.ReadAllText(path);
-            GameState save = JsonUtility.FromJson<GameState>(json);
+            GameRuntimeState save = JsonUtility.FromJson<GameRuntimeState>(json);
 
             save = DictionaryFromList(save);
             _systemEncounterSaveService.Restore(save.SystemEncounter);
@@ -134,7 +134,7 @@ public class SaveService : ISaveService
         }
     }
 
-    private GameState DictionaryFromList(GameState saveRoot)
+    private GameRuntimeState DictionaryFromList(GameRuntimeState saveRoot)
     {
         saveRoot.MissionBlock.OffersByPlanet = new();
         foreach (PlanetOfferedMissionData item in saveRoot.MissionBlock.OffersByPlanet_List)

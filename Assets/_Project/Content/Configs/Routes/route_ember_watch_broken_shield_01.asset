@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaedc1686a2cb49fca489c1c1ab5a9e5, type: 3}
+  m_Name: route_ember_watch_broken_shield_01
+  m_EditorClassIdentifier: Data::RouteConfig
+  id: route_ember_watch_broken_shield_01
+  displayName: 
+  description: 
+  icon: {fileID: 0}
+  FromSystem: {fileID: 11400000, guid: b48830c982d2747d9aab27df7d43d85e, type: 2}
+  ToSystem: {fileID: 11400000, guid: 363d110ffef7e46508892f2e680b8eef, type: 2}
+  IsLockedAtStart: 0
+  RequiredScanLevel: 0
+  ParsecDistance: 10

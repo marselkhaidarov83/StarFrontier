@@ -1,9 +1,9 @@
 public interface IGameSessionService
 {
-    GameState State { get; }
+    GameRuntimeState State { get; }
     bool HasActiveSession { get; }
 
-    void StartNewSession(GameState state);
-    void LoadSession(GameState state);
+    void StartNewSession(GameRuntimeState state);
+    void LoadSession(GameRuntimeState state);
     void ClearSession();
 }

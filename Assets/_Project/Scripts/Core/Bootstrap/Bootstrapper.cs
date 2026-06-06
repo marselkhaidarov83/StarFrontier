@@ -9,6 +9,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private SaveConfig saveConfig;
 
     [Header("Data")]
+    [SerializeField] private List<SectorConfig> sectors;
     [SerializeField] private List<StarSystemConfig> starSystems;
     [SerializeField] private List<ShipConfig> ships;
     [SerializeField] private List<EnemyConfig> enemies;
@@ -75,6 +76,7 @@ public class Bootstrapper : CustomMonoBehaviour
                     gameConfig,
                     debugConfig,
                     saveConfig,
+                    sectors,
                     starSystems,
                     planets,
                     items,

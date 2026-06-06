@@ -10,10 +10,12 @@ public class SystemMapHUDController : CustomMonoBehaviour
     [SerializeField] private Button openGalaxyButton;
 
     private SimpleEventBus eventBus;
+    private IGameStateMachine gameStateMachine;
 
     public void Initialize()
     {
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        gameStateMachine = Bootstrapper.Instance.ServiceRegistry.Get<IGameStateMachine>();
         SubscribeToEvents();
         BindButtons();
 
@@ -103,7 +105,8 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
     private void OnOpenGalaxyClicked()
     {
-        if (eventBus != null)
-            eventBus.Publish(new GalaxyEnteredEvent());
+        // gameStateMachine.Enter(new GalaxyState());
+        // if (eventBus != null)
+            eventBus?.Publish(new GalaxyEnteredEvent());
     }
 }

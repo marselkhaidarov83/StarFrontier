@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1414ae258b9df42bb8ece460f398de7e, type: 3}
+  m_Name: sector_10_outer_abyss
+  m_EditorClassIdentifier: Data::SectorConfig
+  id: sector_10_outer_abyss
+  displayName: Outer Abyss
+  description: 
+  icon: {fileID: 0}
+  systems:
+  - {fileID: 11400000, guid: 62af30f5944844c98952ea679f0f09c5, type: 2}
+  - {fileID: 11400000, guid: cdb504ef6adc4409ead09ef267fd7c25, type: 2}
+  - {fileID: 11400000, guid: 7eafd7e24f19a4a8f9ebb6735b817d37, type: 2}
+  - {fileID: 11400000, guid: 6d4663daf02004837a448031d8cdff70, type: 2}
+  - {fileID: 11400000, guid: ab00de60929914d07a992bcfdfd33a46, type: 2}
+  - {fileID: 11400000, guid: 0e4b4fe37f14f4bc8b5bf9c70d97a66e, type: 2}
+  order: 10

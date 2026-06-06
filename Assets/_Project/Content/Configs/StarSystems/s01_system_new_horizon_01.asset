@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s01_system_new_horizon_01
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_new_horizon_01
+  displayName: "\u041D\u043E\u0432\u044B\u0439 \u0413\u043E\u0440\u0438\u0437\u043E\u043D\u0442"
+  description: "\u041D\u043E\u0432\u044B\u0439 \u0413\u043E\u0440\u0438\u0437\u043E\u043D\u0442"
+  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
+  economyType: 3
+  dangerLevel: 1
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems:
+  - linkedSystem: {fileID: 11400000, guid: 79cf3b4bb4bd444ac9a26a63576072f6, type: 2}
+    parsecDistance: 12
+    exitPoint: {x: 0, y: 0, z: 0}
+    entryPoint: {x: 0, y: 0, z: 0}
+    sprite: {fileID: 0}
+    size: 0
+  - linkedSystem: {fileID: 11400000, guid: a7beacc0c21ab4a2c956364c433009e6, type: 2}
+    parsecDistance: 16
+    exitPoint: {x: 0, y: 0, z: 0}
+    entryPoint: {x: 0, y: 0, z: 0}
+    sprite: {fileID: 0}
+    size: 0
+  missionTags: 040000000000000008000000
+  mapPosition: {x: -250, y: -810}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 0
+  recommendedPower: 1
+  routes:
+  - {fileID: 11400000, guid: 507b61330a59a45c9910c20737cf4554, type: 2}
+  - {fileID: 11400000, guid: 5d72ddf14a2c3462c8ad73234a24595e, type: 2}

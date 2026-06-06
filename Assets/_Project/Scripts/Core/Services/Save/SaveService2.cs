@@ -53,7 +53,7 @@ public class SaveService2 : ISaveService
         Save(_gameSessionService?.State);
     }
 
-    public void Save(GameState state)
+    public void Save(GameRuntimeState state)
     {
         if (!_enabledSave)
             return;
@@ -95,9 +95,9 @@ public class SaveService2 : ISaveService
         }
     }
 
-    public GameState Load()
+    public GameRuntimeState Load()
     {
-        GameState mainSave = TryLoadFromPath(GetSavePath());
+        GameRuntimeState mainSave = TryLoadFromPath(GetSavePath());
 
         if (mainSave != null)
         {
@@ -107,7 +107,7 @@ public class SaveService2 : ISaveService
 
         Debug.LogWarning("[SaveService] Main save failed. Trying backup.");
 
-        GameState backupSave = TryLoadFromPath(GetBackupPath());
+        GameRuntimeState backupSave = TryLoadFromPath(GetBackupPath());
 
         if (backupSave != null)
         {
@@ -139,7 +139,7 @@ public class SaveService2 : ISaveService
         }
     }
 
-    private void PrepareStateBeforeSave(GameState state)
+    private void PrepareStateBeforeSave(GameRuntimeState state)
     {
         state.Meta.SaveVersion++;
         state.Meta.LastSaveUtc = DateTime.UtcNow.Ticks;
@@ -153,7 +153,7 @@ public class SaveService2 : ISaveService
         DictionaryToList(state);
     }
 
-    private GameState TryLoadFromPath(string path)
+    private GameRuntimeState TryLoadFromPath(string path)
     {
         if (!File.Exists(path))
             return null;
@@ -161,7 +161,7 @@ public class SaveService2 : ISaveService
         try
         {
             string json = File.ReadAllText(path);
-            GameState state = JsonUtility.FromJson<GameState>(json);
+            GameRuntimeState state = JsonUtility.FromJson<GameRuntimeState>(json);
 
             if (state == null)
             {
@@ -205,7 +205,7 @@ public class SaveService2 : ISaveService
         return Path.Combine(Application.persistentDataPath, _backupFileName);
     }
 
-    private void DictionaryToList(GameState state)
+    private void DictionaryToList(GameRuntimeState state)
     {
         if (state.MissionBlock == null)
             return;
@@ -219,7 +219,7 @@ public class SaveService2 : ISaveService
         }
     }
 
-    private void DictionaryFromList(GameState state)
+    private void DictionaryFromList(GameRuntimeState state)
     {
         if (state.MissionBlock == null)
             return;

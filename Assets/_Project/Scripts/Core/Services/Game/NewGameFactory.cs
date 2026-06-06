@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 public class NewGameFactory
 {
-    public GameState CreateNewGame()
+    public GameRuntimeState CreateNewGame()
     {
-        var save = new GameState
+        var save = new GameRuntimeState
         {
             Player = CreatePlayerProfile()
         };

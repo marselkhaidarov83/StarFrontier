@@ -9,6 +9,8 @@ public sealed class ConfigService : IConfigService
     public DebugConfig DebugConfig { get; }
     public SaveConfig SaveConfig { get; }
 
+    private readonly List<SectorConfig> _sectors;
+    private readonly Dictionary<string, SectorConfig> _sectorsById;
     private readonly List<StarSystemConfig> _starSystems;
     private readonly Dictionary<string, StarSystemConfig> _starSystemsById;
     private readonly List<PlanetConfig> _planets;
@@ -37,6 +39,7 @@ public sealed class ConfigService : IConfigService
     public ConfigService(GameConfig gameConfig,
                         DebugConfig debugConfig,
                         SaveConfig saveConfig,
+                        IEnumerable<SectorConfig> sectors,
                         IEnumerable<StarSystemConfig> starSystems,
                         IEnumerable<PlanetConfig> planets,
                         IEnumerable<ItemConfig> items,
@@ -53,6 +56,7 @@ public sealed class ConfigService : IConfigService
         DebugConfig = debugConfig;
         SaveConfig = saveConfig;
 
+        BuildIndex(sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
         BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
         BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1414ae258b9df42bb8ece460f398de7e, type: 3}
+  m_Name: sector_06_war_frontier
+  m_EditorClassIdentifier: Data::SectorConfig
+  id: sector_06_war_frontier
+  displayName: War Frontier
+  description: 
+  icon: {fileID: 0}
+  systems:
+  - {fileID: 11400000, guid: 7196989b500a24f498007c7e9dd68a75, type: 2}
+  - {fileID: 11400000, guid: 47d976686152b4f3391a51bd90023167, type: 2}
+  - {fileID: 11400000, guid: a66697daa8bdc422a83720dfb847a152, type: 2}
+  - {fileID: 11400000, guid: 5e3589de3dfd0485cabf123819bb66d0, type: 2}
+  - {fileID: 11400000, guid: 0389f382ae6304074bcac5671abb4e89, type: 2}
+  order: 6

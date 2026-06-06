@@ -3,13 +3,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SectorConfig", menuName = "StarFrontier/Configs/Sector")]
 public class SectorConfig : BaseConfig
 {
-    
     [Header("World Structure")]
     [SerializeField] private StarSystemConfig[] systems;
-    [SerializeField] private StarSystemConfig startingSystem;
-    [SerializeField] private PlanetConfig startingPlanet;
+    [SerializeField] private int order;
 
     public StarSystemConfig[] Systems => systems;
-    public StarSystemConfig StartingSystem => startingSystem;
-    public PlanetConfig StartingPlanet => startingPlanet;
+    public int Order => order;
 }

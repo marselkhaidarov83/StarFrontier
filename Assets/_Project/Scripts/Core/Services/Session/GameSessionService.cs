@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GameSessionService : IGameSessionService
 {
-    public GameState State { get; private set; }
+    public GameRuntimeState State { get; private set; }
 
     public bool HasActiveSession => State != null;
 
@@ -12,13 +12,13 @@ public class GameSessionService : IGameSessionService
     {
     }
 
-    public void StartNewSession(GameState state)
+    public void StartNewSession(GameRuntimeState state)
     {
         State = state;
         InitializeSystemTravelService();
     }
 
-    public void LoadSession(GameState state)
+    public void LoadSession(GameRuntimeState state)
     {
         State = state;
         InitializeSystemTravelService();
