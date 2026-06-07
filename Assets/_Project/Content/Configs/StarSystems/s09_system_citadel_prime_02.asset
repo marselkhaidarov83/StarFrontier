@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s09_system_citadel_prime_02
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_citadel_prime_01
+  displayName: "\u0413\u043B\u0430\u0432\u043D\u0430\u044F \u0426\u0438\u0442\u0430\u0434\u0435\u043B\u044C"
+  description: "\u0413\u043B\u0430\u0432\u043D\u0430\u044F \u0426\u0438\u0442\u0430\u0434\u0435\u043B\u044C"
+  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
+  economyType: 0
+  dangerLevel: 5
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems: []
+  missionTags: 020000000400000007000000
+  mapPosition: {x: 500, y: 700}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 10
+  routes:
+  - {fileID: 11400000, guid: 06c6de482b7e243cd99dea386a265fb5, type: 2}
+  - {fileID: 11400000, guid: c9633aabe73634cf591e41ce3711d1ed, type: 2}

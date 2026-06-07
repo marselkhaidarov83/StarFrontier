@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s08_system_fallen_crown_02
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_fallen_crown_01
+  displayName: "\u041F\u0430\u0432\u0448\u0430\u044F \u041A\u043E\u0440\u043E\u043D\u0430"
+  description: "\u041F\u0430\u0432\u0448\u0430\u044F \u041A\u043E\u0440\u043E\u043D\u0430"
+  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
+  economyType: 2
+  dangerLevel: 4
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems: []
+  missionTags: 020000000600000005000000
+  mapPosition: {x: 500, y: 500}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 8
+  routes:
+  - {fileID: 11400000, guid: fb58d5574b2964625a6669968abbe889, type: 2}
+  - {fileID: 11400000, guid: 097929d737fd74520ad32b91281595b5, type: 2}
+  - {fileID: 11400000, guid: 42574012198ed4de598937bf81ce617c, type: 2}
+  - {fileID: 11400000, guid: e118aa4a44c7446f78271bf088cc66a7, type: 2}

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s10_system_null_field_02
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_null_field_01
+  displayName: "\u041D\u0443\u043B\u0435\u0432\u043E\u0435 \u041F\u043E\u043B\u0435"
+  description: "\u041D\u0443\u043B\u0435\u0432\u043E\u0435 \u041F\u043E\u043B\u0435"
+  icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
+  economyType: 6
+  dangerLevel: 5
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems: []
+  missionTags: 010000000800000005000000
+  mapPosition: {x: 500, y: 900}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 10
+  routes:
+  - {fileID: 11400000, guid: a7ce8fa0a058343ae9640852d850a796, type: 2}
+  - {fileID: 11400000, guid: fa1164b06f199479a9be8bff682e7a41, type: 2}
+  - {fileID: 11400000, guid: 3e04c32639b6f4348b69ad06d627613a, type: 2}
+  - {fileID: 11400000, guid: 32e6f58f4ed584d5d8f64cde27959abc, type: 2}

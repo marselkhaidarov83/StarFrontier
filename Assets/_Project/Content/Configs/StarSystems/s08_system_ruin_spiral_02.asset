@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s08_system_ruin_spiral_02
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_ruin_spiral_01
+  displayName: "\u0421\u043F\u0438\u0440\u0430\u043B\u044C \u0420\u0443\u0438\u043D"
+  description: "\u0421\u043F\u0438\u0440\u0430\u043B\u044C \u0420\u0443\u0438\u043D"
+  icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
+  economyType: 6
+  dangerLevel: 5
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems: []
+  missionTags: 020000000500000008000000
+  mapPosition: {x: 500, y: 500}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 9
+  routes:
+  - {fileID: 11400000, guid: e118aa4a44c7446f78271bf088cc66a7, type: 2}
+  - {fileID: 11400000, guid: e3260570aa2ce413288e4a5721853656, type: 2}
+  - {fileID: 11400000, guid: 3890c106436fa4b69a40b81c658a7b9b, type: 2}
+  - {fileID: 11400000, guid: 8eab33f9579b24c439373811a848e130, type: 2}
+  - {fileID: 11400000, guid: 9d284d2a3352244c9b04ac41fd800fa0, type: 2}
