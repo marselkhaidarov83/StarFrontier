@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::SectorConfig
   id: sector_06_war_frontier
   displayName: War Frontier
-  description: 
+  description: "\u0412\u043E\u0435\u043D\u043D\u0430\u044F \u0433\u0440\u0430\u043D\u0438\u0446\u0430"
   icon: {fileID: 0}
   systems:
   - {fileID: 11400000, guid: 7196989b500a24f498007c7e9dd68a75, type: 2}
@@ -23,3 +23,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5e3589de3dfd0485cabf123819bb66d0, type: 2}
   - {fileID: 11400000, guid: 0389f382ae6304074bcac5671abb4e89, type: 2}
   order: 6
+  mapPosition: {x: 0, y: 0.5}
+  mapSize: {x: 10.8, y: 1.57}
+  SectorPreviewImage: {fileID: 21300000, guid: 4d61806f5054c43dd835a38e2cf1a16c, type: 3}
+  SectorTitleColor: {r: 1, g: 1, b: 1, a: 1}

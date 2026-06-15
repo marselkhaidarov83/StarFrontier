@@ -8,6 +8,8 @@ public sealed class ConfigService : IConfigService
     public GameConfig GameConfig { get; }
     public DebugConfig DebugConfig { get; }
     public SaveConfig SaveConfig { get; }
+    public GalaxyConfig GalaxyConfig { get; }
+    public NewGameConfig NewGameConfig { get; }
 
     private readonly List<SectorConfig> _sectors;
     private readonly Dictionary<string, SectorConfig> _sectorsById;
@@ -39,6 +41,8 @@ public sealed class ConfigService : IConfigService
     public ConfigService(GameConfig gameConfig,
                         DebugConfig debugConfig,
                         SaveConfig saveConfig,
+                        GalaxyConfig galaxyConfig,
+                        NewGameConfig newGameConfig,
                         IEnumerable<SectorConfig> sectors,
                         IEnumerable<StarSystemConfig> starSystems,
                         IEnumerable<PlanetConfig> planets,
@@ -55,8 +59,57 @@ public sealed class ConfigService : IConfigService
         GameConfig = gameConfig;
         DebugConfig = debugConfig;
         SaveConfig = saveConfig;
+        GalaxyConfig = galaxyConfig;
+        NewGameConfig = newGameConfig;
 
         BuildIndex(sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
+        BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
+        BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
+        BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));
+        BuildIndex(ships, out _ships, out _shipsById, nameof(ShipConfig));
+        BuildIndex(enemies, out _enemies, out _enemiesById, nameof(EnemyConfig));
+        BuildIndex(allies, out _allies, out _alliesById, nameof(AllyConfig));
+        BuildIndex(allySpawnRules, out _allySpawnRules, out _allySpawnRulesById, nameof(AllySpawnRuleConfig));
+        BuildIndex(pirates, out _pirates, out _piratesById, nameof(PirateConfig));
+        BuildIndex(pirateGroupSpawnRules, out _pirateGroupSpawnRules, out _pirateGroupSpawnRulesById, nameof(PirateGroupSpawnRuleConfig));
+        BuildIndex(modules, out _modules, out _modulesById, nameof(ModuleConfig));
+        BuildIndex(weapons, out _weapons, out _weaponsById, nameof(WeaponConfig));
+
+        gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+    }
+
+    public ConfigService(GameConfig gameConfig,
+                        DebugConfig debugConfig,
+                        SaveConfig saveConfig,
+                        GalaxyConfig galaxyConfig,
+                        NewGameConfig newGameConfig,
+                        IEnumerable<ItemConfig> items,
+                        IEnumerable<ShipConfig> ships,
+                        IEnumerable<EnemyConfig> enemies,
+                        IEnumerable<AllyConfig> allies,
+                        IEnumerable<AllySpawnRuleConfig> allySpawnRules,
+                        IEnumerable<PirateConfig> pirates,
+                        IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
+                        IEnumerable<ModuleConfig> modules,
+                        IEnumerable<WeaponConfig> weapons)
+    {
+        GameConfig = gameConfig;
+        DebugConfig = debugConfig;
+        SaveConfig = saveConfig;
+        GalaxyConfig = galaxyConfig;
+        NewGameConfig = newGameConfig;
+
+        List<StarSystemConfig> starSystems = new ();
+        List<PlanetConfig> planets = new ();
+        foreach (SectorConfig sector in galaxyConfig.Sectors)
+            foreach (StarSystemConfig starSystem in sector.Systems)
+            {
+                starSystems.Add(starSystem);
+                foreach (PlanetConfig planet in starSystem.PlanetRefs)
+                    planets.Add(planet);
+            }
+
+        BuildIndex(galaxyConfig.Sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
         BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
         BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));
@@ -120,6 +173,11 @@ public sealed class ConfigService : IConfigService
             targetList.Add(config);
             targetById.Add(normalizedId, config);
         }
+    }
+
+    public IReadOnlyList<SectorConfig> GetAllSectors()
+    {
+        return _sectors;
     }
 
     public IReadOnlyList<StarSystemConfig> GetAllStarSystems()

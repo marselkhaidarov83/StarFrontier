@@ -233,7 +233,7 @@ public class SystemMapController2 : CustomMonoBehaviour
             return;
 
         eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -247,7 +247,7 @@ public class SystemMapController2 : CustomMonoBehaviour
             return;
 
         eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -264,7 +264,7 @@ public class SystemMapController2 : CustomMonoBehaviour
             Debug.Log("[SystemMapController2] galaxy entered");
     }
 
-    private void OnSystemEntered(SystemEnteredEvent evt)
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         if (_camera != null)
         {

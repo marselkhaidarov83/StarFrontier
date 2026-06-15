@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::SectorConfig
   id: sector_10_outer_abyss
   displayName: Outer Abyss
-  description: 
+  description: "\u0412\u043D\u0435\u0448\u043D\u044F\u044F \u0431\u0435\u0437\u0434\u043D\u0430"
   icon: {fileID: 0}
   systems:
   - {fileID: 11400000, guid: 62af30f5944844c98952ea679f0f09c5, type: 2}
@@ -24,3 +24,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ab00de60929914d07a992bcfdfd33a46, type: 2}
   - {fileID: 11400000, guid: 0e4b4fe37f14f4bc8b5bf9c70d97a66e, type: 2}
   order: 10
+  mapPosition: {x: 0, y: 6.55}
+  mapSize: {x: 10.8, y: 1.57}
+  SectorPreviewImage: {fileID: 21300000, guid: 5cb530fabe7b34e1f8cfffad661f3b8d, type: 3}
+  SectorTitleColor: {r: 1, g: 1, b: 1, a: 1}

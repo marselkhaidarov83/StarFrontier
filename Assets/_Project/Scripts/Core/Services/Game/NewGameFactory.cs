@@ -2,23 +2,33 @@ using System.Collections.Generic;
 
 public class NewGameFactory
 {
+    private IConfigService _configService;
+
+    public NewGameFactory()
+    {
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();   
+    }
+
     public GameRuntimeState CreateNewGame()
     {
         var save = new GameRuntimeState
         {
-            Player = CreatePlayerProfile()
+            Player = CreatePlayerProfile(_configService.NewGameConfig),
+            Galaxy = GalaxyRuntimeStateFactory.CreateNewGalaxyRuntimeState(_configService.GalaxyConfig)
         };
         return save;
     }
 
-    private PlayerState CreatePlayerProfile()
+    private PlayerState CreatePlayerProfile(NewGameConfig newGameConfig)
     {
         var starterShip = CreateStarterShip();
 
         var profile = new PlayerState
         {
-            Credits = 1000,
-            CurrentSystemId = "system_heliosGate_01",
+            // Credits = 1000,
+            Credits = newGameConfig.StartCredit,
+            // CurrentSystemId = "system_heliosGate_01",
+            CurrentSystemId = newGameConfig.StartSystem.Id,
             PlayerShipState = starterShip
         };
 

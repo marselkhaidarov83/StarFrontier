@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: "\u041C\u043E\u0433\u0438\u043B\u044C\u043D\u0430\u044F \u041B\u0438\u043D\u0438\u044F"
   description: "\u041C\u043E\u0433\u0438\u043B\u044C\u043D\u0430\u044F \u041B\u0438\u043D\u0438\u044F"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
-  economyType: 6
+  economyType: 4
   dangerLevel: 4
   sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
   planetRefs: []
@@ -40,7 +40,7 @@ MonoBehaviour:
     sprite: {fileID: 0}
     size: 0
   missionTags: 010000000500000008000000
-  mapPosition: {x: 500, y: -100}
+  mapPosition: {x: -2.1, y: -0.4}
   systemPopulation: {fileID: 0}
   isStartSystem: 0
   isHiddenAtStart: 1

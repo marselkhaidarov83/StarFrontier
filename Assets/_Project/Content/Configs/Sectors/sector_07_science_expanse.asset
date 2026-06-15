@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::SectorConfig
   id: sector_07_science_expanse
   displayName: Science Expanse
-  description: 
+  description: "\u041D\u0430\u0443\u0447\u043D\u043E\u0435 \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u043E"
   icon: {fileID: 0}
   systems:
   - {fileID: 11400000, guid: c837657b571d041a0adb7abdcf66f66a, type: 2}
@@ -23,3 +23,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d2f45e09b9580415c9df1e1846dcf022, type: 2}
   - {fileID: 11400000, guid: ca972039b151240248be0530799895f5, type: 2}
   order: 7
+  mapPosition: {x: 0, y: 1.9}
+  mapSize: {x: 10.8, y: 1.57}
+  SectorPreviewImage: {fileID: 21300000, guid: 4d61806f5054c43dd835a38e2cf1a16c, type: 3}
+  SectorTitleColor: {r: 1, g: 1, b: 1, a: 1}

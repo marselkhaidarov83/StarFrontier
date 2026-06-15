@@ -65,7 +65,7 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
         {
             if (IsDebug())
                 Debug.Log($"SystemTransitionController2: '{evt.TargetSystemId}' is the current system.");
-            _eventBus.Publish(new SystemEnteredEvent(evt.TargetSystemId));
+            _eventBus.Publish(new StarSystemEnteredEvent(evt.TargetSystemId));
             return;
         }
 

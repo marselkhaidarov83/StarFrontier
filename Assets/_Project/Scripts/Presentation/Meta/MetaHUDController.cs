@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MetaHudController : MonoBehaviour
+public class MetaHudController : CustomMonoBehaviour
 {
     [Header("Texts")]
     [SerializeField] private TMP_Text creditsText;
@@ -38,6 +38,7 @@ public class MetaHudController : MonoBehaviour
         BindButtons();
         UnsubscribeFromEvents();
         SubscribeToEvents();
+        Refresh();
     }
 
     private void OnDestroy()
@@ -74,7 +75,7 @@ public class MetaHudController : MonoBehaviour
             return;
 
         simpleEventBus.Subscribe<ActiveShipChangedEvent>(OnActiveShipChanged);
-        simpleEventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        simpleEventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         simpleEventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         simpleEventBus.Subscribe<FuelChangedEvent>(OnFuelChanged);
         simpleEventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
@@ -87,7 +88,7 @@ public class MetaHudController : MonoBehaviour
             return;
 
         simpleEventBus.Unsubscribe<ActiveShipChangedEvent>(OnActiveShipChanged);
-        simpleEventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        simpleEventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         simpleEventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         simpleEventBus.Unsubscribe<FuelChangedEvent>(OnFuelChanged);
         simpleEventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
@@ -99,7 +100,7 @@ public class MetaHudController : MonoBehaviour
         Refresh();
     }
 
-    private void OnSystemEntered(SystemEnteredEvent evt)
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         Refresh();
     }

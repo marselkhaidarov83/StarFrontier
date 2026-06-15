@@ -447,6 +447,8 @@ MonoBehaviour:
   gameConfig: {fileID: 11400000, guid: f76b09e1774ab45c7a1c5e6e6af8934e, type: 2}
   debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
+  newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
+  galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
   sectors:
   - {fileID: 11400000, guid: 12d3db768e87d49a3b46b00639d37bf1, type: 2}
   - {fileID: 11400000, guid: 4d6bf20c14c344cb1859b15ac92d0389, type: 2}

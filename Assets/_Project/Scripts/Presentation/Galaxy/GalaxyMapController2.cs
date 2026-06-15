@@ -12,7 +12,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
     [SerializeField] private GameObject galaxyMapRoot;
 
     [Header("Systems")]
-    [SerializeField] private SystemNodeView2 nodePrefab2;
+    [SerializeField] private StarSystemNodeView nodePrefab2;
     [SerializeField] private Transform systemNodesContainer;
     [SerializeField] private Image errorImage;
     [SerializeField] private TMP_Text errorText;
@@ -29,7 +29,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
     private ITravelService travelService;
     private ISaveService saveService;
 
-    private SystemNodeView2[] systemNodes;
+    private StarSystemNodeView[] systemNodes;
     private Coroutine currentRoutine;
 
     private void OnDestroy()
@@ -39,6 +39,8 @@ public class GalaxyMapController2 : CustomMonoBehaviour
 
     public void Initialize()
     {
+        return;
+        
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
@@ -84,11 +86,11 @@ public class GalaxyMapController2 : CustomMonoBehaviour
         }
     }
 
-    private void AddNode(SystemNodeView2 newNode)
+    private void AddNode(StarSystemNodeView newNode)
     {
         if (systemNodes == null)
         {
-            systemNodes = new SystemNodeView2[1];
+            systemNodes = new StarSystemNodeView[1];
             systemNodes[0] = newNode;
             return;
         }
@@ -103,7 +105,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
             return;
 
         eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
     } 
 
@@ -113,7 +115,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
             return;
 
         eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
     }
 
@@ -132,7 +134,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
         // saveService.Save();
     }
 
-    private void OnSystemEntered(SystemEnteredEvent evt)
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         galaxyMapRoot?.SetActive(false);
     }
@@ -141,7 +143,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
     {
         if (IsDebug())
             Debug.Log("[GalaxyMapController2] Refresh");
-        foreach (SystemNodeView2 systemNodeView in systemNodes)
+        foreach (StarSystemNodeView systemNodeView in systemNodes)
         {
             if (IsDebug())
                 Debug.Log("[GalaxyMapController2] systemNodeView = " + systemNodeView);
@@ -160,7 +162,7 @@ public class GalaxyMapController2 : CustomMonoBehaviour
         {
             if (IsDebug())
                 Debug.Log($"GalaxyMapController2: '{targetSystemId}' is the current system.");
-            eventBus.Publish(new SystemEnteredEvent(targetSystemId));
+            eventBus.Publish(new StarSystemEnteredEvent(targetSystemId));
             return;
         }
 

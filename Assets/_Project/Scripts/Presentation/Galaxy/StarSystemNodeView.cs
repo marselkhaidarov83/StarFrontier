@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class SystemNodeView2 : CustomMonoBehaviour, IPointerClickHandler
+public class StarSystemNodeView : CustomMonoBehaviour, IPointerClickHandler
 {
     [Header("View")]
     [SerializeField] private SpriteRenderer icon;

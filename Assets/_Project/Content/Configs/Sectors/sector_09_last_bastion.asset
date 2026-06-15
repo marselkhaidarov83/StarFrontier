@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::SectorConfig
   id: sector_09_last_bastion
   displayName: Last Bastion
-  description: 
+  description: "\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0431\u0430\u0441\u0442\u0438\u043E\u043D"
   icon: {fileID: 0}
   systems:
   - {fileID: 11400000, guid: c4acfa3543bd74acdb020ea86d633419, type: 2}
@@ -23,3 +23,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8c998835230804baa921cad4deaf4b98, type: 2}
   - {fileID: 11400000, guid: 779cd11d14a8b4fd886dc4b8b9bbe059, type: 2}
   order: 9
+  mapPosition: {x: 0, y: 4.7}
+  mapSize: {x: 10.8, y: 1.57}
+  SectorPreviewImage: {fileID: 21300000, guid: 4d61806f5054c43dd835a38e2cf1a16c, type: 3}
+  SectorTitleColor: {r: 1, g: 1, b: 1, a: 1}

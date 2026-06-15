@@ -82,7 +82,7 @@ using UnityEngine;
             if (_debugEnabled)
                 Debug.Log($"[TravelService] EventPublished: TravelFinishedEvent");
 
-            _eventBus.Publish(new SystemEnteredEvent(completedResult.ToSystemId));
+            _eventBus.Publish(new StarSystemEnteredEvent(completedResult.ToSystemId));
             if (_debugEnabled)
                 Debug.Log($"[TravelService] EventPublished: SystemEnteredEvent");
 

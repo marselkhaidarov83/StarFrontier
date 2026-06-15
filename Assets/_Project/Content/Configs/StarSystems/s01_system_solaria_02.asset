@@ -19,22 +19,11 @@ MonoBehaviour:
   economyType: 0
   dangerLevel: 1
   sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
-  linkedSystems:
-  - linkedSystem: {fileID: 11400000, guid: 03a893a7348d3438ca180070a07d7109, type: 2}
-    parsecDistance: 10
-    exitPoint: {x: 0, y: 0, z: 0}
-    entryPoint: {x: 0, y: 0, z: 0}
-    sprite: {fileID: 0}
-    size: 0
-  - linkedSystem: {fileID: 11400000, guid: 6e8c013720e2643fab196b990ae888cd, type: 2}
-    parsecDistance: 12
-    exitPoint: {x: 0, y: 0, z: 0}
-    entryPoint: {x: 0, y: 0, z: 0}
-    sprite: {fileID: 0}
-    size: 0
+  planetRefs:
+  - {fileID: 11400000, guid: b04f0b0971a5b4e45bcf426b63d0c39d, type: 2}
+  linkedSystems: []
   missionTags: 040000000300000000000000
-  mapPosition: {x: 0, y: -900}
+  mapPosition: {x: -0.1, y: -6.6}
   systemPopulation: {fileID: 0}
   isStartSystem: 1
   isHiddenAtStart: 0

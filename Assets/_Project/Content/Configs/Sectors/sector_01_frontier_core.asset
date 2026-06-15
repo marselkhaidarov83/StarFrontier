@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: sector_01_frontier_core
   m_EditorClassIdentifier: Data::SectorConfig
   id: sector_01_frontier_core
-  displayName: Frontier Core
-  description: 
+  displayName: Frontier core
+  description: "\u041F\u043E\u0433\u0440\u0430\u043D\u0438\u0447\u043D\u043E\u0435
+    \u044F\u0434\u0440\u043E"
   icon: {fileID: 0}
   systems:
   - {fileID: 11400000, guid: a7beacc0c21ab4a2c956364c433009e6, type: 2}
@@ -23,3 +24,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 79cf3b4bb4bd444ac9a26a63576072f6, type: 2}
   - {fileID: 11400000, guid: 03a893a7348d3438ca180070a07d7109, type: 2}
   order: 1
+  IsUnlocked: 1
+  mapPosition: {x: 0, y: -7}
+  mapSize: {x: 10.8, y: 1.57}
+  SectorPreviewImage: {fileID: 21300000, guid: 4d61806f5054c43dd835a38e2cf1a16c, type: 3}
+  SectorTitleColor: {r: 1, g: 1, b: 1, a: 1}

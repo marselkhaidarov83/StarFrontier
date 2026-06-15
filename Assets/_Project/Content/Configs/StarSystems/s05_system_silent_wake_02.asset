@@ -16,13 +16,13 @@ MonoBehaviour:
   displayName: "\u0422\u0438\u0445\u0438\u0439 \u0421\u043B\u0435\u0434"
   description: "\u0422\u0438\u0445\u0438\u0439 \u0421\u043B\u0435\u0434"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
-  economyType: 6
+  economyType: 2
   dangerLevel: 4
   sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
   planetRefs: []
   linkedSystems: []
   missionTags: 010000000200000005000000
-  mapPosition: {x: 500, y: -100}
+  mapPosition: {x: 3.9, y: -1}
   systemPopulation: {fileID: 0}
   isStartSystem: 0
   isHiddenAtStart: 1

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::SectorConfig
   id: sector_03_trade_corridor
   displayName: Trade Corridor
-  description: 
+  description: "\u0422\u043E\u0440\u0433\u043E\u0432\u044B\u0439 \u043A\u043E\u0440\u0438\u0434\u043E\u0440"
   icon: {fileID: 0}
   systems:
   - {fileID: 11400000, guid: 457aafe2437f44ce2b9fba1af4a35e13, type: 2}
@@ -23,3 +23,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a88906c1b167842e199a14945756ee52, type: 2}
   - {fileID: 11400000, guid: 55b3b81ed26644a6f9cc0e25e65b133a, type: 2}
   order: 3
+  IsUnlocked: 1
+  mapPosition: {x: 0, y: -3.7}
+  mapSize: {x: 10.8, y: 1.57}
+  SectorPreviewImage: {fileID: 21300000, guid: 4d61806f5054c43dd835a38e2cf1a16c, type: 3}
+  SectorTitleColor: {r: 1, g: 1, b: 1, a: 1}
