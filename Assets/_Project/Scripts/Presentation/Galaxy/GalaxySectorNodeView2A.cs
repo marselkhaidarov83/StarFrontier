@@ -30,7 +30,7 @@ public class GalaxySectorNodeView2A : CustomMonoBehaviour
             0f
         );
 
-        LogCustom("transform.localScale = " + transform.localScale);
+        // LogCustom("transform.localScale = " + transform.localScale);
 
         ApplyImage(config, isUnlocked);
         ApplyTitle(config, isUnlocked);

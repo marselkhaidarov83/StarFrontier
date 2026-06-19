@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GalaxySystemInfoPanel : MonoBehaviour
+public class GalaxySystemInfoPanel_old : MonoBehaviour
 {
     [SerializeField] private Text titleText;
     [SerializeField] private Text statusText;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GalaxySectorMapBuilder : CustomMonoBehaviour
+public class GalaxyMapSectorBuilder : CustomMonoBehaviour
 {
     [Header("Сцена")]
     [SerializeField] private Transform sectorNodesRoot;

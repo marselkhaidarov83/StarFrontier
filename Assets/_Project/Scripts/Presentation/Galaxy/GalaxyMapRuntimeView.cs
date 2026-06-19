@@ -41,8 +41,8 @@ public class GalaxyMapRuntimeView : MonoBehaviour
 
         _galaxyConfig = configService.GalaxyConfig;
 
-        if (infoPanel != null)
-            infoPanel.Initialize(this);
+        // if (infoPanel != null)
+        //     infoPanel.Initialize(this);
 
         SubscribeEvents();
         Rebuild();
@@ -187,12 +187,12 @@ public class GalaxyMapRuntimeView : MonoBehaviour
 
         GalaxyRouteLineView view = Instantiate(routeLinePrefab, routesRoot);
 
-        view.Initialize(
-            routeConfig.Id,
-            fromConfig.MapPosition,
-            toConfig.MapPosition,
-            routeState.IsUnlocked
-        );
+        // view.Initialize(
+        //     routeConfig.Id,
+        //     fromConfig.MapPosition,
+        //     toConfig.MapPosition,
+        //     routeState.IsUnlocked
+        // );
 
         _routeViews[routeConfig.Id] = view;
     }
@@ -210,16 +210,16 @@ public class GalaxyMapRuntimeView : MonoBehaviour
         bool isCurrent =
             _galaxyRuntimeState.CurrentSystemId == systemId;
 
-        infoPanel.Show(
-            systemId,
-            config.DisplayName,
-            state.IsDiscovered,
-            state.IsVisited,
-            isCurrent,
-            state.DangerLevel,
-            state.DevelopmentLevel,
-            state.Stability
-        );
+        // infoPanel.Show(
+        //     systemId,
+        //     config.DisplayName,
+        //     state.IsDiscovered,
+        //     state.IsVisited,
+        //     isCurrent,
+        //     state.DangerLevel,
+        //     state.DevelopmentLevel,
+        //     state.Stability
+        // );
     }
 
     public void TryTravelToSelectedSystem(string systemId)

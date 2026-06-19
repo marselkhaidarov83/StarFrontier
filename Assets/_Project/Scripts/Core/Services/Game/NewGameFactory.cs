@@ -49,7 +49,7 @@ public class NewGameFactory
                     CurrentHull = 70,
                     CurrentShield = 50,
                     CurrentEnergy = 100,
-                    CurrentFuel = 3,
+                    CurrentFuel = 20,
                     FuelCapacity = 20,
                     CargoCapacity = 5,
                     HullCapacity = 100,

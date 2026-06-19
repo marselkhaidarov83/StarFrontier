@@ -6,8 +6,11 @@ public class GalaxySceneController : CustomMonoBehaviour
 {
     [Header("Screen Controllers")]
     [SerializeField] private MetaHudController metaHudController;
-    [SerializeField] private GalaxyMapController2A galaxyMapController2a;
-    [SerializeField] private GalaxySectorMapBuilder galaxySectorMapBuilder;
+    [SerializeField] private GalaxyMapSystemBuilder galaxyMapSystemBuilder;
+    [SerializeField] private GalaxyMapSectorBuilder galaxyMapSectorBuilder;
+    [SerializeField] private GalaxyMapRoutesBuilder2A galaxyMapRoutesBuilder2A;
+    [SerializeField] private GalaxyMapBackgroundClickHandler galaxyMapBackgroundClickHandler;
+    [SerializeField] private GalaxySystemInfoPanel2A galaxySystemInfoPanel2A;
 
     [Header("Screen Roots")]
     [SerializeField] private GameObject galaxyMapScreenRoot2;
@@ -15,8 +18,11 @@ public class GalaxySceneController : CustomMonoBehaviour
     private void Start()
     {
         metaHudController?.Initialize();
-        galaxyMapController2a?.Initialize();
-        galaxySectorMapBuilder?.Initialize();
+        galaxyMapSectorBuilder?.Initialize();
+        galaxyMapSystemBuilder?.Initialize();
+        galaxyMapRoutesBuilder2A?.Initialize();
+        galaxyMapBackgroundClickHandler?.Initialize();
+        galaxySystemInfoPanel2A?.Initialize();
 
         LogCustom("all galaxy systems initialized.");
     }

@@ -5,18 +5,17 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
-public class GalaxyMapController2A : CustomMonoBehaviour
+public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 {
     [Header("Screen Roots")]
     [SerializeField] private GameObject galaxyMapRoot;
 
-    [Header("Sectors")]
-    [SerializeField] private GalaxySectorNodeView2 sectorNodePrefab;
-    [SerializeField] private Transform sectorNodeContainer;
-
     [Header("Systems")]
-    [SerializeField] private StarSystemNodeView2 starSystemNodePrefab2;
+    [SerializeField] private StarSystemNodeView2A starSystemNodePrefab2;
     [SerializeField] private Transform systemNodesContainer;
+
+    [Header("Routes")]
+    [SerializeField] private GalaxyMapRoutesBuilder2A routesBuilder;
 
     [Header("Custom")]
     [SerializeField] private Image errorImage;
@@ -34,8 +33,7 @@ public class GalaxyMapController2A : CustomMonoBehaviour
     private ITravelService travelService;
     private IGameStateMachine _gameStateMachine;
 
-    private StarSystemNodeView2[] systemNodes;
-    private SectorLowLayerNodeView[] sectorNodes;
+    private StarSystemNodeView2A[] systemNodes;
     private Coroutine currentRoutine;
 
     private void OnDestroy()
@@ -51,8 +49,6 @@ public class GalaxyMapController2A : CustomMonoBehaviour
         travelService = Bootstrapper.Instance.ServiceRegistry.Get<ITravelService>();
         _gameStateMachine = Bootstrapper.Instance.ServiceRegistry.Get<IGameStateMachine>();
 
-        // CreateSectors();
-        BuildSectors();
         CreateSystemNodes();
 
         LogCustom("systemNodeView.Count " + systemNodes.Count());
@@ -60,45 +56,22 @@ public class GalaxyMapController2A : CustomMonoBehaviour
         SubscribeToEvents();
     }
 
-    private void BuildSectors()
+    public void ClearSelectedSystem()
     {
-        var sectors = configService.GetAllSectors();
-        if (sectors == null)
-            return;
+        if (routesBuilder != null)
+            routesBuilder.ClearSelectedPath();
 
-        foreach (SectorConfig sectorConfig in sectors)
+        if (systemNodes != null)
         {
-            if (sectorConfig == null)
-                continue;
+            foreach (StarSystemNodeView2A systemNodeView in systemNodes)
+            {
+                if (systemNodeView == null)
+                    continue;
 
-            GalaxySectorNodeView2 view = Instantiate(sectorNodePrefab, sectorNodeContainer);
-
-            view.Initialize(sectorConfig);
+                systemNodeView.SetSelected(false);
+            }
         }
     }
-
-    // private void CreateSectors()
-    // {
-    //     var sectors = configService.GetAllSectors();
-
-    //     LogCustom("sectors.Count " + sectors.Count());
-    //     foreach (var sector in sectors)
-    //     {
-    //         LogCustom("sector add " + sector);
-
-    //         Quaternion spawnRotation = Quaternion.identity;
-
-    //         var node = Instantiate(sectorLowLayerNodePrefab, sectorLowLayerNodeContainer);
-    //         node.Initialize(sector);
-    //         node.GetComponent<Transform>().position = sector.MapPosition;
-
-    //         LogCustom("MapPosition " + sector.MapPosition.x + " / " + sector.MapPosition.y);
-    //         LogCustom("SectorConfig " + sector);
-
-    //         AddSectorLowLayerNode(node);
-    //         LogCustom("sectorNodeView.Count " + sectorNodes.Count());
-    //     }
-    // }
 
     private void CreateSystemNodes()
     {
@@ -124,30 +97,22 @@ public class GalaxyMapController2A : CustomMonoBehaviour
         }
     }
 
-    private void AddSectorLowLayerNode(SectorLowLayerNodeView newNode)
-    {
-        if (sectorNodes == null)
-        {
-            sectorNodes = new SectorLowLayerNodeView[1];
-            sectorNodes[0] = newNode;
-            return;
-        }
-
-        Array.Resize(ref sectorNodes, sectorNodes.Length + 1);
-        sectorNodes[sectorNodes.Length - 1] = newNode;
-    }
-
-    private void AddSystemNode(StarSystemNodeView2 newNode)
+    private void AddSystemNode(StarSystemNodeView2A newNode)
     {
         if (systemNodes == null)
         {
-            systemNodes = new StarSystemNodeView2[1];
+            systemNodes = new StarSystemNodeView2A[1];
             systemNodes[0] = newNode;
             return;
         }
 
         Array.Resize(ref systemNodes, systemNodes.Length + 1);
         systemNodes[systemNodes.Length - 1] = newNode;
+    }
+
+    private void OnGalaxyMapSelectionCleared(GalaxyMapSelectionClearedEvent eventData)
+    {
+        ClearSelectedSystem();
     }
 
     private void SubscribeToEvents()
@@ -157,6 +122,7 @@ public class GalaxyMapController2A : CustomMonoBehaviour
 
         eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
+        eventBus.Subscribe<GalaxyMapSelectionClearedEvent>(OnGalaxyMapSelectionCleared);
     }
 
     private void UnsubscribeFromEvents()
@@ -166,6 +132,7 @@ public class GalaxyMapController2A : CustomMonoBehaviour
 
         eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
+        eventBus.Unsubscribe<GalaxyMapSelectionClearedEvent>(OnGalaxyMapSelectionCleared);
     }
 
 
@@ -182,18 +149,66 @@ public class GalaxyMapController2A : CustomMonoBehaviour
     public void Refresh()
     {
         LogCustom("Refresh");
-        foreach (StarSystemNodeView2 systemNodeView in systemNodes)
+        foreach (StarSystemNodeView2A systemNodeView in systemNodes)
         {
             LogCustom("systemNodeView = " + systemNodeView);
             systemNodeView.SetState();
         }
     }
 
+    // private void OnSystemClicked(string targetSystemId)
+    // {
+    //     LogCustom($"Clicked system: {targetSystemId}");
+
+    //     var currentSystemId = gameSessionService.State.Player.CurrentSystemId;
+
+    //     if (string.Equals(currentSystemId, targetSystemId, StringComparison.Ordinal))
+    //     {
+    //         LogCustom($"{targetSystemId} is the current system.");
+    //         _gameStateMachine.Enter(new MetaState());
+    //         eventBus.Publish(new StarSystemEnteredEvent(targetSystemId));
+    //         return;
+    //     }
+
+    //     var result = travelService.GetTravelFailReason(currentSystemId, targetSystemId);
+    //     LogCustom($"travel result = {result}");
+
+    //     switch (result)
+    //     {
+    //         case TravelFailReason.NotEnoughFuel:
+    //             ShowMessage("Для перелёта в выбранную систему недостаточно топлива");
+    //             return;
+    //         case TravelFailReason.SystemsAreNotNeighbors:
+    //             ShowMessage("Перелёт в выбранную систему из текущей невозможен");
+    //             return;
+    //         default:
+    //             break;
+    //     }
+
+    //     StarSystemLink systemLink = configService.GetCurrentStarSystemLink(targetSystemId);
+    //     eventBus.Publish(new ExitMapChangedEvent(systemLink));
+    // }
+
     private void OnSystemClicked(string targetSystemId)
     {
         LogCustom($"Clicked system: {targetSystemId}");
 
-        var currentSystemId = gameSessionService.State.Player.CurrentSystemId;
+        string currentSystemId = gameSessionService.State.Player.CurrentSystemId;
+        System.Collections.Generic.List<string> path = new();
+        if (routesBuilder != null)
+        {
+            path = routesBuilder.ShowShortestPath(
+                currentSystemId,
+                targetSystemId
+            );
+        }
+        else
+        {
+            path.Add(currentSystemId);
+
+            if (currentSystemId != targetSystemId)
+                path.Add(targetSystemId);
+        }
 
         if (string.Equals(currentSystemId, targetSystemId, StringComparison.Ordinal))
         {
@@ -203,23 +218,72 @@ public class GalaxyMapController2A : CustomMonoBehaviour
             return;
         }
 
-        var result = travelService.GetTravelFailReason(currentSystemId, targetSystemId);
+        string nextSystemId = targetSystemId;
+
+        if (routesBuilder != null)
+        {
+            routesBuilder.ShowShortestPath(currentSystemId, targetSystemId);
+
+            if (routesBuilder.HasSelectedPath())
+            {
+                string firstStepSystemId =
+                    routesBuilder.GetNextSystemIdInSelectedPath(currentSystemId);
+
+                if (!string.IsNullOrWhiteSpace(firstStepSystemId))
+                    nextSystemId = firstStepSystemId;
+            }
+            else
+            {
+                ShowMessage("Маршрут к выбранной системе не найден");
+                return;
+            }
+        }
+
+        TravelFailReason result =
+            travelService.GetTravelFailReason(currentSystemId, nextSystemId);
+
         LogCustom($"travel result = {result}");
 
         switch (result)
         {
             case TravelFailReason.NotEnoughFuel:
-                ShowMessage("Для перелёта в выбранную систему недостаточно топлива");
-                return;
+                ShowMessage("Для первого прыжка по маршруту недостаточно топлива");
+                break;
+
             case TravelFailReason.SystemsAreNotNeighbors:
-                ShowMessage("Перелёт в выбранную систему из текущей невозможен");
-                return;
+                ShowMessage("Первая система маршрута недоступна");
+                break;
+
+            case TravelFailReason.TargetSystemMissing:
+                ShowMessage("Целевая система не найдена");
+                break;
+
+            case TravelFailReason.CurrentSystemMissing:
+                ShowMessage("Текущая система не найдена");
+                break;
+
             default:
                 break;
         }
 
-        StarSystemLink systemLink = configService.GetCurrentStarSystemLink(targetSystemId);
-        eventBus.Publish(new ExitMapChangedEvent(systemLink));
+        // StarSystemLink systemLink =
+        //     configService.GetCurrentStarSystemLink(nextSystemId);
+
+        // if (systemLink == null)
+        // {
+        //     ShowMessage("Связь для перелёта не найдена");
+        //     return;
+        // }
+
+        eventBus.Publish(new GalaxyMapSystemSelectedEvent(
+                targetSystemId,
+                currentSystemId,
+                path,
+                nextSystemId,
+                result
+            ));
+
+        // eventBus.Publish(new ExitMapChangedEvent(systemLink));
     }
 
     private void OnExitMapChanged(ExitMapChangedEvent evt)

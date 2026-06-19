@@ -107,7 +107,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IRefuelService, RefuelService>();
         RegisterService<IGalaxyDiscoveryService, GalaxyDiscoveryService>();
         RegisterService<IRouteService, RouteService>();
-        RegisterService<ITravelService, TravelService>();
+        RegisterService<ITravelService, TravelService2A>();
         RegisterService<IRepairService, RepairService>();
         RegisterService<IRewardService, RewardService>();
         RegisterService<IPlanetMissionOfferStateService, PlanetMissionOfferStateService>();

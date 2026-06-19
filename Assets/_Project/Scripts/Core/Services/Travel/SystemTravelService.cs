@@ -5,7 +5,6 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private const float ArrivalDistanceThreshold = 3f;
 
     private readonly SimpleEventBus _eventBus;
-    // private readonly IGameTimeService _gameTimeService;
     private readonly IGameSessionService _gameSessionService;
     private readonly IOrbitalMotionService _orbitalMotionService;
     private readonly IHangarService _hangarService;
@@ -15,6 +14,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public SystemTravelService()
     {
+        // _debugEnabled = true;
         _debugStop = true;
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
@@ -28,6 +28,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     public void SetCurrentSystem(string systemId)
     {
         State.CurrentSystemId = systemId;
+        LogCustom("State = " + State);
     }
 
     public void SetCurrentPlanet(string planetId, Vector3 planetPosition)
@@ -39,6 +40,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         State.Status = SystemTravelStatus.Idle;
         State.Destination = SystemTravelDestination.None();
         State.TravelProgress01 = 0f;
+        LogCustom("State = " + State);
     }
 
     public void SetCurrentPosition(Vector3 position)
@@ -67,6 +69,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         ));
 
         LogCustom($"Planet destination selected: {planetData.Id}");
+        LogCustom("State = " + State);
     }
 
     public void SetMapPointDestination(Vector3 mapPosition)
@@ -84,6 +87,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         ));
 
         LogCustom($"Map point destination selected: {mapPosition}");
+        LogCustom("State = " + State);
     }
 
     public void SetSystemExitDestination(StarSystemLink link)
@@ -113,7 +117,36 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         ));
 
         LogCustom($"System exit destination selected. Target system: {link.LinkedSystem.Id}");
-    }    
+        LogCustom("State = " + State);
+    }
+
+    public void SetSystemExitDestination(RouteExitMapChangedEvent evt)
+    {
+        if (evt == null)
+        {
+            Debug.LogError("[SystemTravelService] RouteExitMapChangedEvent is null");
+            return;
+        }
+
+        State.Destination = SystemTravelDestination.SystemExit(evt);
+
+        if (IsDebug())
+        {
+            Debug.Log(
+                "[SystemTravelService] Route exit destination set. Route = " +
+                (evt.RouteConfig != null ? evt.RouteConfig.Id : "null") +
+                " | From = " +
+                evt.FromSystemId +
+                " | To = " +
+                evt.ToSystemId +
+                " | ExitPoint = " +
+                evt.ExitPoint +
+                " | EntryPoint = " +
+                evt.EntryPoint
+            );
+        }
+        LogCustom("State = " + State);
+    }
 
     public void StartTravel()
     {
@@ -142,6 +175,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         ));
 
         LogCustom("Travel started.");
+        LogCustom("State = " + State);
     }
 
     public void CancelTravel()
@@ -159,6 +193,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _eventBus.Publish(new SystemTravelCancelledEvent());
 
         LogCustom("Travel cancelled.");
+        LogCustom("State = " + State);
     }
 
     private float GetCurrentShipTravelSpeed()
@@ -264,6 +299,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             _eventBus.Publish(new SaveNeedEvent());
             // _saveService.Save();
         }
+        LogCustom("State = " + State);
     }
 
     public Vector3 GetCurrentDestinationPosition()
@@ -279,11 +315,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
                 return _orbitalMotionService.GetPlanetCurrentPosition(
                     State.Destination.PlanetData.PlanetOrbit);
-                // return _orbitalMotionService.GetPlanetPosition(
-                //     State.Destination.PlanetData.PlanetOrbit,
-                //     _gameTimeService.SimulationTimeSeconds
-                // );
-                    // return new Vector3(0, 0, 0);
+            // return _orbitalMotionService.GetPlanetPosition(
+            //     State.Destination.PlanetData.PlanetOrbit,
+            //     _gameTimeService.SimulationTimeSeconds
+            // );
+            // return new Vector3(0, 0, 0);
 
             case TravelDestinationType.MapPoint:
                 return State.Destination.FixedMapPosition;
