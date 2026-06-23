@@ -22,7 +22,7 @@ MonoBehaviour:
   planetRefs: []
   linkedSystems: []
   missionTags: 070000000200000005000000
-  mapPosition: {x: 1.9, y: 5.2}
+  mapPosition: {x: 2.1, y: 5.2}
   systemPopulation: {fileID: 0}
   isStartSystem: 0
   isHiddenAtStart: 1

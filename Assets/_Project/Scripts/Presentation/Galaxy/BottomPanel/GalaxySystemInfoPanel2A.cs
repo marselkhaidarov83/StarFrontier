@@ -154,12 +154,12 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
         _nextSystemId = string.Empty;
         _currentPath.Clear();
 
-        ClearText(planetsText);
-        ClearText(baseText);
-        ClearText(statusText);
-        ClearText(targetSystemText);
-        ClearText(routeSystemCountText);
-        ClearText(routePriceText);
+        SetPlanetsText(null);
+        SetBaseText(null);
+        SetStatusText(null, null, null);
+        SetTargetSystemText(null);
+        SetRouteSystemCountText(null);
+        SetRoutePriceText(null, null, null, TravelFailReason.None);
 
         if (routePriceText != null)
             routePriceText.color = routePriceNormalColor;
@@ -176,10 +176,10 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
     private void SetPlanetsText(StarSystemConfig targetSystemConfig)
     {
-        int planetCount = 0;
+        string planetCount = "";
 
-        if (targetSystemConfig.PlanetRefs != null)
-            planetCount = targetSystemConfig.PlanetRefs.Length;
+        if (targetSystemConfig != null && targetSystemConfig.PlanetRefs != null)
+            planetCount = targetSystemConfig.PlanetRefs.Length.ToString();
 
         if (planetsText != null)
             planetsText.text = "Планеты: " + planetCount;
@@ -187,9 +187,16 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
     private void SetBaseText(StarSystemConfig targetSystemConfig)
     {
+        if (targetSystemConfig == null)
+        {
+            baseText.text = "База:";
+            return;
+        }
+
         string text = "База: нет данных";
 
-        if (targetSystemConfig.PlanetRefs != null &&
+        if (targetSystemConfig != null &&
+            targetSystemConfig.PlanetRefs != null &&
             targetSystemConfig.PlanetRefs.Length > 0)
         {
             bool hasInhabitedPlanet = targetSystemConfig.PlanetRefs.Any(
@@ -212,26 +219,18 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
     {
         string text;
 
-        if (targetSystemState == null)
-        {
+        if (targetSystemConfig == null)
+            text = "Статус:";
+        else if (targetSystemState == null)
             text = "Статус: нет данных";
-        }
         else if (!targetSystemState.IsDiscovered)
-        {
             text = "Статус: скрыта";
-        }
         else if (targetSystemConfig.Id == currentSystemId)
-        {
             text = "Статус: текущая система";
-        }
         else if (targetSystemState.IsVisited)
-        {
             text = "Статус: посещена";
-        }
         else
-        {
             text = "Статус: открыта";
-        }
 
         if (statusText != null)
             statusText.text = text;
@@ -239,16 +238,22 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
     private void SetTargetSystemText(StarSystemConfig targetSystemConfig)
     {
+        if (targetSystemConfig == null)
+        {
+            targetSystemText.text = "Цель: не определена";
+            return;
+        }
+
         if (targetSystemText != null)
             targetSystemText.text = "Цель: " + targetSystemConfig.DisplayName;
     }
 
     private void SetRouteSystemCountText(List<string> path)
     {
-        int jumpCount = 0;
+        string jumpCount = "";
 
         if (path != null && path.Count >= 2)
-            jumpCount = path.Count - 1;
+            jumpCount = (path.Count - 1).ToString();
 
         if (routeSystemCountText != null)
             routeSystemCountText.text = "Прыжков: " + jumpCount;
@@ -260,6 +265,12 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
         string nextSystemId,
         TravelFailReason travelFailReason)
     {
+        if (path == null)
+        {
+            routePriceText.text = "Стоимость:";
+            return;
+        }
+
         int totalPrice = CalculateTotalRoutePrice(path);
         int firstJumpPrice = CalculateFirstJumpPrice(
             currentSystemId,

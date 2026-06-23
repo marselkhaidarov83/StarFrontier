@@ -23,7 +23,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b04f0b0971a5b4e45bcf426b63d0c39d, type: 2}
   linkedSystems: []
   missionTags: 040000000300000000000000
-  mapPosition: {x: -0.1, y: -6.6}
+  mapPosition: {x: -0.2, y: -6.6}
   systemPopulation: {fileID: 0}
   isStartSystem: 1
   isHiddenAtStart: 0

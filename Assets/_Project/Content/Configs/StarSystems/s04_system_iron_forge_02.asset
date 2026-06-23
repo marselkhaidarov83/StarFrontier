@@ -34,7 +34,7 @@ MonoBehaviour:
     sprite: {fileID: 0}
     size: 0
   missionTags: 000000000000000000000000
-  mapPosition: {x: 0.1, y: -2.4}
+  mapPosition: {x: 0.2, y: -2.4}
   systemPopulation: {fileID: 0}
   isStartSystem: 0
   isHiddenAtStart: 1

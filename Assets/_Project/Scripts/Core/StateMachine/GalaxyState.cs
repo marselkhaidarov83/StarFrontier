@@ -1,10 +1,9 @@
 using UnityEngine;
 
-public class GalaxyState : IGameState
+public class GalaxyState : CustomService, IGameState
 {
     private readonly ISceneService _sceneService;
     private readonly SimpleEventBus _simpleEventBus;
-    private bool _debugEnabled;
 
     public GalaxyState()
     {
@@ -20,8 +19,7 @@ public class GalaxyState : IGameState
 
     public void Enter()
     {
-        if (_debugEnabled)
-            Debug.Log("Entered GalaxyState");
+        LogCustom("Entered GalaxyState");
         _sceneService.LoadGalaxy();
         _simpleEventBus.Publish(new GalaxyEnteredEvent());
     }

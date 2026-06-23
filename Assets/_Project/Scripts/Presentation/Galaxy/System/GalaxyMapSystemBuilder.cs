@@ -22,10 +22,17 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     [SerializeField] private TMP_Text errorText;
     [SerializeField] private float errorShowDuration = 2f;
 
-    [Header("Camera")]
-    [SerializeField] private Camera _camera;
-    [SerializeField] private float _cameraSize = 9.6f;
-    [SerializeField] private Vector3 _cameraPosition = new Vector3(0, 0, -10f);
+    // [Header("Camera")]
+    // [SerializeField] private Camera _camera;
+    // [SerializeField] private float _cameraSize = 9.6f;
+    // [SerializeField] private Vector3 _cameraPosition = new Vector3(0, 0, -10f);
+
+    [Header("Adaptive Camera")]
+    [SerializeField] private GalaxyMapViewFitter mapViewFitter;
+
+    [SerializeField] private MapCameraController2A mapCameraController;
+
+    [SerializeField] private GalaxySectorVisualFitter2A sectorVisualFitter;
 
     private IConfigService configService;
     private IGameSessionService gameSessionService;
@@ -54,6 +61,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         LogCustom("systemNodeView.Count " + systemNodes.Count());
 
         SubscribeToEvents();
+        StartCoroutine(ApplyAdaptiveCamera());
     }
 
     public void ClearSelectedSystem()
@@ -77,10 +85,10 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     {
         var systems = configService.GetAllStarSystems();
 
-        LogCustom("systems.Count " + systems.Count());
+        // LogCustom("systems.Count " + systems.Count());
         foreach (var system in systems)
         {
-            LogCustom("system add " + system);
+            // LogCustom("system add " + system);
 
             Quaternion spawnRotation = Quaternion.identity;
 
@@ -89,11 +97,11 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             node.GetComponent<Transform>().position =
                     new Vector2(system.MapPosition.x, system.MapPosition.y);
 
-            LogCustom("MapPosition " + system.MapPosition.x + " / " + system.MapPosition.y);
-            LogCustom("SystemConfig " + system);
+            // LogCustom("MapPosition " + system.MapPosition.x + " / " + system.MapPosition.y);
+            // LogCustom("SystemConfig " + system);
 
             AddSystemNode(node);
-            LogCustom("systemNodeView.Count " + systemNodes.Count());
+            // LogCustom("systemNodeView.Count " + systemNodes.Count());
         }
     }
 
@@ -120,7 +128,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         if (eventBus == null)
             return;
 
-        eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
+        // eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
         eventBus.Subscribe<GalaxyMapSelectionClearedEvent>(OnGalaxyMapSelectionCleared);
     }
@@ -130,21 +138,103 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         if (eventBus == null)
             return;
 
-        eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
+        // eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
         eventBus.Unsubscribe<GalaxyMapSelectionClearedEvent>(OnGalaxyMapSelectionCleared);
     }
 
+    // private void OnGalaxyEntered(GalaxyEnteredEvent evt)
+    // {
+    //     // if (_camera != null)
+    //     // {
+    //     //     _camera.orthographicSize = _cameraSize;
+    //     //     _camera.transform.position = _cameraPosition;
+    //     // }
+    //     Refresh();
 
-    private void OnGalaxyEntered(GalaxyEnteredEvent evt)
+    //     StartCoroutine(ApplyAdaptiveCamera());
+    //     // if (mapViewFitter != null)
+    //     //     mapViewFitter.RequestFit();
+    // }
+
+    // private IEnumerator FitCameraAfterMapBuild()
+    // {
+    //     yield return new WaitForEndOfFrame();
+
+    //     if (mapViewFitter == null)
+    //         yield break;
+
+    //     float fitSize = mapViewFitter.FitNow();
+
+    //     if (mapCameraController != null)
+    //         mapCameraController.SetZoomOutLimit(fitSize);
+    // }
+
+    private IEnumerator ApplyAdaptiveCamera()
     {
-        if (_camera != null)
+        yield return new WaitForEndOfFrame();
+
+        if (mapViewFitter == null)
         {
-            _camera.orthographicSize = _cameraSize;
-            _camera.transform.position = _cameraPosition;
+            Debug.LogError(
+                "[GalaxyMapSystemBuilder] MapViewFitter не назначен."
+            );
+
+            yield break;
         }
-        Refresh();
+
+        if (mapCameraController == null)
+        {
+            Debug.LogError(
+                "[GalaxyMapSystemBuilder] MapCameraController не назначен."
+            );
+
+            yield break;
+        }
+
+        float fitSize = mapViewFitter.FitNow();
+
+        mapCameraController.SetZoomOutLimit(
+            fitSize,
+            applyImmediately: true
+        );
+
+        if (sectorVisualFitter != null)
+            sectorVisualFitter.FitNow();
     }
+
+    // private IEnumerator ApplyAdaptiveCamera()
+    // {
+    //     // Ждём создания секторов, систем, маршрутов
+    //     // и обновления геометрии TextMeshPro.
+    //     yield return new WaitForEndOfFrame();
+
+    //     if (mapViewFitter == null)
+    //     {
+    //         Debug.LogError(
+    //             "[GalaxyMapSystemBuilder] MapViewFitter не назначен."
+    //         );
+
+    //         yield break;
+    //     }
+
+    //     if (mapCameraController == null)
+    //     {
+    //         Debug.LogError(
+    //             "[GalaxyMapSystemBuilder] MapCameraController не назначен."
+    //         );
+
+    //         yield break;
+    //     }
+
+    //     float fitSize = mapViewFitter.FitNow();
+
+    //     LogCustom("fitSize = " + fitSize);
+    //     mapCameraController.SetZoomOutLimit(
+    //         fitSize,
+    //         applyImmediately: true
+    //     );
+    // }
 
     public void Refresh()
     {

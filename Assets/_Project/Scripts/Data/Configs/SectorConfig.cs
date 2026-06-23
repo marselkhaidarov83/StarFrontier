@@ -1,4 +1,3 @@
-using Codice.Client.BaseCommands;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "SectorConfig", menuName = "StarFrontier/Configs/Sector")]

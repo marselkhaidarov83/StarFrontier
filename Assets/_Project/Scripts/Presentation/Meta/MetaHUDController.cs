@@ -12,6 +12,7 @@ public class MetaHudController : CustomMonoBehaviour
     [SerializeField] private TMP_Text cargoText;
     [SerializeField] private TMP_Text systemText;
     [SerializeField] private TMP_Text planetText;
+    [SerializeField] private TMP_Text baseText;
     [Header("Images")]
     [SerializeField] private Image savedImage;
     [Header("Buttons")]
@@ -128,14 +129,14 @@ public class MetaHudController : CustomMonoBehaviour
     public void Refresh()
     {
         if (gameSessionService.State.Player != null)
-            creditsText.text = $"Credits: {gameSessionService.State.Player.Credits}";
+            creditsText.text = $"Кредиты: {gameSessionService.State.Player.Credits}";
         else
-            creditsText.text = "Credits: -";
+            creditsText.text = "Кредиты: -";
 
         if (gameSessionService.State.Player.PlayerShipState.GetActiveShip() != null)
-            fuelText.text = $"Fuel: {gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel} / {gameSessionService.State.Player.PlayerShipState.GetActiveShip().FuelCapacity}";
+            fuelText.text = $"Топливо: {gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel} / {gameSessionService.State.Player.PlayerShipState.GetActiveShip().FuelCapacity}";
         else
-            fuelText.text = "Fuel: -";
+            fuelText.text = "Топливо: -";
 
         if (gameSessionService.State.Player != null &&
                 gameSessionService.State.Player.PlayerShipState.GetActiveShip() != null)
@@ -143,11 +144,11 @@ public class MetaHudController : CustomMonoBehaviour
             RuntimeCargoInventory cargo = gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo;
             int usedCargo = cargo != null ? cargo.GetUsedCapacity() : 0;
             int maxCargo = gameSessionService.State.Player.PlayerShipState.GetActiveShip().CargoCapacity;
-            cargoText.text = $"Cargo: {usedCargo} / {maxCargo}";
+            cargoText.text = $"Груз: {usedCargo} / {maxCargo}";
             
         }
         else
-            cargoText.text = "Cargo: -";
+            cargoText.text = "Груз: -";
 
         if (gameSessionService.State.Player != null)
         {
@@ -158,22 +159,22 @@ public class MetaHudController : CustomMonoBehaviour
                     if (starSystemConfig.Id ==
                             gameSessionService.State.Player.CurrentSystemId)
                     {
-                        systemText.text = $"System: {starSystemConfig.DisplayName ?? "-"}";
+                        systemText.text = $"Система: {starSystemConfig.DisplayName ?? "-"}";
                         break;
                     }
             }
             else
-                systemText.text = "System: -";
+                systemText.text = "Система:";
 
             if (gameSessionService.State.Player.CurrentPlanetId != null)
-                planetText.text = $"Planet: {gameSessionService.State.Player.CurrentPlanetId ?? "-"}";
+                planetText.text = $"Планета: {gameSessionService.State.Player.CurrentPlanetId ?? "-"}";
             else
-                planetText.text = "Planet: -";
+                planetText.text = "Планета:";
         }
         else
         {
-            systemText.text = "System: -";
-            planetText.text = "Planet: -";
+            systemText.text = "Система:";
+            planetText.text = "Планета:";
         }
     }
 
