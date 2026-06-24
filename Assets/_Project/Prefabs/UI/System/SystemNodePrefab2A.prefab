@@ -373,7 +373,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1678419441716373266}
   - component: {fileID: 2643585521783033594}
-  - component: {fileID: 2461391631146070425}
   - component: {fileID: 516426777825741584}
   m_Layer: 0
   m_Name: SystemNodePrefab2A
@@ -438,41 +437,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 100
---- !u!114 &2461391631146070425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3611672235982307302}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 028edf7158cd84f63b11369d4aade12d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Presentation::StarSystemNodeView2
-  _debugEnabled: 0
-  _debugStop: 1
-  starSystemImage: {fileID: 5165188022816872813}
-  starSystemCurrentIcon: {fileID: 6528822734580656806}
-  titleText: {fileID: 8913788645748157461}
-  fuelText: {fileID: 8116552786935227535}
-  fuelImage: {fileID: 7994016988466447585}
-  starSystemConfig: {fileID: 0}
-  balancedSystemSprite: {fileID: 21300000, guid: 1fe825ce7ba4145bb82a1760bd715aea, type: 3}
-  miningSystemSprite: {fileID: 21300000, guid: 7d79f9528604e46a7940cfd11135984f, type: 3}
-  industrialSystemSprite: {fileID: 21300000, guid: 675bfac3b1d184a608824efb4a23591c, type: 3}
-  agriculturalSystemSprite: {fileID: 21300000, guid: df768b12e4c834587ad07011bab4af5b, type: 3}
-  tradeSystemSprite: {fileID: 21300000, guid: 834b74f3c04a34ed0a65e6eb4feb8ab1, type: 3}
-  highTechSystemSprite: {fileID: 21300000, guid: cc6146af7bd554e7eba8f8e88d4d5577, type: 3}
-  frontierSystemSprite: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
-  hiddenSystemSprite: {fileID: 21300000, guid: e72efdbb2dce74a4482a919a74a5708e, type: 3}
-  disabledSystemSprite: {fileID: 21300000, guid: 98c2b386316f3443592dfefabf71d632, type: 3}
-  fuelNormalSprite: {fileID: 21300000, guid: c07dee167c2924245814afcecb41b9fe, type: 3}
-  fuelNotEnoughSprite: {fileID: 21300000, guid: c221900b1ae864ec3a8f9239cb673238, type: 3}
-  fuelColorNormal: {r: 0, g: 0.5568628, b: 0.13333334, a: 1}
-  fuelColorNotEnough: {r: 0.7647059, g: 0.019607844, b: 0.023529412, a: 1}
-  fuelColorCurrent: {r: 1, g: 1, b: 1, a: 1}
-  fuelColorDisabled: {r: 0.14117648, g: 0.14901961, b: 0.16078432, a: 1}
 --- !u!114 &516426777825741584
 MonoBehaviour:
   m_ObjectHideFlags: 0

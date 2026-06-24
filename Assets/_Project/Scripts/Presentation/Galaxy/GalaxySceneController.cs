@@ -1,7 +1,7 @@
 using UnityEngine;
 
 //Скрипт управляет:
-//    стартом функционала на сцене Meta
+//    стартом функционала на сцене Galaxy
 public class GalaxySceneController : CustomMonoBehaviour
 {
     [Header("Screen Controllers")]

@@ -123,7 +123,7 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (IsDebug())
             Debug.Log($"[SystemMapController2] planetRefs: " + starSystem.PlanetRefs.Length);
 
-        List<PlanetSelectableView> planetSelectableViews = new();
+        List<PlanetSelectableView2> planetSelectableViews = new();
         foreach (PlanetConfig planet in starSystem.PlanetRefs)
         {
             if (planet == null)
@@ -153,59 +153,57 @@ public class SystemMapController2 : CustomMonoBehaviour
             // planetSelectableViews.Add(selectableView);
         }
 
-        // systemMapRoot.GetComponent<SystemMapDestinationController>().SetSelectableViews(planetSelectableViews);
-
         if (IsDebug())
             Debug.Log($"[SystemMapController2] planets builded");
     }
 
-    private void SpawnExits(StarSystemConfig starSystem)
-    {
-        if (starSystem == null)
-        {
-            if (IsDebug())
-                Debug.LogError($"[SystemMapController2] starSystem is null");
-            return;
-        }
+    // private void SpawnExits(StarSystemConfig starSystem)
+    // {
+    //     if (starSystem == null)
+    //     {
+    //         if (IsDebug())
+    //             Debug.LogError($"[SystemMapController2] starSystem is null");
+    //         return;
+    //     }
 
-        if (starSystem.LinkedSystems == null)
-        {
-            if (IsDebug())
-                Debug.LogError($"[SystemMapController2] starSystem.LinkedSystems is null");
-            return;
-        }
+    //     if (starSystem.LinkedSystems == null)
+    //     {
+    //         if (IsDebug())
+    //             Debug.LogError($"[SystemMapController2] starSystem.LinkedSystems is null");
+    //         return;
+    //     }
 
-        Vector2 center = Vector2.zero;
-        if (starSystem.Sun != null)
-            center = starSystem.Sun.LocalOffset;
+    //     Vector2 center = Vector2.zero;
+    //     if (starSystem.Sun != null)
+    //         center = starSystem.Sun.LocalOffset;
 
-        if (IsDebug())
-            Debug.Log($"[SystemMapController2] LinkedSystems.Count: " + starSystem.LinkedSystems.Length);
+    //     if (IsDebug())
+    //         Debug.Log($"[SystemMapController2] LinkedSystems.Count: " + starSystem.LinkedSystems.Length);
 
-        foreach (StarSystemLink systemLink in starSystem.LinkedSystems)
-        {
-            if (systemLink == null)
-            {
-                if (IsDebug())
-                    Debug.LogError($"[SystemMapController2] systemLink is null");
-                continue;
-            }
+    //     foreach (StarSystemLink systemLink in starSystem.LinkedSystems)
+    //     {
+    //         if (systemLink == null)
+    //         {
+    //             if (IsDebug())
+    //                 Debug.LogError($"[SystemMapController2] systemLink is null");
+    //             continue;
+    //         }
 
-            GameObject instance = Instantiate(systemMapExitPrefab, exitContainer);
-            instance.transform.SetSiblingIndex(0);
-            _spawnedExits.Add(instance);
+    //         GameObject instance = Instantiate(systemMapExitPrefab, exitContainer);
+    //         instance.transform.SetSiblingIndex(0);
+    //         _spawnedExits.Add(instance);
 
-            if (IsDebug())
-                Debug.Log("[SystemMapController2] SpawnExits.systemLink = " + systemLink.LinkedSystem.DisplayName);
-            instance.GetComponent<SystemExitNodeView2>().Initialize(
-                systemLink,
-                center
-            );
-        }
+    //         if (IsDebug())
+    //             Debug.Log("[SystemMapController2] SpawnExits.systemLink = " + systemLink.LinkedSystem.DisplayName);
+    //         instance.GetComponent<SystemExitNodeView2A>().Initialize(
+    //             systemLink,
+    //             center
+    //         );
+    //     }
 
-        if (IsDebug())
-            Debug.Log($"[SystemMapController2] exits builded");
-    }
+    //     if (IsDebug())
+    //         Debug.Log($"[SystemMapController2] exits builded");
+    // }
 
     private void SpawnExits2(StarSystemConfig starSystem)
     {

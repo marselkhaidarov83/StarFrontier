@@ -6,9 +6,9 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 {
     [Header("Click Sources")]
     [SerializeField] private SystemMapClickArea2 mapClickArea;
-    [SerializeField] private List<PlanetSelectableView> planetViews = new();
+    [SerializeField] private List<PlanetSelectableView2> planetViews = new();
 
-    public void SetSelectableViews(List<PlanetSelectableView> views)
+    public void SetSelectableViews(List<PlanetSelectableView2> views)
     {
         LogCustom("SetSelectableViews");
         planetViews = views;
@@ -30,7 +30,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
     private IOrbitalMotionService _orbitalMotionService;
     private IGameTimeService _gameTimeService;
 
-    private PlanetSelectableView _selectedPlanetView;
+    private PlanetSelectableView2 _selectedPlanetView;
 
     private void Start()
     {
@@ -135,7 +135,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         if (planetData == null)
             return;
 
-        foreach (PlanetSelectableView view in planetViews)
+        foreach (PlanetSelectableView2 view in planetViews)
             if (view.Planet.Id == planetData.Id)
             {
                 _selectedPlanetView = view;

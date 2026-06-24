@@ -121,8 +121,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<ISystemNpcBehaviorService, SystemNpcBehaviorService>();
         RegisterService<IGalaxyNpcBehaviorService, GalaxyNpcBehaviorService>();
         RegisterService<ISystemNpcSimulationSaveService, SystemNpcSimulationSaveService>();
-        // _saveService = RegisterService<ISaveService, SaveService>();
-        _saveService = RegisterService<ISaveService, SaveService2>();
+        _saveService = RegisterService<ISaveService, SaveService2A>();
         RegisterService<IPlayerCombatTargetService, PlayerCombatTargetService>();
         RegisterService<ISystemNpcMovementRouteService, SystemNpcMovementRouteService>();
         RegisterService<ISystemNpcMovementService, SystemNpcMovementService>();

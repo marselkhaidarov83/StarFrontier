@@ -118,6 +118,6 @@ public sealed class SystemShipMarkerController2 : CustomMonoBehaviour
         // Если glow нарисован "вниз", можно добавить поправку.
         if (shipMarkerImage != null)
             shipMarkerImage.transform.localRotation = Quaternion.Euler(0f, 0f, angle - 90f);
-            // shipMarkerImage.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+        // shipMarkerImage.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
     }
 }
