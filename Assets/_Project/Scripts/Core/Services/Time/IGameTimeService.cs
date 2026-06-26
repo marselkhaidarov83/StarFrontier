@@ -1,4 +1,4 @@
-public interface IGameTimeService
+public interface IGameTimeService : ITickable
 {
     GameTimeState State { get; }
 
@@ -10,5 +10,4 @@ public interface IGameTimeService
     void SetPaused(bool paused);
     void TogglePause();
     void StepOneDay();
-    void Tick(float deltaTime);
 }
