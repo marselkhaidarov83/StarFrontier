@@ -7,6 +7,7 @@
   <Project Path="Registry.csproj" />
   <Project Path="Tick.csproj" />
   <Project Path="SystemGameplayState.csproj" />
+  <Project Path="ShipStats.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="PlayerControl.csproj" />
   <Project Path="SaveMigration.csproj" />

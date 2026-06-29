@@ -107,6 +107,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 modules,
                 weapons));
 
+        RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
         _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
         RegisterService<ISystemContextService, SystemContextService>();
