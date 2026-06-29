@@ -288,6 +288,55 @@ public sealed class ShipMovementService2A : IShipMovementService
     }
 
     private bool ClampPositionAndVelocity(
+    ref Vector2 position,
+    ref Vector2 velocity)
+    {
+        SystemBoundsRuntimeState boundsState =
+            _stateService.Bounds;
+
+        if (boundsState != null
+            && boundsState.IsInitialized)
+        {
+            return ClampByRuntimeBounds(
+                boundsState,
+                ref position,
+                ref velocity);
+        }
+
+        return ClampByConfigBounds(
+            ref position,
+            ref velocity);
+    }
+
+    private static bool ClampByRuntimeBounds(
+        SystemBoundsRuntimeState boundsState,
+        ref Vector2 position,
+        ref Vector2 velocity)
+    {
+        if (!boundsState.IsEnabled)
+            return false;
+
+        Vector2 originalPosition =
+            position;
+
+        position =
+            boundsState.ClampPosition(position);
+
+        bool wasClamped =
+            originalPosition != position;
+
+        if (!wasClamped)
+            return false;
+
+        StopVelocityOnClampedAxes(
+            originalPosition,
+            position,
+            ref velocity);
+
+        return true;
+    }
+
+    private bool ClampByConfigBounds(
         ref Vector2 position,
         ref Vector2 velocity)
     {
@@ -297,19 +346,23 @@ public sealed class ShipMovementService2A : IShipMovementService
         Vector2 halfSize =
             _shipMovementConfig.SystemBoundsHalfSize;
 
-        float minX = -Mathf.Abs(halfSize.x);
-        float maxX = Mathf.Abs(halfSize.x);
-        float minY = -Mathf.Abs(halfSize.y);
-        float maxY = Mathf.Abs(halfSize.y);
+        Vector2 min =
+            new Vector2(
+                -Mathf.Abs(halfSize.x),
+                -Mathf.Abs(halfSize.y));
+
+        Vector2 max =
+            new Vector2(
+                Mathf.Abs(halfSize.x),
+                Mathf.Abs(halfSize.y));
 
         Vector2 originalPosition =
             position;
 
-        position.x =
-            Mathf.Clamp(position.x, minX, maxX);
-
-        position.y =
-            Mathf.Clamp(position.y, minY, maxY);
+        position =
+            new Vector2(
+                Mathf.Clamp(position.x, min.x, max.x),
+                Mathf.Clamp(position.y, min.y, max.y));
 
         bool wasClamped =
             originalPosition != position;
@@ -317,20 +370,34 @@ public sealed class ShipMovementService2A : IShipMovementService
         if (!wasClamped)
             return false;
 
-        if (Mathf.Approximately(position.x, minX)
-            || Mathf.Approximately(position.x, maxX))
+        StopVelocityOnClampedAxes(
+            originalPosition,
+            position,
+            ref velocity);
+
+        return true;
+    }
+
+    private static void StopVelocityOnClampedAxes(
+        Vector2 originalPosition,
+        Vector2 clampedPosition,
+        ref Vector2 velocity)
+    {
+        if (!Mathf.Approximately(
+                originalPosition.x,
+                clampedPosition.x))
         {
             velocity.x = 0f;
         }
 
-        if (Mathf.Approximately(position.y, minY)
-            || Mathf.Approximately(position.y, maxY))
+        if (!Mathf.Approximately(
+                originalPosition.y,
+                clampedPosition.y))
         {
             velocity.y = 0f;
         }
-
-        return true;
     }
+
 
     private static Vector2 GetTargetFacingDirection(
         ShipMovementRuntimeState movementState,

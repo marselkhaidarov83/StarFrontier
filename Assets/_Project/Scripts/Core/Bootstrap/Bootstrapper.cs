@@ -110,8 +110,10 @@ public class Bootstrapper : CustomMonoBehaviour
 
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
+        RegisterService<ISystemBoundsService, SystemBoundsService2A>();
         _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
         _shipMovementService = RegisterService<IShipMovementService, ShipMovementService2A>();
+        RegisterService<IPlayerShipSaveSyncService, PlayerShipSaveSyncService2A>();
         RegisterService<ISystemContextService, SystemContextService>();
         RegisterService<ISceneService, SceneService>();
         RegisterService<IInventoryService, InventoryService>();

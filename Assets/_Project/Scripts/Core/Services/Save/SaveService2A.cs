@@ -143,6 +143,10 @@ public class SaveService2A : CustomService, ISaveService
     {
         SaveMigrationService.Migrate(state);
 
+        TryWriteShipMovementToState(state);
+
+        SaveMigrationService.Migrate(state);
+
         state.Meta.SaveVersion++;
         state.Meta.LastSaveUtc = DateTime.UtcNow.Ticks;
 
@@ -155,6 +159,26 @@ public class SaveService2A : CustomService, ISaveService
                 _systemEncounterSaveService.Capture();
 
         DictionaryToList(state);
+    }
+
+    private void TryWriteShipMovementToState(
+        GameRuntimeState state)
+    {
+        if (state == null)
+            return;
+
+        if (Bootstrapper.Instance == null
+            || Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<
+                IPlayerShipSaveSyncService>(
+                out IPlayerShipSaveSyncService syncService))
+        {
+            syncService.WriteMovementToSave(state);
+        }
     }
 
     private GameRuntimeState TryLoadFromPath(string path)
@@ -188,6 +212,8 @@ public class SaveService2A : CustomService, ISaveService
 
             DictionaryFromList(state);
 
+            TryInitializeShipMovementFromState(state);
+
             if (_systemEncounterSaveService != null && state.SystemEncounter != null)
                 _systemEncounterSaveService.Restore(state.SystemEncounter);
 
@@ -200,6 +226,26 @@ public class SaveService2A : CustomService, ISaveService
         {
             Debug.LogError("[SaveService] Failed to load from " + path + ": " + e.Message);
             return null;
+        }
+    }
+
+    private void TryInitializeShipMovementFromState(
+    GameRuntimeState state)
+    {
+        if (state == null)
+            return;
+
+        if (Bootstrapper.Instance == null
+            || Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<
+                IPlayerShipSaveSyncService>(
+                out IPlayerShipSaveSyncService syncService))
+        {
+            syncService.InitializeMovementFromSave(state);
         }
     }
 

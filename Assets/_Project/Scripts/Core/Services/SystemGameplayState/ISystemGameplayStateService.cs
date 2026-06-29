@@ -7,6 +7,7 @@ public interface ISystemGameplayStateService
 
     PlayerControlRuntimeState Control { get; }
     ShipMovementRuntimeState Movement { get; }
+    SystemBoundsRuntimeState Bounds { get; }
     SystemCameraRuntimeState Camera { get; }
     TargetingRuntimeState Targeting { get; }
     InteractionRuntimeState Interaction { get; }

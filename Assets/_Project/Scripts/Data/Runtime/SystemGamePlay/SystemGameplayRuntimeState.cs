@@ -17,6 +17,9 @@ public sealed class SystemGameplayRuntimeState
     public ShipMovementRuntimeState Movement { get; } =
         new ShipMovementRuntimeState();
 
+    public SystemBoundsRuntimeState Bounds { get; } =
+        new SystemBoundsRuntimeState();
+
     public SystemCameraRuntimeState Camera { get; } =
         new SystemCameraRuntimeState();
 
@@ -37,6 +40,7 @@ public sealed class SystemGameplayRuntimeState
     {
         Control.ResetAll();
         Movement.ResetAll();
+        Bounds.ResetAll();
         Camera.ResetAll();
         Targeting.ResetAll();
         Interaction.ResetAll();
@@ -44,10 +48,6 @@ public sealed class SystemGameplayRuntimeState
         IsInitialized = false;
     }
 
-    /// <summary>
-    /// Сбрасывает только одноразовые флаги кадра.
-    /// Это понадобится будущим сервисам в конце кадра.
-    /// </summary>
     public void ResetFrameFlags()
     {
         Control.ResetFrameInput();

@@ -1,7 +1,8 @@
 /// <summary>
 /// Хранит временное состояние локального gameplay.
 /// </summary>
-public sealed class SystemGameplayStateService : CustomService, ISystemGameplayStateService
+public sealed class SystemGameplayStateService :
+    ISystemGameplayStateService
 {
     public SystemGameplayRuntimeState State { get; } =
         new SystemGameplayRuntimeState();
@@ -11,6 +12,9 @@ public sealed class SystemGameplayStateService : CustomService, ISystemGameplayS
 
     public ShipMovementRuntimeState Movement =>
         State.Movement;
+
+    public SystemBoundsRuntimeState Bounds =>
+        State.Bounds;
 
     public SystemCameraRuntimeState Camera =>
         State.Camera;
