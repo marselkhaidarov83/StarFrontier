@@ -11,6 +11,14 @@ public sealed class ConfigService : IConfigService
     public GalaxyConfig GalaxyConfig { get; }
     public NewGameConfig NewGameConfig { get; }
 
+    public PlayerControlConfig PlayerControlConfig { get; }
+    public ShipMovementConfig ShipMovementConfig { get; }
+    public SystemCameraConfig SystemCameraConfig { get; }
+    public TargetingConfig TargetingConfig { get; }
+    public InteractionConfig InteractionConfig { get; }
+    public SystemHudConfig SystemHudConfig { get; }
+    public SystemVisualConfig SystemVisualConfig { get; }
+
     private readonly List<SectorConfig> _sectors;
     private readonly Dictionary<string, SectorConfig> _sectorsById;
     private readonly List<StarSystemConfig> _starSystems;
@@ -83,6 +91,13 @@ public sealed class ConfigService : IConfigService
                         SaveConfig saveConfig,
                         GalaxyConfig galaxyConfig,
                         NewGameConfig newGameConfig,
+                        PlayerControlConfig playerControlConfig,
+                        ShipMovementConfig shipMovementConfig,
+                        SystemCameraConfig systemCameraConfig,
+                        TargetingConfig targetingConfig,
+                        InteractionConfig interactionConfig,
+                        SystemHudConfig systemHudConfig,
+                        SystemVisualConfig systemVisualConfig,
                         IEnumerable<ItemConfig> items,
                         IEnumerable<ShipConfig> ships,
                         IEnumerable<EnemyConfig> enemies,
@@ -98,9 +113,16 @@ public sealed class ConfigService : IConfigService
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
-
-        List<StarSystemConfig> starSystems = new ();
-        List<PlanetConfig> planets = new ();
+        PlayerControlConfig = playerControlConfig;
+        ShipMovementConfig = shipMovementConfig;
+        SystemCameraConfig = systemCameraConfig;
+        TargetingConfig = targetingConfig;
+        InteractionConfig = interactionConfig;
+        SystemHudConfig = systemHudConfig;
+        SystemVisualConfig = systemVisualConfig;
+        
+        List<StarSystemConfig> starSystems = new();
+        List<PlanetConfig> planets = new();
         foreach (SectorConfig sector in galaxyConfig.Sectors)
             foreach (StarSystemConfig starSystem in sector.Systems)
             {
@@ -145,8 +167,8 @@ public sealed class ConfigService : IConfigService
         if (configs == null)
             throw new ArgumentNullException(nameof(configs));
 
-        targetList = new ();
-        targetById = new (StringComparer.Ordinal);        
+        targetList = new();
+        targetById = new(StringComparer.Ordinal);
 
         foreach (var config in configs)
         {

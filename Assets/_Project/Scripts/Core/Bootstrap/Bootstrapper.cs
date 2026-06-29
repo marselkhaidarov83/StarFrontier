@@ -9,6 +9,15 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
 
+    [Header("Sprint 3 System Gameplay")]
+    [SerializeField] private PlayerControlConfig playerControlConfig;
+    [SerializeField] private ShipMovementConfig shipMovementConfig;
+    [SerializeField] private SystemCameraConfig systemCameraConfig;
+    [SerializeField] private TargetingConfig targetingConfig;
+    [SerializeField] private InteractionConfig interactionConfig;
+    [SerializeField] private SystemHudConfig systemHudConfig;
+    [SerializeField] private SystemVisualConfig systemVisualConfig;
+
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
     [SerializeField] private List<SectorConfig> sectors;
@@ -80,6 +89,13 @@ public class Bootstrapper : CustomMonoBehaviour
                 saveConfig,
                 galaxyConfig,
                 newGameConfig,
+                playerControlConfig,
+                shipMovementConfig,
+                systemCameraConfig,
+                targetingConfig,
+                interactionConfig,
+                systemHudConfig,
+                systemVisualConfig,
                 items,
                 ships,
                 enemies,

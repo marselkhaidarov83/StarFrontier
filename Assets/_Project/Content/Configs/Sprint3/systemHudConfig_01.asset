@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8dcf5c17571c40d3affb55cf37a0eb8, type: 3}
+  m_Name: systemHudConfig_01
+  m_EditorClassIdentifier: Data::SystemHudConfig
+  showFuel: 1
+  showHull: 1
+  showShield: 1
+  showCurrentTarget: 1
+  showSystemName: 1
+  useSafeArea: 1
+  hudPadding: {x: 32, y: 32}
+  barWidth: 320
+  barHeight: 28
+  barSpacing: 12
+  lowFuelNormalizedThreshold: 0.2
+  lowHullNormalizedThreshold: 0.25

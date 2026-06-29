@@ -8,6 +8,15 @@ public interface IConfigService
     GalaxyConfig GalaxyConfig { get; }
     NewGameConfig NewGameConfig { get; }
 
+    PlayerControlConfig PlayerControlConfig { get; }
+    ShipMovementConfig ShipMovementConfig { get; }
+    SystemCameraConfig SystemCameraConfig { get; }
+    TargetingConfig TargetingConfig { get; }
+    InteractionConfig InteractionConfig { get; }
+    SystemHudConfig SystemHudConfig { get; }
+    SystemVisualConfig SystemVisualConfig { get; }
+
+
     IReadOnlyList<SectorConfig> GetAllSectors();
 
     StarSystemLink GetCurrentStarSystemLink(string targetSystemId);
