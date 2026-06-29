@@ -4,6 +4,7 @@
   <Project Path="Presentation.csproj" />
   <Project Path="Tools.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Registry.csproj" />
   <Project Path="Tick.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
 </Solution>
