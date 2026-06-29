@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 /// В S3-06 единственный вызов TickService.Tick()
 /// будет выполняться из Bootstrapper.Update().
 /// </summary>
-public sealed class TickService : ITickService
+public sealed class TickService : CustomService, ITickService
 {
     private readonly List<TickEntry> _entries = new();
     private readonly List<TickEntry> _executionBuffer = new();
@@ -53,6 +53,10 @@ public sealed class TickService : ITickService
         _entries.Add(entry);
 
         _entries.Sort(TickEntryComparer.Instance);
+
+        LogCustom($"{nameof(tickable)} registered in " + 
+            $"{nameof(TickService)} with order " +
+            $"{order}");
     }
 
     /// <summary>

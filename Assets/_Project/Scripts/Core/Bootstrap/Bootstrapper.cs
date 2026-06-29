@@ -30,6 +30,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private IGameStateMachine _gameStateMachine;
     private ISaveService _saveService;
     private IGameTimeService _gameTimeService;
+    private ITickService _tickService;
 
     [SerializeField] private bool _globalDebugEnabled;
     public bool GlobalDebugEnabled => _globalDebugEnabled;
@@ -130,7 +131,10 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IPlanetGovernmentMissionService, PlanetGovernmentMissionService>();
         RegisterService<IHangarService, HangarService>();
         RegisterService<ISystemTravelService, SystemTravelService>();
+
+        _tickService = RegisterService<ITickService, TickService>();
         _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();
+        _tickService.Register(_gameTimeService, TickOrder.GameTime);
     }
 
     /// <summary>
@@ -171,10 +175,10 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void Update()
     {
-        float deltaTime = Time.deltaTime;
+        // float deltaTime = Time.deltaTime;
 
-        // _saveService?.Tick(deltaTime);
-        _gameTimeService?.Tick(deltaTime);
+        // _gameTimeService?.Tick(deltaTime);
+        _tickService?.Tick(Time.deltaTime);
     }
 
     private void OnApplicationPause(bool pause)
