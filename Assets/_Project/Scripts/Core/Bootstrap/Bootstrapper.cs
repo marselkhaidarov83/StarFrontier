@@ -39,6 +39,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private IGameStateMachine _gameStateMachine;
     private ISaveService _saveService;
     private IGameTimeService _gameTimeService;
+    private IPlayerControlService _playerControlService;
     private ITickService _tickService;
 
     [SerializeField] private bool _globalDebugEnabled;
@@ -107,6 +108,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 weapons));
 
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
+        _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
         RegisterService<ISystemContextService, SystemContextService>();
         RegisterService<ISceneService, SceneService>();
         RegisterService<IInventoryService, InventoryService>();
@@ -152,6 +154,7 @@ public class Bootstrapper : CustomMonoBehaviour
         _tickService = RegisterService<ITickService, TickService>();
         _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();
         _tickService.Register(_gameTimeService, TickOrder.GameTime);
+        _tickService.Register(_playerControlService, TickOrder.PlayerControl);
     }
 
     /// <summary>

@@ -8,5 +8,6 @@
   <Project Path="Tick.csproj" />
   <Project Path="SystemGameplayState.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="PlayerControl.csproj" />
   <Project Path="SaveMigration.csproj" />
 </Solution>
