@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-public class SaveService2A : ISaveService
+public class SaveService2A : CustomService, ISaveService
 {
     private readonly float _autosaveIntervalSeconds;
     private readonly string _saveFileName;
@@ -101,7 +101,7 @@ public class SaveService2A : ISaveService
 
         if (mainSave != null)
         {
-            Debug.Log("[SaveService] Main save loaded.");
+            LogCustom("[SaveService] Main save loaded.");
             return mainSave;
         }
 
@@ -141,14 +141,18 @@ public class SaveService2A : ISaveService
 
     private void PrepareStateBeforeSave(GameRuntimeState state)
     {
+        SaveMigrationService.Migrate(state);
+
         state.Meta.SaveVersion++;
         state.Meta.LastSaveUtc = DateTime.UtcNow.Ticks;
 
         if (_systemNpcSimulationSaveService != null)
-            state.SystemNpcSimulation = _systemNpcSimulationSaveService.Capture();
+            state.SystemNpcSimulation =
+                _systemNpcSimulationSaveService.Capture();
 
         if (_systemEncounterSaveService != null)
-            state.SystemEncounter = _systemEncounterSaveService.Capture();
+            state.SystemEncounter =
+                _systemEncounterSaveService.Capture();
 
         DictionaryToList(state);
     }
@@ -161,12 +165,25 @@ public class SaveService2A : ISaveService
         try
         {
             string json = File.ReadAllText(path);
-            GameRuntimeState state = JsonUtility.FromJson<GameRuntimeState>(json);
+            GameRuntimeState state =
+                JsonUtility.FromJson<GameRuntimeState>(json);
 
             if (state == null)
             {
-                Debug.LogError("[SaveService] Parsed GameState is null: " + path);
+                Debug.LogError(
+                    "[SaveService] Parsed GameState is null: " + path);
+
                 return null;
+            }
+
+            bool wasMigrated =
+                SaveMigrationService.Migrate(state);
+
+            if (wasMigrated)
+            {
+                Debug.Log(
+                    "[SaveService] Save migrated to data version " +
+                    state.Meta.SaveDataVersion);
             }
 
             DictionaryFromList(state);

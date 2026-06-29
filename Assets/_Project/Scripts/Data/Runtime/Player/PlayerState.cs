@@ -13,6 +13,7 @@ public class PlayerState
     public string CurrentPlanetId;
     public bool IsOnPlanet() { return !string.IsNullOrEmpty(CurrentPlanetId); }
     public Vector3 SystemMapShipPosition = new Vector3(0, 0, -2);
+    public Vector3 SystemMapShipDirection = Vector3.up;
     public ShipRuntimeState PlayerShipState = new();
     public ShipRuntimeData GetActiveShip() { return PlayerShipState.GetActiveShip(); }
 }

@@ -142,8 +142,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c044afffaabb645959763121a612b579, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::SystemExitNodeView2A
-  _debugEnabled: 1
-  _debugStop: 0
+  _debugEnabled: 0
+  _debugStop: 1
   systemExitImage: {fileID: 5366462686301127682}
   systemExitSprite: {fileID: 21300000, guid: c199ec7d5530a4fb8a5e698f10e29958, type: 3}
   systemNameText: {fileID: 7981253200853181391}
