@@ -106,6 +106,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 modules,
                 weapons));
 
+        RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
         RegisterService<ISystemContextService, SystemContextService>();
         RegisterService<ISceneService, SceneService>();
         RegisterService<IInventoryService, InventoryService>();

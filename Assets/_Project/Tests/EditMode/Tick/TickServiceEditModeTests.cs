@@ -19,6 +19,19 @@ public sealed class TickServiceEditModeTests
     }
 
     [Test]
+    public void Tick_WithZeroDeltaTime_IsAllowed()
+    {
+        TickService service = new TickService();
+        RecordingTickable tickable = new RecordingTickable();
+
+        service.Register(tickable);
+        service.Tick(0f);
+
+        Assert.AreEqual(1, tickable.CallCount);
+        Assert.AreEqual(0f, tickable.LastDeltaTime);
+    }
+
+    [Test]
     public void Tick_UsesOrderAndStableRegistrationOrder()
     {
         TickService service = new TickService();
@@ -54,6 +67,42 @@ public sealed class TickServiceEditModeTests
     }
 
     [Test]
+    public void TickOrder_HasExpectedServiceSequence()
+    {
+        Assert.Less(
+            TickOrder.GameTime,
+            TickOrder.PlayerInput);
+
+        Assert.Less(
+            TickOrder.PlayerInput,
+            TickOrder.PlayerControl);
+
+        Assert.Less(
+            TickOrder.PlayerControl,
+            TickOrder.ShipMovement);
+
+        Assert.Less(
+            TickOrder.ShipMovement,
+            TickOrder.Targeting);
+
+        Assert.Less(
+            TickOrder.Targeting,
+            TickOrder.Interaction);
+
+        Assert.Less(
+            TickOrder.Interaction,
+            TickOrder.Camera);
+
+        Assert.Less(
+            TickOrder.Camera,
+            TickOrder.Hud);
+
+        Assert.Less(
+            TickOrder.Hud,
+            TickOrder.Debug);
+    }
+
+    [Test]
     public void RegisterSameInstance_Throws()
     {
         TickService service = new TickService();
@@ -63,6 +112,31 @@ public sealed class TickServiceEditModeTests
 
         Assert.Throws<InvalidOperationException>(
             () => service.Register(tickable));
+    }
+
+    [Test]
+    public void RegisterNull_ThrowsArgumentNullException()
+    {
+        TickService service = new TickService();
+
+        Assert.Throws<ArgumentNullException>(
+            () => service.Register(null));
+    }
+
+    [Test]
+    public void ContainsNull_ReturnsFalse()
+    {
+        TickService service = new TickService();
+
+        Assert.IsFalse(service.Contains(null));
+    }
+
+    [Test]
+    public void UnregisterNull_ReturnsFalse()
+    {
+        TickService service = new TickService();
+
+        Assert.IsFalse(service.Unregister(null));
     }
 
     [Test]
@@ -189,6 +263,28 @@ public sealed class TickServiceEditModeTests
     }
 
     [Test]
+    public void ClearDuringTick_PreventsLaterInvocation()
+    {
+        TickService service = new TickService();
+        RecordingTickable laterTickable = new RecordingTickable();
+
+        DelegateTickable clearingTickable =
+            new DelegateTickable(_ =>
+            {
+                service.Clear();
+            });
+
+        service.Register(clearingTickable, 0);
+        service.Register(laterTickable, 100);
+
+        service.Tick(0.1f);
+
+        Assert.AreEqual(0, laterTickable.CallCount);
+        Assert.AreEqual(0, service.Count);
+        Assert.IsFalse(service.IsTicking);
+    }
+
+    [Test]
     public void Tick_WithInvalidDeltaTime_Throws()
     {
         TickService service = new TickService();
@@ -236,7 +332,9 @@ public sealed class TickServiceEditModeTests
 
         Assert.IsTrue(
             isTickable,
-            "IGameTimeService должен наследовать ITickable.");
+            "IGameTimeService должен наследовать ITickable, " +
+            "потому что в S3-06 GameTimeService обновляется " +
+            "через TickService.");
     }
 
     private sealed class RecordingTickable : ITickable

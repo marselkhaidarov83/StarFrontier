@@ -2,14 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-
 /// <summary>
 /// Единый покадровый планировщик обычных C#-объектов.
-///
-/// В S3-06 единственный вызов TickService.Tick()
-/// будет выполняться из Bootstrapper.Update().
+/// Не зависит от Bootstrapper, CustomService и Unity-сцены.
 /// </summary>
-public sealed class TickService : CustomService, ITickService
+public sealed class TickService : ITickService
 {
     private readonly List<TickEntry> _entries = new();
     private readonly List<TickEntry> _executionBuffer = new();
@@ -23,15 +20,6 @@ public sealed class TickService : CustomService, ITickService
 
     public bool IsTicking { get; private set; }
 
-    /// <summary>
-    /// Регистрирует объект в общем цикле.
-    ///
-    /// Меньшее значение order выполняется раньше.
-    /// При одинаковом order сохраняется порядок регистрации.
-    ///
-    /// Объект, зарегистрированный во время текущего Tick,
-    /// начнёт получать обновление со следующего Tick.
-    /// </summary>
     public void Register(ITickable tickable, int order = 0)
     {
         if (tickable == null)
@@ -53,18 +41,8 @@ public sealed class TickService : CustomService, ITickService
         _entries.Add(entry);
 
         _entries.Sort(TickEntryComparer.Instance);
-
-        LogCustom($"{nameof(tickable)} registered in " + 
-            $"{nameof(TickService)} with order " +
-            $"{order}");
     }
 
-    /// <summary>
-    /// Удаляет объект из общего цикла.
-    ///
-    /// Если объект удалён во время Tick до своей очереди,
-    /// он не будет вызван в текущем Tick.
-    /// </summary>
     public bool Unregister(ITickable tickable)
     {
         if (tickable == null)
@@ -89,9 +67,6 @@ public sealed class TickService : CustomService, ITickService
             && _entriesByTickable.ContainsKey(tickable);
     }
 
-    /// <summary>
-    /// Вызывает Tick у всех зарегистрированных объектов.
-    /// </summary>
     public void Tick(float deltaTime)
     {
         ValidateDeltaTime(deltaTime);
@@ -107,16 +82,6 @@ public sealed class TickService : CustomService, ITickService
 
         IsTicking = true;
 
-        /*
-         * Буфер фиксирует состав объектов текущего прохода.
-         *
-         * Register во время Tick:
-         * новая регистрация не попадёт в текущий буфер.
-         *
-         * Unregister во время Tick:
-         * объект будет удалён из словаря,
-         * поэтому перед вызовом он будет пропущен.
-         */
         _executionBuffer.Clear();
         _executionBuffer.AddRange(_entries);
 
@@ -136,14 +101,6 @@ public sealed class TickService : CustomService, ITickService
                     continue;
                 }
 
-                /*
-                 * Проверка ссылки на регистрацию нужна для случая:
-                 *
-                 * объект удалили во время текущего Tick,
-                 * а затем зарегистрировали этот же экземпляр снова.
-                 *
-                 * Старая запись не должна выполняться.
-                 */
                 if (!ReferenceEquals(
                         bufferedEntry,
                         activeEntry))
@@ -166,12 +123,6 @@ public sealed class TickService : CustomService, ITickService
         _entriesByTickable.Clear();
         _entries.Clear();
 
-        /*
-         * Если Clear вызван во время Tick,
-         * текущий буфер оставляем до выхода из цикла.
-         * Все его записи будут пропущены,
-         * потому что словарь уже очищен.
-         */
         if (!IsTicking)
             _executionBuffer.Clear();
     }
@@ -237,10 +188,6 @@ public sealed class TickService : CustomService, ITickService
         }
     }
 
-    /// <summary>
-    /// Сравнивает ITickable по ссылке,
-    /// даже если конкретный класс переопределил Equals().
-    /// </summary>
     private sealed class TickableReferenceComparer :
         IEqualityComparer<ITickable>
     {
