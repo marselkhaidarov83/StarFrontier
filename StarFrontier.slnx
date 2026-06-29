@@ -10,5 +10,6 @@
   <Project Path="ShipStats.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="PlayerControl.csproj" />
+  <Project Path="ShipMovement.csproj" />
   <Project Path="SaveMigration.csproj" />
 </Solution>

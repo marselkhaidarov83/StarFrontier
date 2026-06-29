@@ -51,6 +51,22 @@ public sealed class ShipMovementRuntimeState
         RotationDegrees = rotationDegrees;
     }
 
+    public void SetFacingDirection(Vector2 facingDirection)
+    {
+        if (!IsFinite(facingDirection)
+            || facingDirection.sqrMagnitude < 0.0001f)
+        {
+            return;
+        }
+
+        FacingDirection = facingDirection.normalized;
+
+        RotationDegrees =
+            -Vector2.SignedAngle(
+                Vector2.up,
+                FacingDirection);
+    }
+
     public void SetBraking(bool isBraking)
     {
         IsBraking = isBraking;
@@ -87,5 +103,17 @@ public sealed class ShipMovementRuntimeState
 
         VisualTilt = 0f;
         VisualBank = 0f;
+    }
+
+    private static bool IsFinite(Vector2 value)
+    {
+        return IsFinite(value.x)
+            && IsFinite(value.y);
+    }
+
+    private static bool IsFinite(float value)
+    {
+        return !float.IsNaN(value)
+            && !float.IsInfinity(value);
     }
 }

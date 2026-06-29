@@ -40,6 +40,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private ISaveService _saveService;
     private IGameTimeService _gameTimeService;
     private IPlayerControlService _playerControlService;
+    private IShipMovementService _shipMovementService;
     private ITickService _tickService;
 
     [SerializeField] private bool _globalDebugEnabled;
@@ -110,6 +111,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
         _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
+        _shipMovementService = RegisterService<IShipMovementService, ShipMovementService2A>();
         RegisterService<ISystemContextService, SystemContextService>();
         RegisterService<ISceneService, SceneService>();
         RegisterService<IInventoryService, InventoryService>();
@@ -156,6 +158,7 @@ public class Bootstrapper : CustomMonoBehaviour
         _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();
         _tickService.Register(_gameTimeService, TickOrder.GameTime);
         _tickService.Register(_playerControlService, TickOrder.PlayerControl);
+        _tickService.Register(_shipMovementService, TickOrder.ShipMovement);
     }
 
     /// <summary>
