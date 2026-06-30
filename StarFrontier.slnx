@@ -13,4 +13,5 @@
   <Project Path="SystemBoundsAndSaveSync.csproj" />
   <Project Path="ShipMovement.csproj" />
   <Project Path="SaveMigration.csproj" />
+  <Project Path="SystemScene.csproj" />
 </Solution>
