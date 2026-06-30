@@ -3,6 +3,7 @@
   <Project Path="Data.csproj" />
   <Project Path="Presentation.csproj" />
   <Project Path="Tools.csproj" />
+  <Project Path="SystemScene.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Registry.csproj" />
   <Project Path="Tick.csproj" />
