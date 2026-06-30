@@ -12272,10 +12272,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2000008951}
     m_Modifications:
-    - target: {fileID: 925335640332489808, guid: 49816fabf42794ef78945fe01bfe389a, type: 3}
-      propertyPath: parentTransform
-      value: 
-      objectReference: {fileID: 2000008951}
     - target: {fileID: 2615460552967337954, guid: 49816fabf42794ef78945fe01bfe389a, type: 3}
       propertyPath: m_Name
       value: ShipMarker
