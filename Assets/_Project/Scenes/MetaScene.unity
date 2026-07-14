@@ -315,6 +315,8 @@ GameObject:
   - component: {fileID: 10713363}
   - component: {fileID: 10713368}
   - component: {fileID: 10713369}
+  - component: {fileID: 10713371}
+  - component: {fileID: 10713370}
   m_Layer: 8
   m_Name: SystemMapRoot
   m_TagString: MainCamera
@@ -596,6 +598,46 @@ MonoBehaviour:
   planetRoot: {fileID: 1256647065}
   metaHudRoot: {fileID: 174899926}
   warnOnAwake: 1
+--- !u!114 &10713370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c397a6afeb6f8466a8786d7f25834b9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::MetaSceneShipStateBridge2A
+  shipMarkerView: {fileID: 1132738920}
+  shipMarkerImage: {fileID: 1132738921}
+  legacyVisualIsSource: 1
+  writeToShipMovementState: 1
+  writeToPlayerStateEveryFrame: 1
+  writeRuntimeStateBackToSystemTravel: 0
+  logMissingServices: 0
+--- !u!114 &10713371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46e9f734fa08e42fda956130a442d909, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::MetaSceneInstaller2A
+  spawnPoint: {fileID: 1358796634}
+  shipMarkerView: {fileID: 1132738920}
+  shipMarkerImage: {fileID: 1132738921}
+  initializeOnStart: 1
+  useSavedPlayerPosition: 1
+  pushPositionToSystemTravelService: 1
+  pushPositionToShipMovementState: 1
+  disableShipMovementServiceTick: 1
+  logInitialization: 1
 --- !u!1 &14325446
 GameObject:
   m_ObjectHideFlags: 0
@@ -14281,6 +14323,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!1 &1358796633
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1358796634}
+  m_Layer: 0
+  m_Name: ShipSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1358796634
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1358796633}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2000008951}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1361601446
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19523,6 +19596,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1132738918}
+  - {fileID: 1358796634}
   m_Father: {fileID: 10713352}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2010343797

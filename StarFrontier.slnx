@@ -6,6 +6,7 @@
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Registry.csproj" />
   <Project Path="Tick.csproj" />
+  <Project Path="MetaScene.csproj" />
   <Project Path="SystemGameplayState.csproj" />
   <Project Path="ShipStats.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
