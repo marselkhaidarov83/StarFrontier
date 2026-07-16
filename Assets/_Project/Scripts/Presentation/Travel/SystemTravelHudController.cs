@@ -17,7 +17,6 @@ public sealed class SystemTravelHudController : MonoBehaviour
     [SerializeField] private float progressBarMaxWidth = 420f;
 
     [Header("Buttons")]
-    [SerializeField] private Button flyButton;
     [SerializeField] private Button playPauseButton;
     [SerializeField] private Button stepDayButton;
 
@@ -68,9 +67,6 @@ public sealed class SystemTravelHudController : MonoBehaviour
 
     private void SubscribeButtons()
     {
-        if (flyButton != null)
-            flyButton.onClick.AddListener(OnFlyClicked);
-
         if (playPauseButton != null)
             playPauseButton.onClick.AddListener(OnPlayPauseClicked);
 
@@ -80,9 +76,6 @@ public sealed class SystemTravelHudController : MonoBehaviour
 
     private void UnsubscribeButtons()
     {
-        if (flyButton != null)
-            flyButton.onClick.RemoveListener(OnFlyClicked);
-
         if (playPauseButton != null)
             playPauseButton.onClick.RemoveListener(OnPlayPauseClicked);
 
@@ -350,9 +343,6 @@ public sealed class SystemTravelHudController : MonoBehaviour
     }
     private void SetFlyButtonActive(bool active)
     {
-        if (flyButton != null)
-            flyButton.interactable = active;
-
         SetTextSafe(flyButtonText, "Fly");
     }
 

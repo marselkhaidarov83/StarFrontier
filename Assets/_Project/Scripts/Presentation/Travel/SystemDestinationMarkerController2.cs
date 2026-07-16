@@ -18,28 +18,49 @@ public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
     [Header("System Exit")]
     [SerializeField] private float systemExitTargetFrameSize = 50f;
 
+    private PlanetConfig _currentPlanet;
+    private bool _isPlanetDestinationVisible;
+
     public void ShowPlanetDestination(Vector3 position, PlanetConfig planet)
     {
         LogCustom("position = " + position);
 
         HideAll();
 
-        if (planetDestinationMarker != null)
-            planetDestinationMarker.position = position;
-
-        if (selectedTargetFrame != null)
-        {
-            selectedTargetFrame.position = position;
-            SpriteRendererSizeUtility.SetWorldSize(
-            selectedTargetFrameSprite,
-            planet.PlanetOrbit.PlanetVisualSize);
-        }
+        _currentPlanet = planet;
+        _isPlanetDestinationVisible = true;
 
         if (planetDestinationObject != null)
             planetDestinationObject.SetActive(true);
 
         if (selectedTargetFrameObject != null)
             selectedTargetFrameObject.SetActive(true);
+
+        UpdatePlanetDestinationPosition(position, planet);
+    }
+
+    public void UpdatePlanetDestinationPosition(Vector3 position, PlanetConfig planet)
+    {
+        if (!_isPlanetDestinationVisible)
+            return;
+
+        if (planetDestinationMarker != null)
+            planetDestinationMarker.position = position;
+
+        if (selectedTargetFrame != null)
+            selectedTargetFrame.position = position;
+
+        PlanetConfig effectivePlanet = planet != null ? planet : _currentPlanet;
+
+        if (selectedTargetFrameSprite != null &&
+            effectivePlanet != null &&
+            effectivePlanet.PlanetOrbit != null)
+        {
+            SpriteRendererSizeUtility.SetWorldSize(
+                selectedTargetFrameSprite,
+                effectivePlanet.PlanetOrbit.PlanetVisualSize
+            );
+        }
     }
 
     public void ShowMapPointDestination(Vector3 position)
@@ -59,22 +80,6 @@ public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
             selectedTargetFrameObject.SetActive(true);
     }
 
-    // public void ShowSystemExitDestination(StarSystemLink link)
-    // {
-    //     HideAll();
-
-    //     if (selectedTargetFrame != null)
-    //     {
-    //         selectedTargetFrame.position = link.ExitPoint;
-    //         SpriteRendererSizeUtility.SetWorldSize(
-    //         selectedTargetFrameSprite,
-    //         link.Size);
-    //     }
-
-    //     if (selectedTargetFrameObject != null)
-    //         selectedTargetFrameObject.SetActive(true);
-    // }
-
     public void ShowSystemExitDestination(RouteExitMapChangedEvent evt)
     {
         if (evt == null)
@@ -86,9 +91,7 @@ public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
         HideAll();
 
         if (selectedTargetFrame != null)
-        {
             selectedTargetFrame.position = evt.ExitPoint;
-        }
 
         if (selectedTargetFrameSprite != null)
         {
@@ -104,6 +107,9 @@ public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
 
     public void HideAll()
     {
+        _currentPlanet = null;
+        _isPlanetDestinationVisible = false;
+
         if (planetDestinationObject != null)
             planetDestinationObject.SetActive(false);
 

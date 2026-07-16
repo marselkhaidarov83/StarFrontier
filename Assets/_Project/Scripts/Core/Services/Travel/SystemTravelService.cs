@@ -186,6 +186,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         LogCustom($"Planet destination selected: {planetData.Id}");
         LogCustom("State = " + State);
+
+        StartTravelAutomaticallyIfPossible();
     }
 
     public void SetMapPointDestination(Vector3 mapPosition)
@@ -204,6 +206,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         LogCustom($"Map point destination selected: {mapPosition}");
         LogCustom("State = " + State);
+
+        StartTravelAutomaticallyIfPossible();
     }
 
     public void SetSystemExitDestination(StarSystemLink link)
@@ -234,6 +238,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         LogCustom($"System exit destination selected. Target system: {link.LinkedSystem.Id}");
         LogCustom("State = " + State);
+
+        StartTravelAutomaticallyIfPossible();
     }
 
     public void SetSystemExitDestination(RouteExitMapChangedEvent evt)
@@ -262,6 +268,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             );
         }
         LogCustom("State = " + State);
+
+        StartTravelAutomaticallyIfPossible();
     }
 
     public void StartTravel()
@@ -304,7 +312,17 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         State.Status = SystemTravelStatus.Cancelled;
         State.Destination = SystemTravelDestination.None();
+        State.DestinationPosition = State.GetCurrentPosition();
+        State.StartPosition = State.GetCurrentPosition();
+        State.TravelDistance = 0f;
         State.TravelProgress01 = 0f;
+
+        if (_gameSessionService != null &&
+            _gameSessionService.State != null &&
+            _gameSessionService.State.Player != null)
+        {
+            _gameSessionService.State.Player.SystemMapShipPosition = State.GetCurrentPosition();
+        }
 
         _eventBus.Publish(new SystemTravelCancelledEvent());
 
@@ -377,6 +395,17 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             State.DestinationPosition,
             State.TravelProgress01
         ));
+    }
+
+    private void StartTravelAutomaticallyIfPossible()
+    {
+        if (!State.HasDestination)
+            return;
+
+        if (State.Status == SystemTravelStatus.Flying)
+            return;
+
+        StartTravel();
     }
 
     public void CompleteTravel()
