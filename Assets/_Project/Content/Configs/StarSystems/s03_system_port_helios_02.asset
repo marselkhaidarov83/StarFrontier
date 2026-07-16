@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s03_system_port_helios_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_port_helios_01
+  id: s03_system_port_helios_02
   displayName: "\u041F\u043E\u0440\u0442 \u0413\u0435\u043B\u0438\u043E\u0441"
   description: "\u041F\u043E\u0440\u0442 \u0413\u0435\u043B\u0438\u043E\u0441"
   icon: {fileID: 21300000, guid: 834b74f3c04a34ed0a65e6eb4feb8ab1, type: 3}
   economyType: 2
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 8e1a89799cc584fdea7b48e0f1d5027a, type: 2}
+  - {fileID: 11400000, guid: 18c9619cc52b74b4ab1aa45f31f4a1d7, type: 2}
+  - {fileID: 11400000, guid: 67bfbcdae7eab4bee8922c1e582f29c4, type: 2}
+  - {fileID: 11400000, guid: 2b29457a8ddc24de19b95058e8b4a4c2, type: 2}
+  - {fileID: 11400000, guid: 0ae7231ad92424289a8006872ef933fd, type: 2}
+  - {fileID: 11400000, guid: 27f4ff9ca06564ac6b59a61fa9442bf0, type: 2}
+  - {fileID: 11400000, guid: e8c82eb86c25b4fccb6a2eb318ede652, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: e2a163fadab994745b3ab8a5b24f7962, type: 2}
     parsecDistance: 14
@@ -39,6 +46,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 5b6b5ba197c434fd2b5d6666c70a48c5, type: 2}
   missionTags: 030000000500000000000000
   mapPosition: {x: 2.1, y: -3.2}
   systemPopulation: {fileID: 0}

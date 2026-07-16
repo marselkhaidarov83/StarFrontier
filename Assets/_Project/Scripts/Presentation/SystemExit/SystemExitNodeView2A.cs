@@ -55,7 +55,7 @@ public sealed class SystemExitNodeView2A : CustomMonoBehaviour, IPointerClickHan
 
         if (systemExitImage != null)
         {
-            systemExitImage.sprite = systemExitSprite;
+            // systemExitImage.sprite = systemExitSprite;
 
             SpriteRendererSizeUtility.SetWorldSize(
                 systemExitImage,

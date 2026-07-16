@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s05_system_grave_line_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_grave_line_01
+  id: s05_system_grave_line_02
   displayName: "\u041C\u043E\u0433\u0438\u043B\u044C\u043D\u0430\u044F \u041B\u0438\u043D\u0438\u044F"
   description: "\u041C\u043E\u0433\u0438\u043B\u044C\u043D\u0430\u044F \u041B\u0438\u043D\u0438\u044F"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   economyType: 4
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 3891ca8d815c449cfb08540caab272d7, type: 2}
+  - {fileID: 11400000, guid: 43925db5c1da64db5849cdcdf68a7047, type: 2}
+  - {fileID: 11400000, guid: 9ab2ce65e39d04860a294a4f5d062ea2, type: 2}
+  - {fileID: 11400000, guid: dd68804a4c0e044abaf97015b6b498d3, type: 2}
+  - {fileID: 11400000, guid: 90a2686643c194166abc5993b15b053c, type: 2}
+  - {fileID: 11400000, guid: d3f0bbff941194587a0aeb681a91a8a5, type: 2}
+  - {fileID: 11400000, guid: b26c4a1a22f8c4305ae0e9e1190bdd66, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 995107ea8be8b49f2a444e51f2634214, type: 2}
     parsecDistance: 22
@@ -39,6 +46,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 98d821aff5cc34466b59f01cbffdc602, type: 2}
   missionTags: 010000000500000008000000
   mapPosition: {x: -2.3, y: -0.4}
   systemPopulation: {fileID: 0}

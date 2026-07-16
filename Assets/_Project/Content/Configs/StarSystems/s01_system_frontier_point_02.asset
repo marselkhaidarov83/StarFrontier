@@ -18,8 +18,15 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   economyType: 6
   dangerLevel: 2
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 369dc129def024d62a83e6d36983a853, type: 2}
+  - {fileID: 11400000, guid: ce045d527dc75415bab4056a4abdf76d, type: 2}
+  - {fileID: 11400000, guid: 1b83b81f1191746caa3aba1cb3477b38, type: 2}
+  - {fileID: 11400000, guid: a1a5f80c365d74738ab8b877e28459f0, type: 2}
+  - {fileID: 11400000, guid: b13dab391c8dc4317b68ac95fa9fcea7, type: 2}
+  - {fileID: 11400000, guid: 4c60a17f59cfe4ddda702dce7af7ae71, type: 2}
+  - {fileID: 11400000, guid: 53d7c2541dacf42b4aa50b586483ea34, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 6e8c013720e2643fab196b990ae888cd, type: 2}
     parsecDistance: 16
@@ -39,6 +46,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: d69c9b2e1ae4c4e3f833275fd47b65c3, type: 2}
   missionTags: 010000000500000002000000
   mapPosition: {x: -4.5, y: -6.6}
   systemPopulation: {fileID: 0}

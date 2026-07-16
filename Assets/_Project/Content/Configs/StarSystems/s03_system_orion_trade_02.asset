@@ -12,14 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s03_system_orion_trade_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_orion_trade_01
+  id: s03_system_orion_trade_02
   displayName: "\u0422\u043E\u0440\u0433\u0438 \u041E\u0440\u0438\u043E\u043D\u0430"
   description: "\u0422\u043E\u0440\u0433\u0438 \u041E\u0440\u0438\u043E\u043D\u0430"
   icon: {fileID: 21300000, guid: 834b74f3c04a34ed0a65e6eb4feb8ab1, type: 3}
   economyType: 4
   dangerLevel: 2
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 34d8d99c8f28d4b4881b064bf7761d53, type: 2}
+  - {fileID: 11400000, guid: f41b340b2835345ad98e735116ea1868, type: 2}
+  - {fileID: 11400000, guid: 5efafabbe3a0f400483b27bde896ec3d, type: 2}
+  - {fileID: 11400000, guid: 290fed72c95cc4810b69c789dea3e3fc, type: 2}
+  - {fileID: 11400000, guid: 52bc214c6c6614fb1bdd4c5823b6556d, type: 2}
+  - {fileID: 11400000, guid: e9f52be7f579041aeb4da0506957138a, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: b48830c982d2747d9aab27df7d43d85e, type: 2}
     parsecDistance: 20
@@ -39,6 +45,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: f71a4724579d944c3969c45e0496f198, type: 2}
   missionTags: 030000000000000004000000
   mapPosition: {x: -0.2, y: -3.8}
   systemPopulation: {fileID: 0}

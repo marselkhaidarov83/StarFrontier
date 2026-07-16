@@ -12,15 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s08_system_collapse_gate_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_collapse_gate_01
+  id: s08_system_collapse_gate_02
   displayName: "\u0412\u0440\u0430\u0442\u0430 \u041A\u0440\u0443\u0448\u0435\u043D\u0438\u044F"
   description: "\u0412\u0440\u0430\u0442\u0430 \u041A\u0440\u0443\u0448\u0435\u043D\u0438\u044F"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   economyType: 4
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 729127d20e46247d1824437e695717b2, type: 2}
+  - {fileID: 11400000, guid: 0b0605c06a52747b09272891cdcb279a, type: 2}
+  - {fileID: 11400000, guid: 6118da8d4857b4c8f81b262db92fa493, type: 2}
+  - {fileID: 11400000, guid: 5545163fb7f31470dbe5cfa37c8c3f82, type: 2}
+  - {fileID: 11400000, guid: b8d1c69725c9d42dab89d051dd6c1eaa, type: 2}
+  - {fileID: 11400000, guid: 95ddc28489a2545ef82f4f126cebb245, type: 2}
+  - {fileID: 11400000, guid: b1e589f281b7342dd8c93fcdf0bd6707, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: a6229270e38874850ae076acb26542da, type: 2}
   missionTags: 020000000500000001000000
   mapPosition: {x: -4.3, y: 3.2}
   systemPopulation: {fileID: 0}

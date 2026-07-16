@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s02_system_broken_shield_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_broken_shield_01
+  id: s02_system_broken_shield_02
   displayName: "\u0421\u043B\u043E\u043C\u0430\u043D\u043D\u044B\u0439 \u0429\u0438\u0442"
   description: "\u0421\u043B\u043E\u043C\u0430\u043D\u043D\u044B\u0439 \u0429\u0438\u0442"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 5
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 1a5a457ac883e4ce6afd0af319336bdd, type: 2}
+  - {fileID: 11400000, guid: 67d980f9f30ee43579c3ca88045269e9, type: 2}
+  - {fileID: 11400000, guid: bfdd882ffd1b143ddb3e534249321c56, type: 2}
+  - {fileID: 11400000, guid: cdaa8aa621bc3435283155d295293c51, type: 2}
+  - {fileID: 11400000, guid: 079f3bc4acd6e4d6c92f938c64ea9218, type: 2}
+  - {fileID: 11400000, guid: f8ecb8ff6533e4d9fb9dba02d4018b15, type: 2}
+  - {fileID: 11400000, guid: e2cf06bc17ce84b68aeb198710593092, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 0dfd11817eb3842229fa17799a174aa8, type: 2}
     parsecDistance: 16
@@ -33,6 +40,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 21b34e446354f4239a4c5f93c94773f3, type: 2}
   missionTags: 020000000500000006000000
   mapPosition: {x: -2.1, y: -4.6}
   systemPopulation: {fileID: 0}

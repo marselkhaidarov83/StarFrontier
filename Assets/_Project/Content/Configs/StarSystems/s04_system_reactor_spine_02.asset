@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s04_system_reactor_spine_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_reactor_spine_01
+  id: s04_system_reactor_spine_02
   displayName: "\u0420\u0435\u0430\u043A\u0442\u043E\u0440\u043D\u044B\u0439 \u0425\u0440\u0435\u0431\u0435\u0442"
   description: "\u0420\u0435\u0430\u043A\u0442\u043E\u0440\u043D\u044B\u0439 \u0425\u0440\u0435\u0431\u0435\u0442"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 4
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: b992f9280aad84dc5b94b7c359cc7c50, type: 2}
+  - {fileID: 11400000, guid: 95ed7e29beb734d21b34ccc70c94bd52, type: 2}
+  - {fileID: 11400000, guid: fda41ad4750ac4546ac1cdb6a5c3d843, type: 2}
+  - {fileID: 11400000, guid: 1e091fd9f6389479ab2a5ef4691b9544, type: 2}
+  - {fileID: 11400000, guid: ec8711febaecd4c8faf444cb225696e6, type: 2}
+  - {fileID: 11400000, guid: d86e3991fa24f48f6ab7e0aaba136f8c, type: 2}
+  - {fileID: 11400000, guid: fb65a52ba949446f2a88d333104e313e, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 698b5b75e4e294471a6f42358374f67b, type: 2}
     parsecDistance: 16
@@ -39,6 +46,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 8804a06a8e57f48dfb297c8f239f4cc6, type: 2}
   missionTags: 
   mapPosition: {x: 2.3, y: -1.8}
   systemPopulation: {fileID: 0}

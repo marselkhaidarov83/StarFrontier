@@ -12,15 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s07_system_nova_institute_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_nova_institute_01
+  id: s07_system_nova_institute_02
   displayName: "\u0418\u043D\u0441\u0442\u0438\u0442\u0443\u0442 \u041D\u043E\u0432\u0430"
   description: "\u0418\u043D\u0441\u0442\u0438\u0442\u0443\u0442 \u041D\u043E\u0432\u0430"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 0
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 00c40037ff37c45a19f543d57da49c72, type: 2}
+  - {fileID: 11400000, guid: f76d3192e50a84f0e96059fc55fd8adc, type: 2}
+  - {fileID: 11400000, guid: c1030d1f8e0624061b8be7168fc5102f, type: 2}
+  - {fileID: 11400000, guid: 069a51a34a5fa4c6b933d9b7c2c40bc8, type: 2}
+  - {fileID: 11400000, guid: e3f983872938f4fa4be8c5cc9579b7ab, type: 2}
+  - {fileID: 11400000, guid: cee6f26758dd843e68b9285b5ccad7d3, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: 78eb7574724a645608923d0a61f4f6c4, type: 2}
   missionTags: 070000000400000000000000
   mapPosition: {x: -0.2, y: 1.8}
   systemPopulation: {fileID: 0}

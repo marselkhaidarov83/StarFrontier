@@ -12,7 +12,7 @@ public class SystemMapController2 : CustomMonoBehaviour
     [SerializeField] private Transform sunContainer;
     [SerializeField] private Transform planetContainer;
     [SerializeField] private Transform exitContainer;
-    [SerializeField] private GameObject systemMapsunPrefab;
+    [SerializeField] private GameObject systemMapSunPrefab;
     [SerializeField] private GameObject systemMapPlanetPrefab;
     [SerializeField] private GameObject systemMapExitPrefab;
 
@@ -80,7 +80,7 @@ public class SystemMapController2 : CustomMonoBehaviour
 
     private void SpawnSun(StarSystemConfig starSystem)
     {
-        if (systemMapsunPrefab == null)
+        if (systemMapSunPrefab == null)
         {
             if (IsDebug())
                 Debug.LogError($"[SystemMapController2] sunPrefab is null");
@@ -94,7 +94,7 @@ public class SystemMapController2 : CustomMonoBehaviour
             return;
         }
 
-        _spawnedSun = Instantiate(systemMapsunPrefab, sunContainer);
+        _spawnedSun = Instantiate(systemMapSunPrefab, sunContainer);
         _spawnedSun.transform.SetSiblingIndex(0);
         _spawnedSun.GetComponent<SunNodeView>().Initialize(starSystem.Sun, null);
 
@@ -297,7 +297,7 @@ public class SystemMapController2 : CustomMonoBehaviour
             }
 
             RouteEndpointConfig endpointConfig =
-                routeConfig.GetEndpointForSystem(currentSystemId);
+                routeConfig.GetEndPointForSystem(currentSystemId);
 
             if (endpointConfig == null)
             {

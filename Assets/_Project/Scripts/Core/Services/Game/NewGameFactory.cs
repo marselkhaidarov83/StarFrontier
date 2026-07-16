@@ -21,7 +21,7 @@ public class NewGameFactory
 
     private PlayerState CreatePlayerProfile(NewGameConfig newGameConfig)
     {
-        var starterShip = CreateStarterShip();
+        var starterShip = CreateStarterShip(newGameConfig);
 
         var profile = new PlayerState
         {
@@ -35,7 +35,7 @@ public class NewGameFactory
         return profile;
     }
 
-    private ShipRuntimeState CreateStarterShip()
+    private ShipRuntimeState CreateStarterShip(NewGameConfig newGameConfig)
     {
         return new ShipRuntimeState
         {
@@ -49,8 +49,8 @@ public class NewGameFactory
                     CurrentHull = 70,
                     CurrentShield = 50,
                     CurrentEnergy = 100,
-                    CurrentFuel = 20,
-                    FuelCapacity = 20,
+                    CurrentFuel = newGameConfig.CurrentFuel,
+                    FuelCapacity = newGameConfig.FuelCapacity,
                     CargoCapacity = 5,
                     HullCapacity = 100,
                     EquippedWeaponIds = new List<string>

@@ -340,6 +340,7 @@ Transform:
   - {fileID: 986958701}
   - {fileID: 2033273962}
   - {fileID: 1429718582}
+  - {fileID: 535141426}
   - {fileID: 584959708}
   - {fileID: 1280497124}
   - {fileID: 2000008951}
@@ -376,9 +377,9 @@ MonoBehaviour:
   sunContainer: {fileID: 2033273962}
   planetContainer: {fileID: 1429718582}
   exitContainer: {fileID: 584959708}
-  systemMapsunPrefab: {fileID: 2615460552967337954, guid: 7185e462d496942b7997ec8b484d240d, type: 3}
-  systemMapPlanetPrefab: {fileID: 2992302129176740718, guid: 7d5f0523c65674972b1529901385a3f7, type: 3}
-  systemMapExitPrefab: {fileID: 2992302129176740718, guid: 1ac13f7b28b4041388471f31c6b1fed0, type: 3}
+  systemMapSunPrefab: {fileID: 2615460552967337954, guid: bcaa36454d4654568ad4c2d28f890bee, type: 3}
+  systemMapPlanetPrefab: {fileID: 2992302129176740718, guid: c918fa3d9088245bf9d564a9ee0e88ad, type: 3}
+  systemMapExitPrefab: {fileID: 2992302129176740718, guid: 71337909dd6bf4caba9743b2dbcf43ae, type: 3}
   _camera: {fileID: 26906026}
   _cameraSize: 1200
   _cameraPosition: {x: 0, y: 0, z: -10}
@@ -1324,10 +1325,6 @@ PrefabInstance:
     - target: {fileID: 2615460552967337954, guid: a9c1f379327d241ae92e24a839a8c650, type: 3}
       propertyPath: m_Name
       value: PlanetDestinationMarker
-      objectReference: {fileID: 0}
-    - target: {fileID: 2615460552967337954, guid: a9c1f379327d241ae92e24a839a8c650, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7080698017654214223, guid: a9c1f379327d241ae92e24a839a8c650, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5829,6 +5826,37 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8007923235378300218, guid: 1a55949f50aea48ceb8f450f2a4c220c, type: 3}
   m_PrefabInstance: {fileID: 505700158}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &535141425
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 535141426}
+  m_Layer: 0
+  m_Name: StationNodesRoot
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &535141426
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 535141425}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 10713352}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &535473463
 GameObject:
   m_ObjectHideFlags: 0
@@ -6846,10 +6874,6 @@ PrefabInstance:
     - target: {fileID: 2615460552967337954, guid: 14cdd7e8e4ff54ece98a7aa41a6337b4, type: 3}
       propertyPath: m_Name
       value: TravelLine
-      objectReference: {fileID: 0}
-    - target: {fileID: 2615460552967337954, guid: 14cdd7e8e4ff54ece98a7aa41a6337b4, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7080698017654214223, guid: 14cdd7e8e4ff54ece98a7aa41a6337b4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -10376,6 +10400,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ArrivalFlash
       objectReference: {fileID: 0}
+    - target: {fileID: 2615460552967337954, guid: 925d159b9e343402884e74071f252450, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7080698017654214223, guid: 925d159b9e343402884e74071f252450, type: 3}
       propertyPath: m_LocalPosition.x
       value: 540
@@ -10975,7 +11003,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -300
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 2c57dd4ecd1ce4156b14191ac8c2f364, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -13602,10 +13630,6 @@ PrefabInstance:
     - target: {fileID: 2615460552967337954, guid: 992345902576144f987a4ec1a65eb99b, type: 3}
       propertyPath: m_Name
       value: MapPointDestinationMarker
-      objectReference: {fileID: 0}
-    - target: {fileID: 2615460552967337954, guid: 992345902576144f987a4ec1a65eb99b, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7080698017654214223, guid: 992345902576144f987a4ec1a65eb99b, type: 3}
       propertyPath: m_LocalPosition.x

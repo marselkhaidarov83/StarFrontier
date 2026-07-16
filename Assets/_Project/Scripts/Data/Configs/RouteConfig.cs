@@ -59,7 +59,7 @@ public class RouteConfig : BaseConfig
         return null;
     }
 
-    public RouteEndpointConfig GetEndpointForSystem(string systemId)
+    public RouteEndpointConfig GetEndPointForSystem(string systemId)
     {
         if (string.IsNullOrWhiteSpace(systemId))
             return null;
@@ -75,12 +75,12 @@ public class RouteConfig : BaseConfig
 
     public RouteEndpointConfig GetDepartureEndpoint(string fromSystemId)
     {
-        return GetEndpointForSystem(fromSystemId);
+        return GetEndPointForSystem(fromSystemId);
     }
 
     public RouteEndpointConfig GetArrivalEndpoint(string toSystemId)
     {
-        return GetEndpointForSystem(toSystemId);
+        return GetEndPointForSystem(toSystemId);
     }
 
     public Vector3 GetExitPoint(string fromSystemId)

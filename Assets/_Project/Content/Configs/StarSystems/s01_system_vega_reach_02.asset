@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s01_system_vega_reach_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_vega_reach_01
+  id: s01_system_vega_reach_02
   displayName: "\u041F\u0440\u0435\u0434\u0435\u043B \u0412\u0435\u0433\u0438"
   description: "\u041F\u0440\u0435\u0434\u0435\u043B \u0412\u0435\u0433\u0438"
   icon: {fileID: 21300000, guid: 834b74f3c04a34ed0a65e6eb4feb8ab1, type: 3}
   economyType: 4
   dangerLevel: 1
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 18b7b31d84290474daae2f1bf5433180, type: 2}
+  - {fileID: 11400000, guid: efa99a1acd55e4c77bf8f222dbb72c0f, type: 2}
+  - {fileID: 11400000, guid: 8aea1a64b60664c36ad465a74261e3d0, type: 2}
+  - {fileID: 11400000, guid: 423c0ddb3b7b54502b375212eb0c093f, type: 2}
+  - {fileID: 11400000, guid: f2287a4d9852b4a118c4b3c8d5b366bd, type: 2}
+  - {fileID: 11400000, guid: c31ce42de00ce47b1ad7458ddd4c3338, type: 2}
+  - {fileID: 11400000, guid: 51302fe3d957d40ae9c0035d780fd6b0, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 79cf3b4bb4bd444ac9a26a63576072f6, type: 2}
     parsecDistance: 10
@@ -33,6 +40,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 9603d7195862042b0986ee12d97cfb6f, type: 2}
   missionTags: 040000000300000000000000
   mapPosition: {x: 4.3, y: -6.6}
   systemPopulation: {fileID: 0}

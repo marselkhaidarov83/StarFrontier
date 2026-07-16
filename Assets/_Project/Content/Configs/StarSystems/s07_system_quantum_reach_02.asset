@@ -12,15 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s07_system_quantum_reach_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_quantum_reach_01
+  id: s07_system_quantum_reach_02
   displayName: "\u041A\u0432\u0430\u043D\u0442\u043E\u0432\u044B\u0439 \u041F\u0440\u0435\u0434\u0435\u043B"
   description: "\u041A\u0432\u0430\u043D\u0442\u043E\u0432\u044B\u0439 \u041F\u0440\u0435\u0434\u0435\u043B"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 2
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 3d1774331631f43d5ab09395977a22d4, type: 2}
+  - {fileID: 11400000, guid: ef0e84a8439414eb79e5f58f106ca22e, type: 2}
+  - {fileID: 11400000, guid: a1e7a8bc1e479472e90bfb0f457c3900, type: 2}
+  - {fileID: 11400000, guid: baa0d458b27614a5796aba213b068713, type: 2}
+  - {fileID: 11400000, guid: 228e97a7f3cdf4d47aad0952b6c1d748, type: 2}
+  - {fileID: 11400000, guid: 1dd1adaa098f046faac1f92f6a510ff9, type: 2}
+  - {fileID: 11400000, guid: 014ecf9a051fe41448076de214a4c31d, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: 660ba915dcc824b769e22163e8d414e6, type: 2}
   missionTags: 070000000100000004000000
   mapPosition: {x: 2.1, y: 2.4}
   systemPopulation: {fileID: 0}

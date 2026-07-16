@@ -126,12 +126,14 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IRefuelService, RefuelService>();
         RegisterService<IGalaxyDiscoveryService, GalaxyDiscoveryService>();
         RegisterService<IRouteService, RouteService>();
+        RegisterService<IOrbitalMotionService, OrbitalMotionService>();
+        RegisterService<IHangarService, HangarService>();
+        RegisterService<ISystemTravelService, SystemTravelService>();
         RegisterService<ITravelService, TravelService2A>();
         RegisterService<IRepairService, RepairService>();
         RegisterService<IRewardService, RewardService>();
         RegisterService<IPlanetMissionOfferStateService, PlanetMissionOfferStateService>();
         RegisterService<IPlanetMissionOfferGenerator, PlanetMissionOfferGenerator>();
-        RegisterService<IOrbitalMotionService, OrbitalMotionService>();
         RegisterService<IGovernmentRewardPayoutService, DebugGovernmentRewardPayoutService>();
         RegisterService<IGovernmentRewardService, GovernmentRewardService>();
         RegisterService<ISystemNpcRuntimeService, SystemNpcRuntimeService>();
@@ -153,8 +155,6 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IMissionService, MissionService>();
         RegisterService<IMissionTracker, MissionTracker>();
         RegisterService<IPlanetGovernmentMissionService, PlanetGovernmentMissionService>();
-        RegisterService<IHangarService, HangarService>();
-        RegisterService<ISystemTravelService, SystemTravelService>();
 
         _tickService = RegisterService<ITickService, TickService>();
         _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();

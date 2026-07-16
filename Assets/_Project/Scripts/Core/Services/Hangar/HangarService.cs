@@ -6,14 +6,12 @@ public class HangarService : IHangarService
     private readonly IConfigService _configService;
     private readonly SimpleEventBus _eventBus;
     private readonly IGameSessionService _gameSessionService;
-    private readonly ISaveService _saveService;
     private readonly ShipStatCalculator _statCalculator;
 
     public HangarService()
     {
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _statCalculator = new ShipStatCalculator();
     }
@@ -199,16 +197,9 @@ public class HangarService : IHangarService
 
     private void SaveAfterSuccessfulHangarOperation(string operationName)
     {
-        if (_saveService == null)
-        {
-            UnityEngine.Debug.LogWarning($"[HangarService] SaveService is missing. Operation was not saved: {operationName}");
-            return;
-        }
-
         try
         {
             _eventBus.Publish(new SaveNeedEvent());
-            // _saveService.Save();
             UnityEngine.Debug.Log($"[HangarService] Autosaved after: {operationName}");
         }
         catch (System.Exception exception)

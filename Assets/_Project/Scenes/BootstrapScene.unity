@@ -518,7 +518,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c18106c37564547fcaa292fec4fe5866, type: 2}
   - {fileID: 11400000, guid: 428d2c88302a6432292246d686d3aa33, type: 2}
   - {fileID: 11400000, guid: d75f4106697cd44e2856cdf8c0ed902a, type: 2}
-  MaxAcceptedMissionCount: 1
+  MaxAcceptedMissionCount: 3
   _globalDebugEnabled: 1
 --- !u!4 &860668904
 Transform:

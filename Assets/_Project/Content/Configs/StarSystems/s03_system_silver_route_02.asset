@@ -12,14 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s03_system_silver_route_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_silver_route_01
+  id: s03_system_silver_route_02
   displayName: "\u0421\u0435\u0440\u0435\u0431\u0440\u044F\u043D\u044B\u0439 \u041F\u0443\u0442\u044C"
   description: "\u0421\u0435\u0440\u0435\u0431\u0440\u044F\u043D\u044B\u0439 \u041F\u0443\u0442\u044C"
   icon: {fileID: 21300000, guid: 834b74f3c04a34ed0a65e6eb4feb8ab1, type: 3}
   economyType: 5
   dangerLevel: 2
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: b36b4123e57c845429a8f7d0d47cd64c, type: 2}
+  - {fileID: 11400000, guid: 9bb59f51cf9cf45bbb1114bb34096019, type: 2}
+  - {fileID: 11400000, guid: 3ea8bff5515bf42d8bbc4a1366c2ab36, type: 2}
+  - {fileID: 11400000, guid: 70b70a94574e44e45af930682883b8fb, type: 2}
+  - {fileID: 11400000, guid: bdf5d95bd77404c7687ededd08c3b435, type: 2}
+  - {fileID: 11400000, guid: b3c9ff142ee844fe5ae880613b3f96ce, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 6b4c5bfc158b1419bb3d2a7c6532e3e8, type: 2}
     parsecDistance: 10
@@ -33,6 +39,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 04c505e816bfe4ba9b5c41962e5ad80f, type: 2}
   missionTags: 030000000000000004000000
   mapPosition: {x: 4.3, y: -3.8}
   systemPopulation: {fileID: 0}

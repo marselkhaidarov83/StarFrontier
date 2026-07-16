@@ -8,7 +8,6 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private readonly IGameSessionService _gameSessionService;
     private readonly IOrbitalMotionService _orbitalMotionService;
     private readonly IHangarService _hangarService;
-    private readonly ISaveService _saveService;
 
     public SystemTravelState State { get; }
 
@@ -19,7 +18,6 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
-        _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
         _hangarService = Bootstrapper.Instance.ServiceRegistry.Get<IHangarService>();
 
         State = new SystemTravelState();
