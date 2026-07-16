@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 159133442907675358}
   - component: {fileID: 5366462686301127682}
   - component: {fileID: 5663445337013748343}
+  - component: {fileID: 8374240209775990155}
   m_Layer: 0
   m_Name: PF_SystemMapExit_Pseudo3D
   m_TagString: Untagged
@@ -116,8 +117,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1415682513
+  m_SortingLayer: 3
   m_SortingOrder: 40
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: a6f5dd15fade94feb956d8c86e3f7942, type: 3}
@@ -148,6 +149,28 @@ MonoBehaviour:
   systemExitSprite: {fileID: 21300000, guid: c199ec7d5530a4fb8a5e698f10e29958, type: 3}
   systemNameText: {fileID: 7981253200853181391}
   size: 50
+--- !u!114 &8374240209775990155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2992302129176740718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de38d086ab4b24383afedef64406c779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::Pseudo3DDepthByY2
+  spriteRenderers:
+  - {fileID: 5366462686301127682}
+  sortingLayerName: SystemObjects
+  baseSortingOrder: 300
+  depthSortingRange: 100
+  farY: 900
+  nearY: -900
+  applyScale: 1
+  farScale: 0.9
+  nearScale: 1.1
 --- !u!1 &4462995027765449251
 GameObject:
   m_ObjectHideFlags: 0

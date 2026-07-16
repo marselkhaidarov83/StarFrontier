@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class SystemTravelService : CustomService, ISystemTravelService
@@ -8,19 +9,136 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private readonly IGameSessionService _gameSessionService;
     private readonly IOrbitalMotionService _orbitalMotionService;
     private readonly IHangarService _hangarService;
+    private readonly IConfigService _configService;
+    private readonly IShipMovementService _shipMovementService;
 
     public SystemTravelState State { get; }
 
     public SystemTravelService()
     {
-        // _debugEnabled = true;
-        _debugStop = true;
+        _debugEnabled = true;
+        // _debugStop = true;
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _hangarService = Bootstrapper.Instance.ServiceRegistry.Get<IHangarService>();
+        _shipMovementService = Bootstrapper.Instance.ServiceRegistry.Get<IShipMovementService>();
 
         State = new SystemTravelState();
+        _eventBus.Subscribe<TravelFinishedEvent>(OnTravelFinished);
+    }
+
+    private void ApplyShipPositionAfterSystemJump(Vector3 position)
+    {
+        State.SetCurrentPosition(position);
+
+        State.StartPosition = position;
+        State.DestinationPosition = position;
+        State.TravelDistance = 0f;
+        State.TravelProgress01 = 1f;
+        State.Status = SystemTravelStatus.Idle;
+        State.Destination = SystemTravelDestination.None();
+
+        _gameSessionService.State.Player.SystemMapShipPosition = position;
+
+        if (_shipMovementService != null)
+        {
+            _shipMovementService.SetPosition(new Vector2(position.x, position.y));
+            _shipMovementService.StopImmediately();
+        }
+    }
+
+    private void OnTravelFinished(TravelFinishedEvent evt)
+    {
+        if (!evt.Success)
+            return;
+
+        if (evt.FailReason != TravelFailReason.None)
+            return;
+
+        if (string.IsNullOrWhiteSpace(evt.FromSystemId))
+            return;
+
+        if (string.IsNullOrWhiteSpace(evt.ToSystemId))
+            return;
+
+        if (evt.FromSystemId == evt.ToSystemId)
+            return;
+
+        RouteConfig routeConfig = FindRouteConfig(evt.FromSystemId, evt.ToSystemId);
+
+        if (routeConfig == null)
+        {
+            Debug.LogWarning(
+                "[SystemTravelService] Cannot set arrival position. RouteConfig not found. " +
+                "From = " + evt.FromSystemId +
+                " | To = " + evt.ToSystemId
+            );
+
+            return;
+        }
+
+        LogCustom("exitPoint = " + routeConfig.GetExitPoint(evt.FromSystemId));
+        LogCustom("entryPoint = " + routeConfig.GetEntryPoint(evt.ToSystemId));
+
+        Vector3 entryPoint = routeConfig.GetEntryPoint(evt.ToSystemId);
+
+        SetCurrentSystem(evt.ToSystemId);
+        ApplyShipPositionAfterSystemJump(entryPoint);
+
+        State.StartPosition = entryPoint;
+        State.DestinationPosition = entryPoint;
+        State.TravelDistance = 0f;
+        State.TravelProgress01 = 1f;
+        State.Status = SystemTravelStatus.Idle;
+        State.Destination = SystemTravelDestination.None();
+
+        _gameSessionService.State.Player.SystemMapShipPosition = entryPoint;
+
+        if (IsDebug())
+        {
+            Debug.Log(
+                "[SystemTravelService] Ship arrival position set. " +
+                "From = " + evt.FromSystemId +
+                " | To = " + evt.ToSystemId +
+                " | EntryPoint = " + entryPoint
+            );
+        }
+    }
+
+    private RouteConfig FindRouteConfig(string fromSystemId, string toSystemId)
+    {
+        if (string.IsNullOrWhiteSpace(fromSystemId))
+            return null;
+
+        if (string.IsNullOrWhiteSpace(toSystemId))
+            return null;
+
+        IReadOnlyList<StarSystemConfig> systems = _configService.GetAllStarSystems();
+
+        if (systems == null)
+            return null;
+
+        foreach (StarSystemConfig systemConfig in systems)
+        {
+            if (systemConfig == null)
+                continue;
+
+            if (systemConfig.Routes == null)
+                continue;
+
+            foreach (RouteConfig routeConfig in systemConfig.Routes)
+            {
+                if (routeConfig == null)
+                    continue;
+
+                if (routeConfig.ConnectsSystems(fromSystemId, toSystemId))
+                    return routeConfig;
+            }
+        }
+
+        return null;
     }
 
     public void SetCurrentSystem(string systemId)
@@ -252,7 +370,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             State.TravelProgress01 = 1f;
         }
 
-        LogCustom("State.TravelProgress01 = " + State.TravelProgress01);
+        // LogCustom("State.TravelProgress01 = " + State.TravelProgress01);
         _gameSessionService.State.Player.SystemMapShipPosition = State.GetCurrentPosition();
         _eventBus.Publish(new SystemTravelProgressChangedEvent(
             State.GetCurrentPosition(),

@@ -81,8 +81,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1415682513
+  m_SortingLayer: 3
   m_SortingOrder: 30
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 42145cac5de7a416ca440f48c98d8163, type: 3}
@@ -170,6 +170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8107737667140789230}
   - component: {fileID: 7124150586144274687}
+  - component: {fileID: 6093255070368080454}
   m_Layer: 0
   m_Name: PF_SystemMapPlanet_Pseudo3D
   m_TagString: Untagged
@@ -212,6 +213,29 @@ MonoBehaviour:
   planetImage: {fileID: 4123749478396347112}
   planetImageObject: {fileID: 2553861229664895122}
   label: {fileID: 7981253200853181391}
+--- !u!114 &6093255070368080454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2992302129176740718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de38d086ab4b24383afedef64406c779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::Pseudo3DDepthByY2
+  spriteRenderers:
+  - {fileID: 8913161159772673412}
+  - {fileID: 4123749478396347112}
+  sortingLayerName: SystemObjects
+  baseSortingOrder: 0
+  depthSortingRange: 200
+  farY: 900
+  nearY: -900
+  applyScale: 1
+  farScale: 0.85
+  nearScale: 1.15
 --- !u!1 &4462995027765449251
 GameObject:
   m_ObjectHideFlags: 0
@@ -471,8 +495,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1415682513
+  m_SortingLayer: 3
   m_SortingOrder: 30
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: fc6734b8591d748dcab8521d913e845a, type: 3}
