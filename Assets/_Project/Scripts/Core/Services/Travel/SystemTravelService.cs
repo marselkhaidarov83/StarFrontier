@@ -3,6 +3,10 @@ using UnityEngine;
 
 public sealed class SystemTravelService : CustomService, ISystemTravelService
 {
+    private const float SunAvoidanceSafetyMargin = 80f;
+    private const int SunAvoidanceArcSegments = 18;
+
+    private readonly List<Vector3> _travelPathBuffer = new List<Vector3>(32);
     private const float ArrivalDistanceThreshold = 3f;
 
     private readonly SimpleEventBus _eventBus;
@@ -369,18 +373,24 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return;
         }
 
-        Vector3 movementDirection = direction.normalized;
-        // float movementDistance = State.TravelSpeedUnitsPerSecond * deltaTime;
         float movementDistance = GetCurrentShipTravelSpeed() * deltaTime;
 
-        if (movementDistance >= distanceToDestination)
+        bool destinationReached;
+        Vector3 nextPosition = CalculateNextTravelPositionByPath(
+            State.GetCurrentPosition(),
+            State.DestinationPosition,
+            movementDistance,
+            out destinationReached
+        );
+
+        State.SetCurrentPosition(nextPosition);
+
+        if (destinationReached ||
+            Vector3.Distance(State.GetCurrentPosition(), State.DestinationPosition) <= ArrivalDistanceThreshold)
         {
-            State.SetCurrentPosition(State.DestinationPosition);
             CompleteTravel();
             return;
         }
-
-        State.SetCurrentPosition(State.GetCurrentPosition() + movementDirection * movementDistance);
 
         float remainingDistance = Vector3.Distance(State.GetCurrentPosition(), State.DestinationPosition);
 
@@ -482,5 +492,299 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             default:
                 return State.GetCurrentPosition();
         }
+    }
+
+    private Vector3 CalculateNextTravelPosition(
+    Vector3 currentPosition,
+    Vector3 destinationPosition,
+    float movementDistance,
+    out bool destinationReached
+)
+    {
+        Vector3 direction = destinationPosition - currentPosition;
+        float distanceToDestination = direction.magnitude;
+
+        if (distanceToDestination <= ArrivalDistanceThreshold)
+        {
+            destinationReached = true;
+            return destinationPosition;
+        }
+
+        if (movementDistance >= distanceToDestination)
+        {
+            destinationReached = true;
+            return destinationPosition;
+        }
+
+        destinationReached = false;
+        return currentPosition + direction.normalized * movementDistance;
+    }
+
+    public TravelRoutePreview2A GetCurrentRoutePreview2A(
+    int smallDotsBetweenTickDots,
+    int maxBigDots,
+    int maxSmallDots,
+    float secondsPerTick)
+    {
+        TravelRoutePreview2A preview = new TravelRoutePreview2A();
+
+        if (State == null)
+            return preview;
+
+        if (!State.HasDestination)
+            return preview;
+
+        if (State.Status != SystemTravelStatus.DestinationSelected &&
+            State.Status != SystemTravelStatus.Flying)
+        {
+            return preview;
+        }
+
+        int safeSmallDotsBetweenTickDots = Mathf.Max(0, smallDotsBetweenTickDots);
+        int safeMaxBigDots = Mathf.Max(1, maxBigDots);
+        int safeMaxSmallDots = Mathf.Max(0, maxSmallDots);
+
+        float safeSecondsPerTick = Mathf.Max(0.01f, secondsPerTick);
+        float speed = Mathf.Max(0.01f, GetCurrentShipTravelSpeed());
+        float distancePerTick = speed * safeSecondsPerTick;
+
+        if (State.Destination != null &&
+            State.Destination.Type == TravelDestinationType.Planet)
+        {
+            BuildLivePlanetRoutePreview2A(
+                preview,
+                safeSmallDotsBetweenTickDots,
+                safeMaxBigDots,
+                safeMaxSmallDots,
+                distancePerTick
+            );
+        }
+        else
+        {
+            BuildStaticRoutePreview2A(
+                preview,
+                safeSmallDotsBetweenTickDots,
+                safeMaxBigDots,
+                safeMaxSmallDots,
+                distancePerTick
+            );
+        }
+
+        return preview;
+    }
+
+    private void BuildStaticRoutePreview2A(
+     TravelRoutePreview2A preview,
+     int smallDotsBetweenTickDots,
+     int maxBigDots,
+     int maxSmallDots,
+     float distancePerTick
+ )
+    {
+        Vector3 simulatedPosition = State.GetCurrentPosition();
+        Vector3 destinationPosition = GetCurrentDestinationPosition();
+
+        for (int tickIndex = 1; tickIndex <= maxBigDots; tickIndex++)
+        {
+            float distanceToDestination = Vector3.Distance(
+                simulatedPosition,
+                destinationPosition
+            );
+
+            if (distanceToDestination <= ArrivalDistanceThreshold)
+                break;
+
+            bool destinationReached;
+            Vector3 tickPosition = CalculateNextTravelPositionByPath(
+                simulatedPosition,
+                destinationPosition,
+                distancePerTick,
+                out destinationReached
+            );
+
+            AddSmallRoutePreviewDots2A(
+                preview,
+                simulatedPosition,
+                tickPosition,
+                tickIndex,
+                smallDotsBetweenTickDots,
+                maxSmallDots
+            );
+
+            preview.AddBigDot(tickPosition, tickIndex);
+
+            simulatedPosition = tickPosition;
+
+            if (destinationReached)
+                break;
+        }
+    }
+
+    private void BuildLivePlanetRoutePreview2A(
+    TravelRoutePreview2A preview,
+    int smallDotsBetweenTickDots,
+    int maxBigDots,
+    int maxSmallDots,
+    float distancePerTick
+)
+    {
+        Vector3 simulatedPosition = State.GetCurrentPosition();
+
+        for (int tickIndex = 1; tickIndex <= maxBigDots; tickIndex++)
+        {
+            Vector3 destinationPosition = GetCurrentDestinationPosition();
+
+            float distanceToDestination = Vector3.Distance(
+                simulatedPosition,
+                destinationPosition
+            );
+
+            if (distanceToDestination <= ArrivalDistanceThreshold)
+                break;
+
+            bool destinationReached;
+            Vector3 tickPosition = CalculateNextTravelPositionByPath(
+                simulatedPosition,
+                destinationPosition,
+                distancePerTick,
+                out destinationReached
+            );
+
+            AddSmallRoutePreviewDots2A(
+                preview,
+                simulatedPosition,
+                tickPosition,
+                tickIndex,
+                smallDotsBetweenTickDots,
+                maxSmallDots
+            );
+
+            preview.AddBigDot(tickPosition, tickIndex);
+
+            simulatedPosition = tickPosition;
+
+            if (destinationReached)
+                break;
+        }
+    }
+
+    private void AddSmallRoutePreviewDots2A(
+    TravelRoutePreview2A preview,
+    Vector3 from,
+    Vector3 to,
+    int tickIndex,
+    int smallDotsBetweenTickDots,
+    int maxSmallDots
+)
+    {
+        if (preview.SmallDotCount >= maxSmallDots)
+            return;
+
+        if (smallDotsBetweenTickDots <= 0)
+            return;
+
+        float segmentDistance = Vector3.Distance(from, to);
+
+        if (segmentDistance <= ArrivalDistanceThreshold)
+            return;
+
+        for (int i = 1; i <= smallDotsBetweenTickDots; i++)
+        {
+            if (preview.SmallDotCount >= maxSmallDots)
+                return;
+
+            float t = i / (smallDotsBetweenTickDots + 1f);
+            Vector3 position = Vector3.Lerp(from, to, t);
+
+            preview.AddSmallDot(position, tickIndex);
+        }
+    }
+
+    private void BuildCurrentTravelPath(
+    Vector3 from,
+    Vector3 to,
+    List<Vector3> path
+)
+    {
+        if (path == null)
+            return;
+
+        StarSystemConfig currentSystem = _configService.GetCurrentSystemConfig();
+
+        if (currentSystem == null || currentSystem.Sun == null)
+        {
+            path.Clear();
+            path.Add(from);
+            path.Add(to);
+            return;
+        }
+
+        SunConfig sun = currentSystem.Sun;
+
+        Vector3 sunCenter = new Vector3(
+            sun.LocalOffset.x,
+            sun.LocalOffset.y,
+            from.z
+        );
+
+        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float avoidanceRadius = sunRadius + SunAvoidanceSafetyMargin;
+
+        SystemTravelSunAvoidancePath2A.BuildPath(
+            path,
+            from,
+            to,
+            sunCenter,
+            avoidanceRadius,
+            SunAvoidanceArcSegments
+        );
+    }
+
+    private Vector3 CalculateNextTravelPositionByPath(
+    Vector3 currentPosition,
+    Vector3 destinationPosition,
+    float movementDistance,
+    out bool destinationReached
+)
+    {
+        BuildCurrentTravelPath(
+            currentPosition,
+            destinationPosition,
+            _travelPathBuffer
+        );
+
+        destinationReached = false;
+
+        if (_travelPathBuffer == null || _travelPathBuffer.Count <= 1)
+            return destinationPosition;
+
+        Vector3 position = currentPosition;
+        float remainingMovement = movementDistance;
+
+        for (int i = 1; i < _travelPathBuffer.Count; i++)
+        {
+            Vector3 waypoint = _travelPathBuffer[i];
+            Vector3 segment = waypoint - position;
+            float segmentDistance = segment.magnitude;
+
+            if (segmentDistance <= ArrivalDistanceThreshold)
+            {
+                position = waypoint;
+                continue;
+            }
+
+            if (remainingMovement >= segmentDistance)
+            {
+                position = waypoint;
+                remainingMovement -= segmentDistance;
+                continue;
+            }
+
+            destinationReached = false;
+            return position + segment.normalized * remainingMovement;
+        }
+
+        destinationReached = true;
+        return destinationPosition;
     }
 }

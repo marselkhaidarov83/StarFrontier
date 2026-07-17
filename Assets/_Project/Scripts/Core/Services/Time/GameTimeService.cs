@@ -99,7 +99,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _galaxyNpcCombatService.Tick(deltaTime);
         _orbitalMotionService.Tick(deltaTime);
         _systemTravelService.Tick(deltaTime, State.CurrentQuantTick);
-        _galaxyPopulationService.Tick(deltaTime);  
+        _galaxyPopulationService.Tick(deltaTime);
         _galaxyNpcMovementService.Tick(deltaTime, State.CurrentQuantTick);
     }
 
@@ -110,5 +110,61 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
         _eventBus.Publish(new GameTimeQuantumAdvancedEvent(State.CurrentQuantTick));
         _eventBus.Publish(new GameDayChangedEvent(_previousTick, State.CurrentQuantTick));
+    }
+
+    public void WriteTimeToSave(GameRuntimeState state)
+    {
+        if (state == null)
+            return;
+
+        if (state.Meta == null)
+            state.Meta = new GameRuntimeMetaState();
+
+        state.Meta.CurrentGameDay = Mathf.Max(1, State.CurrentQuantTick);
+        state.Meta.GameSimulationTimeSeconds = Mathf.Max(0f, State.SimulationTimeSeconds);
+        state.Meta.GameTimeAccumulator = Mathf.Clamp(
+            State.Accumulator,
+            0f,
+            GameTimeState.SecondsPerDay
+        );
+        state.Meta.IsGameTimePaused = State.IsPaused;
+    }
+
+    public void RestoreTimeFromSave(GameRuntimeState state)
+    {
+        if (state == null)
+            return;
+
+        if (state.Meta == null)
+            return;
+
+        int restoredDay = state.Meta.CurrentGameDay;
+
+        if (restoredDay <= 0)
+            restoredDay = 1;
+
+        State.CurrentQuantTick = restoredDay;
+        State.SimulationTimeSeconds = Mathf.Max(0f, state.Meta.GameSimulationTimeSeconds);
+        State.Accumulator = Mathf.Clamp(
+            state.Meta.GameTimeAccumulator,
+            0f,
+            GameTimeState.SecondsPerDay
+        );
+
+        // Важно:
+        // День восстанавливаем из сохранения,
+        // но режим Play/Pause при загрузке НЕ восстанавливаем.
+        // Любая загрузка игры всегда начинается с Pause.
+        SetPaused(true);
+
+        _previousTick = State.CurrentQuantTick - 1;
+
+        LogCustom(
+            "[GameTimeService] Time restored from save. " +
+            "Day = " + State.CurrentQuantTick +
+            " | Accumulator = " + State.Accumulator +
+            " | IsPaused = " + State.IsPaused +
+            " | SavedPauseStateIgnored = " + state.Meta.IsGameTimePaused
+        );
     }
 }

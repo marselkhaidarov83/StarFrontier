@@ -68,7 +68,7 @@ public class MetaHudController : CustomMonoBehaviour
     public void OnClearSaveClicked()
     {
         _saveService.DeleteSave();
-    }    
+    }
 
     private void SubscribeToEvents()
     {
@@ -94,7 +94,7 @@ public class MetaHudController : CustomMonoBehaviour
         simpleEventBus.Unsubscribe<FuelChangedEvent>(OnFuelChanged);
         simpleEventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
         simpleEventBus.Unsubscribe<GameSavedEvent>(OnGameSaved);
-    }    
+    }
 
     private void OnActiveShipChanged(ActiveShipChangedEvent evt)
     {
@@ -145,7 +145,7 @@ public class MetaHudController : CustomMonoBehaviour
             int usedCargo = cargo != null ? cargo.GetUsedCapacity() : 0;
             int maxCargo = gameSessionService.State.Player.PlayerShipState.GetActiveShip().CargoCapacity;
             cargoText.text = $"Груз: {usedCargo} / {maxCargo}";
-            
+
         }
         else
             cargoText.text = "Груз: -";
@@ -166,16 +166,39 @@ public class MetaHudController : CustomMonoBehaviour
             else
                 systemText.text = "Система:";
 
-            if (gameSessionService.State.Player.CurrentPlanetId != null)
-                planetText.text = $"Планета: {gameSessionService.State.Player.CurrentPlanetId ?? "-"}";
+            if (!string.IsNullOrWhiteSpace(gameSessionService.State.Player.CurrentPlanetId))
+            {
+                planetText.text = $"Планета: {GetPlanetDisplayName(gameSessionService.State.Player.CurrentPlanetId)}";
+            }
             else
+            {
                 planetText.text = "Планета:";
+            }
         }
         else
         {
             systemText.text = "Система:";
             planetText.text = "Планета:";
         }
+    }
+
+    private string GetPlanetDisplayName(string planetId)
+    {
+        if (string.IsNullOrWhiteSpace(planetId))
+            return "-";
+
+        if (configService == null)
+            return planetId;
+
+        PlanetConfig planetConfig = configService.GetPlanetConfigById(planetId);
+
+        if (planetConfig == null)
+            return planetId;
+
+        if (string.IsNullOrWhiteSpace(planetConfig.DisplayName))
+            return planetConfig.Id;
+
+        return planetConfig.DisplayName;
     }
 
     public void ShowSaved()

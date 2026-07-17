@@ -180,7 +180,7 @@ public sealed class SystemTravelHudController : MonoBehaviour
         if (_gameTimeService == null)
             return;
 
-        SetTextSafe(dayText, $"Квант {_gameTimeService.CurrentQuantTick}");
+        SetTextSafe(dayText, $"День {_gameTimeService.CurrentQuantTick}");
 
         if (_gameTimeService.IsPaused)
         {

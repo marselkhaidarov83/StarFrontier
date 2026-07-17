@@ -143,6 +143,7 @@ public class SaveService2A : CustomService, ISaveService
     {
         SaveMigrationService.Migrate(state);
 
+        TryWriteGameTimeToState(state);
         TryWriteShipMovementToState(state);
 
         SaveMigrationService.Migrate(state);
@@ -159,6 +160,24 @@ public class SaveService2A : CustomService, ISaveService
                 _systemEncounterSaveService.Capture();
 
         DictionaryToList(state);
+    }
+
+    private void TryWriteGameTimeToState(GameRuntimeState state)
+    {
+        if (state == null)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IGameTimeService>(
+            out IGameTimeService gameTimeService))
+        {
+            gameTimeService.WriteTimeToSave(state);
+        }
     }
 
     private void TryWriteShipMovementToState(
@@ -212,6 +231,7 @@ public class SaveService2A : CustomService, ISaveService
 
             DictionaryFromList(state);
 
+            TryRestoreGameTimeFromState(state);
             TryInitializeShipMovementFromState(state);
 
             if (_systemEncounterSaveService != null && state.SystemEncounter != null)
@@ -226,6 +246,24 @@ public class SaveService2A : CustomService, ISaveService
         {
             Debug.LogError("[SaveService] Failed to load from " + path + ": " + e.Message);
             return null;
+        }
+    }
+
+    private void TryRestoreGameTimeFromState(GameRuntimeState state)
+    {
+        if (state == null)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IGameTimeService>(
+            out IGameTimeService gameTimeService))
+        {
+            gameTimeService.RestoreTimeFromSave(state);
         }
     }
 

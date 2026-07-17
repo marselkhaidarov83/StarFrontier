@@ -37,6 +37,9 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     private float _alphaMultiplier = 1f;
 
     public int LastEstimatedTickCount { get; private set; }
+    public int SmallDotsBetweenTickDots => smallDotsBetweenTickDots;
+    public int MaxBigDots => maxBigDots;
+    public int MaxSmallDots => maxSmallDots;
 
     private void Awake()
     {
@@ -458,6 +461,54 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
             if (distanceAtTick >= totalDistance)
                 break;
         }
+
+        DisableUnusedDots(_bigDotPool, bigDotIndex);
+        DisableUnusedDots(_smallDotPool, smallDotIndex);
+    }
+
+    public void ShowPreview(TravelRoutePreview2A preview)
+    {
+        if (preview == null || !preview.HasDots)
+        {
+            Hide();
+            return;
+        }
+
+        gameObject.SetActive(true);
+        HideAllDots();
+
+        int bigDotIndex = 0;
+        int smallDotIndex = 0;
+
+        foreach (TravelRoutePreviewDot2A dot in preview.Dots)
+        {
+            if (dot.Type == TravelRoutePreviewDotType2A.BigTick)
+            {
+                DrawDot(
+                    GetOrCreateDot(_bigDotPool, "BigTickDot"),
+                    dot.Position,
+                    bigDotDiameter,
+                    bigDotColor,
+                    bigDotSortingOrder
+                );
+
+                bigDotIndex++;
+            }
+            else
+            {
+                DrawDot(
+                    GetOrCreateDot(_smallDotPool, "SmallRouteDot"),
+                    dot.Position,
+                    smallDotDiameter,
+                    smallDotColor,
+                    smallDotSortingOrder
+                );
+
+                smallDotIndex++;
+            }
+        }
+
+        LastEstimatedTickCount = bigDotIndex;
 
         DisableUnusedDots(_bigDotPool, bigDotIndex);
         DisableUnusedDots(_smallDotPool, smallDotIndex);

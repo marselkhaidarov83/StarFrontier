@@ -87,26 +87,18 @@ public sealed class SystemTravelVisualController2A : CustomMonoBehaviour
 
         if (!shouldShow || !state.HasDestination)
         {
-            _routeSnapshotCreated = false;
             travelLineView.Hide();
             return;
         }
 
-        CreateRouteSnapshotIfNeeded(state);
-
-        Vector3 currentPosition = state.GetCurrentPosition();
-        Vector3 destinationPosition = GetVisualDestinationPosition(state);
-
-        float shipSpeedUnitsPerSecond = GetCurrentShipTravelSpeed();
-        float secondsPerTick = GetSecondsPerTick();
-
-        travelLineView.ShowAnchored(
-            _routeStartSnapshot,
-            currentPosition,
-            destinationPosition,
-            shipSpeedUnitsPerSecond,
-            secondsPerTick
+        TravelRoutePreview2A preview = _travelService.GetCurrentRoutePreview2A(
+            travelLineView.SmallDotsBetweenTickDots,
+            travelLineView.MaxBigDots,
+            travelLineView.MaxSmallDots,
+            GetSecondsPerTick()
         );
+
+        travelLineView.ShowPreview(preview);
     }
 
     private void CreateRouteSnapshotIfNeeded(SystemTravelState state)

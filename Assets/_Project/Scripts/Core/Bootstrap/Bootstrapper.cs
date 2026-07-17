@@ -161,6 +161,7 @@ public class Bootstrapper : CustomMonoBehaviour
         _tickService.Register(_gameTimeService, TickOrder.GameTime);
         _tickService.Register(_playerControlService, TickOrder.PlayerControl);
         _tickService.Register(_shipMovementService, TickOrder.ShipMovement);
+        RegisterService<IGameTimePauseScopeService, GameTimePauseScopeService>();
     }
 
     /// <summary>

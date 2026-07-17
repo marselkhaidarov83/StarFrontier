@@ -24,4 +24,27 @@ public class GameRuntimeMetaState
     public long LastSaveUtc;
 
     public string LastSaveReason = "new_game";
+
+    /// <summary>
+    /// Текущий игровой день.
+    /// Раньше в коде назывался CurrentQuantTick.
+    /// В пользовательском интерфейсе показываем как "День".
+    /// </summary>
+    public int CurrentGameDay = 1;
+
+    /// <summary>
+    /// Сколько секунд симуляции прошло внутри текущего запуска/сохранения.
+    /// </summary>
+    public float GameSimulationTimeSeconds;
+
+    /// <summary>
+    /// Накопитель времени внутри текущего дня.
+    /// Нужен, чтобы после загрузки день не начинался строго с нуля.
+    /// </summary>
+    public float GameTimeAccumulator;
+
+    /// <summary>
+    /// Был ли GameTimeService на паузе в момент сохранения.
+    /// </summary>
+    public bool IsGameTimePaused = true;
 }

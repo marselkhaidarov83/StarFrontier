@@ -6,8 +6,6 @@ public class MetaSceneController : CustomMonoBehaviour
 {
     [Header("Screen Controllers")]
     [SerializeField] private MetaHudController metaHudController;
-    // [SerializeField] private GalaxyMapController2 galaxyMapController2;
-    // [SerializeField] private SystemMapController systemMapController;
     [SerializeField] private SystemMapController2 systemMapController2;
     [SerializeField] private SystemMapHUDController systemMapHUDController;
     [SerializeField] private PlanetController planetController;
@@ -15,7 +13,6 @@ public class MetaSceneController : CustomMonoBehaviour
     [SerializeField] private MarketScreenController marketScreenController;
     [SerializeField] private RefuelPanelController refuelPanelController;
     [SerializeField] private MissionScreenController missionScreenController;
-    // [SerializeField] private SystemShipMarkerController systemShipMarkerController;
     [SerializeField] private SystemShipMarkerController2 systemShipMarkerController2;
 
     [Header("Screen Roots")]
@@ -37,8 +34,6 @@ public class MetaSceneController : CustomMonoBehaviour
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
 
         metaHudController?.Initialize();
-        // galaxyMapController2?.Initialize();
-        // systemMapController?.Initialize(); 
         systemMapController2?.Initialize(); 
         systemMapHUDController?.Initialize(); 
         planetController?.Initialize();    
@@ -46,7 +41,6 @@ public class MetaSceneController : CustomMonoBehaviour
         marketScreenController?.Initialize();
         refuelPanelController?.Initialize();
         missionScreenController?.Initialize();
-        // systemShipMarkerController?.Initialize();
         systemShipMarkerController2?.Initialize();
         
         if (galaxyMapScreenRoot2 != null)
