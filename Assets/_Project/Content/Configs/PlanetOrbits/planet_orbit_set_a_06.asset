@@ -24,3 +24,4 @@ MonoBehaviour:
   orbitCenterOffset: {x: 0, y: 0, z: 0}
   planetVisualSize: 42.5
   direction: -1
+  orbitDotCount: 110

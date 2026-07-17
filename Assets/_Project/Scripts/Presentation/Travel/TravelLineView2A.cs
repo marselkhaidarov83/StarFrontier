@@ -348,4 +348,118 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
             DotPixelsPerUnit
         );
     }
+
+    public void ShowAnchored(
+    Vector3 routeStart,
+    Vector3 currentPosition,
+    Vector3 destinationPosition,
+    float shipSpeedUnitsPerSecond,
+    float secondsPerTick
+)
+    {
+        gameObject.SetActive(true);
+
+        UpdateAnchoredRoute(
+            routeStart,
+            currentPosition,
+            destinationPosition,
+            shipSpeedUnitsPerSecond,
+            secondsPerTick
+        );
+    }
+
+    private void UpdateAnchoredRoute(
+    Vector3 routeStart,
+    Vector3 currentPosition,
+    Vector3 destinationPosition,
+    float shipSpeedUnitsPerSecond,
+    float secondsPerTick
+)
+    {
+        if (_dotSprite == null)
+            _dotSprite = CreateDotSprite();
+
+        Vector3 routeVector = destinationPosition - routeStart;
+        float totalDistance = routeVector.magnitude;
+
+        if (totalDistance <= minDistanceToShow)
+        {
+            Hide();
+            return;
+        }
+
+        Vector3 routeDirection = routeVector / totalDistance;
+        float passedDistance = Vector3.Dot(
+            currentPosition - routeStart,
+            routeDirection
+        );
+
+        passedDistance = Mathf.Clamp(
+            passedDistance,
+            0f,
+            totalDistance
+        );
+        if (totalDistance <= minDistanceToShow)
+        {
+            Hide();
+            return;
+        }
+
+        float safeSpeed = Mathf.Max(0.01f, shipSpeedUnitsPerSecond);
+        float safeSecondsPerTick = Mathf.Max(0.01f, secondsPerTick);
+        float distancePerTick = safeSpeed * safeSecondsPerTick;
+
+        LastEstimatedTickCount = Mathf.CeilToInt(totalDistance / distancePerTick);
+        LastEstimatedTickCount = Mathf.Max(1, LastEstimatedTickCount);
+        LastEstimatedTickCount = Mathf.Min(LastEstimatedTickCount, maxBigDots);
+
+        HideAllDots();
+
+        int bigDotIndex = 0;
+        int smallDotIndex = 0;
+
+        Vector3 previousVisibleAnchor = currentPosition;
+
+        for (int tickIndex = 1; tickIndex <= LastEstimatedTickCount; tickIndex++)
+        {
+            float distanceAtTick = Mathf.Min(
+                tickIndex * distancePerTick,
+                totalDistance
+            );
+
+            // Если корабль уже прошёл точку этого тика — не рисуем её.
+            if (distanceAtTick <= passedDistance)
+                continue;
+
+            float route01 = Mathf.Clamp01(distanceAtTick / totalDistance);
+            Vector3 tickPosition = EvaluateRoutePoint(
+                routeStart,
+                destinationPosition,
+                route01
+            );
+
+            DrawSmallDotsBetween(
+                previousVisibleAnchor,
+                tickPosition,
+                ref smallDotIndex
+            );
+
+            DrawDot(
+                GetOrCreateDot(_bigDotPool, "BigTickDot"),
+                tickPosition,
+                bigDotDiameter,
+                bigDotColor,
+                bigDotSortingOrder
+            );
+
+            bigDotIndex++;
+            previousVisibleAnchor = tickPosition;
+
+            if (distanceAtTick >= totalDistance)
+                break;
+        }
+
+        DisableUnusedDots(_bigDotPool, bigDotIndex);
+        DisableUnusedDots(_smallDotPool, smallDotIndex);
+    }
 }

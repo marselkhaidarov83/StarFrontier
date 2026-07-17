@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlanetOrbitConfig", menuName = "StarFrontier/Configs/PlanetOrbit")]
@@ -12,10 +11,15 @@ public class PlanetOrbitConfig : BaseConfig
     [SerializeField] private float planetVisualSize = 96f;
     [SerializeField] private int direction = 1;
 
+    [Header("Orbit Visual")]
+    [SerializeField] private int orbitDotCount = 96;
+
     public float OrbitRadius => orbitRadius;
     public float StartAngleDeg => startAngleDeg;
     public float OrbitSpeedDegPerSec => orbitSpeedDegPerSec;
     public Vector3 OrbitCenterOffset => orbitCenterOffset;
     public float PlanetVisualSize => planetVisualSize;
     public int Direction => direction;
+
+    public int OrbitDotCount => orbitDotCount;
 }

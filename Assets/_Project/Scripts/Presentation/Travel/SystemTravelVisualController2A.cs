@@ -18,6 +18,12 @@ public sealed class SystemTravelVisualController2A : CustomMonoBehaviour
     private IHangarService _hangarService;
     private Vector3 _lastShipPosition;
 
+    private bool _routeSnapshotCreated;
+    private Vector3 _routeStartSnapshot;
+    private Vector3 _staticDestinationSnapshot;
+    private TravelDestinationType _routeDestinationType;
+    private SimpleEventBus _eventBus;
+
     private void Start()
     {
         _travelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
@@ -39,6 +45,22 @@ public sealed class SystemTravelVisualController2A : CustomMonoBehaviour
 
         if (engineGlowView != null)
             engineGlowView.Hide();
+
+        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+
+        if (_eventBus != null)
+            _eventBus.Subscribe<DestinationSelectedEvent>(OnDestinationSelected);
+    }
+
+    private void OnDestroy()
+    {
+        if (_eventBus != null)
+            _eventBus.Unsubscribe<DestinationSelectedEvent>(OnDestinationSelected);
+    }
+
+    private void OnDestinationSelected(DestinationSelectedEvent evt)
+    {
+        _routeSnapshotCreated = false;
     }
 
     private void Update()
@@ -65,22 +87,59 @@ public sealed class SystemTravelVisualController2A : CustomMonoBehaviour
 
         if (!shouldShow || !state.HasDestination)
         {
+            _routeSnapshotCreated = false;
             travelLineView.Hide();
             return;
         }
 
-        Vector3 from = state.GetCurrentPosition();
-        Vector3 to = _travelService.GetCurrentDestinationPosition();
+        CreateRouteSnapshotIfNeeded(state);
+
+        Vector3 currentPosition = state.GetCurrentPosition();
+        Vector3 destinationPosition = GetVisualDestinationPosition(state);
 
         float shipSpeedUnitsPerSecond = GetCurrentShipTravelSpeed();
         float secondsPerTick = GetSecondsPerTick();
 
-        travelLineView.Show(
-            from,
-            to,
+        travelLineView.ShowAnchored(
+            _routeStartSnapshot,
+            currentPosition,
+            destinationPosition,
             shipSpeedUnitsPerSecond,
             secondsPerTick
         );
+    }
+
+    private void CreateRouteSnapshotIfNeeded(SystemTravelState state)
+    {
+        if (_routeSnapshotCreated)
+            return;
+
+        _routeStartSnapshot = state.GetCurrentPosition();
+        _staticDestinationSnapshot = _travelService.GetCurrentDestinationPosition();
+
+        if (state.Destination != null)
+            _routeDestinationType = state.Destination.Type;
+
+        _routeSnapshotCreated = true;
+    }
+
+    private Vector3 GetVisualDestinationPosition(SystemTravelState state)
+    {
+        if (ShouldUpdateDestinationEveryFrame(state))
+            return _travelService.GetCurrentDestinationPosition();
+
+        return _staticDestinationSnapshot;
+    }
+
+    private bool ShouldUpdateDestinationEveryFrame(SystemTravelState state)
+    {
+        if (state == null)
+            return false;
+
+        if (state.Destination == null)
+            return false;
+
+        return state.Destination.Type == TravelDestinationType.Planet;
     }
 
     private void UpdateEngineGlow()
