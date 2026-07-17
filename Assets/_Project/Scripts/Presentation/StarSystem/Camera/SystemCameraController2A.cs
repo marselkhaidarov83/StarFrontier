@@ -312,7 +312,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             return 1200f;
 
         return Mathf.Clamp(
-            GetDefaultOrthographicSizeForCurrentSystem(),
+            cameraConfig.DefaultOrthographicSize,
             cameraConfig.MinOrthographicSize,
             cameraConfig.MaxOrthographicSize
         );
@@ -468,7 +468,10 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         if (targetCamera == null)
             return;
 
-        float desiredSize = GetDefaultOrthographicSizeForCurrentSystem();
+        if (cameraConfig == null)
+            return;
+
+        float desiredSize = cameraConfig.DefaultOrthographicSize;
 
         StarSystemConfig currentSystem = GetCurrentSystemConfig();
 
