@@ -251,22 +251,29 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         }
 
         State.Destination = SystemTravelDestination.SystemExit(evt);
+        State.DestinationPosition = evt.ExitPoint;
+        State.Status = SystemTravelStatus.DestinationSelected;
+        State.TravelProgress01 = 0f;
+
+        _eventBus.Publish(new DestinationSelectedEvent(
+            TravelDestinationType.SystemExit,
+            evt.ExitPoint,
+            string.Empty,
+            evt.ToSystemId
+        ));
 
         if (IsDebug())
         {
             Debug.Log(
-                "[SystemTravelService] Route exit destination set. Route = " +
-                (evt.RouteConfig != null ? evt.RouteConfig.Id : "null") +
-                " | From = " +
-                evt.FromSystemId +
-                " | To = " +
-                evt.ToSystemId +
-                " | ExitPoint = " +
-                evt.ExitPoint +
-                " | EntryPoint = " +
-                evt.EntryPoint
+                "[SystemTravelService] Route exit destination set. " +
+                "Route = " + (evt.RouteConfig != null ? evt.RouteConfig.Id : "null") +
+                " | From = " + evt.FromSystemId +
+                " | To = " + evt.ToSystemId +
+                " | ExitPoint = " + evt.ExitPoint +
+                " | EntryPoint = " + evt.EntryPoint
             );
         }
+
         LogCustom("State = " + State);
 
         StartTravelAutomaticallyIfPossible();
