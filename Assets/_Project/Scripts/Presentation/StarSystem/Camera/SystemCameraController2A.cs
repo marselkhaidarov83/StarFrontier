@@ -188,8 +188,17 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     public void ReturnToShip()
     {
-        if (!_isSystemCameraActive)
+        if (targetCamera == null)
+        {
+            Debug.LogError("[SystemCameraController2A] ReturnToShip failed: targetCamera is null");
             return;
+        }
+
+        if (!_isSystemCameraActive)
+        {
+            Debug.LogWarning("[SystemCameraController2A] ReturnToShip called while camera is inactive. Reactivating.");
+            ActivateSystemCameraSafely();
+        }
 
         mode = SystemCameraMode2A.ReturningToShip;
         _cameraVelocity = Vector3.zero;
@@ -391,19 +400,14 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         Debug.Log("[SystemCameraController2A] SubscribeToEvents started");
 
-        // Включаем подписки по одной.
-        // Сначала только безопасные события ухода с системной карты.
-
         _eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         Debug.Log("[SystemCameraController2A] Subscribed to GalaxyEnteredEvent");
 
         _eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         Debug.Log("[SystemCameraController2A] Subscribed to PlanetEnteredEvent");
 
-        // ВАЖНО:
-        // StarSystemEnteredEvent пока НЕ включаем.
-        // Именно он наиболее подозрительный, потому что публикуется при старте MetaScene.
-        // _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        Debug.Log("[SystemCameraController2A] Subscribed to StarSystemEnteredEvent");
 
         _isSubscribedToEvents = true;
 
@@ -422,9 +426,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         _eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         _eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
-
-        // Пока StarSystemEnteredEvent не подписываем — значит и не отписываем.
-        // _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
 
         _isSubscribedToEvents = false;
 
@@ -433,22 +435,9 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
-        _isSystemCameraActive = true;
+        Debug.Log("[SystemCameraController2A] OnSystemEntered received");
 
-        RebuildSystemBounds();
-        ApplyCameraSizeForCurrentSystem();
-
-        Vector3 shipPosition = GetShipTargetPosition();
-
-        targetCamera.transform.position = ClampCameraPosition(new Vector3(
-            shipPosition.x,
-            shipPosition.y,
-            targetCamera.transform.position.z
-        ));
-
-        mode = SystemCameraMode2A.FollowShip;
-        _cameraVelocity = Vector3.zero;
-        _zoomVelocity = 0f;
+        ActivateSystemCameraSafely();
     }
 
     private void OnGalaxyEntered(GalaxyEnteredEvent evt)
@@ -459,8 +448,12 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private void OnPlanetEntered(PlanetEnteredEvent evt)
     {
+        Debug.Log("[SystemCameraController2A] OnPlanetEntered received. System camera disabled.");
+
         _isSystemCameraActive = false;
+        mode = SystemCameraMode2A.FreeLook;
         _cameraVelocity = Vector3.zero;
+        _zoomVelocity = 0f;
     }
 
     private void ApplyCameraSizeForCurrentSystem()
