@@ -479,12 +479,6 @@ public class SystemMapController2 : CustomMonoBehaviour
 
     private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
-        if (_camera != null)
-        {
-            _camera.orthographicSize = _cameraSize;
-            _camera.transform.position = _cameraPosition;
-        }
-
         BuildSystemMap();
 
         if (systemMapRoot != null)

@@ -14,6 +14,7 @@ public class MetaSceneController : CustomMonoBehaviour
     [SerializeField] private RefuelPanelController refuelPanelController;
     [SerializeField] private MissionScreenController missionScreenController;
     [SerializeField] private SystemShipMarkerController2 systemShipMarkerController2;
+    [SerializeField] private SystemCameraController2A systemCameraController2A;
 
     [Header("Screen Roots")]
     [SerializeField] private GameObject galaxyMapScreenRoot2;
@@ -42,6 +43,7 @@ public class MetaSceneController : CustomMonoBehaviour
         refuelPanelController?.Initialize();
         missionScreenController?.Initialize();
         systemShipMarkerController2?.Initialize();
+        systemCameraController2A?.Initialize();
         
         if (galaxyMapScreenRoot2 != null)
             galaxyMapScreenRoot2.SetActive(false);

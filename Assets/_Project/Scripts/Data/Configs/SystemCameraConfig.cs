@@ -2,60 +2,45 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "SystemCameraConfig",
-    menuName = "StarFrontier/Configs/Sprint 3/System Camera")]
+    menuName = "StarFrontier/Configs/System Camera"
+)]
 public sealed class SystemCameraConfig : ScriptableObject
 {
-    [Header("Camera")]
-    [SerializeField]
-    [Min(1f)]
-    private float orthographicSize = 6.5f;
+    [Header("Follow")]
+    [SerializeField] private float followSmoothTime = 0.18f;
+    [SerializeField] private float returnSmoothTime = 0.12f;
+    [SerializeField] private float followDeadZone = 8f;
 
-    [SerializeField]
-    [Min(0f)]
-    private float followSmoothTime = 0.18f;
+    [Header("View Size")]
+    [SerializeField] private float defaultOrthographicSize = 1200f;
+    [SerializeField] private float minOrthographicSize = 650f;
+    [SerializeField] private float maxOrthographicSize = 1900f;
 
-    [SerializeField]
-    private Vector2 followOffset = new Vector2(0f, 1.2f);
+    [Header("System Bounds")]
+    [SerializeField] private float boundsPadding = 320f;
+    [SerializeField] private float sunExtraPadding = 220f;
+    [SerializeField] private float planetExtraPadding = 180f;
+    [SerializeField] private float stationExtraPadding = 220f;
+    [SerializeField] private float exitExtraPadding = 220f;
 
-    [Header("Look Ahead")]
-    [SerializeField]
-    private bool useLookAhead = true;
+    [Header("Free Look")]
+    [SerializeField] private float dragSensitivity = 1f;
+    [SerializeField] private float freeLookInertia = 0f;
 
-    [SerializeField]
-    [Min(0f)]
-    private float lookAheadDistance = 1.4f;
+    public float FollowSmoothTime => Mathf.Max(0.01f, followSmoothTime);
+    public float ReturnSmoothTime => Mathf.Max(0.01f, returnSmoothTime);
+    public float FollowDeadZone => Mathf.Max(0f, followDeadZone);
 
-    [SerializeField]
-    [Min(0f)]
-    private float lookAheadSmoothTime = 0.25f;
+    public float DefaultOrthographicSize => Mathf.Max(1f, defaultOrthographicSize);
+    public float MinOrthographicSize => Mathf.Max(1f, minOrthographicSize);
+    public float MaxOrthographicSize => Mathf.Max(MinOrthographicSize, maxOrthographicSize);
 
-    [Header("Bounds")]
-    [SerializeField]
-    private bool clampCameraToSystemBounds = true;
+    public float BoundsPadding => Mathf.Max(0f, boundsPadding);
+    public float SunExtraPadding => Mathf.Max(0f, sunExtraPadding);
+    public float PlanetExtraPadding => Mathf.Max(0f, planetExtraPadding);
+    public float StationExtraPadding => Mathf.Max(0f, stationExtraPadding);
+    public float ExitExtraPadding => Mathf.Max(0f, exitExtraPadding);
 
-    [SerializeField]
-    private Vector2 cameraBoundsHalfSize = new Vector2(14f, 22f);
-
-    [Header("Shake")]
-    [SerializeField]
-    [Min(0f)]
-    private float defaultShakeDuration = 0.18f;
-
-    [SerializeField]
-    [Min(0f)]
-    private float defaultShakeAmplitude = 0.12f;
-
-    public float OrthographicSize => orthographicSize;
-    public float FollowSmoothTime => followSmoothTime;
-    public Vector2 FollowOffset => followOffset;
-
-    public bool UseLookAhead => useLookAhead;
-    public float LookAheadDistance => lookAheadDistance;
-    public float LookAheadSmoothTime => lookAheadSmoothTime;
-
-    public bool ClampCameraToSystemBounds => clampCameraToSystemBounds;
-    public Vector2 CameraBoundsHalfSize => cameraBoundsHalfSize;
-
-    public float DefaultShakeDuration => defaultShakeDuration;
-    public float DefaultShakeAmplitude => defaultShakeAmplitude;
+    public float DragSensitivity => Mathf.Max(0.01f, dragSensitivity);
+    public float FreeLookInertia => Mathf.Max(0f, freeLookInertia);
 }
