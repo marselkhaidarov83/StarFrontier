@@ -24,7 +24,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private bool _isInitialized;
     private bool _isSystemCameraActive;
-
+    private bool _isSubscribedToEvents;
     private Vector3 _cameraVelocity;
     private float _defaultOrthographicSizeForCurrentSystem;
     private float _zoomVelocity;
@@ -36,21 +36,115 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     public void Initialize()
     {
+        Debug.Log("[SystemCameraController2A] Initialize started");
+
         if (_isInitialized)
+        {
+            Debug.Log("[SystemCameraController2A] Already initialized");
             return;
+        }
 
         if (targetCamera == null)
             targetCamera = Camera.main;
 
-        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
+        if (targetCamera == null)
+        {
+            Debug.LogError("[SystemCameraController2A] Target Camera is null and Camera.main not found");
+            return;
+        }
+
+        if (cameraConfig == null)
+        {
+            Debug.LogError("[SystemCameraController2A] Camera Config is not assigned");
+            return;
+        }
+
+        if (Bootstrapper.Instance == null)
+        {
+            Debug.LogError("[SystemCameraController2A] Bootstrapper.Instance is null");
+            return;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            Debug.LogError("[SystemCameraController2A] ServiceRegistry is null");
+            return;
+        }
+
+        Bootstrapper.Instance.ServiceRegistry.TryGet<SimpleEventBus>(out _eventBus);
+        Bootstrapper.Instance.ServiceRegistry.TryGet<IGameSessionService>(out _gameSessionService);
+        Bootstrapper.Instance.ServiceRegistry.TryGet<IConfigService>(out _configService);
+        Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemTravelService>(out _systemTravelService);
+
+        if (_eventBus == null)
+        {
+            Debug.LogError("[SystemCameraController2A] SimpleEventBus not found");
+            return;
+        }
+
+        if (_gameSessionService == null)
+            Debug.LogWarning("[SystemCameraController2A] IGameSessionService not found");
+
+        if (_configService == null)
+            Debug.LogWarning("[SystemCameraController2A] IConfigService not found");
+
+        if (_systemTravelService == null)
+            Debug.LogWarning("[SystemCameraController2A] ISystemTravelService not found");
 
         SubscribeToEvents();
+        ActivateSystemCameraSafely();
 
         _isInitialized = true;
+
+        Debug.Log("[SystemCameraController2A] Initialize finished safely");
     }
+
+    private void ActivateSystemCameraSafely()
+    {
+        Debug.Log("[SystemCameraController2A] ActivateSystemCameraSafely started");
+
+        _isSystemCameraActive = true;
+
+        if (targetCamera == null)
+        {
+            Debug.LogError("[SystemCameraController2A] Cannot activate: targetCamera is null");
+            return;
+        }
+
+        ApplyCameraSizeForCurrentSystem();
+
+        Vector3 shipPosition = GetShipTargetPosition();
+
+        targetCamera.transform.position = new Vector3(
+            shipPosition.x,
+            shipPosition.y,
+            targetCamera.transform.position.z
+        );
+
+        mode = SystemCameraMode2A.FollowShip;
+        _cameraVelocity = Vector3.zero;
+        _zoomVelocity = 0f;
+
+        Debug.Log("[SystemCameraController2A] ActivateSystemCameraSafely finished. ShipPosition = " + shipPosition);
+    }
+
+    // public void Initialize()
+    // {
+    //     if (_isInitialized)
+    //         return;
+
+    //     // if (targetCamera == null)
+    //     //     targetCamera = Camera.main;
+
+    //     _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+    //     _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+    //     _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+    //     _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
+
+    //     SubscribeToEvents();
+
+    //     _isInitialized = true;
+    // }
 
     private void OnDestroy()
     {
@@ -283,22 +377,58 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private void SubscribeToEvents()
     {
-        if (_eventBus == null)
+        if (_isSubscribedToEvents)
+        {
+            Debug.LogWarning("[SystemCameraController2A] SubscribeToEvents skipped: already subscribed");
             return;
+        }
 
-        _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        if (_eventBus == null)
+        {
+            Debug.LogError("[SystemCameraController2A] Cannot subscribe: eventBus is null");
+            return;
+        }
+
+        Debug.Log("[SystemCameraController2A] SubscribeToEvents started");
+
+        // Включаем подписки по одной.
+        // Сначала только безопасные события ухода с системной карты.
+
         _eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
+        Debug.Log("[SystemCameraController2A] Subscribed to GalaxyEnteredEvent");
+
         _eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
+        Debug.Log("[SystemCameraController2A] Subscribed to PlanetEnteredEvent");
+
+        // ВАЖНО:
+        // StarSystemEnteredEvent пока НЕ включаем.
+        // Именно он наиболее подозрительный, потому что публикуется при старте MetaScene.
+        // _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
+
+        _isSubscribedToEvents = true;
+
+        Debug.Log("[SystemCameraController2A] SubscribeToEvents finished");
     }
 
     private void UnsubscribeFromEvents()
     {
+        if (!_isSubscribedToEvents)
+            return;
+
         if (_eventBus == null)
             return;
 
-        _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        Debug.Log("[SystemCameraController2A] UnsubscribeFromEvents started");
+
         _eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         _eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
+
+        // Пока StarSystemEnteredEvent не подписываем — значит и не отписываем.
+        // _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
+
+        _isSubscribedToEvents = false;
+
+        Debug.Log("[SystemCameraController2A] UnsubscribeFromEvents finished");
     }
 
     private void OnSystemEntered(StarSystemEnteredEvent evt)

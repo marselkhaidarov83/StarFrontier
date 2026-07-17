@@ -531,7 +531,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 10713350}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e44954944eb7458bb46f6fd82a59d0b, type: 3}
   m_Name: 
@@ -549,7 +549,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 10713350}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51b0994bd873c4a93966ed29cd56c217, type: 3}
   m_Name: 
@@ -3193,7 +3193,7 @@ MonoBehaviour:
   refuelPanelController: {fileID: 1011218185}
   missionScreenController: {fileID: 1624094291}
   systemShipMarkerController2: {fileID: 10713354}
-  systemCameraController2A: {fileID: 0}
+  systemCameraController2A: {fileID: 10713373}
   galaxyMapScreenRoot2: {fileID: 0}
   systemMapScreenRoot: {fileID: 0}
   systemMapScreenRoot2: {fileID: 10713350}
@@ -7269,7 +7269,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 670722764}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac85b0aed778e42de8fccfdfa847b41c, type: 3}
   m_Name: 
