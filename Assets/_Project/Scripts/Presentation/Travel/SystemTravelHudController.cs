@@ -1,40 +1,41 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public sealed class SystemTravelHudController : MonoBehaviour
 {
+    private const string NoTargetText = "не определена";
+    private const string IdleStatusText = "в покое";
+    private const string FlyingStatusText = "полет";
+
     [Header("Texts")]
     [SerializeField] private TMP_Text dayText;
     [SerializeField] private TMP_Text modeText;
     [SerializeField] private TMP_Text targetText;
     [SerializeField] private TMP_Text statusText;
-    [SerializeField] private TMP_Text progressText;
-
-    [Header("Progress")]
-    [SerializeField] private RectTransform progressBarFill;
-    [SerializeField] private float progressBarMaxWidth = 420f;
 
     [Header("Buttons")]
     [SerializeField] private Button playPauseButton;
     [SerializeField] private Button stepDayButton;
 
     [Header("Button Labels")]
-    [SerializeField] private TMP_Text flyButtonText;
     [SerializeField] private TMP_Text playPauseButtonText;
     [SerializeField] private TMP_Text stepDayButtonText;
 
     private IGameTimeService _gameTimeService;
     private ISystemTravelService _travelService;
+    private IConfigService _configService;
     private SimpleEventBus _eventBus;
 
-    private string _currentTargetLabel = "None";
+    private string _currentTargetLabel = NoTargetText;
 
     private void Start()
     {
         _gameTimeService = Bootstrapper.Instance.ServiceRegistry.Get<IGameTimeService>();
         _travelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
 
         if (_gameTimeService == null)
@@ -43,13 +44,16 @@ public sealed class SystemTravelHudController : MonoBehaviour
         if (_travelService == null)
             Debug.LogError("[SystemTravelHudController] ISystemTravelService not found.");
 
+        if (_configService == null)
+            Debug.LogError("[SystemTravelHudController] IConfigService not found.");
+
         if (_eventBus == null)
             Debug.LogError("[SystemTravelHudController] SimpleEventBus not found.");
 
         SubscribeButtons();
         SubscribeEvents();
 
-        SetFlyButtonActive(false);
+        SetNoTargetIdle();
         RefreshAll();
     }
 
@@ -90,9 +94,11 @@ public sealed class SystemTravelHudController : MonoBehaviour
 
         _eventBus.Subscribe<DestinationSelectedEvent>(OnDestinationSelected);
         _eventBus.Subscribe<SystemTravelStartedEvent>(OnTravelStarted);
-        _eventBus.Subscribe<SystemTravelProgressChangedEvent>(OnTravelProgressChanged);
         _eventBus.Subscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
         _eventBus.Subscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
+
+        // Если уже есть событие выбора врага, подключим его на шаге 3.
+        // _eventBus.Subscribe(OnEnemyTargetSelected);
     }
 
     private void UnsubscribeEvents()
@@ -102,25 +108,11 @@ public sealed class SystemTravelHudController : MonoBehaviour
 
         _eventBus.Unsubscribe<DestinationSelectedEvent>(OnDestinationSelected);
         _eventBus.Unsubscribe<SystemTravelStartedEvent>(OnTravelStarted);
-        _eventBus.Unsubscribe<SystemTravelProgressChangedEvent>(OnTravelProgressChanged);
         _eventBus.Unsubscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
         _eventBus.Unsubscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
-    }
 
-    private void OnFlyClicked()
-    {
-        if (_travelService == null)
-            return;
-
-        if (_travelService.State.Status == SystemTravelStatus.Flying)
-            return;
-
-        if (!_travelService.State.HasDestination)
-            return;
-
-        _travelService.StartTravel();
-        SetFlyButtonActive(false);
-        RefreshTravelState();
+        // Если уже есть событие выбора врага, подключим его на шаге 3.
+        // _eventBus.Unsubscribe(OnEnemyTargetSelected);
     }
 
     private void OnPlayPauseClicked()
@@ -132,89 +124,55 @@ public sealed class SystemTravelHudController : MonoBehaviour
         RefreshTime();
     }
 
-    // private void OnStepDayClicked()
-    // {
-    //     if (_gameTimeService == null)
-    //         return;
-
-    //     _gameTimeService.StepOneDay();
-    //     RefreshTime();
-    // }
-
     private void OnStepDayClicked()
     {
         if (_gameTimeService == null)
             return;
 
-        // _gameTimeService.StepOneDay();
         _gameTimeService.TogglePause();
         StartCoroutine(Delay(_gameTimeService.DelayTime));
-
         RefreshTime();
     }
 
     private IEnumerator Delay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        _gameTimeService.TogglePause();
-    }    
+
+        if (_gameTimeService != null)
+            _gameTimeService.TogglePause();
+    }
+
     private void OnDestinationSelected(DestinationSelectedEvent evt)
     {
         _currentTargetLabel = BuildTargetLabel(evt);
 
         SetTargetText(_currentTargetLabel);
-        SetStatusText("Selected");
-        SetProgress(0f);
-        SetFlyButtonActive(true);
+        SetStatusText(FlyingStatusText);
     }
 
     private void OnTravelStarted(SystemTravelStartedEvent evt)
     {
-        SetStatusText("Flying");
-        SetProgress(0f);
-        SetFlyButtonActive(false);
-    }
+        if (_currentTargetLabel == NoTargetText)
+            _currentTargetLabel = BuildTargetLabelFromState();
 
-    private void OnTravelProgressChanged(SystemTravelProgressChangedEvent evt)
-    {
-        // Debug.Log("[HUD] Progress event: " + evt.Progress01);
-        SetStatusText("Flying");
-        SetProgress(evt.Progress01);
+        SetTargetText(_currentTargetLabel);
+        SetStatusText(FlyingStatusText);
     }
 
     private void OnTravelCompleted(SystemTravelCompletedEvent evt)
     {
-        SetStatusText("Arrived");
-        SetProgress(1f);
-        SetFlyButtonActive(false);
-
-        if (evt.DestinationType == TravelDestinationType.SystemExit)
-            _currentTargetLabel = "System Jump";
-
-        if (evt.DestinationType == TravelDestinationType.MapPoint)
-            _currentTargetLabel = "Map Point";
-
-        if (evt.DestinationType == TravelDestinationType.Planet && !string.IsNullOrEmpty(evt.PlanetId))
-            _currentTargetLabel = evt.PlanetId;
-
-        SetTargetText(_currentTargetLabel);
+        SetNoTargetIdle();
     }
 
     private void OnTravelCancelled(SystemTravelCancelledEvent evt)
     {
-        _currentTargetLabel = "None";
-
-        SetTargetText(_currentTargetLabel);
-        SetStatusText("Cancelled");
-        SetProgress(0f);
-        SetFlyButtonActive(false);
+        SetNoTargetIdle();
     }
 
     private void RefreshAll()
     {
         RefreshTime();
         RefreshTravelState();
-        SetTargetText(_currentTargetLabel);
     }
 
     private void RefreshTime()
@@ -222,59 +180,55 @@ public sealed class SystemTravelHudController : MonoBehaviour
         if (_gameTimeService == null)
             return;
 
-        SetTextSafe(dayText, $"QuantTick {_gameTimeService.CurrentQuantTick}");
+        SetTextSafe(dayText, $"Квант {_gameTimeService.CurrentQuantTick}");
 
         if (_gameTimeService.IsPaused)
         {
-            SetTextSafe(modeText, "Pause");
-            SetTextSafe(playPauseButtonText, "Play");
+            SetTextSafe(modeText, "Пауза");
+            SetTextSafe(playPauseButtonText, "Старт");
         }
         else
         {
-            SetTextSafe(modeText, "Play");
-            SetTextSafe(playPauseButtonText, "Pause");
+            SetTextSafe(modeText, "Игра");
+            SetTextSafe(playPauseButtonText, "Пауза");
         }
 
-        SetTextSafe(stepDayButtonText, "Step");
+        SetTextSafe(stepDayButtonText, "Шаг");
     }
 
     private void RefreshTravelState()
     {
         if (_travelService == null)
+        {
+            SetNoTargetIdle();
             return;
+        }
 
         SystemTravelState state = _travelService.State;
 
-        switch (state.Status)
+        if (state == null)
         {
-            case SystemTravelStatus.Idle:
-                if (!state.HasDestination)
-                {
-                    SetStatusText("Idle");
-                    SetFlyButtonActive(false);
-                }
-                break;
+            SetNoTargetIdle();
+            return;
+        }
 
-            case SystemTravelStatus.DestinationSelected:
-                SetStatusText("Selected");
-                SetFlyButtonActive(true);
-                break;
+        if (!state.HasDestination &&
+            state.Status != SystemTravelStatus.Flying &&
+            state.Status != SystemTravelStatus.DestinationSelected)
+        {
+            SetNoTargetIdle();
+            return;
+        }
 
-            case SystemTravelStatus.Flying:
-                SetStatusText("Flying");
-                SetFlyButtonActive(false);
-                SetProgress(state.TravelProgress01);
-                break;
+        if (state.HasDestination ||
+            state.Status == SystemTravelStatus.Flying ||
+            state.Status == SystemTravelStatus.DestinationSelected)
+        {
+            if (_currentTargetLabel == NoTargetText)
+                _currentTargetLabel = BuildTargetLabelFromState();
 
-            case SystemTravelStatus.Arrived:
-                SetStatusText("Arrived");
-                SetFlyButtonActive(false);
-                break;
-
-            case SystemTravelStatus.Cancelled:
-                SetStatusText("Cancelled");
-                SetFlyButtonActive(false);
-                break;
+            SetTargetText(_currentTargetLabel);
+            SetStatusText(FlyingStatusText);
         }
     }
 
@@ -283,67 +237,157 @@ public sealed class SystemTravelHudController : MonoBehaviour
         switch (evt.DestinationType)
         {
             case TravelDestinationType.Planet:
-                return string.IsNullOrEmpty(evt.PlanetId)
-                    ? "Planet"
-                    : evt.PlanetId;
+                return "планета " + GetPlanetDisplayName(evt.PlanetId);
 
             case TravelDestinationType.MapPoint:
-                return $"Point {Mathf.RoundToInt(evt.DestinationPosition.x)}, {Mathf.RoundToInt(evt.DestinationPosition.y)}";
+                return "космос";
 
             case TravelDestinationType.SystemExit:
-                return string.IsNullOrEmpty(evt.TargetSystemId)
-                    ? "System Exit"
-                    : $"Jump to {evt.TargetSystemId}";
+                return "система " + GetSystemDisplayName(evt.TargetSystemId);
 
             default:
-                return "None";
+                return NoTargetText;
         }
+    }
+
+    private string BuildTargetLabelFromState()
+    {
+        if (_travelService == null)
+            return NoTargetText;
+
+        SystemTravelState state = _travelService.State;
+
+        if (state == null || state.Destination == null)
+            return NoTargetText;
+
+        switch (state.Destination.Type)
+        {
+            case TravelDestinationType.Planet:
+                return "планета " + GetPlanetDisplayName(state.Destination.PlanetId);
+
+            case TravelDestinationType.MapPoint:
+                return "космос";
+
+            case TravelDestinationType.SystemExit:
+                return "система " + GetSystemDisplayName(state.Destination.TargetSystemId);
+
+            default:
+                return NoTargetText;
+        }
+    }
+
+    private string GetPlanetDisplayName(string planetId)
+    {
+        if (string.IsNullOrWhiteSpace(planetId))
+            return "неизвестная";
+
+        PlanetConfig planetConfig = FindPlanetConfig(planetId);
+
+        if (planetConfig == null)
+            return planetId;
+
+        if (!string.IsNullOrWhiteSpace(planetConfig.DisplayName))
+            return planetConfig.DisplayName;
+
+        return planetConfig.Id;
+    }
+
+    private string GetSystemDisplayName(string systemId)
+    {
+        if (string.IsNullOrWhiteSpace(systemId))
+            return "неизвестная";
+
+        StarSystemConfig systemConfig = FindStarSystemConfig(systemId);
+
+        if (systemConfig == null)
+            return systemId;
+
+        if (!string.IsNullOrWhiteSpace(systemConfig.DisplayName))
+            return systemConfig.DisplayName;
+
+        return systemConfig.Id;
+    }
+
+    private PlanetConfig FindPlanetConfig(string planetId)
+    {
+        if (_configService == null)
+            return null;
+
+        IReadOnlyList<StarSystemConfig> systems = _configService.GetAllStarSystems();
+
+        if (systems == null)
+            return null;
+
+        foreach (StarSystemConfig systemConfig in systems)
+        {
+            if (systemConfig == null)
+                continue;
+
+            if (systemConfig.PlanetRefs == null)
+                continue;
+
+            foreach (PlanetConfig planetConfig in systemConfig.PlanetRefs)
+            {
+                if (planetConfig == null)
+                    continue;
+
+                if (planetConfig.Id == planetId)
+                    return planetConfig;
+            }
+        }
+
+        return null;
+    }
+
+    private StarSystemConfig FindStarSystemConfig(string systemId)
+    {
+        if (_configService == null)
+            return null;
+
+        IReadOnlyList<StarSystemConfig> systems = _configService.GetAllStarSystems();
+
+        if (systems == null)
+            return null;
+
+        foreach (StarSystemConfig systemConfig in systems)
+        {
+            if (systemConfig == null)
+                continue;
+
+            if (systemConfig.Id == systemId)
+                return systemConfig;
+        }
+
+        return null;
+    }
+
+    public void SetEnemyTarget(string enemyName)
+    {
+        if (string.IsNullOrWhiteSpace(enemyName))
+            enemyName = "неизвестный";
+
+        _currentTargetLabel = "враг " + enemyName;
+
+        SetTargetText(_currentTargetLabel);
+        SetStatusText(FlyingStatusText);
+    }
+
+    private void SetNoTargetIdle()
+    {
+        _currentTargetLabel = NoTargetText;
+
+        SetTargetText(NoTargetText);
+        SetStatusText(IdleStatusText);
     }
 
     private void SetTargetText(string value)
     {
-        SetTextSafe(targetText, $"Target: {value}");
+        SetTextSafe(targetText, $"Цель: {value}");
     }
 
     private void SetStatusText(string value)
     {
-        SetTextSafe(statusText, $"Status: {value}");
-    }
-
-    // private void SetProgress(float progress01)
-    // {
-    //     float clamped = Mathf.Clamp01(progress01);
-
-    //     SetTextSafe(progressText, $"{Mathf.RoundToInt(clamped * 100f)}%");
-
-    //     if (progressBarFill != null)
-    //     {
-    //         Vector2 size = progressBarFill.sizeDelta;
-    //         size.x = progressBarMaxWidth * clamped;
-    //         progressBarFill.sizeDelta = size;
-    //     }
-    // }
-
-    private void SetProgress(float progress01)
-    {
-        float clamped = Mathf.Clamp01(progress01);
-
-        SetTextSafe(progressText, $"{Mathf.RoundToInt(clamped * 100f)}%");
-
-        if (progressBarFill != null)
-        {
-            progressBarFill.anchorMin = new Vector2(0f, 0f);
-            progressBarFill.anchorMax = new Vector2(0f, 1f);
-            progressBarFill.pivot = new Vector2(0f, 0.5f);
-
-            Vector2 size = progressBarFill.sizeDelta;
-            size.x = progressBarMaxWidth * clamped;
-            progressBarFill.sizeDelta = size;
-        }
-    }
-    private void SetFlyButtonActive(bool active)
-    {
-        SetTextSafe(flyButtonText, "Fly");
+        SetTextSafe(statusText, $"Статус: {value}");
     }
 
     private void SetTextSafe(TMP_Text target, string value)

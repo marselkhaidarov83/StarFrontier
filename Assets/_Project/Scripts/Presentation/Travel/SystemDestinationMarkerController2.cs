@@ -44,13 +44,15 @@ public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
         if (!_isPlanetDestinationVisible)
             return;
 
+        PlanetConfig effectivePlanet = planet != null
+            ? planet
+            : _currentPlanet;
+
         if (planetDestinationMarker != null)
             planetDestinationMarker.position = position;
 
         if (selectedTargetFrame != null)
             selectedTargetFrame.position = position;
-
-        PlanetConfig effectivePlanet = planet != null ? planet : _currentPlanet;
 
         if (selectedTargetFrameSprite != null &&
             effectivePlanet != null &&

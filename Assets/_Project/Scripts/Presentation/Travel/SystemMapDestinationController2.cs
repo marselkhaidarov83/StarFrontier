@@ -28,6 +28,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
     private IGameTimeService _gameTimeService;
 
     private PlanetSelectableView2 _selectedPlanetView;
+    private PlanetConfig _selectedPlanetData;
 
     private void Start()
     {
@@ -93,15 +94,18 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
     private void OnTravelCancelled(SystemTravelCancelledEvent evt)
     {
-        _selectedPlanetView = null;
-
-        if (markerController != null)
-            markerController.HideAll();
+        ClearPlanetSelectionAndMarker();
     }
 
     private void OnTravelCompleted(SystemTravelCompletedEvent evt)
     {
+        ClearPlanetSelectionAndMarker();
+    }
+
+    private void ClearPlanetSelectionAndMarker()
+    {
         _selectedPlanetView = null;
+        _selectedPlanetData = null;
 
         if (markerController != null)
             markerController.HideAll();
@@ -109,31 +113,52 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
     private void OnPlanetSelected(PlanetSelectedEvent evt)
     {
-        LogCustom($"Planet clicked");
+        LogCustom("Planet clicked");
+
         if (_systemTravelService == null)
             return;
 
         PlanetConfig planetData = evt.Planet;
-        LogCustom($"Planet clicked: {planetData.Id}");
 
         if (planetData == null)
             return;
 
-        foreach (PlanetSelectableView2 view in planetViews)
-            if (view.Planet.Id == planetData.Id)
-            {
-                _selectedPlanetView = view;
-                break;
-            }
-        // _selectedPlanetView = planetView;
+        LogCustom("Planet clicked: " + planetData.Id);
+
+        _selectedPlanetData = planetData;
+        _selectedPlanetView = FindPlanetView(planetData.Id);
 
         _systemTravelService.SetPlanetDestination(planetData);
 
-        Vector3 position = GetPlanetCurrentPosition(planetData);
-        LogCustom("position = " + position);
-        markerController.ShowPlanetDestination(position, planetData);
+        Vector3 position = GetPlanetMarkerPosition(planetData);
 
-        LogCustom($"LogCustomPlanet selected: {planetData.Id}");
+        if (markerController != null)
+            markerController.ShowPlanetDestination(position, planetData);
+
+        LogCustom("Planet selected: " + planetData.Id);
+    }
+
+    private PlanetSelectableView2 FindPlanetView(string planetId)
+    {
+        if (string.IsNullOrWhiteSpace(planetId))
+            return null;
+
+        if (planetViews == null)
+            return null;
+
+        foreach (PlanetSelectableView2 view in planetViews)
+        {
+            if (view == null)
+                continue;
+
+            if (view.Planet == null)
+                continue;
+
+            if (view.Planet.Id == planetId)
+                return view;
+        }
+
+        return null;
     }
 
     private void OnEmptyMapClicked(Vector3 mapPosition)
@@ -142,26 +167,15 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             return;
 
         _selectedPlanetView = null;
+        _selectedPlanetData = null;
 
         _systemTravelService.SetMapPointDestination(mapPosition);
-        markerController.ShowMapPointDestination(mapPosition);
 
-        LogCustom($"LogCustomMap point selected: {mapPosition}");
+        if (markerController != null)
+            markerController.ShowMapPointDestination(mapPosition);
+
+        LogCustom("Map point selected: " + mapPosition);
     }
-
-    // private void OnExitMapChanged(ExitMapChangedEvent evt)
-    // {
-    //     StarSystemLink link = evt.StarSystemLink;
-    //     LogCustom("OnExitMapChanged.StarSystemLink = " + link.LinkedSystem.DisplayName);
-
-    //     _selectedPlanetView = null;
-
-    //     _systemTravelService.SetSystemExitDestination(link);
-
-    //     markerController.ShowSystemExitDestination(link);
-
-    //     SetFlyButtonActive(true);
-    // }
 
     private void OnRouteExitMapChanged(RouteExitMapChangedEvent evt)
     {
@@ -177,38 +191,35 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             return;
         }
 
-        LogCustom(
-            "OnRouteExitMapChanged.Route = " +
-            evt.RouteConfig.Id +
-            " | From = " +
-            evt.FromSystemId +
-            " | To = " +
-            evt.ToSystemId
-        );
-
         _selectedPlanetView = null;
+        _selectedPlanetData = null;
+
+        LogCustom(
+            "OnRouteExitMapChanged.Route = " + evt.RouteConfig.Id +
+            " | From = " + evt.FromSystemId +
+            " | To = " + evt.ToSystemId
+        );
 
         _systemTravelService.SetSystemExitDestination(evt);
 
-        markerController.ShowSystemExitDestination(evt);
+        if (markerController != null)
+            markerController.ShowSystemExitDestination(evt);
     }
 
     private void UpdateMovingPlanetDestinationMarker()
     {
-        if (_selectedPlanetView == null)
+        if (_selectedPlanetData == null)
             return;
 
-        if (_systemTravelService == null)
+        if (markerController == null)
             return;
 
-        PlanetConfig planetData = _selectedPlanetView.Planet;
+        Vector3 position = GetPlanetMarkerPosition(_selectedPlanetData);
 
-        if (planetData == null)
-            return;
-
-        Vector3 position = GetPlanetCurrentPosition(planetData);
-
-        markerController.UpdatePlanetDestinationPosition(position, planetData);
+        markerController.UpdatePlanetDestinationPosition(
+            position,
+            _selectedPlanetData
+        );
     }
 
     private Vector3 GetPlanetCurrentPosition(PlanetConfig planetData)
@@ -217,5 +228,13 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             return Vector3.zero;
 
         return _orbitalMotionService.GetPlanetCurrentPosition(planetData.PlanetOrbit);
+    }
+
+    private Vector3 GetPlanetMarkerPosition(PlanetConfig planetData)
+    {
+        if (_selectedPlanetView != null)
+            return _selectedPlanetView.transform.position;
+
+        return GetPlanetCurrentPosition(planetData);
     }
 }
