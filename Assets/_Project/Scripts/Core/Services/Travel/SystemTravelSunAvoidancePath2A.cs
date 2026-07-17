@@ -4,6 +4,7 @@ using UnityEngine;
 public static class SystemTravelSunAvoidancePath2A
 {
     private const float Epsilon = 0.001f;
+    private const float PushOutsideOffset = 8f;
 
     private struct TangentOption
     {
@@ -39,30 +40,57 @@ public static class SystemTravelSunAvoidancePath2A
         Vector2 destination2 = new Vector2(destination.x, destination.y);
         Vector2 center2 = new Vector2(sunCenter.x, sunCenter.y);
 
-        if (!SegmentIntersectsCircle(start2, destination2, center2, avoidanceRadius))
-        {
-            result.Add(destination);
-            return;
-        }
-
-        float startDistance = Vector2.Distance(start2, center2);
-        float destinationDistance = Vector2.Distance(destination2, center2);
-
-        // Если корабль или цель уже внутри опасной зоны, не пытаемся строить касательные.
-        // Это аварийный fallback, чтобы не получить NaN.
-        if (startDistance <= avoidanceRadius + Epsilon ||
-            destinationDistance <= avoidanceRadius + Epsilon)
-        {
-            result.Add(destination);
-            return;
-        }
-
-        Vector2[] startTangents = GetTangents(start2, center2, avoidanceRadius);
-        Vector2[] destinationTangents = GetTangents(destination2, center2, avoidanceRadius);
-
-        TangentOption bestOption = FindBestOption(
+        Vector2 safeStart2 = PushPointOutsideCircle(
             start2,
             destination2,
+            center2,
+            avoidanceRadius
+        );
+
+        Vector2 safeDestination2 = PushPointOutsideCircle(
+            destination2,
+            safeStart2,
+            center2,
+            avoidanceRadius
+        );
+
+        Vector3 safeStart3 = ToVector3(safeStart2, start.z);
+        Vector3 safeDestination3 = ToVector3(safeDestination2, destination.z);
+
+        if (Vector2.Distance(start2, safeStart2) > Epsilon)
+            result.Add(safeStart3);
+
+        bool intersectsCircle = SegmentIntersectsCircle(
+            safeStart2,
+            safeDestination2,
+            center2,
+            avoidanceRadius
+        );
+
+        if (!intersectsCircle)
+        {
+            if (Vector2.Distance(safeDestination2, destination2) > Epsilon)
+                result.Add(safeDestination3);
+
+            result.Add(destination);
+            return;
+        }
+
+        Vector2[] startTangents = GetTangents(
+            safeStart2,
+            center2,
+            avoidanceRadius
+        );
+
+        Vector2[] destinationTangents = GetTangents(
+            safeDestination2,
+            center2,
+            avoidanceRadius
+        );
+
+        TangentOption bestOption = FindBestOption(
+            safeStart2,
+            safeDestination2,
             center2,
             avoidanceRadius,
             startTangents,
@@ -86,7 +114,43 @@ public static class SystemTravelSunAvoidancePath2A
         );
 
         result.Add(endTangent3);
+
+        if (Vector2.Distance(safeDestination2, destination2) > Epsilon)
+            result.Add(safeDestination3);
+
         result.Add(destination);
+    }
+
+    private static Vector2 PushPointOutsideCircle(
+        Vector2 point,
+        Vector2 fallbackDirectionPoint,
+        Vector2 center,
+        float radius
+    )
+    {
+        Vector2 fromCenter = point - center;
+        float distance = fromCenter.magnitude;
+
+        if (distance > radius + PushOutsideOffset)
+            return point;
+
+        Vector2 direction;
+
+        if (distance > Epsilon)
+        {
+            direction = fromCenter.normalized;
+        }
+        else
+        {
+            Vector2 fallbackDirection = point - fallbackDirectionPoint;
+
+            if (fallbackDirection.sqrMagnitude <= Epsilon)
+                direction = Vector2.right;
+            else
+                direction = fallbackDirection.normalized;
+        }
+
+        return center + direction * (radius + PushOutsideOffset);
     }
 
     private static bool SegmentIntersectsCircle(
@@ -120,8 +184,20 @@ public static class SystemTravelSunAvoidancePath2A
         Vector2 fromCenter = point - center;
         float distance = fromCenter.magnitude;
 
+        if (distance <= radius + Epsilon)
+        {
+            Vector2 direction = fromCenter.sqrMagnitude <= Epsilon
+                ? Vector2.right
+                : fromCenter.normalized;
+
+            point = center + direction * (radius + PushOutsideOffset);
+            fromCenter = point - center;
+            distance = fromCenter.magnitude;
+        }
+
         float baseAngle = Mathf.Atan2(fromCenter.y, fromCenter.x);
-        float angleOffset = Mathf.Acos(radius / distance);
+        float safeRatio = Mathf.Clamp(radius / distance, -1f, 1f);
+        float angleOffset = Mathf.Acos(safeRatio);
 
         float angleA = baseAngle + angleOffset;
         float angleB = baseAngle - angleOffset;

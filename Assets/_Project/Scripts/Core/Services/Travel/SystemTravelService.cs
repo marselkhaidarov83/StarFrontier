@@ -7,6 +7,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private const int SunAvoidanceArcSegments = 18;
 
     private readonly List<Vector3> _travelPathBuffer = new List<Vector3>(32);
+    private readonly List<Vector3> _routePreviewPathBuffer = new List<Vector3>(64);
     private const float ArrivalDistanceThreshold = 3f;
 
     private readonly SimpleEventBus _eventBus;
@@ -581,30 +582,52 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
      float distancePerTick
  )
     {
-        Vector3 simulatedPosition = State.GetCurrentPosition();
+        Vector3 routeStart = State.StartPosition;
+        Vector3 currentPosition = State.GetCurrentPosition();
         Vector3 destinationPosition = GetCurrentDestinationPosition();
+
+        BuildCurrentTravelPath(
+            routeStart,
+            destinationPosition,
+            _routePreviewPathBuffer
+        );
+
+        float totalPathLength = GetPathLength(_routePreviewPathBuffer);
+
+        if (totalPathLength <= ArrivalDistanceThreshold)
+            return;
+
+        float passedDistance = GetClosestDistanceOnPath(
+            _routePreviewPathBuffer,
+            currentPosition
+        );
+
+        passedDistance = Mathf.Clamp(
+            passedDistance,
+            0f,
+            totalPathLength
+        );
+
+        Vector3 previousVisibleAnchor = currentPosition;
 
         for (int tickIndex = 1; tickIndex <= maxBigDots; tickIndex++)
         {
-            float distanceToDestination = Vector3.Distance(
-                simulatedPosition,
-                destinationPosition
+            float distanceAtTick = Mathf.Min(
+                tickIndex * distancePerTick,
+                totalPathLength
             );
 
-            if (distanceToDestination <= ArrivalDistanceThreshold)
-                break;
+            if (distanceAtTick <= passedDistance)
+                continue;
 
-            bool destinationReached;
-            Vector3 tickPosition = CalculateNextTravelPositionByPath(
-                simulatedPosition,
-                destinationPosition,
-                distancePerTick,
-                out destinationReached
+            Vector3 tickPosition = GetPointOnPathAtDistance(
+                _routePreviewPathBuffer,
+                distanceAtTick
             );
 
             AddSmallRoutePreviewDots2A(
                 preview,
-                simulatedPosition,
+                previousVisibleAnchor,
                 tickPosition,
                 tickIndex,
                 smallDotsBetweenTickDots,
@@ -613,9 +636,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
             preview.AddBigDot(tickPosition, tickIndex);
 
-            simulatedPosition = tickPosition;
+            previousVisibleAnchor = tickPosition;
 
-            if (destinationReached)
+            if (distanceAtTick >= totalPathLength)
                 break;
         }
     }
@@ -628,31 +651,52 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     float distancePerTick
 )
     {
-        Vector3 simulatedPosition = State.GetCurrentPosition();
+        Vector3 routeStart = State.StartPosition;
+        Vector3 currentPosition = State.GetCurrentPosition();
+        Vector3 destinationPosition = GetCurrentDestinationPosition();
+
+        BuildCurrentTravelPath(
+            routeStart,
+            destinationPosition,
+            _routePreviewPathBuffer
+        );
+
+        float totalPathLength = GetPathLength(_routePreviewPathBuffer);
+
+        if (totalPathLength <= ArrivalDistanceThreshold)
+            return;
+
+        float passedDistance = GetClosestDistanceOnPath(
+            _routePreviewPathBuffer,
+            currentPosition
+        );
+
+        passedDistance = Mathf.Clamp(
+            passedDistance,
+            0f,
+            totalPathLength
+        );
+
+        Vector3 previousVisibleAnchor = currentPosition;
 
         for (int tickIndex = 1; tickIndex <= maxBigDots; tickIndex++)
         {
-            Vector3 destinationPosition = GetCurrentDestinationPosition();
-
-            float distanceToDestination = Vector3.Distance(
-                simulatedPosition,
-                destinationPosition
+            float distanceAtTick = Mathf.Min(
+                tickIndex * distancePerTick,
+                totalPathLength
             );
 
-            if (distanceToDestination <= ArrivalDistanceThreshold)
-                break;
+            if (distanceAtTick <= passedDistance)
+                continue;
 
-            bool destinationReached;
-            Vector3 tickPosition = CalculateNextTravelPositionByPath(
-                simulatedPosition,
-                destinationPosition,
-                distancePerTick,
-                out destinationReached
+            Vector3 tickPosition = GetPointOnPathAtDistance(
+                _routePreviewPathBuffer,
+                distanceAtTick
             );
 
             AddSmallRoutePreviewDots2A(
                 preview,
-                simulatedPosition,
+                previousVisibleAnchor,
                 tickPosition,
                 tickIndex,
                 smallDotsBetweenTickDots,
@@ -661,9 +705,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
             preview.AddBigDot(tickPosition, tickIndex);
 
-            simulatedPosition = tickPosition;
+            previousVisibleAnchor = tickPosition;
 
-            if (destinationReached)
+            if (distanceAtTick >= totalPathLength)
                 break;
         }
     }
@@ -786,5 +830,91 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         destinationReached = true;
         return destinationPosition;
+    }
+
+    private float GetPathLength(List<Vector3> path)
+    {
+        if (path == null || path.Count <= 1)
+            return 0f;
+
+        float length = 0f;
+
+        for (int i = 1; i < path.Count; i++)
+            length += Vector3.Distance(path[i - 1], path[i]);
+
+        return length;
+    }
+
+    private Vector3 GetPointOnPathAtDistance(List<Vector3> path, float distance)
+    {
+        if (path == null || path.Count == 0)
+            return Vector3.zero;
+
+        if (path.Count == 1)
+            return path[0];
+
+        float remainingDistance = Mathf.Max(0f, distance);
+
+        for (int i = 1; i < path.Count; i++)
+        {
+            Vector3 from = path[i - 1];
+            Vector3 to = path[i];
+
+            float segmentDistance = Vector3.Distance(from, to);
+
+            if (segmentDistance <= ArrivalDistanceThreshold)
+                continue;
+
+            if (remainingDistance <= segmentDistance)
+            {
+                float t = remainingDistance / segmentDistance;
+                return Vector3.Lerp(from, to, t);
+            }
+
+            remainingDistance -= segmentDistance;
+        }
+
+        return path[path.Count - 1];
+    }
+
+    private float GetClosestDistanceOnPath(
+        List<Vector3> path,
+        Vector3 point
+    )
+    {
+        if (path == null || path.Count <= 1)
+            return 0f;
+
+        float bestDistanceToPathSqr = float.MaxValue;
+        float bestDistanceAlongPath = 0f;
+        float accumulatedDistance = 0f;
+
+        for (int i = 1; i < path.Count; i++)
+        {
+            Vector3 segmentStart = path[i - 1];
+            Vector3 segmentEnd = path[i];
+
+            Vector3 segment = segmentEnd - segmentStart;
+            float segmentLength = segment.magnitude;
+
+            if (segmentLength <= ArrivalDistanceThreshold)
+                continue;
+
+            float t = Vector3.Dot(point - segmentStart, segment) / (segmentLength * segmentLength);
+            t = Mathf.Clamp01(t);
+
+            Vector3 closestPoint = segmentStart + segment * t;
+            float distanceToPathSqr = (point - closestPoint).sqrMagnitude;
+
+            if (distanceToPathSqr < bestDistanceToPathSqr)
+            {
+                bestDistanceToPathSqr = distanceToPathSqr;
+                bestDistanceAlongPath = accumulatedDistance + segmentLength * t;
+            }
+
+            accumulatedDistance += segmentLength;
+        }
+
+        return bestDistanceAlongPath;
     }
 }
