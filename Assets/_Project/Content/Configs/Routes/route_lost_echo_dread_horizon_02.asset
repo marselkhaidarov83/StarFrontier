@@ -21,3 +21,5 @@ MonoBehaviour:
   IsLockedAtStart: 1
   RequiredScanLevel: 0
   ParsecDistance: 70
+  fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 8295a20f5146442c2b15286891c0a7dc, type: 2}
+  toSystemRouteEndpointConfig: {fileID: 11400000, guid: 8207c0002bfef4cd99f087153d82ccb9, type: 2}
