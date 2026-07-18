@@ -22,4 +22,4 @@ MonoBehaviour:
   RequiredScanLevel: 0
   ParsecDistance: 16
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 0151f07f5379e4083976794ff0104537, type: 2}
-  toSystemRouteEndpointConfig: {fileID: 11400000, guid: d954f7864f17f4c8faf73b18238b5d9e, type: 2}
+  toSystemRouteEndpointConfig: {fileID: 11400000, guid: 1f4a3d0a1b5514a9e8a3b3b46e44d02a, type: 2}

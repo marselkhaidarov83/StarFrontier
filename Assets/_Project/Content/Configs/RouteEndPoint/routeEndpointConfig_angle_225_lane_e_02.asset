@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 598ca389eaa8b44119f2595496400224, type: 3}
-  m_Name: routeEndpointConfig_angle_045_lane_d_02
+  m_Name: routeEndpointConfig_angle_225_lane_e_02
   m_EditorClassIdentifier: Data::RouteEndpointConfig
-  id: routeEndpointConfig_angle_045_lane_d_02
+  id: routeEndpointConfig_angle_225_lane_e_02
   displayName: 
   description: 
   icon: {fileID: 0}
-  exitPoint: {x: 650, y: 650, z: 0}
-  entryPoint: {x: 705, y: 590, z: 0}
+  exitPoint: {x: -785, y: -785, z: 0}
+  entryPoint: {x: -850, y: -715, z: 0}
