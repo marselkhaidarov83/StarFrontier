@@ -16,5 +16,5 @@ MonoBehaviour:
   displayName: 
   description: 
   icon: {fileID: 0}
-  exitPoint: {x: -930, y: -629, z: 0}
-  entryPoint: {x: 930, y: 629, z: 0}
+  exitPoint: {x: -725, y: -415, z: 0}
+  entryPoint: {x: -755, y: -350, z: 0}

@@ -303,7 +303,7 @@ MonoBehaviour:
   planetDestinationObject: {fileID: 30838365}
   mapPointDestinationObject: {fileID: 1257313923}
   selectedTargetFrameObject: {fileID: 2062725283}
-  systemExitTargetFrameSize: 50
+  systemExitTargetFrameSize: 52
 --- !u!114 &10713356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18723,14 +18723,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 10713352}
     m_Modifications:
-    - target: {fileID: 1283367952222512526, guid: 93ca3744c4bb84c6c8525496b19830ee, type: 3}
-      propertyPath: m_SortingLayer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 1283367952222512526, guid: 93ca3744c4bb84c6c8525496b19830ee, type: 3}
-      propertyPath: m_SortingLayerID
-      value: -1415682513
-      objectReference: {fileID: 0}
     - target: {fileID: 2615460552967337954, guid: 93ca3744c4bb84c6c8525496b19830ee, type: 3}
       propertyPath: m_Name
       value: SelectedTargetFrame
