@@ -10,11 +10,22 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
         public string debugName;
         public Transform layer;
 
+        [Header("Manual Position Offset")]
+        [Tooltip("Ручное смещение слоя по горизонтали в мировых единицах Unity.")]
+        public float offsetX;
+
+        [Tooltip("Ручное смещение слоя по вертикали в мировых единицах Unity.")]
+        public float offsetY;
+
         [Header("Parallax")]
+        [Tooltip("Сила параллакса отдельно по X и Y.")]
         public Vector2 factor = new Vector2(0.05f, 0.05f);
+
+        [Tooltip("Общий множитель силы параллакса слоя.")]
         public float strength = 1f;
 
-        [HideInInspector] public Vector3 baseLocalPosition;
+        [HideInInspector]
+        public Vector3 baseLocalPosition;
     }
 
     [Header("Target")]
@@ -91,28 +102,59 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
 
         float cameraSize = GetCameraSize();
         float zoomMultiplier = GetZoomMultiplier(cameraSize);
-        float maxOffset = Mathf.Max(1f, cameraSize * maxOffsetByCameraSize);
 
-        Vector3 targetDelta = target.position - _targetStartPosition;
+        float maxOffset = Mathf.Max(
+            1f,
+            cameraSize * maxOffsetByCameraSize
+        );
+
+        Vector3 targetDelta =
+            target.position - _targetStartPosition;
 
         foreach (ParallaxLayer layer in layers)
         {
             if (layer == null || layer.layer == null)
                 continue;
 
-            Vector3 offset = new Vector3(
-                -targetDelta.x * layer.factor.x * layer.strength * zoomMultiplier,
-                -targetDelta.y * layer.factor.y * layer.strength * zoomMultiplier,
+            Vector3 parallaxOffset = new Vector3(
+                -targetDelta.x *
+                layer.factor.x *
+                layer.strength *
+                zoomMultiplier,
+
+                -targetDelta.y *
+                layer.factor.y *
+                layer.strength *
+                zoomMultiplier,
+
                 0f
             );
 
             if (useMaxOffset)
             {
-                offset.x = Mathf.Clamp(offset.x, -maxOffset, maxOffset);
-                offset.y = Mathf.Clamp(offset.y, -maxOffset, maxOffset);
+                parallaxOffset.x = Mathf.Clamp(
+                    parallaxOffset.x,
+                    -maxOffset,
+                    maxOffset
+                );
+
+                parallaxOffset.y = Mathf.Clamp(
+                    parallaxOffset.y,
+                    -maxOffset,
+                    maxOffset
+                );
             }
 
-            layer.layer.localPosition = layer.baseLocalPosition + offset;
+            Vector3 manualOffset = new Vector3(
+                layer.offsetX,
+                layer.offsetY,
+                0f
+            );
+
+            layer.layer.localPosition =
+                layer.baseLocalPosition +
+                manualOffset +
+                parallaxOffset;
 
             if (debugLogs)
             {
@@ -120,7 +162,9 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
                     "[SystemFrameParallax2] " +
                     layer.debugName +
                     " | targetDelta = " + targetDelta +
-                    " | offset = " + offset +
+                    " | manualOffset = " + manualOffset +
+                    " | parallaxOffset = " + parallaxOffset +
+                    " | finalPosition = " + layer.layer.localPosition +
                     " | cameraSize = " + cameraSize +
                     " | useMaxOffset = " + useMaxOffset
                 );
@@ -136,7 +180,10 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
         if (!targetCamera.orthographic)
             return referenceCameraSize;
 
-        return Mathf.Max(1f, targetCamera.orthographicSize);
+        return Mathf.Max(
+            1f,
+            targetCamera.orthographicSize
+        );
     }
 
     private float GetZoomMultiplier(float cameraSize)
@@ -147,7 +194,10 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
         if (referenceCameraSize <= 0f)
             return 1f;
 
-        return Mathf.Max(0.25f, cameraSize / referenceCameraSize);
+        return Mathf.Max(
+            0.25f,
+            cameraSize / referenceCameraSize
+        );
     }
 
     public void SetTarget(Transform newTarget)
@@ -156,15 +206,11 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
 
         if (target != null)
             _targetStartPosition = target.position;
-
-        CacheBasePositions();
     }
 
     public void Recenter()
     {
         if (target != null)
             _targetStartPosition = target.position;
-
-        CacheBasePositions();
     }
 }

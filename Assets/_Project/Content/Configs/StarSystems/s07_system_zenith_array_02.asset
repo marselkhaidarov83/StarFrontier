@@ -35,7 +35,7 @@ MonoBehaviour:
   isHiddenAtStart: 1
   recommendedPower: 7
   routes:
-  - {fileID: 11400000, guid: e5fa0fa87b8314fa79587ce38def9c72, type: 2}
-  - {fileID: 11400000, guid: 01534c7fa5d134502991b68a1bd6d68f, type: 2}
-  - {fileID: 11400000, guid: 01534c7fa5d134502991b68a1bd6d68f, type: 2}
-  - {fileID: 11400000, guid: 01534c7fa5d134502991b68a1bd6d68f, type: 2}
+  - {fileID: 11400000, guid: d0f0f630edf2b438c9ac32bdc61bde4f, type: 2}
+  - {fileID: 11400000, guid: a9592dc9cbd534ed682cae45a6dbc20f, type: 2}
+  - {fileID: 11400000, guid: 1aa385f0ad8b4445d899977a22c9ade8, type: 2}
+  - {fileID: 11400000, guid: 0212fd5b2b00447bf86497d4b2fa6c9e, type: 2}
