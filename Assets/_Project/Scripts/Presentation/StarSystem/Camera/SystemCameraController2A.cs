@@ -15,32 +15,67 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     [SerializeField] private SystemCameraConfig cameraConfig;
 
     [Header("State")]
-    [SerializeField] private SystemCameraMode2A mode = SystemCameraMode2A.FollowShip;
+    [SerializeField]
+    private SystemCameraMode2A mode =
+        SystemCameraMode2A.FollowShip;
 
     private SimpleEventBus _eventBus;
     private IGameSessionService _gameSessionService;
     private IConfigService _configService;
     private ISystemTravelService _systemTravelService;
 
+    private MapCameraController _mapCameraController;
+
     private bool _isInitialized;
     private bool _isSystemCameraActive;
     private bool _isSubscribedToEvents;
+
     private Vector3 _cameraVelocity;
-    private float _defaultOrthographicSizeForCurrentSystem;
     private float _zoomVelocity;
-    private Bounds _currentSystemBounds;
-    private bool _hasSystemBounds;
+
+    private float
+        _defaultOrthographicSizeForCurrentSystem;
 
     public SystemCameraMode2A Mode => mode;
-    public bool IsSystemCameraActive => _isSystemCameraActive;
+
+    public bool IsSystemCameraActive =>
+        _isSystemCameraActive;
+
+    /*
+     * Свойство сохранено для совместимости с другим кодом.
+     * Фактическое значение берётся из MapCameraController.
+     */
+    public float MaxOrthographicSizeWithoutEmptySpace
+    {
+        get
+        {
+            ResolveMapCameraController();
+
+            if (_mapCameraController != null)
+            {
+                return _mapCameraController
+                    .MaxOrthographicSizeWithoutEmptySpace;
+            }
+
+            if (cameraConfig != null)
+                return cameraConfig.MaxOrthographicSize;
+
+            return 2000f;
+        }
+    }
 
     public void Initialize()
     {
-        Debug.Log("[SystemCameraController2A] Initialize started");
+        Debug.Log(
+            "[SystemCameraController2A] Initialize started"
+        );
 
         if (_isInitialized)
         {
-            Debug.Log("[SystemCameraController2A] Already initialized");
+            Debug.Log(
+                "[SystemCameraController2A] Already initialized"
+            );
+
             return;
         }
 
@@ -49,102 +84,174 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         if (targetCamera == null)
         {
-            Debug.LogError("[SystemCameraController2A] Target Camera is null and Camera.main not found");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "Target Camera is null and Camera.main not found"
+            );
+
             return;
         }
 
         if (cameraConfig == null)
         {
-            Debug.LogError("[SystemCameraController2A] Camera Config is not assigned");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "Camera Config is not assigned"
+            );
+
             return;
         }
 
         if (Bootstrapper.Instance == null)
         {
-            Debug.LogError("[SystemCameraController2A] Bootstrapper.Instance is null");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "Bootstrapper.Instance is null"
+            );
+
             return;
         }
 
         if (Bootstrapper.Instance.ServiceRegistry == null)
         {
-            Debug.LogError("[SystemCameraController2A] ServiceRegistry is null");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "ServiceRegistry is null"
+            );
+
             return;
         }
 
-        Bootstrapper.Instance.ServiceRegistry.TryGet<SimpleEventBus>(out _eventBus);
-        Bootstrapper.Instance.ServiceRegistry.TryGet<IGameSessionService>(out _gameSessionService);
-        Bootstrapper.Instance.ServiceRegistry.TryGet<IConfigService>(out _configService);
-        Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemTravelService>(out _systemTravelService);
+        Bootstrapper.Instance.ServiceRegistry
+            .TryGet<SimpleEventBus>(
+                out _eventBus
+            );
+
+        Bootstrapper.Instance.ServiceRegistry
+            .TryGet<IGameSessionService>(
+                out _gameSessionService
+            );
+
+        Bootstrapper.Instance.ServiceRegistry
+            .TryGet<IConfigService>(
+                out _configService
+            );
+
+        Bootstrapper.Instance.ServiceRegistry
+            .TryGet<ISystemTravelService>(
+                out _systemTravelService
+            );
 
         if (_eventBus == null)
         {
-            Debug.LogError("[SystemCameraController2A] SimpleEventBus not found");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "SimpleEventBus not found"
+            );
+
             return;
         }
 
         if (_gameSessionService == null)
-            Debug.LogWarning("[SystemCameraController2A] IGameSessionService not found");
+        {
+            Debug.LogWarning(
+                "[SystemCameraController2A] " +
+                "IGameSessionService not found"
+            );
+        }
 
         if (_configService == null)
-            Debug.LogWarning("[SystemCameraController2A] IConfigService not found");
+        {
+            Debug.LogWarning(
+                "[SystemCameraController2A] " +
+                "IConfigService not found"
+            );
+        }
 
         if (_systemTravelService == null)
-            Debug.LogWarning("[SystemCameraController2A] ISystemTravelService not found");
+        {
+            Debug.LogWarning(
+                "[SystemCameraController2A] " +
+                "ISystemTravelService not found"
+            );
+        }
+
+        ResolveMapCameraController();
 
         SubscribeToEvents();
         ActivateSystemCameraSafely();
 
         _isInitialized = true;
 
-        Debug.Log("[SystemCameraController2A] Initialize finished safely");
+        Debug.Log(
+            "[SystemCameraController2A] " +
+            "Initialize finished safely"
+        );
+    }
+
+    private void ResolveMapCameraController()
+    {
+        if (_mapCameraController != null)
+            return;
+
+        if (targetCamera == null)
+            return;
+
+        _mapCameraController =
+            targetCamera.GetComponent<MapCameraController>();
     }
 
     private void ActivateSystemCameraSafely()
     {
-        Debug.Log("[SystemCameraController2A] ActivateSystemCameraSafely started");
+        Debug.Log(
+            "[SystemCameraController2A] " +
+            "ActivateSystemCameraSafely started"
+        );
 
         _isSystemCameraActive = true;
 
         if (targetCamera == null)
         {
-            Debug.LogError("[SystemCameraController2A] Cannot activate: targetCamera is null");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "Cannot activate: targetCamera is null"
+            );
+
             return;
         }
 
+        ResolveMapCameraController();
+
         ApplyCameraSizeForCurrentSystem();
 
-        Vector3 shipPosition = GetShipTargetPosition();
+        Vector3 shipPosition =
+            GetShipTargetPosition();
 
-        targetCamera.transform.position = new Vector3(
-            shipPosition.x,
-            shipPosition.y,
-            targetCamera.transform.position.z
-        );
+        Vector3 initialCameraPosition =
+            new Vector3(
+                shipPosition.x,
+                shipPosition.y,
+                targetCamera.transform.position.z
+            );
+
+        /*
+         * Корабль центрируется только настолько,
+         * насколько позволяют заданные размеры карты.
+         */
+        MoveCameraTo(initialCameraPosition);
 
         mode = SystemCameraMode2A.FollowShip;
+
         _cameraVelocity = Vector3.zero;
         _zoomVelocity = 0f;
 
-        Debug.Log("[SystemCameraController2A] ActivateSystemCameraSafely finished. ShipPosition = " + shipPosition);
+        Debug.Log(
+            "[SystemCameraController2A] " +
+            "ActivateSystemCameraSafely finished. " +
+            "ShipPosition = " +
+            shipPosition
+        );
     }
-
-    // public void Initialize()
-    // {
-    //     if (_isInitialized)
-    //         return;
-
-    //     // if (targetCamera == null)
-    //     //     targetCamera = Camera.main;
-
-    //     _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-    //     _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-    //     _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-    //     _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
-
-    //     SubscribeToEvents();
-
-    //     _isInitialized = true;
-    // }
 
     private void OnDestroy()
     {
@@ -173,6 +280,11 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
                 break;
 
             case SystemCameraMode2A.FreeLook:
+                /*
+                 * При изменении зума в FreeLook камера
+                 * также должна оставаться внутри карты.
+                 */
+                ReclampCurrentPosition();
                 break;
         }
     }
@@ -190,22 +302,62 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     {
         if (targetCamera == null)
         {
-            Debug.LogError("[SystemCameraController2A] ReturnToShip failed: targetCamera is null");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "ReturnToShip failed: targetCamera is null"
+            );
+
             return;
         }
 
         if (!_isSystemCameraActive)
         {
-            Debug.LogWarning("[SystemCameraController2A] ReturnToShip called while camera is inactive. Reactivating.");
+            Debug.LogWarning(
+                "[SystemCameraController2A] " +
+                "ReturnToShip called while camera is inactive. " +
+                "Reactivating."
+            );
+
             ActivateSystemCameraSafely();
         }
 
+        ResolveMapCameraController();
+
         mode = SystemCameraMode2A.ReturningToShip;
+
         _cameraVelocity = Vector3.zero;
+        _zoomVelocity = 0f;
+
+        float targetZoom =
+            GetDefaultOrthographicSizeForCurrentSystem();
+
+        if (_mapCameraController != null)
+        {
+            _mapCameraController.SetTargetZoom(
+                targetZoom
+            );
+        }
+    }
+
+    public void NotifyManualZoomStarted()
+    {
+        if (!_isSystemCameraActive)
+            return;
+
+        if (mode != SystemCameraMode2A.ReturningToShip)
+            return;
+
+        /*
+         * Ручной зум получает приоритет.
+         * Камера продолжает следовать за кораблём.
+         */
+        mode = SystemCameraMode2A.FollowShip;
         _zoomVelocity = 0f;
     }
 
-    public void MoveFreeLookByScreenDelta(Vector2 screenDelta)
+    public void MoveFreeLookByScreenDelta(
+        Vector2 screenDelta
+    )
     {
         if (!_isSystemCameraActive)
             return;
@@ -215,99 +367,167 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         EnterFreeLook();
 
-        float unitsPerPixel = GetWorldUnitsPerScreenPixel();
+        float unitsPerPixel =
+            GetWorldUnitsPerScreenPixel();
+
         Vector3 worldDelta = new Vector3(
             screenDelta.x * unitsPerPixel,
             screenDelta.y * unitsPerPixel,
             0f
         );
 
-        Vector3 currentPosition = targetCamera.transform.position;
+        Vector3 currentPosition =
+            targetCamera.transform.position;
 
-        // Палец/мышь вправо — карта визуально едет вправо,
-        // значит камера должна сдвинуться влево.
-        Vector3 nextPosition = currentPosition - worldDelta * cameraConfig.DragSensitivity;
+        Vector3 nextPosition =
+            currentPosition -
+            worldDelta * cameraConfig.DragSensitivity;
 
         MoveCameraTo(nextPosition);
     }
 
+    public void ReclampCurrentPosition()
+    {
+        if (!_isSystemCameraActive)
+            return;
+
+        if (targetCamera == null)
+            return;
+
+        MoveCameraTo(
+            targetCamera.transform.position
+        );
+    }
+
     private void UpdateFollowShip()
     {
-        Vector3 shipPosition = GetShipTargetPosition();
-        Vector3 cameraPosition = targetCamera.transform.position;
+        Vector3 cameraPosition =
+            targetCamera.transform.position;
 
-        Vector3 desiredPosition = new Vector3(
-            shipPosition.x,
-            shipPosition.y,
-            cameraPosition.z
-        );
+        Vector3 shipPosition =
+            GetShipTargetPosition();
+
+        Vector3 desiredPosition =
+            new Vector3(
+                shipPosition.x,
+                shipPosition.y,
+                cameraPosition.z
+            );
+
+        /*
+         * Сначала ограничиваем желаемую позицию.
+         * Если корабль находится у края, камера не пытается
+         * постоянно ехать в недостижимую точку за границей.
+         */
+        Vector3 clampedDesiredPosition =
+            ClampCameraPosition(desiredPosition);
 
         float distance = Vector2.Distance(
-            new Vector2(cameraPosition.x, cameraPosition.y),
-            new Vector2(desiredPosition.x, desiredPosition.y)
+            new Vector2(
+                cameraPosition.x,
+                cameraPosition.y
+            ),
+            new Vector2(
+                clampedDesiredPosition.x,
+                clampedDesiredPosition.y
+            )
         );
 
         if (distance <= cameraConfig.FollowDeadZone)
+        {
+            _cameraVelocity = Vector3.zero;
+
+            /*
+             * Даже стоящую камеру повторно ограничиваем:
+             * это необходимо после изменения зума.
+             */
+            MoveCameraTo(cameraPosition);
             return;
+        }
 
-        Vector3 smoothed = Vector3.SmoothDamp(
-            cameraPosition,
-            desiredPosition,
-            ref _cameraVelocity,
-            cameraConfig.FollowSmoothTime
-        );
+        Vector3 smoothedPosition =
+            Vector3.SmoothDamp(
+                cameraPosition,
+                clampedDesiredPosition,
+                ref _cameraVelocity,
+                cameraConfig.FollowSmoothTime
+            );
 
-        MoveCameraTo(smoothed);
+        MoveCameraTo(smoothedPosition);
     }
 
     private void UpdateReturnToShip()
     {
-        Vector3 shipPosition = GetShipTargetPosition();
-        Vector3 cameraPosition = targetCamera.transform.position;
+        Vector3 cameraPosition =
+            targetCamera.transform.position;
 
-        Vector3 desiredPosition = new Vector3(
-            shipPosition.x,
-            shipPosition.y,
-            cameraPosition.z
-        );
+        Vector3 shipPosition =
+            GetShipTargetPosition();
 
-        Vector3 smoothedPosition = Vector3.SmoothDamp(
-            cameraPosition,
-            desiredPosition,
-            ref _cameraVelocity,
-            cameraConfig.ReturnSmoothTime
-        );
+        Vector3 desiredPosition =
+            new Vector3(
+                shipPosition.x,
+                shipPosition.y,
+                cameraPosition.z
+            );
 
-        float targetZoom = GetDefaultOrthographicSizeForCurrentSystem();
+        Vector3 clampedDesiredPosition =
+            ClampCameraPosition(desiredPosition);
 
-        float smoothedZoom = Mathf.SmoothDamp(
-            targetCamera.orthographicSize,
-            targetZoom,
-            ref _zoomVelocity,
-            cameraConfig.ReturnSmoothTime
-        );
-
-        targetCamera.orthographicSize = Mathf.Clamp(
-            smoothedZoom,
-            cameraConfig.MinOrthographicSize,
-            cameraConfig.MaxOrthographicSize
-        );
+        Vector3 smoothedPosition =
+            Vector3.SmoothDamp(
+                cameraPosition,
+                clampedDesiredPosition,
+                ref _cameraVelocity,
+                cameraConfig.ReturnSmoothTime
+            );
 
         MoveCameraTo(smoothedPosition);
 
-        float positionDistance = Vector2.Distance(
-            new Vector2(targetCamera.transform.position.x, targetCamera.transform.position.y),
-            new Vector2(desiredPosition.x, desiredPosition.y)
-        );
+        bool zoomReached;
 
-        float zoomDistance = Mathf.Abs(targetCamera.orthographicSize - targetZoom);
-
-        if (positionDistance <= cameraConfig.FollowDeadZone &&
-            zoomDistance <= 0.5f)
+        if (_mapCameraController != null)
         {
-            targetCamera.orthographicSize = targetZoom;
+            /*
+             * MapCameraController является владельцем зума.
+             */
+            zoomReached =
+                _mapCameraController.IsZoomAtTarget(0.5f);
+        }
+        else
+        {
+            /*
+             * Запасной режим на случай отсутствия
+             * MapCameraController на объекте камеры.
+             */
+            float targetZoom =
+                GetDefaultOrthographicSizeForCurrentSystem();
+
+            float smoothedZoom =
+                Mathf.SmoothDamp(
+                    targetCamera.orthographicSize,
+                    targetZoom,
+                    ref _zoomVelocity,
+                    cameraConfig.ReturnSmoothTime
+                );
+
+            targetCamera.orthographicSize =
+                ClampOrthographicSize(smoothedZoom);
+
+            zoomReached =
+                Mathf.Abs(
+                    targetCamera.orthographicSize -
+                    targetZoom
+                ) <= 0.5f;
+        }
+
+        /*
+         * Позицию не проверяем, потому что корабль
+         * может продолжать движение.
+         */
+        if (zoomReached)
+        {
             mode = SystemCameraMode2A.FollowShip;
-            _cameraVelocity = Vector3.zero;
             _zoomVelocity = 0f;
         }
     }
@@ -315,51 +535,100 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     private float GetDefaultOrthographicSizeForCurrentSystem()
     {
         if (_defaultOrthographicSizeForCurrentSystem > 0f)
-            return _defaultOrthographicSizeForCurrentSystem;
+        {
+            return ClampOrthographicSize(
+                _defaultOrthographicSizeForCurrentSystem
+            );
+        }
 
         if (cameraConfig == null)
-            return 1200f;
+        {
+            return Mathf.Min(
+                1200f,
+                MaxOrthographicSizeWithoutEmptySpace
+            );
+        }
+
+        return ClampOrthographicSize(
+            cameraConfig.DefaultOrthographicSize
+        );
+    }
+
+    private float ClampOrthographicSize(float value)
+    {
+        float maximum =
+            MaxOrthographicSizeWithoutEmptySpace;
+
+        if (cameraConfig == null)
+        {
+            return Mathf.Clamp(
+                value,
+                0.01f,
+                maximum
+            );
+        }
+
+        float minimum =
+            Mathf.Min(
+                cameraConfig.MinOrthographicSize,
+                maximum
+            );
 
         return Mathf.Clamp(
-            cameraConfig.DefaultOrthographicSize,
-            cameraConfig.MinOrthographicSize,
-            cameraConfig.MaxOrthographicSize
+            value,
+            minimum,
+            maximum
         );
+    }
+
+    private void SetZoomImmediate(float value)
+    {
+        float clampedValue =
+            ClampOrthographicSize(value);
+
+        ResolveMapCameraController();
+
+        if (_mapCameraController != null)
+        {
+            _mapCameraController.SetZoomImmediate(
+                clampedValue
+            );
+
+            return;
+        }
+
+        if (targetCamera != null)
+        {
+            targetCamera.orthographicSize =
+                clampedValue;
+        }
     }
 
     private void MoveCameraTo(Vector3 position)
     {
-        Vector3 clampedPosition = ClampCameraPosition(position);
-        targetCamera.transform.position = clampedPosition;
+        Vector3 clampedPosition =
+            ClampCameraPosition(position);
+
+        targetCamera.transform.position =
+            clampedPosition;
     }
 
-    private Vector3 ClampCameraPosition(Vector3 position)
+    private Vector3 ClampCameraPosition(
+        Vector3 position
+    )
     {
-        if (!_hasSystemBounds)
+        ResolveMapCameraController();
+
+        if (_mapCameraController == null ||
+            targetCamera == null)
+        {
             return position;
+        }
 
-        float verticalHalfSize = targetCamera.orthographicSize;
-        float horizontalHalfSize = verticalHalfSize * targetCamera.aspect;
-
-        float minX = _currentSystemBounds.min.x + horizontalHalfSize;
-        float maxX = _currentSystemBounds.max.x - horizontalHalfSize;
-
-        float minY = _currentSystemBounds.min.y + verticalHalfSize;
-        float maxY = _currentSystemBounds.max.y - verticalHalfSize;
-
-        Vector3 result = position;
-
-        if (minX > maxX)
-            result.x = _currentSystemBounds.center.x;
-        else
-            result.x = Mathf.Clamp(result.x, minX, maxX);
-
-        if (minY > maxY)
-            result.y = _currentSystemBounds.center.y;
-        else
-            result.y = Mathf.Clamp(result.y, minY, maxY);
-
-        return result;
+        return _mapCameraController.ClampPositionToMap(
+            position,
+            targetCamera.orthographicSize
+        );
     }
 
     private Vector3 GetShipTargetPosition()
@@ -367,8 +636,12 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         if (shipTarget != null)
             return shipTarget.position;
 
-        if (_systemTravelService != null && _systemTravelService.State != null)
-            return _systemTravelService.State.GetCurrentPosition();
+        if (_systemTravelService != null &&
+            _systemTravelService.State != null)
+        {
+            return _systemTravelService.State
+                .GetCurrentPosition();
+        }
 
         return Vector3.zero;
     }
@@ -381,37 +654,47 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         if (Screen.height <= 0)
             return 1f;
 
-        return targetCamera.orthographicSize * 2f / Screen.height;
+        return
+            targetCamera.orthographicSize *
+            2f /
+            Screen.height;
     }
 
     private void SubscribeToEvents()
     {
         if (_isSubscribedToEvents)
         {
-            Debug.LogWarning("[SystemCameraController2A] SubscribeToEvents skipped: already subscribed");
+            Debug.LogWarning(
+                "[SystemCameraController2A] " +
+                "SubscribeToEvents skipped: already subscribed"
+            );
+
             return;
         }
 
         if (_eventBus == null)
         {
-            Debug.LogError("[SystemCameraController2A] Cannot subscribe: eventBus is null");
+            Debug.LogError(
+                "[SystemCameraController2A] " +
+                "Cannot subscribe: eventBus is null"
+            );
+
             return;
         }
 
-        Debug.Log("[SystemCameraController2A] SubscribeToEvents started");
+        _eventBus.Subscribe<GalaxyEnteredEvent>(
+            OnGalaxyEntered
+        );
 
-        _eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        Debug.Log("[SystemCameraController2A] Subscribed to GalaxyEnteredEvent");
+        _eventBus.Subscribe<PlanetEnteredEvent>(
+            OnPlanetEntered
+        );
 
-        _eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
-        Debug.Log("[SystemCameraController2A] Subscribed to PlanetEnteredEvent");
-
-        _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
-        Debug.Log("[SystemCameraController2A] Subscribed to StarSystemEnteredEvent");
+        _eventBus.Subscribe<StarSystemEnteredEvent>(
+            OnSystemEntered
+        );
 
         _isSubscribedToEvents = true;
-
-        Debug.Log("[SystemCameraController2A] SubscribeToEvents finished");
     }
 
     private void UnsubscribeFromEvents()
@@ -422,36 +705,45 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         if (_eventBus == null)
             return;
 
-        Debug.Log("[SystemCameraController2A] UnsubscribeFromEvents started");
+        _eventBus.Unsubscribe<GalaxyEnteredEvent>(
+            OnGalaxyEntered
+        );
 
-        _eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        _eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
-        _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        _eventBus.Unsubscribe<PlanetEnteredEvent>(
+            OnPlanetEntered
+        );
+
+        _eventBus.Unsubscribe<StarSystemEnteredEvent>(
+            OnSystemEntered
+        );
 
         _isSubscribedToEvents = false;
-
-        Debug.Log("[SystemCameraController2A] UnsubscribeFromEvents finished");
     }
 
-    private void OnSystemEntered(StarSystemEnteredEvent evt)
+    private void OnSystemEntered(
+        StarSystemEnteredEvent evt
+    )
     {
-        Debug.Log("[SystemCameraController2A] OnSystemEntered received");
-
         ActivateSystemCameraSafely();
     }
 
-    private void OnGalaxyEntered(GalaxyEnteredEvent evt)
+    private void OnGalaxyEntered(
+        GalaxyEnteredEvent evt
+    )
     {
         _isSystemCameraActive = false;
+
         _cameraVelocity = Vector3.zero;
+        _zoomVelocity = 0f;
     }
 
-    private void OnPlanetEntered(PlanetEnteredEvent evt)
+    private void OnPlanetEntered(
+        PlanetEnteredEvent evt
+    )
     {
-        Debug.Log("[SystemCameraController2A] OnPlanetEntered received. System camera disabled.");
-
         _isSystemCameraActive = false;
         mode = SystemCameraMode2A.FreeLook;
+
         _cameraVelocity = Vector3.zero;
         _zoomVelocity = 0f;
     }
@@ -464,79 +756,79 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         if (cameraConfig == null)
             return;
 
-        float desiredSize = cameraConfig.DefaultOrthographicSize;
+        float desiredSize =
+            cameraConfig.DefaultOrthographicSize;
 
-        StarSystemConfig currentSystem = GetCurrentSystemConfig();
+        StarSystemConfig currentSystem =
+            GetCurrentSystemConfig();
 
         if (currentSystem != null)
         {
-            float largestObjectRadius = GetLargestObjectRadius(currentSystem);
-            desiredSize = Mathf.Max(desiredSize, largestObjectRadius * 4.5f);
+            float largestObjectRadius =
+                GetLargestObjectRadius(
+                    currentSystem
+                );
+
+            desiredSize = Mathf.Max(
+                desiredSize,
+                largestObjectRadius * 4.5f
+            );
         }
 
         targetCamera.orthographic = true;
 
-        _defaultOrthographicSizeForCurrentSystem = Mathf.Clamp(
-            desiredSize,
-            cameraConfig.MinOrthographicSize,
-            cameraConfig.MaxOrthographicSize
-        );
+        _defaultOrthographicSizeForCurrentSystem =
+            ClampOrthographicSize(desiredSize);
 
-        targetCamera.orthographicSize = _defaultOrthographicSizeForCurrentSystem;
+        SetZoomImmediate(
+            _defaultOrthographicSizeForCurrentSystem
+        );
     }
 
-    private float GetLargestObjectRadius(StarSystemConfig systemConfig)
+    private float GetLargestObjectRadius(
+        StarSystemConfig systemConfig
+    )
     {
         float largestRadius = 0f;
 
         if (systemConfig.Sun != null)
-            largestRadius = Mathf.Max(largestRadius, systemConfig.Sun.VisualSize * 0.5f);
+        {
+            largestRadius = Mathf.Max(
+                largestRadius,
+                systemConfig.Sun.VisualSize * 0.5f
+            );
+        }
 
         if (systemConfig.PlanetRefs != null)
         {
-            foreach (PlanetConfig planet in systemConfig.PlanetRefs)
+            foreach (
+                PlanetConfig planet
+                in systemConfig.PlanetRefs
+            )
             {
-                if (planet == null || planet.PlanetOrbit == null)
+                if (planet == null ||
+                    planet.PlanetOrbit == null)
+                {
                     continue;
+                }
 
                 largestRadius = Mathf.Max(
                     largestRadius,
-                    planet.PlanetOrbit.PlanetVisualSize * 0.5f
+                    planet.PlanetOrbit
+                        .PlanetVisualSize * 0.5f
                 );
             }
         }
 
         if (systemConfig.Station != null)
-            largestRadius = Mathf.Max(largestRadius, systemConfig.Station.VisualSize * 0.5f);
+        {
+            largestRadius = Mathf.Max(
+                largestRadius,
+                systemConfig.Station.VisualSize * 0.5f
+            );
+        }
 
         return largestRadius;
-    }
-
-    private void RebuildSystemBounds()
-    {
-        _hasSystemBounds = false;
-
-        StarSystemConfig currentSystem = GetCurrentSystemConfig();
-
-        if (currentSystem == null)
-            return;
-
-        Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
-        bool hasAnyPoint = false;
-
-        AddSunBounds(currentSystem, ref bounds, ref hasAnyPoint);
-        AddPlanetBounds(currentSystem, ref bounds, ref hasAnyPoint);
-        AddStationBounds(currentSystem, ref bounds, ref hasAnyPoint);
-        AddRouteExitBounds(currentSystem, ref bounds, ref hasAnyPoint);
-        AddShipBounds(ref bounds, ref hasAnyPoint);
-
-        if (!hasAnyPoint)
-            return;
-
-        bounds.Expand(cameraConfig.BoundsPadding * 2f);
-
-        _currentSystemBounds = bounds;
-        _hasSystemBounds = true;
     }
 
     private StarSystemConfig GetCurrentSystemConfig()
@@ -548,153 +840,28 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             return null;
         }
 
-        string currentSystemId = _gameSessionService.State.Player.CurrentSystemId;
+        string currentSystemId =
+            _gameSessionService.State.Player
+                .CurrentSystemId;
 
-        if (string.IsNullOrWhiteSpace(currentSystemId))
+        if (string.IsNullOrWhiteSpace(
+                currentSystemId
+            ))
+        {
             return null;
+        }
 
         if (_configService == null)
             return null;
 
-        if (_configService.TryGetStarSystem(currentSystemId, out StarSystemConfig systemConfig))
+        if (_configService.TryGetStarSystem(
+                currentSystemId,
+                out StarSystemConfig systemConfig
+            ))
+        {
             return systemConfig;
+        }
 
         return null;
-    }
-
-    private void AddSunBounds(
-        StarSystemConfig systemConfig,
-        ref Bounds bounds,
-        ref bool hasAnyPoint
-    )
-    {
-        if (systemConfig.Sun == null)
-            return;
-
-        Vector3 center = new Vector3(
-            systemConfig.Sun.LocalOffset.x,
-            systemConfig.Sun.LocalOffset.y,
-            0f
-        );
-
-        float radius = systemConfig.Sun.VisualSize * 0.5f + cameraConfig.SunExtraPadding;
-
-        EncapsulateCircle(ref bounds, ref hasAnyPoint, center, radius);
-    }
-
-    private void AddPlanetBounds(
-        StarSystemConfig systemConfig,
-        ref Bounds bounds,
-        ref bool hasAnyPoint
-    )
-    {
-        if (systemConfig.PlanetRefs == null)
-            return;
-
-        foreach (PlanetConfig planet in systemConfig.PlanetRefs)
-        {
-            if (planet == null || planet.PlanetOrbit == null)
-                continue;
-
-            PlanetOrbitConfig orbit = planet.PlanetOrbit;
-
-            Vector3 center = orbit.OrbitCenterOffset;
-            float radius =
-                orbit.OrbitRadius +
-                orbit.PlanetVisualSize * 0.5f +
-                cameraConfig.PlanetExtraPadding;
-
-            EncapsulateCircle(ref bounds, ref hasAnyPoint, center, radius);
-        }
-    }
-
-    private void AddStationBounds(
-        StarSystemConfig systemConfig,
-        ref Bounds bounds,
-        ref bool hasAnyPoint
-    )
-    {
-        if (systemConfig.Station == null)
-            return;
-
-        Vector3 center = new Vector3(
-            systemConfig.Station.LocalOffset.x,
-            systemConfig.Station.LocalOffset.y,
-            0f
-        );
-
-        float radius = systemConfig.Station.VisualSize * 0.5f + cameraConfig.StationExtraPadding;
-
-        EncapsulateCircle(ref bounds, ref hasAnyPoint, center, radius);
-    }
-
-    private void AddRouteExitBounds(
-        StarSystemConfig systemConfig,
-        ref Bounds bounds,
-        ref bool hasAnyPoint
-    )
-    {
-        if (systemConfig.Routes == null)
-            return;
-
-        foreach (RouteConfig routeConfig in systemConfig.Routes)
-        {
-            if (routeConfig == null)
-                continue;
-
-            RouteEndpointConfig endpointConfig = routeConfig.GetEndPointForSystem(systemConfig.Id);
-
-            if (endpointConfig == null)
-                continue;
-
-            EncapsulateCircle(
-                ref bounds,
-                ref hasAnyPoint,
-                endpointConfig.ExitPoint,
-                cameraConfig.ExitExtraPadding
-            );
-
-            EncapsulateCircle(
-                ref bounds,
-                ref hasAnyPoint,
-                endpointConfig.EntryPoint,
-                cameraConfig.ExitExtraPadding
-            );
-        }
-    }
-
-    private void AddShipBounds(ref Bounds bounds, ref bool hasAnyPoint)
-    {
-        Vector3 shipPosition = GetShipTargetPosition();
-
-        EncapsulateCircle(
-            ref bounds,
-            ref hasAnyPoint,
-            shipPosition,
-            cameraConfig.PlanetExtraPadding
-        );
-    }
-
-    private void EncapsulateCircle(
-        ref Bounds bounds,
-        ref bool hasAnyPoint,
-        Vector3 center,
-        float radius
-    )
-    {
-        Vector3 min = new Vector3(center.x - radius, center.y - radius, 0f);
-        Vector3 max = new Vector3(center.x + radius, center.y + radius, 0f);
-
-        if (!hasAnyPoint)
-        {
-            bounds = new Bounds(center, Vector3.zero);
-            bounds.Encapsulate(min);
-            bounds.Encapsulate(max);
-            hasAnyPoint = true;
-            return;
-        }
-
-        bounds.Encapsulate(min);
-        bounds.Encapsulate(max);
     }
 }

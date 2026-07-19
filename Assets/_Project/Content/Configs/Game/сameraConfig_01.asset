@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99975e5e598cf4fe18614a9403f21740, type: 3}
   m_Name: "\u0441ameraConfig_01"
   m_EditorClassIdentifier: Data::SystemCameraConfig
-  followSmoothTime: 0.18
-  returnSmoothTime: 0.12
-  followDeadZone: 8
+  followSmoothTime: 0.1
+  returnSmoothTime: 0.2
+  followDeadZone: 0.01
   defaultOrthographicSize: 500
   minOrthographicSize: 650
   maxOrthographicSize: 1900
