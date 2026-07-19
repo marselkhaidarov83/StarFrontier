@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 598ca389eaa8b44119f2595496400224, type: 3}
   m_Name: routeEndpointConfig_angle_105_lane_c_02
   m_EditorClassIdentifier: Data::RouteEndpointConfig
-  id: routeEndpointConfig_angle_105_lane_a_02
+  id: routeEndpointConfig_angle_105_lane_c_02
   displayName: 
   description: 
   icon: {fileID: 0}
-  exitPoint: {x: -220, y: 830, z: 0}
-  entryPoint: {x: -150, y: 845, z: 0}
+  exitPoint: {x: -255, y: 955, z: 0}
+  entryPoint: {x: -170, y: 975, z: 0}

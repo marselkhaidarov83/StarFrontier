@@ -37,7 +37,7 @@ MonoBehaviour:
   recommendedPower: 10
   routes:
   - {fileID: 11400000, guid: e4e2f805bc0e447419030568416008cf, type: 2}
-  - {fileID: 11400000, guid: 534c1540bc3ba4bca8bc854d53b4da2b, type: 2}
   - {fileID: 11400000, guid: 05208e01d87a2499e8405ff9e50ac27e, type: 2}
   - {fileID: 11400000, guid: 9b1a50c825c2448d1963dcd539a014e5, type: 2}
   - {fileID: 11400000, guid: 3e04c32639b6f4348b69ad06d627613a, type: 2}
+  - {fileID: 11400000, guid: 534c1540bc3ba4bca8bc854d53b4da2b, type: 2}
