@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 [CreateAssetMenu(
     fileName = "PlayerControlConfig",
     menuName = "StarFrontier/Configs/Sprint 3/Player Control")]
