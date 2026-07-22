@@ -199,6 +199,8 @@ GameObject:
   - component: {fileID: 10713370}
   - component: {fileID: 10713373}
   - component: {fileID: 10713374}
+  - component: {fileID: 10713375}
+  - component: {fileID: 10713376}
   m_Layer: 8
   m_Name: SystemMapRoot
   m_TagString: MainCamera
@@ -555,6 +557,46 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Presentation::SystemCameraDragInput2A
   cameraController: {fileID: 10713373}
+--- !u!114 &10713375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f7599aff7e24c97812223ce1209247, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::PlayerInputBridge2A
+  inputActions: {fileID: -944628639613478452, guid: 9bf50663d0bec4aa9b252026f311d114, type: 3}
+  actionMapName: Player
+  moveActionName: Move
+  interactActionName: Interact
+  recenterActionName: RecenterCamera
+  blockingUiRoots: []
+  enableInputOnStart: 1
+  logInitialization: 1
+--- !u!114 &10713376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbaab7c5e90df4ed1b6b5c7d3f65069b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::MetaSceneKeyboardTravelBridge2A
+  shipMarkerView: {fileID: 1132738920}
+  speedUnitsPerSecond: 100
+  cancelPointTravelWhenKeyboardStarts: 1
+  clampToRuntimeBounds: 1
+  useFallbackBounds: 1
+  fallbackBoundsCenter: {x: 0, y: 0}
+  fallbackBoundsHalfSize: {x: 1200, y: 2000}
+  logInitialization: 1
 --- !u!1 &14325446
 GameObject:
   m_ObjectHideFlags: 0
@@ -11558,6 +11600,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2000008951}
     m_Modifications:
+    - target: {fileID: 1638779656650137503, guid: 49816fabf42794ef78945fe01bfe389a, type: 3}
+      propertyPath: feedbackRenderer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1638779656650137503, guid: 49816fabf42794ef78945fe01bfe389a, type: 3}
+      propertyPath: keyboardTravelBridge
+      value: 
+      objectReference: {fileID: 10713376}
     - target: {fileID: 2615460552967337954, guid: 49816fabf42794ef78945fe01bfe389a, type: 3}
       propertyPath: m_Name
       value: ShipMarker
@@ -17555,59 +17605,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1933546021}
   m_CullTransparentMesh: 1
---- !u!1 &1947218190
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1947218192}
-  - component: {fileID: 1947218191}
-  m_Layer: 0
-  m_Name: PlayerInputRoot
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1947218191
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1947218190}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f7599aff7e24c97812223ce1209247, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Presentation::PlayerInputBridge2A
-  inputActions: {fileID: -944628639613478452, guid: 9bf50663d0bec4aa9b252026f311d114, type: 3}
-  actionMapName: Player
-  moveActionName: Move
-  interactActionName: Interact
-  recenterActionName: RecenterCamera
-  blockingUiRoots:
-  - {fileID: 1256647064}
-  enableInputOnStart: 1
-  logInitialization: 1
---- !u!4 &1947218192
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1947218190}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 540, y: 960, z: -2}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1958413635
 GameObject:
   m_ObjectHideFlags: 0
@@ -20526,5 +20523,4 @@ SceneRoots:
   - {fileID: 26906027}
   - {fileID: 757877088}
   - {fileID: 233840023}
-  - {fileID: 1947218192}
   - {fileID: 316846418}

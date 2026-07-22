@@ -5,6 +5,7 @@
   <Project Path="Tools.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Registry.csproj" />
+  <Project Path="ShipMovement.csproj" />
   <Project Path="Tick.csproj" />
   <Project Path="MetaScene.csproj" />
   <Project Path="SystemGameplayState.csproj" />
@@ -12,7 +13,6 @@
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="PlayerControl.csproj" />
   <Project Path="SystemBoundsAndSaveSync.csproj" />
-  <Project Path="ShipMovement.csproj" />
   <Project Path="SaveMigration.csproj" />
   <Project Path="SystemScene.csproj" />
 </Solution>
