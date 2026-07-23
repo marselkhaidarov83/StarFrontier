@@ -6,4 +6,5 @@
   <Project Path="StarFrontier.Sprint1Verification.EditMode.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="StarFrontier.SystemScene.EditModeTests.csproj" />
 </Solution>
