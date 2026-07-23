@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class SceneService : ISceneService
 {
     private const string BOOTSTRAP_SCENE = "BootstrapScene";
+    private const string LOADING_SCENE = "LoadingScene";
     private const string MAIN_MENU_SCENE = "MainMenuScene";
     private const string META_SCENE = "MetaScene";
     private const string GALAXY_SCENE = "GalaxyScene";
@@ -12,9 +13,17 @@ public class SceneService : ISceneService
     private const string COMBAT_SCENE = "CombatScene";
 
     private bool _debugEnabled;
+    private AsyncOperation _activeLoadOperation;
+    private Action<AsyncOperation> _activeLoadCompleted;
+    private string _activeSceneName = string.Empty;
 
     public event Action<string> SceneLoadCompleted;
     public event Action<string, string> SceneLoadFailed;
+    public event Action<string> SceneLoadCancelled;
+
+    public bool HasActiveLoad =>
+        _activeLoadOperation != null &&
+        !_activeLoadOperation.isDone;
 
     public void LoadScene(string sceneName)
     {
@@ -26,6 +35,7 @@ public class SceneService : ISceneService
 
         try
         {
+            CancelActiveLoad();
             SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
             NotifyCompleted(sceneName);
         }
@@ -46,6 +56,8 @@ public class SceneService : ISceneService
 
         try
         {
+            CancelActiveLoad();
+
             AsyncOperation operation =
                 SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
 
@@ -58,7 +70,23 @@ public class SceneService : ISceneService
                 return null;
             }
 
-            operation.completed += _ => NotifyCompleted(sceneName);
+            _activeLoadOperation = operation;
+            _activeSceneName = sceneName;
+            _activeLoadCompleted = completedOperation =>
+            {
+                if (!ReferenceEquals(
+                        _activeLoadOperation,
+                        completedOperation))
+                {
+                    return;
+                }
+
+                string completedSceneName = _activeSceneName;
+                ClearActiveLoad();
+                NotifyCompleted(completedSceneName);
+            };
+
+            operation.completed += _activeLoadCompleted;
 
             if (_debugEnabled)
                 AppLog.Info($"Async scene load started: {sceneName}");
@@ -67,10 +95,32 @@ public class SceneService : ISceneService
         }
         catch (Exception exception)
         {
+            ClearActiveLoad();
             NotifyFailure(sceneName, exception.Message);
             AppLog.Exception(exception);
             return null;
         }
+    }
+
+    public AsyncOperation LoadLoadingAsync()
+    {
+        return LoadSceneAsync(LOADING_SCENE);
+    }
+
+    public bool CancelActiveLoad()
+    {
+        if (_activeLoadOperation == null)
+            return false;
+
+        string cancelledSceneName = _activeSceneName;
+        ClearActiveLoad();
+
+        AppLog.Warning(
+            $"Scene load callbacks cancelled: {cancelledSceneName}. " +
+            "Unity may still finish the underlying AsyncOperation.");
+
+        NotifyCancelled(cancelledSceneName);
+        return true;
     }
 
     public bool TryLoadFallback(string fallbackSceneName)
@@ -86,7 +136,7 @@ public class SceneService : ISceneService
         if (_debugEnabled)
             AppLog.Info("LoadBootstrap started");
 
-        LoadScene(BOOTSTRAP_SCENE);
+        LoadSceneAsync(BOOTSTRAP_SCENE);
     }
 
     public void LoadMainMenu()
@@ -94,7 +144,7 @@ public class SceneService : ISceneService
         if (_debugEnabled)
             AppLog.Info("LoadMainMenu started");
 
-        LoadScene(MAIN_MENU_SCENE);
+        LoadSceneAsync(MAIN_MENU_SCENE);
     }
 
     public void LoadMeta()
@@ -102,7 +152,7 @@ public class SceneService : ISceneService
         if (_debugEnabled)
             AppLog.Info("LoadMeta started");
 
-        LoadScene(META_SCENE);
+        LoadSceneAsync(META_SCENE);
     }
 
     public void LoadGalaxy()
@@ -110,7 +160,7 @@ public class SceneService : ISceneService
         if (_debugEnabled)
             AppLog.Info("LoadGalaxy started");
 
-        LoadScene(GALAXY_SCENE);
+        LoadSceneAsync(GALAXY_SCENE);
     }
 
     public void LoadSystem()
@@ -118,7 +168,7 @@ public class SceneService : ISceneService
         if (_debugEnabled)
             AppLog.Info("LoadSystem started");
 
-        LoadScene(SYSTEM_SCENE);
+        LoadSceneAsync(SYSTEM_SCENE);
     }
 
     public void LoadCombat()
@@ -126,7 +176,7 @@ public class SceneService : ISceneService
         if (_debugEnabled)
             AppLog.Info("LoadCombat started");
 
-        LoadScene(COMBAT_SCENE);
+        LoadSceneAsync(COMBAT_SCENE);
     }
 
     private static bool CanLoadScene(string sceneName, out string error)
@@ -149,6 +199,20 @@ public class SceneService : ISceneService
         return true;
     }
 
+    private void ClearActiveLoad()
+    {
+        if (_activeLoadOperation != null &&
+            _activeLoadCompleted != null)
+        {
+            _activeLoadOperation.completed -=
+                _activeLoadCompleted;
+        }
+
+        _activeLoadOperation = null;
+        _activeLoadCompleted = null;
+        _activeSceneName = string.Empty;
+    }
+
     private void NotifyCompleted(string sceneName)
     {
         if (_debugEnabled)
@@ -157,6 +221,18 @@ public class SceneService : ISceneService
         try
         {
             SceneLoadCompleted?.Invoke(sceneName);
+        }
+        catch (Exception exception)
+        {
+            AppLog.Exception(exception);
+        }
+    }
+
+    private void NotifyCancelled(string sceneName)
+    {
+        try
+        {
+            SceneLoadCancelled?.Invoke(sceneName ?? string.Empty);
         }
         catch (Exception exception)
         {
