@@ -395,7 +395,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             ? starSystemLinks[UnityEngine.Random.Range(0, starSystemLinks.Length)]
             : null;
 
-        npc.TargetSystemLink = starSystemLinkRandom;
+        // npc.TargetSystemLink = starSystemLinkRandom;
+        StarSystemLink link = starSystemLinks.Length > 0
+            ? starSystemLinks[UnityEngine.Random.Range(0, starSystemLinks.Length)]
+            : null;
+
+        npc.TargetSystemId = link?.LinkedSystem?.Id;
+        npc.TargetSystemExitPoint = link?.ExitPoint ?? Vector3.zero;
+        npc.TargetSystemEntryPoint = link?.EntryPoint ?? Vector3.zero;
+        npc.StartPosition = npc.CurrentPosition;
+        npc.TravelProgress01 = 0f;
         // npc.TargetSystemId = starSystemLinkRandom.LinkedSystem.Id;
         npc.StartPosition = npc.CurrentPosition;
         // npc.TargetPosition = npc.CurrentPosition + RandomOffset(6f);

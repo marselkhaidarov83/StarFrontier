@@ -30,6 +30,13 @@ public static class SaveMigrationService
 
         NormalizeShipDirection(state);
 
+        if (sourceVersion < SaveDataVersions.IntegrityChecksum)
+        {
+            MigrateToIntegrityChecksum(state);
+            changed = true;
+            sourceVersion = SaveDataVersions.IntegrityChecksum;
+        }
+
         if (state.Meta.SaveDataVersion != SaveDataVersions.Current)
         {
             state.Meta.SaveDataVersion = SaveDataVersions.Current;
@@ -107,6 +114,12 @@ public static class SaveMigrationService
 
         state.Player.SystemMapShipDirection =
             direction.normalized;
+    }
+
+    private static void MigrateToIntegrityChecksum(
+        GameRuntimeState state)
+    {
+        state.Meta.IntegrityChecksum ??= string.Empty;
     }
 
     private static bool IsInvalidDirection(

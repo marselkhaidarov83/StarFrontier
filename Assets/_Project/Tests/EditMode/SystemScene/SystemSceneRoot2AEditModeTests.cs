@@ -128,7 +128,7 @@ public sealed class SystemSceneRoot2AEditModeTests
     }
 
     [Test]
-    public void GetMissingReferencesReport_ContainsMissingFieldNames()
+    public void GetMissingReferencesReport_ContainsOnlyActuallyMissingFields()
     {
         GameObject rootObject =
             new GameObject("SystemMapRoot");
@@ -139,7 +139,7 @@ public sealed class SystemSceneRoot2AEditModeTests
         string report =
             root.GetMissingReferencesReport();
 
-        Assert.IsTrue(report.Contains("systemMapRoot"));
+        Assert.IsFalse(report.Contains("systemMapRoot"));
         Assert.IsTrue(report.Contains("mainCamera"));
         Assert.IsTrue(report.Contains("systemBackground"));
         Assert.IsTrue(report.Contains("sunNodesRoot"));

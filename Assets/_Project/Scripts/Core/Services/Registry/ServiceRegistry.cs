@@ -11,6 +11,8 @@ public class ServiceRegistry : IServiceRegistry
 {
     private readonly Dictionary<Type, object> _services = new();
 
+    public int Count => _services.Count;
+
     /// <summary>
     /// Регистрирует готовый экземпляр под типом TService.
     /// </summary>

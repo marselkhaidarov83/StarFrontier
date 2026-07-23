@@ -19,6 +19,12 @@ public class GameRuntimeMetaState
     /// </summary>
     public int SaveVersion = 1;
 
+    /// <summary>
+    /// SHA-256 от канонического JSON Save с пустым полем checksum.
+    /// Используется для обнаружения повреждённого или частично изменённого файла.
+    /// </summary>
+    public string IntegrityChecksum = string.Empty;
+
     public long CreatedUtcTicks = DateTime.UtcNow.Ticks;
 
     public long LastSaveUtc;

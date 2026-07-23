@@ -14,7 +14,9 @@ public sealed class SystemNpcSaveData
 
     public string OriginSystemId;
     public string CurrentSystemId;
-    public StarSystemLink TargetSystemLink;
+    public string TargetSystemId;
+    public Vector3 TargetSystemExitPoint;
+    public Vector3 TargetSystemEntryPoint;
 
     public string CurrentPlanetId;
     public string TargetPlanetId;

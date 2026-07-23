@@ -21,5 +21,10 @@ public static class SaveDataVersions
     /// </summary>
     public const int ShipDirection = 2;
 
-    public const int Current = ShipDirection;
+    /// <summary>
+    /// Версия с post-load validation и SHA-256 integrity checksum.
+    /// </summary>
+    public const int IntegrityChecksum = 3;
+
+    public const int Current = IntegrityChecksum;
 }

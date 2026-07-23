@@ -482,7 +482,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             if (openCurrentSystem)
             {
                 gameStateMachine?.Enter(
-                    new MetaState()
+                    new SystemState()
                 );
 
                 eventBus?.Publish(

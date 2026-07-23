@@ -44,7 +44,7 @@ public class ContinueGameService : CustomService, IContinueGameService
                 Debug.Log("GameStateMachine is null");
         }
         else 
-            _gameStateMachine.Enter(new MetaState());
+            _gameStateMachine.Enter(new SystemState());
 
         return true;
     }

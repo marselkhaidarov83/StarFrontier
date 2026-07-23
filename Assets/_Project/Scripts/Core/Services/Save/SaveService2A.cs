@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 public class SaveService2A : CustomService, ISaveService
@@ -16,6 +17,9 @@ public class SaveService2A : CustomService, ISaveService
     private readonly IGameSessionService _gameSessionService;
     private readonly ISystemEncounterSaveService _systemEncounterSaveService;
     private readonly ISystemNpcSimulationSaveService _systemNpcSimulationSaveService;
+    private readonly SaveMigrationStage _migrationStage = new();
+    private readonly SaveValidationStage _validationStage = new();
+    private readonly SaveIntegrityStage _integrityStage = new();
 
     public SaveService2A()
     {
@@ -60,7 +64,7 @@ public class SaveService2A : CustomService, ISaveService
 
         if (state == null)
         {
-            Debug.LogWarning("[SaveService] Save skipped: GameState is null.");
+            AppLog.Warning("[SaveService] Save skipped: GameState is null.");
             return;
         }
 
@@ -69,28 +73,24 @@ public class SaveService2A : CustomService, ISaveService
             _enabledSave = false;
 
             PrepareStateBeforeSave(state);
-
-            if (File.Exists(GetSavePath()))
-            {
-                File.Copy(GetSavePath(), GetBackupPath(), true);
-                Debug.Log("[SaveService] Backup created: " + GetBackupPath());
-            }
+            _integrityStage.Stamp(state);
 
             string json = JsonUtility.ToJson(state, true);
-            File.WriteAllText(GetSavePath(), json);
+            WriteSaveAtomically(json);
 
             _eventBus?.Publish(new GameSavedEvent());
 
             _autosaveTimer = 0f;
 
-            Debug.Log("[SaveService] Game saved to: " + GetSavePath());
+            AppLog.Info("[SaveService] Game saved to: " + GetSavePath());
         }
         catch (Exception e)
         {
-            Debug.LogError("[SaveService] Failed to save: " + e.Message);
+            AppLog.Error("[SaveService] Failed to save: " + e.Message);
         }
         finally
         {
+            DeleteTempFileIfExists();
             _enabledSave = true;
         }
     }
@@ -105,17 +105,17 @@ public class SaveService2A : CustomService, ISaveService
             return mainSave;
         }
 
-        Debug.LogWarning("[SaveService] Main save failed. Trying backup.");
+        AppLog.Warning("[SaveService] Main save failed. Trying backup.");
 
         GameRuntimeState backupSave = TryLoadFromPath(GetBackupPath());
 
         if (backupSave != null)
         {
-            Debug.LogWarning("[SaveService] Backup save loaded.");
+            AppLog.Warning("[SaveService] Backup save loaded.");
             return backupSave;
         }
 
-        Debug.LogWarning("[SaveService] No valid save found.");
+        AppLog.Warning("[SaveService] No valid save found.");
         return null;
     }
 
@@ -123,6 +123,7 @@ public class SaveService2A : CustomService, ISaveService
     {
         DeleteFileIfExists(GetSavePath());
         DeleteFileIfExists(GetBackupPath());
+        DeleteFileIfExists(GetTempPath());
     }
 
     public void Tick(float deltaTime)
@@ -135,18 +136,18 @@ public class SaveService2A : CustomService, ISaveService
         if (_autosaveTimer >= _autosaveIntervalSeconds)
         {
             Save();
-            Debug.Log("[SaveService] Periodic autosave completed.");
+            AppLog.Info("[SaveService] Periodic autosave completed.");
         }
     }
 
     private void PrepareStateBeforeSave(GameRuntimeState state)
     {
-        SaveMigrationService.Migrate(state);
+        _migrationStage.Run(state);
 
         TryWriteGameTimeToState(state);
         TryWriteShipMovementToState(state);
 
-        SaveMigrationService.Migrate(state);
+        _migrationStage.Run(state);
 
         state.Meta.SaveVersion++;
         state.Meta.LastSaveUtc = DateTime.UtcNow.Ticks;
@@ -160,6 +161,16 @@ public class SaveService2A : CustomService, ISaveService
                 _systemEncounterSaveService.Capture();
 
         DictionaryToList(state);
+
+        SaveValidationResult validation =
+            _validationStage.ValidateAndNormalize(state);
+
+        if (!validation.IsValid)
+        {
+            throw new InvalidDataException(
+                "[SaveService] Save validation failed: " +
+                validation.BuildErrorMessage());
+        }
     }
 
     private void TryWriteGameTimeToState(GameRuntimeState state)
@@ -213,23 +224,63 @@ public class SaveService2A : CustomService, ISaveService
 
             if (state == null)
             {
-                Debug.LogError(
+                AppLog.Error(
                     "[SaveService] Parsed GameState is null: " + path);
 
                 return null;
             }
 
+            SaveValidationResult versionValidation =
+                _validationStage.ValidateVersion(state);
+
+            if (!versionValidation.IsValid)
+            {
+                AppLog.Error(
+                    "[SaveService] Unsupported save version: " +
+                    versionValidation.BuildErrorMessage());
+                return null;
+            }
+
+            SaveIntegrityStatus integrityStatus =
+                _integrityStage.Verify(state);
+
+            if (integrityStatus == SaveIntegrityStatus.Invalid)
+            {
+                AppLog.Error(
+                    "[SaveService] Save integrity verification failed: " +
+                    path);
+                return null;
+            }
+
+            if (integrityStatus == SaveIntegrityStatus.Missing)
+            {
+                AppLog.Warning(
+                    "[SaveService] Legacy save has no integrity checksum: " +
+                    path);
+            }
+
             bool wasMigrated =
-                SaveMigrationService.Migrate(state);
+                _migrationStage.Run(state);
 
             if (wasMigrated)
             {
-                Debug.Log(
+                AppLog.Info(
                     "[SaveService] Save migrated to data version " +
                     state.Meta.SaveDataVersion);
             }
 
             DictionaryFromList(state);
+
+            SaveValidationResult validation =
+                _validationStage.ValidateAndNormalize(state);
+
+            if (!validation.IsValid)
+            {
+                AppLog.Error(
+                    "[SaveService] Post-load validation failed: " +
+                    validation.BuildErrorMessage());
+                return null;
+            }
 
             TryRestoreGameTimeFromState(state);
             TryInitializeShipMovementFromState(state);
@@ -244,7 +295,7 @@ public class SaveService2A : CustomService, ISaveService
         }
         catch (Exception e)
         {
-            Debug.LogError("[SaveService] Failed to load from " + path + ": " + e.Message);
+            AppLog.Error("[SaveService] Failed to load from " + path + ": " + e.Message);
             return null;
         }
     }
@@ -293,7 +344,58 @@ public class SaveService2A : CustomService, ISaveService
             return;
 
         File.Delete(path);
-        Debug.Log("[SaveService] Deleted file: " + path);
+        AppLog.Info("[SaveService] Deleted file: " + path);
+    }
+
+    private void WriteSaveAtomically(string json)
+    {
+        string savePath = GetSavePath();
+        string backupPath = GetBackupPath();
+        string tempPath = GetTempPath();
+
+        DeleteTempFileIfExists();
+
+        using (var stream = new FileStream(
+            tempPath,
+            FileMode.CreateNew,
+            FileAccess.Write,
+            FileShare.None))
+        using (var writer = new StreamWriter(
+            stream,
+            new UTF8Encoding(false)))
+        {
+            writer.Write(json);
+            writer.Flush();
+            stream.Flush(true);
+        }
+
+        if (File.Exists(savePath))
+        {
+            File.Replace(tempPath, savePath, backupPath);
+            AppLog.Info("[SaveService] Backup created: " + backupPath);
+            return;
+        }
+
+        File.Move(tempPath, savePath);
+    }
+
+    private void DeleteTempFileIfExists()
+    {
+        string tempPath = GetTempPath();
+
+        if (!File.Exists(tempPath))
+            return;
+
+        try
+        {
+            File.Delete(tempPath);
+        }
+        catch (Exception exception)
+        {
+            AppLog.Warning(
+                "[SaveService] Failed to delete temp save: " +
+                exception.Message);
+        }
     }
 
     public string GetSavePath()
@@ -304,6 +406,11 @@ public class SaveService2A : CustomService, ISaveService
     public string GetBackupPath()
     {
         return Path.Combine(Application.persistentDataPath, _backupFileName);
+    }
+
+    public string GetTempPath()
+    {
+        return GetSavePath() + ".temp";
     }
 
     private void DictionaryToList(GameRuntimeState state)
