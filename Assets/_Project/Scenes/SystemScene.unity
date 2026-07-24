@@ -464,7 +464,7 @@ MonoBehaviour:
   metaCanvas: {fileID: 691586606}
   systemMapHudRoot: {fileID: 1614100115}
   planetRoot: {fileID: 1256647065}
-  metaHudRoot: {fileID: 0}
+  metaHudRoot: {fileID: 1614100115}
   warnOnAwake: 1
 --- !u!114 &10713370
 MonoBehaviour:

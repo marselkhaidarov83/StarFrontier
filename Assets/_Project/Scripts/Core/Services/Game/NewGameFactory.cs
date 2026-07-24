@@ -25,9 +25,7 @@ public class NewGameFactory
 
         var profile = new PlayerState
         {
-            // Credits = 1000,
             Credits = newGameConfig.StartCredit,
-            // CurrentSystemId = "system_heliosGate_01",
             CurrentSystemId = newGameConfig.StartSystem.Id,
             PlayerShipState = starterShip
         };

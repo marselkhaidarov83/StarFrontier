@@ -20,7 +20,7 @@ MonoBehaviour:
   dangerLevel: 4
   sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
   planetRefs:
-  - {fileID: 11400000, guid: ac34b132c47d64b20a42dd6502486571, type: 2}
+  - {fileID: 11400000, guid: afb705007fd6d4f4d935d6875a15c0a6, type: 2}
   - {fileID: 11400000, guid: ac34b132c47d64b20a42dd6502486571, type: 2}
   - {fileID: 11400000, guid: d667f73fd3f6c485ca7b668603793d78, type: 2}
   - {fileID: 11400000, guid: 038c6347bcdbb4b27b7de5a905a06ae4, type: 2}
