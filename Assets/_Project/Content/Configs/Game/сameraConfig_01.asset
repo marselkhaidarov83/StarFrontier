@@ -41,8 +41,8 @@ MonoBehaviour:
   planetExtraPadding: 180
   stationExtraPadding: 220
   exitExtraPadding: 220
-  dragSensitivity: 3
-  freeLookSmoothTime: 0.015
+  dragSensitivity: 2
+  freeLookSmoothTime: 0.025
   freeLookInertia: 0
   largestObjectZoomMultiplier: 4.5
   zoomSmoothTime: 0.08
