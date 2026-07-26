@@ -2,21 +2,26 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Мост между Unity Input System / touch UI
-/// и существующим IPlayerControlService.
+/// Единственный мост между Unity Input System / touch UI
+/// и IPlayerControlService.
 ///
 /// Поддерживает:
 /// - keyboard;
-/// - mouse как UI pointer;
-/// - touch UI.
+/// - touch UI;
+/// - Interact;
+/// - Recenter Camera;
+/// - Stop Movement;
+/// - блокировку gameplay-ввода при открытых UI-панелях.
 ///
-/// Не поддерживает hardware Gamepad или Joystick.
-/// Не рассчитывает движение и не вызывает Tick().
+/// Не рассчитывает физику движения.
+/// Не изменяет Transform корабля.
+/// Не вызывает Tick() сервисов.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class PlayerInputBridge2A : MonoBehaviour
 {
     [Header("Input Actions")]
+
     [SerializeField]
     private InputActionAsset inputActions;
 
@@ -32,7 +37,21 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
     [SerializeField]
     private string recenterActionName = "RecenterCamera";
 
+    [SerializeField]
+    private string stopActionName = "StopMovement";
+
+    [Header("Destination")]
+
+    [Tooltip(
+        "Адаптер point/click destination. " +
+        "Нужен, чтобы клавиатура, touch и Stop " +
+        "могли отменить текущую точку назначения.")]
+    [SerializeField]
+    private PointDestinationMovementAdapter2A
+        destinationAdapter;
+
     [Header("Input Blocking")]
+
     [Tooltip(
         "Панели, при открытии которых корабль не должен " +
         "получать команды движения.")]
@@ -42,8 +61,13 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
     [SerializeField]
     private bool enableInputOnStart = true;
 
+    [Header("Diagnostics")]
+
     [SerializeField]
     private bool logInitialization = true;
+
+    [SerializeField]
+    private bool logStopCommands = false;
 
     private IPlayerControlService _playerControlService;
 
@@ -51,6 +75,7 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
     private InputAction _moveAction;
     private InputAction _interactAction;
     private InputAction _recenterAction;
+    private InputAction _stopAction;
 
     private Vector2 _keyboardMoveInput;
     private Vector2 _touchMoveInput;
@@ -66,6 +91,9 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
     private bool _errorReported;
 
     public bool IsInitialized => _initialized;
+
+    public bool IsGameplayInputEnabled =>
+        _manualInputEnabled && !IsInputBlocked();
 
     private void Awake()
     {
@@ -94,17 +122,15 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
         if (isBlocked)
         {
-            _touchMoveInput = Vector2.zero;
+            StopMovementInternal(
+                immediateStop: false,
+                cancelInteraction: true);
 
-            _playerControlService.SetRawMoveInput(
-                Vector2.zero);
-
-            CancelAllInteraction();
             return;
         }
 
         _keyboardMoveInput =
-            _moveAction.ReadValue<Vector2>();
+            ReadCurrentKeyboardMoveInput();
 
         PushMoveInput();
     }
@@ -116,17 +142,50 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
     /// <summary>
     /// Вызывается экранной сенсорной зоной движения.
+    /// Например, виртуальной touch-зоной или UI-кнопками.
     /// </summary>
     public void SetTouchMoveInput(Vector2 value)
     {
+        if (!TryInitialize())
+            return;
+
+        if (IsInputBlocked())
+        {
+            _touchMoveInput = Vector2.zero;
+
+            _playerControlService.SetRawMoveInput(
+                Vector2.zero);
+
+            return;
+        }
+
+        if (!IsFinite(value))
+        {
+            _touchMoveInput = Vector2.zero;
+            PushMoveInput();
+            return;
+        }
+
         _touchMoveInput =
-            IsFinite(value)
-                ? Vector2.ClampMagnitude(value, 1f)
-                : Vector2.zero;
+            Vector2.ClampMagnitude(value, 1f);
+
+        /*
+         * Ручное touch-управление становится
+         * новым владельцем movement intent.
+         * Текущая point/click destination отменяется.
+         */
+        if (_touchMoveInput.sqrMagnitude > 0.0001f)
+        {
+            CancelPointDestination(
+                immediateStop: false);
+        }
 
         PushMoveInput();
     }
 
+    /// <summary>
+    /// Вызывается после отпускания touch-зоны движения.
+    /// </summary>
     public void ClearTouchMoveInput()
     {
         _touchMoveInput = Vector2.zero;
@@ -135,8 +194,11 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
     public void PressInteractFromTouch()
     {
-        if (!TryInitialize() || IsInputBlocked())
+        if (!TryInitialize() ||
+            IsInputBlocked())
+        {
             return;
+        }
 
         SetTouchInteractionHeld(true);
     }
@@ -149,36 +211,82 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         SetTouchInteractionHeld(false);
     }
 
+    /// <summary>
+    /// Подключается к UI-кнопке «К кораблю».
+    /// </summary>
     public void PressRecenterCameraFromUi()
     {
-        if (!TryInitialize() || IsInputBlocked())
+        if (!TryInitialize() ||
+            IsInputBlocked())
+        {
             return;
+        }
 
-        _playerControlService.PressRecenterCamera();
+        _playerControlService
+            .PressRecenterCamera();
     }
 
-    public void SetGameplayInputEnabled(bool isEnabled)
+    /// <summary>
+    /// Можно подключить к отдельной UI-кнопке Stop.
+    /// Кнопка для выполнения подэтапа не обязательна.
+    /// </summary>
+    public void PressStopMovementFromUi()
+    {
+        if (!TryInitialize())
+            return;
+
+        StopMovementInternal(
+            immediateStop: false,
+            cancelInteraction: false);
+    }
+
+    /// <summary>
+    /// Полностью включает или выключает gameplay-ввод.
+    /// Используется при смене экранов или режимов.
+    /// </summary>
+    public void SetGameplayInputEnabled(
+        bool isEnabled)
     {
         _manualInputEnabled = isEnabled;
 
         if (!_initialized)
-            return;
-
-        if (IsInputBlocked())
         {
-            _touchMoveInput = Vector2.zero;
+            if (isEnabled)
+                TryInitialize();
 
-            _playerControlService.SetRawMoveInput(
-                Vector2.zero);
+            return;
+        }
 
-            CancelAllInteraction();
+        if (!isEnabled ||
+            IsInputBlocked())
+        {
+            StopMovementInternal(
+                immediateStop: false,
+                cancelInteraction: true);
+
             return;
         }
 
         _keyboardMoveInput =
-            _moveAction.ReadValue<Vector2>();
+            ReadCurrentKeyboardMoveInput();
 
         PushMoveInput();
+    }
+
+    /// <summary>
+    /// Полная остановка для внешнего кода.
+    /// immediateStop = true вызывает StopImmediately()
+    /// через destination adapter.
+    /// </summary>
+    public void StopMovement(
+        bool immediateStop)
+    {
+        if (!TryInitialize())
+            return;
+
+        StopMovementInternal(
+            immediateStop,
+            cancelInteraction: false);
     }
 
     private bool TryInitialize()
@@ -189,7 +297,8 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         if (inputActions == null)
         {
             ReportErrorOnce(
-                "[PlayerInputBridge2A] InputActions is not assigned.");
+                "[PlayerInputBridge2A] " +
+                "InputActions is not assigned.");
 
             return false;
         }
@@ -200,8 +309,10 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
             return false;
         }
 
-        if (!Bootstrapper.Instance.ServiceRegistry.TryGet(
-                out _playerControlService))
+        if (!Bootstrapper.Instance
+                .ServiceRegistry
+                .TryGet(
+                    out _playerControlService))
         {
             return false;
         }
@@ -214,8 +325,9 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         if (_playerActionMap == null)
         {
             ReportErrorOnce(
-                $"[PlayerInputBridge2A] Action Map " +
-                $"'{actionMapName}' was not found.");
+                "[PlayerInputBridge2A] " +
+                $"Action Map '{actionMapName}' " +
+                "was not found.");
 
             return false;
         }
@@ -235,13 +347,21 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
                 recenterActionName,
                 false);
 
+        _stopAction =
+            _playerActionMap.FindAction(
+                stopActionName,
+                false);
+
         if (_moveAction == null ||
             _interactAction == null ||
-            _recenterAction == null)
+            _recenterAction == null ||
+            _stopAction == null)
         {
             ReportErrorOnce(
-                "[PlayerInputBridge2A] Required actions " +
-                "Move, Interact or RecenterCamera were not found.");
+                "[PlayerInputBridge2A] " +
+                "Required actions were not found. " +
+                "Expected: Move, Interact, " +
+                "RecenterCamera and StopMovement.");
 
             return false;
         }
@@ -258,16 +378,36 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         _wasBlocked = IsInputBlocked();
 
         _keyboardMoveInput =
-            _moveAction.ReadValue<Vector2>();
+            ReadCurrentKeyboardMoveInput();
 
-        PushMoveInput();
+        if (_wasBlocked)
+        {
+            StopMovementInternal(
+                immediateStop: false,
+                cancelInteraction: true);
+        }
+        else
+        {
+            PushMoveInput();
+        }
 
         if (logInitialization)
         {
             Debug.Log(
                 "[PlayerInputBridge2A] Initialized: " +
-                "keyboard, mouse UI and touch UI.",
+                "keyboard, touch UI, Interact, " +
+                "RecenterCamera and StopMovement.",
                 this);
+
+            if (destinationAdapter == null)
+            {
+                Debug.LogWarning(
+                    "[PlayerInputBridge2A] " +
+                    "Destination Adapter is not assigned. " +
+                    "Stop will clear control input, but it " +
+                    "will not cancel point/click destination.",
+                    this);
+            }
         }
 
         return true;
@@ -278,13 +418,23 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         if (_subscribed)
             return;
 
-        _moveAction.performed += OnMoveChanged;
-        _moveAction.canceled += OnMoveCancelled;
+        _moveAction.performed +=
+            OnMoveChanged;
 
-        _interactAction.started += OnInteractStarted;
-        _interactAction.canceled += OnInteractCancelled;
+        _moveAction.canceled +=
+            OnMoveCancelled;
 
-        _recenterAction.performed += OnRecenterPerformed;
+        _interactAction.started +=
+            OnInteractStarted;
+
+        _interactAction.canceled +=
+            OnInteractCancelled;
+
+        _recenterAction.performed +=
+            OnRecenterPerformed;
+
+        _stopAction.performed +=
+            OnStopPerformed;
 
         _subscribed = true;
     }
@@ -296,19 +446,32 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
         if (_moveAction != null)
         {
-            _moveAction.performed -= OnMoveChanged;
-            _moveAction.canceled -= OnMoveCancelled;
+            _moveAction.performed -=
+                OnMoveChanged;
+
+            _moveAction.canceled -=
+                OnMoveCancelled;
         }
 
         if (_interactAction != null)
         {
-            _interactAction.started -= OnInteractStarted;
-            _interactAction.canceled -= OnInteractCancelled;
+            _interactAction.started -=
+                OnInteractStarted;
+
+            _interactAction.canceled -=
+                OnInteractCancelled;
         }
 
         if (_recenterAction != null)
         {
-            _recenterAction.performed -= OnRecenterPerformed;
+            _recenterAction.performed -=
+                OnRecenterPerformed;
+        }
+
+        if (_stopAction != null)
+        {
+            _stopAction.performed -=
+                OnStopPerformed;
         }
 
         _subscribed = false;
@@ -317,8 +480,33 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
     private void OnMoveChanged(
         InputAction.CallbackContext context)
     {
-        _keyboardMoveInput =
+        if (IsInputBlocked())
+        {
+            StopMovementInternal(
+                immediateStop: false,
+                cancelInteraction: false);
+
+            return;
+        }
+
+        Vector2 value =
             context.ReadValue<Vector2>();
+
+        _keyboardMoveInput =
+            IsFinite(value)
+                ? Vector2.ClampMagnitude(value, 1f)
+                : Vector2.zero;
+
+        /*
+         * Клавиатурное управление отменяет
+         * ранее назначенный point/click destination.
+         */
+        if (_keyboardMoveInput.sqrMagnitude >
+            0.0001f)
+        {
+            CancelPointDestination(
+                immediateStop: false);
+        }
 
         PushMoveInput();
     }
@@ -326,7 +514,9 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
     private void OnMoveCancelled(
         InputAction.CallbackContext context)
     {
-        _keyboardMoveInput = Vector2.zero;
+        _keyboardMoveInput =
+            Vector2.zero;
+
         PushMoveInput();
     }
 
@@ -351,7 +541,19 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         if (IsInputBlocked())
             return;
 
-        _playerControlService.PressRecenterCamera();
+        _playerControlService
+            .PressRecenterCamera();
+    }
+
+    private void OnStopPerformed(
+        InputAction.CallbackContext context)
+    {
+        if (IsInputBlocked())
+            return;
+
+        StopMovementInternal(
+            immediateStop: false,
+            cancelInteraction: false);
     }
 
     private void PushMoveInput()
@@ -370,25 +572,94 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
             return;
         }
 
-        // Touch имеет приоритет, пока игрок держит
-        // экранную сенсорную зону.
+        /*
+         * Touch имеет приоритет, пока игрок
+         * удерживает экранную сенсорную зону.
+         */
         Vector2 selectedInput =
-            _touchMoveInput.sqrMagnitude > 0f
+            _touchMoveInput.sqrMagnitude > 0.0001f
                 ? _touchMoveInput
                 : _keyboardMoveInput;
 
+        if (!IsFinite(selectedInput))
+            selectedInput = Vector2.zero;
+
         _playerControlService.SetRawMoveInput(
-            Vector2.ClampMagnitude(selectedInput, 1f));
+            Vector2.ClampMagnitude(
+                selectedInput,
+                1f));
     }
 
-    private void SetKeyboardInteractionHeld(bool isHeld)
+    private Vector2 ReadCurrentKeyboardMoveInput()
+    {
+        if (_moveAction == null)
+            return Vector2.zero;
+
+        Vector2 value =
+            _moveAction.ReadValue<Vector2>();
+
+        if (!IsFinite(value))
+            return Vector2.zero;
+
+        return Vector2.ClampMagnitude(
+            value,
+            1f);
+    }
+
+    private void StopMovementInternal(
+        bool immediateStop,
+        bool cancelInteraction)
+    {
+        _keyboardMoveInput =
+            Vector2.zero;
+
+        _touchMoveInput =
+            Vector2.zero;
+
+        if (_playerControlService != null)
+        {
+            _playerControlService.SetRawMoveInput(
+                Vector2.zero);
+        }
+
+        CancelPointDestination(
+            immediateStop);
+
+        if (cancelInteraction)
+        {
+            CancelAllInteraction();
+        }
+
+        if (logStopCommands)
+        {
+            Debug.Log(
+                "[PlayerInputBridge2A] " +
+                $"Stop movement. Immediate: " +
+                $"{immediateStop}.",
+                this);
+        }
+    }
+
+    private void CancelPointDestination(
+        bool immediateStop)
+    {
+        if (destinationAdapter == null)
+            return;
+
+        destinationAdapter.CancelDestination(
+            immediateStop);
+    }
+
+    private void SetKeyboardInteractionHeld(
+        bool isHeld)
     {
         SetInteractionSource(
             ref _keyboardInteractionHeld,
             isHeld);
     }
 
-    private void SetTouchInteractionHeld(bool isHeld)
+    private void SetTouchInteractionHeld(
+        bool isHeld)
     {
         SetInteractionSource(
             ref _touchInteractionHeld,
@@ -414,11 +685,13 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
         if (!wasHeld && isHeldNow)
         {
-            _playerControlService.PressInteract();
+            _playerControlService
+                .PressInteract();
         }
         else if (wasHeld && !isHeldNow)
         {
-            _playerControlService.ReleaseInteract();
+            _playerControlService
+                .ReleaseInteract();
         }
     }
 
@@ -434,7 +707,8 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         if (wasHeld &&
             _playerControlService != null)
         {
-            _playerControlService.ReleaseInteract();
+            _playerControlService
+                .ReleaseInteract();
         }
     }
 
@@ -446,7 +720,8 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         if (blockingUiRoots == null)
             return false;
 
-        foreach (GameObject root in blockingUiRoots)
+        foreach (GameObject root in
+                 blockingUiRoots)
         {
             if (root != null &&
                 root.activeInHierarchy)
@@ -460,16 +735,20 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
     private void ShutdownBridge()
     {
-        if (_playerControlService != null)
+        if (_initialized)
         {
-            _playerControlService.SetRawMoveInput(
-                Vector2.zero);
-
-            CancelAllInteraction();
+            StopMovementInternal(
+                immediateStop: false,
+                cancelInteraction: true);
         }
+        else
+        {
+            _keyboardMoveInput =
+                Vector2.zero;
 
-        _keyboardMoveInput = Vector2.zero;
-        _touchMoveInput = Vector2.zero;
+            _touchMoveInput =
+                Vector2.zero;
+        }
 
         Unsubscribe();
 
@@ -484,16 +763,21 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
         _initialized = false;
     }
 
-    private void ReportErrorOnce(string message)
+    private void ReportErrorOnce(
+        string message)
     {
         if (_errorReported)
             return;
 
         _errorReported = true;
-        Debug.LogError(message, this);
+
+        Debug.LogError(
+            message,
+            this);
     }
 
-    private static bool IsFinite(Vector2 value)
+    private static bool IsFinite(
+        Vector2 value)
     {
         return
             !float.IsNaN(value.x) &&

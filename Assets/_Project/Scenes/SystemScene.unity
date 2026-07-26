@@ -201,9 +201,12 @@ GameObject:
   - component: {fileID: 10713374}
   - component: {fileID: 10713375}
   - component: {fileID: 10713376}
+  - component: {fileID: 10713377}
+  - component: {fileID: 10713380}
+  - component: {fileID: 10713379}
   m_Layer: 8
   m_Name: SystemMapRoot
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -473,16 +476,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 10713350}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c397a6afeb6f8466a8786d7f25834b9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::MetaSceneShipStateBridge2A
   shipMarkerView: {fileID: 1132738920}
   shipMarkerImage: {fileID: 1132738921}
-  legacyVisualIsSource: 1
-  writeToShipMovementState: 1
-  writeToPlayerStateEveryFrame: 1
+  legacyVisualIsSource: 0
+  writeToShipMovementState: 0
+  writeToPlayerStateEveryFrame: 0
   writeRuntimeStateBackToSystemTravel: 0
   logMissingServices: 0
 --- !u!114 &10713371
@@ -503,8 +506,8 @@ MonoBehaviour:
   initializeOnStart: 1
   useSavedPlayerPosition: 1
   pushPositionToSystemTravelService: 1
-  pushPositionToShipMovementState: 1
-  disableShipMovementServiceTick: 1
+  pushPositionToShipMovementState: 0
+  disableShipMovementServiceTick: 0
   logInitialization: 1
 --- !u!114 &10713372
 MonoBehaviour:
@@ -544,6 +547,8 @@ MonoBehaviour:
   shipTarget: {fileID: 1132738918}
   cameraConfig: {fileID: 11400000, guid: 6944029378bee4a669c1b150a1ce3fdc, type: 2}
   mode: 0
+  logInitialization: 1
+  logModeChanges: 0
 --- !u!114 &10713374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -557,6 +562,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Presentation::SystemCameraDragInput2A
   cameraController: {fileID: 10713373}
+  blockingUiRoots: []
+  inputEnabled: 1
 --- !u!114 &10713375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -574,9 +581,13 @@ MonoBehaviour:
   moveActionName: Move
   interactActionName: Interact
   recenterActionName: RecenterCamera
-  blockingUiRoots: []
-  enableInputOnStart: 1
+  stopActionName: StopMovement
+  destinationAdapter: {fileID: 10713377}
+  blockingUiRoots:
+  - {fileID: 1256647064}
+  enableInputOnStart: 0
   logInitialization: 1
+  logStopCommands: 0
 --- !u!114 &10713376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -584,7 +595,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 10713350}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dbaab7c5e90df4ed1b6b5c7d3f65069b, type: 3}
   m_Name: 
@@ -597,6 +608,59 @@ MonoBehaviour:
   fallbackBoundsCenter: {x: 0, y: 0}
   fallbackBoundsHalfSize: {x: 1200, y: 2000}
   logInitialization: 1
+--- !u!114 &10713377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ca3dd5280b964bad9d6121307adc0c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::PointDestinationMovementAdapter2A
+  arrivalRadius: 3
+  slowDownRadius: 120
+  stopImmediatelyOnArrival: 1
+  logCommands: 0
+--- !u!114 &10713379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a767173d41e404b54a640dd6daf74aa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::SystemControlPresentationBridge2A
+  cameraController: {fileID: 10713373}
+--- !u!114 &10713380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da2ce94e141c44c9188c21d458516b6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::SystemCameraZoomInput2A
+  cameraController: {fileID: 10713373}
+  enableMouseWheel: 1
+  mouseZoomStep: 0.3
+  mouseStepInterval: 0.08
+  mouseScrollThreshold: 0.02
+  invertMouseWheel: 0
+  enablePinch: 1
+  pinchInputMultiplier: 18
+  pinchDeadZonePixels: 0.5
+  blockingUiRoots: []
+  inputEnabled: 1
+  logMouseSteps: 0
 --- !u!1 &14325446
 GameObject:
   m_ObjectHideFlags: 0
@@ -9083,7 +9147,7 @@ GameObject:
   - component: {fileID: 757877084}
   - component: {fileID: 757877083}
   m_Layer: 0
-  m_Name: MainCamera_old_to_delete
+  m_Name: SystemMainCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9112,7 +9176,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 757877082}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 633fc40478eb74539bb39f77f73ca994, type: 3}
   m_Name: 
