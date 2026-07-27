@@ -11,17 +11,12 @@ public enum SystemCameraMode2A
 /// <summary>
 /// Единственный владелец системной камеры.
 ///
-/// Компонент отвечает за:
-/// - положение и поворот камеры;
-/// - zoom;
-/// - Follow Ship;
-/// - Free Look;
-/// - Return To Ship;
-/// - ограничение камеры границами карты;
-/// - фиксацию солнца в центре при максимальном отдалении.
-///
-/// Координаты и движение корабля рассчитываются
-/// исключительно игровыми сервисами.
+/// Главный принцип ограничения:
+/// - сначала рассчитывается допустимый диапазон focus point;
+/// - затем ограничивается target focus;
+/// - только после этого выполняется SmoothDamp;
+/// - старый post-correction больше не двигает карту
+///   против пользовательского drag.
 /// </summary>
 [DefaultExecutionOrder(1000)]
 [DisallowMultipleComponent]
@@ -40,8 +35,8 @@ public sealed class SystemCameraController2A :
     private SystemCameraConfig cameraConfig;
 
     [Tooltip(
-        "Корневой объект содержимого системной карты. " +
-        "Внутри него будет найден созданный SunNodeView.")]
+        "SystemMapRoot. Используется для поиска SunNodeView " +
+        "и преобразования Sun.LocalOffset в мировые координаты.")]
     [SerializeField]
     private Transform systemMapContentRoot;
 
@@ -51,30 +46,63 @@ public sealed class SystemCameraController2A :
     private SystemCameraMode2A mode =
         SystemCameraMode2A.FollowShip;
 
-    [Header("Overview Centering")]
+    [Header("Bounds")]
 
+    [Tooltip(
+        "WorldBoundsRect из SystemCameraConfig считается локальным " +
+        "прямоугольником относительно центра текущего солнца. " +
+        "Для систем, построенных вокруг Sun.LocalOffset, должно быть включено.")]
+    [SerializeField]
+    private bool worldBoundsAreRelativeToSun = true;
+
+    [FormerlySerializedAs("centerSunWhenWholeMapFits")]
     [FormerlySerializedAs("centerSunAtMaximumZoom")]
     [Tooltip(
-        "На максимальном отдалении фиксировать " +
-        "фактический визуальный центр солнца " +
-        "точно в центре экрана.")]
+        "Когда viewport становится больше карты по оси, " +
+        "эта ось фиксируется на центре солнца.")]
     [SerializeField]
-    private bool centerSunWhenWholeMapFits = true;
+    private bool centerOversizedAxesOnSun = true;
 
     [Tooltip(
-        "Допустимый запас до Max Zoom. " +
-        "0 означает включать центрирование только " +
-        "при фактическом достижении максимального Target Zoom.")]
-    [Range(0f, 0.1f)]
+        "На максимальном Target Zoom обе оси плавно возвращаются " +
+        "к центру солнца, даже если одна из осей ещё имеет диапазон drag.")]
     [SerializeField]
-    private float overviewViewportPadding = 0f;
+    private bool forceFullCenterAtMaximumZoom = true;
 
+    [Min(0.01f)]
+    [SerializeField]
+    private float maximumZoomTolerance = 1f;
+
+    [FormerlySerializedAs("blockDragWhenWholeMapFits")]
     [FormerlySerializedAs("blockDragAtMaximumZoom")]
     [Tooltip(
-        "Запретить drag, пока солнце зафиксировано " +
-        "в центре при максимальном отдалении.")]
+        "На максимальном zoom запрещает drag, пока камера " +
+        "автоматически удерживает солнце в центре.")]
     [SerializeField]
-    private bool blockDragWhenWholeMapFits = true;
+    private bool blockDragAtMaximumZoom = true;
+
+    [Min(0f)]
+    [Tooltip(
+        "Внутренний отступ от World Bounds в мировых единицах. " +
+        "Обычно оставьте 0.")]
+    [SerializeField]
+    private float worldBoundsPadding = 0f;
+
+    [Header("Zoom Center Preservation")]
+
+    [Tooltip(
+        "Если перед изменением zoom солнце уже находится в центре, " +
+        "контроллер сохраняет его в центре на всём пути zoom. " +
+        "Это устраняет уход карты вверх перед overview-режимом.")]
+    [SerializeField]
+    private bool preserveSunCenterDuringZoom = true;
+
+    [Min(0f)]
+    [Tooltip(
+        "Допуск в мировых единицах, в пределах которого focus " +
+        "считается установленным на солнце.")]
+    [SerializeField]
+    private float sunCenterPreservationTolerance = 8f;
 
     [Header("Diagnostics")]
 
@@ -84,9 +112,10 @@ public sealed class SystemCameraController2A :
     [SerializeField]
     private bool logModeChanges = false;
 
+    [FormerlySerializedAs("logSunCenteringChanges")]
     [FormerlySerializedAs("logMaximumZoomCentering")]
     [SerializeField]
-    private bool logSunCenteringChanges = false;
+    private bool logBoundsStateChanges = false;
 
     private SimpleEventBus _eventBus;
     private IGameSessionService _gameSessionService;
@@ -97,8 +126,17 @@ public sealed class SystemCameraController2A :
     private bool _isSystemCameraActive;
     private bool _isSubscribedToEvents;
     private bool _ownershipErrorReported;
-    private bool _isSunCenteredForOverview;
     private bool _missingSunWarningLogged;
+
+    private bool _horizontalAxisLocked;
+    private bool _verticalAxisLocked;
+    private bool _maximumZoomCenteringActive;
+    private bool _sunCenterPreservationActive;
+    private bool _forceCenterXActive;
+    private bool _forceCenterYActive;
+    private bool _lastLoggedHorizontalLock;
+    private bool _lastLoggedVerticalLock;
+    private bool _lastLoggedMaximumCentering;
 
     private SunNodeView _cachedSunNodeView;
 
@@ -106,21 +144,10 @@ public sealed class SystemCameraController2A :
     private Vector3 _targetFocusPoint;
     private Vector3 _focusVelocity;
 
-    /*
-     * Perspective:
-     * zoom = расстояние от камеры до focus point.
-     *
-     * Orthographic:
-     * zoom = Orthographic Size.
-     */
     private float _currentZoom;
     private float _targetZoom;
     private float _zoomVelocity;
 
-    /*
-     * Угол Perspective-камеры рассчитывается
-     * только из конфигурации и не меняется при zoom.
-     */
     private Vector3 _fixedPerspectiveOffsetDirection;
     private Quaternion _fixedPerspectiveRotation;
     private bool _fixedPerspectiveOrientationReady;
@@ -132,7 +159,15 @@ public sealed class SystemCameraController2A :
         _isSystemCameraActive;
 
     public bool IsSunCenteredForOverview =>
-        _isSunCenteredForOverview;
+        _maximumZoomCenteringActive ||
+        (_horizontalAxisLocked &&
+         _verticalAxisLocked);
+
+    public bool IsHorizontalAxisLocked =>
+        _horizontalAxisLocked;
+
+    public bool IsVerticalAxisLocked =>
+        _verticalAxisLocked;
 
     public Camera TargetCamera =>
         targetCamera;
@@ -164,13 +199,10 @@ public sealed class SystemCameraController2A :
                     : 1f;
 
             float maximumByHeight =
-                bounds.height *
-                0.5f;
+                bounds.height * 0.5f;
 
             float maximumByWidth =
-                bounds.width *
-                0.5f /
-                aspect;
+                bounds.width * 0.5f / aspect;
 
             return Mathf.Min(
                 cameraConfig.MaxOrthographicSize,
@@ -222,16 +254,15 @@ public sealed class SystemCameraController2A :
         ResolveServices();
         SubscribeToEvents();
 
-        _isInitialized =
-            true;
+        _isInitialized = true;
 
         ActivateSystemCameraSafely();
 
         if (logInitialization)
         {
             Debug.Log(
-                "[SystemCameraController2A] " +
-                "Initialized. Perspective angle is locked.",
+                "[SystemCameraController2A] Initialized. " +
+                "Target-first bounds clamp is active.",
                 this);
         }
     }
@@ -347,18 +378,13 @@ public sealed class SystemCameraController2A :
         if (_ownershipErrorReported)
             return;
 
-        _ownershipErrorReported =
-            true;
+        _ownershipErrorReported = true;
 
         Debug.LogError(
             message,
             this);
     }
 
-    /// <summary>
-    /// Рассчитывает и фиксирует направление камеры.
-    /// После этого zoom меняет только расстояние.
-    /// </summary>
     private void RefreshFixedPerspectiveOrientation()
     {
         if (cameraConfig == null)
@@ -384,9 +410,8 @@ public sealed class SystemCameraController2A :
                     cameraConfig
                         .PerspectiveYaw);
 
-        if (!IsFinite(offset) ||
-            offset.sqrMagnitude <
-            0.000001f)
+        if (!SystemCameraMath2A.IsFinite(offset) ||
+            offset.sqrMagnitude < 0.000001f)
         {
             offset =
                 Vector3.back;
@@ -420,8 +445,9 @@ public sealed class SystemCameraController2A :
         _isSystemCameraActive =
             true;
 
-        SetSunCenteredForOverview(false);
         InvalidateSunReference();
+        ResetBoundsRuntimeState();
+        _sunCenterPreservationActive = false;
 
         Vector3 shipPosition =
             GetShipTargetPosition();
@@ -437,8 +463,7 @@ public sealed class SystemCameraController2A :
             GetDefaultZoomForCurrentSystem();
 
         _currentZoom =
-            ClampZoom(
-                defaultZoom);
+            ClampZoom(defaultZoom);
 
         _targetZoom =
             _currentZoom;
@@ -452,7 +477,12 @@ public sealed class SystemCameraController2A :
         SetMode(
             SystemCameraMode2A.FollowShip);
 
-        ApplyCameraPoseAndClamp();
+        ApplyProjectionSettings();
+        ConstrainTargetAndCurrentFocus(
+            snapCurrentToTarget: true);
+        ApplyCameraPoseAtFocus(
+            _currentFocusPoint,
+            _currentZoom);
     }
 
     private void LateUpdate()
@@ -465,9 +495,16 @@ public sealed class SystemCameraController2A :
             return;
         }
 
+        ApplyProjectionSettings();
         UpdateTargetsForCurrentMode();
-        SmoothCurrentCameraState();
-        ApplyCameraPoseAndClamp();
+        SmoothZoom();
+        ConstrainTargetFocus();
+        SmoothFocus();
+        ConstrainCurrentFocusWithoutOversizedSnap();
+        ApplyCameraPoseAtFocus(
+            _currentFocusPoint,
+            _currentZoom);
+        LogBoundsStateIfChanged();
 
         if (mode ==
             SystemCameraMode2A.ReturningToShip)
@@ -478,6 +515,28 @@ public sealed class SystemCameraController2A :
 
     private void UpdateTargetsForCurrentMode()
     {
+        /*
+         * Пока выполняется zoom, начатый из центрированного
+         * положения, не разрешаем FollowShip заменить центр
+         * солнца позицией корабля.
+         *
+         * После завершения обычного zoom FollowShip снова
+         * работает, если overview-lock по осям не активен.
+         */
+        if (_sunCenterPreservationActive &&
+            (IsZoomTransitionActive() ||
+             _forceCenterXActive ||
+             _forceCenterYActive) &&
+            TryGetSystemCenterWorld(
+                out Vector3 preservedCenter))
+        {
+            _targetFocusPoint =
+                ToGameplayPlane(
+                    preservedCenter);
+
+            return;
+        }
+
         switch (mode)
         {
             case SystemCameraMode2A.FollowShip:
@@ -492,7 +551,6 @@ public sealed class SystemCameraController2A :
                 _targetZoom =
                     ClampZoom(
                         GetDefaultZoomForCurrentSystem());
-
                 break;
 
             case SystemCameraMode2A.FreeLook:
@@ -502,9 +560,6 @@ public sealed class SystemCameraController2A :
 
     private void UpdateFollowTarget()
     {
-        if (_isSunCenteredForOverview)
-            return;
-
         Vector3 shipPosition =
             ToGameplayPlane(
                 GetShipTargetPosition());
@@ -531,7 +586,28 @@ public sealed class SystemCameraController2A :
             shipPosition;
     }
 
-    private void SmoothCurrentCameraState()
+    private void SmoothZoom()
+    {
+        float deltaTime =
+            Mathf.Max(
+                0.00001f,
+                Time.unscaledDeltaTime);
+
+        _currentZoom =
+            Mathf.SmoothDamp(
+                _currentZoom,
+                _targetZoom,
+                ref _zoomVelocity,
+                cameraConfig.ZoomSmoothTime,
+                Mathf.Infinity,
+                deltaTime);
+
+        _currentZoom =
+            ClampZoom(
+                _currentZoom);
+    }
+
+    private void SmoothFocus()
     {
         float deltaTime =
             Mathf.Max(
@@ -549,19 +625,16 @@ public sealed class SystemCameraController2A :
 
         _currentFocusPoint.z =
             cameraConfig.GameplayPlaneZ;
+    }
 
-        _currentZoom =
-            Mathf.SmoothDamp(
-                _currentZoom,
-                _targetZoom,
-                ref _zoomVelocity,
-                cameraConfig.ZoomSmoothTime,
-                Mathf.Infinity,
-                deltaTime);
-
-        _currentZoom =
-            ClampZoom(
-                _currentZoom);
+    private bool IsZoomTransitionActive()
+    {
+        return
+            Mathf.Abs(
+                _currentZoom -
+                _targetZoom) > 0.01f ||
+            Mathf.Abs(
+                _zoomVelocity) > 0.01f;
     }
 
     private float GetFocusSmoothTime()
@@ -569,16 +642,13 @@ public sealed class SystemCameraController2A :
         switch (mode)
         {
             case SystemCameraMode2A.ReturningToShip:
-                return
-                    cameraConfig.ReturnSmoothTime;
+                return cameraConfig.ReturnSmoothTime;
 
             case SystemCameraMode2A.FreeLook:
-                return
-                    cameraConfig.FreeLookSmoothTime;
+                return cameraConfig.FreeLookSmoothTime;
 
             default:
-                return
-                    cameraConfig.FollowSmoothTime;
+                return cameraConfig.FollowSmoothTime;
         }
     }
 
@@ -587,11 +657,19 @@ public sealed class SystemCameraController2A :
         if (!_isSystemCameraActive)
             return;
 
-        if (_isSunCenteredForOverview &&
-            blockDragWhenWholeMapFits)
+        if (_maximumZoomCenteringActive &&
+            blockDragAtMaximumZoom)
         {
             return;
         }
+
+        /*
+         * Явный drag означает, что игрок хочет выйти
+         * из автоматического удержания солнца.
+         * На максимальном zoom это по-прежнему запрещено
+         * настройкой blockDragAtMaximumZoom.
+         */
+        _sunCenterPreservationActive = false;
 
         SetMode(
             SystemCameraMode2A.FreeLook);
@@ -601,6 +679,12 @@ public sealed class SystemCameraController2A :
 
         _focusVelocity =
             Vector3.zero;
+
+        /*
+         * Пересчитываем lock-состояние сразу, чтобы первый
+         * кадр drag не использовал устаревшие overview-locks.
+         */
+        ConstrainTargetFocus();
     }
 
     public void ReturnToShip()
@@ -618,7 +702,7 @@ public sealed class SystemCameraController2A :
             ActivateSystemCameraSafely();
         }
 
-        SetSunCenteredForOverview(false);
+        _sunCenterPreservationActive = false;
 
         _targetFocusPoint =
             ToGameplayPlane(
@@ -669,10 +753,14 @@ public sealed class SystemCameraController2A :
             return;
         }
 
-        if (!IsFinite(zoomInInput))
+        if (!SystemCameraMath2A.IsFinite(
+                zoomInInput))
+        {
             return;
+        }
 
         NotifyManualZoomStarted();
+        PrepareSunCenterPreservationForZoom();
 
         _targetZoom -=
             zoomInInput *
@@ -681,22 +769,34 @@ public sealed class SystemCameraController2A :
         _targetZoom =
             ClampZoom(
                 _targetZoom);
+
+        /*
+         * Пересчитываем target bounds сразу по новому target zoom.
+         * Это не даёт focus начать позднее движение к границе.
+         */
+        ConstrainTargetFocus();
     }
 
     public void SetTargetZoom(
         float value)
     {
+        PrepareSunCenterPreservationForZoom();
+
         _targetZoom =
             ClampZoom(
                 value);
 
         _zoomVelocity =
             0f;
+
+        ConstrainTargetFocus();
     }
 
     public void SetZoomImmediate(
         float value)
     {
+        PrepareSunCenterPreservationForZoom();
+
         float clampedValue =
             ClampZoom(
                 value);
@@ -710,7 +810,12 @@ public sealed class SystemCameraController2A :
         _zoomVelocity =
             0f;
 
-        ApplyCameraPoseAndClamp();
+        ApplyProjectionSettings();
+        ConstrainTargetAndCurrentFocus(
+            snapCurrentToTarget: false);
+        ApplyCameraPoseAtFocus(
+            _currentFocusPoint,
+            _currentZoom);
     }
 
     public bool IsZoomAtTarget(
@@ -733,14 +838,17 @@ public sealed class SystemCameraController2A :
             return;
         }
 
-        if (_isSunCenteredForOverview &&
-            blockDragWhenWholeMapFits)
+        if (_maximumZoomCenteringActive &&
+            blockDragAtMaximumZoom)
         {
             return;
         }
 
-        if (!IsFinite(screenDelta))
+        if (!SystemCameraMath2A.IsFinite(
+                screenDelta))
+        {
             return;
+        }
 
         if (Screen.width <= 0 ||
             Screen.height <= 0)
@@ -750,18 +858,16 @@ public sealed class SystemCameraController2A :
 
         EnterFreeLook();
 
-        if (_isSunCenteredForOverview &&
-            blockDragWhenWholeMapFits)
+        if (_maximumZoomCenteringActive &&
+            blockDragAtMaximumZoom)
         {
             return;
         }
 
         Vector2 screenCenter =
             new Vector2(
-                Screen.width *
-                0.5f,
-                Screen.height *
-                0.5f);
+                Screen.width * 0.5f,
+                Screen.height * 0.5f);
 
         Vector2 movedScreenPoint =
             screenCenter +
@@ -791,11 +897,25 @@ public sealed class SystemCameraController2A :
         worldMovement *=
             cameraConfig.DragSensitivity;
 
+        if (_horizontalAxisLocked)
+        {
+            worldMovement.x =
+                0f;
+        }
+
+        if (_verticalAxisLocked)
+        {
+            worldMovement.y =
+                0f;
+        }
+
         _targetFocusPoint +=
             worldMovement;
 
         _targetFocusPoint.z =
             cameraConfig.GameplayPlaneZ;
+
+        ConstrainTargetFocus();
     }
 
     public void ReclampCurrentPosition()
@@ -803,7 +923,12 @@ public sealed class SystemCameraController2A :
         if (!_isSystemCameraActive)
             return;
 
-        ApplyCameraPoseAndClamp();
+        ApplyProjectionSettings();
+        ConstrainTargetAndCurrentFocus(
+            snapCurrentToTarget: false);
+        ApplyCameraPoseAtFocus(
+            _currentFocusPoint,
+            _currentZoom);
     }
 
     private bool TryScreenPointToGameplayPlane(
@@ -830,392 +955,447 @@ public sealed class SystemCameraController2A :
                 out worldPoint);
     }
 
-    private void ApplyCameraPoseAndClamp()
+    private void ConstrainTargetFocus()
     {
+        /*
+         * Target focus ограничивается по TARGET zoom.
+         * Благодаря этому контроллер заранее знает будущий
+         * размер viewport и не начинает позднюю коррекцию
+         * уже во время SmoothDamp zoom.
+         */
+        if (!TryBuildClampContext(
+                _targetZoom,
+                out Vector3 systemCenter,
+                out Rect effectiveBounds,
+                out Vector2 footprintMinimumOffset,
+                out Vector2 footprintMaximumOffset))
+        {
+            ResetBoundsRuntimeState();
+            return;
+        }
+
+        _maximumZoomCenteringActive =
+            forceFullCenterAtMaximumZoom &&
+            IsTargetAtMaximumZoom();
+
+        bool centeredViewExceedsBoundsX =
+            DoesCenteredViewExceedBoundsX(
+                effectiveBounds,
+                systemCenter,
+                footprintMinimumOffset,
+                footprintMaximumOffset);
+
+        bool centeredViewExceedsBoundsY =
+            DoesCenteredViewExceedBoundsY(
+                effectiveBounds,
+                systemCenter,
+                footprintMinimumOffset,
+                footprintMaximumOffset);
+
+        /*
+         * Если zoom начался при уже центрированном солнце,
+         * не разрешаем строгому perspective-clamp сдвинуть
+         * focus к асимметричной границе карты.
+         *
+         * Ось удерживается на солнце только с момента,
+         * когда центрированный viewport перестаёт полностью
+         * помещаться в строгие bounds. До этого обычный
+         * диапазон drag сохраняется.
+         */
+        bool preserveCenterX =
+            preserveSunCenterDuringZoom &&
+            _sunCenterPreservationActive &&
+            centeredViewExceedsBoundsX;
+
+        bool preserveCenterY =
+            preserveSunCenterDuringZoom &&
+            _sunCenterPreservationActive &&
+            centeredViewExceedsBoundsY;
+
+        _forceCenterXActive =
+            _maximumZoomCenteringActive ||
+            preserveCenterX;
+
+        _forceCenterYActive =
+            _maximumZoomCenteringActive ||
+            preserveCenterY;
+
+        Vector2 requested =
+            new Vector2(
+                _targetFocusPoint.x,
+                _targetFocusPoint.y);
+
+        Vector2 clamped =
+            SystemCameraMath2A.ClampFocusPoint(
+                effectiveBounds,
+                requested,
+                footprintMinimumOffset,
+                footprintMaximumOffset,
+                new Vector2(
+                    systemCenter.x,
+                    systemCenter.y),
+                centerOversizedAxesOnSun,
+                _forceCenterXActive,
+                _forceCenterYActive,
+                out _horizontalAxisLocked,
+                out _verticalAxisLocked);
+
+        _targetFocusPoint =
+            new Vector3(
+                clamped.x,
+                clamped.y,
+                cameraConfig.GameplayPlaneZ);
+    }
+
+    /// <summary>
+    /// Ограничивает current focus только на осях,
+    /// где существует допустимый диапазон.
+    ///
+    /// На оси, где viewport уже больше карты,
+    /// current focus плавно идёт к target focus,
+    /// а не телепортируется в центр.
+    /// </summary>
+    private void ConstrainCurrentFocusWithoutOversizedSnap()
+    {
+        if (!TryBuildClampContext(
+                _currentZoom,
+                out Vector3 systemCenter,
+                out Rect effectiveBounds,
+                out Vector2 footprintMinimumOffset,
+                out Vector2 footprintMaximumOffset))
+        {
+            return;
+        }
+
+        Vector2 requested =
+            new Vector2(
+                _currentFocusPoint.x,
+                _currentFocusPoint.y);
+
+        Vector2 clamped =
+            SystemCameraMath2A.ClampFocusPoint(
+                effectiveBounds,
+                requested,
+                footprintMinimumOffset,
+                footprintMaximumOffset,
+                new Vector2(
+                    systemCenter.x,
+                    systemCenter.y),
+                centerOversizedAxes: false,
+                forceCenterX: false,
+                forceCenterY: false,
+                out _,
+                out _);
+
+        /*
+         * Когда target ось удерживается на солнце,
+         * current ось должна свободно SmoothDamp-двигаться
+         * к этому target. Строгий current-clamp не должен
+         * каждый кадр возвращать её к асимметричной границе.
+         */
+        if (_forceCenterXActive)
+        {
+            clamped.x =
+                requested.x;
+        }
+
+        if (_forceCenterYActive)
+        {
+            clamped.y =
+                requested.y;
+        }
+
+        _currentFocusPoint =
+            new Vector3(
+                clamped.x,
+                clamped.y,
+                cameraConfig.GameplayPlaneZ);
+    }
+
+    private void ConstrainTargetAndCurrentFocus(
+        bool snapCurrentToTarget)
+    {
+        ConstrainTargetFocus();
+
+        if (snapCurrentToTarget)
+        {
+            _currentFocusPoint =
+                _targetFocusPoint;
+
+            _focusVelocity =
+                Vector3.zero;
+
+            return;
+        }
+
+        ConstrainCurrentFocusWithoutOversizedSnap();
+    }
+
+    private bool TryBuildClampContext(
+        float zoom,
+        out Vector3 systemCenter,
+        out Rect effectiveBounds,
+        out Vector2 footprintMinimumOffset,
+        out Vector2 footprintMaximumOffset)
+    {
+        systemCenter =
+            Vector3.zero;
+
+        effectiveBounds =
+            default;
+
+        footprintMinimumOffset =
+            Vector2.zero;
+
+        footprintMaximumOffset =
+            Vector2.zero;
+
         if (targetCamera == null ||
             cameraConfig == null)
         {
+            return false;
+        }
+
+        if (!TryGetSystemCenterWorld(
+                out systemCenter))
+        {
+            return false;
+        }
+
+        systemCenter =
+            ToGameplayPlane(
+                systemCenter);
+
+        effectiveBounds =
+            GetEffectiveWorldBounds(
+                systemCenter);
+
+        if (effectiveBounds.width <= 0f ||
+            effectiveBounds.height <= 0f)
+        {
+            return false;
+        }
+
+        if (!TryGetViewportFootprintOffsets(
+                systemCenter,
+                ClampZoom(zoom),
+                out footprintMinimumOffset,
+                out footprintMaximumOffset))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool DoesCenteredViewExceedBoundsX(
+        Rect bounds,
+        Vector3 systemCenter,
+        Vector2 footprintMinimumOffset,
+        Vector2 footprintMaximumOffset)
+    {
+        float centeredMinimum =
+            systemCenter.x +
+            footprintMinimumOffset.x;
+
+        float centeredMaximum =
+            systemCenter.x +
+            footprintMaximumOffset.x;
+
+        return
+            centeredMinimum < bounds.xMin - 0.001f ||
+            centeredMaximum > bounds.xMax + 0.001f;
+    }
+
+    private bool DoesCenteredViewExceedBoundsY(
+        Rect bounds,
+        Vector3 systemCenter,
+        Vector2 footprintMinimumOffset,
+        Vector2 footprintMaximumOffset)
+    {
+        float centeredMinimum =
+            systemCenter.y +
+            footprintMinimumOffset.y;
+
+        float centeredMaximum =
+            systemCenter.y +
+            footprintMaximumOffset.y;
+
+        return
+            centeredMinimum < bounds.yMin - 0.001f ||
+            centeredMaximum > bounds.yMax + 0.001f;
+    }
+
+    /// <summary>
+    /// Если до изменения zoom камера уже смотрит на солнце,
+    /// включает сохранение этого визуального якоря.
+    /// Состояние снимается первым явным drag или сменой режима.
+    /// </summary>
+    private void PrepareSunCenterPreservationForZoom()
+    {
+        if (!preserveSunCenterDuringZoom)
+        {
+            _sunCenterPreservationActive =
+                false;
+
             return;
         }
 
-        ApplyProjectionSettings();
+        if (_sunCenterPreservationActive)
+            return;
 
-        /*
-         * На максимальном TARGET zoom сразу используем
-         * реальный центр солнца.
-         *
-         * Bounds correction в этом режиме не вызывается,
-         * поэтому он не может сдвинуть карту вверх.
-         */
-        if (TryCenterSunAtMaximumTargetZoom())
+        if (!TryGetSystemCenterWorld(
+                out Vector3 systemCenter))
         {
             return;
         }
 
-        SetSunCenteredForOverview(false);
+        systemCenter =
+            ToGameplayPlane(
+                systemCenter);
+
+        float safeTolerance =
+            Mathf.Max(
+                0f,
+                sunCenterPreservationTolerance);
+
+        bool currentCentered =
+            Vector2.Distance(
+                new Vector2(
+                    _currentFocusPoint.x,
+                    _currentFocusPoint.y),
+                new Vector2(
+                    systemCenter.x,
+                    systemCenter.y)) <=
+            safeTolerance;
+
+        bool targetCentered =
+            Vector2.Distance(
+                new Vector2(
+                    _targetFocusPoint.x,
+                    _targetFocusPoint.y),
+                new Vector2(
+                    systemCenter.x,
+                    systemCenter.y)) <=
+            safeTolerance;
+
+        if (!currentCentered &&
+            !targetCentered)
+        {
+            return;
+        }
+
+        _sunCenterPreservationActive =
+            true;
+
+        _targetFocusPoint =
+            ToGameplayPlane(
+                systemCenter);
+
+        /*
+         * Если камера уже практически в центре,
+         * убираем остаточную скорость focus, чтобы
+         * она не создала небольшой drift при zoom.
+         */
+        if (currentCentered)
+        {
+            _currentFocusPoint =
+                ToGameplayPlane(
+                    systemCenter);
+
+            _focusVelocity =
+                Vector3.zero;
+        }
+    }
+
+    private Rect GetEffectiveWorldBounds(
+        Vector3 systemCenter)
+    {
+        Rect configuredBounds =
+            cameraConfig.WorldBoundsRect;
+
+        Vector2 originOffset =
+            worldBoundsAreRelativeToSun
+                ? new Vector2(
+                    systemCenter.x,
+                    systemCenter.y)
+                : Vector2.zero;
+
+        Rect worldBounds =
+            new Rect(
+                configuredBounds.x +
+                originOffset.x,
+                configuredBounds.y +
+                originOffset.y,
+                configuredBounds.width,
+                configuredBounds.height);
+
+        float safePadding =
+            Mathf.Max(
+                0f,
+                worldBoundsPadding);
+
+        if (safePadding > 0f &&
+            worldBounds.width > safePadding * 2f &&
+            worldBounds.height > safePadding * 2f)
+        {
+            worldBounds.xMin +=
+                safePadding;
+
+            worldBounds.xMax -=
+                safePadding;
+
+            worldBounds.yMin +=
+                safePadding;
+
+            worldBounds.yMax -=
+                safePadding;
+        }
+
+        return worldBounds;
+    }
+
+    private bool TryGetViewportFootprintOffsets(
+        Vector3 referenceFocus,
+        float zoom,
+        out Vector2 footprintMinimumOffset,
+        out Vector2 footprintMaximumOffset)
+    {
+        footprintMinimumOffset =
+            Vector2.zero;
+
+        footprintMaximumOffset =
+            Vector2.zero;
 
         ApplyCameraPoseAtFocus(
-            _currentFocusPoint);
+            referenceFocus,
+            zoom);
 
         if (!TryGetViewportFootprint(
                 out Vector2 footprintMinimum,
                 out Vector2 footprintMaximum))
         {
-            return;
-        }
-
-        Vector2 correction =
-            SystemCameraMath2A
-                .CalculateBoundsCorrection(
-                    cameraConfig.WorldBoundsRect,
-                    footprintMinimum,
-                    footprintMaximum);
-
-        if (correction.sqrMagnitude <=
-            0.000001f)
-        {
-            return;
-        }
-
-        _currentFocusPoint.x +=
-            correction.x;
-
-        _currentFocusPoint.y +=
-            correction.y;
-
-        _targetFocusPoint.x +=
-            correction.x;
-
-        _targetFocusPoint.y +=
-            correction.y;
-
-        ApplyCameraPoseAtFocus(
-            _currentFocusPoint);
-    }
-
-    /// <summary>
-    /// На максимальном целевом zoom устанавливает
-    /// фактический визуальный центр солнца
-    /// точно в оптический центр камеры.
-    /// </summary>
-    private bool TryCenterSunAtMaximumTargetZoom()
-    {
-        if (!centerSunWhenWholeMapFits)
-            return false;
-
-        if (!IsTargetAtMaximumZoom())
-            return false;
-
-        if (!TryGetActualSunWorldCenter(
-                out Vector3 sunWorldCenter))
-        {
             return false;
         }
 
-        _currentFocusPoint =
-            ToGameplayPlane(
-                sunWorldCenter);
+        Vector2 reference =
+            new Vector2(
+                referenceFocus.x,
+                referenceFocus.y);
 
-        _targetFocusPoint =
-            _currentFocusPoint;
+        footprintMinimumOffset =
+            footprintMinimum -
+            reference;
 
-        _focusVelocity =
-            Vector3.zero;
+        footprintMaximumOffset =
+            footprintMaximum -
+            reference;
 
-        SetSunCenteredForOverview(true);
-
-        /*
-         * Здесь сохраняется фактический world Z
-         * центра спрайта солнца.
-         *
-         * Для наклонённой Perspective-камеры
-         * это исключает дополнительный экранный сдвиг.
-         */
-        ApplyCameraPoseAtExactWorldFocus(
-            sunWorldCenter);
-
-        return true;
-    }
-
-    /// <summary>
-    /// Проверяет Target Zoom, а не Current Zoom.
-    /// Центрирование начинается сразу после последнего
-    /// шага zoom, пока сама камера ещё плавно отдаляется.
-    /// </summary>
-    private bool IsTargetAtMaximumZoom()
-    {
-        if (cameraConfig == null)
-            return false;
-
-        float tolerance =
-            Mathf.Max(
-                0.01f,
-                cameraConfig.MaxZoom *
-                Mathf.Clamp01(
-                    overviewViewportPadding));
-
-        return _targetZoom >=
-               cameraConfig.MaxZoom -
-               tolerance;
-    }
-
-    /// <summary>
-    /// Получает фактический визуальный центр текущего солнца.
-    ///
-    /// Приоритет:
-    /// 1. SpriteRenderer созданного SunNodeView;
-    /// 2. Sun.LocalOffset текущего StarSystemConfig;
-    /// 3. Transform созданного SunNodeView.
-    /// </summary>
-    private bool TryGetActualSunWorldCenter(
-        out Vector3 worldCenter)
-    {
-        worldCenter =
-            Vector3.zero;
-
-        if (_cachedSunNodeView == null ||
-            !_cachedSunNodeView
-                .gameObject
-                .activeInHierarchy)
-        {
-            _cachedSunNodeView =
-                FindSunNodeView();
-        }
-
-        if (_cachedSunNodeView != null)
-        {
-            SpriteRenderer sunSprite =
-                _cachedSunNodeView
-                    .GetComponent<
-                        SpriteRenderer>();
-
-            if (sunSprite == null)
-            {
-                sunSprite =
-                    _cachedSunNodeView
-                        .GetComponentInChildren<
-                            SpriteRenderer>(true);
-            }
-
-            if (sunSprite != null &&
-                sunSprite.enabled &&
-                sunSprite
-                    .gameObject
-                    .activeInHierarchy)
-            {
-                worldCenter =
-                    sunSprite
-                        .bounds
-                        .center;
-
-                if (SystemCameraMath2A.IsFinite(
-                        worldCenter))
-                {
-                    _missingSunWarningLogged =
-                        false;
-
-                    return true;
-                }
-            }
-        }
-
-        StarSystemConfig currentSystem =
-            GetCurrentSystemConfig();
-
-        if (currentSystem != null &&
-            currentSystem.Sun != null)
-        {
-            Vector2 localOffset =
-                currentSystem
-                    .Sun
-                    .LocalOffset;
-
-            Vector3 localCenter =
-                new Vector3(
-                    localOffset.x,
-                    localOffset.y,
-                    cameraConfig.GameplayPlaneZ);
-
-            worldCenter =
-                systemMapContentRoot != null
-                    ? systemMapContentRoot
-                        .TransformPoint(
-                            localCenter)
-                    : localCenter;
-
-            if (SystemCameraMath2A.IsFinite(
-                    worldCenter))
-            {
-                _missingSunWarningLogged =
-                    false;
-
-                return true;
-            }
-        }
-
-        if (_cachedSunNodeView != null)
-        {
-            worldCenter =
-                _cachedSunNodeView
-                    .transform
-                    .position;
-
-            if (SystemCameraMath2A.IsFinite(
-                    worldCenter))
-            {
-                _missingSunWarningLogged =
-                    false;
-
-                return true;
-            }
-        }
-
-        if (!_missingSunWarningLogged)
-        {
-            _missingSunWarningLogged =
-                true;
-
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
-                "Actual sun center was not found.",
-                this);
-        }
-
-        return false;
-    }
-
-    private SunNodeView FindSunNodeView()
-    {
-        if (systemMapContentRoot != null)
-        {
-            SunNodeView sunInsideMap =
-                systemMapContentRoot
-                    .GetComponentInChildren<
-                        SunNodeView>(true);
-
-            if (sunInsideMap != null)
-            {
-                return sunInsideMap;
-            }
-        }
-
-        return FindFirstObjectByType<
-            SunNodeView>();
-    }
-
-    private void InvalidateSunReference()
-    {
-        _cachedSunNodeView =
-            null;
-
-        _missingSunWarningLogged =
-            false;
-    }
-
-    private void SetSunCenteredForOverview(
-        bool centered)
-    {
-        if (_isSunCenteredForOverview ==
-            centered)
-        {
-            return;
-        }
-
-        _isSunCenteredForOverview =
-            centered;
-
-        if (logSunCenteringChanges)
-        {
-            Debug.Log(
-                "[SystemCameraController2A] " +
-                $"Sun centered for overview: {centered}.",
-                this);
-        }
-    }
-
-    private void ApplyProjectionSettings()
-    {
-        bool usePerspective =
-            cameraConfig.ProjectionMode ==
-            SystemCameraProjection2A.Perspective;
-
-        targetCamera.orthographic =
-            !usePerspective;
-
-        targetCamera.nearClipPlane =
-            cameraConfig.NearClipPlane;
-
-        targetCamera.farClipPlane =
-            cameraConfig.FarClipPlane;
-
-        if (usePerspective)
-        {
-            targetCamera.fieldOfView =
-                cameraConfig
-                    .PerspectiveFieldOfView;
-        }
-        else
-        {
-            targetCamera.orthographicSize =
-                ClampZoom(
-                    _currentZoom);
-        }
-    }
-
-    private void ApplyCameraPoseAtFocus(
-        Vector3 focusPoint)
-    {
-        focusPoint =
-            ToGameplayPlane(
-                focusPoint);
-
-        ApplyCameraPoseAtExactWorldFocus(
-            focusPoint);
-    }
-
-    /// <summary>
-    /// Устанавливает камеру относительно точной
-    /// мировой точки и не заменяет её Z.
-    /// </summary>
-    private void ApplyCameraPoseAtExactWorldFocus(
-        Vector3 worldFocusPoint)
-    {
-        if (cameraConfig.ProjectionMode ==
-            SystemCameraProjection2A.Perspective)
-        {
-            if (!_fixedPerspectiveOrientationReady)
-            {
-                RefreshFixedPerspectiveOrientation();
-            }
-
-            Vector3 cameraPosition =
-                worldFocusPoint +
-                _fixedPerspectiveOffsetDirection *
-                _currentZoom;
-
-            targetCamera.transform
-                .SetPositionAndRotation(
-                    cameraPosition,
-                    _fixedPerspectiveRotation);
-
-            return;
-        }
-
-        Vector3 orthographicPosition =
-            new Vector3(
-                worldFocusPoint.x,
-                worldFocusPoint.y,
-                cameraConfig
-                    .OrthographicCameraZ);
-
-        targetCamera.transform
-            .SetPositionAndRotation(
-                orthographicPosition,
-                Quaternion.identity);
-
-        targetCamera.orthographicSize =
-            ClampZoom(
-                _currentZoom);
+        return
+            SystemCameraMath2A.IsFinite(
+                footprintMinimumOffset) &&
+            SystemCameraMath2A.IsFinite(
+                footprintMaximumOffset);
     }
 
     private bool TryGetViewportFootprint(
@@ -1279,8 +1459,297 @@ public sealed class SystemCameraController2A :
         }
 
         return
-            IsFinite(footprintMinimum) &&
-            IsFinite(footprintMaximum);
+            SystemCameraMath2A.IsFinite(
+                footprintMinimum) &&
+            SystemCameraMath2A.IsFinite(
+                footprintMaximum);
+    }
+
+    private bool IsTargetAtMaximumZoom()
+    {
+        if (cameraConfig == null)
+            return false;
+
+        float tolerance =
+            Mathf.Max(
+                0.01f,
+                maximumZoomTolerance);
+
+        return _targetZoom >=
+               cameraConfig.MaxZoom -
+               tolerance;
+    }
+
+    private bool TryGetSystemCenterWorld(
+        out Vector3 worldCenter)
+    {
+        worldCenter =
+            Vector3.zero;
+
+        if (_cachedSunNodeView == null ||
+            !_cachedSunNodeView
+                .gameObject
+                .activeInHierarchy)
+        {
+            _cachedSunNodeView =
+                FindSunNodeView();
+        }
+
+        if (_cachedSunNodeView != null)
+        {
+            SpriteRenderer rootSprite =
+                _cachedSunNodeView
+                    .GetComponent<
+                        SpriteRenderer>();
+
+            if (rootSprite == null)
+            {
+                rootSprite =
+                    _cachedSunNodeView
+                        .GetComponentInChildren<
+                            SpriteRenderer>(true);
+            }
+
+            if (rootSprite != null &&
+                rootSprite.enabled &&
+                rootSprite.gameObject.activeInHierarchy)
+            {
+                worldCenter =
+                    rootSprite.bounds.center;
+
+                if (SystemCameraMath2A.IsFinite(
+                        worldCenter))
+                {
+                    _missingSunWarningLogged =
+                        false;
+
+                    return true;
+                }
+            }
+
+            worldCenter =
+                _cachedSunNodeView
+                    .transform
+                    .position;
+
+            if (SystemCameraMath2A.IsFinite(
+                    worldCenter))
+            {
+                _missingSunWarningLogged =
+                    false;
+
+                return true;
+            }
+        }
+
+        StarSystemConfig currentSystem =
+            GetCurrentSystemConfig();
+
+        if (currentSystem != null &&
+            currentSystem.Sun != null)
+        {
+            Vector2 localOffset =
+                currentSystem
+                    .Sun
+                    .LocalOffset;
+
+            Vector3 localCenter =
+                new Vector3(
+                    localOffset.x,
+                    localOffset.y,
+                    cameraConfig.GameplayPlaneZ);
+
+            worldCenter =
+                systemMapContentRoot != null
+                    ? systemMapContentRoot
+                        .TransformPoint(
+                            localCenter)
+                    : localCenter;
+
+            if (SystemCameraMath2A.IsFinite(
+                    worldCenter))
+            {
+                _missingSunWarningLogged =
+                    false;
+
+                return true;
+            }
+        }
+
+        if (!_missingSunWarningLogged)
+        {
+            _missingSunWarningLogged =
+                true;
+
+            Debug.LogWarning(
+                "[SystemCameraController2A] " +
+                "System center was not found. " +
+                "Bounds clamp was skipped.",
+                this);
+        }
+
+        return false;
+    }
+
+    private SunNodeView FindSunNodeView()
+    {
+        if (systemMapContentRoot != null)
+        {
+            SunNodeView sunInsideMap =
+                systemMapContentRoot
+                    .GetComponentInChildren<
+                        SunNodeView>(true);
+
+            if (sunInsideMap != null)
+            {
+                return sunInsideMap;
+            }
+        }
+
+        return FindFirstObjectByType<
+            SunNodeView>();
+    }
+
+    private void InvalidateSunReference()
+    {
+        _cachedSunNodeView =
+            null;
+
+        _missingSunWarningLogged =
+            false;
+    }
+
+    private void ResetBoundsRuntimeState()
+    {
+        _horizontalAxisLocked =
+            false;
+
+        _verticalAxisLocked =
+            false;
+
+        _maximumZoomCenteringActive =
+            false;
+
+        _forceCenterXActive =
+            false;
+
+        _forceCenterYActive =
+            false;
+    }
+
+    private void LogBoundsStateIfChanged()
+    {
+        if (!logBoundsStateChanges)
+            return;
+
+        if (_lastLoggedHorizontalLock ==
+                _horizontalAxisLocked &&
+            _lastLoggedVerticalLock ==
+                _verticalAxisLocked &&
+            _lastLoggedMaximumCentering ==
+                _maximumZoomCenteringActive)
+        {
+            return;
+        }
+
+        _lastLoggedHorizontalLock =
+            _horizontalAxisLocked;
+
+        _lastLoggedVerticalLock =
+            _verticalAxisLocked;
+
+        _lastLoggedMaximumCentering =
+            _maximumZoomCenteringActive;
+
+        Debug.Log(
+            "[SystemCameraController2A] " +
+            $"Bounds state: lockX={_horizontalAxisLocked}, " +
+            $"lockY={_verticalAxisLocked}, " +
+            $"maxCenter={_maximumZoomCenteringActive}, " +
+            $"currentZoom={_currentZoom:F2}, " +
+            $"targetZoom={_targetZoom:F2}.",
+            this);
+    }
+
+    private void ApplyProjectionSettings()
+    {
+        bool usePerspective =
+            cameraConfig.ProjectionMode ==
+            SystemCameraProjection2A.Perspective;
+
+        targetCamera.orthographic =
+            !usePerspective;
+
+        targetCamera.nearClipPlane =
+            cameraConfig.NearClipPlane;
+
+        targetCamera.farClipPlane =
+            cameraConfig.FarClipPlane;
+
+        targetCamera.lensShift =
+            Vector2.zero;
+
+        if (usePerspective)
+        {
+            targetCamera.fieldOfView =
+                cameraConfig
+                    .PerspectiveFieldOfView;
+        }
+        else
+        {
+            targetCamera.orthographicSize =
+                ClampZoom(
+                    _currentZoom);
+        }
+    }
+
+    private void ApplyCameraPoseAtFocus(
+        Vector3 focusPoint,
+        float zoom)
+    {
+        focusPoint =
+            ToGameplayPlane(
+                focusPoint);
+
+        float safeZoom =
+            ClampZoom(
+                zoom);
+
+        if (cameraConfig.ProjectionMode ==
+            SystemCameraProjection2A.Perspective)
+        {
+            if (!_fixedPerspectiveOrientationReady)
+            {
+                RefreshFixedPerspectiveOrientation();
+            }
+
+            Vector3 cameraPosition =
+                focusPoint +
+                _fixedPerspectiveOffsetDirection *
+                safeZoom;
+
+            targetCamera.transform
+                .SetPositionAndRotation(
+                    cameraPosition,
+                    _fixedPerspectiveRotation);
+
+            return;
+        }
+
+        Vector3 orthographicPosition =
+            new Vector3(
+                focusPoint.x,
+                focusPoint.y,
+                cameraConfig
+                    .OrthographicCameraZ);
+
+        targetCamera.transform
+            .SetPositionAndRotation(
+                orthographicPosition,
+                Quaternion.identity);
+
+        targetCamera.orthographicSize =
+            safeZoom;
     }
 
     private void TryFinishReturningToShip()
@@ -1569,7 +2038,8 @@ public sealed class SystemCameraController2A :
         _isSystemCameraActive =
             false;
 
-        SetSunCenteredForOverview(false);
+        _sunCenterPreservationActive = false;
+        ResetBoundsRuntimeState();
         InvalidateSunReference();
 
         _focusVelocity =
@@ -1585,7 +2055,8 @@ public sealed class SystemCameraController2A :
         _isSystemCameraActive =
             false;
 
-        SetSunCenteredForOverview(false);
+        _sunCenterPreservationActive = false;
+        ResetBoundsRuntimeState();
         InvalidateSunReference();
 
         _focusVelocity =
@@ -1601,30 +2072,5 @@ public sealed class SystemCameraController2A :
     private void OnDestroy()
     {
         UnsubscribeFromEvents();
-    }
-
-    private static bool IsFinite(
-        float value)
-    {
-        return
-            !float.IsNaN(value) &&
-            !float.IsInfinity(value);
-    }
-
-    private static bool IsFinite(
-        Vector2 value)
-    {
-        return
-            IsFinite(value.x) &&
-            IsFinite(value.y);
-    }
-
-    private static bool IsFinite(
-        Vector3 value)
-    {
-        return
-            IsFinite(value.x) &&
-            IsFinite(value.y) &&
-            IsFinite(value.z);
     }
 }
