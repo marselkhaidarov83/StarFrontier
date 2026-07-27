@@ -11,17 +11,18 @@ public enum SystemCameraMode2A
 /// <summary>
 /// Единственный владелец системной камеры.
 ///
-/// Компонент отвечает за:
-/// - положение и поворот камеры;
+/// Компонент отвечает только за представление:
+/// - положение камеры;
+/// - поворот камеры;
 /// - zoom;
 /// - Follow Ship;
 /// - Free Look;
 /// - Return To Ship;
 /// - ограничение камеры границами карты;
-/// - фиксацию солнца в центре при максимальном отдалении.
+/// - центрирование солнца, когда вся карта помещается в кадр.
 ///
 /// Координаты и движение корабля рассчитываются
-/// исключительно игровыми сервисами.
+/// исключительно в сервисах.
 /// </summary>
 [DefaultExecutionOrder(1000)]
 [DisallowMultipleComponent]
@@ -55,24 +56,24 @@ public sealed class SystemCameraController2A :
 
     [FormerlySerializedAs("centerSunAtMaximumZoom")]
     [Tooltip(
-        "На максимальном отдалении фиксировать " +
-        "фактический визуальный центр солнца " +
-        "точно в центре экрана.")]
+        "Центрировать реальное солнце сразу после того, " +
+        "как вся карта начинает помещаться в кадр. " +
+        "Точного достижения Max Zoom ждать не требуется.")]
     [SerializeField]
     private bool centerSunWhenWholeMapFits = true;
 
     [Tooltip(
-        "Допустимый запас до Max Zoom. " +
-        "0 означает включать центрирование только " +
-        "при фактическом достижении максимального Target Zoom.")]
+        "Дополнительный отступ границ карты от краёв viewport. " +
+        "0 означает включать центрирование сразу после того, " +
+        "как вся карта вошла в кадр.")]
     [Range(0f, 0.1f)]
     [SerializeField]
     private float overviewViewportPadding = 0f;
 
     [FormerlySerializedAs("blockDragAtMaximumZoom")]
     [Tooltip(
-        "Запретить drag, пока солнце зафиксировано " +
-        "в центре при максимальном отдалении.")]
+        "Запретить drag, пока вся карта помещается " +
+        "и солнце зафиксировано в центре.")]
     [SerializeField]
     private bool blockDragWhenWholeMapFits = true;
 
@@ -97,7 +98,15 @@ public sealed class SystemCameraController2A :
     private bool _isSystemCameraActive;
     private bool _isSubscribedToEvents;
     private bool _ownershipErrorReported;
+
+    /*
+     * true означает:
+     * - вся карта помещается;
+     * - солнце является focus point;
+     * - обычный bounds correction отключён.
+     */
     private bool _isSunCenteredForOverview;
+
     private bool _missingSunWarningLogged;
 
     private SunNodeView _cachedSunNodeView;
@@ -119,7 +128,9 @@ public sealed class SystemCameraController2A :
 
     /*
      * Угол Perspective-камеры рассчитывается
-     * только из конфигурации и не меняется при zoom.
+     * только один раз из конфигурации.
+     *
+     * Zoom меняет только расстояние.
      */
     private Vector3 _fixedPerspectiveOffsetDirection;
     private Quaternion _fixedPerspectiveRotation;
@@ -164,8 +175,7 @@ public sealed class SystemCameraController2A :
                     : 1f;
 
             float maximumByHeight =
-                bounds.height *
-                0.5f;
+                bounds.height * 0.5f;
 
             float maximumByWidth =
                 bounds.width *
@@ -181,9 +191,6 @@ public sealed class SystemCameraController2A :
 
     private void Reset()
     {
-        targetCamera =
-            GetComponent<Camera>();
-
         systemMapContentRoot =
             transform;
     }
@@ -222,8 +229,7 @@ public sealed class SystemCameraController2A :
         ResolveServices();
         SubscribeToEvents();
 
-        _isInitialized =
-            true;
+        _isInitialized = true;
 
         ActivateSystemCameraSafely();
 
@@ -238,12 +244,6 @@ public sealed class SystemCameraController2A :
 
     private void ResolveReferences()
     {
-        if (targetCamera == null)
-        {
-            targetCamera =
-                GetComponent<Camera>();
-        }
-
         if (targetCamera == null)
         {
             targetCamera =
@@ -347,8 +347,7 @@ public sealed class SystemCameraController2A :
         if (_ownershipErrorReported)
             return;
 
-        _ownershipErrorReported =
-            true;
+        _ownershipErrorReported = true;
 
         Debug.LogError(
             message,
@@ -357,7 +356,8 @@ public sealed class SystemCameraController2A :
 
     /// <summary>
     /// Рассчитывает и фиксирует направление камеры.
-    /// После этого zoom меняет только расстояние.
+    ///
+    /// После этого zoom не может изменить угол.
     /// </summary>
     private void RefreshFixedPerspectiveOrientation()
     {
@@ -385,8 +385,7 @@ public sealed class SystemCameraController2A :
                         .PerspectiveYaw);
 
         if (!IsFinite(offset) ||
-            offset.sqrMagnitude <
-            0.000001f)
+            offset.sqrMagnitude < 0.000001f)
         {
             offset =
                 Vector3.back;
@@ -502,6 +501,10 @@ public sealed class SystemCameraController2A :
 
     private void UpdateFollowTarget()
     {
+        /*
+         * Пока вся карта помещается,
+         * солнце остаётся focus point.
+         */
         if (_isSunCenteredForOverview)
             return;
 
@@ -758,10 +761,8 @@ public sealed class SystemCameraController2A :
 
         Vector2 screenCenter =
             new Vector2(
-                Screen.width *
-                0.5f,
-                Screen.height *
-                0.5f);
+                Screen.width * 0.5f,
+                Screen.height * 0.5f);
 
         Vector2 movedScreenPoint =
             screenCenter +
@@ -841,13 +842,15 @@ public sealed class SystemCameraController2A :
         ApplyProjectionSettings();
 
         /*
-         * На максимальном TARGET zoom сразу используем
-         * реальный центр солнца.
+         * Проверка выполняется на каждом кадре.
          *
-         * Bounds correction в этом режиме не вызывается,
-         * поэтому он не может сдвинуть карту вверх.
+         * Как только вся карта начинает помещаться
+         * при фокусе на солнце, солнце сразу становится
+         * центром экрана.
+         *
+         * Точного Max Zoom ждать не требуется.
          */
-        if (TryCenterSunAtMaximumTargetZoom())
+        if (TryCenterSunWhenWholeMapFits())
         {
             return;
         }
@@ -894,83 +897,173 @@ public sealed class SystemCameraController2A :
     }
 
     /// <summary>
-    /// На максимальном целевом zoom устанавливает
-    /// фактический визуальный центр солнца
-    /// точно в оптический центр камеры.
+    /// Центрирует солнце сразу после того,
+    /// как вся карта начинает помещаться в viewport.
+    ///
+    /// Метод не ждёт достижения Max Zoom.
     /// </summary>
-    private bool TryCenterSunAtMaximumTargetZoom()
+    private bool TryCenterSunWhenWholeMapFits()
     {
         if (!centerSunWhenWholeMapFits)
-            return false;
-
-        if (!IsTargetAtMaximumZoom())
-            return false;
-
-        if (!TryGetActualSunWorldCenter(
-                out Vector3 sunWorldCenter))
         {
+            SetSunCenteredForOverview(false);
             return false;
         }
 
-        _currentFocusPoint =
+        if (!TryGetSunWorldPosition(
+                out Vector3 sunWorldPosition))
+        {
+            SetSunCenteredForOverview(false);
+            return false;
+        }
+
+        sunWorldPosition =
             ToGameplayPlane(
-                sunWorldCenter);
+                sunWorldPosition);
+
+        /*
+         * Временно ставим камеру так,
+         * чтобы солнце было focus point.
+         *
+         * Рендер между этим действием
+         * и проверкой границ не выполняется.
+         */
+        ApplyCameraPoseAtFocus(
+            sunWorldPosition);
+
+        bool wholeMapFits =
+            AreWorldBoundsInsideViewport(
+                cameraConfig.WorldBoundsRect,
+                overviewViewportPadding);
+
+        if (!wholeMapFits)
+        {
+            /*
+             * Карта ещё не помещается.
+             * Возвращаем обычную позицию камеры.
+             */
+            SetSunCenteredForOverview(false);
+
+            ApplyCameraPoseAtFocus(
+                _currentFocusPoint);
+
+            return false;
+        }
+
+        /*
+         * Вся карта уже помещается.
+         *
+         * Солнце становится точным focus point.
+         * Обычный bounds correction после этого
+         * не выполняется и не может сдвинуть карту вверх.
+         */
+        _currentFocusPoint =
+            sunWorldPosition;
 
         _targetFocusPoint =
-            _currentFocusPoint;
+            sunWorldPosition;
 
         _focusVelocity =
             Vector3.zero;
 
         SetSunCenteredForOverview(true);
 
-        /*
-         * Здесь сохраняется фактический world Z
-         * центра спрайта солнца.
-         *
-         * Для наклонённой Perspective-камеры
-         * это исключает дополнительный экранный сдвиг.
-         */
-        ApplyCameraPoseAtExactWorldFocus(
-            sunWorldCenter);
+        ApplyCameraPoseAtFocus(
+            sunWorldPosition);
 
         return true;
     }
 
     /// <summary>
-    /// Проверяет Target Zoom, а не Current Zoom.
-    /// Центрирование начинается сразу после последнего
-    /// шага zoom, пока сама камера ещё плавно отдаляется.
+    /// Проверяет, находятся ли все четыре угла
+    /// World Bounds внутри viewport камеры.
     /// </summary>
-    private bool IsTargetAtMaximumZoom()
+    private bool AreWorldBoundsInsideViewport(
+        Rect bounds,
+        float padding)
     {
-        if (cameraConfig == null)
+        if (targetCamera == null ||
+            cameraConfig == null)
+        {
             return false;
+        }
 
-        float tolerance =
-            Mathf.Max(
-                0.01f,
-                cameraConfig.MaxZoom *
-                Mathf.Clamp01(
-                    overviewViewportPadding));
+        float safePadding =
+            Mathf.Clamp(
+                padding,
+                0f,
+                0.1f);
 
-        return _targetZoom >=
-               cameraConfig.MaxZoom -
-               tolerance;
+        float viewportMinimum =
+            safePadding;
+
+        float viewportMaximum =
+            1f - safePadding;
+
+        Vector3[] worldCorners =
+        {
+            new Vector3(
+                bounds.xMin,
+                bounds.yMin,
+                cameraConfig.GameplayPlaneZ),
+
+            new Vector3(
+                bounds.xMin,
+                bounds.yMax,
+                cameraConfig.GameplayPlaneZ),
+
+            new Vector3(
+                bounds.xMax,
+                bounds.yMin,
+                cameraConfig.GameplayPlaneZ),
+
+            new Vector3(
+                bounds.xMax,
+                bounds.yMax,
+                cameraConfig.GameplayPlaneZ)
+        };
+
+        foreach (
+            Vector3 worldCorner
+            in worldCorners)
+        {
+            Vector3 viewportPoint =
+                targetCamera.WorldToViewportPoint(
+                    worldCorner);
+
+            if (!IsFinite(viewportPoint))
+                return false;
+
+            /*
+             * Точка должна находиться перед камерой.
+             */
+            if (viewportPoint.z <= 0f)
+                return false;
+
+            if (viewportPoint.x <
+                    viewportMinimum ||
+                viewportPoint.x >
+                    viewportMaximum)
+            {
+                return false;
+            }
+
+            if (viewportPoint.y <
+                    viewportMinimum ||
+                viewportPoint.y >
+                    viewportMaximum)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    /// <summary>
-    /// Получает фактический визуальный центр текущего солнца.
-    ///
-    /// Приоритет:
-    /// 1. SpriteRenderer созданного SunNodeView;
-    /// 2. Sun.LocalOffset текущего StarSystemConfig;
-    /// 3. Transform созданного SunNodeView.
-    /// </summary>
-    private bool TryGetActualSunWorldCenter(
-        out Vector3 worldCenter)
+    private bool TryGetSunWorldPosition(
+        out Vector3 worldPosition)
     {
-        worldCenter =
+        worldPosition =
             Vector3.zero;
 
         if (_cachedSunNodeView == null ||
@@ -982,106 +1075,33 @@ public sealed class SystemCameraController2A :
                 FindSunNodeView();
         }
 
-        if (_cachedSunNodeView != null)
+        if (_cachedSunNodeView == null)
         {
-            SpriteRenderer sunSprite =
-                _cachedSunNodeView
-                    .GetComponent<
-                        SpriteRenderer>();
-
-            if (sunSprite == null)
-            {
-                sunSprite =
-                    _cachedSunNodeView
-                        .GetComponentInChildren<
-                            SpriteRenderer>(true);
-            }
-
-            if (sunSprite != null &&
-                sunSprite.enabled &&
-                sunSprite
-                    .gameObject
-                    .activeInHierarchy)
-            {
-                worldCenter =
-                    sunSprite
-                        .bounds
-                        .center;
-
-                if (SystemCameraMath2A.IsFinite(
-                        worldCenter))
-                {
-                    _missingSunWarningLogged =
-                        false;
-
-                    return true;
-                }
-            }
-        }
-
-        StarSystemConfig currentSystem =
-            GetCurrentSystemConfig();
-
-        if (currentSystem != null &&
-            currentSystem.Sun != null)
-        {
-            Vector2 localOffset =
-                currentSystem
-                    .Sun
-                    .LocalOffset;
-
-            Vector3 localCenter =
-                new Vector3(
-                    localOffset.x,
-                    localOffset.y,
-                    cameraConfig.GameplayPlaneZ);
-
-            worldCenter =
-                systemMapContentRoot != null
-                    ? systemMapContentRoot
-                        .TransformPoint(
-                            localCenter)
-                    : localCenter;
-
-            if (SystemCameraMath2A.IsFinite(
-                    worldCenter))
+            if (!_missingSunWarningLogged)
             {
                 _missingSunWarningLogged =
-                    false;
+                    true;
 
-                return true;
+                Debug.LogWarning(
+                    "[SystemCameraController2A] " +
+                    "SunNodeView was not found. " +
+                    "Overview centering was skipped.",
+                    this);
             }
+
+            return false;
         }
 
-        if (_cachedSunNodeView != null)
-        {
-            worldCenter =
-                _cachedSunNodeView
-                    .transform
-                    .position;
+        _missingSunWarningLogged =
+            false;
 
-            if (SystemCameraMath2A.IsFinite(
-                    worldCenter))
-            {
-                _missingSunWarningLogged =
-                    false;
+        worldPosition =
+            _cachedSunNodeView
+                .transform
+                .position;
 
-                return true;
-            }
-        }
-
-        if (!_missingSunWarningLogged)
-        {
-            _missingSunWarningLogged =
-                true;
-
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
-                "Actual sun center was not found.",
-                this);
-        }
-
-        return false;
+        return IsFinite(
+            worldPosition);
     }
 
     private SunNodeView FindSunNodeView()
@@ -1169,17 +1189,6 @@ public sealed class SystemCameraController2A :
             ToGameplayPlane(
                 focusPoint);
 
-        ApplyCameraPoseAtExactWorldFocus(
-            focusPoint);
-    }
-
-    /// <summary>
-    /// Устанавливает камеру относительно точной
-    /// мировой точки и не заменяет её Z.
-    /// </summary>
-    private void ApplyCameraPoseAtExactWorldFocus(
-        Vector3 worldFocusPoint)
-    {
         if (cameraConfig.ProjectionMode ==
             SystemCameraProjection2A.Perspective)
         {
@@ -1189,7 +1198,7 @@ public sealed class SystemCameraController2A :
             }
 
             Vector3 cameraPosition =
-                worldFocusPoint +
+                focusPoint +
                 _fixedPerspectiveOffsetDirection *
                 _currentZoom;
 
@@ -1203,8 +1212,8 @@ public sealed class SystemCameraController2A :
 
         Vector3 orthographicPosition =
             new Vector3(
-                worldFocusPoint.x,
-                worldFocusPoint.y,
+                focusPoint.x,
+                focusPoint.y,
                 cameraConfig
                     .OrthographicCameraZ);
 
@@ -1559,6 +1568,10 @@ public sealed class SystemCameraController2A :
     private void OnSystemEntered(
         StarSystemEnteredEvent evt)
     {
+        /*
+         * При входе в систему карта пересоздаёт солнце.
+         * Старую ссылку необходимо сбросить.
+         */
         InvalidateSunReference();
         ActivateSystemCameraSafely();
     }

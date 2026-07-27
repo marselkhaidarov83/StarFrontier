@@ -19,14 +19,10 @@ public static class SystemCameraMath2A
         float maximum)
     {
         float safeMinimum =
-            Mathf.Max(
-                Epsilon,
-                minimum);
+            Mathf.Max(Epsilon, minimum);
 
         float safeMaximum =
-            Mathf.Max(
-                safeMinimum,
-                maximum);
+            Mathf.Max(safeMinimum, maximum);
 
         if (!IsFinite(value))
             return safeMinimum;
@@ -39,16 +35,7 @@ public static class SystemCameraMath2A
 
     /// <summary>
     /// Рассчитывает коррекцию focus point, необходимую,
-    /// чтобы проекция viewport находилась внутри границ карты.
-    ///
-    /// Если viewport уже больше карты по одной из осей,
-    /// коррекция по этой оси не выполняется.
-    ///
-    /// Это важно для наклонённой Perspective-камеры:
-    /// центр проекции viewport на игровую плоскость
-    /// не совпадает с визуальным центром экрана.
-    /// Попытка центрировать слишком большую проекцию
-    /// сдвигала карту вверх.
+    /// чтобы проекция viewport находилась внутри границ.
     /// </summary>
     public static Vector2 CalculateBoundsCorrection(
         Rect allowedBounds,
@@ -69,48 +56,66 @@ public static class SystemCameraMath2A
             footprintMaximum.y -
             footprintMinimum.y;
 
-        if (!IsFinite(footprintWidth) ||
-            !IsFinite(footprintHeight))
-        {
-            return Vector2.zero;
-        }
-
         Vector2 correction =
             Vector2.zero;
 
-        if (footprintWidth <
-            allowedBounds.width - Epsilon)
+        if (footprintWidth >
+            allowedBounds.width)
+        {
+            float footprintCenterX =
+                (footprintMinimum.x +
+                 footprintMaximum.x) *
+                0.5f;
+
+            correction.x =
+                allowedBounds.center.x -
+                footprintCenterX;
+        }
+        else
         {
             if (footprintMinimum.x <
                 allowedBounds.xMin)
             {
-                correction.x =
+                correction.x +=
                     allowedBounds.xMin -
                     footprintMinimum.x;
             }
-            else if (footprintMaximum.x >
-                     allowedBounds.xMax)
+
+            if (footprintMaximum.x >
+                allowedBounds.xMax)
             {
-                correction.x =
+                correction.x +=
                     allowedBounds.xMax -
                     footprintMaximum.x;
             }
         }
 
-        if (footprintHeight <
-            allowedBounds.height - Epsilon)
+        if (footprintHeight >
+            allowedBounds.height)
+        {
+            float footprintCenterY =
+                (footprintMinimum.y +
+                 footprintMaximum.y) *
+                0.5f;
+
+            correction.y =
+                allowedBounds.center.y -
+                footprintCenterY;
+        }
+        else
         {
             if (footprintMinimum.y <
                 allowedBounds.yMin)
             {
-                correction.y =
+                correction.y +=
                     allowedBounds.yMin -
                     footprintMinimum.y;
             }
-            else if (footprintMaximum.y >
-                     allowedBounds.yMax)
+
+            if (footprintMaximum.y >
+                allowedBounds.yMax)
             {
-                correction.y =
+                correction.y +=
                     allowedBounds.yMax -
                     footprintMaximum.y;
             }
@@ -123,7 +128,7 @@ public static class SystemCameraMath2A
     /// Возвращает позицию камеры относительно focus point.
     ///
     /// tiltFromTopDegrees:
-    /// 0 — камера строго сверху;
+    /// 0 — строго сверху;
     /// увеличение значения — больший псевдо-3D наклон.
     /// </summary>
     public static Vector3 CreatePerspectiveOffset(
@@ -132,9 +137,7 @@ public static class SystemCameraMath2A
         float yawDegrees)
     {
         float safeDistance =
-            Mathf.Max(
-                Epsilon,
-                distance);
+            Mathf.Max(Epsilon, distance);
 
         float safeTilt =
             Mathf.Clamp(
@@ -167,8 +170,7 @@ public static class SystemCameraMath2A
         float planeZ,
         out Vector3 point)
     {
-        point =
-            Vector3.zero;
+        point = Vector3.zero;
 
         float denominator =
             ray.direction.z;
@@ -191,30 +193,26 @@ public static class SystemCameraMath2A
 
         point =
             ray.origin +
-            ray.direction *
-            distance;
+            ray.direction * distance;
 
         return IsFinite(point);
     }
 
-    public static bool IsFinite(
-        float value)
+    public static bool IsFinite(float value)
     {
         return
             !float.IsNaN(value) &&
             !float.IsInfinity(value);
     }
 
-    public static bool IsFinite(
-        Vector2 value)
+    public static bool IsFinite(Vector2 value)
     {
         return
             IsFinite(value.x) &&
             IsFinite(value.y);
     }
 
-    public static bool IsFinite(
-        Vector3 value)
+    public static bool IsFinite(Vector3 value)
     {
         return
             IsFinite(value.x) &&
