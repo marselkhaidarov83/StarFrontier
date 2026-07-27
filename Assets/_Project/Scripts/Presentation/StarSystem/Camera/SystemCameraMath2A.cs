@@ -3,7 +3,11 @@ using UnityEngine;
 /// <summary>
 /// Чистые математические функции системной камеры.
 ///
-/// Класс не обращается к сцене и пригоден для EditMode-тестов.
+/// Класс:
+/// - не обращается к сцене;
+/// - не изменяет Transform;
+/// - не изменяет Camera;
+/// - пригоден для EditMode-тестов.
 /// </summary>
 public static class SystemCameraMath2A
 {
@@ -15,10 +19,14 @@ public static class SystemCameraMath2A
         float maximum)
     {
         float safeMinimum =
-            Mathf.Max(Epsilon, minimum);
+            Mathf.Max(
+                Epsilon,
+                minimum);
 
         float safeMaximum =
-            Mathf.Max(safeMinimum, maximum);
+            Mathf.Max(
+                safeMinimum,
+                maximum);
 
         if (!IsFinite(value))
             return safeMinimum;
@@ -30,121 +38,17 @@ public static class SystemCameraMath2A
     }
 
     /// <summary>
-    /// Ограничивает focus point так, чтобы проекция viewport
-    /// не выходила за allowedBounds, пока viewport меньше карты.
+    /// Рассчитывает коррекцию focus point, необходимую,
+    /// чтобы проекция viewport находилась внутри границ карты.
     ///
-    /// footprintMinimumOffset и footprintMaximumOffset —
-    /// смещения углов проекции viewport относительно focus point.
+    /// Если viewport уже больше карты по одной из осей,
+    /// коррекция по этой оси не выполняется.
     ///
-    /// Если viewport больше карты по оси, допустимого диапазона
-    /// focus point по этой оси не существует. Тогда ось либо
-    /// центрируется на oversizedCenter, либо остаётся без изменения.
-    /// </summary>
-    public static Vector2 ClampFocusPoint(
-        Rect allowedBounds,
-        Vector2 requestedFocus,
-        Vector2 footprintMinimumOffset,
-        Vector2 footprintMaximumOffset,
-        Vector2 oversizedCenter,
-        bool centerOversizedAxes,
-        bool forceCenterX,
-        bool forceCenterY,
-        out bool xLocked,
-        out bool yLocked)
-    {
-        if (!IsFinite(requestedFocus) ||
-            !IsFinite(footprintMinimumOffset) ||
-            !IsFinite(footprintMaximumOffset) ||
-            !IsFinite(oversizedCenter))
-        {
-            xLocked = false;
-            yLocked = false;
-            return requestedFocus;
-        }
-
-        float minimumFocusX =
-            allowedBounds.xMin -
-            footprintMinimumOffset.x;
-
-        float maximumFocusX =
-            allowedBounds.xMax -
-            footprintMaximumOffset.x;
-
-        float minimumFocusY =
-            allowedBounds.yMin -
-            footprintMinimumOffset.y;
-
-        float maximumFocusY =
-            allowedBounds.yMax -
-            footprintMaximumOffset.y;
-
-        bool hasHorizontalRange =
-            minimumFocusX <=
-            maximumFocusX + Epsilon;
-
-        bool hasVerticalRange =
-            minimumFocusY <=
-            maximumFocusY + Epsilon;
-
-        Vector2 result =
-            requestedFocus;
-
-        if (forceCenterX)
-        {
-            xLocked = true;
-            result.x = oversizedCenter.x;
-        }
-        else if (hasHorizontalRange)
-        {
-            xLocked = false;
-            result.x = Mathf.Clamp(
-                requestedFocus.x,
-                minimumFocusX,
-                maximumFocusX);
-        }
-        else
-        {
-            xLocked = true;
-
-            if (centerOversizedAxes)
-            {
-                result.x = oversizedCenter.x;
-            }
-        }
-
-        if (forceCenterY)
-        {
-            yLocked = true;
-            result.y = oversizedCenter.y;
-        }
-        else if (hasVerticalRange)
-        {
-            yLocked = false;
-            result.y = Mathf.Clamp(
-                requestedFocus.y,
-                minimumFocusY,
-                maximumFocusY);
-        }
-        else
-        {
-            yLocked = true;
-
-            if (centerOversizedAxes)
-            {
-                result.y = oversizedCenter.y;
-            }
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Совместимость со старыми тестами и вызовами.
-    ///
-    /// Метод корректирует проекцию только тогда, когда viewport
-    /// меньше карты по соответствующей оси. Если viewport больше
-    /// карты, корректная позиция должна определяться через
-    /// ClampFocusPoint и центр системы.
+    /// Это важно для наклонённой Perspective-камеры:
+    /// центр проекции viewport на игровую плоскость
+    /// не совпадает с визуальным центром экрана.
+    /// Попытка центрировать слишком большую проекцию
+    /// сдвигала карту вверх.
     /// </summary>
     public static Vector2 CalculateBoundsCorrection(
         Rect allowedBounds,
@@ -228,7 +132,9 @@ public static class SystemCameraMath2A
         float yawDegrees)
     {
         float safeDistance =
-            Mathf.Max(Epsilon, distance);
+            Mathf.Max(
+                Epsilon,
+                distance);
 
         float safeTilt =
             Mathf.Clamp(
@@ -285,7 +191,8 @@ public static class SystemCameraMath2A
 
         point =
             ray.origin +
-            ray.direction * distance;
+            ray.direction *
+            distance;
 
         return IsFinite(point);
     }

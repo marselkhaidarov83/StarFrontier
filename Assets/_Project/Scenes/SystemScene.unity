@@ -548,15 +548,12 @@ MonoBehaviour:
   cameraConfig: {fileID: 11400000, guid: 6944029378bee4a669c1b150a1ce3fdc, type: 2}
   systemMapContentRoot: {fileID: 10713352}
   mode: 0
-  worldBoundsAreRelativeToSun: 1
-  centerOversizedAxesOnSun: 1
-  forceFullCenterAtMaximumZoom: 1
-  maximumZoomTolerance: 1
+  centerSunAtMaximumZoom: 1
+  maximumZoomCenterTolerance: 10
   blockDragAtMaximumZoom: 1
-  worldBoundsPadding: 0
   logInitialization: 1
   logModeChanges: 0
-  logBoundsStateChanges: 0
+  logMaximumZoomCentering: 0
 --- !u!114 &10713374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9286,7 +9283,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 58
-  orthographic: 0
+  orthographic: 1
   orthographic size: 1200
   m_Depth: 0
   m_CullingMask:
