@@ -12,37 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99975e5e598cf4fe18614a9403f21740, type: 3}
   m_Name: "\u0441ameraConfig_01"
   m_EditorClassIdentifier: Data::SystemCameraConfig
-  projectionMode: 1
-  gameplayPlaneZ: 0
-  perspectiveFieldOfView: 42
-  perspectiveTiltFromTop: 28
-  perspectiveYaw: 0
-  defaultPerspectiveDistance: 1500
-  minPerspectiveDistance: 650
-  maxPerspectiveDistance: 4500
-  perspectiveZoomUnitsPerInput: 450
-  nearClipPlane: 1
-  farClipPlane: 10000
-  orthographicCameraZ: -10
-  defaultOrthographicSize: 650
-  minOrthographicSize: 650
-  maxOrthographicSize: 1900
-  orthographicZoomUnitsPerInput: 100
   followSmoothTime: 0.1
   returnSmoothTime: 0.2
   followDeadZone: 0.01
-  returnPositionTolerance: 1
-  returnZoomTolerance: 1
-  worldBoundsCenter: {x: 0, y: 0}
-  worldBoundsSize: {x: 2400, y: 4000}
-  viewportBoundsInset: 0
+  defaultOrthographicSize: 500
+  minOrthographicSize: 650
+  maxOrthographicSize: 1900
   boundsPadding: 320
   sunExtraPadding: 220
   planetExtraPadding: 180
   stationExtraPadding: 220
   exitExtraPadding: 220
-  dragSensitivity: 3
-  freeLookSmoothTime: 0.015
+  dragSensitivity: 1
   freeLookInertia: 0
-  largestObjectZoomMultiplier: 4.5
-  zoomSmoothTime: 0.08

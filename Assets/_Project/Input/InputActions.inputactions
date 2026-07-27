@@ -367,15 +367,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "StopMovement",
-                    "type": "Button",
-                    "id": "139872e7-3d4b-4567-b13d-359304854a81",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -508,17 +499,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "RecenterCamera",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "3824a55f-1a56-45fc-a311-878f1e9e0144",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "StopMovement",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
