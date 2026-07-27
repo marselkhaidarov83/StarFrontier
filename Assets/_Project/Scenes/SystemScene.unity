@@ -546,14 +546,9 @@ MonoBehaviour:
   targetCamera: {fileID: 757877087}
   shipTarget: {fileID: 1132738918}
   cameraConfig: {fileID: 11400000, guid: 6944029378bee4a669c1b150a1ce3fdc, type: 2}
-  systemMapContentRoot: {fileID: 10713352}
   mode: 0
-  centerSunAtMaximumZoom: 1
-  maximumZoomCenterTolerance: 10
-  blockDragAtMaximumZoom: 1
   logInitialization: 1
   logModeChanges: 0
-  logMaximumZoomCentering: 0
 --- !u!114 &10713374
 MonoBehaviour:
   m_ObjectHideFlags: 0
