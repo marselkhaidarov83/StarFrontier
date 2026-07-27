@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 3610070561847855316}
   - component: {fileID: 4631934383770344206}
   - component: {fileID: 1638779656650137503}
+  - component: {fileID: 7113685313230008363}
   m_Layer: 9
   m_Name: ShipPrefab2
   m_TagString: Player
@@ -291,6 +292,24 @@ MonoBehaviour:
   feedbackStartScale: 0.85
   feedbackEndScale: 1.25
   feedbackStartAlpha: 0.9
+--- !u!114 &7113685313230008363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2615460552967337954}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 383a98d57552f452f9c1eaae2e916523, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::ShipMovementViewBinder2A
+  shipView: {fileID: 7080698017654214223}
+  applyPosition: 1
+  applyRotation: 1
+  preserveInitialZ: 1
+  logSuccessfulBinding: 1
+  logMissingService: 1
 --- !u!1 &4518690649384215785
 GameObject:
   m_ObjectHideFlags: 0

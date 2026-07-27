@@ -201,9 +201,11 @@ GameObject:
   - component: {fileID: 10713374}
   - component: {fileID: 10713375}
   - component: {fileID: 10713376}
+  - component: {fileID: 10713377}
+  - component: {fileID: 10713378}
   m_Layer: 8
   m_Name: SystemMapRoot
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -484,7 +486,7 @@ MonoBehaviour:
   writeToShipMovementState: 1
   writeToPlayerStateEveryFrame: 1
   writeRuntimeStateBackToSystemTravel: 0
-  logMissingServices: 0
+  logMissingServices: 1
 --- !u!114 &10713371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -574,9 +576,13 @@ MonoBehaviour:
   moveActionName: Move
   interactActionName: Interact
   recenterActionName: RecenterCamera
-  blockingUiRoots: []
+  stopActionName: StopMovement
+  destinationAdapter: {fileID: 10713377}
+  blockingUiRoots:
+  - {fileID: 1256647064}
   enableInputOnStart: 1
   logInitialization: 1
+  logStopCommands: 0
 --- !u!114 &10713376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -597,6 +603,35 @@ MonoBehaviour:
   fallbackBoundsCenter: {x: 0, y: 0}
   fallbackBoundsHalfSize: {x: 1200, y: 2000}
   logInitialization: 1
+--- !u!114 &10713377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19c6ede47e1b74cccbd69a1c8809fa33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::PointDestinationMovementAdapter2A
+  arrivalRadius: 3
+  slowDownRadius: 120
+  stopImmediatelyOnArrival: 1
+  logCommands: 0
+--- !u!114 &10713378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a767173d41e404b54a640dd6daf74aa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::SystemControlPresentationBridge2A
+  cameraController: {fileID: 10713373}
 --- !u!1 &14325446
 GameObject:
   m_ObjectHideFlags: 0
@@ -5650,7 +5685,7 @@ GameObject:
   - component: {fileID: 535141426}
   m_Layer: 0
   m_Name: StationNodesRoot
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6768,7 +6803,7 @@ GameObject:
   - component: {fileID: 584959708}
   m_Layer: 0
   m_Name: SystemExitsNodesRoot
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9083,7 +9118,7 @@ GameObject:
   - component: {fileID: 757877084}
   - component: {fileID: 757877083}
   m_Layer: 0
-  m_Name: MainCamera_old_to_delete
+  m_Name: SystemMainCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13878,7 +13913,7 @@ GameObject:
   - component: {fileID: 1429718582}
   m_Layer: 0
   m_Name: 'PlanetNodesRoot '
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -18552,7 +18587,7 @@ GameObject:
   - component: {fileID: 2033273962}
   m_Layer: 0
   m_Name: SunNodesRoot
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
