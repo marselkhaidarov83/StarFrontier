@@ -48,14 +48,21 @@ public sealed class TargetMarkerView2A :
     private bool
         _subscribed;
 
+    private bool _markerVisible;
+    private Vector3
+    _baseMarkerLocalScale =
+        Vector3.one;
+
     private bool
-        _markerVisible;
+        _baseMarkerScaleCaptured;
 
     public void Initialize(
         string targetId,
         bool interactable,
         bool available)
     {
+        CaptureBaseMarkerScale();
+
         _targetId =
             targetId ?? string.Empty;
 
@@ -98,11 +105,13 @@ public sealed class TargetMarkerView2A :
 
     private void Awake()
     {
+        CaptureBaseMarkerScale();
         SetMarkerVisible(false);
     }
 
     private void OnEnable()
     {
+        CaptureBaseMarkerScale();
         ResolveDependencies();
         ApplyCurrentTargetState();
     }
@@ -271,11 +280,10 @@ public sealed class TargetMarkerView2A :
 
     private void AnimateMarker()
     {
-        if (markerRoot == null ||
-            _targetingConfig == null)
-        {
+        if (markerRoot == null)
             return;
-        }
+
+        CaptureBaseMarkerScale();
 
         float pulse =
             1f +
@@ -287,18 +295,34 @@ public sealed class TargetMarkerView2A :
                 2f) *
             0.06f;
 
-        float scale =
-            _targetingConfig
-                .MarkerWorldScale *
-            pulse;
-
         markerRoot
             .transform
             .localScale =
                 new Vector3(
-                    scale,
-                    scale,
-                    1f);
+                    _baseMarkerLocalScale.x *
+                    pulse,
+
+                    _baseMarkerLocalScale.y *
+                    pulse,
+
+                    _baseMarkerLocalScale.z);
+    }
+
+    private void CaptureBaseMarkerScale()
+    {
+        if (_baseMarkerScaleCaptured)
+            return;
+
+        if (markerRoot == null)
+            return;
+
+        _baseMarkerLocalScale =
+            markerRoot
+                .transform
+                .localScale;
+
+        _baseMarkerScaleCaptured =
+            true;
     }
 
     private void RefreshVisual()

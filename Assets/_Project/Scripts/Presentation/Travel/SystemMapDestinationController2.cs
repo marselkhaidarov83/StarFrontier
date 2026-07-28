@@ -26,6 +26,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
     private ISystemTravelService _systemTravelService;
     private IOrbitalMotionService _orbitalMotionService;
     private IGameTimeService _gameTimeService;
+    private ITargetService2A _targetService;
 
     private PlanetSelectableView2 _selectedPlanetView;
     private PlanetConfig _selectedPlanetData;
@@ -38,6 +39,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _gameTimeService = Bootstrapper.Instance.ServiceRegistry.Get<IGameTimeService>();
+        _targetService = Bootstrapper.Instance.ServiceRegistry.Get<ITargetService2A>();
 
         if (_simpleEventBus == null)
             Debug.LogError("[SystemMapDestinationController2] _simpleEventBus not found.");
@@ -104,11 +106,21 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
     private void ClearPlanetSelectionAndMarker()
     {
-        _selectedPlanetView = null;
-        _selectedPlanetData = null;
+        _selectedPlanetView =
+            null;
+
+        _selectedPlanetData =
+            null;
+
+        if (_targetService != null)
+        {
+            _targetService.ClearTarget();
+        }
 
         if (markerController != null)
+        {
             markerController.HideAll();
+        }
     }
 
     private void OnPlanetSelected(PlanetSelectedEvent evt)
@@ -168,6 +180,9 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
         _selectedPlanetView = null;
         _selectedPlanetData = null;
+
+        if (_targetService != null)
+            _targetService.ClearTarget();
 
         _systemTravelService.SetMapPointDestination(mapPosition);
 

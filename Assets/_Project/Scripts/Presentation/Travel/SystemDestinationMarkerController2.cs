@@ -1,124 +1,227 @@
 using UnityEngine;
 
-public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
+public sealed class SystemDestinationMarkerController2 :
+    CustomMonoBehaviour
 {
     [Header("Markers")]
-    [SerializeField] private Transform planetDestinationMarker;
-    [SerializeField] private Transform mapPointDestinationMarker;
-    [SerializeField] private Transform selectedTargetFrame;
+
+    [SerializeField]
+    private Transform planetDestinationMarker;
+
+    [SerializeField]
+    private Transform mapPointDestinationMarker;
+
+    [SerializeField]
+    private Transform selectedTargetFrame;
 
     [Header("Sprites")]
-    [SerializeField] private SpriteRenderer selectedTargetFrameSprite;
+
+    [SerializeField]
+    private SpriteRenderer selectedTargetFrameSprite;
 
     [Header("Marker GameObjects")]
-    [SerializeField] private GameObject planetDestinationObject;
-    [SerializeField] private GameObject mapPointDestinationObject;
-    [SerializeField] private GameObject selectedTargetFrameObject;
+
+    [SerializeField]
+    private GameObject planetDestinationObject;
+
+    [SerializeField]
+    private GameObject mapPointDestinationObject;
+
+    [SerializeField]
+    private GameObject selectedTargetFrameObject;
 
     [Header("System Exit")]
-    [SerializeField] private float systemExitTargetFrameSize = 50f;
+
+    [SerializeField]
+    private float systemExitTargetFrameSize =
+        50f;
+
+    [Header("Compatibility")]
+
+    [Tooltip(
+        "Старая отдельная рамка SystemScene. " +
+        "Отключена, потому что отображением выбранной " +
+        "цели занимается TargetMarkerView2A.")]
+    [SerializeField]
+    private bool showLegacySelectedTargetFrame =
+        false;
 
     private PlanetConfig _currentPlanet;
+
     private bool _isPlanetDestinationVisible;
 
-    public void ShowPlanetDestination(Vector3 position, PlanetConfig planet)
+    private void Awake()
     {
-        LogCustom("position = " + position);
+        SetLegacyFrameVisible(false);
+    }
+
+    public void ShowPlanetDestination(
+        Vector3 position,
+        PlanetConfig planet)
+    {
+        LogCustom(
+            "position = " +
+            position);
 
         HideAll();
 
-        _currentPlanet = planet;
-        _isPlanetDestinationVisible = true;
+        _currentPlanet =
+            planet;
+
+        _isPlanetDestinationVisible =
+            true;
 
         if (planetDestinationObject != null)
-            planetDestinationObject.SetActive(true);
+        {
+            planetDestinationObject.SetActive(
+                true);
+        }
 
-        if (selectedTargetFrameObject != null)
-            selectedTargetFrameObject.SetActive(true);
+        SetLegacyFrameVisible(true);
 
-        UpdatePlanetDestinationPosition(position, planet);
+        UpdatePlanetDestinationPosition(
+            position,
+            planet);
     }
 
-    public void UpdatePlanetDestinationPosition(Vector3 position, PlanetConfig planet)
+    public void UpdatePlanetDestinationPosition(
+        Vector3 position,
+        PlanetConfig planet)
     {
         if (!_isPlanetDestinationVisible)
             return;
 
-        PlanetConfig effectivePlanet = planet != null
-            ? planet
-            : _currentPlanet;
+        PlanetConfig effectivePlanet =
+            planet != null
+                ? planet
+                : _currentPlanet;
 
         if (planetDestinationMarker != null)
-            planetDestinationMarker.position = position;
+        {
+            planetDestinationMarker.position =
+                position;
+        }
 
-        if (selectedTargetFrame != null)
-            selectedTargetFrame.position = position;
+        SetLegacyFramePosition(
+            position);
 
-        if (selectedTargetFrameSprite != null &&
-            effectivePlanet != null &&
+        if (effectivePlanet != null &&
             effectivePlanet.PlanetOrbit != null)
         {
-            SpriteRendererSizeUtility.SetWorldSize(
-                selectedTargetFrameSprite,
-                effectivePlanet.PlanetOrbit.PlanetVisualSize
-            );
+            SetLegacyFrameSize(
+                effectivePlanet
+                    .PlanetOrbit
+                    .PlanetVisualSize);
         }
     }
 
-    public void ShowMapPointDestination(Vector3 position)
+    public void ShowMapPointDestination(
+        Vector3 position)
     {
         HideAll();
 
         if (mapPointDestinationMarker != null)
-            mapPointDestinationMarker.position = position;
-
-        if (selectedTargetFrame != null)
-            selectedTargetFrame.position = position;
+        {
+            mapPointDestinationMarker.position =
+                position;
+        }
 
         if (mapPointDestinationObject != null)
-            mapPointDestinationObject.SetActive(true);
+        {
+            mapPointDestinationObject.SetActive(
+                true);
+        }
 
-        if (selectedTargetFrameObject != null)
-            selectedTargetFrameObject.SetActive(true);
+        SetLegacyFramePosition(
+            position);
+
+        SetLegacyFrameVisible(
+            true);
     }
 
-    public void ShowSystemExitDestination(RouteExitMapChangedEvent evt)
+    public void ShowSystemExitDestination(
+        RouteExitMapChangedEvent evt)
     {
         if (evt == null)
         {
-            Debug.LogError("[SystemDestinationMarkerController2] RouteExitMapChangedEvent is null");
+            Debug.LogError(
+                "[SystemDestinationMarkerController2] " +
+                "RouteExitMapChangedEvent is null.");
+
             return;
         }
 
         HideAll();
 
-        if (selectedTargetFrame != null)
-            selectedTargetFrame.position = evt.ExitPoint;
+        SetLegacyFramePosition(
+            evt.ExitPoint);
 
-        if (selectedTargetFrameSprite != null)
-        {
-            SpriteRendererSizeUtility.SetWorldSize(
-                selectedTargetFrameSprite,
-                systemExitTargetFrameSize
-            );
-        }
+        SetLegacyFrameSize(
+            systemExitTargetFrameSize);
 
-        if (selectedTargetFrameObject != null)
-            selectedTargetFrameObject.SetActive(true);
+        SetLegacyFrameVisible(
+            true);
     }
 
     public void HideAll()
     {
-        _currentPlanet = null;
-        _isPlanetDestinationVisible = false;
+        _currentPlanet =
+            null;
+
+        _isPlanetDestinationVisible =
+            false;
 
         if (planetDestinationObject != null)
-            planetDestinationObject.SetActive(false);
+        {
+            planetDestinationObject.SetActive(
+                false);
+        }
 
         if (mapPointDestinationObject != null)
-            mapPointDestinationObject.SetActive(false);
+        {
+            mapPointDestinationObject.SetActive(
+                false);
+        }
 
-        if (selectedTargetFrameObject != null)
-            selectedTargetFrameObject.SetActive(false);
+        SetLegacyFrameVisible(
+            false);
+    }
+
+    private void SetLegacyFrameVisible(
+        bool visible)
+    {
+        if (selectedTargetFrameObject == null)
+            return;
+
+        selectedTargetFrameObject.SetActive(
+            showLegacySelectedTargetFrame &&
+            visible);
+    }
+
+    private void SetLegacyFramePosition(
+        Vector3 position)
+    {
+        if (!showLegacySelectedTargetFrame)
+            return;
+
+        if (selectedTargetFrame != null)
+        {
+            selectedTargetFrame.position =
+                position;
+        }
+    }
+
+    private void SetLegacyFrameSize(
+        float worldSize)
+    {
+        if (!showLegacySelectedTargetFrame)
+            return;
+
+        if (selectedTargetFrameSprite == null)
+            return;
+
+        SpriteRendererSizeUtility.SetWorldSize(
+            selectedTargetFrameSprite,
+            worldSize);
     }
 }

@@ -152,7 +152,7 @@ MonoBehaviour:
   systemExitImage: {fileID: 5366462686301127682}
   systemExitSprite: {fileID: 21300000, guid: c199ec7d5530a4fb8a5e698f10e29958, type: 3}
   systemNameText: {fileID: 7981253200853181391}
-  interactionTarget: {fileID: 0}
+  interactionTarget: {fileID: 9015911482768209628}
   size: 50
 --- !u!114 &8374240209775990155
 MonoBehaviour:
@@ -192,7 +192,7 @@ MonoBehaviour:
   targetType: 30
   isInteractable: 1
   isAvailable: 1
-  targetMarkerView: {fileID: 0}
+  targetMarkerView: {fileID: 8838294096529800687}
 --- !u!114 &8838294096529800687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,7 +221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae4022abd0bba457ca443de84075b62d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::TravelPointInteractionTarget2A
-  targetType: 0
+  targetType: 30
   selectableView: {fileID: 1885972551723587633}
   markerView: {fileID: 8838294096529800687}
   positionTolerance: 0.5

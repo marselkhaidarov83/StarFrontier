@@ -267,9 +267,6 @@ MonoBehaviour:
   systemMapSunPrefab: {fileID: 2615460552967337954, guid: bcaa36454d4654568ad4c2d28f890bee, type: 3}
   systemMapPlanetPrefab: {fileID: 2992302129176740718, guid: c918fa3d9088245bf9d564a9ee0e88ad, type: 3}
   systemMapExitPrefab: {fileID: 2992302129176740718, guid: 71337909dd6bf4caba9743b2dbcf43ae, type: 3}
-  _camera: {fileID: 26906026}
-  _cameraSize: 1200
-  _cameraPosition: {x: 0, y: 0, z: -10}
 --- !u!114 &10713354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,6 +305,7 @@ MonoBehaviour:
   mapPointDestinationObject: {fileID: 1257313923}
   selectedTargetFrameObject: {fileID: 2062725283}
   systemExitTargetFrameSize: 52
+  showLegacySelectedTargetFrame: 0
 --- !u!114 &10713356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -506,8 +504,10 @@ MonoBehaviour:
   useSavedPlayerPosition: 1
   pushPositionToSystemTravelService: 1
   pushPositionToShipMovementState: 1
+  sessionReadyTimeoutFrames: 120
   disableShipMovementServiceTick: 1
   logInitialization: 1
+  logSessionWait: 1
 --- !u!114 &10713372
 MonoBehaviour:
   m_ObjectHideFlags: 0
