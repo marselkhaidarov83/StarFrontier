@@ -16,8 +16,6 @@ public interface IGameTimeService : ITickable
 
     void StepOneDay();
 
-    void Tick(float deltaTime);
-
     void WriteTimeToSave(GameRuntimeState state);
 
     void RestoreTimeFromSave(GameRuntimeState state);

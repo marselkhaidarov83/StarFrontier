@@ -21,7 +21,6 @@ public class Bootstrapper : CustomMonoBehaviour
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
     [SerializeField] private List<SectorConfig> sectors;
-    [SerializeField] private List<StarSystemConfig> starSystems;
     [SerializeField] private List<ShipConfig> ships;
     [SerializeField] private List<EnemyConfig> enemies;
     [SerializeField] private List<AllyConfig> allies;
@@ -41,6 +40,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private IGameTimeService _gameTimeService;
     private IPlayerControlService _playerControlService;
     private IShipMovementService _shipMovementService;
+    private IInteractionService2A _interactionService;
     private ITickService _tickService;
 
     [SerializeField] private bool _globalDebugEnabled;
@@ -81,9 +81,6 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<SimpleEventBus, SimpleEventBus>();
         RegisterService<IGameSessionService, GameSessionService>();
 
-        List<PlanetConfig> planets = new List<PlanetConfig>();
-        foreach (StarSystemConfig config in starSystems)
-            planets.AddRange(config.PlanetRefs);
         RegisterService<IConfigService>(
             new ConfigService(
                 gameConfig,
@@ -110,6 +107,7 @@ public class Bootstrapper : CustomMonoBehaviour
 
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
+        RegisterService<ITargetService2A, TargetService2A>();
         RegisterService<ISystemBoundsService, SystemBoundsService2A>();
         _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
         _shipMovementService = RegisterService<IShipMovementService, ShipMovementService2A>();
@@ -130,6 +128,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IHangarService, HangarService>();
         RegisterService<ISystemTravelService, SystemTravelService>();
         RegisterService<ITravelService, TravelService2A>();
+        _interactionService = RegisterService<IInteractionService2A, InteractionService2A>();
         RegisterService<IRepairService, RepairService>();
         RegisterService<IRewardService, RewardService>();
         RegisterService<IPlanetMissionOfferStateService, PlanetMissionOfferStateService>();
@@ -161,6 +160,7 @@ public class Bootstrapper : CustomMonoBehaviour
         _tickService.Register(_gameTimeService, TickOrder.GameTime);
         _tickService.Register(_playerControlService, TickOrder.PlayerControl);
         _tickService.Register(_shipMovementService, TickOrder.ShipMovement);
+        _tickService.Register(_interactionService, TickOrder.Interaction);
         RegisterService<IGameTimePauseScopeService, GameTimePauseScopeService>();
     }
 

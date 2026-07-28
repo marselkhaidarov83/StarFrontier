@@ -467,18 +467,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a575e903ae9c049ce8ee0b371a8aae58, type: 2}
   - {fileID: 11400000, guid: 10b4aa44545c14ba4bdd3a265c3be226, type: 2}
   - {fileID: 11400000, guid: 12d8e96510e20460e8a1742b87ad82ab, type: 2}
-  starSystems:
-  - {fileID: 11400000, guid: 5d9b8ebf2cbec4fb18ec7cdb91136463, type: 2}
-  - {fileID: 11400000, guid: 62d8f47103b7c4e26b1d851015b703a5, type: 2}
-  - {fileID: 11400000, guid: 85f6de5a929834e65a365b67795ed337, type: 2}
-  - {fileID: 11400000, guid: 092347aa480324109a5f47ae00985aa3, type: 2}
-  - {fileID: 11400000, guid: 8365a353287974e0babf0bfbdfce46c3, type: 2}
-  - {fileID: 11400000, guid: 3946b0d145d5d410abbd102202322b5f, type: 2}
-  - {fileID: 11400000, guid: 1bd02b7a49afc49c2b8c18d930dfcb4a, type: 2}
-  - {fileID: 11400000, guid: 1ffbbb1516f9d4486af06558ca31375d, type: 2}
-  - {fileID: 11400000, guid: 799c3952b8c554e49b7895d5687c63d5, type: 2}
-  - {fileID: 11400000, guid: 7bf9d183ca0954eacb83e0432f2fb1e2, type: 2}
-  - {fileID: 11400000, guid: 97987aba3483740e79ce3182774035dd, type: 2}
+  starSystems: []
   ships:
   - {fileID: 11400000, guid: e7dbcdc25d859411990de39f023083bc, type: 2}
   - {fileID: 11400000, guid: 124aa3e84adcd4de9a71347b84f62060, type: 2}

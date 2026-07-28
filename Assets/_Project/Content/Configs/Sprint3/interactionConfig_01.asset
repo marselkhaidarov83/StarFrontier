@@ -18,5 +18,5 @@ MonoBehaviour:
   holdToInteractSeconds: 0.25
   interactionCooldownSeconds: 0.5
   requireSelectedTarget: 1
-  autoSelectNearestIfNoneSelected: 1
+  autoSelectNearestIfNoneSelected: 0
   pauseShipOnInteraction: 1

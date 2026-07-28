@@ -16,11 +16,6 @@ public class SystemMapController2 : CustomMonoBehaviour
     [SerializeField] private GameObject systemMapPlanetPrefab;
     [SerializeField] private GameObject systemMapExitPrefab;
 
-    [Header("Camera")]
-    [SerializeField] private Camera _camera;
-    [SerializeField] private float _cameraSize = 1200f;
-    [SerializeField] private Vector3 _cameraPosition = new Vector3(0, 0, -10f);
-
     private SimpleEventBus eventBus;
     private IGameSessionService gameSessionService;
     private IConfigService configService;

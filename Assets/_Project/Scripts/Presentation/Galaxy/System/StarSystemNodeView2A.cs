@@ -51,10 +51,6 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
     [SerializeField] private int fuelImageOrder = 31;
     [SerializeField] private int fuelTextOrder = 32;
 
-    [Header("Selection")]
-    [SerializeField] private float normalScale = 1f;
-    [SerializeField] private float selectedScale = 1.12f;
-
     private IGameSessionService _gameSessionService;
     private ITravelService _travelService;
     private GalaxyRuntimeState _galaxyRuntimeState;
