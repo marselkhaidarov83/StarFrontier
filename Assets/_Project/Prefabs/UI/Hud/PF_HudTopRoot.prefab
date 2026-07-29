@@ -1068,6 +1068,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6852134551070901415}
   - component: {fileID: 8848564818274580228}
+  - component: {fileID: 3263997258932185636}
   m_Layer: 5
   m_Name: PF_HudTopRoot
   m_TagString: Untagged
@@ -1118,6 +1119,28 @@ MonoBehaviour:
   savedImage: {fileID: 7681130653931340438}
   gotoMenuButton: {fileID: 4200568770342985412}
   showDuration: 2
+--- !u!114 &3263997258932185636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4451064579014983664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 921dc42ab201f46b9950ad597f0f7bb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::SystemTopHudFuelIndicator2A
+  fuelIconImage: {fileID: 4189400700307336301}
+  fuelText: {fileID: 576768435984720145}
+  fuelPercentText: {fileID: 0}
+  iconFuelLow: {fileID: 21300000, guid: 4ba06a40e7b464d53a8e731eee9cc3df, type: 3}
+  iconFuelMedium: {fileID: 21300000, guid: 6897d66c730b44b699c3e224a38967df, type: 3}
+  iconFuelNormal: {fileID: 21300000, guid: cfee7d147d00d45319bb740021149063, type: 3}
+  refreshEveryFrame: 0
+  hideWhenServicesMissing: 0
+  logMissingServices: 1
+  logMissingSprites: 1
 --- !u!1 &5079651508763218235
 GameObject:
   m_ObjectHideFlags: 0
@@ -1635,7 +1658,7 @@ GameObject:
   - component: {fileID: 811059805356497359}
   - component: {fileID: 4189400700307336301}
   m_Layer: 5
-  m_Name: FuelImage
+  m_Name: FuelStateImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
