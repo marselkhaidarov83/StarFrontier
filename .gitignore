@@ -7,3 +7,34 @@
 [Uu]ser[Ss]ettings/
 *.csproj
 *.sln
+
+# ---------------------------------------------------------------------------
+# STAR FRONTIER — local/generated files
+# Added for 2A-S03-05-T16 repository hygiene
+# ---------------------------------------------------------------------------
+
+# macOS
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+
+# Unity/local temporary files
+.utmp
+.utmp/
+**/.utmp
+**/.utmp/
+*.utmp
+
+# Local IDE settings
+.vscode/
+.idea/
+.vs/
+
+# Optional local captures
+MemoryCaptures/
+Recordings/
+
+# IMPORTANT:
+# Do not ignore Assets/**/*.meta.
+# Do not ignore ProjectSettings, Packages, Documentation or production assets.
