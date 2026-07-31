@@ -75,7 +75,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         }
 
         ShipRuntimeData activeShip =
-            _gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip();
+            _gameSessionService.State.Player.PlayerShipState.GetActiveShip();
 
         if (activeShip == null)
             return;

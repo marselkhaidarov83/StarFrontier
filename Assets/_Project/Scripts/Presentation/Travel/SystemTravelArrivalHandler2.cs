@@ -64,7 +64,7 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
         // if (planetScreenPanel != null)
         //     planetScreenPanel.SetActive(true);
 
-        _gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId = evt.PlanetId;
+        _gameSessionService.State.Player.CurrentPlanetId = evt.PlanetId;
         _eventBus.Publish(new PlanetEnteredEvent(evt.PlanetId));
 
         // Позже в E1-S7-006 здесь будет MetaSceneRouter.OpenPlanetScreen(evt.PlanetId)

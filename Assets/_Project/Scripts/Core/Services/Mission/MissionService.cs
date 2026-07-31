@@ -19,19 +19,19 @@ public class MissionService : CustomService, IMissionService
 
     public IReadOnlyList<MissionInstanceData> GetAvailableMissions()
     {
-        return _gameSessionService.CurrentSave.MissionBlock.AvailableMissions;
+        return _gameSessionService.State.MissionBlock.AvailableMissions;
     }
     public IReadOnlyList<MissionInstanceData> GetActiveMissions()
     {
-        return _gameSessionService.CurrentSave.MissionBlock.ActiveMissions;
+        return _gameSessionService.State.MissionBlock.ActiveMissions;
     }
     public IReadOnlyList<MissionInstanceData> GetCompletedMissions()
     {
-        return _gameSessionService.CurrentSave.MissionBlock.CompletedMissions;
+        return _gameSessionService.State.MissionBlock.CompletedMissions;
     }
     public void SetAvailableMissions(List<MissionInstanceData> missions)
     {
-        _gameSessionService.CurrentSave.MissionBlock.AvailableMissions.Clear();
+        _gameSessionService.State.MissionBlock.AvailableMissions.Clear();
 
         if (missions == null)
             return;
@@ -52,14 +52,14 @@ public class MissionService : CustomService, IMissionService
                 mission.Objective.IsMissionCargoDelivered = false;
             }
 
-            _gameSessionService.CurrentSave.MissionBlock.AvailableMissions.Add(mission);
+            _gameSessionService.State.MissionBlock.AvailableMissions.Add(mission);
         }
         _saveService.EnableSave(true);
     }
 
     public bool AcceptMission(string missionRuntimeId)
     {
-        MissionInstanceData mission = _gameSessionService.CurrentSave.MissionBlock.AvailableMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
+        MissionInstanceData mission = _gameSessionService.State.MissionBlock.AvailableMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
 
         if (mission == null)
         {
@@ -69,7 +69,7 @@ public class MissionService : CustomService, IMissionService
         }
 
         _saveService.EnableSave(false);
-        _gameSessionService.CurrentSave.MissionBlock.AvailableMissions.Remove(mission);
+        _gameSessionService.State.MissionBlock.AvailableMissions.Remove(mission);
         mission.Status = MissionStatus.Accepted;
 
         if (mission.MissionType == MissionType.Delivery && mission.Objective != null)
@@ -82,19 +82,19 @@ public class MissionService : CustomService, IMissionService
         if (mission.MissionType.Equals(MissionType.Elimination))
             mission.PirateGroupNpcId = _systemNpcPopulationService.CreatePirateGroup(mission.PirateGroupSpawnRuleConfig);
 
-        _gameSessionService.CurrentSave.MissionBlock.ActiveMissions.Add(mission);
+        _gameSessionService.State.MissionBlock.ActiveMissions.Add(mission);
         _saveService.EnableSave(true);
 
         LogCustom($"MissionService: Mission accepted: {mission.Title}");
-        LogCustom($"MissionService: _availableMissions.Count: {_gameSessionService.CurrentSave.MissionBlock.AvailableMissions.Count}");
-        LogCustom($"MissionService: _activeMissions.Count: {_gameSessionService.CurrentSave.MissionBlock.ActiveMissions.Count}");
+        LogCustom($"MissionService: _availableMissions.Count: {_gameSessionService.State.MissionBlock.AvailableMissions.Count}");
+        LogCustom($"MissionService: _activeMissions.Count: {_gameSessionService.State.MissionBlock.ActiveMissions.Count}");
 
         return true;
     }
 
     public bool CompleteMission(string missionRuntimeId)
     {
-        MissionInstanceData mission = _gameSessionService.CurrentSave.MissionBlock.ActiveMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
+        MissionInstanceData mission = _gameSessionService.State.MissionBlock.ActiveMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
 
         if (mission == null)
         {
@@ -119,10 +119,10 @@ public class MissionService : CustomService, IMissionService
         }
 
         _saveService.EnableSave(false);
-        _gameSessionService.CurrentSave.MissionBlock.ActiveMissions.Remove(mission);
+        _gameSessionService.State.MissionBlock.ActiveMissions.Remove(mission);
         mission.Status = MissionStatus.Completed;
-        _gameSessionService.CurrentSave.MissionBlock.CompletedMissions.Add(mission);
-        _rewardService.TryGrantMissionReward(mission, _gameSessionService.CurrentSave.PlayerProfile);
+        _gameSessionService.State.MissionBlock.CompletedMissions.Add(mission);
+        _rewardService.TryGrantMissionReward(mission, _gameSessionService.State.Player);
         _saveService.EnableSave(true);
 
         if (IsDebug())
@@ -132,7 +132,7 @@ public class MissionService : CustomService, IMissionService
 
     public bool FailMission(string missionRuntimeId)
     {
-        MissionInstanceData mission = _gameSessionService.CurrentSave.MissionBlock.ActiveMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
+        MissionInstanceData mission = _gameSessionService.State.MissionBlock.ActiveMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
 
         if (mission == null)
         {
@@ -142,7 +142,7 @@ public class MissionService : CustomService, IMissionService
         }
 
         _saveService.EnableSave(false);
-        _gameSessionService.CurrentSave.MissionBlock.ActiveMissions.Remove(mission);
+        _gameSessionService.State.MissionBlock.ActiveMissions.Remove(mission);
         mission.Status = MissionStatus.Failed;
         _saveService.EnableSave(true);
 
@@ -153,24 +153,24 @@ public class MissionService : CustomService, IMissionService
 
     public MissionInstanceData GetMissionById(string missionRuntimeId)
     {
-        MissionInstanceData mission = _gameSessionService.CurrentSave.MissionBlock.AvailableMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
+        MissionInstanceData mission = _gameSessionService.State.MissionBlock.AvailableMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
         if (mission != null)
             return mission;
 
-        mission = _gameSessionService.CurrentSave.MissionBlock.ActiveMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
+        mission = _gameSessionService.State.MissionBlock.ActiveMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
         if (mission != null)
             return mission;
 
-        mission = _gameSessionService.CurrentSave.MissionBlock.CompletedMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
+        mission = _gameSessionService.State.MissionBlock.CompletedMissions.FirstOrDefault(m => m.MissionRuntimeId == missionRuntimeId);
         return mission;
     }
 
     public void ClearAll()
     {
         _saveService.EnableSave(false);
-        _gameSessionService.CurrentSave.MissionBlock.AvailableMissions.Clear();
-        _gameSessionService.CurrentSave.MissionBlock.ActiveMissions.Clear();
-        _gameSessionService.CurrentSave.MissionBlock.CompletedMissions.Clear();
+        _gameSessionService.State.MissionBlock.AvailableMissions.Clear();
+        _gameSessionService.State.MissionBlock.ActiveMissions.Clear();
+        _gameSessionService.State.MissionBlock.CompletedMissions.Clear();
         _saveService.EnableSave(true);
     }
 

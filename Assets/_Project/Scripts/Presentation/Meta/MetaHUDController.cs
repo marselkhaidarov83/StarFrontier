@@ -126,36 +126,36 @@ public class MetaHudController : MonoBehaviour
 
     public void Refresh()
     {
-        if (gameSessionService.CurrentSave.PlayerProfile != null)
-            creditsText.text = $"Credits: {gameSessionService.CurrentSave.PlayerProfile.Credits}";
+        if (gameSessionService.State.Player != null)
+            creditsText.text = $"Credits: {gameSessionService.State.Player.Credits}";
         else
             creditsText.text = "Credits: -";
 
-        if (gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip() != null)
-            fuelText.text = $"Fuel: {gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().CurrentFuel} / {gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().FuelCapacity}";
+        if (gameSessionService.State.Player.PlayerShipState.GetActiveShip() != null)
+            fuelText.text = $"Fuel: {gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel} / {gameSessionService.State.Player.PlayerShipState.GetActiveShip().FuelCapacity}";
         else
             fuelText.text = "Fuel: -";
 
-        if (gameSessionService.CurrentSave.PlayerProfile != null &&
-                gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip() != null)
+        if (gameSessionService.State.Player != null &&
+                gameSessionService.State.Player.PlayerShipState.GetActiveShip() != null)
         {
-            RuntimeCargoInventory cargo = gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().Cargo;
+            RuntimeCargoInventory cargo = gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo;
             int usedCargo = cargo != null ? cargo.GetUsedCapacity() : 0;
-            int maxCargo = gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().CargoCapacity;
+            int maxCargo = gameSessionService.State.Player.PlayerShipState.GetActiveShip().CargoCapacity;
             cargoText.text = $"Cargo: {usedCargo} / {maxCargo}";
             
         }
         else
             cargoText.text = "Cargo: -";
 
-        if (gameSessionService.CurrentSave.PlayerProfile != null)
+        if (gameSessionService.State.Player != null)
         {
-            if (gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId != null)
+            if (gameSessionService.State.Player.CurrentSystemId != null)
             {
                 IReadOnlyList<StarSystemConfig> starSystemConfigs = configService.GetAllStarSystems();
                 foreach (StarSystemConfig starSystemConfig in configService.GetAllStarSystems())
                     if (starSystemConfig.Id ==
-                            gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId)
+                            gameSessionService.State.Player.CurrentSystemId)
                     {
                         systemText.text = $"System: {starSystemConfig.DisplayName ?? "-"}";
                         break;
@@ -164,8 +164,8 @@ public class MetaHudController : MonoBehaviour
             else
                 systemText.text = "System: -";
 
-            if (gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId != null)
-                planetText.text = $"Planet: {gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId ?? "-"}";
+            if (gameSessionService.State.Player.CurrentPlanetId != null)
+                planetText.text = $"Planet: {gameSessionService.State.Player.CurrentPlanetId ?? "-"}";
             else
                 planetText.text = "Planet: -";
         }

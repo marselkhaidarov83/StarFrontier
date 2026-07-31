@@ -34,8 +34,8 @@ using UnityEngine;
 
         public TravelResult TryTravel(string toSystemId)
         {
-            var session = _gameSessionService.CurrentSave;
-            var fromSystemId = session.PlayerProfile.CurrentSystemId;
+            var session = _gameSessionService.State;
+            var fromSystemId = session.Player.CurrentSystemId;
 
             _eventBus.Publish(new TravelStartedEvent(fromSystemId, toSystemId));
             if (_debugEnabled)
@@ -63,13 +63,13 @@ using UnityEngine;
             var fuelCost = CalculateFuelCost(fromSystemId, toSystemId);
 
             if (_debugEnabled)
-                Debug.Log($"[TravelService] : Current fuel " + session.PlayerProfile.PlayerShipState.GetActiveShip().CurrentFuel);
+                Debug.Log($"[TravelService] : Current fuel " + session.Player.PlayerShipState.GetActiveShip().CurrentFuel);
 
-            session.PlayerProfile.PlayerShipState.GetActiveShip().CurrentFuel -= fuelCost;
+            session.Player.PlayerShipState.GetActiveShip().CurrentFuel -= fuelCost;
             if (_debugEnabled)
-                Debug.Log($"[TravelService] : Current fuel " + session.PlayerProfile.PlayerShipState.GetActiveShip().CurrentFuel);
+                Debug.Log($"[TravelService] : Current fuel " + session.Player.PlayerShipState.GetActiveShip().CurrentFuel);
 
-            session.PlayerProfile.CurrentSystemId = toSystemId.Trim();
+            session.Player.CurrentSystemId = toSystemId.Trim();
 
             var completedResult = TravelResult.Completed(fromSystemId, toSystemId.Trim(), fuelCost);
 
@@ -91,7 +91,7 @@ using UnityEngine;
 
         public void TryTravelToPlanet(string planetId)
         {
-            _gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId = planetId;
+            _gameSessionService.State.Player.CurrentPlanetId = planetId;
             Debug.Log("[TravelService] TryTravelToPlanet = " + planetId);
 
             if (_eventBus != null)
@@ -124,8 +124,8 @@ using UnityEngine;
             var fuelCost = CalculateFuelCost(normalizedFromId, normalizedToId);
 
             if (_debugEnabled)
-                Debug.Log($"[TravelService] CurrentFuel: " + _gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().CurrentFuel);
-            if (_gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip().CurrentFuel < fuelCost)
+                Debug.Log($"[TravelService] CurrentFuel: " + _gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel);
+            if (_gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel < fuelCost)
                 return TravelFailReason.NotEnoughFuel;
 
             return TravelFailReason.None;

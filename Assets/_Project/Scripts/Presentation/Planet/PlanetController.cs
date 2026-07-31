@@ -127,9 +127,9 @@ public class PlanetController : CustomMonoBehaviour
         Vector2 planetPosition = _orbitalMotionService.GetPlanetCurrentPosition(
                 _configService.GetCurrentPlanetConfig().PlanetOrbit);
         _systemTravelService.SetCurrentPosition(planetPosition);
-        gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId = "";
+        gameSessionService.State.Player.CurrentPlanetId = "";
 
-        eventBus.Publish(new SystemEnteredEvent(gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId));
+        eventBus.Publish(new SystemEnteredEvent(gameSessionService.State.Player.CurrentSystemId));
     }
 
     private void OnOpenHangarClicked()
@@ -212,7 +212,7 @@ public class PlanetController : CustomMonoBehaviour
 
     private void RefreshBackground()
     {
-        string currentPlanetId = gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId;
+        string currentPlanetId = gameSessionService.State.Player.CurrentPlanetId;
         PlanetConfig planetConfig = configService.GetPlanetConfigById(currentPlanetId);
 
         if (backgroundImage == null || planetConfig == null)
@@ -322,7 +322,7 @@ public class PlanetController : CustomMonoBehaviour
 
     private void RefreshActionAvailability()
     {
-        var planetId = gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId;
+        var planetId = gameSessionService.State.Player.CurrentPlanetId;
         PlanetConfig currentPlanet = configService.GetPlanetConfigById(planetId);
 
         if (currentPlanet == null)

@@ -63,7 +63,7 @@ public class SystemMapController2 : CustomMonoBehaviour
             return;
         }
 
-        string currentSystemId = gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId;
+        string currentSystemId = gameSessionService.State.Player.CurrentSystemId;
         if (!configService.TryGetStarSystem(currentSystemId, out StarSystemConfig starSystem))
         {
             Debug.LogError($"[SystemMapController2] No StarSystemData for id: {currentSystemId}");

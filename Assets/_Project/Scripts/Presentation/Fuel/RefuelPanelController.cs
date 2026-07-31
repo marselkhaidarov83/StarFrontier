@@ -75,22 +75,22 @@ public class RefuelPanelController : MonoBehaviour
 
         eventBus.Unsubscribe<RefuelEnteredEvent>(OnRefuelEntered);
         eventBus.Unsubscribe<FuelChangedEvent>(OnFuelChanged);
-    }  
+    }
 
     private void OnRefuelEntered(RefuelEnteredEvent evt)
     {
         Refresh();
-    }    
+    }
     private void OnFuelChanged(FuelChangedEvent evt)
     {
         Refresh();
-    }    
+    }
     public void Refresh()
     {
         if (_refuelService == null)
             return;
 
-        PlayerProfileData player = gameSessionService.CurrentSave.PlayerProfile;
+        PlayerState player = gameSessionService.State.Player;
 
         int fuelCount = 0;
         int maxValue = 0;
@@ -99,15 +99,15 @@ public class RefuelPanelController : MonoBehaviour
             fuelCount = player.PlayerShipState.GetActiveShip().FuelCapacity - player.PlayerShipState.GetActiveShip().CurrentFuel;
             if (fuelCount > 0)
             {
-                refuelCountSlider.maxValue = maxValue = fuelCount;                
+                refuelCountSlider.maxValue = maxValue = fuelCount;
                 refuelCountSlider.minValue = 1;
                 refuelCountSlider.value = fuelCount;
             }
             else
             {
-                refuelCountSlider.minValue = 0;                
-                refuelCountSlider.maxValue = maxValue = 0;     
-                refuelCountSlider.value = 0;           
+                refuelCountSlider.minValue = 0;
+                refuelCountSlider.maxValue = maxValue = 0;
+                refuelCountSlider.value = 0;
             }
         }
 
@@ -157,7 +157,7 @@ public class RefuelPanelController : MonoBehaviour
 
     private string BuildWarningText()
     {
-        ShipRuntimeData ship = gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip();
+        ShipRuntimeData ship = gameSessionService.State.Player.PlayerShipState.GetActiveShip();
 
         if (ship.CurrentFuel >= ship.FuelCapacity)
             return "Fuel tank is full";

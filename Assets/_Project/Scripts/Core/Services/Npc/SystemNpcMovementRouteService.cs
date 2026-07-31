@@ -314,10 +314,10 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
     {
         position = Vector3.zero;
 
-        if (_gameSessionService?.CurrentSave?.PlayerProfile == null)
+        if (_gameSessionService?.State?.Player == null)
             return false;
 
-        var profile = _gameSessionService.CurrentSave.PlayerProfile;
+        var profile = _gameSessionService.State.Player;
 
         if (profile.CurrentSystemId != enemy.CurrentSystemId)
             return false;

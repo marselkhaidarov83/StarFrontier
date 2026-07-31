@@ -20,10 +20,10 @@ public class HangarService : IHangarService
 
     public ShipRuntimeData GetActiveShipState()
     {
-        if (_gameSessionService.CurrentSave.PlayerProfile.PlayerShipState == null)
+        if (_gameSessionService.State.Player.PlayerShipState == null)
             return null;
 
-        return _gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip();
+        return _gameSessionService.State.Player.PlayerShipState.GetActiveShip();
     }
 
     public ShipConfig GetActiveShipData()
@@ -51,13 +51,13 @@ public class HangarService : IHangarService
 
     public HangarOperationResult SwitchShip(string shipId)
     {
-        if (_gameSessionService.CurrentSave.PlayerProfile.PlayerShipState == null)
+        if (_gameSessionService.State.Player.PlayerShipState == null)
             return HangarOperationResult.Fail(HangarError.ActiveShipMissing);
 
         if (string.IsNullOrEmpty(shipId))
             return HangarOperationResult.Fail(HangarError.ShipNotFound);
 
-        ShipRuntimeData shipRuntime = _gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetOwnedShip(shipId);
+        ShipRuntimeData shipRuntime = _gameSessionService.State.Player.PlayerShipState.GetOwnedShip(shipId);
         // if (!_gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.OwnsShip(shipId))
         if (shipRuntime == null)
             return HangarOperationResult.Fail(HangarError.ShipNotOwned);
@@ -68,7 +68,7 @@ public class HangarService : IHangarService
         if (shipData == null)
             return HangarOperationResult.Fail(HangarError.ShipNotFound);
 
-        _gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.ActiveShipId = shipId;
+        _gameSessionService.State.Player.PlayerShipState.ActiveShipId = shipId;
 
         _eventBus.Publish(new ActiveShipChangedEvent(shipId));
         _eventBus.Publish(new ShipStatsChangedEvent(shipId));
@@ -207,7 +207,8 @@ public class HangarService : IHangarService
 
         try
         {
-            _saveService.Save();
+            _eventBus.Publish(new SaveNeedEvent());
+            // _saveService.Save();
             UnityEngine.Debug.Log($"[HangarService] Autosaved after: {operationName}");
         }
         catch (System.Exception exception)

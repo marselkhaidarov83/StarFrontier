@@ -5,6 +5,10 @@ using UnityEngine;
 
 public sealed class ConfigService : IConfigService
 {
+    public GameConfig GameConfig { get; }
+    public DebugConfig DebugConfig { get; }
+    public SaveConfig SaveConfig { get; }
+
     private readonly List<StarSystemConfig> _starSystems;
     private readonly Dictionary<string, StarSystemConfig> _starSystemsById;
     private readonly List<PlanetConfig> _planets;
@@ -30,7 +34,10 @@ public sealed class ConfigService : IConfigService
 
     private readonly IGameSessionService gameSessionService;
 
-    public ConfigService(IEnumerable<StarSystemConfig> starSystems,
+    public ConfigService(GameConfig gameConfig,
+                        DebugConfig debugConfig,
+                        SaveConfig saveConfig,
+                        IEnumerable<StarSystemConfig> starSystems,
                         IEnumerable<PlanetConfig> planets,
                         IEnumerable<ItemConfig> items,
                         IEnumerable<ShipConfig> ships,
@@ -42,6 +49,10 @@ public sealed class ConfigService : IConfigService
                         IEnumerable<ModuleConfig> modules,
                         IEnumerable<WeaponConfig> weapons)
     {
+        GameConfig = gameConfig;
+        DebugConfig = debugConfig;
+        SaveConfig = saveConfig;
+
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
         BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
         BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));
@@ -135,7 +146,7 @@ public sealed class ConfigService : IConfigService
 
     public StarSystemConfig GetCurrentSystemConfig()
     {
-        return GetStarSystemConfigById(gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId);
+        return GetStarSystemConfigById(gameSessionService.State.Player.CurrentSystemId);
     }
     public IReadOnlyList<PlanetConfig> GetAllPlanets()
     {
@@ -155,7 +166,7 @@ public sealed class ConfigService : IConfigService
 
     public PlanetConfig GetCurrentPlanetConfig()
     {
-        return GetPlanetConfigById(gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId);
+        return GetPlanetConfigById(gameSessionService.State.Player.CurrentPlanetId);
     }
 
     public bool ContainsStarSystem(string systemId)

@@ -52,7 +52,7 @@ using System.Linq;
             entry = null;
 
             PlanetConfig currentPlanet = 
-                    configService.GetPlanetConfigById(gameSessionService.CurrentSave.PlayerProfile.CurrentPlanetId);
+                    configService.GetPlanetConfigById(gameSessionService.State.Player.CurrentPlanetId);
             // PlanetConfig currentPlanet = _currentPlanetProvider.GetCurrentPlanet();
             
             if (currentPlanet == null || currentPlanet.MarketProfile == null)

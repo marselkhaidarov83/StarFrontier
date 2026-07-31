@@ -220,7 +220,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         }
 
         LogCustom("State.TravelProgress01 = " + State.TravelProgress01);
-        _gameSessionService.CurrentSave.PlayerProfile.SystemMapShipPosition = State.GetCurrentPosition();
+        _gameSessionService.State.Player.SystemMapShipPosition = State.GetCurrentPosition();
         _eventBus.Publish(new SystemTravelProgressChangedEvent(
             State.GetCurrentPosition(),
             State.DestinationPosition,
@@ -257,10 +257,13 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         State.Destination = SystemTravelDestination.None();
         State.Status = SystemTravelStatus.Idle;
 
-        _gameSessionService.CurrentSave.PlayerProfile.SystemMapShipPosition = State.GetCurrentPosition();
+        _gameSessionService.State.Player.SystemMapShipPosition = State.GetCurrentPosition();
         if (destinationType == TravelDestinationType.Planet ||
             destinationType == TravelDestinationType.SystemExit)
-            _saveService.Save();
+        {
+            _eventBus.Publish(new SaveNeedEvent());
+            // _saveService.Save();
+        }
     }
 
     public Vector3 GetCurrentDestinationPosition()

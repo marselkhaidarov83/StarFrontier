@@ -8,7 +8,7 @@ public class RewardService : IRewardService
     private readonly HashSet<string> _grantedMissionRewards = new();
     private string _lastRewardMessage = "No rewards granted yet.";
 
-    public bool TryGrantMissionReward(MissionInstanceData mission, PlayerProfileData profile)
+    public bool TryGrantMissionReward(MissionInstanceData mission, PlayerState profile)
     {
         if (mission == null)
         {

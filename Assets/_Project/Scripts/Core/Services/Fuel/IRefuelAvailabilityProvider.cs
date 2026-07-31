@@ -1,4 +1,4 @@
 public interface IRefuelAvailabilityProvider
-    {
-        bool IsRefuelAvailable();
-    }
+{
+    bool IsRefuelAvailable();
+}

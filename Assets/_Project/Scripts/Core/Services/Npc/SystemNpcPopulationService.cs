@@ -223,7 +223,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 // position.y += (UnityEngine.Random.insideUnitCircle * randomPosition).y;
 
                 StarSystemConfig starSystem = _configService.GetStarSystemConfigById(
-                            _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId);
+                            _gameSessionService.State.Player.CurrentSystemId);
                 PlanetConfig[] inhabitedPlanets = starSystem.PlanetRefs
                     .Where(p => p.IsInhabited)
                     .ToArray();
@@ -235,8 +235,8 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 SystemNpcRuntimeState pirate =
                     SystemNpcRuntimeFactory.CreatePirate(
                         entry.PirateConfig,
-                        _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId,
-                        _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId,
+                        _gameSessionService.State.Player.CurrentSystemId,
+                        _gameSessionService.State.Player.CurrentSystemId,
                         _orbitalMotionService.GetPlanetCurrentPosition(randomPlanet.PlanetOrbit),
                         rule.Id,
                         groupRuntimeId
@@ -249,7 +249,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
                 Debug.Log(
                     $"[SystemPopulationService] Enemy spawned. " +
-                    $"System: {_gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId}, GroupRule: {rule.Id}, Config: {entry.PirateConfig.Id}, GroupRuntimeId: {groupRuntimeId}"
+                    $"System: {_gameSessionService.State.Player.CurrentSystemId}, GroupRule: {rule.Id}, Config: {entry.PirateConfig.Id}, GroupRuntimeId: {groupRuntimeId}"
                 );
             }
         }

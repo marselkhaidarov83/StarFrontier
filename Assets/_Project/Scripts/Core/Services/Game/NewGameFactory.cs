@@ -2,20 +2,20 @@ using System.Collections.Generic;
 
 public class NewGameFactory
 {
-    public SaveData CreateNewGame()
+    public GameState CreateNewGame()
     {
-        var save = new SaveData
+        var save = new GameState
         {
-            PlayerProfile = CreatePlayerProfile()
+            Player = CreatePlayerProfile()
         };
         return save;
     }
 
-    private PlayerProfileData CreatePlayerProfile()
+    private PlayerState CreatePlayerProfile()
     {
         var starterShip = CreateStarterShip();
 
-        var profile = new PlayerProfileData
+        var profile = new PlayerState
         {
             Credits = 1000,
             CurrentSystemId = "system_heliosGate_01",

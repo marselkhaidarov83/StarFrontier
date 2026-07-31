@@ -97,6 +97,6 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private string GetCurrentSystemId()
     {
-        return _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId;
+        return _gameSessionService.State.Player.CurrentSystemId;
     }
 }

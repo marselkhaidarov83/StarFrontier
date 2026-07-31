@@ -86,8 +86,6 @@ public class SystemNodeView2 : CustomMonoBehaviour, IPointerClickHandler
             Debug.Log("[SystemNodeView2] SetState");
         if (IsDebug())
             Debug.Log("[SystemNodeView2] starSystemConfig = " + starSystemConfig);
-        // if (IsDebug())
-        //     Debug.Log("[SystemNodeView2] gameSessionService = " + _gameSessionService);
         
         Sprite sprite = normalSystemSprite;
         Color color = fuelColorNormal;
@@ -95,7 +93,7 @@ public class SystemNodeView2 : CustomMonoBehaviour, IPointerClickHandler
         bool fuelVisible = true;
 
         TravelFailReason travelFailReason = _travelService.GetTravelFailReason(
-            _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId, starSystemConfig.Id);
+            _gameSessionService.State.Player.CurrentSystemId, starSystemConfig.Id);
 
         if (IsDebug())
             Debug.Log("[SystemNodeView2] travelFailReason = " + travelFailReason);
@@ -129,7 +127,7 @@ public class SystemNodeView2 : CustomMonoBehaviour, IPointerClickHandler
         }
 
         int travelCost = _travelService.GetTravelCost(
-                    _gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId,
+                    _gameSessionService.State.Player.CurrentSystemId,
                     starSystemConfig.Id);
         String fuelCount = travelCost == 0 ? "" : travelCost.ToString();
 

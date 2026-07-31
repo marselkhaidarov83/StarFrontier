@@ -2,9 +2,9 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class PlayerProfileData
+public class PlayerState
 {
-    public string PlayerId = "local_player";
+    public string PlayerId = "player";
     public string PlayerName = "Pilot";
     public int Level = 1;
     public int Experience = 0;    

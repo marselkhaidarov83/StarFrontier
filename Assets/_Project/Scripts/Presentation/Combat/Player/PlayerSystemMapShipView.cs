@@ -51,7 +51,7 @@ public sealed class PlayerSystemMapShipView : MonoBehaviour
             return;
         }
 
-        Vector3 position = _gameSessionService.CurrentSave.PlayerProfile.SystemMapShipPosition;
+        Vector3 position = _gameSessionService.State.Player.SystemMapShipPosition;
         position.z = transform.position.z;
         transform.position = position;
     }
@@ -78,9 +78,9 @@ public sealed class PlayerSystemMapShipView : MonoBehaviour
 
     private ShipRuntimeData GetActiveShip()
     {
-        if (_gameSessionService?.CurrentSave?.PlayerProfile?.PlayerShipState == null)
+        if (_gameSessionService?.State?.Player?.PlayerShipState == null)
             return null;
 
-        return _gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.GetActiveShip();
+        return _gameSessionService.State.Player.PlayerShipState.GetActiveShip();
     }
 }
