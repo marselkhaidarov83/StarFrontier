@@ -21,8 +21,8 @@ public interface ISystemTravelService
     Vector3 GetCurrentDestinationPosition();
 
     TravelRoutePreview2A GetCurrentRoutePreview2A(
-    int smallDotsBetweenTickDots,
-    int maxBigDots,
-    int maxSmallDots,
-    float secondsPerTick);
+        float smallDotSpacing,
+        int maxBigDots,
+        int maxSmallDots,
+        float secondsPerTick);
 }

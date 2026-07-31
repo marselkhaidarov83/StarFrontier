@@ -23,3 +23,4 @@ MonoBehaviour:
   ParsecDistance: 90
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 8d3677979f2b9491593798c8eba4a638, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 06016c6be7cec46b3b0249729a5b16fc, type: 2}
+  galaxyMapCurveStrength: -0.22

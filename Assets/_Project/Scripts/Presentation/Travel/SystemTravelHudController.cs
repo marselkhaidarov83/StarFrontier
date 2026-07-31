@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,14 +10,14 @@ using UnityEngine.UI;
 /// Управляет нижним HUD сцены звёздной системы.
 ///
 /// Отображает:
-/// - игровой день;
+/// - игровую дату и время;
 /// - режим игрового времени;
 /// - текущую цель;
 /// - статус корабля;
 /// - текущую скорость корабля.
 ///
 /// Контроллер:
-/// - не создаёт gameplay-сервисы;
+/// - не создаёт игровые сервисы;
 /// - не рассчитывает движение корабля;
 /// - не изменяет Movement State;
 /// - получает сервисы через ServiceRegistry;
@@ -40,6 +42,20 @@ public sealed class SystemTravelHudController :
 
     private const float SpeedEpsilon =
         0.0001f;
+
+    private const int DefaultMinutesPerGameTick =
+        15;
+
+    private static readonly DateTime
+        GameStartDateTime =
+            new DateTime(
+                year: 3000,
+                month: 1,
+                day: 1,
+                hour: 0,
+                minute: 0,
+                second: 0,
+                kind: DateTimeKind.Unspecified);
 
     [Header("Texts")]
 
@@ -105,24 +121,9 @@ public sealed class SystemTravelHudController :
     private SimpleEventBus
         _eventBus;
 
-    /*
-     * Новый movement service.
-     *
-     * Используется как основной источник скорости,
-     * когда именно он является активным владельцем
-     * движения корабля.
-     */
     private IShipMovementService
         _shipMovementService;
 
-    /*
-     * Legacy travel service получает фактическую
-     * скорость перелёта из активного корабля.
-     *
-     * Поэтому IHangarService используется как
-     * fallback, пока новым movement service
-     * движение не управляется.
-     */
     private IHangarService
         _hangarService;
 
@@ -138,16 +139,15 @@ public sealed class SystemTravelHudController :
     private float _nextSpeedRefreshTime;
 
     private bool _isInitialized;
-
     private bool _buttonsSubscribed;
-
     private bool _eventsSubscribed;
 
     private void Start()
     {
         ResolveServices();
 
-        _isInitialized = true;
+        _isInitialized =
+            true;
 
         SubscribeButtons();
         SubscribeEvents();
@@ -212,7 +212,8 @@ public sealed class SystemTravelHudController :
         UnsubscribeButtons();
         UnsubscribeEvents();
 
-        _isInitialized = false;
+        _isInitialized =
+            false;
     }
 
     private void ResolveServices()
@@ -254,11 +255,6 @@ public sealed class SystemTravelHudController :
         _eventBus =
             registry.Get<SimpleEventBus>();
 
-        /*
-         * Эти сервисы получаем через TryGet,
-         * чтобы HUD мог продолжить работу
-         * в legacy-конфигурации сцены.
-         */
         registry.TryGet<IShipMovementService>(
             out _shipMovementService);
 
@@ -337,7 +333,8 @@ public sealed class SystemTravelHudController :
                     OnStepDayClicked);
         }
 
-        _buttonsSubscribed = true;
+        _buttonsSubscribed =
+            true;
     }
 
     private void UnsubscribeButtons()
@@ -361,7 +358,8 @@ public sealed class SystemTravelHudController :
                     OnStepDayClicked);
         }
 
-        _buttonsSubscribed = false;
+        _buttonsSubscribed =
+            false;
     }
 
     private void SubscribeEvents()
@@ -388,13 +386,8 @@ public sealed class SystemTravelHudController :
             SystemTravelCancelledEvent>(
                 OnTravelCancelled);
 
-        /*
-         * Если будет добавлено production-событие
-         * выбора врага, его подписка должна быть
-         * добавлена здесь.
-         */
-
-        _eventsSubscribed = true;
+        _eventsSubscribed =
+            true;
     }
 
     private void UnsubscribeEvents()
@@ -421,7 +414,8 @@ public sealed class SystemTravelHudController :
             SystemTravelCancelledEvent>(
                 OnTravelCancelled);
 
-        _eventsSubscribed = false;
+        _eventsSubscribed =
+            false;
     }
 
     private void OnPlayPauseClicked()
@@ -522,6 +516,12 @@ public sealed class SystemTravelHudController :
             force: true);
     }
 
+    /// <summary>
+    /// Выводит игровую дату и время в существующий DayText.
+    ///
+    /// Формула:
+    /// начало игры + количество тиков × минут за тик.
+    /// </summary>
     private void RefreshTime()
     {
         if (_gameTimeService == null)
@@ -529,9 +529,7 @@ public sealed class SystemTravelHudController :
 
         SetTextSafe(
             dayText,
-            "День " +
-            _gameTimeService
-                .CurrentQuantTick);
+            BuildGameDateTimeText());
 
         if (_gameTimeService.IsPaused)
         {
@@ -557,6 +555,63 @@ public sealed class SystemTravelHudController :
         SetTextSafe(
             stepDayButtonText,
             "Шаг");
+    }
+
+    private string BuildGameDateTimeText()
+    {
+        int currentTick =
+            Mathf.Max(
+                0,
+                _gameTimeService
+                    .CurrentQuantTick);
+
+        int minutesPerGameTick =
+            GetMinutesPerGameTick();
+
+        long elapsedMinutes =
+            (long)currentTick *
+            minutesPerGameTick;
+
+        long maximumElapsedMinutes =
+            (DateTime.MaxValue.Ticks -
+             GameStartDateTime.Ticks) /
+            TimeSpan.TicksPerMinute;
+
+        if (elapsedMinutes >
+            maximumElapsedMinutes)
+        {
+            elapsedMinutes =
+                maximumElapsedMinutes;
+        }
+
+        DateTime currentGameDateTime =
+            GameStartDateTime.AddMinutes(
+                elapsedMinutes);
+
+        return currentGameDateTime.ToString(
+            "dd.MM.yyyy HH:mm",
+            CultureInfo.InvariantCulture);
+    }
+
+    private int GetMinutesPerGameTick()
+    {
+        if (_configService == null ||
+            _configService.GameConfig == null)
+        {
+            return DefaultMinutesPerGameTick;
+        }
+
+        int configuredValue =
+            _configService
+                .GameConfig
+                .minutesPerGameTick;
+
+        if (configuredValue <= 0)
+        {
+            return DefaultMinutesPerGameTick;
+        }
+
+        return configuredValue;
     }
 
     private void RefreshTravelState()
@@ -616,7 +671,7 @@ public sealed class SystemTravelHudController :
     }
 
     private string BuildTargetLabel(
-     DestinationSelectedEvent evt)
+        DestinationSelectedEvent evt)
     {
         switch (evt.DestinationType)
         {
@@ -810,7 +865,7 @@ public sealed class SystemTravelHudController :
     /// логики выбора врага.
     ///
     /// Не создаёт Target State и не изменяет
-    /// gameplay-сервисы.
+    /// игровые сервисы.
     /// </summary>
     public void SetEnemyTarget(
         string enemyName)
@@ -854,11 +909,6 @@ public sealed class SystemTravelHudController :
             value);
     }
 
-    /// <summary>
-    /// Сохраняет существующее значение статуса.
-    /// Финальная строка вместе со скоростью
-    /// строится только в RefreshStatusTextWithSpeed.
-    /// </summary>
     private void SetStatusText(
         string value)
     {
@@ -881,13 +931,6 @@ public sealed class SystemTravelHudController :
             force: true);
     }
 
-    /// <summary>
-    /// Формирует одну общую строку:
-    ///
-    /// Статус: полет • Скорость: 3.2
-    ///
-    /// Метод не изменяет gameplay State.
-    /// </summary>
     private void RefreshStatusTextWithSpeed(
         bool force = false)
     {
@@ -927,15 +970,6 @@ public sealed class SystemTravelHudController :
             nextText;
     }
 
-    /// <summary>
-    /// Возвращает скорость, которая должна
-    /// отображаться игроку.
-    ///
-    /// Приоритет:
-    /// 1. активный ShipMovementRuntimeState;
-    /// 2. фактическая legacy travel speed;
-    /// 3. ноль.
-    /// </summary>
     private float GetCurrentShipSpeed()
     {
         usesMovementRuntimeState =
@@ -944,24 +978,12 @@ public sealed class SystemTravelHudController :
         usesLegacyTravelSpeed =
             false;
 
-        /*
-         * При общей игровой паузе корабль
-         * фактически не перемещается.
-         */
         if (_gameTimeService != null &&
             _gameTimeService.IsPaused)
         {
             return 0f;
         }
 
-        /*
-         * Новый movement service считается
-         * источником только тогда, когда он включён.
-         *
-         * Это исключает чтение stale velocity,
-         * когда legacy travel остаётся владельцем
-         * движения.
-         */
         if (_shipMovementService != null &&
             _shipMovementService.IsEnabled &&
             _shipMovementService.State != null)
@@ -978,10 +1000,6 @@ public sealed class SystemTravelHudController :
             return movementSpeed;
         }
 
-        /*
-         * Fallback для текущей legacy-системы
-         * перелёта.
-         */
         float legacySpeed =
             GetLegacyTravelSpeed();
 
@@ -995,14 +1013,6 @@ public sealed class SystemTravelHudController :
         return legacySpeed;
     }
 
-    /// <summary>
-    /// Читает ту же скорость активного корабля,
-    /// которую legacy SystemTravelService
-    /// использует во время полёта.
-    ///
-    /// HUD не вычисляет движение и не меняет
-    /// полученные данные.
-    /// </summary>
     private float GetLegacyTravelSpeed()
     {
         if (_travelService == null ||

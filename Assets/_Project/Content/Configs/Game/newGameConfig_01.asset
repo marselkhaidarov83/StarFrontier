@@ -18,3 +18,5 @@ MonoBehaviour:
   icon: {fileID: 0}
   StartSystem: {fileID: 11400000, guid: 79cf3b4bb4bd444ac9a26a63576072f6, type: 2}
   StartCredit: 999999
+  CurrentFuel: 1000
+  FuelCapacity: 1000

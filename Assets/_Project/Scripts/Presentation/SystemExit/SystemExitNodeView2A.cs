@@ -8,7 +8,8 @@ using UnityEngine.EventSystems;
 /// Поддерживает:
 /// - отображение точки выхода;
 /// - подпись системы назначения;
-/// - выбор точки как локального пункта движения;
+/// - проверку топлива при нажатии;
+/// - выбор точки как цели движения;
 /// - передачу ID системы назначения
 ///   в TravelPointInteractionTarget2A.
 /// </summary>
@@ -33,31 +34,33 @@ public sealed class SystemExitNodeView2A :
         "Компонент, который передаёт ID системы назначения " +
         "в TargetSelectableView2A и InteractionService2A.")]
     [SerializeField]
-    private TravelPointInteractionTarget2A
-        interactionTarget;
+    private TravelPointInteractionTarget2A interactionTarget;
 
     [Header("Size")]
 
     [SerializeField]
-    private float size = 50f;
+    private float size =
+        50f;
 
-    private RouteConfig
-        _routeConfig;
+    private RouteConfig _routeConfig;
+    private RouteEndpointConfig _endpointConfig;
 
-    private RouteEndpointConfig
-        _endpointConfig;
+    private string _currentSystemId =
+        string.Empty;
 
-    private string
-        _currentSystemId;
+    private string _targetSystemId =
+        string.Empty;
 
-    private string
-        _targetSystemId;
+    private SimpleEventBus _simpleEventBus;
+    private ITravelService _travelService;
+    private ISystemTravelService _systemTravelService;
+    private ITargetService2A _targetService;
 
-    private IGameSessionService
-        _gameSessionService;
+    private SystemTransitionController2
+        _systemTransitionController;
 
-    private SimpleEventBus
-        _simpleEventBus;
+    private TargetSelectableView2A
+        _selectableView;
 
     /// <summary>
     /// Вызывается существующим кодом создания
@@ -70,36 +73,7 @@ public sealed class SystemExitNodeView2A :
         RouteEndpointConfig endpointConfig,
         Vector2 center)
     {
-        if (Bootstrapper.Instance == null)
-        {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
-                "Bootstrapper.Instance is null.",
-                this);
-
-            return;
-        }
-
-        if (Bootstrapper.Instance
-                .ServiceRegistry == null)
-        {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
-                "ServiceRegistry is null.",
-                this);
-
-            return;
-        }
-
-        _simpleEventBus =
-            Bootstrapper.Instance
-                .ServiceRegistry
-                .Get<SimpleEventBus>();
-
-        _gameSessionService =
-            Bootstrapper.Instance
-                .ServiceRegistry
-                .Get<IGameSessionService>();
+        ResolveRuntimeDependencies();
 
         _routeConfig =
             routeConfig;
@@ -171,33 +145,29 @@ public sealed class SystemExitNodeView2A :
         if (systemExitImage != null)
         {
             /*
-             * Строка назначения sprite пока
-             * сохраняется отключённой,
+             * Назначение systemExitSprite пока
+             * остаётся отключённым,
              * как в существующей реализации.
              *
              * systemExitImage.sprite =
              *     systemExitSprite;
              */
 
-            SpriteRendererSizeUtility
-                .SetWorldSize(
-                    systemExitImage,
-                    size);
+            SpriteRendererSizeUtility.SetWorldSize(
+                systemExitImage,
+                size);
         }
 
         /*
-         * Сначала устанавливаем фактическую
-         * координату выхода.
+         * Устанавливаем фактическую координату
+         * точки выхода.
          */
         transform.position =
             _endpointConfig.ExitPoint;
 
         /*
-         * Затем передаём ID системы назначения
+         * Передаём ID системы назначения
          * interaction-компоненту.
-         *
-         * Это точное место вызова
-         * interactionTarget.Initialize().
          */
         ResolveInteractionTarget();
 
@@ -212,7 +182,37 @@ public sealed class SystemExitNodeView2A :
             return;
         }
 
-        interactionTarget.Initialize(_targetSystemId);
+        interactionTarget.Initialize(
+            _targetSystemId);
+
+        /*
+         * На префабе присутствует второй
+         * IPointerClickHandler:
+         * TargetSelectableView2A.
+         *
+         * Запрещаем ему самостоятельно обрабатывать
+         * нажатие на точку выхода.
+         *
+         * Выбор цели будет вызван ниже вручную,
+         * только после успешной проверки топлива.
+         */
+        ResolveSelectableView();
+
+        if (_selectableView != null)
+        {
+            _selectableView
+                .SetPointerClickHandlingEnabled(
+                    false);
+        }
+        else
+        {
+            Debug.LogError(
+                "[SystemExitNodeView2A] " +
+                "TargetSelectableView2A component is missing.",
+                this);
+        }
+
+        ResolveSystemTransitionController();
 
         if (IsDebug())
         {
@@ -231,15 +231,32 @@ public sealed class SystemExitNodeView2A :
     }
 
     /// <summary>
-    /// Существующая обработка нажатия на exit.
+    /// Обрабатывает нажатие на точку выхода.
     ///
-    /// Публикует RouteExitMapChangedEvent,
-    /// после чего SystemTravelService назначает
-    /// локальное движение к точке выхода.
+    /// Проверка топлива выполняется до:
+    /// - выбора цели;
+    /// - появления маркера;
+    /// - отправки RouteExitMapChangedEvent;
+    /// - начала движения корабля.
     /// </summary>
     public void OnPointerClick(
         PointerEventData eventData)
     {
+        ResolveRuntimeDependencies();
+        ResolveSelectableView();
+
+        /*
+         * На случай повторной инициализации
+         * ещё раз запрещаем второму компоненту
+         * самостоятельно обрабатывать нажатие.
+         */
+        if (_selectableView != null)
+        {
+            _selectableView
+                .SetPointerClickHandlingEnabled(
+                    false);
+        }
+
         LogCustom(
             "route = " +
             (_routeConfig != null
@@ -311,6 +328,111 @@ public sealed class SystemExitNodeView2A :
             return;
         }
 
+        if (_travelService == null)
+        {
+            Debug.LogError(
+                "[SystemExitNodeView2A] " +
+                "Cannot check travel. " +
+                "ITravelService is null.",
+                this);
+
+            return;
+        }
+
+        /*
+         * GetTravelFailReason только проверяет
+         * возможность перелёта.
+         *
+         * Топливо здесь не списывается.
+         */
+        TravelFailReason failReason =
+            _travelService.GetTravelFailReason(
+                _currentSystemId,
+                _targetSystemId);
+
+        if (failReason ==
+            TravelFailReason.NotEnoughFuel)
+        {
+            /*
+             * Сбрасываем локальную цель движения.
+             *
+             * CancelTravel также отправляет
+             * SystemTravelCancelledEvent,
+             * благодаря которому существующие
+             * маркеры маршрута скрываются.
+             */
+            if (_systemTravelService != null)
+            {
+                _systemTravelService.CancelTravel();
+            }
+
+            /*
+             * Отдельно очищаем игровую цель,
+             * чтобы точка выхода не оставалась
+             * выбранной даже при другом порядке
+             * вызова компонентов Unity.
+             */
+            if (_targetService != null)
+            {
+                _targetService.ClearTarget();
+            }
+
+            /*
+             * Используем существующий объект
+             * SystemTransitionController2
+             * на SystemScene.
+             */
+            ResolveSystemTransitionController();
+
+            if (_systemTransitionController != null)
+            {
+                _systemTransitionController
+                    .ShowTravelFailReason(
+                        failReason);
+            }
+            else
+            {
+                Debug.LogError(
+                    "[SystemExitNodeView2A] " +
+                    "SystemTransitionController2 " +
+                    "was not found on SystemScene.",
+                    this);
+            }
+
+            LogCustom(
+                "System exit selection rejected. " +
+                "Not enough fuel. " +
+                "Route = " +
+                _routeConfig.Id +
+                " | From = " +
+                _currentSystemId +
+                " | To = " +
+                _targetSystemId);
+
+            /*
+             * Важно:
+             * RouteExitMapChangedEvent не публикуется.
+             *
+             * Поэтому новая цель движения
+             * не назначается.
+             */
+            return;
+        }
+
+        /*
+         * Если топлива хватает,
+         * сохраняем прежнее поведение выбора цели.
+         */
+        if (_selectableView != null)
+        {
+            _selectableView.TrySelectTarget();
+        }
+
+        /*
+         * Только после проверки топлива
+         * назначаем локальный маршрут
+         * к точке выхода.
+         */
         _simpleEventBus.Publish(
             new RouteExitMapChangedEvent(
                 _routeConfig,
@@ -321,14 +443,69 @@ public sealed class SystemExitNodeView2A :
                     _targetSystemId)));
     }
 
+    private void ResolveRuntimeDependencies()
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        if (Bootstrapper.Instance.ServiceRegistry == null)
+            return;
+
+        IServiceRegistry registry =
+            Bootstrapper.Instance
+                .ServiceRegistry;
+
+        if (_simpleEventBus == null)
+        {
+            _simpleEventBus =
+                registry.Get<SimpleEventBus>();
+        }
+
+        if (_travelService == null)
+        {
+            _travelService =
+                registry.Get<ITravelService>();
+        }
+
+        if (_systemTravelService == null)
+        {
+            _systemTravelService =
+                registry.Get<ISystemTravelService>();
+        }
+
+        if (_targetService == null)
+        {
+            _targetService =
+                registry.Get<ITargetService2A>();
+        }
+    }
+
     private void ResolveInteractionTarget()
     {
         if (interactionTarget != null)
             return;
 
         interactionTarget =
-            GetComponent<
-                TravelPointInteractionTarget2A>();
+            GetComponent<TravelPointInteractionTarget2A>();
+    }
+
+    private void ResolveSelectableView()
+    {
+        if (_selectableView != null)
+            return;
+
+        _selectableView =
+            GetComponent<TargetSelectableView2A>();
+    }
+
+    private void ResolveSystemTransitionController()
+    {
+        if (_systemTransitionController != null)
+            return;
+
+        _systemTransitionController =
+            Object.FindFirstObjectByType<
+                SystemTransitionController2>();
     }
 
     private static string NormalizeId(

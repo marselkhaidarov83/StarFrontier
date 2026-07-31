@@ -10,7 +10,12 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     [SerializeField] private SpriteRenderer legacyLineSpriteRenderer;
 
     [Header("Dots")]
-    [SerializeField] private int smallDotsBetweenTickDots = 4;
+    [Tooltip(
+    "Постоянное расстояние между маленькими точками " +
+    "маршрута в мировых координатах карты системы.")]
+    [SerializeField]
+    [Min(0.01f)]
+    private float smallDotSpacing = 20f;
     [SerializeField] private float bigDotDiameter = 28f;
     [SerializeField] private float smallDotDiameter = 10f;
     [SerializeField] private Color bigDotColor = new Color(0.55f, 0.9f, 1f, 0.95f);
@@ -37,9 +42,12 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     private float _alphaMultiplier = 1f;
 
     public int LastEstimatedTickCount { get; private set; }
-    public int SmallDotsBetweenTickDots => smallDotsBetweenTickDots;
     public int MaxBigDots => maxBigDots;
     public int MaxSmallDots => maxSmallDots;
+    public float SmallDotSpacing =>
+    Mathf.Max(
+        0.01f,
+        smallDotSpacing);
 
     private void Awake()
     {
@@ -164,32 +172,50 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     }
 
     private void DrawSmallDotsBetween(
-        Vector3 from,
-        Vector3 to,
-        ref int smallDotIndex
-    )
+     Vector3 from,
+     Vector3 to,
+     ref int smallDotIndex
+ )
     {
-        if (smallDotsBetweenTickDots <= 0)
-            return;
-
         if (smallDotIndex >= maxSmallDots)
             return;
 
-        float segmentDistance = Vector3.Distance(from, to);
+        float segmentDistance =
+            Vector3.Distance(
+                from,
+                to);
 
         if (segmentDistance <= minDistanceToShow)
             return;
 
-        for (int i = 1; i <= smallDotsBetweenTickDots; i++)
+        float safeSpacing =
+            Mathf.Max(
+                0.01f,
+                smallDotSpacing);
+
+        for (
+            float distanceFromStart = safeSpacing;
+            distanceFromStart <
+                segmentDistance - 0.001f;
+            distanceFromStart += safeSpacing)
         {
             if (smallDotIndex >= maxSmallDots)
                 return;
 
-            float t = i / (smallDotsBetweenTickDots + 1f);
-            Vector3 position = Vector3.Lerp(from, to, t);
+            float route01 =
+                distanceFromStart /
+                segmentDistance;
+
+            Vector3 position =
+                Vector3.Lerp(
+                    from,
+                    to,
+                    route01);
 
             DrawDot(
-                GetOrCreateDot(_smallDotPool, "SmallRouteDot"),
+                GetOrCreateDot(
+                    _smallDotPool,
+                    "SmallRouteDot"),
                 position,
                 smallDotDiameter,
                 smallDotColor,

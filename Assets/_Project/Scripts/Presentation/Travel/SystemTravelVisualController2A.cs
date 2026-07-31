@@ -91,12 +91,13 @@ public sealed class SystemTravelVisualController2A : CustomMonoBehaviour
             return;
         }
 
-        TravelRoutePreview2A preview = _travelService.GetCurrentRoutePreview2A(
-            travelLineView.SmallDotsBetweenTickDots,
-            travelLineView.MaxBigDots,
-            travelLineView.MaxSmallDots,
-            GetSecondsPerTick()
-        );
+        TravelRoutePreview2A preview =
+    _travelService.GetCurrentRoutePreview2A(
+        travelLineView.SmallDotSpacing,
+        travelLineView.MaxBigDots,
+        travelLineView.MaxSmallDots,
+        GetSecondsPerTick()
+    );
 
         travelLineView.ShowPreview(preview);
     }

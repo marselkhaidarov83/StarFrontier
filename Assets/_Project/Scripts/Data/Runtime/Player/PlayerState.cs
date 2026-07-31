@@ -4,16 +4,56 @@ using UnityEngine;
 [Serializable]
 public class PlayerState
 {
-    public string PlayerId = "player";
-    public string PlayerName = "Pilot";
-    public int Level = 1;
-    public int Experience = 0;    
-    public int Credits = 1000;
+    public string PlayerId =
+        "player";
+
+    public string PlayerName =
+        "Pilot";
+
+    public int Level =
+        1;
+
+    public int Experience =
+        0;
+
+    public int Credits =
+        1000;
+
+    /*
+     * Премиальная валюта игрока.
+     *
+     * Для старых сохранений, в которых этого поля
+     * ещё не было, значение останется равным нулю.
+     */
+    public int Diamonds =
+        0;
+
     public string CurrentSystemId;
+
     public string CurrentPlanetId;
-    public bool IsOnPlanet() { return !string.IsNullOrEmpty(CurrentPlanetId); }
-    public Vector3 SystemMapShipPosition = new Vector3(0, 0, -2);
-    public Vector3 SystemMapShipDirection = Vector3.up;
-    public ShipRuntimeState PlayerShipState = new();
-    public ShipRuntimeData GetActiveShip() { return PlayerShipState.GetActiveShip(); }
+
+    public bool IsOnPlanet()
+    {
+        return
+            !string.IsNullOrEmpty(
+                CurrentPlanetId);
+    }
+
+    public Vector3 SystemMapShipPosition =
+        new Vector3(
+            0,
+            0,
+            -2);
+
+    public Vector3 SystemMapShipDirection =
+        Vector3.up;
+
+    public ShipRuntimeState PlayerShipState =
+        new();
+
+    public ShipRuntimeData GetActiveShip()
+    {
+        return
+            PlayerShipState.GetActiveShip();
+    }
 }

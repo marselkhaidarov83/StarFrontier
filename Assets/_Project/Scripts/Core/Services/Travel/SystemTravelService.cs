@@ -34,24 +34,147 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _eventBus.Subscribe<TravelFinishedEvent>(OnTravelFinished);
     }
 
-    private void ApplyShipPositionAfterSystemJump(Vector3 position)
+    private void ApplyShipPositionAfterSystemJump(
+    Vector3 position,
+    StarSystemConfig destinationSystemConfig)
     {
-        State.SetCurrentPosition(position);
+        /*
+         * Рассчитываем направление:
+         *
+         * точка входа корабля -> солнце новой системы.
+         */
+        Vector2 facingDirection =
+            GetArrivalFacingDirection(
+                position,
+                destinationSystemConfig);
 
-        State.StartPosition = position;
-        State.DestinationPosition = position;
-        State.TravelDistance = 0f;
-        State.TravelProgress01 = 1f;
-        State.Status = SystemTravelStatus.Idle;
-        State.Destination = SystemTravelDestination.None();
+        State.SetCurrentPosition(
+            position);
 
-        _gameSessionService.State.Player.SystemMapShipPosition = position;
+        State.StartPosition =
+            position;
+
+        State.DestinationPosition =
+            position;
+
+        State.TravelDistance =
+            0f;
+
+        State.TravelProgress01 =
+            1f;
+
+        State.Status =
+            SystemTravelStatus.Idle;
+
+        State.Destination =
+            SystemTravelDestination.None();
+
+        PlayerState playerState =
+            null;
+
+        if (_gameSessionService != null &&
+            _gameSessionService.State != null)
+        {
+            playerState =
+                _gameSessionService.State.Player;
+        }
+
+        /*
+         * Записываем позицию и направление
+         * в состояние игрока.
+         *
+         * Это необходимо для последующего
+         * сохранения и восстановления игры.
+         */
+        if (playerState != null)
+        {
+            playerState.SystemMapShipPosition =
+                position;
+
+            playerState.SystemMapShipDirection =
+                new Vector3(
+                    facingDirection.x,
+                    facingDirection.y,
+                    0f);
+        }
 
         if (_shipMovementService != null)
         {
-            _shipMovementService.SetPosition(new Vector2(position.x, position.y));
-            _shipMovementService.StopImmediately();
+            _shipMovementService.SetPosition(
+                new Vector2(
+                    position.x,
+                    position.y));
+
+            /*
+             * Сначала полностью прекращаем
+             * предыдущее движение.
+             */
+            _shipMovementService
+                .StopImmediately();
+
+            /*
+             * Затем задаём итоговое направление.
+             */
+            _shipMovementService
+                .SetFacingDirection(
+                    facingDirection);
+
+            /*
+             * Синхронизируем состояние движения
+             * с PlayerState.
+             */
+            if (playerState != null)
+            {
+                _shipMovementService
+                    .WriteToPlayerState(
+                        playerState);
+            }
         }
+    }
+
+    private Vector2 GetArrivalFacingDirection(
+    Vector3 shipPosition,
+    StarSystemConfig destinationSystemConfig)
+    {
+        /*
+         * Запасное направление используется,
+         * если конфигурация новой системы
+         * или её солнца отсутствует.
+         */
+        if (destinationSystemConfig == null ||
+            destinationSystemConfig.Sun == null)
+        {
+            return Vector2.up;
+        }
+
+        Vector2 shipPosition2D =
+            new Vector2(
+                shipPosition.x,
+                shipPosition.y);
+
+        Vector2 sunPosition =
+            destinationSystemConfig
+                .Sun
+                .LocalOffset;
+
+        Vector2 directionToSun =
+            sunPosition -
+            shipPosition2D;
+
+        bool hasInvalidValue =
+            float.IsNaN(directionToSun.x) ||
+            float.IsNaN(directionToSun.y) ||
+            float.IsInfinity(directionToSun.x) ||
+            float.IsInfinity(directionToSun.y);
+
+        if (hasInvalidValue ||
+            directionToSun.sqrMagnitude <=
+                0.0001f)
+        {
+            return Vector2.up;
+        }
+
+        return directionToSun.normalized;
     }
 
     private void OnTravelFinished(TravelFinishedEvent evt)
@@ -87,10 +210,24 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         LogCustom("exitPoint = " + routeConfig.GetExitPoint(evt.FromSystemId));
         LogCustom("entryPoint = " + routeConfig.GetEntryPoint(evt.ToSystemId));
 
-        Vector3 entryPoint = routeConfig.GetEntryPoint(evt.ToSystemId);
+        Vector3 entryPoint =
+    routeConfig.GetEntryPoint(
+        evt.ToSystemId);
 
-        SetCurrentSystem(evt.ToSystemId);
-        ApplyShipPositionAfterSystemJump(entryPoint);
+        /*
+         * Получаем конфигурацию именно новой системы.
+         * Она нужна для определения положения её солнца.
+         */
+        StarSystemConfig destinationSystemConfig =
+            routeConfig.GetOtherSystem(
+                evt.FromSystemId);
+
+        SetCurrentSystem(
+            evt.ToSystemId);
+
+        ApplyShipPositionAfterSystemJump(
+            entryPoint,
+            destinationSystemConfig);
 
         State.StartPosition = entryPoint;
         State.DestinationPosition = entryPoint;
@@ -522,12 +659,13 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     }
 
     public TravelRoutePreview2A GetCurrentRoutePreview2A(
-    int smallDotsBetweenTickDots,
+    float smallDotSpacing,
     int maxBigDots,
     int maxSmallDots,
     float secondsPerTick)
     {
-        TravelRoutePreview2A preview = new TravelRoutePreview2A();
+        TravelRoutePreview2A preview =
+            new TravelRoutePreview2A();
 
         if (State == null)
             return preview;
@@ -535,26 +673,52 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         if (!State.HasDestination)
             return preview;
 
-        if (State.Status != SystemTravelStatus.DestinationSelected &&
-            State.Status != SystemTravelStatus.Flying)
+        if (
+            State.Status !=
+                SystemTravelStatus.DestinationSelected &&
+            State.Status !=
+                SystemTravelStatus.Flying)
         {
             return preview;
         }
 
-        int safeSmallDotsBetweenTickDots = Mathf.Max(0, smallDotsBetweenTickDots);
-        int safeMaxBigDots = Mathf.Max(1, maxBigDots);
-        int safeMaxSmallDots = Mathf.Max(0, maxSmallDots);
+        float safeSmallDotSpacing =
+            Mathf.Max(
+                0.01f,
+                smallDotSpacing);
 
-        float safeSecondsPerTick = Mathf.Max(0.01f, secondsPerTick);
-        float speed = Mathf.Max(0.01f, GetCurrentShipTravelSpeed());
-        float distancePerTick = speed * safeSecondsPerTick;
+        int safeMaxBigDots =
+            Mathf.Max(
+                1,
+                maxBigDots);
 
-        if (State.Destination != null &&
-            State.Destination.Type == TravelDestinationType.Planet)
+        int safeMaxSmallDots =
+            Mathf.Max(
+                0,
+                maxSmallDots);
+
+        float safeSecondsPerTick =
+            Mathf.Max(
+                0.01f,
+                secondsPerTick);
+
+        float speed =
+            Mathf.Max(
+                0.01f,
+                GetCurrentShipTravelSpeed());
+
+        float distancePerTick =
+            speed *
+            safeSecondsPerTick;
+
+        if (
+            State.Destination != null &&
+            State.Destination.Type ==
+                TravelDestinationType.Planet)
         {
             BuildLivePlanetRoutePreview2A(
                 preview,
-                safeSmallDotsBetweenTickDots,
+                safeSmallDotSpacing,
                 safeMaxBigDots,
                 safeMaxSmallDots,
                 distancePerTick
@@ -564,7 +728,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         {
             BuildStaticRoutePreview2A(
                 preview,
-                safeSmallDotsBetweenTickDots,
+                safeSmallDotSpacing,
                 safeMaxBigDots,
                 safeMaxSmallDots,
                 distancePerTick
@@ -576,84 +740,51 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     private void BuildStaticRoutePreview2A(
      TravelRoutePreview2A preview,
-     int smallDotsBetweenTickDots,
+     float smallDotSpacing,
      int maxBigDots,
      int maxSmallDots,
-     float distancePerTick
- )
+     float distancePerTick)
     {
-        Vector3 routeStart = State.StartPosition;
-        Vector3 currentPosition = State.GetCurrentPosition();
-        Vector3 destinationPosition = GetCurrentDestinationPosition();
-
-        BuildCurrentTravelPath(
-            routeStart,
-            destinationPosition,
-            _routePreviewPathBuffer
+        BuildRoutePreview2A(
+            preview,
+            smallDotSpacing,
+            maxBigDots,
+            maxSmallDots,
+            distancePerTick
         );
-
-        float totalPathLength = GetPathLength(_routePreviewPathBuffer);
-
-        if (totalPathLength <= ArrivalDistanceThreshold)
-            return;
-
-        float passedDistance = GetClosestDistanceOnPath(
-            _routePreviewPathBuffer,
-            currentPosition
-        );
-
-        passedDistance = Mathf.Clamp(
-            passedDistance,
-            0f,
-            totalPathLength
-        );
-
-        Vector3 previousVisibleAnchor = currentPosition;
-
-        for (int tickIndex = 1; tickIndex <= maxBigDots; tickIndex++)
-        {
-            float distanceAtTick = Mathf.Min(
-                tickIndex * distancePerTick,
-                totalPathLength
-            );
-
-            if (distanceAtTick <= passedDistance)
-                continue;
-
-            Vector3 tickPosition = GetPointOnPathAtDistance(
-                _routePreviewPathBuffer,
-                distanceAtTick
-            );
-
-            AddSmallRoutePreviewDots2A(
-                preview,
-                previousVisibleAnchor,
-                tickPosition,
-                tickIndex,
-                smallDotsBetweenTickDots,
-                maxSmallDots
-            );
-
-            preview.AddBigDot(tickPosition, tickIndex);
-
-            previousVisibleAnchor = tickPosition;
-
-            if (distanceAtTick >= totalPathLength)
-                break;
-        }
     }
 
     private void BuildLivePlanetRoutePreview2A(
-    TravelRoutePreview2A preview,
-    int smallDotsBetweenTickDots,
-    int maxBigDots,
-    int maxSmallDots,
-    float distancePerTick
-)
+        TravelRoutePreview2A preview,
+        float smallDotSpacing,
+        int maxBigDots,
+        int maxSmallDots,
+        float distancePerTick)
     {
-        Vector3 routeStart = State.StartPosition;
-        Vector3 currentPosition = State.GetCurrentPosition();
-        Vector3 destinationPosition = GetCurrentDestinationPosition();
+        BuildRoutePreview2A(
+            preview,
+            smallDotSpacing,
+            maxBigDots,
+            maxSmallDots,
+            distancePerTick
+        );
+    }
+
+    private void BuildRoutePreview2A(
+        TravelRoutePreview2A preview,
+        float smallDotSpacing,
+        int maxBigDots,
+        int maxSmallDots,
+        float distancePerTick)
+    {
+        Vector3 routeStart =
+            State.StartPosition;
+
+        Vector3 currentPosition =
+            State.GetCurrentPosition();
+
+        Vector3 destinationPosition =
+            GetCurrentDestinationPosition();
 
         BuildCurrentTravelPath(
             routeStart,
@@ -661,86 +792,176 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             _routePreviewPathBuffer
         );
 
-        float totalPathLength = GetPathLength(_routePreviewPathBuffer);
+        float totalPathLength =
+            GetPathLength(
+                _routePreviewPathBuffer);
 
-        if (totalPathLength <= ArrivalDistanceThreshold)
-            return;
-
-        float passedDistance = GetClosestDistanceOnPath(
-            _routePreviewPathBuffer,
-            currentPosition
-        );
-
-        passedDistance = Mathf.Clamp(
-            passedDistance,
-            0f,
-            totalPathLength
-        );
-
-        Vector3 previousVisibleAnchor = currentPosition;
-
-        for (int tickIndex = 1; tickIndex <= maxBigDots; tickIndex++)
+        if (
+            totalPathLength <=
+            ArrivalDistanceThreshold)
         {
-            float distanceAtTick = Mathf.Min(
-                tickIndex * distancePerTick,
-                totalPathLength
-            );
+            return;
+        }
 
-            if (distanceAtTick <= passedDistance)
-                continue;
-
-            Vector3 tickPosition = GetPointOnPathAtDistance(
+        float passedDistance =
+            GetClosestDistanceOnPath(
                 _routePreviewPathBuffer,
-                distanceAtTick
+                currentPosition
             );
+
+        passedDistance =
+            Mathf.Clamp(
+                passedDistance,
+                0f,
+                totalPathLength);
+
+        for (
+            int tickIndex = 1;
+            tickIndex <= maxBigDots;
+            tickIndex++)
+        {
+            /*
+             * Начало участка текущего временного тика.
+             * Координата всегда считается от начала
+             * всего маршрута, а не от корабля.
+             */
+            float intervalStartDistance =
+                Mathf.Min(
+                    (tickIndex - 1) *
+                        distancePerTick,
+                    totalPathLength
+                );
+
+            float distanceAtTick =
+                Mathf.Min(
+                    tickIndex *
+                        distancePerTick,
+                    totalPathLength
+                );
+
+            /*
+             * Большая точка уже пройдена.
+             * Весь соответствующий участок маршрута
+             * больше не отображается.
+             */
+            if (
+                distanceAtTick <=
+                passedDistance + 0.001f)
+            {
+                continue;
+            }
 
             AddSmallRoutePreviewDots2A(
                 preview,
-                previousVisibleAnchor,
-                tickPosition,
+                _routePreviewPathBuffer,
+                intervalStartDistance,
+                distanceAtTick,
+                passedDistance,
                 tickIndex,
-                smallDotsBetweenTickDots,
+                smallDotSpacing,
                 maxSmallDots
             );
 
-            preview.AddBigDot(tickPosition, tickIndex);
+            Vector3 tickPosition =
+                GetPointOnPathAtDistance(
+                    _routePreviewPathBuffer,
+                    distanceAtTick
+                );
 
-            previousVisibleAnchor = tickPosition;
+            preview.AddBigDot(
+                tickPosition,
+                tickIndex);
 
-            if (distanceAtTick >= totalPathLength)
+            if (
+                distanceAtTick >=
+                totalPathLength)
+            {
                 break;
+            }
         }
     }
 
     private void AddSmallRoutePreviewDots2A(
     TravelRoutePreview2A preview,
-    Vector3 from,
-    Vector3 to,
+    List<Vector3> path,
+    float intervalStartDistance,
+    float intervalEndDistance,
+    float passedDistance,
     int tickIndex,
-    int smallDotsBetweenTickDots,
-    int maxSmallDots
-)
+    float smallDotSpacing,
+    int maxSmallDots)
     {
+        if (preview == null)
+            return;
+
+        if (path == null || path.Count == 0)
+            return;
+
         if (preview.SmallDotCount >= maxSmallDots)
             return;
 
-        if (smallDotsBetweenTickDots <= 0)
-            return;
+        float safeSpacing =
+            Mathf.Max(
+                0.01f,
+                smallDotSpacing);
 
-        float segmentDistance = Vector3.Distance(from, to);
+        float safeStartDistance =
+            Mathf.Max(
+                0f,
+                intervalStartDistance);
 
-        if (segmentDistance <= ArrivalDistanceThreshold)
-            return;
+        float safeEndDistance =
+            Mathf.Max(
+                safeStartDistance,
+                intervalEndDistance);
 
-        for (int i = 1; i <= smallDotsBetweenTickDots; i++)
+        /*
+         * Каждая точка получает постоянную координату
+         * вдоль полного маршрута:
+         *
+         * начало участка + один шаг,
+         * начало участка + два шага и так далее.
+         */
+        for (
+            float dotDistance =
+                safeStartDistance +
+                safeSpacing;
+
+            dotDistance <
+                safeEndDistance -
+                0.001f;
+
+            dotDistance +=
+                safeSpacing)
         {
-            if (preview.SmallDotCount >= maxSmallDots)
+            if (
+                preview.SmallDotCount >=
+                maxSmallDots)
+            {
                 return;
+            }
 
-            float t = i / (smallDotsBetweenTickDots + 1f);
-            Vector3 position = Vector3.Lerp(from, to, t);
+            /*
+             * Корабль уже прошёл эту точку.
+             * Не переносим её вперёд, а исключаем.
+             */
+            if (
+                dotDistance <=
+                passedDistance +
+                0.001f)
+            {
+                continue;
+            }
 
-            preview.AddSmallDot(position, tickIndex);
+            Vector3 position =
+                GetPointOnPathAtDistance(
+                    path,
+                    dotDistance
+                );
+
+            preview.AddSmallDot(
+                position,
+                tickIndex);
         }
     }
 

@@ -4,7 +4,8 @@ public enum SystemCameraMode2A
 {
     FollowShip,
     FreeLook,
-    ReturningToShip
+    ReturningToShip,
+    CenteringOnTarget
 }
 
 public sealed class SystemCameraController2A : CustomMonoBehaviour
@@ -32,6 +33,18 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private Vector3 _cameraVelocity;
     private float _zoomVelocity;
+
+    /*
+ * Положение цели запоминается в момент нажатия.
+ *
+ * Даже если планета продолжает двигаться,
+ * камера не будет следовать за ней после клика.
+ */
+    private Vector3 _centerOnTargetPosition;
+
+    private const float
+        CenterOnTargetPositionTolerance =
+            1f;
 
     private float
         _defaultOrthographicSizeForCurrentSystem;
@@ -279,6 +292,10 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
                 UpdateReturnToShip();
                 break;
 
+            case SystemCameraMode2A.CenteringOnTarget:
+                UpdateCenterOnTarget();
+                break;
+
             case SystemCameraMode2A.FreeLook:
                 /*
                  * При изменении зума в FreeLook камера
@@ -339,20 +356,135 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Можно ли сейчас центрировать камеру
+    /// на цели движения корабля.
+    /// </summary>
+    public bool CanCenterOnMovementTarget
+    {
+        get
+        {
+            return
+                _isInitialized &&
+                _isSystemCameraActive &&
+                targetCamera != null &&
+                _systemTravelService != null &&
+                _systemTravelService.State != null &&
+                _systemTravelService.State.HasDestination;
+        }
+    }
+
+    /// <summary>
+    /// Один раз центрирует камеру на текущей
+    /// цели движения корабля.
+    ///
+    /// После центрирования камера остаётся
+    /// в режиме FreeLook и больше не следует
+    /// ни за кораблём, ни за самой целью.
+    /// </summary>
+    /// <summary>
+    /// Плавно перемещает камеру к текущей
+    /// цели движения корабля.
+    ///
+    /// Положение цели сохраняется в момент клика.
+    /// После завершения перехода камера остаётся
+    /// в режиме FreeLook.
+    /// </summary>
+    public bool CenterOnMovementTarget()
+    {
+        if (!CanCenterOnMovementTarget)
+        {
+            Debug.LogWarning(
+                "[SystemCameraController2A] " +
+                "CenterOnMovementTarget skipped: " +
+                "movement target is unavailable."
+            );
+
+            return false;
+        }
+
+        ResolveMapCameraController();
+
+        /*
+         * Запоминаем положение цели только один раз.
+         *
+         * Если целью является движущаяся планета,
+         * камера переместится к положению планеты
+         * на момент нажатия и не будет следовать
+         * за ней дальше.
+         */
+        _centerOnTargetPosition =
+            _systemTravelService
+                .GetCurrentDestinationPosition();
+
+        mode =
+            SystemCameraMode2A
+                .CenteringOnTarget;
+
+        _cameraVelocity =
+            Vector3.zero;
+
+        _zoomVelocity =
+            0f;
+
+        float targetZoom =
+            GetDefaultOrthographicSizeForCurrentSystem();
+
+        /*
+         * Не устанавливаем масштаб мгновенно.
+         * Запускаем тот же плавный переход,
+         * который используется ReturnToShip.
+         */
+        if (_mapCameraController != null)
+        {
+            _mapCameraController.SetTargetZoom(
+                targetZoom
+            );
+        }
+
+        return true;
+    }
+
     public void NotifyManualZoomStarted()
     {
         if (!_isSystemCameraActive)
             return;
 
-        if (mode != SystemCameraMode2A.ReturningToShip)
-            return;
+        if (mode ==
+            SystemCameraMode2A.ReturningToShip)
+        {
+            /*
+             * Во время возврата к кораблю
+             * ручной масштаб прекращает возврат зума,
+             * но камера продолжает следовать
+             * за кораблём.
+             */
+            mode =
+                SystemCameraMode2A.FollowShip;
 
-        /*
-         * Ручной зум получает приоритет.
-         * Камера продолжает следовать за кораблём.
-         */
-        mode = SystemCameraMode2A.FollowShip;
-        _zoomVelocity = 0f;
+            _zoomVelocity =
+                0f;
+
+            return;
+        }
+
+        if (mode ==
+            SystemCameraMode2A.CenteringOnTarget)
+        {
+            /*
+             * При ручном вмешательстве прекращаем
+             * автоматическое центрирование и остаёмся
+             * в текущей точке карты.
+             */
+            mode =
+                SystemCameraMode2A.FreeLook;
+
+            _cameraVelocity =
+                Vector3.zero;
+
+            _zoomVelocity =
+                0f;
+        }
     }
 
     public void MoveFreeLookByScreenDelta(
@@ -454,6 +586,133 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             );
 
         MoveCameraTo(smoothedPosition);
+    }
+
+    /// <summary>
+    /// Плавно перемещает камеру к сохранённому
+    /// положению цели и одновременно возвращает
+    /// стандартный масштаб.
+    ///
+    /// После завершения камера переходит
+    /// в FreeLook и больше ни за чем не следует.
+    /// </summary>
+    private void UpdateCenterOnTarget()
+    {
+        if (targetCamera == null)
+        {
+            mode =
+                SystemCameraMode2A.FreeLook;
+
+            return;
+        }
+
+        Vector3 cameraPosition =
+            targetCamera.transform.position;
+
+        Vector3 desiredPosition =
+            new Vector3(
+                _centerOnTargetPosition.x,
+                _centerOnTargetPosition.y,
+                cameraPosition.z
+            );
+
+        /*
+         * Ограничение пересчитывается каждый кадр,
+         * потому что во время перехода одновременно
+         * изменяется масштаб камеры.
+         */
+        Vector3 clampedDesiredPosition =
+            ClampCameraPosition(
+                desiredPosition);
+
+        Vector3 smoothedPosition =
+            Vector3.SmoothDamp(
+                cameraPosition,
+                clampedDesiredPosition,
+                ref _cameraVelocity,
+                cameraConfig.ReturnSmoothTime
+            );
+
+        MoveCameraTo(
+            smoothedPosition);
+
+        bool zoomReached;
+
+        if (_mapCameraController != null)
+        {
+            zoomReached =
+                _mapCameraController
+                    .IsZoomAtTarget(
+                        0.5f);
+        }
+        else
+        {
+            /*
+             * Запасной вариант, когда на камере
+             * отсутствует MapCameraController.
+             */
+            float targetZoom =
+                GetDefaultOrthographicSizeForCurrentSystem();
+
+            float smoothedZoom =
+                Mathf.SmoothDamp(
+                    targetCamera.orthographicSize,
+                    targetZoom,
+                    ref _zoomVelocity,
+                    cameraConfig.ReturnSmoothTime
+                );
+
+            targetCamera.orthographicSize =
+                ClampOrthographicSize(
+                    smoothedZoom);
+
+            zoomReached =
+                Mathf.Abs(
+                    targetCamera.orthographicSize -
+                    targetZoom
+                ) <= 0.5f;
+        }
+
+        Vector3 actualCameraPosition =
+            targetCamera.transform.position;
+
+        float remainingDistance =
+            Vector2.Distance(
+                new Vector2(
+                    actualCameraPosition.x,
+                    actualCameraPosition.y
+                ),
+                new Vector2(
+                    clampedDesiredPosition.x,
+                    clampedDesiredPosition.y
+                )
+            );
+
+        bool positionReached =
+            remainingDistance <=
+            CenterOnTargetPositionTolerance;
+
+        if (!positionReached ||
+            !zoomReached)
+        {
+            return;
+        }
+
+        /*
+         * Фиксируем конечную позицию без остаточной
+         * погрешности SmoothDamp.
+         */
+        MoveCameraTo(
+            clampedDesiredPosition);
+
+        mode =
+            SystemCameraMode2A.FreeLook;
+
+        _cameraVelocity =
+            Vector3.zero;
+
+        _zoomVelocity =
+            0f;
     }
 
     private void UpdateReturnToShip()

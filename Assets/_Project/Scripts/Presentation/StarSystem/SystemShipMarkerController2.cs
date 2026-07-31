@@ -15,6 +15,8 @@ public sealed class SystemShipMarkerController2 :
     private SimpleEventBus _simpleEventBus;
     private ISystemTravelService _systemTravelService;
     private IHangarService _hangarService;
+    private IShipMovementService _shipMovementService;
+    private string _lastSystemId;
 
     private Vector3 _lastShipPosition;
     private bool _hasLastShipPosition;
@@ -35,6 +37,11 @@ public sealed class SystemShipMarkerController2 :
             Bootstrapper.Instance
                 .ServiceRegistry
                 .Get<IHangarService>();
+
+        _shipMovementService =
+            Bootstrapper.Instance
+            .ServiceRegistry
+            .Get<IShipMovementService>();
 
         if (_systemTravelService == null)
         {
@@ -76,6 +83,11 @@ public sealed class SystemShipMarkerController2 :
                 .GetCurrentPosition();
 
         _hasLastShipPosition = true;
+
+        _lastSystemId =
+            _systemTravelService
+                .State
+                .CurrentSystemId;
 
         /*
          * На первом обновлении выставляется только позиция.
@@ -189,6 +201,47 @@ public sealed class SystemShipMarkerController2 :
         shipMarkerView2.SetPosition(
             shipPosition);
 
+        string currentSystemId =
+_systemTravelService
+    .State
+    .CurrentSystemId;
+
+        bool enteredNewSystem =
+            !string.IsNullOrWhiteSpace(
+                currentSystemId) &&
+            currentSystemId !=
+                _lastSystemId;
+
+        if (enteredNewSystem)
+        {
+            /*
+             * Не используем разницу координат
+             * между старой и новой системами.
+             *
+             * Берём направление, которое уже
+             * рассчитано относительно солнца.
+             */
+            ApplyMovementFacingDirection();
+
+            _lastSystemId =
+                currentSystemId;
+
+            _lastShipPosition =
+                shipPosition;
+
+            _hasLastShipPosition =
+                true;
+
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(
+                currentSystemId))
+        {
+            _lastSystemId =
+                currentSystemId;
+        }
+
         /*
          * При первом чтении позиции направление
          * намеренно не вычисляется.
@@ -219,6 +272,32 @@ public sealed class SystemShipMarkerController2 :
          */
         _lastShipPosition =
             shipPosition;
+    }
+
+    private void ApplyMovementFacingDirection()
+    {
+        if (_shipMovementService == null)
+            return;
+
+        if (_shipMovementService.State == null)
+            return;
+
+        Vector2 facingDirection =
+            _shipMovementService
+                .State
+                .FacingDirection;
+
+        if (facingDirection.sqrMagnitude <=
+            0.0001f)
+        {
+            return;
+        }
+
+        SetDirection(
+            new Vector3(
+                facingDirection.x,
+                facingDirection.y,
+                0f));
     }
 
     public void SetDirection(

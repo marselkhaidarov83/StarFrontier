@@ -22,9 +22,8 @@ public sealed class TargetSelectableView2A :
     private string targetId;
 
     [SerializeField]
-    private SystemGameplayTargetType
-        targetType =
-            SystemGameplayTargetType.None;
+    private SystemGameplayTargetType targetType =
+        SystemGameplayTargetType.None;
 
     [SerializeField]
     private bool isInteractable =
@@ -37,11 +36,20 @@ public sealed class TargetSelectableView2A :
     [Header("Visual")]
 
     [SerializeField]
-    private TargetMarkerView2A
-        targetMarkerView;
+    private TargetMarkerView2A targetMarkerView;
 
-    private ITargetService2A
-        _targetService;
+    private ITargetService2A _targetService;
+
+    /*
+     * По умолчанию компонент самостоятельно
+     * обрабатывает нажатие.
+     *
+     * Для PF_SystemMapExit_Pseudo3D обработку
+     * отключает SystemExitNodeView2A,
+     * чтобы сначала проверить топливо.
+     */
+    private bool _pointerClickHandlingEnabled =
+        true;
 
     private void Awake()
     {
@@ -50,8 +58,7 @@ public sealed class TargetSelectableView2A :
         if (targetMarkerView == null)
         {
             targetMarkerView =
-                GetComponent<
-                    TargetMarkerView2A>();
+                GetComponent<TargetMarkerView2A>();
         }
 
         InitializeMarker();
@@ -79,59 +86,55 @@ public sealed class TargetSelectableView2A :
         InitializeMarker();
     }
 
-    public void SetAvailable(
-        bool available)
+    /// <summary>
+    /// Разрешает или запрещает самостоятельную
+    /// обработку IPointerClickHandler.
+    ///
+    /// Сам компонент при этом остаётся активным
+    /// и может быть вызван другим скриптом.
+    /// </summary>
+    public void SetPointerClickHandlingEnabled(
+        bool enabled)
     {
-        isAvailable =
-            available;
-
-        if (targetMarkerView != null)
-        {
-            targetMarkerView
-                .SetAvailable(
-                    available);
-        }
+        _pointerClickHandlingEnabled =
+            enabled;
     }
 
-    public void SetInteractable(
-        bool interactable)
-    {
-        isInteractable =
-            interactable;
-
-        if (targetMarkerView != null)
-        {
-            targetMarkerView
-                .SetInteractable(
-                    interactable);
-        }
-    }
-
-    public void OnPointerClick(
-        PointerEventData eventData)
+    /// <summary>
+    /// Выполняет выбор текущей настроенной цели.
+    ///
+    /// Используется как собственным нажатием,
+    /// так и SystemExitNodeView2A после проверки топлива.
+    /// </summary>
+    public bool TrySelectTarget()
     {
         if (!ResolveService())
-            return;
+        {
+            Debug.LogError(
+                "[TargetSelectableView2A] " +
+                "ITargetService2A not found.",
+                this);
+
+            return false;
+        }
 
         Vector3 currentPosition =
             transform.position;
 
         bool selected =
-            _targetService
-                .TrySelectTarget(
-                    targetId,
-                    targetType,
-                    new Vector2(
-                        currentPosition.x,
-                        currentPosition.y),
-                    isInteractable,
-                    isAvailable,
-                    true,
-                    out TargetSelectionFailReason2A
-                        failReason);
+            _targetService.TrySelectTarget(
+                targetId,
+                targetType,
+                new Vector2(
+                    currentPosition.x,
+                    currentPosition.y),
+                isInteractable,
+                isAvailable,
+                true,
+                out TargetSelectionFailReason2A failReason);
 
         if (selected)
-            return;
+            return true;
 
         Debug.LogWarning(
             "[TargetSelectableView2A] " +
@@ -143,6 +146,43 @@ public sealed class TargetSelectableView2A :
             " | Reason = " +
             failReason,
             this);
+
+        return false;
+    }
+
+    public void SetAvailable(
+        bool available)
+    {
+        isAvailable =
+            available;
+
+        if (targetMarkerView != null)
+        {
+            targetMarkerView.SetAvailable(
+                available);
+        }
+    }
+
+    public void SetInteractable(
+        bool interactable)
+    {
+        isInteractable =
+            interactable;
+
+        if (targetMarkerView != null)
+        {
+            targetMarkerView.SetInteractable(
+                interactable);
+        }
+    }
+
+    public void OnPointerClick(
+        PointerEventData eventData)
+    {
+        if (!_pointerClickHandlingEnabled)
+            return;
+
+        TrySelectTarget();
     }
 
     private bool ResolveService()
@@ -153,11 +193,8 @@ public sealed class TargetSelectableView2A :
         if (Bootstrapper.Instance == null)
             return false;
 
-        if (Bootstrapper.Instance
-                .ServiceRegistry == null)
-        {
+        if (Bootstrapper.Instance.ServiceRegistry == null)
             return false;
-        }
 
         _targetService =
             Bootstrapper.Instance
