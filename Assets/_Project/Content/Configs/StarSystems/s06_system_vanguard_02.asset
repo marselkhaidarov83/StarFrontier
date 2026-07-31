@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s06_system_vanguard_02
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_vanguard_01
+  displayName: "\u0410\u0432\u0430\u043D\u0433\u0430\u0440\u0434"
+  description: "\u0410\u0432\u0430\u043D\u0433\u0430\u0440\u0434"
+  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
+  economyType: 6
+  dangerLevel: 4
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems: []
+  missionTags: 020000000700000004000000
+  mapPosition: {x: 4.5, y: 0.4}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 6
+  routes:
+  - {fileID: 11400000, guid: 6c24b5f15129b45d88ccdc5ac07b2a4c, type: 2}
+  - {fileID: 11400000, guid: 8a742aea7c40b4b6ca706965d83e467c, type: 2}
+  - {fileID: 11400000, guid: ee01d73bb0af247f3b95ce8d20f49f12, type: 2}
+  - {fileID: 11400000, guid: 348da991d64514f089a4c7cb3885c502, type: 2}
+  - {fileID: 11400000, guid: a762aee25ada2438e8a13d33c3705aa2, type: 2}

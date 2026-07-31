@@ -1,11 +1,10 @@
 using UnityEngine;
 
-public class ContinueGameService : IContinueGameService
+public class ContinueGameService : CustomService, IContinueGameService
 {
     private readonly ISaveService _saveService;
     private readonly IGameSessionService _gameSessionService;
     public readonly IGameStateMachine _gameStateMachine;
-    private bool _debugEnabled = true;
 
     public ContinueGameService()
     {

@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MetaHudController : MonoBehaviour
+public class MetaHudController : CustomMonoBehaviour
 {
     [Header("Texts")]
     [SerializeField] private TMP_Text creditsText;
@@ -12,6 +12,7 @@ public class MetaHudController : MonoBehaviour
     [SerializeField] private TMP_Text cargoText;
     [SerializeField] private TMP_Text systemText;
     [SerializeField] private TMP_Text planetText;
+    [SerializeField] private TMP_Text baseText;
     [Header("Images")]
     [SerializeField] private Image savedImage;
     [Header("Buttons")]
@@ -38,6 +39,7 @@ public class MetaHudController : MonoBehaviour
         BindButtons();
         UnsubscribeFromEvents();
         SubscribeToEvents();
+        Refresh();
     }
 
     private void OnDestroy()
@@ -74,7 +76,7 @@ public class MetaHudController : MonoBehaviour
             return;
 
         simpleEventBus.Subscribe<ActiveShipChangedEvent>(OnActiveShipChanged);
-        simpleEventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        simpleEventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         simpleEventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         simpleEventBus.Subscribe<FuelChangedEvent>(OnFuelChanged);
         simpleEventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
@@ -87,7 +89,7 @@ public class MetaHudController : MonoBehaviour
             return;
 
         simpleEventBus.Unsubscribe<ActiveShipChangedEvent>(OnActiveShipChanged);
-        simpleEventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        simpleEventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         simpleEventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         simpleEventBus.Unsubscribe<FuelChangedEvent>(OnFuelChanged);
         simpleEventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
@@ -99,7 +101,7 @@ public class MetaHudController : MonoBehaviour
         Refresh();
     }
 
-    private void OnSystemEntered(SystemEnteredEvent evt)
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         Refresh();
     }
@@ -127,14 +129,14 @@ public class MetaHudController : MonoBehaviour
     public void Refresh()
     {
         if (gameSessionService.State.Player != null)
-            creditsText.text = $"Credits: {gameSessionService.State.Player.Credits}";
+            creditsText.text = $"Кредиты: {gameSessionService.State.Player.Credits}";
         else
-            creditsText.text = "Credits: -";
+            creditsText.text = "Кредиты: -";
 
         if (gameSessionService.State.Player.PlayerShipState.GetActiveShip() != null)
-            fuelText.text = $"Fuel: {gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel} / {gameSessionService.State.Player.PlayerShipState.GetActiveShip().FuelCapacity}";
+            fuelText.text = $"Топливо: {gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel} / {gameSessionService.State.Player.PlayerShipState.GetActiveShip().FuelCapacity}";
         else
-            fuelText.text = "Fuel: -";
+            fuelText.text = "Топливо: -";
 
         if (gameSessionService.State.Player != null &&
                 gameSessionService.State.Player.PlayerShipState.GetActiveShip() != null)
@@ -142,11 +144,11 @@ public class MetaHudController : MonoBehaviour
             RuntimeCargoInventory cargo = gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo;
             int usedCargo = cargo != null ? cargo.GetUsedCapacity() : 0;
             int maxCargo = gameSessionService.State.Player.PlayerShipState.GetActiveShip().CargoCapacity;
-            cargoText.text = $"Cargo: {usedCargo} / {maxCargo}";
+            cargoText.text = $"Груз: {usedCargo} / {maxCargo}";
             
         }
         else
-            cargoText.text = "Cargo: -";
+            cargoText.text = "Груз: -";
 
         if (gameSessionService.State.Player != null)
         {
@@ -157,22 +159,22 @@ public class MetaHudController : MonoBehaviour
                     if (starSystemConfig.Id ==
                             gameSessionService.State.Player.CurrentSystemId)
                     {
-                        systemText.text = $"System: {starSystemConfig.DisplayName ?? "-"}";
+                        systemText.text = $"Система: {starSystemConfig.DisplayName ?? "-"}";
                         break;
                     }
             }
             else
-                systemText.text = "System: -";
+                systemText.text = "Система:";
 
             if (gameSessionService.State.Player.CurrentPlanetId != null)
-                planetText.text = $"Planet: {gameSessionService.State.Player.CurrentPlanetId ?? "-"}";
+                planetText.text = $"Планета: {gameSessionService.State.Player.CurrentPlanetId ?? "-"}";
             else
-                planetText.text = "Planet: -";
+                planetText.text = "Планета:";
         }
         else
         {
-            systemText.text = "System: -";
-            planetText.text = "Planet: -";
+            systemText.text = "Система:";
+            planetText.text = "Планета:";
         }
     }
 

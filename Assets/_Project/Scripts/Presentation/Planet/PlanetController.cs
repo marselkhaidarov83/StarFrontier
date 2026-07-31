@@ -129,7 +129,7 @@ public class PlanetController : CustomMonoBehaviour
         _systemTravelService.SetCurrentPosition(planetPosition);
         gameSessionService.State.Player.CurrentPlanetId = "";
 
-        eventBus.Publish(new SystemEnteredEvent(gameSessionService.State.Player.CurrentSystemId));
+        eventBus.Publish(new StarSystemEnteredEvent(gameSessionService.State.Player.CurrentSystemId));
     }
 
     private void OnOpenHangarClicked()
@@ -293,7 +293,7 @@ public class PlanetController : CustomMonoBehaviour
             LogCustom("PlanetGovernmentEntered() ended");
     }
 
-    private void OnSystemEntered(SystemEnteredEvent evt)
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         if (planetRoot != null)
             planetRoot.SetActive(false);
@@ -308,7 +308,7 @@ public class PlanetController : CustomMonoBehaviour
             return;
 
         eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
-        eventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
     }
 
     private void UnsubscribeFromEvents()
@@ -317,7 +317,7 @@ public class PlanetController : CustomMonoBehaviour
             return;
 
            eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
-        eventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
     }
 
     private void RefreshActionAvailability()

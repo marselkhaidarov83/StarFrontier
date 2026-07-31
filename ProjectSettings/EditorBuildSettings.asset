@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/MetaScene.unity
     guid: a436cbe30ca6348be803daad2d6f0b6e
   - enabled: 1
+    path: Assets/_Project/Scenes/GalaxyScene.unity
+    guid: 47366ce8af8994aa6b87e270e68c4dd2
+  - enabled: 1
     path: Assets/_Project/Scenes/CombatScene.unity
     guid: decde98478092474cb2692ceac6df240
   - enabled: 1

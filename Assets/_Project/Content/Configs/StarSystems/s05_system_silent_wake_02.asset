@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s05_system_silent_wake_02
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_silent_wake_01
+  displayName: "\u0422\u0438\u0445\u0438\u0439 \u0421\u043B\u0435\u0434"
+  description: "\u0422\u0438\u0445\u0438\u0439 \u0421\u043B\u0435\u0434"
+  icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
+  economyType: 2
+  dangerLevel: 4
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems: []
+  missionTags: 010000000200000005000000
+  mapPosition: {x: 4.3, y: -1}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 6
+  routes:
+  - {fileID: 11400000, guid: 27208c5a7a2284b82ab8c74aaa93b2c8, type: 2}
+  - {fileID: 11400000, guid: 1648d1e9011ed452197274735c9bb74f, type: 2}
+  - {fileID: 11400000, guid: bebc565306f644005bdad0370047f6c5, type: 2}
+  - {fileID: 11400000, guid: b361ab64189a1477fb50a9e9d4061e65, type: 2}
+  - {fileID: 11400000, guid: 65e69558755fe482486e85da07861593, type: 2}

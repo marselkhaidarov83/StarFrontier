@@ -15,6 +15,9 @@ public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
     [SerializeField] private GameObject mapPointDestinationObject;
     [SerializeField] private GameObject selectedTargetFrameObject;
 
+    [Header("System Exit")]
+    [SerializeField] private float systemExitTargetFrameSize = 50f;
+
     public void ShowPlanetDestination(Vector3 position, PlanetConfig planet)
     {
         LogCustom("position = " + position);
@@ -56,16 +59,43 @@ public sealed class SystemDestinationMarkerController2 : CustomMonoBehaviour
             selectedTargetFrameObject.SetActive(true);
     }
 
-    public void ShowSystemExitDestination(StarSystemLink link)
+    // public void ShowSystemExitDestination(StarSystemLink link)
+    // {
+    //     HideAll();
+
+    //     if (selectedTargetFrame != null)
+    //     {
+    //         selectedTargetFrame.position = link.ExitPoint;
+    //         SpriteRendererSizeUtility.SetWorldSize(
+    //         selectedTargetFrameSprite,
+    //         link.Size);
+    //     }
+
+    //     if (selectedTargetFrameObject != null)
+    //         selectedTargetFrameObject.SetActive(true);
+    // }
+
+    public void ShowSystemExitDestination(RouteExitMapChangedEvent evt)
     {
+        if (evt == null)
+        {
+            Debug.LogError("[SystemDestinationMarkerController2] RouteExitMapChangedEvent is null");
+            return;
+        }
+
         HideAll();
 
         if (selectedTargetFrame != null)
         {
-            selectedTargetFrame.position = link.ExitPoint;
+            selectedTargetFrame.position = evt.ExitPoint;
+        }
+
+        if (selectedTargetFrameSprite != null)
+        {
             SpriteRendererSizeUtility.SetWorldSize(
-            selectedTargetFrameSprite,
-            link.Size);
+                selectedTargetFrameSprite,
+                systemExitTargetFrameSize
+            );
         }
 
         if (selectedTargetFrameObject != null)

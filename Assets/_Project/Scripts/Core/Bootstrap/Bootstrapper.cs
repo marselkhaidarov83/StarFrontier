@@ -7,8 +7,11 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private GameConfig gameConfig;
     [SerializeField] private DebugConfig debugConfig;
     [SerializeField] private SaveConfig saveConfig;
+    [SerializeField] private NewGameConfig newGameConfig;
 
     [Header("Data")]
+    [SerializeField] private GalaxyConfig galaxyConfig;
+    [SerializeField] private List<SectorConfig> sectors;
     [SerializeField] private List<StarSystemConfig> starSystems;
     [SerializeField] private List<ShipConfig> ships;
     [SerializeField] private List<EnemyConfig> enemies;
@@ -75,8 +78,11 @@ public class Bootstrapper : CustomMonoBehaviour
                     gameConfig,
                     debugConfig,
                     saveConfig,
-                    starSystems,
-                    planets,
+                    galaxyConfig,
+                    newGameConfig,
+                    // sectors,
+                    // starSystems,
+                    // planets,
                     items,
                     ships,
                     enemies,
@@ -89,6 +95,7 @@ public class Bootstrapper : CustomMonoBehaviour
         if (IsDebug())
             Debug.Log("ConfigService registered");
 
+        RegisterService<ISystemContextService, SystemContextService>();
         RegisterService<ISceneService, SceneService>();
         RegisterService<IInventoryService, InventoryService>();
         RegisterService<ISystemEncounterService, SystemEncounterService>();
@@ -98,7 +105,9 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IEconomyService, EconomyService>();
         RegisterService<IMarketTransactionService, MarketTransactionService>();
         RegisterService<IRefuelService, RefuelService>();
-        RegisterService<ITravelService, TravelService>();
+        RegisterService<IGalaxyDiscoveryService, GalaxyDiscoveryService>();
+        RegisterService<IRouteService, RouteService>();
+        RegisterService<ITravelService, TravelService2A>();
         RegisterService<IRepairService, RepairService>();
         RegisterService<IRewardService, RewardService>();
         RegisterService<IPlanetMissionOfferStateService, PlanetMissionOfferStateService>();

@@ -10,10 +10,12 @@ public class SystemMapHUDController : CustomMonoBehaviour
     [SerializeField] private Button openGalaxyButton;
 
     private SimpleEventBus eventBus;
+    private IGameStateMachine gameStateMachine;
 
     public void Initialize()
     {
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        gameStateMachine = Bootstrapper.Instance.ServiceRegistry.Get<IGameStateMachine>();
         SubscribeToEvents();
         BindButtons();
 
@@ -33,7 +35,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
             return;
 
         eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -47,7 +49,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
             return;
 
         eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -64,7 +66,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
             Debug.Log("[SystemMapHUDController] galaxy entered");
     }
 
-    private void OnSystemEntered(SystemEnteredEvent evt)
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         if (systemMapHUDRoot != null)
             systemMapHUDRoot.SetActive(true);
@@ -103,7 +105,8 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
     private void OnOpenGalaxyClicked()
     {
-        if (eventBus != null)
-            eventBus.Publish(new GalaxyEnteredEvent());
+        gameStateMachine.Enter(new GalaxyState());
+        // if (eventBus != null)
+            // eventBus?.Publish(new GalaxyEnteredEvent());
     }
 }

@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s04_system_reactor_spine_01
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: system_reactor_spine_01
+  displayName: "\u0420\u0435\u0430\u043A\u0442\u043E\u0440\u043D\u044B\u0439 \u0425\u0440\u0435\u0431\u0435\u0442"
+  description: "\u0420\u0435\u0430\u043A\u0442\u043E\u0440\u043D\u044B\u0439 \u0425\u0440\u0435\u0431\u0435\u0442"
+  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
+  economyType: 5
+  dangerLevel: 4
+  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
+  planetRefs: []
+  linkedSystems:
+  - linkedSystem: {fileID: 11400000, guid: 698b5b75e4e294471a6f42358374f67b, type: 2}
+    parsecDistance: 16
+    exitPoint: {x: 0, y: 0, z: 0}
+    entryPoint: {x: 0, y: 0, z: 0}
+    sprite: {fileID: 0}
+    size: 0
+  - linkedSystem: {fileID: 11400000, guid: e4181b494435e415f9ab045957a00a61, type: 2}
+    parsecDistance: 10
+    exitPoint: {x: 0, y: 0, z: 0}
+    entryPoint: {x: 0, y: 0, z: 0}
+    sprite: {fileID: 0}
+    size: 0
+  - linkedSystem: {fileID: 11400000, guid: f5e06f770b6bf474798968301caec276, type: 2}
+    parsecDistance: 22
+    exitPoint: {x: 0, y: 0, z: 0}
+    entryPoint: {x: 0, y: 0, z: 0}
+    sprite: {fileID: 0}
+    size: 0
+  missionTags: 
+  mapPosition: {x: 500, y: -300}
+  systemPopulation: {fileID: 0}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 5
+  routes:
+  - {fileID: 11400000, guid: bbbdad3960d764f349214dc20e1dfa91, type: 2}
+  - {fileID: 11400000, guid: d7dfbea4e6fce43008d949ee8ed00f7d, type: 2}
+  - {fileID: 11400000, guid: 4d762a9edb83743a68a2f3657959f21f, type: 2}

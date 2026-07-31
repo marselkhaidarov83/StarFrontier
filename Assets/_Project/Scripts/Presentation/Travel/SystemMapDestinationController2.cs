@@ -54,7 +54,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             Debug.LogError("[SystemMapDestinationController2] IGameTimeService not found.");
 
         Subscribe();
-        SetFlyButtonActive(false);
+        SetFlyButtonActive(_systemTravelService.State.HasDestination);
     }
 
     private void Update()
@@ -77,7 +77,8 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
         if (_simpleEventBus != null)
         {
-            _simpleEventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
+            _simpleEventBus.Subscribe<RouteExitMapChangedEvent>(OnRouteExitMapChanged);
+            // _simpleEventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
             _simpleEventBus.Subscribe<PlanetSelectedEvent>(OnPlanetSelected);
         }
     }
@@ -92,7 +93,8 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
         if (_simpleEventBus != null)
         {
-            _simpleEventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
+            _simpleEventBus.Unsubscribe<RouteExitMapChangedEvent>(OnRouteExitMapChanged);
+            // _simpleEventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
             _simpleEventBus.Unsubscribe<PlanetSelectedEvent>(OnPlanetSelected);
         }
     }
@@ -167,16 +169,48 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         LogCustom($"LogCustomMap point selected: {mapPosition}");
     }
 
-    private void OnExitMapChanged(ExitMapChangedEvent evt)
+    // private void OnExitMapChanged(ExitMapChangedEvent evt)
+    // {
+    //     StarSystemLink link = evt.StarSystemLink;
+    //     LogCustom("OnExitMapChanged.StarSystemLink = " + link.LinkedSystem.DisplayName);
+
+    //     _selectedPlanetView = null;
+
+    //     _systemTravelService.SetSystemExitDestination(link);
+
+    //     markerController.ShowSystemExitDestination(link);
+
+    //     SetFlyButtonActive(true);
+    // }
+
+    private void OnRouteExitMapChanged(RouteExitMapChangedEvent evt)
     {
-        StarSystemLink link = evt.StarSystemLink;
-        LogCustom("OnExitMapChanged.StarSystemLink = " + link.LinkedSystem.DisplayName);
+        if (evt == null)
+        {
+            LogCustom("OnRouteExitMapChanged evt is null");
+            return;
+        }
+
+        if (evt.RouteConfig == null)
+        {
+            LogCustom("OnRouteExitMapChanged RouteConfig is null");
+            return;
+        }
+
+        LogCustom(
+            "OnRouteExitMapChanged.Route = " +
+            evt.RouteConfig.Id +
+            " | From = " +
+            evt.FromSystemId +
+            " | To = " +
+            evt.ToSystemId
+        );
 
         _selectedPlanetView = null;
 
-        _systemTravelService.SetSystemExitDestination(link);
+        _systemTravelService.SetSystemExitDestination(evt);
 
-        markerController.ShowSystemExitDestination(link);
+        markerController.ShowSystemExitDestination(evt);
 
         SetFlyButtonActive(true);
     }

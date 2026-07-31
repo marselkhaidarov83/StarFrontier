@@ -17,10 +17,18 @@ public class StarSystemConfig : BaseConfig
     [SerializeField] private MissionTag[] missionTags;
 
     [Header("Map")]
-    [SerializeField] private Vector3 mapPosition;
+    [SerializeField] private Vector2 mapPosition;
 
     [Header("Npc")]
     [SerializeField] private SystemPopulationConfig systemPopulation;
+
+    [Header("AtStart")]
+    [SerializeField] private bool isStartSystem;
+    [SerializeField] private bool isHiddenAtStart;
+    [SerializeField] private int recommendedPower;
+
+    [Header("Routes")]
+    [SerializeField] private System.Collections.Generic.List<RouteConfig> routes = new();
 
     public SystemEconomyType EconomyType => economyType;
     public int DangerLevel => dangerLevel;
@@ -32,4 +40,8 @@ public class StarSystemConfig : BaseConfig
     public MissionTag[] MissionTags => missionTags;
     public Vector3 MapPosition => mapPosition;
     public SystemPopulationConfig SystemPopulation => systemPopulation;
+    public bool IsStartSystem => isStartSystem;
+    public bool IsHiddenAtStart => isHiddenAtStart;
+    public int RecommendedPower => recommendedPower;
+    public System.Collections.Generic.List<RouteConfig> Routes => routes;
 }

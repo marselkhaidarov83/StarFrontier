@@ -16,7 +16,7 @@ public class MissionTracker : CustomService, IMissionTracker
         _systemNpcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
 
         _eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
-        _eventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         _eventBus.Subscribe<SystemNpcDestroyedEvent>(OnSystemNpcDestroyedEvent);
         _eventBus.Subscribe<MissionAcceptedEvent>(OnMissionAccepted);
 
@@ -27,7 +27,7 @@ public class MissionTracker : CustomService, IMissionTracker
     public void Dispose()
     {
         _eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
-        _eventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         _eventBus.Unsubscribe<SystemNpcDestroyedEvent>(OnSystemNpcDestroyedEvent);
         _eventBus.Unsubscribe<MissionAcceptedEvent>(OnMissionAccepted);
 
@@ -63,7 +63,7 @@ public class MissionTracker : CustomService, IMissionTracker
         }
     }
 
-    private void OnSystemEntered(SystemEnteredEvent eventData)
+    private void OnSystemEntered(StarSystemEnteredEvent eventData)
     {
         var activeMissions = _missionService.GetActiveMissions();
 

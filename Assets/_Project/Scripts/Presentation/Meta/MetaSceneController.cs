@@ -76,14 +76,14 @@ public class MetaSceneController : CustomMonoBehaviour
         }
         else if (currentSystemId != null && currentSystemId != "")
         {
-            eventBus.Publish(new SystemEnteredEvent(currentSystemId));
+            eventBus.Publish(new StarSystemEnteredEvent(currentSystemId));
             LogCustom("enter to system : " + currentSystemId);
         }
-        else
-        {
-            eventBus.Publish(new GalaxyEnteredEvent());
-            LogCustom("enter to galaxy");
-        }
+        // else
+        // {
+        //     eventBus.Publish(new GalaxyEnteredEvent());
+        //     LogCustom("enter to galaxy");
+        // }
 
         if (IsDebug())
             LogCustom("all meta systems initialized.");

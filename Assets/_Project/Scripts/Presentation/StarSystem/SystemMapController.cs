@@ -260,7 +260,7 @@ public class SystemMapController : CustomMonoBehaviour
             return;
 
         eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Subscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -274,7 +274,7 @@ public class SystemMapController : CustomMonoBehaviour
             return;
 
         eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
-        eventBus.Unsubscribe<SystemEnteredEvent>(OnSystemEntered);
+        eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -291,7 +291,7 @@ public class SystemMapController : CustomMonoBehaviour
             Debug.Log("[SystemMapController] galaxy entered");
     }
 
-    private void OnSystemEntered(SystemEnteredEvent evt)
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         BuildSystemMap();
 

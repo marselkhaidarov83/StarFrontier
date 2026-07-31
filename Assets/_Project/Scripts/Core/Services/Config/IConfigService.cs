@@ -5,6 +5,10 @@ public interface IConfigService
     GameConfig GameConfig { get; }
     DebugConfig DebugConfig { get; }
     SaveConfig SaveConfig { get; }
+    GalaxyConfig GalaxyConfig { get; }
+    NewGameConfig NewGameConfig { get; }
+
+    IReadOnlyList<SectorConfig> GetAllSectors();
 
     StarSystemLink GetCurrentStarSystemLink(string targetSystemId);
     bool ContainsStarSystem(string systemId);

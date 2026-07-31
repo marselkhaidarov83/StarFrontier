@@ -447,6 +447,19 @@ MonoBehaviour:
   gameConfig: {fileID: 11400000, guid: f76b09e1774ab45c7a1c5e6e6af8934e, type: 2}
   debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
+  newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
+  galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
+  sectors:
+  - {fileID: 11400000, guid: 12d3db768e87d49a3b46b00639d37bf1, type: 2}
+  - {fileID: 11400000, guid: 4d6bf20c14c344cb1859b15ac92d0389, type: 2}
+  - {fileID: 11400000, guid: aa2262e941d794774be5e76169e452a0, type: 2}
+  - {fileID: 11400000, guid: bcf6d7ecc394b474c8bc33d118b968a8, type: 2}
+  - {fileID: 11400000, guid: 18298caf9666044ecb2af8920b3413a3, type: 2}
+  - {fileID: 11400000, guid: 5706b7bbaaa9f4748b7b2b9af43a22e4, type: 2}
+  - {fileID: 11400000, guid: 841407ad6da284f39b2cf0d5179fcd6b, type: 2}
+  - {fileID: 11400000, guid: a575e903ae9c049ce8ee0b371a8aae58, type: 2}
+  - {fileID: 11400000, guid: 10b4aa44545c14ba4bdd3a265c3be226, type: 2}
+  - {fileID: 11400000, guid: 12d8e96510e20460e8a1742b87ad82ab, type: 2}
   starSystems:
   - {fileID: 11400000, guid: 5d9b8ebf2cbec4fb18ec7cdb91136463, type: 2}
   - {fileID: 11400000, guid: 62d8f47103b7c4e26b1d851015b703a5, type: 2}
@@ -499,7 +512,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 428d2c88302a6432292246d686d3aa33, type: 2}
   - {fileID: 11400000, guid: d75f4106697cd44e2856cdf8c0ed902a, type: 2}
   MaxAcceptedMissionCount: 1
-  _autosaveIntervalSeconds: 60
   _globalDebugEnabled: 1
 --- !u!4 &860668904
 Transform:
