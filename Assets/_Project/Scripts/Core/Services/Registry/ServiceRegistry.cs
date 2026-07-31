@@ -42,9 +42,4 @@ public class ServiceRegistry : IServiceRegistry
         service = default!;
         return false;
     }
-
-    public void Clear()
-    {
-        _services.Clear();
-    }
 }
