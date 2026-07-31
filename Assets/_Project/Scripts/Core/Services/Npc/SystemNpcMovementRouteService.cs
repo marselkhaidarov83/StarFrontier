@@ -1,127 +1,3 @@
-// using System.Linq;
-// using Vector3 = UnityEngine.Vector3;
-
-// public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMovementRouteService
-// {
-//     private IConfigService _configService;
-//     private IOrbitalMotionService _orbitalMotionService;
-//     private ISystemNpcRuntimeService _npcRuntimeService;
-//     private IGameSessionService _gameSessionService;
-
-//     public SystemNpcMovementRouteService()
-//     {
-//         _debugStop = true;
-//         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-//         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-//         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
-//         _npcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
-//     }
-
-//     public Vector3 GetNextTargetPosition(SystemNpcRuntimeState npc)
-//     {
-//         LogCustom("npc.IsEnemy = " + npc.IsEnemy);
-
-//         if (npc == null)
-//             return Vector3.zero;
-
-//         if (npc.IsAlly)
-//         {
-//             SystemNpcRuntimeState npcTarget;
-//             if (npc.CurrentTargetRuntimeNpcId != null &&
-//                     _npcRuntimeService.TryGetNpc(npc.CurrentTargetRuntimeNpcId, out npcTarget))
-//             {
-//                 float distance = Vector3.Distance(npc.CurrentPosition, npcTarget.CurrentPosition);
-//                 if (distance < 100)
-//                 {
-//                     Vector3 random50 = UnityEngine.Random.insideUnitCircle * 100f;
-//                     return npcTarget.CurrentPosition + new Vector3(random50.x, random50.y, 0);
-//                 }
-//                 else
-//                     return npcTarget.CurrentPosition;
-//             }
-
-//             if (npc.TargetSystemLink != null && npc.TargetSystemLink.LinkedSystem != null)
-//             {
-//                 LogCustom("NextTargetPosTSL = " + npc.TargetSystemLink.LinkedSystem.Id + ", " + npc.TargetSystemLink.ExitPoint);
-//                 return npc.TargetSystemLink.ExitPoint;
-//             }
-
-//             if (npc.TargetPlanetId != null)
-//             {
-//                 LogCustom("NextTargetPosPL = " + _orbitalMotionService.GetPlanetCurrentPosition(
-//                         _configService.GetPlanetConfigById(npc.TargetPlanetId).PlanetOrbit));
-//                 return _orbitalMotionService.GetPlanetCurrentPosition(
-//                         _configService.GetPlanetConfigById(npc.TargetPlanetId).PlanetOrbit);
-//             }
-
-//             if (npc.TargetPosition != Vector3.zero)
-//             {
-//                 LogCustom("NextTargetPosTP = " + npc.TargetPosition);
-//                 return npc.TargetPosition;
-//             }
-//         }
-//         else if (npc.IsEnemy)
-//         {
-//             SystemNpcRuntimeState npcTarget;
-//             if (npc.CurrentTargetRuntimeNpcId != null &&
-//                     _npcRuntimeService.TryGetNpc(npc.CurrentTargetRuntimeNpcId, out npcTarget))
-//             {
-//                 float distance = Vector3.Distance(npc.CurrentPosition, npcTarget.CurrentPosition);
-//                 if (distance < 100)
-//                 {
-//                     Vector3 random50 = UnityEngine.Random.insideUnitCircle * 100f;
-//                     return npcTarget.CurrentPosition + new Vector3(random50.x, random50.y, 0);
-//                 }
-//                 else
-//                     return npcTarget.CurrentPosition;
-//             }
-
-//             if (_gameSessionService.CurrentSave.PlayerProfile.CurrentSystemId ==
-//                     npc.CurrentSystemId)
-//             {
-//                 float distance = Vector3.Distance(npc.CurrentPosition,
-//                         _gameSessionService.CurrentSave.PlayerProfile.SystemMapShipPosition);
-//                 if (distance < 100)
-//                 {
-//                     Vector3 random50 = UnityEngine.Random.insideUnitCircle * 100f;
-//                     return _gameSessionService.CurrentSave.PlayerProfile.SystemMapShipPosition + new Vector3(random50.x, random50.y, 0);
-//                 }
-//                 else
-//                     return _gameSessionService.CurrentSave.PlayerProfile.SystemMapShipPosition;
-//             }
-
-//             // else
-//             {
-//                 StarSystemConfig starSystem = _configService.GetStarSystemConfigById(npc.CurrentSystemId);
-//                 PlanetConfig[] planetsInhabited = starSystem.PlanetInhabited();
-//                 Vector3 targetV = _orbitalMotionService.GetPlanetCurrentPosition(planetsInhabited[0].PlanetOrbit);
-//                 float distance = Vector3.Distance(npc.CurrentPosition, targetV);
-//                 for (int i = 1; i < planetsInhabited.Count(); i++)
-//                 {
-//                     Vector3 planetVector = _orbitalMotionService.GetPlanetCurrentPosition(planetsInhabited[i].PlanetOrbit);
-//                     float distNew = Vector3.Distance(npc.CurrentPosition, planetVector);
-//                     if (distNew < distance)
-//                     {
-//                         distance = distNew;
-//                         targetV = planetVector;
-//                     }
-//                 }
-
-//                 if (distance < 100)
-//                 {
-//                     Vector3 random50 = UnityEngine.Random.insideUnitCircle * 200f;
-//                     return targetV + new Vector3(random50.x, random50.y, 0);
-//                 }
-//                 else
-//                     return targetV;
-//             }
-//         }
-
-//         Vector3 random = UnityEngine.Random.insideUnitCircle * 5f;
-//         return npc.CurrentPosition + new Vector3(random.x, random.y, -2f);
-//     }
-// }
-
 using System.Linq;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
@@ -170,13 +46,13 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         if (TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition))
             return GetApproachPosition(npc.CurrentPosition, npcTargetPosition, KeepDistanceRadius);
 
-        if (npc.TargetSystemLink != null && npc.TargetSystemLink.LinkedSystem != null)
+        if (npc.TargetSystemId != null)
         {
             LogCustom("Ally target system link = " +
-                      npc.TargetSystemLink.LinkedSystem.Id + ", " +
-                      npc.TargetSystemLink.ExitPoint);
+                      npc.TargetSystemId + ", " +
+                      npc.TargetSystemExitPoint);
 
-            return npc.TargetSystemLink.ExitPoint;
+            return npc.TargetSystemExitPoint;
         }
 
         if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId))
@@ -197,13 +73,13 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         if (TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition))
             return GetApproachPosition(npc.CurrentPosition, npcTargetPosition, KeepDistanceRadius);
 
-        if (npc.TargetSystemLink != null && npc.TargetSystemLink.LinkedSystem != null)
+        if (npc.TargetSystemId != null)
         {
             LogCustom("Ally target system link = " +
-                      npc.TargetSystemLink.LinkedSystem.Id + ", " +
-                      npc.TargetSystemLink.ExitPoint);
+                      npc.TargetSystemId + ", " +
+                      npc.TargetSystemExitPoint);
 
-            return npc.TargetSystemLink.ExitPoint;
+            return npc.TargetSystemExitPoint;
         }
 
         if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId))

@@ -20,7 +20,7 @@ public class MissionInstanceData
 
         public MissionRewardData Reward;
         public MissionObjectiveData Objective;
-        public PirateGroupSpawnRuleConfig PirateGroupSpawnRuleConfig;
+        public string PirateGroupSpawnRuleId;
         public string PirateGroupNpcId;
 
         public bool IsReadyToTurnIn;

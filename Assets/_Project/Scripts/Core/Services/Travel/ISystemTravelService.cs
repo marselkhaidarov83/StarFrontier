@@ -19,4 +19,10 @@ public interface ISystemTravelService
     void CompleteTravel();
 
     Vector3 GetCurrentDestinationPosition();
+
+    TravelRoutePreview2A GetCurrentRoutePreview2A(
+        float smallDotSpacing,
+        int maxBigDots,
+        int maxSmallDots,
+        float secondsPerTick);
 }

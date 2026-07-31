@@ -11,6 +11,8 @@ public class MissionTracker : CustomService, IMissionTracker
 
     public MissionTracker()
     {
+        _debugStop = true;
+
         _missionService = Bootstrapper.Instance.ServiceRegistry.Get<IMissionService>();
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _systemNpcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
@@ -67,7 +69,7 @@ public class MissionTracker : CustomService, IMissionTracker
     {
         var activeMissions = _missionService.GetActiveMissions();
 
-        Debug.Log("[MissionTracker] activeMissions.count = " + activeMissions.Count);
+        LogCustom("[MissionTracker] activeMissions.count = " + activeMissions.Count);
         foreach (MissionInstanceData mission in activeMissions)
         {
             if (mission == null || mission.Objective == null)
@@ -145,6 +147,6 @@ public class MissionTracker : CustomService, IMissionTracker
     private void SetTrackerMessage(string message)
     {
         LastTrackerMessage = message;
-        Debug.Log($"MissionTracker: {message}");
+        LogCustom($"MissionTracker: {message}");
     }
 }

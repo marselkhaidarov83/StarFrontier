@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -11,29 +12,37 @@ public sealed class ConfigService : IConfigService
     public GalaxyConfig GalaxyConfig { get; }
     public NewGameConfig NewGameConfig { get; }
 
-    private readonly List<SectorConfig> _sectors;
+    public PlayerControlConfig PlayerControlConfig { get; }
+    public ShipMovementConfig ShipMovementConfig { get; }
+    public SystemCameraConfig SystemCameraConfig { get; }
+    public TargetingConfig TargetingConfig { get; }
+    public InteractionConfig InteractionConfig { get; }
+    public SystemHudConfig SystemHudConfig { get; }
+    public SystemVisualConfig SystemVisualConfig { get; }
+
+    private readonly IReadOnlyList<SectorConfig> _sectors;
     private readonly Dictionary<string, SectorConfig> _sectorsById;
-    private readonly List<StarSystemConfig> _starSystems;
+    private readonly IReadOnlyList<StarSystemConfig> _starSystems;
     private readonly Dictionary<string, StarSystemConfig> _starSystemsById;
-    private readonly List<PlanetConfig> _planets;
+    private readonly IReadOnlyList<PlanetConfig> _planets;
     private readonly Dictionary<string, PlanetConfig> _planetsById;
-    private readonly List<ItemConfig> _items;
+    private readonly IReadOnlyList<ItemConfig> _items;
     private readonly Dictionary<string, ItemConfig> _itemsById;
-    private readonly List<ShipConfig> _ships;
+    private readonly IReadOnlyList<ShipConfig> _ships;
     private readonly Dictionary<string, ShipConfig> _shipsById;
-    private readonly List<EnemyConfig> _enemies;
+    private readonly IReadOnlyList<EnemyConfig> _enemies;
     private readonly Dictionary<string, EnemyConfig> _enemiesById;
-    private readonly List<AllyConfig> _allies;
+    private readonly IReadOnlyList<AllyConfig> _allies;
     private readonly Dictionary<string, AllyConfig> _alliesById;
-    private readonly List<AllySpawnRuleConfig> _allySpawnRules;
+    private readonly IReadOnlyList<AllySpawnRuleConfig> _allySpawnRules;
     private readonly Dictionary<string, AllySpawnRuleConfig> _allySpawnRulesById;
-    private readonly List<PirateConfig> _pirates;
+    private readonly IReadOnlyList<PirateConfig> _pirates;
     private readonly Dictionary<string, PirateConfig> _piratesById;
-    private readonly List<PirateGroupSpawnRuleConfig> _pirateGroupSpawnRules;
+    private readonly IReadOnlyList<PirateGroupSpawnRuleConfig> _pirateGroupSpawnRules;
     private readonly Dictionary<string, PirateGroupSpawnRuleConfig> _pirateGroupSpawnRulesById;
-    private readonly List<ModuleConfig> _modules;
+    private readonly IReadOnlyList<ModuleConfig> _modules;
     private readonly Dictionary<string, ModuleConfig> _modulesById;
-    private readonly List<WeaponConfig> _weapons;
+    private readonly IReadOnlyList<WeaponConfig> _weapons;
     private readonly Dictionary<string, WeaponConfig> _weaponsById;
 
     private readonly IGameSessionService gameSessionService;
@@ -83,6 +92,13 @@ public sealed class ConfigService : IConfigService
                         SaveConfig saveConfig,
                         GalaxyConfig galaxyConfig,
                         NewGameConfig newGameConfig,
+                        PlayerControlConfig playerControlConfig,
+                        ShipMovementConfig shipMovementConfig,
+                        SystemCameraConfig systemCameraConfig,
+                        TargetingConfig targetingConfig,
+                        InteractionConfig interactionConfig,
+                        SystemHudConfig systemHudConfig,
+                        SystemVisualConfig systemVisualConfig,
                         IEnumerable<ItemConfig> items,
                         IEnumerable<ShipConfig> ships,
                         IEnumerable<EnemyConfig> enemies,
@@ -98,9 +114,16 @@ public sealed class ConfigService : IConfigService
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
-
-        List<StarSystemConfig> starSystems = new ();
-        List<PlanetConfig> planets = new ();
+        PlayerControlConfig = playerControlConfig;
+        ShipMovementConfig = shipMovementConfig;
+        SystemCameraConfig = systemCameraConfig;
+        TargetingConfig = targetingConfig;
+        InteractionConfig = interactionConfig;
+        SystemHudConfig = systemHudConfig;
+        SystemVisualConfig = systemVisualConfig;
+        
+        List<StarSystemConfig> starSystems = new();
+        List<PlanetConfig> planets = new();
         foreach (SectorConfig sector in galaxyConfig.Sectors)
             foreach (StarSystemConfig starSystem in sector.Systems)
             {
@@ -137,7 +160,7 @@ public sealed class ConfigService : IConfigService
 
     private void BuildIndex<TConfig>(
         IEnumerable<TConfig> configs,
-        out List<TConfig> targetList,
+        out IReadOnlyList<TConfig> targetList,
         out Dictionary<string, TConfig> targetById,
         string configName)
         where TConfig : BaseConfig
@@ -145,20 +168,20 @@ public sealed class ConfigService : IConfigService
         if (configs == null)
             throw new ArgumentNullException(nameof(configs));
 
-        targetList = new ();
-        targetById = new (StringComparer.Ordinal);        
+        var mutableList = new List<TConfig>();
+        targetById = new(StringComparer.Ordinal);
 
         foreach (var config in configs)
         {
             if (config == null)
             {
-                Debug.LogWarning($"ConfigService: null {configName} was skipped.");
+                AppLog.Warning($"ConfigService: null {configName} was skipped.");
                 continue;
             }
 
             if (string.IsNullOrWhiteSpace(config.Id))
             {
-                Debug.LogWarning($"ConfigService: {configName} with empty Id was skipped.");
+                AppLog.Warning($"ConfigService: {configName} with empty Id was skipped.");
                 continue;
             }
 
@@ -166,12 +189,42 @@ public sealed class ConfigService : IConfigService
 
             if (targetById.ContainsKey(normalizedId))
             {
-                Debug.LogWarning($"ConfigService: duplicate {configName} Id '{normalizedId}' was skipped.");
+                AppLog.Warning($"ConfigService: duplicate {configName} Id '{normalizedId}' was skipped.");
                 continue;
             }
 
-            targetList.Add(config);
+            mutableList.Add(config);
             targetById.Add(normalizedId, config);
+        }
+
+        targetList = new ReadOnlyListView<TConfig>(mutableList);
+    }
+
+    /// <summary>
+    /// Read-only list wrapper that cannot be cast back to IList&lt;T&gt;.
+    /// Config indexes are constructed once and are never mutated afterwards.
+    /// </summary>
+    private sealed class ReadOnlyListView<T> : IReadOnlyList<T>
+    {
+        private readonly List<T> _source;
+
+        public ReadOnlyListView(List<T> source)
+        {
+            _source = source ?? throw new ArgumentNullException(nameof(source));
+        }
+
+        public int Count => _source.Count;
+
+        public T this[int index] => _source[index];
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _source.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 

@@ -77,8 +77,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         }
 
         String linkedSystemId = "";
-        if (npc.TargetSystemLink != null && npc.TargetSystemLink.LinkedSystem != null)
-            linkedSystemId = npc.TargetSystemLink?.LinkedSystem?.Id;
+        if (npc.TargetSystemId != null)
+            linkedSystemId = npc.TargetSystemId;
         LogCustom("npc.TargetSystemLink = " + linkedSystemId +
                 " npc.TargetPlanetId = " + npc.TargetPlanetId +
                 " npc.TargetPosition = " + npc.TargetPosition +
@@ -161,11 +161,14 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         //     npc.TargetSystemId = null;
         // }
         LogCustom("started");
-        if (npc.TargetSystemLink != null)
+        if (!string.IsNullOrWhiteSpace(npc.TargetSystemId))
         {
-            npc.CurrentSystemId = npc.TargetSystemLink.LinkedSystem.Id;
-            npc.CurrentPosition = npc.TargetSystemLink.EntryPoint;
-            npc.TargetSystemLink = null;
+            npc.CurrentSystemId = npc.TargetSystemId;
+            npc.CurrentPosition = npc.TargetSystemEntryPoint;
+
+            npc.TargetSystemId = null;
+            npc.TargetSystemExitPoint = Vector3.zero;
+            npc.TargetSystemEntryPoint = Vector3.zero;
         }
 
         npc.IsOnPlanet = false;

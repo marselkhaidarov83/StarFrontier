@@ -1,0 +1,52 @@
+﻿STAR FRONTIER — SPRINT 3 VALIDATION REPORT
+Mode: FULL
+Started UTC: 2026-07-30T12:09:47.1799570Z
+Finished UTC: 2026-07-30T12:09:47.8321220Z
+Unity: 6000.3.11f1
+Branch: UNKNOWN (Error loading required libraries. If there is an ongoing installation please wait for it to complete. Otherwise reinstall. (dlopen(@rpath/libxcodebuildLoader.dylib, 0x0001): Symbol not found: __ZN38pxrInternal_v0_21__aapl__pxrReserved__11TfSingletonINS_15TfDiagnosticMgrEE15_CreateInstanceEv
+  Referenced from: <E253B5A6-AA78-3400-908F-18A455D150EB> /Applications/Xcode.app/Contents/SystemFrameworks/USDKit.framework/Versions/A/USDKit
+  Expected as weak-def export from some loaded dylib)
+git: error: unable to locate xcodebuild, please make sure the path to the Xcode folder is set correctly!
+git: error: You can set the path to the Xcode folder using /usr/bin/xcode-select -switch)
+SHA: UNKNOWN (Error loading required libraries. If there is an ongoing installation please wait for it to complete. Otherwise reinstall. (dlopen(@rpath/libxcodebuildLoader.dylib, 0x0001): Symbol not found: __ZN38pxrInternal_v0_21__aapl__pxrReserved__11TfSingletonINS_15TfDiagnosticMgrEE15_CreateInstanceEv
+  Referenced from: <E253B5A6-AA78-3400-908F-18A455D150EB> /Applications/Xcode.app/Contents/SystemFrameworks/USDKit.framework/Versions/A/USDKit
+  Expected as weak-def export from some loaded dylib)
+git: error: unable to locate xcodebuild, please make sure the path to the Xcode folder is set correctly!
+git: error: You can set the path to the Xcode folder using /usr/bin/xcode-select -switch)
+Scene: Assets/_Project/Scenes/SystemScene.unity
+
+ERRORS: 0
+WARNINGS: 1
+PASSES: 17
+
+============================================================
+1. CONFIG VALIDATION
+============================================================
+[PASS ] PlayerControlConfig: найден Assets/_Project/Content/Configs/Sprint3/playerControlConfig_01.asset
+[PASS ] ShipMovementConfig: найден Assets/_Project/Content/Configs/Ships/shipMovementConfig_01.asset
+[PASS ] SystemCameraConfig: найден Assets/_Project/Content/Configs/Sprint3/systemCameraConfig_01.asset
+[PASS ] TargetingConfig: найден Assets/_Project/Content/Configs/Sprint3/targetingConfig_01.asset
+[PASS ] InteractionConfig: найден Assets/_Project/Content/Configs/Sprint3/interactionConfig_01.asset
+[PASS ] ShipConfig: найдено asset-файлов: 3
+[PASS ] Источник параметров топлива найден: Assets/_Project/Content/Configs/Game/fuelHudPresentationConfig_01.asset
+[PASS ] Источник финальных параметров корабля найден.
+
+============================================================
+2. OPEN SCENE VALIDATION
+============================================================
+[PASS ] Проверяется сцена: Assets/_Project/Scenes/SystemScene.unity
+[PASS ] SystemCameraController2A: найден один активный владелец (SystemMapRoot).
+[PASS ] PlayerInputBridge2A: найден один активный владелец (SystemMapRoot).
+[PASS ] SystemControlPresentationBridge2A: активных компонентов 1.
+[PASS ] EventSystem: найден один активный владелец (EventSystem).
+[PASS ] HUD root найден: Canvas/SafeAreaRoot_TopHud/PF_HudTopRoot, Canvas/SafeAreaRoot_TopHud/SystemMapRightHUD, Canvas/SafeAreaRoot_BottomHud/PF_SystemHudBottomRoot
+[PASS ] Компоненты связи корабля со сценой: MetaSceneShipStateBridge2A@SystemMapRoot, SystemControlPresentationBridge2A@SystemMapRoot
+[PASS ] MainCamera: SystemMainCamera
+
+============================================================
+3. PREFAB VALIDATION
+============================================================
+[PASS ] Префабов для проверки найдено: 38
+[WARN ] Assets/_Project/Prefabs/UI/Planet/PF_SystemMapPlanet_Pseudo3D.prefab: SpriteRenderer без Sprite — PF_SystemMapPlanet_Pseudo3D/PlanetOrbit
+
+RESULT: PASSED WITH/WITHOUT WARNINGS

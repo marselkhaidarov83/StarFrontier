@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s04_system_deep_foundry_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_deep_foundry_01
+  id: s04_system_deep_foundry_02
   displayName: "\u0413\u043B\u0443\u0431\u0438\u043D\u043D\u0430\u044F \u041B\u0438\u0442\u0435\u0439\u043D\u0430\u044F"
   description: "\u0413\u043B\u0443\u0431\u0438\u043D\u043D\u0430\u044F \u041B\u0438\u0442\u0435\u0439\u043D\u0430\u044F"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 0
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 17f37622ee5414f73b897fe7b3b37f24, type: 2}
+  - {fileID: 11400000, guid: fbef4edb5f0e74617b751ae4eb2df54b, type: 2}
+  - {fileID: 11400000, guid: 1fd57830bac9d497bad12ba08e3229c4, type: 2}
+  - {fileID: 11400000, guid: 1f39da0c30b974c489238596e4a3f46a, type: 2}
+  - {fileID: 11400000, guid: 2e1baa04f608a450cae0f0d8b03f438a, type: 2}
+  - {fileID: 11400000, guid: 4cf3de6a5a22e4ac992f48fae6872db6, type: 2}
+  - {fileID: 11400000, guid: c4bd626143d6f4792b5743a15431d246, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: e0deadb1c51e64b2b8de4358c37f2651, type: 2}
     parsecDistance: 16
@@ -33,6 +40,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 286a616df28064997a409e976f2cfe19, type: 2}
   missionTags: 060000000800000005000000
   mapPosition: {x: -4.3, y: -2.4}
   systemPopulation: {fileID: 0}

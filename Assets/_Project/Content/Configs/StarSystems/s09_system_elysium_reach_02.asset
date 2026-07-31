@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s09_system_elysium_reach_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_elysium_reach_01
+  id: s09_system_elysium_reach_02
   displayName: "\u042D\u043B\u0438\u0437\u0438\u0443\u043C\u0441\u043A\u0438\u0439
     \u041F\u0440\u0435\u0434\u0435\u043B"
   description: "\u042D\u043B\u0438\u0437\u0438\u0443\u043C\u0441\u043A\u0438\u0439
@@ -20,9 +20,16 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 0
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: d02282eae9050423ba4ea37d88099cde, type: 2}
+  - {fileID: 11400000, guid: 1bab3fc9252bd4a3cb784859c0a0bcd9, type: 2}
+  - {fileID: 11400000, guid: 2f24fcc57f6b64a029acd1d5d1926939, type: 2}
+  - {fileID: 11400000, guid: fb26113c990fa4029926a27308e09c28, type: 2}
+  - {fileID: 11400000, guid: d96118c2fc86c45fa9193fbb5a7d0961, type: 2}
+  - {fileID: 11400000, guid: b65625845e0e5410284bc6c7f7314de5, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: e4347c3c0abb94856986c2cb4cbbb2e3, type: 2}
   missionTags: 040000000000000008000000
   mapPosition: {x: -2.3, y: 5.2}
   systemPopulation: {fileID: 0}

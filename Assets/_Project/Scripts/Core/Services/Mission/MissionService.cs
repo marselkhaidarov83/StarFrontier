@@ -8,6 +8,7 @@ public class MissionService : CustomService, IMissionService
     private ISaveService _saveService;
     private IRewardService _rewardService;
     private ISystemNpcPopulationService _systemNpcPopulationService;
+    private readonly IConfigService _configService;
 
     public MissionService()
     {
@@ -15,6 +16,7 @@ public class MissionService : CustomService, IMissionService
         _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
         _rewardService = Bootstrapper.Instance.ServiceRegistry.Get<IRewardService>();
         _systemNpcPopulationService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcPopulationService>();
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
     }
 
     public IReadOnlyList<MissionInstanceData> GetAvailableMissions()
@@ -79,8 +81,23 @@ public class MissionService : CustomService, IMissionService
             mission.IsReadyToTurnIn = false;
         }
 
+        PirateGroupSpawnRuleConfig rule =
+            _configService.GetPirateGroupSpawnRuleConfigById(
+                mission.PirateGroupSpawnRuleId);
+
+        if (rule == null)
+        {
+            Debug.LogError(
+                $"MissionService: pirate rule not found: " +
+                $"{mission.PirateGroupSpawnRuleId}");
+            return false;
+        }
+
+        mission.PirateGroupNpcId =
+            _systemNpcPopulationService.CreatePirateGroup(rule);
+
         if (mission.MissionType.Equals(MissionType.Elimination))
-            mission.PirateGroupNpcId = _systemNpcPopulationService.CreatePirateGroup(mission.PirateGroupSpawnRuleConfig);
+            mission.PirateGroupNpcId = _systemNpcPopulationService.CreatePirateGroup(rule);
 
         _gameSessionService.State.MissionBlock.ActiveMissions.Add(mission);
         _saveService.EnableSave(true);

@@ -12,14 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s02_system_iron_vale_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_iron_vale_01
+  id: s02_system_iron_vale_02
   displayName: "\u0416\u0435\u043B\u0435\u0437\u043D\u0430\u044F \u0414\u043E\u043B\u0438\u043D\u0430"
   description: "\u0416\u0435\u043B\u0435\u0437\u043D\u0430\u044F \u0414\u043E\u043B\u0438\u043D\u0430"
   icon: {fileID: 21300000, guid: 7d79f9528604e46a7940cfd11135984f, type: 3}
   economyType: 6
   dangerLevel: 2
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 15acea6aa1ee241b7a856f3c43cb3a09, type: 2}
+  - {fileID: 11400000, guid: 259c6f6a3bbfe4f2f8a68ede4f707351, type: 2}
+  - {fileID: 11400000, guid: d0211298ff0be47f38552387d60f9958, type: 2}
+  - {fileID: 11400000, guid: 0eabad4eac20f4fd383502b59baedd24, type: 2}
+  - {fileID: 11400000, guid: 02095ca625968417f8ded00d780d1bc2, type: 2}
+  - {fileID: 11400000, guid: 348790b80c2164c769350cf7a54e3e12, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 75405d83c44a84536b8c5d1c0f15fb1d, type: 2}
     parsecDistance: 12
@@ -33,6 +39,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: d0d94159953ae47dfa46cb175e987462, type: 2}
   missionTags: 060000000800000000000000
   mapPosition: {x: 4.5, y: -5.2}
   systemPopulation: {fileID: 0}

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61e4e3a1f3ba341afa5fd1c82762d657, type: 3}
+  m_Name: planet_hollow_reach_mining_01
+  m_EditorClassIdentifier: Data::PlanetConfig
+  id: planet_hollow_reach_mining_01
+  displayName: "\u0413\u0443\u043B\u043A\u0438\u0435 \u041D\u0435\u0434\u0440\u0430"
+  description: 
+  icon: {fileID: 21300000, guid: 43b49bf299c2f4df2a9b71b68f855da8, type: 3}
+  planetType: 2
+  isInhabited: 1
+  planetOrbit: {fileID: 11400000, guid: 577d9f155896648f6aa34a08b58b320b, type: 2}
+  missionPool: {fileID: 0}
+  encounterProfile: {fileID: 0}
+  marketProfile: {fileID: 0}
+  planetMissionConfig: {fileID: 0}
+  planetSprite: {fileID: 21300000, guid: 43b49bf299c2f4df2a9b71b68f855da8, type: 3}
+  backgroundSprite: {fileID: 0}

@@ -2,201 +2,472 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public sealed class TravelService2A : CustomService, ITravelService
+public sealed class TravelService2A :
+    CustomService,
+    ITravelService
 {
     private const int DefaultFuelCostPerJump = 99;
 
     private readonly GalaxyGraphModel _galaxyGraph;
-    private readonly IGameSessionService _gameSessionService;
-    private readonly IConfigService _configService;
-    private readonly SimpleEventBus _eventBus;
 
-    private GalaxyRuntimeState _galaxyRuntimeState;
-    private readonly IGalaxyDiscoveryService _discoveryService;
+    private readonly IGameSessionService
+        _gameSessionService;
+
+    private readonly IConfigService
+        _configService;
+
+    private readonly SimpleEventBus
+        _eventBus;
+
+    private readonly IGalaxyDiscoveryService
+        _discoveryService;
+
+    private readonly IRefuelService
+        _refuelService;
+
+    private GalaxyRuntimeState
+        _galaxyRuntimeState;
+
+    public TravelService2A()
+    {
+        _debugEnabled = true;
+
+        _gameSessionService =
+            Bootstrapper.Instance
+                .ServiceRegistry
+                .Get<IGameSessionService>();
+
+        _configService =
+            Bootstrapper.Instance
+                .ServiceRegistry
+                .Get<IConfigService>();
+
+        _eventBus =
+            Bootstrapper.Instance
+                .ServiceRegistry
+                .Get<SimpleEventBus>();
+
+        _discoveryService =
+            Bootstrapper.Instance
+                .ServiceRegistry
+                .Get<IGalaxyDiscoveryService>();
+
+        _refuelService =
+            Bootstrapper.Instance
+                .ServiceRegistry
+                .Get<IRefuelService>();
+
+        ReinitializeGalaxyState();
+
+        /*
+         * Сохраняется для совместимости
+         * со старым кодом GalaxyGraph().
+         *
+         * Основная проверка перелёта выполняется
+         * через RouteConfig и RouteRuntimeState.
+         */
+        _galaxyGraph =
+            GalaxyGraphFactory.CreateFromConfigs(
+                _configService
+                    .GetAllStarSystems());
+    }
 
     public GalaxyGraphModel GalaxyGraph()
     {
         return _galaxyGraph;
     }
 
-    public TravelService2A()
-    {
-        _debugEnabled = true;
-
-        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _discoveryService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyDiscoveryService>();
-        ReinitializeGalaxyState();
-
-        // Оставляем для совместимости со старым кодом, который может вызывать GalaxyGraph().
-        // Но доступность перелёта ниже уже проверяется через RouteConfig + RouteRuntimeState.
-        _galaxyGraph = GalaxyGraphFactory.CreateFromConfigs(_configService.GetAllStarSystems());
-    }
-
     private void ReinitializeGalaxyState()
     {
-        if (_galaxyRuntimeState == null && _gameSessionService.State != null)
-            _galaxyRuntimeState = _gameSessionService.State.Galaxy;
+        if (_galaxyRuntimeState != null)
+            return;
+
+        if (_gameSessionService == null)
+            return;
+
+        if (_gameSessionService.State == null)
+            return;
+
+        _galaxyRuntimeState =
+            _gameSessionService
+                .State
+                .Galaxy;
     }
 
-    public bool CanTravel(string fromSystemId, string toSystemId)
+    public bool CanTravel(
+        string fromSystemId,
+        string toSystemId)
     {
-        return GetTravelFailReason(fromSystemId, toSystemId) == TravelFailReason.None;
+        return GetTravelFailReason(
+                   fromSystemId,
+                   toSystemId) ==
+               TravelFailReason.None;
     }
 
-    public TravelResult TryTravel(string toSystemId)
+    public TravelResult TryTravel(
+        string toSystemId)
     {
-        string fromSystemId = GetCurrentSystemId();
+        string fromSystemId =
+            GetCurrentSystemId();
 
-        _eventBus.Publish(new TravelStartedEvent(fromSystemId, toSystemId));
+        /*
+         * Сохраняем существующий контракт:
+         * попытка перелёта публикует Started
+         * до получения результата.
+         */
+        _eventBus.Publish(
+            new TravelStartedEvent(
+                fromSystemId,
+                toSystemId));
 
-        TravelFailReason failReason = GetTravelFailReason(fromSystemId, toSystemId);
+        TravelFailReason failReason =
+            GetTravelFailReason(
+                fromSystemId,
+                toSystemId);
 
-        if (failReason != TravelFailReason.None)
+        if (failReason !=
+            TravelFailReason.None)
         {
-            TravelResult failedResult = TravelResult.Failed(
+            return CreateAndPublishFailedResult(
                 failReason,
                 fromSystemId,
-                toSystemId
-            );
-
-            _eventBus.Publish(new TravelFinishedEvent(
-                fromSystemId: failedResult.FromSystemId,
-                toSystemId: failedResult.ToSystemId,
-                success: false,
-                fuelSpent: 0,
-                failReason: failedResult.FailReason
-            ));
-
-            return failedResult;
+                toSystemId);
         }
 
-        string normalizedFromId = fromSystemId.Trim();
-        string normalizedToId = toSystemId.Trim();
+        string normalizedFromId =
+            fromSystemId.Trim();
 
-        int fuelCost = CalculateFuelCost(normalizedFromId, normalizedToId);
+        string normalizedToId =
+            toSystemId.Trim();
 
-        _gameSessionService.State.Player.PlayerShipState
-            .GetActiveShip()
-            .CurrentFuel -= fuelCost;
+        /*
+         * GetTravelFailReason уже подтвердил,
+         * что RouteConfig существует.
+         *
+         * Тот же метод расчёта используется:
+         * - в preview;
+         * - в проверке;
+         * - в фактическом расходе.
+         */
+        int fuelCost =
+            CalculateFuelCost(
+                normalizedFromId,
+                normalizedToId);
 
-        SetCurrentSystemId(normalizedToId);
+        /*
+         * Повторная атомарная проверка непосредственно
+         * перед изменением Fuel.
+         *
+         * Между GetTravelFailReason и этой строкой
+         * State теоретически мог измениться.
+         */
+        if (!_refuelService.Consume(
+                fuelCost,
+                out FuelConsumeFailReason
+                    consumeReason))
+        {
+            Debug.LogWarning(
+                "[TravelService2A] " +
+                "Fuel consumption rejected. " +
+                "From = " +
+                normalizedFromId +
+                " | To = " +
+                normalizedToId +
+                " | Cost = " +
+                fuelCost +
+                " | Reason = " +
+                consumeReason);
 
-        _discoveryService.VisitSystem(normalizedToId);
+            /*
+             * Текущий TravelFailReason уже содержит
+             * NotEnoughFuel.
+             *
+             * Пока отдельная player-facing причина
+             * отсутствия Fuel State не вводится,
+             * все отказы топливного слоя возвращаются
+             * через существующий контракт.
+             *
+             * Точная техническая причина остаётся
+             * в диагностическом логе.
+             */
+            return CreateAndPublishFailedResult(
+                TravelFailReason.NotEnoughFuel,
+                normalizedFromId,
+                normalizedToId);
+        }
 
-        TravelResult completedResult = TravelResult.Completed(
-            normalizedFromId,
-            normalizedToId,
-            fuelCost
-        );
+        /*
+         * После успешного Consume все проверки
+         * завершены. Далее не должно быть обычных
+         * веток, возвращающих отказ.
+         */
 
-        _eventBus.Publish(new TravelFinishedEvent(
-            fromSystemId: completedResult.FromSystemId,
-            toSystemId: completedResult.ToSystemId,
-            success: true,
-            fuelSpent: completedResult.FuelSpent,
-            failReason: TravelFailReason.None
-        ));
+        SetCurrentSystemId(
+            normalizedToId);
 
-        _eventBus.Publish(new StarSystemEnteredEvent(completedResult.ToSystemId));
+        _discoveryService.VisitSystem(
+            normalizedToId);
 
-        _eventBus.Publish(new CurrentSystemEnteredEvent(
-            normalizedToId
-        ));
+        TravelResult completedResult =
+            TravelResult.Completed(
+                normalizedFromId,
+                normalizedToId,
+                fuelCost);
+
+        /*
+         * SystemTravelService слушает это событие
+         * и устанавливает позицию входа
+         * в новой системе.
+         */
+        _eventBus.Publish(
+            new TravelFinishedEvent(
+                fromSystemId:
+                    completedResult
+                        .FromSystemId,
+
+                toSystemId:
+                    completedResult
+                        .ToSystemId,
+
+                success: true,
+
+                fuelSpent:
+                    completedResult
+                        .FuelSpent,
+
+                failReason:
+                    TravelFailReason.None));
+
+        _eventBus.Publish(
+            new StarSystemEnteredEvent(
+                completedResult
+                    .ToSystemId));
+
+        _eventBus.Publish(
+            new CurrentSystemEnteredEvent(
+                normalizedToId));
+
+        /*
+         * Сохранение вызывается последним.
+         *
+         * К этому моменту уже согласованы:
+         * - Fuel активного корабля;
+         * - Player.CurrentSystemId;
+         * - Galaxy.CurrentSystemId;
+         * - discovery state;
+         * - обработчики TravelFinishedEvent,
+         *   включая позицию входа.
+         */
+        _eventBus.Publish(
+            new SaveNeedEvent());
 
         return completedResult;
     }
 
-    public void TryTravelToPlanet(string planetId)
+    public void TryTravelToPlanet(
+        string planetId)
     {
-        _gameSessionService.State.Player.CurrentPlanetId = planetId;
+        _gameSessionService
+            .State
+            .Player
+            .CurrentPlanetId =
+                planetId;
 
-        if (_eventBus != null)
-            _eventBus.Publish(new PlanetEnteredEvent(planetId));
+        _eventBus.Publish(
+            new PlanetEnteredEvent(
+                planetId));
     }
 
-    public TravelFailReason GetTravelFailReason(string fromSystemId, string toSystemId)
+    public TravelFailReason GetTravelFailReason(
+        string fromSystemId,
+        string toSystemId)
     {
-        if (string.IsNullOrWhiteSpace(fromSystemId))
-            return TravelFailReason.CurrentSystemMissing;
+        if (string.IsNullOrWhiteSpace(
+                fromSystemId))
+        {
+            return TravelFailReason
+                .CurrentSystemMissing;
+        }
 
-        if (string.IsNullOrWhiteSpace(toSystemId))
-            return TravelFailReason.TargetSystemMissing;
+        if (string.IsNullOrWhiteSpace(
+                toSystemId))
+        {
+            return TravelFailReason
+                .TargetSystemMissing;
+        }
 
-        string normalizedFromId = fromSystemId.Trim();
-        string normalizedToId = toSystemId.Trim();
+        string normalizedFromId =
+            fromSystemId.Trim();
 
-        StarSystemConfig fromSystemConfig = FindSystemConfig(normalizedFromId);
+        string normalizedToId =
+            toSystemId.Trim();
+
+        StarSystemConfig fromSystemConfig =
+            FindSystemConfig(
+                normalizedFromId);
 
         if (fromSystemConfig == null)
-            return TravelFailReason.CurrentSystemMissing;
+        {
+            return TravelFailReason
+                .CurrentSystemMissing;
+        }
 
-        StarSystemConfig toSystemConfig = FindSystemConfig(normalizedToId);
+        StarSystemConfig toSystemConfig =
+            FindSystemConfig(
+                normalizedToId);
 
         if (toSystemConfig == null)
-            return TravelFailReason.TargetSystemMissing;
+        {
+            return TravelFailReason
+                .TargetSystemMissing;
+        }
 
-        if (normalizedFromId == normalizedToId)
-            return TravelFailReason.TargetSystemIsCurrent;
+        if (normalizedFromId ==
+            normalizedToId)
+        {
+            return TravelFailReason
+                .TargetSystemIsCurrent;
+        }
 
-        if (!_discoveryService.IsSystemDiscovered(normalizedToId))
-            return TravelFailReason.TargetSystemMissing;
+        if (!_discoveryService
+                .IsSystemDiscovered(
+                    normalizedToId))
+        {
+            return TravelFailReason
+                .TargetSystemMissing;
+        }
 
-        RouteConfig routeConfig = FindRouteConfig(
-            normalizedFromId,
-            normalizedToId
-        );
+        RouteConfig routeConfig =
+            FindRouteConfig(
+                normalizedFromId,
+                normalizedToId);
 
         if (routeConfig == null)
-            return TravelFailReason.SystemsAreNotNeighbors;
+        {
+            return TravelFailReason
+                .SystemsAreNotNeighbors;
+        }
 
-        if (!IsRouteUnlocked(routeConfig))
-            return TravelFailReason.SystemsAreNotNeighbors;
+        if (!IsRouteUnlocked(
+                routeConfig))
+        {
+            return TravelFailReason
+                .SystemsAreNotNeighbors;
+        }
 
-        int fuelCost = CalculateFuelCostByRoute(routeConfig);
-        // LogCustom("routeConfig = " + routeConfig);
-        // LogCustom("fuelCost = " + fuelCost);
+        int fuelCost =
+            CalculateFuelCostByRoute(
+                routeConfig);
 
-        if (_gameSessionService.State.Player.PlayerShipState.GetActiveShip().CurrentFuel < fuelCost)
-            return TravelFailReason.NotEnoughFuel;
+        if (!_refuelService.CanConsume(
+                fuelCost,
+                out FuelConsumeFailReason
+                    fuelReason))
+        {
+            LogCustom(
+                "[TravelService2A] " +
+                "Travel fuel validation failed. " +
+                "From = " +
+                normalizedFromId +
+                " | To = " +
+                normalizedToId +
+                " | Cost = " +
+                fuelCost +
+                " | Reason = " +
+                fuelReason);
+
+            return TravelFailReason
+                .NotEnoughFuel;
+        }
 
         return TravelFailReason.None;
     }
 
-    public int GetTravelCost(string fromSystemId, string toSystemId)
+    public int GetTravelCost(
+        string fromSystemId,
+        string toSystemId)
     {
-        // if (GetTravelFailReason(fromSystemId, toSystemId) != TravelFailReason.None)
-        //     return 0;
+        if (string.IsNullOrWhiteSpace(
+                fromSystemId))
+        {
+            return 0;
+        }
 
-        string normalizedFromId = fromSystemId.Trim();
-        string normalizedToId = toSystemId.Trim();
+        if (string.IsNullOrWhiteSpace(
+                toSystemId))
+        {
+            return 0;
+        }
 
-        RouteConfig routeConfig = FindRouteConfig(
-            normalizedFromId,
-            normalizedToId
-        );
+        string normalizedFromId =
+            fromSystemId.Trim();
+
+        string normalizedToId =
+            toSystemId.Trim();
+
+        RouteConfig routeConfig =
+            FindRouteConfig(
+                normalizedFromId,
+                normalizedToId);
 
         if (routeConfig == null)
             return 0;
 
-        return CalculateFuelCostByRoute(routeConfig);
+        return CalculateFuelCostByRoute(
+            routeConfig);
     }
 
-    private int CalculateFuelCost(string fromSystemId, string toSystemId)
+    private TravelResult
+        CreateAndPublishFailedResult(
+            TravelFailReason failReason,
+            string fromSystemId,
+            string toSystemId)
     {
-        RouteConfig routeConfig = FindRouteConfig(
-            fromSystemId,
-            toSystemId
-        );
+        TravelResult failedResult =
+            TravelResult.Failed(
+                failReason,
+                fromSystemId,
+                toSystemId);
+
+        _eventBus.Publish(
+            new TravelFinishedEvent(
+                fromSystemId:
+                    failedResult
+                        .FromSystemId,
+
+                toSystemId:
+                    failedResult
+                        .ToSystemId,
+
+                success: false,
+
+                fuelSpent: 0,
+
+                failReason:
+                    failedResult
+                        .FailReason));
+
+        return failedResult;
+    }
+
+    private int CalculateFuelCost(
+        string fromSystemId,
+        string toSystemId)
+    {
+        RouteConfig routeConfig =
+            FindRouteConfig(
+                fromSystemId,
+                toSystemId);
 
         if (routeConfig == null)
             return DefaultFuelCostPerJump;
 
-        return CalculateFuelCostByRoute(routeConfig);
+        return CalculateFuelCostByRoute(
+            routeConfig);
     }
 
-    private int CalculateFuelCostByRoute(RouteConfig routeConfig)
+    private int CalculateFuelCostByRoute(
+        RouteConfig routeConfig)
     {
         if (routeConfig == null)
             return DefaultFuelCostPerJump;
@@ -207,46 +478,75 @@ public sealed class TravelService2A : CustomService, ITravelService
         return routeConfig.ParsecDistance;
     }
 
-    private StarSystemConfig FindSystemConfig(string systemId)
+    private StarSystemConfig FindSystemConfig(
+        string systemId)
     {
-        if (string.IsNullOrWhiteSpace(systemId))
+        if (string.IsNullOrWhiteSpace(
+                systemId))
+        {
             return null;
+        }
 
-        IReadOnlyList<StarSystemConfig> systems = _configService.GetAllStarSystems();
+        IReadOnlyList<StarSystemConfig> systems =
+            _configService
+                .GetAllStarSystems();
 
         if (systems == null)
             return null;
 
         return systems.FirstOrDefault(
-            system => system != null && system.Id == systemId
-        );
+            system =>
+                system != null &&
+                system.Id == systemId);
     }
 
-    private RouteConfig FindRouteConfig(string fromSystemId, string toSystemId)
+    private RouteConfig FindRouteConfig(
+        string fromSystemId,
+        string toSystemId)
     {
-        if (string.IsNullOrWhiteSpace(fromSystemId))
+        if (string.IsNullOrWhiteSpace(
+                fromSystemId))
+        {
             return null;
+        }
 
-        if (string.IsNullOrWhiteSpace(toSystemId))
+        if (string.IsNullOrWhiteSpace(
+                toSystemId))
+        {
             return null;
+        }
 
-        IReadOnlyList<StarSystemConfig> systems = _configService.GetAllStarSystems();
+        IReadOnlyList<StarSystemConfig> systems =
+            _configService
+                .GetAllStarSystems();
 
         if (systems == null)
             return null;
 
-        foreach (StarSystemConfig systemConfig in systems)
+        foreach (
+            StarSystemConfig systemConfig
+            in systems)
         {
-            if (systemConfig == null || systemConfig.Routes == null)
+            if (systemConfig == null)
                 continue;
 
-            foreach (RouteConfig routeConfig in systemConfig.Routes)
+            if (systemConfig.Routes == null)
+                continue;
+
+            foreach (
+                RouteConfig routeConfig
+                in systemConfig.Routes)
             {
                 if (routeConfig == null)
                     continue;
 
-                if (IsRouteBetweenSystems(routeConfig, fromSystemId, toSystemId))
+                if (IsRouteBetweenSystems(
+                        routeConfig,
+                        fromSystemId,
+                        toSystemId))
+                {
                     return routeConfig;
+                }
             }
         }
 
@@ -267,67 +567,115 @@ public sealed class TravelService2A : CustomService, ITravelService
         if (routeConfig.ToSystem == null)
             return false;
 
-        string routeFromSystemId = routeConfig.FromSystem.Id;
-        string routeToSystemId = routeConfig.ToSystem.Id;
+        string routeFromSystemId =
+            routeConfig
+                .FromSystem
+                .Id;
+
+        string routeToSystemId =
+            routeConfig
+                .ToSystem
+                .Id;
 
         bool direct =
-            routeFromSystemId == firstSystemId &&
-            routeToSystemId == secondSystemId;
+            routeFromSystemId ==
+                firstSystemId &&
+            routeToSystemId ==
+                secondSystemId;
 
         bool reverse =
-            routeFromSystemId == secondSystemId &&
-            routeToSystemId == firstSystemId;
+            routeFromSystemId ==
+                secondSystemId &&
+            routeToSystemId ==
+                firstSystemId;
 
         return direct || reverse;
     }
 
-    private bool IsRouteUnlocked(RouteConfig routeConfig)
+    private bool IsRouteUnlocked(
+        RouteConfig routeConfig)
     {
         if (routeConfig == null)
             return false;
 
-        RouteRuntimeState routeState = FindRouteRuntimeState(routeConfig.Id);
+        RouteRuntimeState routeState =
+            FindRouteRuntimeState(
+                routeConfig.Id);
 
         if (routeState != null)
             return routeState.IsUnlocked;
 
-        // Защита для старых сохранений или временных тестов:
-        // если состояния маршрута ещё нет, используем стартовую настройку из конфига.
-        return routeConfig.IsLockedAtStart == false;
+        /*
+         * Защита старых сохранений
+         * и временных тестовых State.
+         */
+        return routeConfig
+                   .IsLockedAtStart ==
+               false;
     }
 
-    private RouteRuntimeState FindRouteRuntimeState(string routeId)
+    private RouteRuntimeState
+        FindRouteRuntimeState(
+            string routeId)
     {
         ReinitializeGalaxyState();
 
-        if (string.IsNullOrWhiteSpace(routeId))
+        if (string.IsNullOrWhiteSpace(
+                routeId))
+        {
+            return null;
+        }
+
+        if (_galaxyRuntimeState == null)
             return null;
 
-        if (_galaxyRuntimeState == null || _galaxyRuntimeState.Routes == null)
+        if (_galaxyRuntimeState.Routes == null)
             return null;
 
-        return _galaxyRuntimeState.Routes.FirstOrDefault(
-            route => route != null && route.RouteId == routeId
-        );
+        return _galaxyRuntimeState
+            .Routes
+            .FirstOrDefault(
+                route =>
+                    route != null &&
+                    route.RouteId ==
+                        routeId);
     }
 
     private string GetCurrentSystemId()
     {
         ReinitializeGalaxyState();
 
-        if (_galaxyRuntimeState != null && !string.IsNullOrWhiteSpace(_galaxyRuntimeState.CurrentSystemId))
-            return _galaxyRuntimeState.CurrentSystemId;
+        if (_galaxyRuntimeState != null &&
+            !string.IsNullOrWhiteSpace(
+                _galaxyRuntimeState
+                    .CurrentSystemId))
+        {
+            return _galaxyRuntimeState
+                .CurrentSystemId;
+        }
 
-        return _gameSessionService.State.Player.CurrentSystemId;
+        return _gameSessionService
+            .State
+            .Player
+            .CurrentSystemId;
     }
 
-    private void SetCurrentSystemId(string systemId)
+    private void SetCurrentSystemId(
+        string systemId)
     {
         ReinitializeGalaxyState();
 
-        _gameSessionService.State.Player.CurrentSystemId = systemId;
+        _gameSessionService
+            .State
+            .Player
+            .CurrentSystemId =
+                systemId;
 
         if (_galaxyRuntimeState != null)
-            _galaxyRuntimeState.CurrentSystemId = systemId;
+        {
+            _galaxyRuntimeState
+                .CurrentSystemId =
+                    systemId;
+        }
     }
 }

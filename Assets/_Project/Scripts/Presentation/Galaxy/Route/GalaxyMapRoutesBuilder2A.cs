@@ -204,12 +204,32 @@ public class GalaxyMapRoutesBuilder2A : CustomMonoBehaviour
             toSystemId,
             fromConfig.MapPosition,
             toConfig.MapPosition,
+            GetGalaxyMapRoutePointSpacing(),
             GalaxyMapRouteVisualState.Hidden
         );
 
         string routeKey = MakeRouteKey(fromSystemId, toSystemId);
 
         _routeViewsByKey[routeKey] = view;
+    }
+
+    private float GetGalaxyMapRoutePointSpacing()
+    {
+        const float fallbackSpacing = 0.25f;
+
+        if (_configService == null)
+            return fallbackSpacing;
+
+        GameConfig gameConfig =
+            _configService.GameConfig;
+
+        if (gameConfig == null)
+            return fallbackSpacing;
+
+        if (gameConfig.galaxyMapRoutePointSpacing <= 0f)
+            return fallbackSpacing;
+
+        return gameConfig.galaxyMapRoutePointSpacing;
     }
 
     public void ClearSelectedPath()

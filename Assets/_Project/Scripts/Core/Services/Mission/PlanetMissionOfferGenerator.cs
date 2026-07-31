@@ -161,7 +161,11 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
             TargetSystemId = starSystem.Id,
             // TargetPlanetId = missionTemplate.TargetPlanet.Id,
             // TargetSystemId = missionTemplate.TargetSystem.Id,
-            PirateGroupSpawnRuleConfig = missionTemplate.PirateGroupSpawnRuleConfig,
+            // PirateGroupSpawnRuleConfig = missionTemplate.PirateGroupSpawnRuleConfig,
+            PirateGroupSpawnRuleId =
+                missionTemplate.PirateGroupSpawnRuleConfig != null
+                    ? missionTemplate.PirateGroupSpawnRuleConfig.Id
+                    : null,
             Reward = new MissionRewardData
             {
                 Credits = Random.Range(missionTemplate.CreditRewardMin, missionTemplate.CreditRewardMax + 1),

@@ -12,15 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s07_system_zenith_array_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_zenith_array_01
+  id: s07_system_zenith_array_02
   displayName: "\u0417\u0435\u043D\u0438\u0442\u043D\u0430\u044F \u0420\u0435\u0448\u0435\u0442\u043A\u0430"
   description: "\u0417\u0435\u043D\u0438\u0442\u043D\u0430\u044F \u0420\u0435\u0448\u0435\u0442\u043A\u0430"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 5
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 80e049703d99e4f7d929bc8436029380, type: 2}
+  - {fileID: 11400000, guid: e8ba8952af0c3453d8c5326605a799b2, type: 2}
+  - {fileID: 11400000, guid: 24aa96bf8d9a148dc8ce4c4afc5ebd6b, type: 2}
+  - {fileID: 11400000, guid: 53c19bb309d794c1e9e9ea6f6e653ee1, type: 2}
+  - {fileID: 11400000, guid: 47555aa40974049c3b7c4a47b09506d6, type: 2}
+  - {fileID: 11400000, guid: e83dff2daaed14e7f9da47f7a71ce033, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: 1cb7a31a4c0e64799b5df686ca44f315, type: 2}
   missionTags: 070000000200000004000000
   mapPosition: {x: 4.3, y: 1.8}
   systemPopulation: {fileID: 0}
@@ -28,7 +35,7 @@ MonoBehaviour:
   isHiddenAtStart: 1
   recommendedPower: 7
   routes:
-  - {fileID: 11400000, guid: e5fa0fa87b8314fa79587ce38def9c72, type: 2}
-  - {fileID: 11400000, guid: 01534c7fa5d134502991b68a1bd6d68f, type: 2}
-  - {fileID: 11400000, guid: 01534c7fa5d134502991b68a1bd6d68f, type: 2}
-  - {fileID: 11400000, guid: 01534c7fa5d134502991b68a1bd6d68f, type: 2}
+  - {fileID: 11400000, guid: d0f0f630edf2b438c9ac32bdc61bde4f, type: 2}
+  - {fileID: 11400000, guid: a9592dc9cbd534ed682cae45a6dbc20f, type: 2}
+  - {fileID: 11400000, guid: 1aa385f0ad8b4445d899977a22c9ade8, type: 2}
+  - {fileID: 11400000, guid: 0212fd5b2b00447bf86497d4b2fa6c9e, type: 2}

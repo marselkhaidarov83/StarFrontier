@@ -12,15 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s08_system_fallen_crown_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_fallen_crown_01
+  id: s08_system_fallen_crown_02
   displayName: "\u041F\u0430\u0432\u0448\u0430\u044F \u041A\u043E\u0440\u043E\u043D\u0430"
   description: "\u041F\u0430\u0432\u0448\u0430\u044F \u041A\u043E\u0440\u043E\u043D\u0430"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 2
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: c6519127adc2e4e5a80ab70a156dddb6, type: 2}
+  - {fileID: 11400000, guid: 7fa5470ca744a4715aa2dfc9aed6d2ad, type: 2}
+  - {fileID: 11400000, guid: 927170828c42e4b2d9bc2165ed46933d, type: 2}
+  - {fileID: 11400000, guid: de246305058bb4fe98f6577c60781985, type: 2}
+  - {fileID: 11400000, guid: 7f876f9fb8d3a41adb5224eb75a4dcb8, type: 2}
+  - {fileID: 11400000, guid: cf3eeb2d034374779990ef5039dd2080, type: 2}
+  - {fileID: 11400000, guid: 15408fe1d1ecd431fb0a2c608d1e99c7, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: 1d595b4d6023f49d08381523653e6bbd, type: 2}
   missionTags: 020000000600000005000000
   mapPosition: {x: 0.2, y: 3.2}
   systemPopulation: {fileID: 0}

@@ -12,6 +12,7 @@ public class StarSystemConfig : BaseConfig
     [SerializeField] private SunConfig sun;
     [SerializeField] private PlanetConfig[] planetRefs;
     [SerializeField] private StarSystemLink[] linkedSystems;
+    [SerializeField] private StationConfig station;
 
     [Header("Mission Data")]
     [SerializeField] private MissionTag[] missionTags;
@@ -44,4 +45,5 @@ public class StarSystemConfig : BaseConfig
     public bool IsHiddenAtStart => isHiddenAtStart;
     public int RecommendedPower => recommendedPower;
     public System.Collections.Generic.List<RouteConfig> Routes => routes;
+    public StationConfig Station => station;
 }

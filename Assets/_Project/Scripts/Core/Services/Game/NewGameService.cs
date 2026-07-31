@@ -43,7 +43,7 @@ public class NewGameService : CustomService, INewGameService
                 LogCustom("GameStateMachine is null");
             }
             else 
-                _gameStateMachine.Enter(new MetaState());
+                _gameStateMachine.Enter(new SystemState());
         }
     }
 }

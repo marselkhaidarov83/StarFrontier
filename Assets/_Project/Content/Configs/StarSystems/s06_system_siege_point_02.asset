@@ -12,15 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s06_system_siege_point_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_siege_point_01
+  id: s06_system_siege_point_02
   displayName: "\u041E\u0441\u0430\u0434\u043D\u044B\u0439 \u0423\u0437\u0435\u043B"
   description: "\u041E\u0441\u0430\u0434\u043D\u044B\u0439 \u0423\u0437\u0435\u043B"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   economyType: 4
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: afb705007fd6d4f4d935d6875a15c0a6, type: 2}
+  - {fileID: 11400000, guid: ac34b132c47d64b20a42dd6502486571, type: 2}
+  - {fileID: 11400000, guid: d667f73fd3f6c485ca7b668603793d78, type: 2}
+  - {fileID: 11400000, guid: 038c6347bcdbb4b27b7de5a905a06ae4, type: 2}
+  - {fileID: 11400000, guid: a23cc6d1b6d824d33a6687694dde0073, type: 2}
+  - {fileID: 11400000, guid: 4ded41338fa1044f8b1c00f3dfa05cf5, type: 2}
+  - {fileID: 11400000, guid: 6d9f069db2d97472db0994812e011df8, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: b9d03fe88c1e34ba5b27df6fa0feabe1, type: 2}
   missionTags: 020000000500000001000000
   mapPosition: {x: 2.3, y: 1}
   systemPopulation: {fileID: 0}

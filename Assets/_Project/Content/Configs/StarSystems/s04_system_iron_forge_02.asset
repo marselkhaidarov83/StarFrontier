@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s04_system_iron_forge_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_iron_forge_01
+  id: s04_system_iron_forge_02
   displayName: "\u0416\u0435\u043B\u0435\u0437\u043D\u0430\u044F \u041A\u0443\u0437\u043D\u0438\u0446\u0430"
   description: "\u0416\u0435\u043B\u0435\u0437\u043D\u0430\u044F \u041A\u0443\u0437\u043D\u0438\u0446\u0430"
   icon: {fileID: 21300000, guid: 7d79f9528604e46a7940cfd11135984f, type: 3}
   economyType: 5
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 5ad0d825e57dd428ba76bd569d1180dc, type: 2}
+  - {fileID: 11400000, guid: b3c1f3e2802804aff90ef4d5cf25743b, type: 2}
+  - {fileID: 11400000, guid: 46db6d02a04d4491ab0b706fb00db5bb, type: 2}
+  - {fileID: 11400000, guid: 5dc93efe06c794f088e4385f7827aea2, type: 2}
+  - {fileID: 11400000, guid: 62a6e992ed81d4decb4172a8d739d6a3, type: 2}
+  - {fileID: 11400000, guid: 881b8a8b063ca460eaf835d006c91d47, type: 2}
+  - {fileID: 11400000, guid: 89465563f00664784a4b725b101058ea, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 864c4b08379da496ebba2539b781a403, type: 2}
     parsecDistance: 12
@@ -33,6 +40,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: c07df5f848d1544e7a7b7bf61ef7a9a6, type: 2}
   missionTags: 000000000000000000000000
   mapPosition: {x: 0.2, y: -2.4}
   systemPopulation: {fileID: 0}

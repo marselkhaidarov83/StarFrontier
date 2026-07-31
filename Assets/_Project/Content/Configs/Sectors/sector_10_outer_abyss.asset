@@ -24,6 +24,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ab00de60929914d07a992bcfdfd33a46, type: 2}
   - {fileID: 11400000, guid: 0e4b4fe37f14f4bc8b5bf9c70d97a66e, type: 2}
   order: 10
+  IsUnlocked: 0
   mapPosition: {x: 0, y: 6.55}
   mapSize: {x: 10.8, y: 1.57}
   SectorPreviewImage: {fileID: 21300000, guid: 5cb530fabe7b34e1f8cfffad661f3b8d, type: 3}

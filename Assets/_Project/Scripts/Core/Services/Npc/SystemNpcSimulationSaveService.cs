@@ -90,7 +90,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             OriginSystemId = npc.OriginSystemId,
             CurrentSystemId = npc.CurrentSystemId,
             // TargetSystemId = npc.TargetSystemId,
-            TargetSystemLink = npc.TargetSystemLink,
+            TargetSystemId = npc.TargetSystemId,
 
             CurrentPlanetId = npc.CurrentPlanetId,
             TargetPlanetId = npc.TargetPlanetId,
@@ -165,8 +165,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
             OriginSystemId = save.OriginSystemId,
             CurrentSystemId = save.CurrentSystemId,
-            // TargetSystemId = save.TargetSystemId,
-            TargetSystemLink = save.TargetSystemLink,
+            TargetSystemId = save.TargetSystemId,
 
             CurrentPlanetId = save.CurrentPlanetId,
             TargetPlanetId = save.TargetPlanetId,

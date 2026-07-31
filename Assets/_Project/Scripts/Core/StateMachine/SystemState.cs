@@ -19,13 +19,13 @@ public class SystemState : IGameState
     public void Enter()
     {
         if (_debugEnabled)
-            Debug.Log("Entered SystemState");
+            Debug.Log("Entered MetaState");
         _sceneService.LoadSystem();
     }
 
     public void Exit()
     {
         if (_debugEnabled)
-            Debug.Log("Exited SystemState");
+            Debug.Log("Exited MetaState");
     }
 }

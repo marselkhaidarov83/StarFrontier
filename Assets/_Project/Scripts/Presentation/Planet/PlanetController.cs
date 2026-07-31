@@ -19,108 +19,108 @@ public class PlanetController : CustomMonoBehaviour
     [SerializeField] private Sprite scienceBackground;
     [SerializeField] private Sprite deadBackground;
     [SerializeField] private Sprite fallbackBackground;
-        // [Header("Texts")]
+    // [Header("Texts")]
 
-        // [SerializeField]
-        // private TMP_Text systemNameText;
+    // [SerializeField]
+    // private TMP_Text systemNameText;
 
-        // [SerializeField]
-        // private TMP_Text economyText;
+    // [SerializeField]
+    // private TMP_Text economyText;
 
-        // [SerializeField]
-        // private TMP_Text dangerText;
+    // [SerializeField]
+    // private TMP_Text dangerText;
 
-        // [Header("Buttons")]
+    // [Header("Buttons")]
 
-        [SerializeField] private Button openSystemButton;
+    [SerializeField] private Button openSystemButton;
 
-        [SerializeField] private Button openHangarButton;
+    [SerializeField] private Button openHangarButton;
 
-        [SerializeField] private Button openMarketButton;
+    [SerializeField] private Button openMarketButton;
 
-        [SerializeField] private Button openGovernmentButton;
-        [SerializeField] private Button refuelButton;
+    [SerializeField] private Button openGovernmentButton;
+    [SerializeField] private Button refuelButton;
 
-        // [Header("Optional Root References")]
+    // [Header("Optional Root References")]
 
-        // [SerializeField]
-        // private GameObject systemScreenRoot;
+    // [SerializeField]
+    // private GameObject systemScreenRoot;
 
-        // [SerializeField]
-        // private GameObject galaxyMapScreenRoot;
+    // [SerializeField]
+    // private GameObject galaxyMapScreenRoot;
 
-        // [Header("Controllers")]
-        // [SerializeField] private MarketScreenController marketScreenController;
+    // [Header("Controllers")]
+    // [SerializeField] private MarketScreenController marketScreenController;
 
-        private SimpleEventBus eventBus;
-        private IGameSessionService gameSessionService;
-        // private IRefuelService refuelService;
-        private IConfigService configService;
-        private ISystemTravelService _systemTravelService;
-        private IOrbitalMotionService _orbitalMotionService;
-        private IGameTimeService _gameTimeService;
-        private IConfigService _configService;
-        // private ITravelService _travelService;
-        // private GalaxyGraphModel _galaxyGraph;
+    private SimpleEventBus eventBus;
+    private IGameSessionService gameSessionService;
+    // private IRefuelService refuelService;
+    private IConfigService configService;
+    private ISystemTravelService _systemTravelService;
+    private IOrbitalMotionService _orbitalMotionService;
+    private IGameTimeService _gameTimeService;
+    private IConfigService _configService;
+    // private ITravelService _travelService;
+    // private GalaxyGraphModel _galaxyGraph;
 
-        // private bool _isInitialized;
-        // private bool _isSubscribed;
+    // private bool _isInitialized;
+    // private bool _isSubscribed;
 
-        public void Initialize()
-        {
-            eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-            _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-            gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-            configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-            _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
-            _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
-            _gameTimeService = Bootstrapper.Instance.ServiceRegistry.Get<IGameTimeService>();
+    public void Initialize()
+    {
+        eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+        configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
+        _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
+        _gameTimeService = Bootstrapper.Instance.ServiceRegistry.Get<IGameTimeService>();
 
-            BindButtons();
-            SubscribeToEvents();
-        }
+        BindButtons();
+        SubscribeToEvents();
+    }
 
-        private void OnDestroy()
-        {
-            UnsubscribeFromEvents();
-            UnbindButtons();
-        }
+    private void OnDestroy()
+    {
+        UnsubscribeFromEvents();
+        UnbindButtons();
+    }
 
-        private void BindButtons()
-        {
-            if (openSystemButton != null)
-                openSystemButton.onClick.AddListener(OnOpenSystemClicked);
+    private void BindButtons()
+    {
+        if (openSystemButton != null)
+            openSystemButton.onClick.AddListener(OnOpenSystemClicked);
 
-            if (openHangarButton != null)
-                openHangarButton.onClick.AddListener(OnOpenHangarClicked);
+        if (openHangarButton != null)
+            openHangarButton.onClick.AddListener(OnOpenHangarClicked);
 
-            if (openMarketButton != null)
-                openMarketButton.onClick.AddListener(OnOpenMarketClicked);
+        if (openMarketButton != null)
+            openMarketButton.onClick.AddListener(OnOpenMarketClicked);
 
-            if (openGovernmentButton != null)
-                openGovernmentButton.onClick.AddListener(OnOpenGovernmentClicked);
+        if (openGovernmentButton != null)
+            openGovernmentButton.onClick.AddListener(OnOpenGovernmentClicked);
 
-            if (refuelButton != null)
-                refuelButton.onClick.AddListener(OnRefuelClicked);
-        }
+        if (refuelButton != null)
+            refuelButton.onClick.AddListener(OnRefuelClicked);
+    }
 
-        private void UnbindButtons()
-        {
-            if (openSystemButton != null)
-                openSystemButton.onClick.RemoveAllListeners();
+    private void UnbindButtons()
+    {
+        if (openSystemButton != null)
+            openSystemButton.onClick.RemoveAllListeners();
 
-            if (openHangarButton != null)
-                openHangarButton.onClick.RemoveAllListeners();
+        if (openHangarButton != null)
+            openHangarButton.onClick.RemoveAllListeners();
 
-            if (openMarketButton != null)
-                openMarketButton.onClick.RemoveAllListeners();
+        if (openMarketButton != null)
+            openMarketButton.onClick.RemoveAllListeners();
 
-            if (openGovernmentButton != null)
-                openGovernmentButton.onClick.RemoveAllListeners();                
+        if (openGovernmentButton != null)
+            openGovernmentButton.onClick.RemoveAllListeners();
 
-            if (refuelButton != null)
-                refuelButton.onClick.RemoveAllListeners();
-        }
+        if (refuelButton != null)
+            refuelButton.onClick.RemoveAllListeners();
+    }
 
     private void OnOpenSystemClicked()
     {
@@ -176,7 +176,7 @@ public class PlanetController : CustomMonoBehaviour
 
         if (IsDebug())
             Debug.Log("[PlanetController] Open Government clicked");
-    }    
+    }
 
     private void OnRefuelClicked()
     {
@@ -195,7 +195,7 @@ public class PlanetController : CustomMonoBehaviour
 
         if (IsDebug())
             Debug.Log("[PlanetController] Refuel clicked");
-    }            
+    }
 
     private void OnPlanetEntered(PlanetEnteredEvent evt)
     {
@@ -316,13 +316,20 @@ public class PlanetController : CustomMonoBehaviour
         if (eventBus == null)
             return;
 
-           eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
+        eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
     }
 
     private void RefreshActionAvailability()
     {
-        var planetId = gameSessionService.State.Player.CurrentPlanetId;
+        if (gameSessionService == null || configService == null)
+            return;
+
+        string planetId = gameSessionService.State.Player.CurrentPlanetId;
+
+        if (string.IsNullOrWhiteSpace(planetId))
+            return;
+
         PlanetConfig currentPlanet = configService.GetPlanetConfigById(planetId);
 
         if (currentPlanet == null)
@@ -330,10 +337,26 @@ public class PlanetController : CustomMonoBehaviour
 
         bool isInhabited = currentPlanet.IsInhabited;
 
-        openMarketButton.gameObject.SetActive(isInhabited);
-        openGovernmentButton.gameObject.SetActive(isInhabited);
-        openHangarButton.gameObject.SetActive(isInhabited);
-        refuelButton.gameObject.SetActive(isInhabited);
+        SetButtonActiveIfAlive(openMarketButton, isInhabited);
+        SetButtonActiveIfAlive(openGovernmentButton, isInhabited);
+        SetButtonActiveIfAlive(openHangarButton, isInhabited);
+        SetButtonActiveIfAlive(refuelButton, isInhabited);
     }
-    
+
+    private void SetButtonActiveIfAlive(Button button, bool isActive)
+    {
+        if (button == null)
+            return;
+
+        if (!button)
+            return;
+
+        GameObject buttonObject = button.gameObject;
+
+        if (buttonObject == null)
+            return;
+
+        buttonObject.SetActive(isActive);
+    }
+
 }

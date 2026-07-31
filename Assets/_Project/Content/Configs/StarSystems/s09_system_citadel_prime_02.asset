@@ -12,15 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s09_system_citadel_prime_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_citadel_prime_01
+  id: s09_system_citadel_prime_02
   displayName: "\u0413\u043B\u0430\u0432\u043D\u0430\u044F \u0426\u0438\u0442\u0430\u0434\u0435\u043B\u044C"
   description: "\u0413\u043B\u0430\u0432\u043D\u0430\u044F \u0426\u0438\u0442\u0430\u0434\u0435\u043B\u044C"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 6
   dangerLevel: 5
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: cca26ce474ebe4833a29fc0fe6903ea0, type: 2}
+  - {fileID: 11400000, guid: dbf7af91ab1174581ac4ef1dba0f8f1e, type: 2}
+  - {fileID: 11400000, guid: b01b6207dbdcf4ce38e23acdd4ffb728, type: 2}
+  - {fileID: 11400000, guid: 990c615620c0a43258179e2c209ef66c, type: 2}
+  - {fileID: 11400000, guid: 8e63e109f10dc47389b5c58802d3ac11, type: 2}
+  - {fileID: 11400000, guid: a45e37b13dd854d71b7b94d412e8343a, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: 9813f86bb87294b538fa2d125ec4e7ac, type: 2}
   missionTags: 020000000400000007000000
   mapPosition: {x: -4.5, y: 4.6}
   systemPopulation: {fileID: 0}

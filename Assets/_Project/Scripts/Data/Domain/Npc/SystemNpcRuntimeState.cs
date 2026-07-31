@@ -16,8 +16,9 @@ public sealed class SystemNpcRuntimeState
     [Header("System Location")]
     public string OriginSystemId;
     public string CurrentSystemId;
-    // public string TargetSystemId;
-    public StarSystemLink TargetSystemLink;
+    public string TargetSystemId;
+    public Vector3 TargetSystemExitPoint;
+    public Vector3 TargetSystemEntryPoint;
 
     [Header("Planet Location")]
     public string CurrentPlanetId;
@@ -54,7 +55,7 @@ public sealed class SystemNpcRuntimeState
     public bool IsFighting;
     public bool IsAggressiveToPlayer;
     public bool WasDamagedByPlayer;
-    
+
     [Header("Stats")]
     public int MaxHull;
     public int CurrentHull;

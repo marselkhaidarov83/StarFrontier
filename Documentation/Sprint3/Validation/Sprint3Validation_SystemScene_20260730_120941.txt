@@ -1,0 +1,40 @@
+﻿STAR FRONTIER — SPRINT 3 VALIDATION REPORT
+Mode: SCENE_AND_PREFABS
+Started UTC: 2026-07-30T12:09:40.8071260Z
+Finished UTC: 2026-07-30T12:09:41.4903960Z
+Unity: 6000.3.11f1
+Branch: UNKNOWN (Error loading required libraries. If there is an ongoing installation please wait for it to complete. Otherwise reinstall. (dlopen(@rpath/libxcodebuildLoader.dylib, 0x0001): Symbol not found: __ZN38pxrInternal_v0_21__aapl__pxrReserved__11TfSingletonINS_15TfDiagnosticMgrEE15_CreateInstanceEv
+  Referenced from: <E253B5A6-AA78-3400-908F-18A455D150EB> /Applications/Xcode.app/Contents/SystemFrameworks/USDKit.framework/Versions/A/USDKit
+  Expected as weak-def export from some loaded dylib)
+git: error: unable to locate xcodebuild, please make sure the path to the Xcode folder is set correctly!
+git: error: You can set the path to the Xcode folder using /usr/bin/xcode-select -switch)
+SHA: UNKNOWN (Error loading required libraries. If there is an ongoing installation please wait for it to complete. Otherwise reinstall. (dlopen(@rpath/libxcodebuildLoader.dylib, 0x0001): Symbol not found: __ZN38pxrInternal_v0_21__aapl__pxrReserved__11TfSingletonINS_15TfDiagnosticMgrEE15_CreateInstanceEv
+  Referenced from: <E253B5A6-AA78-3400-908F-18A455D150EB> /Applications/Xcode.app/Contents/SystemFrameworks/USDKit.framework/Versions/A/USDKit
+  Expected as weak-def export from some loaded dylib)
+git: error: unable to locate xcodebuild, please make sure the path to the Xcode folder is set correctly!
+git: error: You can set the path to the Xcode folder using /usr/bin/xcode-select -switch)
+Scene: Assets/_Project/Scenes/SystemScene.unity
+
+ERRORS: 0
+WARNINGS: 1
+PASSES: 9
+
+============================================================
+2. OPEN SCENE VALIDATION
+============================================================
+[PASS ] Проверяется сцена: Assets/_Project/Scenes/SystemScene.unity
+[PASS ] SystemCameraController2A: найден один активный владелец (SystemMapRoot).
+[PASS ] PlayerInputBridge2A: найден один активный владелец (SystemMapRoot).
+[PASS ] SystemControlPresentationBridge2A: активных компонентов 1.
+[PASS ] EventSystem: найден один активный владелец (EventSystem).
+[PASS ] HUD root найден: Canvas/SafeAreaRoot_TopHud/PF_HudTopRoot, Canvas/SafeAreaRoot_TopHud/SystemMapRightHUD, Canvas/SafeAreaRoot_BottomHud/PF_SystemHudBottomRoot
+[PASS ] Компоненты связи корабля со сценой: MetaSceneShipStateBridge2A@SystemMapRoot, SystemControlPresentationBridge2A@SystemMapRoot
+[PASS ] MainCamera: SystemMainCamera
+
+============================================================
+3. PREFAB VALIDATION
+============================================================
+[PASS ] Префабов для проверки найдено: 38
+[WARN ] Assets/_Project/Prefabs/UI/Planet/PF_SystemMapPlanet_Pseudo3D.prefab: SpriteRenderer без Sprite — PF_SystemMapPlanet_Pseudo3D/PlanetOrbit
+
+RESULT: PASSED WITH/WITHOUT WARNINGS

@@ -8,7 +8,6 @@ public class PlanetConfig : BaseConfig
     [SerializeField] private bool isInhabited;
 
     [Header("Relations")]
-    [SerializeField] private string systemId;
     [SerializeField] private PlanetOrbitConfig planetOrbit;
 
     [Header("Content Links")]
@@ -27,7 +26,6 @@ public class PlanetConfig : BaseConfig
 
     public PlanetType PlanetType => planetType;
     public bool IsInhabited => isInhabited;
-    public string SystemId => systemId;
     public PlanetOrbitConfig PlanetOrbit => planetOrbit;
     public MarketProfileConfig MarketProfile => marketProfile;
     public PlanetMissionConfig PlanetMissionConfig => planetMissionConfig;

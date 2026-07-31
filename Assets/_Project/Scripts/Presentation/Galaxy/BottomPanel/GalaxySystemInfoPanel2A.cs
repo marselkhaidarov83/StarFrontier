@@ -503,7 +503,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
         // LogCustom("Travel started/completed to system: " + _nextSystemId);
 
-        _gameStateMachine.Enter(new MetaState());
+        _gameStateMachine.Enter(new SystemState());
         // _simpleEventBus.Publish(new RouteExitMapChangedEvent(
         //     _routeConfig,
         //     currentSystemId,
@@ -582,7 +582,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             exitPoint,
             entryPoint
         ));
-        _gameStateMachine.Enter(new MetaState());
+        _gameStateMachine.Enter(new SystemState());
         // _eventBus.Publish(new StarSystemEnteredEvent(currentSystemId));
         // _eventBus.Publish(new RouteExitMapChangedEvent(
         //     routeConfig,

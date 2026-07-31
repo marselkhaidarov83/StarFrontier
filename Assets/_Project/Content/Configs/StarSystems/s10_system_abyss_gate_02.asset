@@ -12,15 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s10_system_abyss_gate_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_abyss_gate_01
+  id: s10_system_abyss_gate_02
   displayName: "\u0412\u0440\u0430\u0442\u0430 \u0411\u0435\u0437\u0434\u043D\u044B"
   description: "\u0412\u0440\u0430\u0442\u0430 \u0411\u0435\u0437\u0434\u043D\u044B"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   economyType: 6
   dangerLevel: 5
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: a147f7f4142d843b792454d098d6cd0a, type: 2}
+  - {fileID: 11400000, guid: 460ef0a62c76447e68c715c0bb6da9db, type: 2}
+  - {fileID: 11400000, guid: 11514893e8c444859ab43441180c29c0, type: 2}
+  - {fileID: 11400000, guid: c2d1fcb3c32fc4bce8266a2b14cfc784, type: 2}
+  - {fileID: 11400000, guid: d723cf0ba59f24806adae78d59a4666c, type: 2}
+  - {fileID: 11400000, guid: 95bef0eddc8b2446b94775dc6a7515a2, type: 2}
+  - {fileID: 11400000, guid: dcc79d6ab2c3441be9632f337c631918, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: 693563e97d16644bf9fcb1729c46fc2e, type: 2}
   missionTags: 010000000200000005000000
   mapPosition: {x: -4.4, y: 6.5}
   systemPopulation: {fileID: 0}

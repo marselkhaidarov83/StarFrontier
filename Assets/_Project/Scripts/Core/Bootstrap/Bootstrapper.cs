@@ -9,10 +9,18 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
 
+    [Header("Sprint 3 System Gameplay")]
+    [SerializeField] private PlayerControlConfig playerControlConfig;
+    [SerializeField] private ShipMovementConfig shipMovementConfig;
+    [SerializeField] private SystemCameraConfig systemCameraConfig;
+    [SerializeField] private TargetingConfig targetingConfig;
+    [SerializeField] private InteractionConfig interactionConfig;
+    [SerializeField] private SystemHudConfig systemHudConfig;
+    [SerializeField] private SystemVisualConfig systemVisualConfig;
+
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
     [SerializeField] private List<SectorConfig> sectors;
-    [SerializeField] private List<StarSystemConfig> starSystems;
     [SerializeField] private List<ShipConfig> ships;
     [SerializeField] private List<EnemyConfig> enemies;
     [SerializeField] private List<AllyConfig> allies;
@@ -30,6 +38,10 @@ public class Bootstrapper : CustomMonoBehaviour
     private IGameStateMachine _gameStateMachine;
     private ISaveService _saveService;
     private IGameTimeService _gameTimeService;
+    private IPlayerControlService _playerControlService;
+    private IShipMovementService _shipMovementService;
+    private IInteractionService2A _interactionService;
+    private ITickService _tickService;
 
     [SerializeField] private bool _globalDebugEnabled;
     public bool GlobalDebugEnabled => _globalDebugEnabled;
@@ -45,8 +57,7 @@ public class Bootstrapper : CustomMonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (IsDebug())
-            Debug.Log("Bootstrapper awaked");
+        LogCustom("Bootstrapper awaked");
 
         InitializeServiceRegistry();
         InitializeStateMachine();
@@ -57,8 +68,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private void InitializeServiceRegistry()
     {
         ServiceRegistry = new ServiceRegistry();
-        if (IsDebug())
-            Debug.Log("ServiceRegistry created");
+        LogCustom("ServiceRegistry created");
     }
 
     private void InitializeStateMachine()
@@ -71,30 +81,37 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<SimpleEventBus, SimpleEventBus>();
         RegisterService<IGameSessionService, GameSessionService>();
 
-        List<PlanetConfig> planets = new List<PlanetConfig>();
-        foreach (StarSystemConfig config in starSystems)
-            planets.AddRange(config.PlanetRefs);
-        ServiceRegistry.Register<IConfigService>(new ConfigService(
-                    gameConfig,
-                    debugConfig,
-                    saveConfig,
-                    galaxyConfig,
-                    newGameConfig,
-                    // sectors,
-                    // starSystems,
-                    // planets,
-                    items,
-                    ships,
-                    enemies,
-                    allies,
-                    allySpawnRuleConfigs,
-                    pirates,
-                    pirateGroupSpawnRules,
-                    modules,
-                    weapons));
-        if (IsDebug())
-            Debug.Log("ConfigService registered");
+        RegisterService<IConfigService>(
+            new ConfigService(
+                gameConfig,
+                debugConfig,
+                saveConfig,
+                galaxyConfig,
+                newGameConfig,
+                playerControlConfig,
+                shipMovementConfig,
+                systemCameraConfig,
+                targetingConfig,
+                interactionConfig,
+                systemHudConfig,
+                systemVisualConfig,
+                items,
+                ships,
+                enemies,
+                allies,
+                allySpawnRuleConfigs,
+                pirates,
+                pirateGroupSpawnRules,
+                modules,
+                weapons));
 
+        RegisterService<IShipStatsService, ShipStatsService>();
+        RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
+        RegisterService<ITargetService2A, TargetService2A>();
+        RegisterService<ISystemBoundsService, SystemBoundsService2A>();
+        _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
+        _shipMovementService = RegisterService<IShipMovementService, ShipMovementService2A>();
+        RegisterService<IPlayerShipSaveSyncService, PlayerShipSaveSyncService2A>();
         RegisterService<ISystemContextService, SystemContextService>();
         RegisterService<ISceneService, SceneService>();
         RegisterService<IInventoryService, InventoryService>();
@@ -107,12 +124,15 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IRefuelService, RefuelService>();
         RegisterService<IGalaxyDiscoveryService, GalaxyDiscoveryService>();
         RegisterService<IRouteService, RouteService>();
+        RegisterService<IOrbitalMotionService, OrbitalMotionService>();
+        RegisterService<IHangarService, HangarService>();
+        RegisterService<ISystemTravelService, SystemTravelService>();
         RegisterService<ITravelService, TravelService2A>();
+        _interactionService = RegisterService<IInteractionService2A, InteractionService2A>();
         RegisterService<IRepairService, RepairService>();
         RegisterService<IRewardService, RewardService>();
         RegisterService<IPlanetMissionOfferStateService, PlanetMissionOfferStateService>();
         RegisterService<IPlanetMissionOfferGenerator, PlanetMissionOfferGenerator>();
-        RegisterService<IOrbitalMotionService, OrbitalMotionService>();
         RegisterService<IGovernmentRewardPayoutService, DebugGovernmentRewardPayoutService>();
         RegisterService<IGovernmentRewardService, GovernmentRewardService>();
         RegisterService<ISystemNpcRuntimeService, SystemNpcRuntimeService>();
@@ -121,8 +141,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<ISystemNpcBehaviorService, SystemNpcBehaviorService>();
         RegisterService<IGalaxyNpcBehaviorService, GalaxyNpcBehaviorService>();
         RegisterService<ISystemNpcSimulationSaveService, SystemNpcSimulationSaveService>();
-        // _saveService = RegisterService<ISaveService, SaveService>();
-        _saveService = RegisterService<ISaveService, SaveService2>();
+        _saveService = RegisterService<ISaveService, SaveService2A>();
         RegisterService<IPlayerCombatTargetService, PlayerCombatTargetService>();
         RegisterService<ISystemNpcMovementRouteService, SystemNpcMovementRouteService>();
         RegisterService<ISystemNpcMovementService, SystemNpcMovementService>();
@@ -135,20 +154,43 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IMissionService, MissionService>();
         RegisterService<IMissionTracker, MissionTracker>();
         RegisterService<IPlanetGovernmentMissionService, PlanetGovernmentMissionService>();
-        RegisterService<IHangarService, HangarService>();
-        RegisterService<ISystemTravelService, SystemTravelService>();
+
+        _tickService = RegisterService<ITickService, TickService>();
         _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();
+        _tickService.Register(_gameTimeService, TickOrder.GameTime);
+        _tickService.Register(_playerControlService, TickOrder.PlayerControl);
+        _tickService.Register(_shipMovementService, TickOrder.ShipMovement);
+        _tickService.Register(_interactionService, TickOrder.Interaction);
+        RegisterService<IGameTimePauseScopeService, GameTimePauseScopeService>();
     }
 
-    private TInterface RegisterService<TInterface, TImplementation>()
-            where TImplementation : TInterface, new()
+    /// <summary>
+    /// Создаёт сервис через пустой конструктор
+    /// и передаёт его в регистрацию готового экземпляра.
+    /// </summary>
+    private TInterface RegisterService<
+        TInterface,
+        TImplementation>()
+        where TImplementation : TInterface, new()
     {
-        var service = new TImplementation();
+        TImplementation service =
+            new TImplementation();
 
+        return RegisterService<TInterface>(service);
+    }
+
+    /// <summary>
+    /// Регистрирует уже созданный экземпляр сервиса.
+    ///
+    /// Используется, когда объект создан заранее
+    /// или требует параметров конструктора.
+    /// </summary>
+    private TInterface RegisterService<TInterface>(
+        TInterface service)
+    {
         ServiceRegistry.Register<TInterface>(service);
 
-        if (IsDebug())
-            Debug.Log($"{typeof(TImplementation).Name} registered");
+        LogCustom($"{service.GetType().Name} registered " + $"as {typeof(TInterface).Name}");
 
         return service;
     }
@@ -160,10 +202,10 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void Update()
     {
-        float deltaTime = Time.deltaTime;
+        // float deltaTime = Time.deltaTime;
 
-        // _saveService?.Tick(deltaTime);
-        _gameTimeService?.Tick(deltaTime);
+        // _gameTimeService?.Tick(deltaTime);
+        _tickService?.Tick(Time.deltaTime);
     }
 
     private void OnApplicationPause(bool pause)

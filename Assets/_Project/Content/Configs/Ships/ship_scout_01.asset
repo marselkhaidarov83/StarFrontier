@@ -20,7 +20,7 @@ MonoBehaviour:
   baseShield: 70
   baseEnergy: 100
   baseEnergyRegen: 12
-  baseSpeed: 80
+  baseSpeed: 200
   baseAcceleration: 8.5
   baseTurnRate: 140
   baseCargoCapacity: 30

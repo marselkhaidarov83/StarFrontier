@@ -21,3 +21,6 @@ MonoBehaviour:
   IsLockedAtStart: 1
   RequiredScanLevel: 0
   ParsecDistance: 60
+  fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 5ec2d6d63ae7345c794181df4e904efa, type: 2}
+  toSystemRouteEndpointConfig: {fileID: 11400000, guid: 5f9d40e74826d4c389d3299b1e3317a5, type: 2}
+  galaxyMapCurveStrength: -0.25

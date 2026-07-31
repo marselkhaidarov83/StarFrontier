@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d81ffced8174445f59daa3f83a82381c, type: 3}
+  m_Name: targetingConfig_01
+  m_EditorClassIdentifier: Data::TargetingConfig
+  maxTargetDistance: 6
+  tapSelectRadiusWorld: 0.75
+  autoSelectRadiusWorld: 3.5
+  preferInteractableTargets: 1
+  allowPlanets: 1
+  allowStations: 1
+  allowTravelPoints: 1
+  allowEnemies: 0
+  markerWorldScale: 1
+  markerPulseSpeed: 2.5
+  unavailableTargetAlpha: 0.35

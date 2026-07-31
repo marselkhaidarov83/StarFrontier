@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s02_system_ember_watch_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_ember_watch_01
+  id: s02_system_ember_watch_02
   displayName: "\u0423\u0433\u043E\u043B\u044C\u043D\u044B\u0439 \u0414\u043E\u0437\u043E\u0440"
   description: "\u0423\u0433\u043E\u043B\u044C\u043D\u044B\u0439 \u0414\u043E\u0437\u043E\u0440"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   economyType: 0
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 26e3c1fb11c1c4de184356737a496a16, type: 2}
+  - {fileID: 11400000, guid: a646b0971940b4fd7913063dd63eecde, type: 2}
+  - {fileID: 11400000, guid: 6e1aa69224728406fa1c8c662ef9b62b, type: 2}
+  - {fileID: 11400000, guid: caa16a4597ccb4a4dbb73dc2d224129d, type: 2}
+  - {fileID: 11400000, guid: b94422a0344e84ae781be9e8e6cc9995, type: 2}
+  - {fileID: 11400000, guid: 3fc5c772bb3c44b979eee2d8d78cc554, type: 2}
+  - {fileID: 11400000, guid: 9a9df7fd7858e4ae9b0a572d67d688e8, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: fa762db6a87814477af7a564fc083f1f, type: 2}
     parsecDistance: 16
@@ -39,6 +46,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: d84612a48158b4f66ace4057071df29d, type: 2}
   missionTags: 020000000500000001000000
   mapPosition: {x: 2.3, y: -4.6}
   systemPopulation: {fileID: 0}

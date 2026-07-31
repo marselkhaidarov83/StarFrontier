@@ -41,6 +41,24 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: SystemBackground
+    uniqueID: 2415189023
+    locked: 0
+  - name: SystemFarFX
+    uniqueID: 4088957149
+    locked: 0
+  - name: SystemObjects
+    uniqueID: 2879284783
+    locked: 0
+  - name: SystemShipFX
+    uniqueID: 1258504597
+    locked: 0
+  - name: SystemForegroundFX
+    uniqueID: 671584715
+    locked: 0
+  - name: SystemUI
+    uniqueID: 3780450625
+    locked: 0
   m_RenderingLayers:
   - Default
   - Light Layer 1

@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="84" result="Passed" total="84" passed="84" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.615666">
+  <test-suite type="TestSuite" id="1112" name="STAR FRONTIER" fullname="STAR FRONTIER" runstate="Runnable" testcasecount="84" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.615666" total="84" passed="84" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1096" name="StarFrontier.Sprint1Verification.EditMode.dll" fullname="/Users/marselhaidarov/StarFrontier/Library/ScriptAssemblies/StarFrontier.Sprint1Verification.EditMode.dll" runstate="Runnable" testcasecount="83" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.598978" total="83" passed="83" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="61108" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1097" name="StarFrontier" fullname="StarFrontier" runstate="Runnable" testcasecount="83" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.597497" total="83" passed="83" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1098" name="Tests" fullname="StarFrontier.Tests" runstate="Runnable" testcasecount="83" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.596320" total="83" passed="83" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1099" name="Sprint1" fullname="StarFrontier.Tests.Sprint1" runstate="Runnable" testcasecount="83" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.594921" total="83" passed="83" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1002" name="ConfigAndStateCurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.057468" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1004" name="EmptyAndDuplicateIds_AreSkippedWithDiagnostics" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests.EmptyAndDuplicateIds_AreSkippedWithDiagnostics" methodname="EmptyAndDuplicateIds_AreSkippedWithDiagnostics" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" seed="369677955" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.029983" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[ConfigService: duplicate ItemConfig Id 'same' was skipped.
+ConfigService: ItemConfig with empty Id was skipped.
+]]></output>
+              </test-case>
+              <test-case id="1006" name="GameRuntimeState_JsonRoundTripPreservesCoreValues" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests.GameRuntimeState_JsonRoundTripPreservesCoreValues" methodname="GameRuntimeState_JsonRoundTripPreservesCoreValues" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" seed="999300125" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001009" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="Lookup_TrimsIdAndUsesOrdinalComparison" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests.Lookup_TrimsIdAndUsesOrdinalComparison" methodname="Lookup_TrimsIdAndUsesOrdinalComparison" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" seed="2023371734" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000893" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1008" name="Migration_RecreatesNullNestedBlocks" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests.Migration_RecreatesNullNestedBlocks" methodname="Migration_RecreatesNullNestedBlocks" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" seed="720628827" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001140" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1009" name="PersistentRoot_DoesNotEmbedSessionRuntimeStateTypes" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests.PersistentRoot_DoesNotEmbedSessionRuntimeStateTypes" methodname="PersistentRoot_DoesNotEmbedSessionRuntimeStateTypes" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" seed="1257670775" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001613" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1007" name="PersistentStateGraph_HasNoUnityObjectReferences" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests.PersistentStateGraph_HasNoUnityObjectReferences" methodname="PersistentStateGraph_HasNoUnityObjectReferences" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" seed="417544928" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001882" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1005" name="ReturnedCollections_DoNotExposeMutableBackingLists" fullname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests.ReturnedCollections_DoNotExposeMutableBackingLists" methodname="ReturnedCollections_DoNotExposeMutableBackingLists" classname="StarFrontier.Tests.Sprint1.ConfigAndStateCurrentEditModeTests" runstate="Runnable" seed="1970434917" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000763" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1010" name="DiagnosticsSecurityCurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.158969" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1011" name="CriticalServices_UseCentralLoggingFacade" fullname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests.CriticalServices_UseCentralLoggingFacade" methodname="CriticalServices_UseCentralLoggingFacade" classname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests" runstate="Runnable" seed="244766199" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.004551" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1014" name="DeveloperTools_AreGuardedForNonReleaseBuilds" fullname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests.DeveloperTools_AreGuardedForNonReleaseBuilds" methodname="DeveloperTools_AreGuardedForNonReleaseBuilds" classname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests" runstate="Runnable" seed="764985859" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.005271" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="DiagnosticReportContract_Exists" fullname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests.DiagnosticReportContract_Exists" methodname="DiagnosticReportContract_Exists" classname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests" runstate="Runnable" seed="1945830994" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.138351" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="SaveImplementation_DoesNotLogSerializedState" fullname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests.SaveImplementation_DoesNotLogSerializedState" methodname="SaveImplementation_DoesNotLogSerializedState" classname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests" runstate="Runnable" seed="998356728" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000658" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1012" name="SaveWrite_UsesTempAndAtomicReplacement" fullname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests.SaveWrite_UsesTempAndAtomicReplacement" methodname="SaveWrite_UsesTempAndAtomicReplacement" classname="StarFrontier.Tests.Sprint1.DiagnosticsSecurityCurrentEditModeTests" runstate="Runnable" seed="1181398983" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.003769" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1016" name="SaveMigrationCurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.015233" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1023" name="JsonWithoutNewFields_MigratesToCurrentVersion" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests.JsonWithoutNewFields_MigratesToCurrentVersion" methodname="JsonWithoutNewFields_MigratesToCurrentVersion" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" seed="2030099219" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.002388" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1020" name="Migrate_InvalidDirection_UsesUp" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests.Migrate_InvalidDirection_UsesUp" methodname="Migrate_InvalidDirection_UsesUp" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" seed="27683286" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000222" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1019" name="Migrate_NormalizesShipDirection" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests.Migrate_NormalizesShipDirection" methodname="Migrate_NormalizesShipDirection" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" seed="1388461578" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001123" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1021" name="Migrate_NullNestedBlocks_RecreatesAllRequiredRoots" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests.Migrate_NullNestedBlocks_RecreatesAllRequiredRoots" methodname="Migrate_NullNestedBlocks_RecreatesAllRequiredRoots" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" seed="162228859" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000681" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1017" name="Migrate_OldSave_AddsCurrentDataVersion" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests.Migrate_OldSave_AddsCurrentDataVersion" methodname="Migrate_OldSave_AddsCurrentDataVersion" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" seed="1314830378" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000166" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1018" name="Migrate_OldSave_AddsDefaultShipDirection" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests.Migrate_OldSave_AddsDefaultShipDirection" methodname="Migrate_OldSave_AddsDefaultShipDirection" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" seed="810450566" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000209" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1022" name="Migrate_PlayerShipState_RecreatesOwnedShipsList" fullname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests.Migrate_PlayerShipState_RecreatesOwnedShipsList" methodname="Migrate_PlayerShipState_RecreatesOwnedShipsList" classname="StarFrontier.Tests.Sprint1.SaveMigrationCurrentEditModeTests" runstate="Runnable" seed="1063404621" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000223" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1024" name="SavePipelineStagesCurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.012396" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1031" name="Integrity_MissingChecksum_IsReportedSeparately" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.Integrity_MissingChecksum_IsReportedSeparately" methodname="Integrity_MissingChecksum_IsReportedSeparately" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="666141393" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000552" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1029" name="Integrity_StampedState_VerifiesAsValid" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.Integrity_StampedState_VerifiesAsValid" methodname="Integrity_StampedState_VerifiesAsValid" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="1291095863" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000718" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1032" name="Integrity_StampWithoutState_Throws" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.Integrity_StampWithoutState_Throws" methodname="Integrity_StampWithoutState_Throws" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="1233547957" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001679" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1030" name="Integrity_TamperedState_IsRejectedAndChecksumIsPreserved" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.Integrity_TamperedState_IsRejectedAndChecksumIsPreserved" methodname="Integrity_TamperedState_IsRejectedAndChecksumIsPreserved" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="690623545" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000423" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1027" name="ValidateAndNormalize_InvalidPlayerRanges_AreClamped" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.ValidateAndNormalize_InvalidPlayerRanges_AreClamped" methodname="ValidateAndNormalize_InvalidPlayerRanges_AreClamped" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="457360307" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000481" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1028" name="ValidateAndNormalize_NullMarkets_AreRecreated" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.ValidateAndNormalize_NullMarkets_AreRecreated" methodname="ValidateAndNormalize_NullMarkets_AreRecreated" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="333777999" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000257" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1026" name="ValidateVersion_FutureVersion_IsRejectedWithoutMutation" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.ValidateVersion_FutureVersion_IsRejectedWithoutMutation" methodname="ValidateVersion_FutureVersion_IsRejectedWithoutMutation" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="159855251" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000261" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1025" name="ValidateVersion_NullState_IsRejected" fullname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests.ValidateVersion_NullState_IsRejected" methodname="ValidateVersion_NullState_IsRejected" classname="StarFrontier.Tests.Sprint1.SavePipelineStagesCurrentEditModeTests" runstate="Runnable" seed="1032900577" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000812" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1033" name="SaveService2ACurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.067545" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1039" name="AutosaveTick_WritesCurrentSession" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.AutosaveTick_WritesCurrentSession" methodname="AutosaveTick_WritesCurrentSession" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="1432438757" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.006053" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-8b9b3a2f353a48e5b426bfae2dd437aa.json
+[SaveService] Periodic autosave completed.
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-8b9b3a2f353a48e5b426bfae2dd437aa.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1037" name="BothCorruptFiles_ReturnNull" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.BothCorruptFiles_ReturnNull" methodname="BothCorruptFiles_ReturnNull" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="1893877023" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.007931" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Failed to load from /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-2930af680f464d3794c535ce4358e31a.json: JSON parse error: Invalid value.
+[SaveService] Main save failed. Trying backup.
+[SaveService] Failed to load from /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-2930af680f464d3794c535ce4358e31a.backup.json: JSON parse error: Invalid value.
+[SaveService] No valid save found.
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-2930af680f464d3794c535ce4358e31a.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-2930af680f464d3794c535ce4358e31a.backup.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1040" name="DeleteSave_RemovesMainAndBackup" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.DeleteSave_RemovesMainAndBackup" methodname="DeleteSave_RemovesMainAndBackup" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="80456208" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.007792" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-42ca3f4096184ccebf69aa426addc87d.json
+[SaveService] Backup created: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-42ca3f4096184ccebf69aa426addc87d.backup.json
+[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-42ca3f4096184ccebf69aa426addc87d.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-42ca3f4096184ccebf69aa426addc87d.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-42ca3f4096184ccebf69aa426addc87d.backup.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1035" name="Save_PublishesExactlyOneEvent" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.Save_PublishesExactlyOneEvent" methodname="Save_PublishesExactlyOneEvent" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="571879454" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.003945" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-14aed2632dd2495e86b382a6a5181de7.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-14aed2632dd2495e86b382a6a5181de7.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1041" name="Save_WritesCurrentSchemaVersion" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.Save_WritesCurrentSchemaVersion" methodname="Save_WritesCurrentSchemaVersion" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="113282629" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.003949" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-91f5f617275348aba466cac7ce90aa31.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-91f5f617275348aba466cac7ce90aa31.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1042" name="Save_WritesIntegrityChecksum" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.Save_WritesIntegrityChecksum" methodname="Save_WritesIntegrityChecksum" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="1493973598" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.004727" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-95a10da583d74199921335c31e9431e3.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-95a10da583d74199921335c31e9431e3.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1034" name="SaveAndLoad_RoundTripCoreValues" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.SaveAndLoad_RoundTripCoreValues" methodname="SaveAndLoad_RoundTripCoreValues" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="1776758145" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.003893" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-e7b1dd1bdfd3498eb3750863634e3dd5.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-e7b1dd1bdfd3498eb3750863634e3dd5.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1038" name="SaveNull_DoesNotCreateFile" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.SaveNull_DoesNotCreateFile" methodname="SaveNull_DoesNotCreateFile" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="2141408398" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001913" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Save skipped: GameState is null.
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1036" name="SecondSave_CreatesBackupRecoverableAfterMainCorruption" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.SecondSave_CreatesBackupRecoverableAfterMainCorruption" methodname="SecondSave_CreatesBackupRecoverableAfterMainCorruption" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="1984516275" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.010557" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-9b594f15fa6d42e28f695ded93492d76.json
+[SaveService] Backup created: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-9b594f15fa6d42e28f695ded93492d76.backup.json
+[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-9b594f15fa6d42e28f695ded93492d76.json
+[SaveService] Failed to load from /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-9b594f15fa6d42e28f695ded93492d76.json: JSON parse error: Missing a name for object member.
+[SaveService] Main save failed. Trying backup.
+[SaveService] Backup save loaded.
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-9b594f15fa6d42e28f695ded93492d76.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-9b594f15fa6d42e28f695ded93492d76.backup.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1043" name="TamperedMainSave_FallsBackToValidBackup" fullname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests.TamperedMainSave_FallsBackToValidBackup" methodname="TamperedMainSave_FallsBackToValidBackup" classname="StarFrontier.Tests.Sprint1.SaveService2ACurrentEditModeTests" runstate="Runnable" seed="813929695" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.010576" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-cc702de7536b466ca7b7eea09cd0f3a1.json
+[SaveService] Backup created: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-cc702de7536b466ca7b7eea09cd0f3a1.backup.json
+[SaveService] Game saved to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-cc702de7536b466ca7b7eea09cd0f3a1.json
+[SaveService] Save integrity verification failed: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-cc702de7536b466ca7b7eea09cd0f3a1.json
+[SaveService] Main save failed. Trying backup.
+[SaveService] Backup save loaded.
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-cc702de7536b466ca7b7eea09cd0f3a1.json
+[SaveService] Deleted file: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/sf-s1-cc702de7536b466ca7b7eea09cd0f3a1.backup.json
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1044" name="SceneConfigurationEditModeTests" fullname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests" classname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.210796" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1046" name="BuildSettings_ContainsEnabledBootstrapLoadingAndSystemRoles" fullname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests.BuildSettings_ContainsEnabledBootstrapLoadingAndSystemRoles" methodname="BuildSettings_ContainsEnabledBootstrapLoadingAndSystemRoles" classname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests" runstate="Runnable" seed="1490845482" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001269" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1045" name="BuildSettings_FirstEnabledScene_IsBootstrap" fullname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests.BuildSettings_FirstEnabledScene_IsBootstrap" methodname="BuildSettings_FirstEnabledScene_IsBootstrap" classname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests" runstate="Runnable" seed="281586437" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000611" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1048" name="CanonicalSceneFiles_ExistAtConfiguredPaths" fullname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests.CanonicalSceneFiles_ExistAtConfiguredPaths" methodname="CanonicalSceneFiles_ExistAtConfiguredPaths" classname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests" runstate="Runnable" seed="1330264774" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001022" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="ProductionCode_DoesNotBypassSceneService" fullname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests.ProductionCode_DoesNotBypassSceneService" methodname="ProductionCode_DoesNotBypassSceneService" classname="StarFrontier.Tests.Sprint1.SceneConfigurationEditModeTests" runstate="Runnable" seed="2110208737" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.201551" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1049" name="SceneFlowContractCurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.013348" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1053" name="BootstrapFlow_ReferencesLoadingBeforeGameplay" fullname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests.BootstrapFlow_ReferencesLoadingBeforeGameplay" methodname="BootstrapFlow_ReferencesLoadingBeforeGameplay" classname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests" runstate="Runnable" seed="1282089026" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000550" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1054" name="LoadingScene_ContainsUiRootAndCanvas" fullname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests.LoadingScene_ContainsUiRootAndCanvas" methodname="LoadingScene_ContainsUiRootAndCanvas" classname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests" runstate="Runnable" seed="2067778767" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001321" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1052" name="SceneService_ExposesCancellationContract" fullname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests.SceneService_ExposesCancellationContract" methodname="SceneService_ExposesCancellationContract" classname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests" runstate="Runnable" seed="728888274" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000698" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1051" name="SceneService_ExposesExplicitLoadingTransition" fullname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests.SceneService_ExposesExplicitLoadingTransition" methodname="SceneService_ExposesExplicitLoadingTransition" classname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests" runstate="Runnable" seed="1959920042" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000300" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1050" name="SceneService_InvalidScene_RaisesFailureAndDoesNotStartOperation" fullname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests.SceneService_InvalidScene_RaisesFailureAndDoesNotStartOperation" methodname="SceneService_InvalidScene_RaisesFailureAndDoesNotStartOperation" classname="StarFrontier.Tests.Sprint1.SceneFlowContractCurrentEditModeTests" runstate="Runnable" seed="2077970004" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001125" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Scene load failed: . Scene name is empty.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1055" name="ServiceRegistryEditModeTests" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.011233" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1060" name="Get_MissingService_ThrowsWithServiceTypeInMessage" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests.Get_MissingService_ThrowsWithServiceTypeInMessage" methodname="Get_MissingService_ThrowsWithServiceTypeInMessage" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" seed="1989903650" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000891" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1058" name="Register_DuplicateType_ThrowsAndKeepsOriginalInstance" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests.Register_DuplicateType_ThrowsAndKeepsOriginalInstance" methodname="Register_DuplicateType_ThrowsAndKeepsOriginalInstance" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" seed="177018495" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000475" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1059" name="Register_Null_ThrowsAndDoesNotRegisterType" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests.Register_Null_ThrowsAndDoesNotRegisterType" methodname="Register_Null_ThrowsAndDoesNotRegisterType" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" seed="2109305474" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000454" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1056" name="RegisterConcrete_Get_ReturnsTheSameInstance" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests.RegisterConcrete_Get_ReturnsTheSameInstance" methodname="RegisterConcrete_Get_ReturnsTheSameInstance" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" seed="1465532153" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000246" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1057" name="RegisterInterface_Get_ReturnsTheSameInstance" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests.RegisterInterface_Get_ReturnsTheSameInstance" methodname="RegisterInterface_Get_ReturnsTheSameInstance" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" seed="476485894" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000217" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1062" name="RegistrationByInterface_DoesNotCreateAmbiguousConcreteAlias" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests.RegistrationByInterface_DoesNotCreateAmbiguousConcreteAlias" methodname="RegistrationByInterface_DoesNotCreateAmbiguousConcreteAlias" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" seed="205703862" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000267" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1061" name="TryGet_MissingService_ReturnsFalseAndDefault" fullname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests.TryGet_MissingService_ReturnsFalseAndDefault" methodname="TryGet_MissingService_ReturnsFalseAndDefault" classname="StarFrontier.Tests.Sprint1.ServiceRegistryEditModeTests" runstate="Runnable" seed="1139631730" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000248" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1063" name="SimpleEventBusEditModeTests" fullname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" classname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.013083" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1066" name="Clear_RemovesAllEventTypes" fullname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests.Clear_RemovesAllEventTypes" methodname="Clear_RemovesAllEventTypes" classname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" runstate="Runnable" seed="853258305" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.002679" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SimpleEventBus] Cleared all listeners
+[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1068" name="HandlerAddsSubscriber_NewSubscriberStartsOnNextPublish" fullname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests.HandlerAddsSubscriber_NewSubscriberStartsOnNextPublish" methodname="HandlerAddsSubscriber_NewSubscriberStartsOnNextPublish" classname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" runstate="Runnable" seed="1177138785" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001306" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1067" name="HandlerUnsubscribesItself_DoesNotBreakCurrentPublish_AndIsAbsentNextTime" fullname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests.HandlerUnsubscribesItself_DoesNotBreakCurrentPublish_AndIsAbsentNextTime" methodname="HandlerUnsubscribesItself_DoesNotBreakCurrentPublish_AndIsAbsentNextTime" classname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" runstate="Runnable" seed="1219403423" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.002212" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1069" name="PublishWithoutSubscribers_DoesNotThrow" fullname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests.PublishWithoutSubscribers_DoesNotThrow" methodname="PublishWithoutSubscribers_DoesNotThrow" classname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" runstate="Runnable" seed="251063609" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000915" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1064" name="SubscribeThenPublish_InvokesHandlerOnceWithPayload" fullname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests.SubscribeThenPublish_InvokesHandlerOnceWithPayload" methodname="SubscribeThenPublish_InvokesHandlerOnceWithPayload" classname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" runstate="Runnable" seed="822081553" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000970" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+              <test-case id="1065" name="Unsubscribe_RemovesOnlySpecifiedHandler" fullname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests.Unsubscribe_RemovesOnlySpecifiedHandler" methodname="Unsubscribe_RemovesOnlySpecifiedHandler" classname="StarFrontier.Tests.Sprint1.SimpleEventBusEditModeTests" runstate="Runnable" seed="1820515678" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000990" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[SimpleEventBus] Cleared all listeners
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1070" name="Sprint1CoreArchitectureCurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.015669" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1072" name="Bootstrapper_HasSingleRegistryAndTickOwner" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests.Bootstrapper_HasSingleRegistryAndTickOwner" methodname="Bootstrapper_HasSingleRegistryAndTickOwner" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" seed="175099581" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000924" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1077" name="DiagnosticsFoundation_HasLoggerHudAndReleaseGate" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests.DiagnosticsFoundation_HasLoggerHudAndReleaseGate" methodname="DiagnosticsFoundation_HasLoggerHudAndReleaseGate" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" seed="200954838" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.005631" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1074" name="GameRuntimeState_IsSerializableAndRoundTrips" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests.GameRuntimeState_IsSerializableAndRoundTrips" methodname="GameRuntimeState_IsSerializableAndRoundTrips" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" seed="1543504866" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000425" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1075" name="SavePipeline_HasMigrationValidationIntegrityAndAtomicStages" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests.SavePipeline_HasMigrationValidationIntegrityAndAtomicStages" methodname="SavePipeline_HasMigrationValidationIntegrityAndAtomicStages" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" seed="1310389083" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.002238" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1076" name="SceneService_HasAsyncCompletionAndFailureContract" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests.SceneService_HasAsyncCompletionAndFailureContract" methodname="SceneService_HasAsyncCompletionAndFailureContract" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" seed="783104597" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000489" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1073" name="Services_ArePureCSharpObjects" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests.Services_ArePureCSharpObjects" methodname="Services_ArePureCSharpObjects" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" seed="1444521682" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000301" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1071" name="TickInfrastructure_HasRequiredContract" fullname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests.TickInfrastructure_HasRequiredContract" methodname="TickInfrastructure_HasRequiredContract" classname="StarFrontier.Tests.Sprint1.Sprint1CoreArchitectureCurrentEditModeTests" runstate="Runnable" seed="1881266470" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001114" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1078" name="TickServiceCurrentEditModeTests" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" testcasecount="17" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.014195" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1091" name="Clear_RemovesAllTickables" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.Clear_RemovesAllTickables" methodname="Clear_RemovesAllTickables" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="1647336596" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000538" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1092" name="ClearDuringTick_PreventsLaterInvocationAndRestoresState" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.ClearDuringTick_PreventsLaterInvocationAndRestoresState" methodname="ClearDuringTick_PreventsLaterInvocationAndRestoresState" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="1212920354" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000456" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1085" name="ContainsNull_ReturnsFalse" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.ContainsNull_ReturnsFalse" methodname="ContainsNull_ReturnsFalse" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="1459720801" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000225" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1095" name="GameTimeServiceInterface_IsTickable" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.GameTimeServiceInterface_IsTickable" methodname="GameTimeServiceInterface_IsTickable" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="1128553001" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000157" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1094" name="RecursiveTick_ThrowsAndRestoresState" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.RecursiveTick_ThrowsAndRestoresState" methodname="RecursiveTick_ThrowsAndRestoresState" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="2054191231" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000409" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1079" name="RegisterAndTick_PassesDeltaTime" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.RegisterAndTick_PassesDeltaTime" methodname="RegisterAndTick_PassesDeltaTime" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="132848014" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000337" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1088" name="RegisterDuringTick_StartsOnNextTick" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.RegisterDuringTick_StartsOnNextTick" methodname="RegisterDuringTick_StartsOnNextTick" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="1729921598" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000387" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1084" name="RegisterNull_ThrowsArgumentNullException" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.RegisterNull_ThrowsArgumentNullException" methodname="RegisterNull_ThrowsArgumentNullException" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="919903516" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000370" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1083" name="RegisterSameInstance_ThrowsAndKeepsOriginalRegistration" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.RegisterSameInstance_ThrowsAndKeepsOriginalRegistration" methodname="RegisterSameInstance_ThrowsAndKeepsOriginalRegistration" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="356465555" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000411" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1081" name="Tick_UsesOrderAndStableRegistrationOrder" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.Tick_UsesOrderAndStableRegistrationOrder" methodname="Tick_UsesOrderAndStableRegistrationOrder" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="1656367263" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001201" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1093" name="Tick_WithInvalidDeltaTime_ThrowsWithoutEnteringTick" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.Tick_WithInvalidDeltaTime_ThrowsWithoutEnteringTick" methodname="Tick_WithInvalidDeltaTime_ThrowsWithoutEnteringTick" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="297340521" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000504" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1080" name="Tick_WithZeroDeltaTime_IsAllowed" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.Tick_WithZeroDeltaTime_IsAllowed" methodname="Tick_WithZeroDeltaTime_IsAllowed" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="1840272820" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000234" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1082" name="TickOrder_HasExpectedServiceSequence" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.TickOrder_HasExpectedServiceSequence" methodname="TickOrder_HasExpectedServiceSequence" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="2076930262" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000491" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1087" name="Unregister_PreventsFurtherTicks" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.Unregister_PreventsFurtherTicks" methodname="Unregister_PreventsFurtherTicks" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="140513671" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000506" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1090" name="UnregisterAndRegisterSameInstanceDuringTick_StartsOnNextTick" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.UnregisterAndRegisterSameInstanceDuringTick_StartsOnNextTick" methodname="UnregisterAndRegisterSameInstanceDuringTick_StartsOnNextTick" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="968351794" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000403" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1089" name="UnregisterDuringTick_PreventsLaterInvocation" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.UnregisterDuringTick_PreventsLaterInvocation" methodname="UnregisterDuringTick_PreventsLaterInvocation" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="56448461" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000348" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1086" name="UnregisterNull_ReturnsFalse" fullname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests.UnregisterNull_ReturnsFalse" methodname="UnregisterNull_ReturnsFalse" classname="StarFrontier.Tests.Sprint1.TickServiceCurrentEditModeTests" runstate="Runnable" seed="493487516" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000156" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1102" name="Unity.Addressables.DocExampleCode.Editor.Tests.dll" fullname="/Users/marselhaidarov/StarFrontier/Library/ScriptAssemblies/Unity.Addressables.DocExampleCode.Editor.Tests.dll" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.004653" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="61108" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1103" name="AddressableAssets" fullname="AddressableAssets" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001863" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1104" name="DocExampleCode" fullname="AddressableAssets.DocExampleCode" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001454" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1100" name="TestStub" fullname="AddressableAssets.DocExampleCode.TestStub" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.001042" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1101" name="RequiredTest" fullname="AddressableAssets.DocExampleCode.TestStub.RequiredTest" methodname="RequiredTest" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" seed="1634703660" result="Passed" start-time="2026-07-23 13:39:55Z" end-time="2026-07-23 13:39:55Z" duration="0.000132" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/marselhaidarov/Library/Application Support/KhaidarovMarselMansurovitch/STAR FRONTIER/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

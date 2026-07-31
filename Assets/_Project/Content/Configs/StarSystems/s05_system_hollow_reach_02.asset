@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s05_system_hollow_reach_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_hollow_reach_01
+  id: s05_system_hollow_reach_02
   displayName: "\u041F\u0443\u0441\u0442\u043E\u0439 \u041F\u0440\u0435\u0434\u0435\u043B"
   description: "\u041F\u0443\u0441\u0442\u043E\u0439 \u041F\u0440\u0435\u0434\u0435\u043B"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   economyType: 0
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 87f7c2ef1cc7b467d9aa29635905245c, type: 2}
+  - {fileID: 11400000, guid: a63bf0ff05e5c42e59d25ab844ea3db2, type: 2}
+  - {fileID: 11400000, guid: 316762a21554a4a098efedf0616a5922, type: 2}
+  - {fileID: 11400000, guid: f17e63850047440acbd01df996d481d4, type: 2}
+  - {fileID: 11400000, guid: 80127fab4414046e68b4ea6c2bd5e1de, type: 2}
+  - {fileID: 11400000, guid: bbc0309380e824af68cfa4a842ddb0e0, type: 2}
+  - {fileID: 11400000, guid: 22ba8ec99d96744feada3f1a5191bdc6, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 0}
     parsecDistance: 0
@@ -33,6 +40,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 4c706061bda8346fb9288321823f250b, type: 2}
   missionTags: 010000000800000005000000
   mapPosition: {x: -0.2, y: -1}
   systemPopulation: {fileID: 0}

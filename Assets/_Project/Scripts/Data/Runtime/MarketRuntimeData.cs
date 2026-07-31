@@ -6,5 +6,5 @@ public class MarketRuntimeData
 {
     public string SystemId;
     public string PlanetId;
-    public List<MarketItemEntry> Items = new();
+    public List<MarketRuntimeItemState> Items = new();
 }

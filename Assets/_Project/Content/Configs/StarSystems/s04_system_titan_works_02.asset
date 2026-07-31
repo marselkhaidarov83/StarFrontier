@@ -12,14 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s04_system_titan_works_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_titan_works_01
+  id: s04_system_titan_works_02
   displayName: "\u0417\u0430\u0432\u043E\u0434\u044B \u0422\u0438\u0442\u0430\u043D\u0430"
   description: "\u0417\u0430\u0432\u043E\u0434\u044B \u0422\u0438\u0442\u0430\u043D\u0430"
   icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
   economyType: 6
   dangerLevel: 3
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 728f52a286cc94de5bca06116005b9f7, type: 2}
+  - {fileID: 11400000, guid: 7214118e2a26f4579861b1c978cabff9, type: 2}
+  - {fileID: 11400000, guid: 5541797b3a94c4844b3a30acb866bb3a, type: 2}
+  - {fileID: 11400000, guid: b3bd245d24e4441938280ab1cca586c6, type: 2}
+  - {fileID: 11400000, guid: 9c94786ee9c01417a919993aaf19eb37, type: 2}
+  - {fileID: 11400000, guid: b6960a619849d4e1388b63502f8d8fad, type: 2}
   linkedSystems:
   - linkedSystem: {fileID: 11400000, guid: 864c4b08379da496ebba2539b781a403, type: 2}
     parsecDistance: 12
@@ -33,6 +39,7 @@ MonoBehaviour:
     entryPoint: {x: 0, y: 0, z: 0}
     sprite: {fileID: 0}
     size: 0
+  station: {fileID: 11400000, guid: 017dbe252fa58472c82c016ecd248081, type: 2}
   missionTags: 060000000800000002000000
   mapPosition: {x: 4.5, y: -2.4}
   systemPopulation: {fileID: 0}

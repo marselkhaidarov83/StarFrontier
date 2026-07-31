@@ -16,8 +16,10 @@ MonoBehaviour:
   displayName: 
   description: 
   icon: {fileID: 0}
-  FromSystem: {fileID: 11400000, guid: 62af30f5944844c98952ea679f0f09c5, type: 2}
-  ToSystem: {fileID: 11400000, guid: 7eafd7e24f19a4a8f9ebb6735b817d37, type: 2}
+  FromSystem: {fileID: 11400000, guid: ab00de60929914d07a992bcfdfd33a46, type: 2}
+  ToSystem: {fileID: 11400000, guid: 0e4b4fe37f14f4bc8b5bf9c70d97a66e, type: 2}
   IsLockedAtStart: 0
   RequiredScanLevel: 0
   ParsecDistance: 50
+  fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 0151f07f5379e4083976794ff0104537, type: 2}
+  toSystemRouteEndpointConfig: {fileID: 11400000, guid: 6a99de532018547dc9929c7af2fc997c, type: 2}

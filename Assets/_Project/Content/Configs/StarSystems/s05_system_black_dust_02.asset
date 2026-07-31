@@ -12,15 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
   m_Name: s05_system_black_dust_02
   m_EditorClassIdentifier: Data::StarSystemConfig
-  id: system_black_dust_01
+  id: s05_system_black_dust_02
   displayName: "\u0427\u0435\u0440\u043D\u0430\u044F \u041F\u044B\u043B\u044C"
   description: "\u0427\u0435\u0440\u043D\u0430\u044F \u041F\u044B\u043B\u044C"
   icon: {fileID: 21300000, guid: 7d79f9528604e46a7940cfd11135984f, type: 3}
   economyType: 6
   dangerLevel: 4
-  sun: {fileID: 11400000, guid: 38962041b0e8343a0993f8c16533f58c, type: 2}
-  planetRefs: []
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 616515b2ddc9f45b1ab3a91865bb777e, type: 2}
+  - {fileID: 11400000, guid: 6508c018be13243e58949dd98bd64a66, type: 2}
+  - {fileID: 11400000, guid: feeb621856d6c4c748ab5da92155df1a, type: 2}
+  - {fileID: 11400000, guid: e6dd29e90105e4182b5666950948863f, type: 2}
+  - {fileID: 11400000, guid: 8e5a91dd7bb6842138240975c0476cfa, type: 2}
+  - {fileID: 11400000, guid: e038a22616d6e4e3f87b13aa15bc93cc, type: 2}
+  - {fileID: 11400000, guid: d7024fe2c75ba43a2b31e6388d40b5dd, type: 2}
   linkedSystems: []
+  station: {fileID: 11400000, guid: 846a9ad53822c4b92be58e9c435b6c15, type: 2}
   missionTags: 080000000500000001000000
   mapPosition: {x: -4.5, y: -1}
   systemPopulation: {fileID: 0}
