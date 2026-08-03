@@ -23,8 +23,8 @@ using Object = UnityEngine.Object;
 [TestFixture]
 public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
 {
-    private const string ExpectedBranch = "stage-2a-sprint-3-2026.06.24";
-    private const string ExpectedSha = "97228829de726ea3908fd58deaf0d50d903e4232";
+    private const string ExpectedBranch = "main";
+    private const string ExpectedSha = "b57d223341446b6a79da1ee486ff6508174b3a73";
     private const string ExpectedUnityVersion = "6000.3.11f1";
     private const string SystemScenePath = "Assets/_Project/Scenes/SystemScene.unity";
     private const string ValidationReportPath =

@@ -1,0 +1,731 @@
+{
+  "updated": "2026-08-03",
+  "sprintId": "2A-S04",
+  "title": "Полноценная боевая система",
+  "status": "READY_TO_START",
+  "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+  "tasksTotal": 40,
+  "substageCount": 5,
+  "tasks": [
+    {
+      "id": "2A-S04-01-T01",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Зафиксировать канонический runtime боя: SystemScene или отдельная CombatScene.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-01-T02",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Провести аудит существующих боевых сервисов: encounter, enemy, ally, NPC combat, player attack.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-01-T03",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Убрать или явно пометить debug-only боевые пути, которые не должны попасть в production.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-01-T04",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Зафиксировать ownership боевых root-объектов: enemies, allies, projectiles, VFX.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-01-T05",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Проверить регистрацию всех боевых сервисов в Bootstrap/ServiceRegistry.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-01-T06",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Зафиксировать contract событий боя: start, damage, projectile, destroyed, victory, defeat, reward.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-01-T07",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Проверить, что бой не ломает Sprint 3 управление, камеру, HUD, fuel и targeting.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-01-T08",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-01",
+      "substageTitle": "Канонизация боевой архитектуры и сцены",
+      "title": "Добавить smoke-test: сцена открывается, сервисы боя доступны, ошибок нет.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T01",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Привязать enemy spawn к реальной системе/маршрутам, а не только к debug system id.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T02",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Проверить и стабилизировать EnemyConfig: hull, shield, energy, speed, weapon, rewards.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T03",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Проверить и стабилизировать EnemyGroupSpawnRuleConfig.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T04",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Реализовать production-условия старта encounter.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T05",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Реализовать корректное появление врагов на System Map.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T06",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Реализовать/проверить союзников в encounter, если они входят в Sprint 4.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T07",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Закрыть победу: все враги уничтожены, encounter переходит в reward pending.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-02-T08",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-02",
+      "substageTitle": "Враги, союзники и encounter lifecycle",
+      "title": "Закрыть поражение: игрок уничтожен, улетел, или оставил союзников без поддержки.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T01",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Проверить WeaponConfig: damage, range, cooldown, fireRate, projectile speed/lifetime.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T02",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Зафиксировать единый путь атаки игрока: target selected -> weapon fires -> projectile/hit -> damage.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T03",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Зафиксировать единый путь атаки врага/NPC.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T04",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Проверить shield-before-hull damage для игрока, врагов и союзников.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T05",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Проверить уничтожение врага и публикацию события destroyed.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T06",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Проверить уничтожение игрока и defeat event.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T07",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Стабилизировать projectile visuals: spawn, movement, hit, cleanup.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-03-T08",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-03",
+      "substageTitle": "Оружие, снаряды, урон",
+      "title": "Добавить tests на cooldown, range, invalid target, dead target, no weapon.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T01",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Интегрировать боевое targeting-поведение с Sprint 3 target marker.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T02",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Показывать выбранную цель, hull/shield врага и состояние боя.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T03",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Показывать hull/shield игрока в HUD без конфликта с Sprint 3 HUD.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T04",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Добавить понятный CTA для атаки/выбора цели/сброса цели.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T05",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Показывать victory pending reward.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T06",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Реализовать claim reward через существующий GovernmentRewardService.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T07",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Показать defeat state и безопасный выход из него.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-04-T08",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-04",
+      "substageTitle": "Боевой UI, targeting и награды",
+      "title": "Проверить touch targets и Safe Area на Android.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T01",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Проверить capture/restore encounter state.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T02",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Проверить сохранение enemies/allies hull, shield, position, alive/dead.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T03",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Проверить восстановление pending reward после reload.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T04",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Проверить, что resolved encounter не воскресает после reload.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T05",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Добавить Sprint 4 verification suite.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T06",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Добавить validator для scene bindings боя.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T07",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Провести regression Sprint 1-3 после включения боя.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    },
+    {
+      "id": "2A-S04-05-T08",
+      "sprintId": "2A-S04",
+      "substageId": "2A-S04-05",
+      "substageTitle": "Save/Load, QA gate и Android",
+      "title": "Собрать Android build и пройти player-facing UA.",
+      "status": "NOT_STARTED",
+      "canonicalStatus": "NOT_STARTED",
+      "uaStatus": "NOT_RECORDED",
+      "base": "main @ b57d223341446b6a79da1ee486ff6508174b3a73",
+      "evidenceRequired": [
+        "changed source files",
+        "Unity scene/prefab bindings",
+        "EditMode or validation tests",
+        "manual player-facing check",
+        "Android evidence for final gate"
+      ]
+    }
+  ]
+}

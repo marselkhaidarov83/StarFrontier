@@ -8865,7 +8865,7 @@ MonoBehaviour:
   mapHeight: 4000
   minZoom: 30
   maxZoom: 2000
-  touchZoomSpeed: 1000
+  touchZoomSpeed: 75
   mouseZoomSpeed: 1000
   zoomSmoothTime: 0.005
 --- !u!114 &757877085

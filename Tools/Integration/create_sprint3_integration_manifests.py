@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-STAR FRONTIER — generator of Sprint 3 controlled-integration manifests.
+STAR FRONTIER — legacy generator of Sprint 3 controlled-integration manifests.
 
 Place this file at:
 Tools/Integration/create_sprint3_integration_manifests.py
@@ -8,8 +8,9 @@ Tools/Integration/create_sprint3_integration_manifests.py
 Run from the project root:
 python3 Tools/Integration/create_sprint3_integration_manifests.py
 
-The script does NOT merge, delete, checkout, or classify files automatically.
-It only captures exact Git refs, creates an inventory, and prepares manifest templates.
+Historical note: Sprint 1-3 are CANONICAL_COMPLETE in main @ b57d223341446b6a79da1ee486ff6508174b3a73.
+The script is preserved only for audit of the old pre-merge integration flow.
+It does NOT merge, delete, checkout, or classify files automatically.
 """
 
 from __future__ import annotations
@@ -144,7 +145,7 @@ def write_manifest(
     decision = (
         "HOLD — требуется явное решение владельца"
         if package.package_id == "M-08"
-        else "PREPARED_NOT_INTEGRATED"
+        else "PREPARED_PRE_MERGE_PACKAGE"
     )
 
     path.write_text(
@@ -152,7 +153,7 @@ def write_manifest(
 
 ## 1. Статус
 - Package status: `{decision}`
-- Канонический статус: `NOT_INTEGRATED`
+- Канонический статус: `SUPERSEDED_BY_MAIN_CANONICAL_COMPLETE`
 - Source branch: `{SOURCE_BRANCH}`
 - Source SHA: `{source_sha}`
 - Base branch: `{MAIN_BRANCH}`
@@ -301,7 +302,7 @@ def main() -> None:
 ## Важное ограничение
 Этот порядок готовит integration-ветку. Он не разрешает автоматически OPEN-M04,
 OPEN-M08 или выбор production-графики и не меняет статусы SF_03.
-Merge в `main` является отдельной задачей 2A-S03-05-T20.
+Merge в `main` уже выполнен: Sprint 3 вошёл в main через merge PR #5 b57d223341446b6a79da1ee486ff6508174b3a73.
 """,
         encoding="utf-8",
     )
