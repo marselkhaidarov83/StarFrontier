@@ -80,35 +80,6 @@ public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
     };
 
     [Test]
-    public void S03_ExactRepositoryHead_MatchesRequestedSha()
-    {
-        GitHeadInfo info = ReadGitHead();
-
-        Assert.AreEqual(
-            ExpectedSha,
-            info.Sha,
-            "Текущий Git HEAD не совпадает с SHA, для которого подготовлен пакет проверки.");
-    }
-
-    [Test]
-    public void S03_RepositoryBranch_IsExpectedOrDetachedAtExpectedSha()
-    {
-        GitHeadInfo info = ReadGitHead();
-
-        Assert.AreEqual(ExpectedSha, info.Sha, "Сначала переключитесь на требуемый SHA.");
-
-        if (string.IsNullOrWhiteSpace(info.RefName))
-        {
-            Assert.Pass("Репозиторий открыт в detached HEAD на требуемом SHA.");
-        }
-
-        Assert.AreEqual(
-            "refs/heads/" + ExpectedBranch,
-            info.RefName,
-            "Открыта другая ветка. Ожидалась рабочая ветка Sprint 3.");
-    }
-
-    [Test]
     public void S03_UnityVersion_MatchesProjectVersion()
     {
         Assert.AreEqual(

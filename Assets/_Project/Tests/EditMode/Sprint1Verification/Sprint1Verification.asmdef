@@ -1,12 +1,11 @@
 {
-    "name": "Sprint3Verification",
+    "name": "Sprint1Verification",
     "rootNamespace": "",
     "references": [
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
         "Core",
         "Data",
-        "Presentation"
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [
         "Editor"

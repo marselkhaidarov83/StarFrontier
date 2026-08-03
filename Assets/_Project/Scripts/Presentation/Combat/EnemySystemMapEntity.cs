@@ -28,7 +28,7 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         _movementController = GetComponent<EnemySystemMovementController>();
-        _playerWeaponFireController = FindObjectOfType<WeaponFireController>();
+        _playerWeaponFireController = Object.FindFirstObjectByType<WeaponFireController>();
     }
 
     private void Update()
@@ -95,7 +95,7 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
         }
 
         if (_playerWeaponFireController == null)
-            _playerWeaponFireController = FindObjectOfType<WeaponFireController>();
+            _playerWeaponFireController = Object.FindFirstObjectByType<WeaponFireController>();
 
         if (_playerWeaponFireController == null)
         {

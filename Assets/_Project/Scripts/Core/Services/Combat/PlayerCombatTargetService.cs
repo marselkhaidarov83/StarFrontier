@@ -104,9 +104,22 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             activeShip.CurrentHull
         ));
 
+        _eventBus.Publish(new CombatDamageEvent2A(
+            "player",
+            true,
+            damage,
+            activeShip.CurrentShield,
+            activeShip.CurrentHull));
+
         if (activeShip.CurrentHull <= 0)
         {
             _eventBus.Publish(new PlayerShipDestroyedByNpcEvent());
+
+            _eventBus.Publish(new CombatTargetDestroyedEvent2A(
+                string.Empty,
+                _gameSessionService.State.Player.CurrentSystemId,
+                "player",
+                "npc"));
 
             Debug.Log("[PlayerCombatTargetService] Player ship destroyed by NPC.");
         }

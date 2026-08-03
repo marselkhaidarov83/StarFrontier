@@ -3,12 +3,13 @@
   <Project Path="Data.csproj" />
   <Project Path="Presentation.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
-  <Project Path="Sprint2Verification1.csproj" />
+  <Project Path="Sprint3Verification.csproj" />
   <Project Path="Tools.csproj" />
-  <Project Path="StarFrontier.Sprint1Verification.EditMode.csproj" />
+  <Project Path="Sprint1Verification.csproj" />
   <Project Path="Sprint3Validation.csproj" />
   <Project Path="Sprint2Verification.csproj" />
   <Project Path="Audit.csproj" />
+  <Project Path="Sprint4Verification.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
-  <Project Path="StarFrontier.SystemScene.EditModeTests.csproj" />
+  <Project Path="SystemScene.csproj" />
 </Solution>

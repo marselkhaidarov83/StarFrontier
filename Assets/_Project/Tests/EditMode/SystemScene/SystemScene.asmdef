@@ -1,12 +1,10 @@
 {
-    "name": "Sprint3Verification",
-    "rootNamespace": "",
+    "name": "SystemScene",
+    "rootNamespace": "StarFrontier.Tests.SystemScene",
     "references": [
+        "Presentation",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
-        "Core",
-        "Data",
-        "Presentation"
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [
         "Editor"

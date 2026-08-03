@@ -245,6 +245,15 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             weaponConfig.ProjectileSpeed
         ));
 
+        _eventBus.Publish(new CombatProjectileCreatedEvent2A(
+            projectile.ProjectileId,
+            projectile.SystemId,
+            projectile.ShooterNpcId,
+            projectile.TargetNpcId,
+            projectile.WeaponConfigId,
+            projectile.StartPosition,
+            projectile.LastKnownTargetPosition));
+
         LogCustom(
             $"[SystemNpcCombatService] Projectile created. " +
             $"Projectile: {projectile.ProjectileId}, Shooter: {shooter.RuntimeNpcId}, " +
@@ -368,6 +377,14 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             hitPosition,
             didHit
         ));
+
+        _eventBus.Publish(new CombatProjectileImpactEvent2A(
+            projectile.ProjectileId,
+            projectile.SystemId,
+            projectile.TargetNpcId,
+            projectile.Damage,
+            hitPosition,
+            didHit));
 
         LogCustom(
             $"[SystemNpcCombatService] Projectile resolved. " +
@@ -623,6 +640,15 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             projectile.LastKnownTargetPosition,
             weaponConfig.ProjectileSpeed
         ));
+
+        _eventBus.Publish(new CombatProjectileCreatedEvent2A(
+            projectile.ProjectileId,
+            projectile.SystemId,
+            "player",
+            projectile.TargetNpcId,
+            projectile.WeaponConfigId,
+            projectile.StartPosition,
+            projectile.LastKnownTargetPosition));
 
         LogCustom(
             "[SystemNpcCombatService] Player projectile created. " +

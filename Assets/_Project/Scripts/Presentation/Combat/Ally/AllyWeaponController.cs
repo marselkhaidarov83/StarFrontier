@@ -50,7 +50,9 @@ using UnityEngine;
 
         private EnemySystemMapEntity FindNearestEnemyView()
         {
-            EnemySystemMapEntity[] enemies = FindObjectsOfType<EnemySystemMapEntity>();
+            EnemySystemMapEntity[] enemies =
+                Object.FindObjectsByType<EnemySystemMapEntity>(
+                    FindObjectsSortMode.None);
 
             EnemySystemMapEntity best = null;
             float bestDistance = float.MaxValue;
