@@ -8,6 +8,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     private readonly IOrbitalMotionService _orbitalMotionService;
     private readonly IGameSessionService _gameSessionService;
     private readonly IConfigService _configService;
+
     private float randomPosition = 200f;
 
     public SystemPopulationRuntimeState RuntimeState { get; } = new();
@@ -15,15 +16,27 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     public SystemNpcPopulationService()
     {
         _debugStop = true;
-        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _npcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
-        _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
+
+        _gameSessionService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+
+        _configService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+
+        _npcRuntimeService =
+            Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
+
+        _orbitalMotionService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
     }
 
     public void Tick(StarSystemConfig starSystem, float deltaTime)
     {
-        SystemPopulationConfig config = starSystem.SystemPopulation;
+        if (starSystem == null)
+            return;
+
+        SystemPopulationConfig config =
+            starSystem.SystemPopulation;
 
         if (config == null)
             return;
@@ -40,64 +53,132 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         RuntimeState.Clear();
     }
 
-    private void TickAllies(StarSystemConfig starSystem, float deltaTime)
+    private void TickAllies(
+        StarSystemConfig starSystem,
+        float deltaTime)
     {
-        //TODO: Надо сделать, чтобы в захваченной системе не создавались союзники
+        SystemPopulationConfig config =
+            starSystem.SystemPopulation;
 
-        SystemPopulationConfig config = starSystem.SystemPopulation;
+        if (config == null)
+            return;
+
+        if (config.AllySpawnRules == null)
+            return;
+
         foreach (AllySpawnRuleConfig rule in config.AllySpawnRules)
         {
-            if (rule == null || rule.AllyConfig == null)
+            if (rule == null)
                 continue;
 
-            int aliveCount = CountAliveAlliesForRule(starSystem.Id, rule);
+            if (!rule.HasValidAllies())
+                continue;
 
-            if (aliveCount < rule.MinCount)
+            if (rule.Allies == null)
+                continue;
+
+            for (int i = 0; i < rule.Allies.Count; i++)
             {
-                int missing = rule.MinCount - aliveCount;
+                AllyGroupEntryConfig entry =
+                    rule.Allies[i];
 
-                for (int i = 0; i < missing; i++)
-                    CreateAlly(starSystem, rule);
+                if (entry == null)
+                    continue;
 
-                continue;
+                if (!entry.IsValid())
+                    continue;
+
+                AllyConfig allyConfig =
+                    entry.AllyConfig;
+
+                if (allyConfig == null)
+                    continue;
+
+                int aliveCount =
+                    CountAliveAlliesForRule(
+                        starSystem.Id,
+                        rule,
+                        allyConfig);
+
+                if (aliveCount < entry.MinCount)
+                {
+                    int missing =
+                        entry.MinCount - aliveCount;
+
+                    for (int c = 0; c < missing; c++)
+                    {
+                        CreateAlly(
+                            starSystem,
+                            rule,
+                            allyConfig);
+                    }
+
+                    continue;
+                }
+
+                if (aliveCount >= entry.MaxCount)
+                    continue;
+
+                string timerKey =
+                    BuildAllyTimerKey(
+                        rule,
+                        allyConfig);
+
+                SystemPopulationRuleTimerState timer =
+                    RuntimeState.GetOrCreateTimer(
+                        starSystem.Id,
+                        timerKey);
+
+                timer.TimerSeconds += deltaTime;
+
+                if (timer.TimerSeconds < rule.SpawnIntervalSeconds)
+                    continue;
+
+                timer.TimerSeconds = 0f;
+
+                CreateAlly(
+                    starSystem,
+                    rule,
+                    allyConfig);
             }
-
-            if (aliveCount >= rule.MaxCount)
-                continue;
-
-            SystemPopulationRuleTimerState timer =
-                RuntimeState.GetOrCreateTimer(starSystem.Id, rule.Id);
-
-            timer.TimerSeconds += deltaTime;
-
-            if (timer.TimerSeconds < rule.SpawnIntervalSeconds)
-                continue;
-
-            timer.TimerSeconds = 0f;
-
-            CreateAlly(starSystem, rule);
         }
     }
 
-    private void TickEnemyGroups(StarSystemConfig starSystem, float deltaTime)
+    private void TickEnemyGroups(
+        StarSystemConfig starSystem,
+        float deltaTime)
     {
-        //TODO: Надо сделать, чтобы в захваченной системе создалось максимум врагов к имеющейся группе
+        SystemPopulationConfig config =
+            starSystem.SystemPopulation;
 
-        SystemPopulationConfig config = starSystem.SystemPopulation;
+        if (config == null)
+            return;
+
+        if (config.EnemyGroupSpawnRules == null)
+            return;
+
         foreach (EnemyGroupSpawnRuleConfig rule in config.EnemyGroupSpawnRules)
         {
             if (rule == null)
                 continue;
 
-            int aliveGroupCount = _npcRuntimeService
-                .GetAliveEnemyGroupsByRule(starSystem.Id, rule.Id)
-                .Count;
+            if (!rule.HasValidEnemies())
+                continue;
+
+            int aliveGroupCount =
+                _npcRuntimeService
+                    .GetAliveEnemyGroupsByRule(
+                        starSystem.Id,
+                        rule.Id)
+                    .Count;
 
             if (aliveGroupCount >= rule.MaxAliveGroupsFromThisRule)
                 continue;
 
             SystemPopulationRuleTimerState timer =
-                RuntimeState.GetOrCreateTimer(starSystem.Id, rule.Id);
+                RuntimeState.GetOrCreateTimer(
+                    starSystem.Id,
+                    rule.Id);
 
             timer.TimerSeconds += deltaTime;
 
@@ -106,44 +187,83 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
             timer.TimerSeconds = 0f;
 
-            CreateEnemyGroup(starSystem, rule);
+            CreateEnemyGroup(
+                starSystem,
+                rule);
         }
     }
 
-    private int CountAliveAlliesForRule(string systemId, AllySpawnRuleConfig rule)
+    private int CountAliveAlliesForRule(
+        string systemId,
+        AllySpawnRuleConfig rule,
+        AllyConfig allyConfig)
     {
-        return _npcRuntimeService
-            .GetAliveNpcsBySpawnRule(
+        if (rule == null)
+            return 0;
+
+        if (allyConfig == null)
+            return 0;
+
+        var aliveAllies =
+            _npcRuntimeService.GetAliveNpcsBySpawnRule(
                 systemId,
                 rule.Id,
-                SystemNpcType.Ally)
-            .Count;
+                SystemNpcType.Ally);
+
+        int count = 0;
+
+        for (int i = 0; i < aliveAllies.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                aliveAllies[i];
+
+            if (npc == null)
+                continue;
+
+            if (npc.ConfigId != allyConfig.Id)
+                continue;
+
+            count++;
+        }
+
+        return count;
     }
 
-    private void CreateAlly(StarSystemConfig starSystem, AllySpawnRuleConfig rule)
+    private void CreateAlly(
+        StarSystemConfig starSystem,
+        AllySpawnRuleConfig rule,
+        AllyConfig allyConfig)
     {
-        SystemPopulationConfig config = starSystem.SystemPopulation;
+        if (starSystem == null)
+            return;
 
-        PlanetConfig[] inhabitedPlanets = starSystem.PlanetRefs
-            .Where(p => p.IsInhabited)
-            .ToArray();
+        if (rule == null)
+            return;
 
-        PlanetConfig randomPlanet = inhabitedPlanets.Length > 0
-            ? inhabitedPlanets[UnityEngine.Random.Range(0, inhabitedPlanets.Length)]
-            : null;
+        if (allyConfig == null)
+            return;
 
-        SystemNpcRuntimeState ally = SystemNpcRuntimeFactory.CreateAlly(
-            rule.AllyConfig,
-            starSystem.Id,
-            starSystem.Id,
-            randomPlanet.Id,
-            _orbitalMotionService.GetPlanetCurrentPosition(randomPlanet.PlanetOrbit),
-            rule.Id
-        );
+        PlanetConfig randomPlanet =
+            PickRandomInhabitedPlanet(starSystem);
 
-        // ally.CurrentBehavior = SystemNpcBehaviorSelector.PickBehavior(
-        //     rule.BehaviorWeights
-        // );
+        string planetId =
+            randomPlanet != null
+                ? randomPlanet.Id
+                : string.Empty;
+
+        Vector3 position =
+            ResolveAllySpawnPosition(
+                starSystem,
+                randomPlanet);
+
+        SystemNpcRuntimeState ally =
+            SystemNpcRuntimeFactory.CreateAlly(
+                allyConfig,
+                starSystem.Id,
+                starSystem.Id,
+                planetId,
+                position,
+                rule.Id);
 
         ally.BehaviorStartedTick = 0;
         ally.CanChangeLocationOnRestore = true;
@@ -151,33 +271,50 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         _npcRuntimeService.AddNpc(ally);
 
         LogCustom(
-            $"[SystemPopulationService] Ally spawned. " +
-            $"System: {starSystem.Id}, Planet: {randomPlanet.Id}, Rule: {rule.Id}, Config: {rule.AllyConfig.Id}, Behavior: {ally.CurrentBehavior}"
-        );
+            "[SystemPopulationService] Ally spawned. " +
+            "System: " + starSystem.Id + ", " +
+            "Planet: " + planetId + ", " +
+            "Rule: " + rule.Id + ", " +
+            "Config: " + allyConfig.Id + ", " +
+            "Behavior: " + ally.CurrentBehavior);
     }
 
     private void CreateEnemyGroup(
         StarSystemConfig starSystem,
         EnemyGroupSpawnRuleConfig rule)
     {
-        SystemPopulationConfig config = starSystem.SystemPopulation;
-        string groupRuntimeId = Guid.NewGuid().ToString("N");
+        if (starSystem == null)
+            return;
+
+        if (rule == null)
+            return;
+
+        if (rule.Enemies == null)
+            return;
+
+        string groupRuntimeId =
+            Guid.NewGuid().ToString("N");
 
         foreach (EnemyGroupEntryConfig entry in rule.Enemies)
         {
-            if (entry == null || entry.EnemyConfig == null)
+            if (entry == null)
                 continue;
 
-            int count = UnityEngine.Random.Range(
-                entry.MinCount,
-                entry.MaxCount + 1
-            );
+            if (entry.EnemyConfig == null)
+                continue;
+
+            if (!entry.IsValid())
+                continue;
+
+            int count =
+                UnityEngine.Random.Range(
+                    entry.MinCount,
+                    entry.MaxCount + 1);
 
             for (int i = 0; i < count; i++)
             {
-                Vector3 position = rule.StartPosition;
-                position.x += (UnityEngine.Random.insideUnitCircle * randomPosition).x;
-                position.y += (UnityEngine.Random.insideUnitCircle * randomPosition).y;
+                Vector3 position =
+                    BuildEnemySpawnPosition(rule);
 
                 SystemNpcRuntimeState enemy =
                     SystemNpcRuntimeFactory.CreateEnemy(
@@ -186,74 +323,166 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                         starSystem.Id,
                         position,
                         rule.Id,
-                        groupRuntimeId
-                    );
+                        groupRuntimeId);
 
-                // enemy.CurrentBehavior = SystemNpcBehaviorType.EngageEnemies;
                 enemy.CanChangeLocationOnRestore = false;
 
                 _npcRuntimeService.AddNpc(enemy);
 
                 Debug.Log(
-                    $"[SystemPopulationService] Enemy spawned. " +
-                    $"System: {starSystem.Id}, GroupRule: {rule.Id}, Config: {entry.EnemyConfig.Id}, GroupRuntimeId: {groupRuntimeId}"
-                );
+                    "[SystemPopulationService] Enemy spawned. " +
+                    "System: " + starSystem.Id + ", " +
+                    "GroupRule: " + rule.Id + ", " +
+                    "Config: " + entry.EnemyConfig.Id + ", " +
+                    "GroupRuntimeId: " + groupRuntimeId);
             }
         }
     }
 
     public string CreatePirateGroup(PirateGroupSpawnRuleConfig rule)
     {
-        string groupRuntimeId = Guid.NewGuid().ToString("N");
+        string groupRuntimeId =
+            Guid.NewGuid().ToString("N");
+
+        if (rule == null)
+            return groupRuntimeId;
+
+        if (rule.Pirates == null)
+            return groupRuntimeId;
 
         foreach (PirateGroupEntryConfig entry in rule.Pirates)
         {
             if (entry == null || entry.PirateConfig == null)
                 continue;
 
-            int count = UnityEngine.Random.Range(
-                entry.MinCount,
-                entry.MaxCount + 1
-            );
+            int count =
+                UnityEngine.Random.Range(
+                    entry.MinCount,
+                    entry.MaxCount + 1);
 
             for (int i = 0; i < count; i++)
             {
-                // Vector3 position = rule.StartPosition;
-                // position.x += (UnityEngine.Random.insideUnitCircle * randomPosition).x;
-                // position.y += (UnityEngine.Random.insideUnitCircle * randomPosition).y;
+                string currentSystemId =
+                    _gameSessionService.State.Player.CurrentSystemId;
 
-                StarSystemConfig starSystem = _configService.GetStarSystemConfigById(
-                            _gameSessionService.State.Player.CurrentSystemId);
-                PlanetConfig[] inhabitedPlanets = starSystem.PlanetRefs
-                    .Where(p => p.IsInhabited)
-                    .ToArray();
+                StarSystemConfig starSystem =
+                    _configService.GetStarSystemConfigById(
+                        currentSystemId);
 
-                PlanetConfig randomPlanet = inhabitedPlanets.Length > 0
-                    ? inhabitedPlanets[UnityEngine.Random.Range(0, inhabitedPlanets.Length)]
-                    : null;
+                if (starSystem == null)
+                    continue;
+
+                PlanetConfig randomPlanet =
+                    PickRandomInhabitedPlanet(starSystem);
+
+                string planetId =
+                    randomPlanet != null
+                        ? randomPlanet.Id
+                        : string.Empty;
+
+                Vector3 position =
+                    ResolveAllySpawnPosition(
+                        starSystem,
+                        randomPlanet);
 
                 SystemNpcRuntimeState pirate =
                     SystemNpcRuntimeFactory.CreatePirate(
                         entry.PirateConfig,
-                        _gameSessionService.State.Player.CurrentSystemId,
-                        _gameSessionService.State.Player.CurrentSystemId,
-                        _orbitalMotionService.GetPlanetCurrentPosition(randomPlanet.PlanetOrbit),
+                        currentSystemId,
+                        currentSystemId,
+                        position,
                         rule.Id,
-                        groupRuntimeId
-                    );
+                        groupRuntimeId);
 
-                // enemy.CurrentBehavior = SystemNpcBehaviorType.EngageEnemies;
+                pirate.CurrentPlanetId = planetId;
                 pirate.CanChangeLocationOnRestore = false;
 
                 _npcRuntimeService.AddNpc(pirate);
 
                 Debug.Log(
-                    $"[SystemPopulationService] Enemy spawned. " +
-                    $"System: {_gameSessionService.State.Player.CurrentSystemId}, GroupRule: {rule.Id}, Config: {entry.PirateConfig.Id}, GroupRuntimeId: {groupRuntimeId}"
-                );
+                    "[SystemPopulationService] Pirate spawned. " +
+                    "System: " + currentSystemId + ", " +
+                    "GroupRule: " + rule.Id + ", " +
+                    "Config: " + entry.PirateConfig.Id + ", " +
+                    "GroupRuntimeId: " + groupRuntimeId);
             }
         }
 
         return groupRuntimeId;
+    }
+
+    private PlanetConfig PickRandomInhabitedPlanet(
+        StarSystemConfig starSystem)
+    {
+        if (starSystem == null)
+            return null;
+
+        if (starSystem.PlanetRefs == null ||
+            starSystem.PlanetRefs.Length == 0)
+            return null;
+
+        PlanetConfig[] inhabitedPlanets =
+            starSystem.PlanetRefs
+                .Where(p => p != null && p.IsInhabited)
+                .ToArray();
+
+        if (inhabitedPlanets.Length <= 0)
+            return null;
+
+        int index =
+            UnityEngine.Random.Range(
+                0,
+                inhabitedPlanets.Length);
+
+        return inhabitedPlanets[index];
+    }
+
+    private Vector3 ResolveAllySpawnPosition(
+        StarSystemConfig starSystem,
+        PlanetConfig planet)
+    {
+        if (planet != null && planet.PlanetOrbit != null)
+        {
+            return _orbitalMotionService.GetPlanetCurrentPosition(
+                planet.PlanetOrbit);
+        }
+
+        if (starSystem != null)
+            return starSystem.MapPosition;
+
+        return Vector3.zero;
+    }
+
+    private Vector3 BuildEnemySpawnPosition(
+        EnemyGroupSpawnRuleConfig rule)
+    {
+        Vector3 position =
+            rule.StartPosition;
+
+        Vector2 randomOffset =
+            UnityEngine.Random.insideUnitCircle * randomPosition;
+
+        position.x += randomOffset.x;
+        position.y += randomOffset.y;
+        position.z = 0f;
+
+        return position;
+    }
+
+    private string BuildAllyTimerKey(
+        AllySpawnRuleConfig rule,
+        AllyConfig allyConfig)
+    {
+        string ruleId =
+            rule != null
+                ? rule.Id
+                : "unknown_rule";
+
+        string allyConfigId =
+            allyConfig != null
+                ? allyConfig.Id
+                : "unknown_ally";
+
+        return ruleId + "_" + allyConfigId;
     }
 }

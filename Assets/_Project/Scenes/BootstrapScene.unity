@@ -467,24 +467,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a575e903ae9c049ce8ee0b371a8aae58, type: 2}
   - {fileID: 11400000, guid: 10b4aa44545c14ba4bdd3a265c3be226, type: 2}
   - {fileID: 11400000, guid: 12d8e96510e20460e8a1742b87ad82ab, type: 2}
-  starSystems: []
   ships:
   - {fileID: 11400000, guid: e7dbcdc25d859411990de39f023083bc, type: 2}
   - {fileID: 11400000, guid: 124aa3e84adcd4de9a71347b84f62060, type: 2}
   - {fileID: 11400000, guid: aedcb48ad00a14affb12ffb030f56466, type: 2}
   enemies:
-  - {fileID: 11400000, guid: be0e705b4443b4f0cb89672d320f93b3, type: 2}
-  - {fileID: 11400000, guid: 4e971613b8d374fc88ee80699439c7ca, type: 2}
-  - {fileID: 11400000, guid: 947c8b0e8dc52424792d00209dd3f658, type: 2}
-  - {fileID: 11400000, guid: e85167b6dde2e4e74959e42622c6485d, type: 2}
-  - {fileID: 11400000, guid: e23d093b6b66c4b99a8d53b21d83c631, type: 2}
-  - {fileID: 11400000, guid: 8080f071365524b73b9b6243902c6d49, type: 2}
+  - {fileID: 11400000, guid: b98da69312b834240899d15160d7d249, type: 2}
+  - {fileID: 11400000, guid: 0276abde60d2648faa4ec548a917da3f, type: 2}
+  - {fileID: 11400000, guid: 596a4ddf9720d47f1889f1f5eef286a5, type: 2}
   allies:
-  - {fileID: 11400000, guid: e024229b9939c4a90929c3bd2cfacf38, type: 2}
-  - {fileID: 11400000, guid: fc7630b3c87384b0bb595978611dfd1e, type: 2}
+  - {fileID: 11400000, guid: 4372aeeb6252447c497f23da605ffa9c, type: 2}
+  - {fileID: 11400000, guid: 4c699b1589cab44b1a9374a2a49b146c, type: 2}
+  - {fileID: 11400000, guid: 21483003f5f56435eb46015755eb030b, type: 2}
   allySpawnRuleConfigs:
-  - {fileID: 11400000, guid: e02b72856185f4c158d86e5ee1132a06, type: 2}
-  - {fileID: 11400000, guid: 6781b3754bd644144b8504423228a960, type: 2}
+  - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
   pirates:
   - {fileID: 11400000, guid: f21272adbb4464b118431f4637ba652d, type: 2}
   pirateGroupSpawnRules:
@@ -496,8 +492,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 25899fa0b12e949fa8939f4521f48058, type: 2}
   - {fileID: 11400000, guid: d28854f61639443fea152e7f6e154c4e, type: 2}
   weapons:
-  - {fileID: 11400000, guid: 106ae8e8b101b4c4abbb1fb21e0a6779, type: 2}
-  - {fileID: 11400000, guid: c7adcdc4429044cdeb0c491af8387737, type: 2}
+  - {fileID: 11400000, guid: f5cea52a8b15b4d16bd62a5894783a3d, type: 2}
+  - {fileID: 11400000, guid: 9b6b5d6c45b924d64849ee6fdab37afe, type: 2}
+  - {fileID: 11400000, guid: ee278b33cdbd046f4b9e1c3b55c2177e, type: 2}
+  - {fileID: 11400000, guid: 8cf9e180e45a5438ab266af96afedaf3, type: 2}
+  - {fileID: 11400000, guid: bff98b919fd254b7b9d7c7af4a4b5044, type: 2}
+  - {fileID: 11400000, guid: 493f721f0a931474aa306d82789daae4, type: 2}
+  - {fileID: 11400000, guid: bdb09595a90114190a5d97e45f237707, type: 2}
+  - {fileID: 11400000, guid: 7cd869a8f3c964d1791e8dc763665f8f, type: 2}
+  - {fileID: 11400000, guid: 70b010f525b01448ca7de2d6bf689e6d, type: 2}
+  - {fileID: 11400000, guid: fb9e32aad33484d68a22875ce15dc866, type: 2}
+  - {fileID: 11400000, guid: 05a373211c3044061a41e33243168a45, type: 2}
+  - {fileID: 11400000, guid: bb0581271b30147df882444aea900e7d, type: 2}
   items:
   - {fileID: 11400000, guid: a006717fb8e04459b994235b87140afa, type: 2}
   - {fileID: 11400000, guid: 03007b53fda4544a8ad4c6fcfeaa20a7, type: 2}

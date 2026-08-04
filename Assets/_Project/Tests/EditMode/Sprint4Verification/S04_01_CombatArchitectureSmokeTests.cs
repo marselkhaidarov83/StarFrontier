@@ -77,7 +77,7 @@ public sealed class S04_01_CombatArchitectureSmokeTests
             OpenSceneMode.Single);
 
         SystemSceneRoot2A root =
-            Object.FindObjectOfType<SystemSceneRoot2A>();
+            Object.FindFirstObjectByType<SystemSceneRoot2A>();
 
         Assert.NotNull(
             root,
