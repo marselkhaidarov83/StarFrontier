@@ -17,15 +17,15 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   allies:
-  - allyConfig: {fileID: 0}
-    minCount: 0
-    maxCount: 0
-  - allyConfig: {fileID: 0}
-    minCount: 0
-    maxCount: 0
-  - allyConfig: {fileID: 0}
-    minCount: 0
-    maxCount: 0
+  - allyConfig: {fileID: 11400000, guid: 4372aeeb6252447c497f23da605ffa9c, type: 2}
+    minCount: 1
+    maxCount: 3
+  - allyConfig: {fileID: 11400000, guid: 4c699b1589cab44b1a9374a2a49b146c, type: 2}
+    minCount: 1
+    maxCount: 3
+  - allyConfig: {fileID: 11400000, guid: 21483003f5f56435eb46015755eb030b, type: 2}
+    minCount: 1
+    maxCount: 3
   spawnIntervalSeconds: 15
   behaviorWeights:
   - behaviorType: 11

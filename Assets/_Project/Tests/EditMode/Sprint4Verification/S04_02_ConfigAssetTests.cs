@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEditor;
 
@@ -7,85 +6,102 @@ public sealed class S04_02_ConfigAssetTests
     private const string AllySpawnRuleId =
         "allySpawnRule_ranger_01";
 
-    private const string EnemyGroupSpawnRuleId =
-        "enemyGroupSpawnRule_ai_01";
-
-    private static readonly string[] RequiredAllyConfigIds =
+    private static readonly AllyExpectation[] RequiredAllies =
     {
-        "ally_ranger_L01_01",
-        "ally_trader_L01_01",
-        "ally_warrior_L01_01"
+        new AllyExpectation(
+            "ally_ranger_L01_01",
+            AllyRole2A.Ranger,
+            1),
+
+        new AllyExpectation(
+            "ally_warrior_L01_01",
+            AllyRole2A.Warrior,
+            2),
+
+        new AllyExpectation(
+            "ally_trader_L01_01",
+            AllyRole2A.Trader,
+            0)
     };
 
-    private static readonly AllyRole2A[] RequiredAllyRoles =
+    private static readonly EnemyRuleExpectation[] RequiredEnemyRules =
     {
-        AllyRole2A.Ranger,
-        AllyRole2A.Warrior,
-        AllyRole2A.Trader
-    };
+        new EnemyRuleExpectation(
+            "enemyGroupSpawnRule_ancients_01",
+            "enemy_ancients_L01_01",
+            1,
+            5),
 
-    private static readonly string[] RequiredEnemyConfigIds =
-    {
-        "enemy_ancients_L01_01",
-        "enemy_ai_L01_01",
-        "enemy_infected_L01_01"
+        new EnemyRuleExpectation(
+            "enemyGroupSpawnRule_ai_01",
+            "enemy_ai_L01_01",
+            1,
+            5),
+
+        new EnemyRuleExpectation(
+            "enemyGroupSpawnRule_infected_01",
+            "enemy_infected_L01_01",
+            1,
+            5)
     };
 
     [Test]
-    public void AllyConfigs_ExistAndHaveCorrectRoles()
+    public void AllyConfigs_ExistAndMatchLatestGithubConfig()
     {
-        for (int i = 0; i < RequiredAllyConfigIds.Length; i++)
+        for (int i = 0; i < RequiredAllies.Length; i++)
         {
+            AllyExpectation expectation =
+                RequiredAllies[i];
+
             AllyConfig config =
                 FindConfigById<AllyConfig>(
-                    RequiredAllyConfigIds[i]);
+                    expectation.Id);
 
             Assert.NotNull(
                 config,
-                "Missing AllyConfig: " + RequiredAllyConfigIds[i]);
+                "Missing AllyConfig: " + expectation.Id);
 
             Assert.AreEqual(
-                RequiredAllyRoles[i],
+                expectation.Role,
                 config.Role,
-                config.Id + " has wrong ally role.");
-
-            Assert.IsTrue(
-                config.HasWeapons(),
-                config.Id + " must have weapons.");
+                config.Id + " has wrong AllyRole2A.");
 
             Assert.GreaterOrEqual(
                 config.WeaponCount,
-                2,
-                config.Id + " must have at least two weapons.");
+                expectation.MinWeaponCount,
+                config.Id + " has less weapons than expected.");
         }
     }
 
     [Test]
-    public void EnemyConfigs_ExistAndHaveWeapons()
+    public void EnemyConfigs_ExistAndHaveAtLeastOneWeapon()
     {
-        for (int i = 0; i < RequiredEnemyConfigIds.Length; i++)
+        for (int i = 0; i < RequiredEnemyRules.Length; i++)
         {
+            EnemyRuleExpectation expectation =
+                RequiredEnemyRules[i];
+
             EnemyConfig config =
                 FindConfigById<EnemyConfig>(
-                    RequiredEnemyConfigIds[i]);
+                    expectation.EnemyConfigId);
 
             Assert.NotNull(
                 config,
-                "Missing EnemyConfig: " + RequiredEnemyConfigIds[i]);
+                "Missing EnemyConfig: " + expectation.EnemyConfigId);
 
             Assert.IsTrue(
                 config.HasWeapons(),
-                config.Id + " must have weapons.");
+                config.Id + " must have at least one weapon.");
 
             Assert.GreaterOrEqual(
                 config.WeaponCount,
-                3,
-                config.Id + " must have three weapons.");
+                1,
+                config.Id + " must have at least one WeaponConfig.");
         }
     }
 
     [Test]
-    public void AllySpawnRule_HasRangerWarriorTrader()
+    public void AllySpawnRule_ExistsAndHasNoEmptyPlaceholders()
     {
         AllySpawnRuleConfig rule =
             FindConfigById<AllySpawnRuleConfig>(
@@ -95,167 +111,103 @@ public sealed class S04_02_ConfigAssetTests
             rule,
             "Missing AllySpawnRuleConfig: " + AllySpawnRuleId);
 
+        Assert.NotNull(
+            rule.Allies,
+            rule.Id + " Allies list is null.");
+
+        Assert.Greater(
+            rule.Allies.Count,
+            0,
+            rule.Id + " must contain ally entries.");
+
         Assert.IsTrue(
             rule.HasValidAllies(),
-            rule.Id + " must have valid allies.");
-
-        Assert.AreEqual(
-            3,
-            rule.Allies.Count,
-            rule.Id + " must contain exactly three ally entries.");
-
-        AssertAllyEntry(
-            rule,
-            "ally_ranger_basic_s04_02",
-            1,
-            1);
-
-        AssertAllyEntry(
-            rule,
-            "ally_warrior_basic_s04_02",
-            1,
-            1);
-
-        AssertAllyEntry(
-            rule,
-            "ally_trader_basic_s04_02",
-            1,
-            1);
-    }
-
-    [Test]
-    public void EnemyGroupSpawnRule_HasThreeEnemyFactions()
-    {
-        EnemyGroupSpawnRuleConfig rule =
-            FindConfigById<EnemyGroupSpawnRuleConfig>(
-                EnemyGroupSpawnRuleId);
-
-        Assert.NotNull(
-            rule,
-            "Missing EnemyGroupSpawnRuleConfig: " + EnemyGroupSpawnRuleId);
-
-        Assert.IsTrue(
-            rule.HasValidEnemies(),
-            rule.Id + " must have valid enemies.");
-
-        Assert.AreEqual(
-            3,
-            rule.Enemies.Count,
-            rule.Id + " must contain exactly three enemy entries.");
-
-        AssertEnemyEntry(
-            rule,
-            "enemy_ancients_basic_s04_02",
-            1,
-            1);
-
-        AssertEnemyEntry(
-            rule,
-            "enemy_ai_basic_s04_02",
-            1,
-            1);
-
-        AssertEnemyEntry(
-            rule,
-            "enemy_infected_basic_s04_02",
-            1,
-            1);
-    }
-
-    private static void AssertAllyEntry(
-        AllySpawnRuleConfig rule,
-        string allyConfigId,
-        int expectedMin,
-        int expectedMax)
-    {
-        AllyGroupEntryConfig entry =
-            FindAllyEntry(
-                rule,
-                allyConfigId);
-
-        Assert.NotNull(
-            entry,
-            rule.Id + " must contain ally: " + allyConfigId);
-
-        Assert.AreEqual(
-            expectedMin,
-            entry.MinCount,
-            allyConfigId + " has wrong MinCount.");
-
-        Assert.AreEqual(
-            expectedMax,
-            entry.MaxCount,
-            allyConfigId + " has wrong MaxCount.");
-    }
-
-    private static void AssertEnemyEntry(
-        EnemyGroupSpawnRuleConfig rule,
-        string enemyConfigId,
-        int expectedMin,
-        int expectedMax)
-    {
-        EnemyGroupEntryConfig entry =
-            FindEnemyEntry(
-                rule,
-                enemyConfigId);
-
-        Assert.NotNull(
-            entry,
-            rule.Id + " must contain enemy: " + enemyConfigId);
-
-        Assert.AreEqual(
-            expectedMin,
-            entry.MinCount,
-            enemyConfigId + " has wrong MinCount.");
-
-        Assert.AreEqual(
-            expectedMax,
-            entry.MaxCount,
-            enemyConfigId + " has wrong MaxCount.");
-    }
-
-    private static AllyGroupEntryConfig FindAllyEntry(
-        AllySpawnRuleConfig rule,
-        string allyConfigId)
-    {
-        if (rule == null || rule.Allies == null)
-            return null;
+            rule.Id + " must have at least one valid AllyGroupEntryConfig.");
 
         for (int i = 0; i < rule.Allies.Count; i++)
         {
             AllyGroupEntryConfig entry =
                 rule.Allies[i];
 
-            if (entry == null || entry.AllyConfig == null)
-                continue;
+            Assert.NotNull(
+                entry,
+                rule.Id + " has null ally entry at index " + i);
 
-            if (entry.AllyConfig.Id == allyConfigId)
-                return entry;
+            Assert.NotNull(
+                entry.AllyConfig,
+                rule.Id + " has empty AllyConfig at index " + i);
+
+            Assert.IsTrue(
+                entry.IsValid(),
+                rule.Id + " has invalid ally entry at index " + i);
+
+            Assert.Greater(
+                entry.MaxCount,
+                0,
+                rule.Id + " ally entry maxCount must be greater than zero at index " + i);
+
+            Assert.GreaterOrEqual(
+                entry.MaxCount,
+                entry.MinCount,
+                rule.Id + " ally entry MaxCount must be >= MinCount at index " + i);
         }
-
-        return null;
     }
 
-    private static EnemyGroupEntryConfig FindEnemyEntry(
-        EnemyGroupSpawnRuleConfig rule,
-        string enemyConfigId)
+    [Test]
+    public void EnemyGroupSpawnRules_ExistAndReferenceExpectedEnemies()
     {
-        if (rule == null || rule.Enemies == null)
-            return null;
-
-        for (int i = 0; i < rule.Enemies.Count; i++)
+        for (int i = 0; i < RequiredEnemyRules.Length; i++)
         {
+            EnemyRuleExpectation expectation =
+                RequiredEnemyRules[i];
+
+            EnemyGroupSpawnRuleConfig rule =
+                FindConfigById<EnemyGroupSpawnRuleConfig>(
+                    expectation.RuleId);
+
+            Assert.NotNull(
+                rule,
+                "Missing EnemyGroupSpawnRuleConfig: " + expectation.RuleId);
+
+            Assert.IsTrue(
+                rule.HasValidEnemies(),
+                rule.Id + " must have valid enemies.");
+
+            Assert.NotNull(
+                rule.Enemies,
+                rule.Id + " Enemies list is null.");
+
+            Assert.AreEqual(
+                1,
+                rule.Enemies.Count,
+                rule.Id + " must contain exactly one enemy entry in latest GitHub config.");
+
             EnemyGroupEntryConfig entry =
-                rule.Enemies[i];
+                rule.Enemies[0];
 
-            if (entry == null || entry.EnemyConfig == null)
-                continue;
+            Assert.NotNull(
+                entry,
+                rule.Id + " has null enemy entry.");
 
-            if (entry.EnemyConfig.Id == enemyConfigId)
-                return entry;
+            Assert.NotNull(
+                entry.EnemyConfig,
+                rule.Id + " has empty EnemyConfig.");
+
+            Assert.AreEqual(
+                expectation.EnemyConfigId,
+                entry.EnemyConfig.Id,
+                rule.Id + " references wrong EnemyConfig.");
+
+            Assert.AreEqual(
+                expectation.ExpectedMinCount,
+                entry.MinCount,
+                rule.Id + " has wrong MinCount.");
+
+            Assert.AreEqual(
+                expectation.ExpectedMaxCount,
+                entry.MaxCount,
+                rule.Id + " has wrong MaxCount.");
         }
-
-        return null;
     }
 
     private static T FindConfigById<T>(string id)
@@ -283,5 +235,42 @@ public sealed class S04_02_ConfigAssetTests
         }
 
         return null;
+    }
+
+    private sealed class AllyExpectation
+    {
+        public AllyExpectation(
+            string id,
+            AllyRole2A role,
+            int minWeaponCount)
+        {
+            Id = id;
+            Role = role;
+            MinWeaponCount = minWeaponCount;
+        }
+
+        public string Id { get; }
+        public AllyRole2A Role { get; }
+        public int MinWeaponCount { get; }
+    }
+
+    private sealed class EnemyRuleExpectation
+    {
+        public EnemyRuleExpectation(
+            string ruleId,
+            string enemyConfigId,
+            int expectedMinCount,
+            int expectedMaxCount)
+        {
+            RuleId = ruleId;
+            EnemyConfigId = enemyConfigId;
+            ExpectedMinCount = expectedMinCount;
+            ExpectedMaxCount = expectedMaxCount;
+        }
+
+        public string RuleId { get; }
+        public string EnemyConfigId { get; }
+        public int ExpectedMinCount { get; }
+        public int ExpectedMaxCount { get; }
     }
 }

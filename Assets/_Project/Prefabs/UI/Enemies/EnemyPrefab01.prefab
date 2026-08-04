@@ -63,6 +63,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dfe0d268b24d493da169bde18c7535e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::EnemySystemMapEntity
+  _debugEnabled: 0
+  _debugStop: 0
   runtimeEnemyId: 
   spriteRenderer: {fileID: 5888589098744888690}
 --- !u!114 &1645215810062566161
@@ -213,9 +215,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 20
+  m_SortingLayerID: 1258504597
+  m_SortingLayer: 4
+  m_SortingOrder: 210
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7b83f75e6042c45c4ad4fa313be160ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

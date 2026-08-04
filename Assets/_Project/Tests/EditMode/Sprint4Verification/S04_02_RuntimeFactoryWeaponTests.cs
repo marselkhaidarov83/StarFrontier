@@ -7,20 +7,20 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
 {
     private static readonly string[] EnemyConfigIds =
     {
-        "enemy_ancients_basic_s04_02",
-        "enemy_ai_basic_s04_02",
-        "enemy_infected_basic_s04_02"
+        "enemy_ancients_L01_01",
+        "enemy_ai_L01_01",
+        "enemy_infected_L01_01"
     };
 
     private static readonly string[] AllyConfigIds =
     {
-        "ally_ranger_basic_s04_02",
-        "ally_warrior_basic_s04_02",
-        "ally_trader_basic_s04_02"
+        "ally_ranger_L01_01",
+        "ally_warrior_L01_01",
+        "ally_trader_L01_01"
     };
 
     [Test]
-    public void EnemyRuntimeFactory_CopiesAllWeapons()
+    public void EnemyRuntimeFactory_CopiesAllConfiguredWeapons()
     {
         for (int i = 0; i < EnemyConfigIds.Length; i++)
         {
@@ -42,12 +42,15 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
                     "test_group");
 
             Assert.NotNull(npc);
-            Assert.AreEqual(SystemNpcType.Enemy, npc.NpcType);
+
+            Assert.AreEqual(
+                SystemNpcType.Enemy,
+                npc.NpcType);
 
             Assert.AreEqual(
                 config.WeaponCount,
                 npc.Weapons.Count,
-                config.Id + " runtime weapon count is wrong.");
+                config.Id + " runtime weapon count must match EnemyConfig.WeaponCount.");
 
             AssertRuntimeWeaponsMatchConfigWeapons(
                 config.Id,
@@ -57,7 +60,7 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
     }
 
     [Test]
-    public void AllyRuntimeFactory_CopiesAllWeapons()
+    public void AllyRuntimeFactory_CopiesAllConfiguredWeapons()
     {
         for (int i = 0; i < AllyConfigIds.Length; i++)
         {
@@ -79,12 +82,15 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
                     "test_ally_rule");
 
             Assert.NotNull(npc);
-            Assert.AreEqual(SystemNpcType.Ally, npc.NpcType);
+
+            Assert.AreEqual(
+                SystemNpcType.Ally,
+                npc.NpcType);
 
             Assert.AreEqual(
                 config.WeaponCount,
                 npc.Weapons.Count,
-                config.Id + " runtime weapon count is wrong.");
+                config.Id + " runtime weapon count must match AllyConfig.WeaponCount.");
 
             AssertRuntimeWeaponsMatchConfigWeapons(
                 config.Id,
@@ -117,6 +123,10 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
             if (weaponConfig == null)
                 continue;
 
+            Assert.IsFalse(
+                string.IsNullOrWhiteSpace(weaponConfig.Id),
+                ownerConfigId + " has configured weapon without Id.");
+
             expectedWeaponIds.Add(
                 weaponConfig.Id);
         }
@@ -146,6 +156,11 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
                 0f,
                 ownerConfigId + " has negative ShotDistance for " + runtimeWeapon.WeaponConfigId);
         }
+
+        Assert.AreEqual(
+            expectedWeaponIds.Count,
+            actualWeaponIds.Count,
+            ownerConfigId + " runtime weapon id count does not match config weapon id count.");
 
         foreach (string expectedId in expectedWeaponIds)
         {

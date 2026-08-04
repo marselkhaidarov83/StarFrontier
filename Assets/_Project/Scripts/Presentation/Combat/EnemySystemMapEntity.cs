@@ -8,6 +8,8 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
 
     [Header("View")]
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private string sortingLayerName = "SystemShipFX";
+    [SerializeField] private int sortingOrder = 210;
 
     private SimpleEventBus _simpleEventBus;
     private ISystemEnemyService _enemyService;
@@ -77,8 +79,15 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
         runtimeEnemyId = runtimeEnemy.RuntimeEnemyId;
         _isBound = true;
 
-        if (spriteRenderer != null && runtimeEnemy.EnemyConfig != null)
-            spriteRenderer.sprite = runtimeEnemy.EnemyConfig.CombatSprite;
+        if (spriteRenderer != null)
+        {
+            if (runtimeEnemy.EnemyConfig != null)
+                spriteRenderer.sprite = runtimeEnemy.EnemyConfig.CombatSprite;
+
+            spriteRenderer.sortingLayerName = sortingLayerName;
+            spriteRenderer.sortingOrder = sortingOrder;
+            spriteRenderer.enabled = true;
+        }
 
         if (_movementController != null)
             _movementController.ApplyRuntimeConfig(runtimeEnemy);

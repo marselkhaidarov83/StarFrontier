@@ -20,3 +20,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
   enemyGroupSpawnRules:
   - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+  - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+  - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
