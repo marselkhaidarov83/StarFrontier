@@ -15,7 +15,7 @@ public sealed class S04_02_ConfigAssetTests
 
         new AllyExpectation(
             "ally_warrior_L01_01",
-            AllyRole2A.Warrior,
+            AllyRole2A.Military,
             2),
 
         new AllyExpectation(

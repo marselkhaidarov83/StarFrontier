@@ -479,6 +479,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4372aeeb6252447c497f23da605ffa9c, type: 2}
   - {fileID: 11400000, guid: 4c699b1589cab44b1a9374a2a49b146c, type: 2}
   - {fileID: 11400000, guid: 21483003f5f56435eb46015755eb030b, type: 2}
+  - {fileID: 11400000, guid: 461229c2b325f4d26a86302839b094bc, type: 2}
+  - {fileID: 11400000, guid: 705fd518e07884a238fc51f18fa8ca0e, type: 2}
   allySpawnRuleConfigs:
   - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
   pirates:

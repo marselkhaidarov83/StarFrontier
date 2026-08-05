@@ -11,4 +11,18 @@ public class StarSystemRuntimeState
     public int DevelopmentLevel;
     public int DangerLevel;
     public int Stability;
+
+    public StarSystemStatus SystemStatus =
+        StarSystemStatus.Stable;
+
+    public void SetSystemStatus(StarSystemStatus newStatus)
+    {
+        SystemStatus = newStatus;
+    }
+
+    public bool IsSecured(int aliveEnemyGroupsCount)
+    {
+        return SystemStatus == StarSystemStatus.Stable
+               && aliveEnemyGroupsCount <= 0;
+    }
 }

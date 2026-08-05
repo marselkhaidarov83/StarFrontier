@@ -136,6 +136,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IGovernmentRewardPayoutService, DebugGovernmentRewardPayoutService>();
         RegisterService<IGovernmentRewardService, GovernmentRewardService>();
         RegisterService<ISystemNpcRuntimeService, SystemNpcRuntimeService>();
+        RegisterService<ISystemSecurityService, SystemSecurityService>();
         RegisterService<ISystemNpcPopulationService, SystemNpcPopulationService>();
         RegisterService<IGalaxyPopulationService, GalaxyPopulationService>();
         RegisterService<ISystemNpcBehaviorService, SystemNpcBehaviorService>();

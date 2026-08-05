@@ -26,5 +26,12 @@ public static class SaveDataVersions
     /// </summary>
     public const int IntegrityChecksum = 3;
 
-    public const int Current = IntegrityChecksum;
+    /// <summary>
+    /// Версия, в которой каждая звёздная система получила
+    /// сохраняемый статус безопасности: Stable, Threatened,
+    /// Invasion или Captured.
+    /// </summary>
+    public const int SystemSecurity = 4;
+
+    public const int Current = SystemSecurity;
 }

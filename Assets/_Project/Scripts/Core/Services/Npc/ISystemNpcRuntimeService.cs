@@ -25,6 +25,9 @@ public interface ISystemNpcRuntimeService
         string systemId,
         string groupRuleId);
 
+    IReadOnlyList<SystemNpcRuntimeState> GetAliveEnemyGroupsInSystem(
+        string systemId);
+
     void UpdateNpcPosition(string runtimeNpcId, Vector3 position);
 
     void ApplyDamage(string runtimeNpcId, int damage, bool killedByPlayer, bool damagedByPlayer);

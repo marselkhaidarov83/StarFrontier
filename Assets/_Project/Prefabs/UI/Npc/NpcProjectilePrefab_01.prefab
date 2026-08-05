@@ -77,9 +77,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 30
+  m_SortingLayerID: 1258504597
+  m_SortingLayer: 4
+  m_SortingOrder: 210
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0.0028479954, g: 0.6037736, b: 0.013953282, a: 1}
@@ -151,7 +151,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43a4abb91f2684b79965509ba950baaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::GalaxyNpcProjectileView
-  _debugEnabled: 0
-  _debugStop: 1
-  fallbackSpeed: 12
-  maxLifetime: 10

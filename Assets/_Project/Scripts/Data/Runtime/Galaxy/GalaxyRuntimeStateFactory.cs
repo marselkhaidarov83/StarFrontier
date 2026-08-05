@@ -50,7 +50,8 @@ public static class GalaxyRuntimeStateFactory
                     IsVisited = systemConfig.IsStartSystem,
                     DevelopmentLevel = 1,
                     DangerLevel = 0,
-                    Stability = 100
+                    Stability = 100,
+                    SystemStatus = StarSystemStatus.Stable
                 };
 
                 state.Systems.Add(systemState);

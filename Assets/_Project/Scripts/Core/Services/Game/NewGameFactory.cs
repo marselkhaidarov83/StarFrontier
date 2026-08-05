@@ -53,11 +53,7 @@ public class NewGameFactory
                     HullCapacity = 100,
                     EquippedWeaponIds = new List<string>
                     {
-                        "weapon_missile_light_01"
-                    },
-                    EquippedModuleIds = new List<string>
-                    {
-                        "module_shield_booster_01"
+                        "weapon_common_pulse_L1_01"
                     }
                 },
                 new ShipRuntimeData

@@ -55,7 +55,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     {
         return _npcs
             .Where(x => x.IsAlive && x.GroupRuntimeId == groupId)
-            .ToList();        
+            .ToList();
     }
 
     public IReadOnlyList<SystemNpcRuntimeState> GetAliveNpcsInSystemByType(
@@ -84,6 +84,22 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             .ToList();
     }
 
+    public IReadOnlyList<SystemNpcRuntimeState> GetAliveEnemyGroupsInSystem(
+        string systemId)
+    {
+        return _npcs
+            .Where(npc =>
+                npc.IsAlive &&
+                npc.CurrentSystemId == systemId &&
+                npc.NpcType == SystemNpcType.Enemy)
+            .GroupBy(npc =>
+                string.IsNullOrEmpty(npc.GroupRuntimeId)
+                    ? npc.RuntimeNpcId
+                    : npc.GroupRuntimeId)
+            .Select(group => group.First())
+            .ToList();
+    }
+    
     public IReadOnlyList<SystemNpcRuntimeState> GetAliveEnemyGroupsByRule(
         string systemId,
         string groupRuleId)

@@ -24,7 +24,7 @@ MonoBehaviour:
   baseHull: 100
   baseShield: 70
   baseEnergy: 100
-  baseSpeed: 2.2
+  baseSpeed: 50
   level: 1
   role: 0
   weaponConfigs:
