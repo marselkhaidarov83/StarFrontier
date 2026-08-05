@@ -30,7 +30,7 @@ MonoBehaviour:
   station: {fileID: 11400000, guid: 9813f86bb87294b538fa2d125ec4e7ac, type: 2}
   missionTags: 020000000400000007000000
   mapPosition: {x: -4.5, y: 4.6}
-  systemPopulation: {fileID: 0}
+  systemPopulation: {fileID: 11400000, guid: c49f728976bd146e9a0b56d4db177d66, type: 2}
   isStartSystem: 0
   isHiddenAtStart: 1
   recommendedPower: 10

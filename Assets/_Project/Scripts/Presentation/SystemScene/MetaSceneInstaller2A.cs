@@ -16,7 +16,7 @@ using UnityEngine;
 /// </summary>
 [DefaultExecutionOrder(-100)]
 [DisallowMultipleComponent]
-public sealed class MetaSceneInstaller2A : MonoBehaviour
+public sealed class MetaSceneInstaller2A : CustomMonoBehaviour
 {
     [Header("Scene References")]
 
@@ -117,11 +117,10 @@ public sealed class MetaSceneInstaller2A : MonoBehaviour
 
         if (logSessionWait)
         {
-            Debug.Log(
+            LogCustom(
                 "[MetaSceneInstaller2A] " +
                 $"Session wait finished after {waitedFrames} frames. " +
-                $"Session ready: {IsGameSessionReady()}.",
-                this);
+                $"Session ready: {IsGameSessionReady()}.");
         }
 
         InitializeScene();
@@ -220,13 +219,12 @@ public sealed class MetaSceneInstaller2A : MonoBehaviour
 
         if (logInitialization)
         {
-            Debug.Log(
+            LogCustom(
                 "[MetaSceneInstaller2A] Initialized. " +
                 $"Position = {initialPosition} | " +
                 $"Direction = {initialDirection} | " +
                 $"Rotation Z = " +
-                $"{GetCurrentVisualRotationZ()}",
-                this);
+                $"{GetCurrentVisualRotationZ()}");
         }
     }
 

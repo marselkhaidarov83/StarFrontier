@@ -11,7 +11,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
     public SystemNpcRuntimeService()
     {
-        // _debugStop = true;
+        _debugStop = true;
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
     }
 

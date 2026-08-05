@@ -18,7 +18,7 @@ using UnityEngine.InputSystem;
 /// Не вызывает Tick() сервисов.
 /// </summary>
 [DisallowMultipleComponent]
-public sealed class PlayerInputBridge2A : MonoBehaviour
+public sealed class PlayerInputBridge2A : CustomMonoBehaviour
 {
     [Header("Input Actions")]
 
@@ -393,11 +393,10 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
         if (logInitialization)
         {
-            Debug.Log(
+            LogCustom(
                 "[PlayerInputBridge2A] Initialized: " +
                 "keyboard, touch UI, Interact, " +
-                "RecenterCamera and StopMovement.",
-                this);
+                "RecenterCamera and StopMovement.");
 
             if (destinationAdapter == null)
             {
@@ -632,11 +631,10 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
         if (logStopCommands)
         {
-            Debug.Log(
+            LogCustom(
                 "[PlayerInputBridge2A] " +
                 $"Stop movement. Immediate: " +
-                $"{immediateStop}.",
-                this);
+                $"{immediateStop}.");
         }
     }
 

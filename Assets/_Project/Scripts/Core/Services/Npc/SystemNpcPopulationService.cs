@@ -114,7 +114,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem,
         float deltaTime)
     {
-        SystemPopulationLevelProfile profile =
+        SystemPopulationProfile profile =
             GetCurrentPopulationProfile(starSystem);
 
         if (profile == null)
@@ -221,7 +221,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem,
         float deltaTime)
     {
-        SystemPopulationLevelProfile profile =
+        SystemPopulationProfile profile =
             GetCurrentPopulationProfile(starSystem);
 
         if (profile == null)
@@ -570,7 +570,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         return position;
     }
 
-    private SystemPopulationLevelProfile GetCurrentPopulationProfile(
+    private SystemPopulationProfile GetCurrentPopulationProfile(
         StarSystemConfig starSystem)
     {
         if (starSystem == null)
@@ -655,7 +655,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem =
             _configService.GetStarSystemConfigById(systemId);
 
-        SystemPopulationLevelProfile profile =
+        SystemPopulationProfile profile =
             GetCurrentPopulationProfile(starSystem);
 
         if (profile == null ||

@@ -23,6 +23,8 @@ public class SaveService2A : CustomService, ISaveService
 
     public SaveService2A()
     {
+        _debugStop = true;
+        
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _autosaveIntervalSeconds = _configService.SaveConfig.AutosaveIntervalSeconds;
         _saveFileName = _configService.SaveConfig.SaveFileName;
@@ -82,11 +84,11 @@ public class SaveService2A : CustomService, ISaveService
 
             _autosaveTimer = 0f;
 
-            AppLog.Info("[SaveService] Game saved to: " + GetSavePath());
+            LogCustom("Game saved to: " + GetSavePath());
         }
         catch (Exception e)
         {
-            AppLog.Error("[SaveService] Failed to save: " + e.Message);
+            Debug.LogError("[SaveService] Failed to save: " + e.Message);
         }
         finally
         {
@@ -372,7 +374,7 @@ public class SaveService2A : CustomService, ISaveService
         if (File.Exists(savePath))
         {
             File.Replace(tempPath, savePath, backupPath);
-            AppLog.Info("[SaveService] Backup created: " + backupPath);
+            LogCustom("Backup created: " + backupPath);
             return;
         }
 

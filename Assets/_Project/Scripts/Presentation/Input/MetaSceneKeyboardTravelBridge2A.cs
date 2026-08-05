@@ -16,7 +16,7 @@ using UnityEngine;
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class MetaSceneKeyboardTravelBridge2A :
-    MonoBehaviour
+    CustomMonoBehaviour
 {
     private const float InputThresholdSqrMagnitude = 0.0001f;
 
@@ -298,11 +298,10 @@ public sealed class MetaSceneKeyboardTravelBridge2A :
 
         _initializationLogged = true;
 
-        Debug.Log(
+        LogCustom(
             "[MetaSceneKeyboardTravelBridge2A] " +
             "Initialized. Constant speed = " +
-            speedUnitsPerSecond,
-            this);
+            speedUnitsPerSecond);
     }
 
     private void ReportErrorOnce(

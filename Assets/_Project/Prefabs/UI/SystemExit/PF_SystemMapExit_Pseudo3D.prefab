@@ -221,6 +221,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae4022abd0bba457ca443de84075b62d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::TravelPointInteractionTarget2A
+  _debugEnabled: 0
+  _debugStop: 1
   targetType: 30
   selectableView: {fileID: 1885972551723587633}
   markerView: {fileID: 8838294096529800687}

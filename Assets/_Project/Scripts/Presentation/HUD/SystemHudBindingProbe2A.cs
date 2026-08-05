@@ -96,12 +96,11 @@ public sealed class SystemHudBindingProbe2A :
 
         if (logLifecycle)
         {
-            Debug.Log(
+            LogCustom(
                 "[2A-S03-03-T02] " +
                 "HUD binding probe bound. " +
                 $"Registry services: " +
-                $"{registeredServiceCount}.",
-                this);
+                $"{registeredServiceCount}.");
         }
     }
 
@@ -111,10 +110,9 @@ public sealed class SystemHudBindingProbe2A :
 
         if (logLifecycle)
         {
-            Debug.Log(
+            LogCustom(
                 "[2A-S03-03-T02] " +
-                "HUD binding probe unbound.",
-                this);
+                "HUD binding probe unbound.");
         }
     }
 }

@@ -10,11 +10,11 @@ public sealed class SystemPopulationGalaxyLevelEditModeTests
         SystemPopulationConfig config =
             ScriptableObject.CreateInstance<SystemPopulationConfig>();
 
-        SystemPopulationLevelProfile levelOne =
-            new SystemPopulationLevelProfile();
+        SystemPopulationProfile levelOne =
+            new SystemPopulationProfile();
 
-        SystemPopulationLevelProfile levelFour =
-            new SystemPopulationLevelProfile();
+        SystemPopulationProfile levelFour =
+            new SystemPopulationProfile();
 
         SetPrivateField(levelOne, "galaxyLevel", 1);
         SetPrivateField(levelFour, "galaxyLevel", 4);

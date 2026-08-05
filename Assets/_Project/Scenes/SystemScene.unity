@@ -497,6 +497,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46e9f734fa08e42fda956130a442d909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::MetaSceneInstaller2A
+  _debugEnabled: 0
+  _debugStop: 1
   spawnPoint: {fileID: 1358796634}
   shipMarkerView: {fileID: 1132738920}
   shipMarkerImage: {fileID: 1132738921}
@@ -541,7 +543,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Presentation::SystemCameraController2A
   _debugEnabled: 0
-  _debugStop: 0
+  _debugStop: 1
   targetCamera: {fileID: 757877087}
   shipTarget: {fileID: 1132738918}
   cameraConfig: {fileID: 11400000, guid: 6944029378bee4a669c1b150a1ce3fdc, type: 2}
@@ -571,6 +573,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59f7599aff7e24c97812223ce1209247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::PlayerInputBridge2A
+  _debugEnabled: 0
+  _debugStop: 1
   inputActions: {fileID: -944628639613478452, guid: 9bf50663d0bec4aa9b252026f311d114, type: 3}
   actionMapName: Player
   moveActionName: Move
@@ -595,6 +599,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbaab7c5e90df4ed1b6b5c7d3f65069b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::MetaSceneKeyboardTravelBridge2A
+  _debugEnabled: 0
+  _debugStop: 1
   shipMarkerView: {fileID: 1132738920}
   speedUnitsPerSecond: 100
   cancelPointTravelWhenKeyboardStarts: 1
@@ -2242,6 +2248,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f464c38d7767496aa0311ac500d078e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::SystemHudCompositionRoot2A
+  _debugEnabled: 0
+  _debugStop: 1
   bindersRoot: {fileID: 691586607}
   additionalBindersRoots: []
   autoDiscoverChildBinders: 1
@@ -12560,6 +12568,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f0bd015b4d7341d9bd1fdcfee75ce48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::SystemHudBindingProbe2A
+  _debugEnabled: 0
+  _debugStop: 1
   isBound: 0
   logLifecycle: 1
   bindCount: 0

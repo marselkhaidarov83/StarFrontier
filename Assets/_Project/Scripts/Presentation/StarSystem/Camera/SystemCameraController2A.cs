@@ -79,13 +79,13 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     public void Initialize()
     {
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] Initialize started"
         );
 
         if (_isInitialized)
         {
-            Debug.Log(
+            LogCustom(
                 "[SystemCameraController2A] Already initialized"
             );
 
@@ -196,7 +196,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         _isInitialized = true;
 
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] " +
             "Initialize finished safely"
         );
@@ -216,7 +216,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private void ActivateSystemCameraSafely()
     {
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] " +
             "ActivateSystemCameraSafely started"
         );
@@ -258,7 +258,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         _cameraVelocity = Vector3.zero;
         _zoomVelocity = 0f;
 
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] " +
             "ActivateSystemCameraSafely finished. " +
             "ShipPosition = " +

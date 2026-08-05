@@ -1,39 +1,6 @@
 using System;
 using UnityEngine;
 
-[Serializable]
-public sealed class SystemPopulationLevelProfile
-{
-    [Header("Galaxy Level")]
-    [SerializeField] [Range(1, 10)] private int galaxyLevel = 1;
-
-    [Header("Allies")]
-    [SerializeField] private AllySpawnRuleConfig[] allySpawnRules =
-        new AllySpawnRuleConfig[0];
-
-    [Header("Enemies")]
-    [SerializeField] private EnemyGroupSpawnRuleConfig[] enemyGroupSpawnRules =
-        new EnemyGroupSpawnRuleConfig[0];
-
-    public int GalaxyLevel => galaxyLevel;
-    public AllySpawnRuleConfig[] AllySpawnRules => allySpawnRules;
-    public EnemyGroupSpawnRuleConfig[] EnemyGroupSpawnRules =>
-        enemyGroupSpawnRules;
-
-#if UNITY_EDITOR
-    public void EnsureLevel(int level)
-    {
-        galaxyLevel = Mathf.Clamp(level, 1, 10);
-
-        if (allySpawnRules == null)
-            allySpawnRules = new AllySpawnRuleConfig[0];
-
-        if (enemyGroupSpawnRules == null)
-            enemyGroupSpawnRules = new EnemyGroupSpawnRuleConfig[0];
-    }
-#endif
-}
-
 [CreateAssetMenu(
     fileName = "SystemPopulationConfig",
     menuName = "StarFrontier/Configs/System Population")]
@@ -42,14 +9,14 @@ public sealed class SystemPopulationConfig : BaseConfig
     [Header("Profiles by Galaxy Level")]
     [Tooltip(
         "Exactly one profile is required for every GalaxyLevel from 1 to 10.")]
-    [SerializeField] private SystemPopulationLevelProfile[] levelProfiles =
-        new SystemPopulationLevelProfile[0];
+    [SerializeField] private SystemPopulationProfile[] levelProfiles =
+        new SystemPopulationProfile[0];
 
     [Header("Legacy Fallback - Remove After Migration")]
     [SerializeField] private AllySpawnRuleConfig[] allySpawnRules;
     [SerializeField] private EnemyGroupSpawnRuleConfig[] enemyGroupSpawnRules;
 
-    public SystemPopulationLevelProfile[] LevelProfiles =>
+    public SystemPopulationProfile[] LevelProfiles =>
         levelProfiles;
 
     // Legacy read-only properties are retained so older code and assets compile.
@@ -57,7 +24,7 @@ public sealed class SystemPopulationConfig : BaseConfig
     public EnemyGroupSpawnRuleConfig[] EnemyGroupSpawnRules =>
         enemyGroupSpawnRules;
 
-    public SystemPopulationLevelProfile GetProfileForGalaxyLevel(
+    public SystemPopulationProfile GetProfileForGalaxyLevel(
         int galaxyLevel)
     {
         int normalizedLevel = Mathf.Clamp(galaxyLevel, 1, 10);
@@ -67,7 +34,7 @@ public sealed class SystemPopulationConfig : BaseConfig
 
         for (int i = 0; i < levelProfiles.Length; i++)
         {
-            SystemPopulationLevelProfile profile = levelProfiles[i];
+            SystemPopulationProfile profile = levelProfiles[i];
 
             if (profile == null)
                 continue;
@@ -99,12 +66,12 @@ public sealed class SystemPopulationConfig : BaseConfig
     private void OnValidate()
     {
         if (levelProfiles == null)
-            levelProfiles = new SystemPopulationLevelProfile[0];
+            levelProfiles = new SystemPopulationProfile[0];
 
         for (int i = 0; i < levelProfiles.Length; i++)
         {
             if (levelProfiles[i] == null)
-                levelProfiles[i] = new SystemPopulationLevelProfile();
+                levelProfiles[i] = new SystemPopulationProfile();
 
             levelProfiles[i].EnsureLevel(i + 1);
         }
