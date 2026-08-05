@@ -16,9 +16,76 @@ MonoBehaviour:
   displayName: 
   description: 
   icon: {fileID: 0}
-  allySpawnRules:
-  - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
-  enemyGroupSpawnRules:
-  - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
-  - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
-  - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  levelProfiles:
+  - galaxyLevel: 1
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 2
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 3
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 4
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 5
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 6
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 7
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 8
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 9
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  - galaxyLevel: 10
+    allySpawnRules:
+    - {fileID: 11400000, guid: 0abd5541f64b64f76a5c96fff07c692f, type: 2}
+    enemyGroupSpawnRules:
+    - {fileID: 11400000, guid: 50dbf3746c29b455fbf541674b9fe816, type: 2}
+    - {fileID: 11400000, guid: ecbb232310d644c9ebc1eec794a5e7b5, type: 2}
+    - {fileID: 11400000, guid: 34cd741b360304039a2de3774a786dce, type: 2}
+  allySpawnRules: []
+  enemyGroupSpawnRules: []

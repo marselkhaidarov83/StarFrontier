@@ -41,6 +41,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (config == null)
             return;
 
+        if (GetCurrentPopulationProfile(starSystem) == null)
+            return;
+
         if (deltaTime <= 0f)
             return;
 
@@ -111,16 +114,16 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem,
         float deltaTime)
     {
-        SystemPopulationConfig config =
-            starSystem.SystemPopulation;
+        SystemPopulationLevelProfile profile =
+            GetCurrentPopulationProfile(starSystem);
 
-        if (config == null)
+        if (profile == null)
             return;
 
-        if (config.AllySpawnRules == null)
+        if (profile.AllySpawnRules == null)
             return;
 
-        foreach (AllySpawnRuleConfig rule in config.AllySpawnRules)
+        foreach (AllySpawnRuleConfig rule in profile.AllySpawnRules)
         {
             if (rule == null)
                 continue;
@@ -218,16 +221,16 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem,
         float deltaTime)
     {
-        SystemPopulationConfig config =
-            starSystem.SystemPopulation;
+        SystemPopulationLevelProfile profile =
+            GetCurrentPopulationProfile(starSystem);
 
-        if (config == null)
+        if (profile == null)
             return;
 
-        if (config.EnemyGroupSpawnRules == null)
+        if (profile.EnemyGroupSpawnRules == null)
             return;
 
-        foreach (EnemyGroupSpawnRuleConfig rule in config.EnemyGroupSpawnRules)
+        foreach (EnemyGroupSpawnRuleConfig rule in profile.EnemyGroupSpawnRules)
         {
             if (rule == null)
                 continue;
@@ -377,6 +380,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         string groupRuntimeId =
             Guid.NewGuid().ToString("N");
 
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
         foreach (EnemyGroupEntryConfig entry in rule.Enemies)
         {
             if (entry == null)
@@ -387,6 +393,19 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
             if (!entry.IsValid())
                 continue;
+
+            if (!SystemPopulationConfig.IsEnemyConfigAllowedForGalaxyLevel(
+                    entry.EnemyConfig,
+                    currentGalaxyLevel))
+            {
+                LogCustom(
+                    "[SystemPopulationService] Enemy entry skipped because " +
+                    "its level does not equal the current GalaxyLevel. " +
+                    "Config: " + entry.EnemyConfig.Id +
+                    ", ConfigLevel: " + entry.EnemyConfig.Level +
+                    ", GalaxyLevel: " + currentGalaxyLevel);
+                continue;
+            }
 
             int count =
                 UnityEngine.Random.Range(
@@ -551,6 +570,43 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         return position;
     }
 
+    private SystemPopulationLevelProfile GetCurrentPopulationProfile(
+        StarSystemConfig starSystem)
+    {
+        if (starSystem == null)
+            return null;
+
+        SystemPopulationConfig config =
+            starSystem.SystemPopulation;
+
+        if (config == null)
+            return null;
+
+        return config.GetProfileForGalaxyLevel(
+            GetCurrentGalaxyLevel());
+    }
+
+    private int GetCurrentGalaxyLevel()
+    {
+        if (_gameSessionService == null ||
+            !_gameSessionService.HasActiveSession ||
+            _gameSessionService.State == null ||
+            _gameSessionService.State.Galaxy == null ||
+            _gameSessionService.State.Galaxy.Sectors == null)
+        {
+            return 1;
+        }
+
+        int unlockedSectorCount =
+            _gameSessionService.State.Galaxy.Sectors.Count(
+                sector => sector != null && sector.IsUnlocked);
+
+        return Mathf.Clamp(
+            Mathf.Max(1, unlockedSectorCount),
+            1,
+            10);
+    }
+
     private string BuildAllyTimerKey(
         AllySpawnRuleConfig rule,
         AllyConfig allyConfig)
@@ -599,19 +655,21 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem =
             _configService.GetStarSystemConfigById(systemId);
 
-        if (starSystem == null ||
-            starSystem.SystemPopulation == null ||
-            starSystem.SystemPopulation.EnemyGroupSpawnRules == null)
+        SystemPopulationLevelProfile profile =
+            GetCurrentPopulationProfile(starSystem);
+
+        if (profile == null ||
+            profile.EnemyGroupSpawnRules == null)
         {
             return false;
         }
 
         for (int i = 0;
-             i < starSystem.SystemPopulation.EnemyGroupSpawnRules.Length;
+             i < profile.EnemyGroupSpawnRules.Length;
              i++)
         {
             EnemyGroupSpawnRuleConfig rule =
-                starSystem.SystemPopulation.EnemyGroupSpawnRules[i];
+                profile.EnemyGroupSpawnRules[i];
 
             if (rule == null || rule.Id != npc.SpawnRuleId)
                 continue;
