@@ -23,6 +23,7 @@ public static class SystemNpcRuntimeFactory
             ConfigId = config.Id,
             SpawnRuleId = spawnRuleId,
             GroupRuntimeId = groupRuntimeId,
+            Level = config.Level,
 
             OriginSystemId = originSystemId,
             CurrentSystemId = currentSystemId,
@@ -47,6 +48,8 @@ public static class SystemNpcRuntimeFactory
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
+            DestroyedAtTick = 0,
+            NextRespawnTick = 0,
 
             CreditReward = config.CreditReward,
             XpReward = config.XpReward,
@@ -80,6 +83,7 @@ public static class SystemNpcRuntimeFactory
             ConfigId = config.Id,
             SpawnRuleId = spawnRuleId,
             GroupRuntimeId = groupRuntimeId,
+            Level = 1,
 
             OriginSystemId = originSystemId,
             CurrentSystemId = currentSystemId,
@@ -104,6 +108,8 @@ public static class SystemNpcRuntimeFactory
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
+            DestroyedAtTick = 0,
+            NextRespawnTick = 0,
 
             CreditReward = config.CreditReward,
             XpReward = config.XpReward,
@@ -135,6 +141,8 @@ public static class SystemNpcRuntimeFactory
 
             ConfigId = config.Id,
             SpawnRuleId = spawnRuleId,
+            AllyRole = config.Role,
+            Level = config.Level,
 
             OriginSystemId = originSystemId,
             CurrentSystemId = currentSystemId,
@@ -162,6 +170,8 @@ public static class SystemNpcRuntimeFactory
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
+            DestroyedAtTick = 0,
+            NextRespawnTick = 0,
 
             IsOnPlanet = true,
 

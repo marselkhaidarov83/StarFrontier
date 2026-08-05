@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -37,6 +38,19 @@ public static class SaveMigrationService
             sourceVersion = SaveDataVersions.IntegrityChecksum;
         }
 
+        if (sourceVersion < SaveDataVersions.SystemSecurity)
+        {
+            MigrateToSystemSecurity(state);
+            changed = true;
+            sourceVersion = SaveDataVersions.SystemSecurity;
+        }
+
+        if (sourceVersion < SaveDataVersions.SystemNpcPersistentState)
+        {
+            MigrateToSystemNpcPersistentState(state);
+            changed = true;
+        }
+
         if (state.Meta.SaveDataVersion != SaveDataVersions.Current)
         {
             state.Meta.SaveDataVersion = SaveDataVersions.Current;
@@ -65,6 +79,12 @@ public static class SaveMigrationService
 
         state.SystemNpcSimulation ??=
             new SystemNpcSimulationSaveData();
+
+        state.SystemNpcSimulation.Npcs ??=
+            new List<SystemNpcSaveData>();
+
+        state.SystemNpcSimulation.PopulationTimers ??=
+            new List<SystemPopulationRuleTimerState>();
 
         state.Player.PlayerShipState ??=
             new ShipRuntimeState();
@@ -120,6 +140,69 @@ public static class SaveMigrationService
         GameRuntimeState state)
     {
         state.Meta.IntegrityChecksum ??= string.Empty;
+    }
+
+    private static void MigrateToSystemSecurity(
+        GameRuntimeState state)
+    {
+        if (state.Galaxy == null || state.Galaxy.Systems == null)
+            return;
+
+        foreach (StarSystemRuntimeState systemState in state.Galaxy.Systems)
+        {
+            if (systemState == null)
+                continue;
+
+            if (!Enum.IsDefined(
+                    typeof(StarSystemStatus),
+                    systemState.SystemStatus))
+            {
+                systemState.SystemStatus = StarSystemStatus.Stable;
+            }
+        }
+    }
+
+    private static void MigrateToSystemNpcPersistentState(
+        GameRuntimeState state)
+    {
+        if (state.SystemNpcSimulation == null)
+            return;
+
+        if (state.SystemNpcSimulation.Npcs != null)
+        {
+            foreach (SystemNpcSaveData npc in state.SystemNpcSimulation.Npcs)
+            {
+                if (npc == null)
+                    continue;
+
+                npc.Level = Mathf.Max(1, npc.Level);
+
+                if (!Enum.IsDefined(typeof(AllyRole2A), npc.AllyRole))
+                    npc.AllyRole = AllyRole2A.Ranger;
+
+                npc.DestroyedAtTick = Mathf.Max(0, npc.DestroyedAtTick);
+                npc.NextRespawnTick = Mathf.Max(0, npc.NextRespawnTick);
+
+                if (npc.IsAlive)
+                {
+                    npc.DestroyedAtTick = 0;
+                    npc.NextRespawnTick = 0;
+                }
+            }
+        }
+
+        if (state.SystemNpcSimulation.PopulationTimers == null)
+            return;
+
+        foreach (SystemPopulationRuleTimerState timer
+                 in state.SystemNpcSimulation.PopulationTimers)
+        {
+            if (timer == null)
+                continue;
+
+            timer.TimerSeconds = Mathf.Max(0f, timer.TimerSeconds);
+            timer.NextSpawnTick = Mathf.Max(0, timer.NextSpawnTick);
+        }
     }
 
     private static bool IsInvalidDirection(

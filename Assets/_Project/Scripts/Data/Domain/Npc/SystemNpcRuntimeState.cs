@@ -13,6 +13,10 @@ public sealed class SystemNpcRuntimeState
     public string SpawnRuleId;
     public string GroupRuntimeId;
 
+    [Header("Identity Details")]
+    public AllyRole2A AllyRole;
+    public int Level = 1;
+
     [Header("System Location")]
     public string OriginSystemId;
     public string CurrentSystemId;
@@ -71,6 +75,8 @@ public sealed class SystemNpcRuntimeState
     [Header("Life")]
     public SystemNpcLifeState LifeState;
     public bool IsAlive;
+    public int DestroyedAtTick;
+    public int NextRespawnTick;
 
     [Header("Rewards / Contribution")]
     public bool WasKilledByPlayer;

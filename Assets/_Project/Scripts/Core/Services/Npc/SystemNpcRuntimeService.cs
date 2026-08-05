@@ -163,6 +163,8 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         {
             LogCustom("npc destroyed");
             npc.WasKilledByPlayer = killedByPlayer;
+            npc.DestroyedAtTick = GetCurrentQuantTick();
+            npc.NextRespawnTick = ScheduleRespawn(npc);
 
             _eventBus.Publish(new SystemNpcDestroyedEvent(
                 npc.GroupRuntimeId,
@@ -212,5 +214,66 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         foreach (var npc in npcs)
             RestoreNpc(npc);
+    }
+
+    private int GetCurrentQuantTick()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return 1;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IGameTimeService>(
+                out IGameTimeService gameTimeService))
+        {
+            return Mathf.Max(1, gameTimeService.CurrentQuantTick);
+        }
+
+        return 1;
+    }
+
+    private int ScheduleRespawn(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return 0;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return 0;
+        }
+
+        if (!Bootstrapper.Instance.ServiceRegistry.TryGet<
+                ISystemNpcPopulationService>(
+                out ISystemNpcPopulationService populationService))
+        {
+            return 0;
+        }
+
+        int nextRespawnTick = populationService.ScheduleRespawn(
+            npc,
+            npc.DestroyedAtTick);
+
+        if (nextRespawnTick <= 0 ||
+            string.IsNullOrWhiteSpace(npc.GroupRuntimeId))
+        {
+            return nextRespawnTick;
+        }
+
+        for (int i = 0; i < _npcs.Count; i++)
+        {
+            SystemNpcRuntimeState groupNpc = _npcs[i];
+
+            if (groupNpc == null || groupNpc.IsAlive)
+                continue;
+
+            if (groupNpc.GroupRuntimeId != npc.GroupRuntimeId)
+                continue;
+
+            groupNpc.NextRespawnTick = nextRespawnTick;
+        }
+
+        return nextRespawnTick;
     }
 }

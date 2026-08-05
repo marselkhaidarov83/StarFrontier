@@ -11,6 +11,8 @@ public sealed class SystemNpcSaveData
     public string ConfigId;
     public string SpawnRuleId;
     public string GroupRuntimeId;
+    public AllyRole2A AllyRole;
+    public int Level;
 
     public string OriginSystemId;
     public string CurrentSystemId;
@@ -31,6 +33,7 @@ public sealed class SystemNpcSaveData
     public int TravelStartTick;
     public int TravelEndTick;
 
+    public SystemNpcBehaviorType PrevBehavior;
     public SystemNpcBehaviorType CurrentBehavior;
     public int BehaviorStartedTick;
     public int BehaviorEndsTick;
@@ -44,6 +47,8 @@ public sealed class SystemNpcSaveData
     public SystemNpcCombatState CombatState;
     public string CurrentTargetRuntimeNpcId;
     public bool IsFighting;
+    public bool IsAggressiveToPlayer;
+    public bool WasDamagedByPlayer;
 
     public int MaxHull;
     public int CurrentHull;
@@ -58,6 +63,8 @@ public sealed class SystemNpcSaveData
 
     public SystemNpcLifeState LifeState;
     public bool IsAlive;
+    public int DestroyedAtTick;
+    public int NextRespawnTick;
 
     public bool WasKilledByPlayer;
     public int CreditReward;

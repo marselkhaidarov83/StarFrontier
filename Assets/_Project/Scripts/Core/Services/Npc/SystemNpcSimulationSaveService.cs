@@ -19,6 +19,9 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
         foreach (SystemNpcRuntimeState npc in _npcRuntimeService.Npcs)
         {
+            if (npc == null)
+                continue;
+
             saveData.Npcs.Add(CaptureNpc(npc));
         }
 
@@ -28,7 +31,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
                 timer.SystemId,
                 timer.RuleId)
             {
-                TimerSeconds = timer.TimerSeconds
+                TimerSeconds = timer.TimerSeconds,
+                NextSpawnTick = timer.NextSpawnTick
             });
         }
 
@@ -53,21 +57,32 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
         var restoredNpcs = new List<SystemNpcRuntimeState>();
 
-        foreach (SystemNpcSaveData npcSave in saveData.Npcs)
+        if (saveData.Npcs != null)
         {
-            restoredNpcs.Add(RestoreNpc(npcSave));
+            foreach (SystemNpcSaveData npcSave in saveData.Npcs)
+            {
+                if (npcSave != null)
+                    restoredNpcs.Add(RestoreNpc(npcSave));
+            }
         }
 
         _npcRuntimeService.RestoreNpcs(restoredNpcs);
 
-        foreach (SystemPopulationRuleTimerState timer in saveData.PopulationTimers)
+        if (saveData.PopulationTimers != null)
         {
-            var restoredTimer = _populationService.RuntimeState.GetOrCreateTimer(
-                timer.SystemId,
-                timer.RuleId
-            );
+            foreach (SystemPopulationRuleTimerState timer in saveData.PopulationTimers)
+            {
+                if (timer == null)
+                    continue;
 
-            restoredTimer.TimerSeconds = timer.TimerSeconds;
+                var restoredTimer = _populationService.RuntimeState.GetOrCreateTimer(
+                    timer.SystemId,
+                    timer.RuleId
+                );
+
+                restoredTimer.TimerSeconds = timer.TimerSeconds;
+                restoredTimer.NextSpawnTick = timer.NextSpawnTick;
+            }
         }
 
         LogCustom(
@@ -86,11 +101,15 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             ConfigId = npc.ConfigId,
             SpawnRuleId = npc.SpawnRuleId,
             GroupRuntimeId = npc.GroupRuntimeId,
+            AllyRole = npc.AllyRole,
+            Level = npc.Level,
 
             OriginSystemId = npc.OriginSystemId,
             CurrentSystemId = npc.CurrentSystemId,
             // TargetSystemId = npc.TargetSystemId,
             TargetSystemId = npc.TargetSystemId,
+            TargetSystemExitPoint = npc.TargetSystemExitPoint,
+            TargetSystemEntryPoint = npc.TargetSystemEntryPoint,
 
             CurrentPlanetId = npc.CurrentPlanetId,
             TargetPlanetId = npc.TargetPlanetId,
@@ -105,6 +124,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             TravelStartTick = npc.TravelStartTick,
             TravelEndTick = npc.TravelEndTick,
 
+            PrevBehavior = npc.PrevBehavior,
             CurrentBehavior = npc.CurrentBehavior,
             BehaviorStartedTick = npc.BehaviorStartedTick,
             BehaviorEndsTick = npc.BehaviorEndsTick,
@@ -118,6 +138,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             CombatState = npc.CombatState,
             CurrentTargetRuntimeNpcId = npc.CurrentTargetRuntimeNpcId,
             IsFighting = npc.IsFighting,
+            IsAggressiveToPlayer = npc.IsAggressiveToPlayer,
+            WasDamagedByPlayer = npc.WasDamagedByPlayer,
 
             MaxHull = npc.MaxHull,
             CurrentHull = npc.CurrentHull,
@@ -132,6 +154,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
             LifeState = npc.LifeState,
             IsAlive = npc.IsAlive,
+            DestroyedAtTick = npc.DestroyedAtTick,
+            NextRespawnTick = npc.NextRespawnTick,
 
             WasKilledByPlayer = npc.WasKilledByPlayer,
             CreditReward = npc.CreditReward,
@@ -162,10 +186,14 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             ConfigId = save.ConfigId,
             SpawnRuleId = save.SpawnRuleId,
             GroupRuntimeId = save.GroupRuntimeId,
+            AllyRole = save.AllyRole,
+            Level = Mathf.Max(1, save.Level),
 
             OriginSystemId = save.OriginSystemId,
             CurrentSystemId = save.CurrentSystemId,
             TargetSystemId = save.TargetSystemId,
+            TargetSystemExitPoint = save.TargetSystemExitPoint,
+            TargetSystemEntryPoint = save.TargetSystemEntryPoint,
 
             CurrentPlanetId = save.CurrentPlanetId,
             TargetPlanetId = save.TargetPlanetId,
@@ -180,6 +208,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             TravelStartTick = save.TravelStartTick,
             TravelEndTick = save.TravelEndTick,
 
+            PrevBehavior = save.PrevBehavior,
             CurrentBehavior = save.CurrentBehavior,
             BehaviorStartedTick = save.BehaviorStartedTick,
             BehaviorEndsTick = save.BehaviorEndsTick,
@@ -193,6 +222,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             CombatState = save.CombatState,
             CurrentTargetRuntimeNpcId = save.CurrentTargetRuntimeNpcId,
             IsFighting = save.IsFighting,
+            IsAggressiveToPlayer = save.IsAggressiveToPlayer,
+            WasDamagedByPlayer = save.WasDamagedByPlayer,
 
             MaxHull = save.MaxHull,
             CurrentHull = save.CurrentHull,
@@ -207,6 +238,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
             LifeState = save.LifeState,
             IsAlive = save.IsAlive,
+            DestroyedAtTick = Mathf.Max(0, save.DestroyedAtTick),
+            NextRespawnTick = Mathf.Max(0, save.NextRespawnTick),
 
             WasKilledByPlayer = save.WasKilledByPlayer,
             CreditReward = save.CreditReward,
@@ -214,8 +247,13 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             DangerTier = save.DangerTier
         };
 
+        if (save.Weapons == null)
+            return npc;
+
         foreach (SystemNpcWeaponSaveData weaponSave in save.Weapons)
         {
+            if (weaponSave == null)
+                continue;
             npc.Weapons.Add(new SystemNpcWeaponRuntimeState
             {
                 WeaponConfigId = weaponSave.WeaponConfigId,

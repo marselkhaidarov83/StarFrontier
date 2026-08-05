@@ -53,6 +53,60 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         RuntimeState.Clear();
     }
 
+    public int ScheduleRespawn(
+        SystemNpcRuntimeState npc,
+        int destroyedAtTick)
+    {
+        if (npc == null)
+            return 0;
+
+        if (npc.IsPirate)
+            return 0;
+
+        string systemId = string.IsNullOrWhiteSpace(npc.OriginSystemId)
+            ? npc.CurrentSystemId
+            : npc.OriginSystemId;
+
+        if (string.IsNullOrWhiteSpace(systemId))
+            return 0;
+
+        string timerRuleId;
+        float intervalSeconds;
+
+        if (!TryResolveRespawnRule(
+                npc,
+                systemId,
+                out timerRuleId,
+                out intervalSeconds))
+        {
+            return 0;
+        }
+
+        if (npc.IsEnemy &&
+            !string.IsNullOrWhiteSpace(npc.GroupRuntimeId) &&
+            _npcRuntimeService.GetAliveNpcsByGroupId(
+                npc.GroupRuntimeId).Count > 0)
+        {
+            return 0;
+        }
+
+        int delayTicks = Mathf.Max(
+            1,
+            Mathf.CeilToInt(
+                intervalSeconds / GameTimeState.SecondsPerDay));
+
+        int nextRespawnTick =
+            Mathf.Max(1, destroyedAtTick) + delayTicks;
+
+        SystemPopulationRuleTimerState timer =
+            RuntimeState.GetOrCreateTimer(systemId, timerRuleId);
+
+        timer.TimerSeconds = 0f;
+        timer.NextSpawnTick = nextRespawnTick;
+
+        return nextRespawnTick;
+    }
+
     private void TickAllies(
         StarSystemConfig starSystem,
         float deltaTime)
@@ -100,6 +154,22 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                         rule,
                         allyConfig);
 
+                string timerKey =
+                    BuildAllyTimerKey(
+                        rule,
+                        allyConfig);
+
+                SystemPopulationRuleTimerState timer =
+                    RuntimeState.GetOrCreateTimer(
+                        starSystem.Id,
+                        timerKey);
+
+                bool respawnIsDue =
+                    ConsumeDueRespawn(timer);
+
+                if (timer.NextSpawnTick > 0)
+                    continue;
+
                 if (aliveCount < entry.MinCount)
                 {
                     int missing =
@@ -119,15 +189,15 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 if (aliveCount >= entry.MaxCount)
                     continue;
 
-                string timerKey =
-                    BuildAllyTimerKey(
+                if (respawnIsDue)
+                {
+                    CreateAlly(
+                        starSystem,
                         rule,
                         allyConfig);
 
-                SystemPopulationRuleTimerState timer =
-                    RuntimeState.GetOrCreateTimer(
-                        starSystem.Id,
-                        timerKey);
+                    continue;
+                }
 
                 timer.TimerSeconds += deltaTime;
 
@@ -179,6 +249,18 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 RuntimeState.GetOrCreateTimer(
                     starSystem.Id,
                     rule.Id);
+
+            if (ConsumeDueRespawn(timer))
+            {
+                CreateEnemyGroup(
+                    starSystem,
+                    rule);
+
+                continue;
+            }
+
+            if (timer.NextSpawnTick > 0)
+                continue;
 
             timer.TimerSeconds += deltaTime;
 
@@ -484,5 +566,97 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 : "unknown_ally";
 
         return ruleId + "_" + allyConfigId;
+    }
+
+    private bool TryResolveRespawnRule(
+        SystemNpcRuntimeState npc,
+        string systemId,
+        out string timerRuleId,
+        out float intervalSeconds)
+    {
+        timerRuleId = string.Empty;
+        intervalSeconds = 0f;
+
+        if (npc.IsAlly)
+        {
+            AllySpawnRuleConfig rule =
+                _configService.GetAllySpawnRuleConfigById(
+                    npc.SpawnRuleId);
+
+            if (rule == null)
+                return false;
+
+            timerRuleId = BuildAllyTimerKey(
+                rule,
+                _configService.GetAllyConfigById(npc.ConfigId));
+            intervalSeconds = rule.SpawnIntervalSeconds;
+            return true;
+        }
+
+        if (!npc.IsEnemy)
+            return false;
+
+        StarSystemConfig starSystem =
+            _configService.GetStarSystemConfigById(systemId);
+
+        if (starSystem == null ||
+            starSystem.SystemPopulation == null ||
+            starSystem.SystemPopulation.EnemyGroupSpawnRules == null)
+        {
+            return false;
+        }
+
+        for (int i = 0;
+             i < starSystem.SystemPopulation.EnemyGroupSpawnRules.Length;
+             i++)
+        {
+            EnemyGroupSpawnRuleConfig rule =
+                starSystem.SystemPopulation.EnemyGroupSpawnRules[i];
+
+            if (rule == null || rule.Id != npc.SpawnRuleId)
+                continue;
+
+            timerRuleId = rule.Id;
+            intervalSeconds = rule.SpawnIntervalSeconds;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool ConsumeDueRespawn(
+        SystemPopulationRuleTimerState timer)
+    {
+        if (timer == null)
+            return false;
+
+        if (timer.NextSpawnTick <= 0)
+            return false;
+
+        int currentTick = GetCurrentQuantTick();
+
+        if (currentTick < timer.NextSpawnTick)
+            return false;
+
+        timer.NextSpawnTick = 0;
+        timer.TimerSeconds = 0f;
+        return true;
+    }
+
+    private int GetCurrentQuantTick()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return 1;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IGameTimeService>(
+                out IGameTimeService gameTimeService))
+        {
+            return Mathf.Max(1, gameTimeService.CurrentQuantTick);
+        }
+
+        return 1;
     }
 }
