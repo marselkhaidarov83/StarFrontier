@@ -7,25 +7,33 @@ using UnityEngine;
 public sealed class AllyConfig : BaseConfig
 {
     [Header("Base Stats")]
-    [SerializeField] private int baseHull = 50;
-    [SerializeField] private int baseShield = 20;
-    [SerializeField] private int baseEnergy = 50;
-    [SerializeField] private float baseSpeed = 2f;
+    [SerializeField]
+    private int baseHull = 50;
+
+    [SerializeField]
+    private int baseShield = 20;
+
+    [SerializeField]
+    private int baseEnergy = 50;
+
+    [SerializeField]
+    private float baseSpeed = 2f;
+
     [SerializeField]
     [Range(1, 10)]
     private int level = 1;
 
     [Header("Ally Role")]
-    [SerializeField] private AllyRole2A role =
+    [SerializeField]
+    private AllyRole2A role =
         AllyRole2A.Ranger;
 
     [Header("Behavior Scenarios")]
     [Tooltip(
-        "Профили поведения союзника по сценариям. " +
-        "ID сценария хранится строкой и может быть расширен.")]
+        "Scenario enum and reference to the behavior profile.")]
     [SerializeField]
-    private AllyBehaviourScenarioConfig[] behaviorScenarios =
-        new AllyBehaviourScenarioConfig[0];
+    private AllyBehaviourScenarioEntry[] behaviorScenarios =
+        new AllyBehaviourScenarioEntry[0];
 
     [Header("Weapons")]
     [SerializeField]
@@ -33,28 +41,35 @@ public sealed class AllyConfig : BaseConfig
         new WeaponConfig[0];
 
     [Header("Visuals")]
-    [SerializeField] private Sprite mapSprite;
+    [SerializeField]
+    private Sprite mapSprite;
 
-    public int BaseHull => baseHull;
-    public int BaseShield => baseShield;
-    public int BaseEnergy => baseEnergy;
-    public float BaseSpeed => baseSpeed;
-    public int Level => level;
+    public int BaseHull =>
+        baseHull;
 
-    public AllyRole2A Role => role;
+    public int BaseShield =>
+        baseShield;
 
-    public IReadOnlyList<AllyBehaviourScenarioConfig>
+    public int BaseEnergy =>
+        baseEnergy;
+
+    public float BaseSpeed =>
+        baseSpeed;
+
+    public int Level =>
+        level;
+
+    public AllyRole2A Role =>
+        role;
+
+    public IReadOnlyList<AllyBehaviourScenarioEntry>
         BehaviorScenarios =>
         behaviorScenarios;
 
-    public IReadOnlyList<WeaponConfig> WeaponConfigs =>
+    public IReadOnlyList<WeaponConfig>
+        WeaponConfigs =>
         weaponConfigs;
 
-    /*
-     * Старое свойство оставляем для совместимости.
-     * Старый код, который ожидает AllyConfig.WeaponConfig,
-     * получает первое непустое оружие из массива.
-     */
     public WeaponConfig WeaponConfig
     {
         get
@@ -72,35 +87,33 @@ public sealed class AllyConfig : BaseConfig
         }
     }
 
-    public Sprite MapSprite => mapSprite;
+    public Sprite MapSprite =>
+        mapSprite;
 
     public bool TryGetBehaviorScenario(
-        string scenarioId,
-        out AllyBehaviourScenarioConfig scenario)
+        AllyBehaviourScenario scenario,
+        out AllyBehaviourScenarioConfig behaviorConfig)
     {
-        scenario = null;
-
-        if (string.IsNullOrWhiteSpace(scenarioId))
-            return false;
+        behaviorConfig = null;
 
         if (behaviorScenarios == null)
             return false;
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
         {
-            AllyBehaviourScenarioConfig candidate =
+            AllyBehaviourScenarioEntry entry =
                 behaviorScenarios[i];
 
-            if (candidate == null)
+            if (entry == null)
                 continue;
 
-            if (!candidate.IsValid())
+            if (!entry.IsValid())
                 continue;
 
-            if (!candidate.Matches(scenarioId))
+            if (entry.Scenario != scenario)
                 continue;
 
-            scenario = candidate;
+            behaviorConfig = entry.BehaviorConfig;
             return true;
         }
 
@@ -108,51 +121,45 @@ public sealed class AllyConfig : BaseConfig
     }
 
     public AllyBehaviourScenarioConfig GetBehaviorScenario(
-        string scenarioId)
+        AllyBehaviourScenario scenario)
     {
-        AllyBehaviourScenarioConfig scenario;
+        AllyBehaviourScenarioConfig behaviorConfig;
 
         if (!TryGetBehaviorScenario(
-                scenarioId,
-                out scenario))
+                scenario,
+                out behaviorConfig))
         {
             return null;
         }
 
-        return scenario;
+        return behaviorConfig;
     }
 
-    public bool HasBehaviorScenario(string scenarioId)
+    public bool HasBehaviorScenario(
+        AllyBehaviourScenario scenario)
     {
         return TryGetBehaviorScenario(
-            scenarioId,
+            scenario,
             out _);
     }
 
-    public bool HasDuplicateBehaviorScenarioIds()
+    public bool HasDuplicateBehaviorScenarios()
     {
         if (behaviorScenarios == null)
             return false;
 
-        HashSet<string> scenarioIds =
-            new HashSet<string>(
-                System.StringComparer.OrdinalIgnoreCase);
+        HashSet<AllyBehaviourScenario> scenarios =
+            new HashSet<AllyBehaviourScenario>();
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
         {
-            AllyBehaviourScenarioConfig scenario =
+            AllyBehaviourScenarioEntry entry =
                 behaviorScenarios[i];
 
-            if (scenario == null)
+            if (entry == null)
                 continue;
 
-            if (!scenario.IsValid())
-                continue;
-
-            string normalizedId =
-                scenario.Id.Trim();
-
-            if (!scenarioIds.Add(normalizedId))
+            if (!scenarios.Add(entry.Scenario))
                 return true;
         }
 
@@ -186,13 +193,10 @@ public sealed class AllyConfig : BaseConfig
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (weaponConfigs == null)
-            weaponConfigs = new WeaponConfig[0];
-
         if (behaviorScenarios == null)
         {
             behaviorScenarios =
-                new AllyBehaviourScenarioConfig[0];
+                new AllyBehaviourScenarioEntry[0];
         }
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
@@ -200,11 +204,12 @@ public sealed class AllyConfig : BaseConfig
             if (behaviorScenarios[i] == null)
             {
                 behaviorScenarios[i] =
-                    new AllyBehaviourScenarioConfig();
+                    new AllyBehaviourScenarioEntry();
             }
-
-            behaviorScenarios[i].Validate();
         }
+
+        if (weaponConfigs == null)
+            weaponConfigs = new WeaponConfig[0];
 
         baseHull = Mathf.Max(1, baseHull);
         baseShield = Mathf.Max(0, baseShield);

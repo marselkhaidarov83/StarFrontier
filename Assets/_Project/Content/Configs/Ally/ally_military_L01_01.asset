@@ -26,6 +26,13 @@ MonoBehaviour:
   baseSpeed: 60
   level: 1
   role: 10
+  behaviorScenarios:
+  - scenario: 0
+    behaviorConfig: {fileID: 11400000, guid: 424059737fe514d8b8ec63c434bc7e94, type: 2}
+  - scenario: 10
+    behaviorConfig: {fileID: 11400000, guid: 9b011d1716e494f0cb85e948087ecab7, type: 2}
+  - scenario: 20
+    behaviorConfig: {fileID: 11400000, guid: 9cc2b3aefb5fc44ab8e0882058459c32, type: 2}
   weaponConfigs:
   - {fileID: 11400000, guid: ee278b33cdbd046f4b9e1c3b55c2177e, type: 2}
   - {fileID: 11400000, guid: f5cea52a8b15b4d16bd62a5894783a3d, type: 2}

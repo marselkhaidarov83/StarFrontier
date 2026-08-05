@@ -1,18 +1,14 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
+[CreateAssetMenu(
+    fileName = "AllyBehaviourScenarioConfig",
+    menuName = "StarFrontier/Configs/Npc/Ally Behaviour Scenario")]
 public sealed class AllyBehaviourScenarioConfig : BaseConfig
 {
-    [Header("Scenario")]
-    [Tooltip(
-        "Расширяемый строковый идентификатор сценария. " +
-        "Примеры: normal, enemy_invasion, enemy_system_invasion.")]
-    [SerializeField] private string scenarioId = "normal";
-
     [Header("Behavior Weights")]
-    [SerializeField] private SystemNpcBehaviorWeight[] behaviorWeights =
+    [SerializeField]
+    private SystemNpcBehaviorWeight[] behaviorWeights =
         new SystemNpcBehaviorWeight[0];
 
     [Header("Combat")]
@@ -20,41 +16,15 @@ public sealed class AllyBehaviourScenarioConfig : BaseConfig
     [Range(0f, 100f)]
     private float engageEnemiesWeight = 100f;
 
-    public string ScenarioId => scenarioId;
-
     public IReadOnlyList<SystemNpcBehaviorWeight> BehaviorWeights =>
         behaviorWeights;
 
     public float EngageEnemiesWeight =>
         engageEnemiesWeight;
 
-    public bool Matches(string requestedScenarioId)
-    {
-        if (string.IsNullOrWhiteSpace(requestedScenarioId))
-            return false;
-
-        if (string.IsNullOrWhiteSpace(scenarioId))
-            return false;
-
-        return string.Equals(
-            scenarioId.Trim(),
-            requestedScenarioId.Trim(),
-            StringComparison.OrdinalIgnoreCase);
-    }
-
-    public bool IsValid()
-    {
-        return !string.IsNullOrWhiteSpace(scenarioId);
-    }
-
 #if UNITY_EDITOR
-    public void Validate()
+    private void OnValidate()
     {
-        if (scenarioId == null)
-            scenarioId = string.Empty;
-        else
-            scenarioId = scenarioId.Trim().ToLowerInvariant();
-
         if (behaviorWeights == null)
             behaviorWeights = new SystemNpcBehaviorWeight[0];
 
