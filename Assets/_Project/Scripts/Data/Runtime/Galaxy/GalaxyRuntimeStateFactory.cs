@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 public static class GalaxyRuntimeStateFactory
 {
-    private static bool _seectorAllOpened = true;
-    private static bool _routeAllUnlocked = true;
+    private static bool _seectorAllOpened = false;
+    private static bool _routeAllUnlocked = false;
 
     public static GalaxyRuntimeState CreateNewGalaxyRuntimeState(GalaxyConfig config)
     {
