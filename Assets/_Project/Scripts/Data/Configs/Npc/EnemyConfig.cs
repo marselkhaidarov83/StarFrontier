@@ -1,84 +1,263 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-[CreateAssetMenu(fileName = "EnemyConfig", menuName = "StarFrontier/Configs/Npc/Enemy")]
+[CreateAssetMenu(
+    fileName = "EnemyConfig",
+    menuName = "StarFrontier/Configs/Npc/Enemy")]
 public class EnemyConfig : BaseConfig
 {
-    [Header("Base Stats")]
-    [SerializeField] private int baseHull;
-    [SerializeField] private int baseShield;
-    [SerializeField] private int baseEnergy;
-    [SerializeField] private float baseSpeed;
-    [SerializeField] [Range(1, 10)] private int level;
+    private static readonly WeaponConfig[] EmptyWeaponConfigs =
+        new WeaponConfig[0];
+
+    [Header("Base Stats Range")]
+    [FormerlySerializedAs("baseHull")]
+    [SerializeField]
+    private int baseHullMin = 1;
+
+    [SerializeField]
+    private int baseHullMax = 1;
+
+    [FormerlySerializedAs("baseShield")]
+    [SerializeField]
+    private int baseShieldMin = 0;
+
+    [SerializeField]
+    private int baseShieldMax = 0;
+
+    [FormerlySerializedAs("baseEnergy")]
+    [SerializeField]
+    private int baseEnergyMin = 0;
+
+    [SerializeField]
+    private int baseEnergyMax = 0;
+
+    [FormerlySerializedAs("baseSpeed")]
+    [SerializeField]
+    private float baseSpeedMin = 0f;
+
+    [SerializeField]
+    private float baseSpeedMax = 0f;
+
+    [SerializeField]
+    [Range(1, 10)]
+    private int level = 1;
 
     [Header("Combat Role")]
-    [SerializeField] private EnemyArchetype archetype;
+    [SerializeField]
+    private EnemyArchetype archetype;
 
-    [Header("Weapons")]
-    [SerializeField] private WeaponConfig[] weaponConfigs = new WeaponConfig[0];
+    [Header("Weapon Groups")]
+    [SerializeField]
+    private WeaponGroupConfig[] weaponGroups =
+        new WeaponGroupConfig[0];
 
-    [Header("Rewards")]
-    [SerializeField] private int creditReward;
-    [SerializeField] private int xpReward;
-    [SerializeField] [Range(1, 5)] private int dangerTier = 1;
+    [Header("Legacy Weapons - Migration Fallback")]
+    [FormerlySerializedAs("weaponConfigs")]
+    [SerializeField]
+    [HideInInspector]
+    private WeaponConfig[] legacyWeaponConfigs =
+        new WeaponConfig[0];
+
+    [Header("Rewards Range")]
+    [FormerlySerializedAs("creditReward")]
+    [SerializeField]
+    private int creditRewardMin = 0;
+
+    [SerializeField]
+    private int creditRewardMax = 0;
+
+    [FormerlySerializedAs("xpReward")]
+    [SerializeField]
+    private int xpRewardMin = 0;
+
+    [SerializeField]
+    private int xpRewardMax = 0;
+
+    [SerializeField]
+    [Range(1, 5)]
+    private int dangerTier = 1;
 
     [Header("Visuals")]
-    [SerializeField] private Sprite combatSprite;
+    [SerializeField]
+    private Sprite combatSprite;
 
-    public int BaseHull => baseHull;
-    public int BaseShield => baseShield;
-    public int BaseEnergy => baseEnergy;
-    public float BaseSpeed => baseSpeed;
-    public int Level => level;
+    public int BaseHullMin =>
+        baseHullMin;
 
-    public EnemyArchetype AiArchetype => archetype;
+    public int BaseHullMax =>
+        baseHullMax;
 
-    public IReadOnlyList<WeaponConfig> WeaponConfigs => weaponConfigs;
+    public int BaseShieldMin =>
+        baseShieldMin;
+
+    public int BaseShieldMax =>
+        baseShieldMax;
+
+    public int BaseEnergyMin =>
+        baseEnergyMin;
+
+    public int BaseEnergyMax =>
+        baseEnergyMax;
+
+    public float BaseSpeedMin =>
+        baseSpeedMin;
+
+    public float BaseSpeedMax =>
+        baseSpeedMax;
 
     /*
-     * Старое свойство оставляем для совместимости.
-     * Старый код, который ожидает EnemyConfig.WeaponConfig,
-     * получит первое непустое оружие из массива.
+     * Legacy read-only properties.
+     * Оставлены, чтобы старый код/тесты не ломались при компиляции.
+     * Реальное создание врага должно использовать Min/Max.
      */
+    public int BaseHull =>
+        baseHullMin;
+
+    public int BaseShield =>
+        baseShieldMin;
+
+    public int BaseEnergy =>
+        baseEnergyMin;
+
+    public float BaseSpeed =>
+        baseSpeedMin;
+
+    public int Level =>
+        level;
+
+    public EnemyArchetype AiArchetype =>
+        archetype;
+
+    public IReadOnlyList<WeaponGroupConfig> WeaponGroups =>
+        weaponGroups;
+
+    /*
+     * Legacy compatibility:
+     * раньше EnemyConfig отдавал плоский список оружия.
+     * Теперь возвращается первая валидная WeaponGroup.
+     * Если группы ещё не заполнены, используется legacyWeaponConfigs.
+     */
+    public IReadOnlyList<WeaponConfig> WeaponConfigs =>
+        GetFirstValidWeaponGroupWeaponsOrLegacy();
+
     public WeaponConfig WeaponConfig
     {
         get
         {
-            if (weaponConfigs == null)
+            IReadOnlyList<WeaponConfig> weapons =
+                GetFirstValidWeaponGroupWeaponsOrLegacy();
+
+            if (weapons == null)
                 return null;
 
-            for (int i = 0; i < weaponConfigs.Length; i++)
+            for (int i = 0; i < weapons.Count; i++)
             {
-                if (weaponConfigs[i] != null)
-                    return weaponConfigs[i];
+                WeaponConfig weaponConfig =
+                    weapons[i];
+
+                if (weaponConfig != null)
+                    return weaponConfig;
             }
 
             return null;
         }
     }
 
-    public int CreditReward => creditReward;
-    public int XpReward => xpReward;
-    public int DangerTier => dangerTier;
-    public Sprite CombatSprite => combatSprite;
+    public int CreditRewardMin =>
+        creditRewardMin;
+
+    public int CreditRewardMax =>
+        creditRewardMax;
+
+    public int XpRewardMin =>
+        xpRewardMin;
+
+    public int XpRewardMax =>
+        xpRewardMax;
+
+    /*
+     * Legacy read-only properties.
+     * Реальное создание врага должно использовать Min/Max.
+     */
+    public int CreditReward =>
+        creditRewardMin;
+
+    public int XpReward =>
+        xpRewardMin;
+
+    public int DangerTier =>
+        dangerTier;
+
+    public Sprite CombatSprite =>
+        combatSprite;
 
     public bool HasWeapons()
     {
         return WeaponCount > 0;
     }
 
-    public int WeaponCount
+    public bool HasWeaponGroups()
+    {
+        return WeaponGroupCount > 0;
+    }
+
+    public int WeaponGroupCount
     {
         get
         {
-            if (weaponConfigs == null)
+            if (weaponGroups == null)
                 return 0;
 
             int count = 0;
 
-            for (int i = 0; i < weaponConfigs.Length; i++)
+            for (int i = 0; i < weaponGroups.Length; i++)
             {
-                if (weaponConfigs[i] != null)
+                WeaponGroupConfig group =
+                    weaponGroups[i];
+
+                if (group == null)
+                    continue;
+
+                if (!group.IsValid())
+                    continue;
+
+                count++;
+            }
+
+            return count;
+        }
+    }
+
+    public int WeaponCount
+    {
+        get
+        {
+            int count = 0;
+
+            if (weaponGroups != null)
+            {
+                for (int i = 0; i < weaponGroups.Length; i++)
+                {
+                    WeaponGroupConfig group =
+                        weaponGroups[i];
+
+                    if (group == null)
+                        continue;
+
+                    count += group.WeaponCount;
+                }
+            }
+
+            if (count > 0)
+                return count;
+
+            if (legacyWeaponConfigs == null)
+                return 0;
+
+            for (int i = 0; i < legacyWeaponConfigs.Length; i++)
+            {
+                if (legacyWeaponConfigs[i] != null)
                     count++;
             }
 
@@ -86,19 +265,62 @@ public class EnemyConfig : BaseConfig
         }
     }
 
+    private IReadOnlyList<WeaponConfig>
+        GetFirstValidWeaponGroupWeaponsOrLegacy()
+    {
+        if (weaponGroups != null)
+        {
+            for (int i = 0; i < weaponGroups.Length; i++)
+            {
+                WeaponGroupConfig group =
+                    weaponGroups[i];
+
+                if (group == null)
+                    continue;
+
+                if (!group.IsValid())
+                    continue;
+
+                return group.WeaponConfigs;
+            }
+        }
+
+        if (legacyWeaponConfigs != null)
+            return legacyWeaponConfigs;
+
+        return EmptyWeaponConfigs;
+    }
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (weaponConfigs == null)
-            weaponConfigs = new WeaponConfig[0];
+        if (weaponGroups == null)
+            weaponGroups = new WeaponGroupConfig[0];
 
-        baseHull = Mathf.Max(1, baseHull);
-        baseShield = Mathf.Max(0, baseShield);
-        baseEnergy = Mathf.Max(0, baseEnergy);
-        baseSpeed = Mathf.Max(0f, baseSpeed);
-        level = Mathf.Max(1, level);
-        creditReward = Mathf.Max(0, creditReward);
-        xpReward = Mathf.Max(0, xpReward);
+        if (legacyWeaponConfigs == null)
+            legacyWeaponConfigs = new WeaponConfig[0];
+
+        baseHullMin = Mathf.Max(1, baseHullMin);
+        baseHullMax = Mathf.Max(baseHullMin, baseHullMax);
+
+        baseShieldMin = Mathf.Max(0, baseShieldMin);
+        baseShieldMax = Mathf.Max(baseShieldMin, baseShieldMax);
+
+        baseEnergyMin = Mathf.Max(0, baseEnergyMin);
+        baseEnergyMax = Mathf.Max(baseEnergyMin, baseEnergyMax);
+
+        baseSpeedMin = Mathf.Max(0f, baseSpeedMin);
+        baseSpeedMax = Mathf.Max(baseSpeedMin, baseSpeedMax);
+
+        level = Mathf.Clamp(level, 1, 10);
+
+        creditRewardMin = Mathf.Max(0, creditRewardMin);
+        creditRewardMax = Mathf.Max(creditRewardMin, creditRewardMax);
+
+        xpRewardMin = Mathf.Max(0, xpRewardMin);
+        xpRewardMax = Mathf.Max(xpRewardMin, xpRewardMax);
+
+        dangerTier = Mathf.Clamp(dangerTier, 1, 5);
     }
 #endif
 }

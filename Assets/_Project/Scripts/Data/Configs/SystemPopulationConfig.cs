@@ -12,17 +12,8 @@ public sealed class SystemPopulationConfig : BaseConfig
     [SerializeField] private SystemPopulationProfile[] levelProfiles =
         new SystemPopulationProfile[0];
 
-    [Header("Legacy Fallback - Remove After Migration")]
-    [SerializeField] private AllySpawnRuleConfig[] allySpawnRules;
-    [SerializeField] private EnemyGroupSpawnRuleConfig[] enemyGroupSpawnRules;
-
     public SystemPopulationProfile[] LevelProfiles =>
         levelProfiles;
-
-    // Legacy read-only properties are retained so older code and assets compile.
-    public AllySpawnRuleConfig[] AllySpawnRules => allySpawnRules;
-    public EnemyGroupSpawnRuleConfig[] EnemyGroupSpawnRules =>
-        enemyGroupSpawnRules;
 
     public SystemPopulationProfile GetProfileForGalaxyLevel(
         int galaxyLevel)

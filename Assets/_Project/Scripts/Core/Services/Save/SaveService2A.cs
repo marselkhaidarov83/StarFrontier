@@ -88,7 +88,7 @@ public class SaveService2A : CustomService, ISaveService
         }
         catch (Exception e)
         {
-            Debug.LogError("[SaveService] Failed to save: " + e.Message);
+            AppLog.Error("[SaveService] Failed to save: " + e.Message);
         }
         finally
         {

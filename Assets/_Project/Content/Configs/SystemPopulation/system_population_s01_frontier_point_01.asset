@@ -17,5 +17,3 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   levelProfiles: []
-  allySpawnRules: []
-  enemyGroupSpawnRules: []
