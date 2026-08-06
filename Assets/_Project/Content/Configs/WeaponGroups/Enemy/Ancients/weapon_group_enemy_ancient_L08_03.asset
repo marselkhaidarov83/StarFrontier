@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1f5b29ec6984b88b3e77930fb53b24, type: 3}
+  m_Name: weapon_group_enemy_ancient_L08_03
+  m_EditorClassIdentifier: Data::WeaponGroupConfig
+  id: weapon_group_enemy_ancient_L08_03
+  displayName: "\u0412\u0440\u0430\u0433\u0438 \u2014 \u0414\u0440\u0435\u0432\u043D\u0438\u0435
+    \u2014 \u0443\u0440\u043E\u0432\u0435\u043D\u044C 8, \u0432\u0430\u0440\u0438\u0430\u043D\u0442
+    3"
+  description: "\u0412\u0440\u0430\u0436\u0435\u0441\u043A\u0438\u0435 \u0433\u0440\u0443\u043F\u043F\u044B
+    \u0414\u0440\u0435\u0432\u043D\u0438\u0445: \u0442\u044F\u0436\u0451\u043B\u043E\u0435,
+    \u0434\u0430\u043B\u044C\u043D\u043E\u0431\u043E\u0439\u043D\u043E\u0435 \u0438
+    \u0432\u0437\u0440\u044B\u0432\u043D\u043E\u0435 \u043E\u0440\u0443\u0436\u0438\u0435.
+    Strict-level: 8; weapon count: 4; enemy baseline tier: Silver."
+  icon: {fileID: 0}
+  level: 8
+  groupKind: 10
+  allyType: 0
+  enemyFaction: 20
+  strengthRank: 0
+  strengthOrder: Enemy faction; not part of ally order
+  weaponOwner: Ancients
+  weaponOwnerKey: ancient
+  variant: 3
+  weaponCount: 4
+  powerScore: 812
+  tierPattern: Silver + Silver + Silver + Silver
+  familyPattern: singularity + orb + lance + beam
+  weaponConfigs:
+  - {fileID: 11400000, guid: f56d63eab11564884b4b0e21d87901d8, type: 2}
+  - {fileID: 11400000, guid: 29f72633a258f4621aa937769f1e096c, type: 2}
+  - {fileID: 11400000, guid: 779321aab0bf7436392b697a9a178ea3, type: 2}
+  - {fileID: 11400000, guid: b00ea8e4f730641d280c76fe01bf98ed, type: 2}

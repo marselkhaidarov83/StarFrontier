@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1f5b29ec6984b88b3e77930fb53b24, type: 3}
+  m_Name: weapon_group_ally_military_L05_02
+  m_EditorClassIdentifier: Data::WeaponGroupConfig
+  id: weapon_group_ally_military_L05_02
+  displayName: "\u0412\u043E\u0435\u043D\u043D\u044B\u0435 \u2014 \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    5, \u0432\u0430\u0440\u0438\u0430\u043D\u0442 2"
+  description: "\u0421\u0438\u043B\u044C\u043D\u0435\u0439\u0448\u0438\u0435 \u0441\u043E\u044E\u0437\u043D\u044B\u0435
+    \u0431\u043E\u0435\u0432\u044B\u0435 \u0433\u0440\u0443\u043F\u043F\u044B: \u0442\u044F\u0436\u0451\u043B\u043E\u0435
+    \u0438 \u0434\u0430\u043B\u044C\u043D\u043E\u0431\u043E\u0439\u043D\u043E\u0435
+    \u043E\u0440\u0443\u0436\u0438\u0435, \u0432\u044B\u0441\u043E\u043A\u0438\u0439
+    tier-mix. Strict-level: 5; weapon count: 3; primary focus: \u0434\u0430\u043B\u044C\u043D\u0438\u0439
+    \u0431\u043E\u0439. Tier-mix intentionally avoids mono-tier groups when weaponCount
+    > 1."
+  icon: {fileID: 0}
+  level: 5
+  groupKind: 0
+  allyType: 10
+  enemyFaction: 0
+  strengthRank: 5
+  strengthOrder: "1 \u2014 strongest ally"
+  weaponOwner: PlayerAndRangers
+  weaponOwnerKey: common
+  variant: 2
+  weaponCount: 3
+  powerScore: 811
+  tierPattern: Gold + Silver + Gold
+  familyPattern: railgun + missile + laser
+  weaponConfigs:
+  - {fileID: 11400000, guid: 70e3cb5593bad4879b2fafca9a50384e, type: 2}
+  - {fileID: 11400000, guid: d105a1b3c201d4ae389afc9a90880077, type: 2}
+  - {fileID: 11400000, guid: d00c98c0c6e774d4ebffca67beed973d, type: 2}

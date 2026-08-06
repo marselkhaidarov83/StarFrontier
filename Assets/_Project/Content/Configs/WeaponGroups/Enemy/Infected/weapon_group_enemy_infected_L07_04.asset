@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1f5b29ec6984b88b3e77930fb53b24, type: 3}
+  m_Name: weapon_group_enemy_infected_L07_04
+  m_EditorClassIdentifier: Data::WeaponGroupConfig
+  id: weapon_group_enemy_infected_L07_04
+  displayName: "\u0412\u0440\u0430\u0433\u0438 \u2014 \u0417\u0430\u0440\u0430\u0436\u0451\u043D\u043D\u044B\u0435
+    \u2014 \u0443\u0440\u043E\u0432\u0435\u043D\u044C 7, \u0432\u0430\u0440\u0438\u0430\u043D\u0442
+    4"
+  description: "\u0412\u0440\u0430\u0436\u0435\u0441\u043A\u0438\u0435 \u0433\u0440\u0443\u043F\u043F\u044B
+    \u0417\u0430\u0440\u0430\u0436\u0451\u043D\u043D\u044B\u0445: \u043D\u0435\u0441\u0442\u0430\u0431\u0438\u043B\u044C\u043D\u044B\u0439
+    \u0448\u043A\u0432\u0430\u043B\u044C\u043D\u044B\u0439 \u0438 \u0442\u044F\u0436\u0451\u043B\u044B\u0439
+    \u043E\u0433\u043E\u043D\u044C. Strict-level: 7; weapon count: 4; enemy baseline
+    tier: Silver."
+  icon: {fileID: 0}
+  level: 7
+  groupKind: 10
+  allyType: 0
+  enemyFaction: 30
+  strengthRank: 0
+  strengthOrder: Enemy faction; not part of ally order
+  weaponOwner: Infected
+  weaponOwnerKey: infected
+  variant: 4
+  weaponCount: 4
+  powerScore: 812
+  tierPattern: Silver + Silver + Silver + Silver
+  familyPattern: tendril + spore + swarm + burst
+  weaponConfigs:
+  - {fileID: 11400000, guid: a70c0cfbb013f4916934f60b0f270531, type: 2}
+  - {fileID: 11400000, guid: fbe6844da66bb427cb64540f1b52b72b, type: 2}
+  - {fileID: 11400000, guid: aa0256b5ff62d44058680556ac85bdc6, type: 2}
+  - {fileID: 11400000, guid: 72d97f6b0b0f64f21b16fabc20655fb6, type: 2}

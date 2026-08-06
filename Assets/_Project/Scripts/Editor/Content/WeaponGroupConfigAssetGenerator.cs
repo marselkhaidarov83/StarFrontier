@@ -59,7 +59,7 @@ public static class WeaponGroupConfigAssetGenerator
     public static void DeleteGeneratedGroups()
     {
         var deleted = DeleteWeaponGroupAssets(confirm: true);
-        Debug.Log($"WeaponGroupConfig: deleted generated group assets: {deleted}");
+        Debug.Log($"WeaponGroupConfig: deleted generated group assets/folders: {deleted}");
     }
 
     private static void GenerateFromCsv(string csvAssetPath, bool validateOnly)
@@ -101,6 +101,8 @@ public static class WeaponGroupConfigAssetGenerator
             return;
         }
 
+        PrepareOutputFolders(parsedRows);
+
         var created = 0;
         var updated = 0;
 
@@ -110,8 +112,6 @@ public static class WeaponGroupConfigAssetGenerator
         {
             foreach (var parsedRow in parsedRows)
             {
-                EnsureFolder(Path.GetDirectoryName(parsedRow.AssetPath)?.Replace("\\", "/"));
-
                 var asset = AssetDatabase.LoadAssetAtPath<WeaponGroupConfig>(parsedRow.AssetPath);
                 if (asset == null)
                 {
@@ -148,7 +148,7 @@ public static class WeaponGroupConfigAssetGenerator
         {
             var shouldDelete = EditorUtility.DisplayDialog(
                 "Delete WeaponGroupConfig assets",
-                $"Будут удалены все WeaponGroupConfig asset-ы внутри:\n{OutputRoot}\n\nCSV, скрипты и WeaponConfig asset-ы не удаляются.",
+                $"Будут удалены все WeaponGroupConfig asset-ы внутри:\n{OutputRoot}\n\nCSV, скрипты и WeaponConfig asset-ы не удаляются. Все подпапки внутри WeaponGroups будут очищены, включая случайные Ally 1 / Enemy 1.",
                 "Удалить",
                 "Отмена");
 
@@ -157,7 +157,7 @@ public static class WeaponGroupConfigAssetGenerator
         }
 
         var guids = AssetDatabase.FindAssets("t:WeaponGroupConfig", new[] { OutputRoot });
-        var deleted = 0;
+        var deletedAssets = 0;
 
         AssetDatabase.StartAssetEditing();
 
@@ -169,11 +169,11 @@ public static class WeaponGroupConfigAssetGenerator
                 if (string.IsNullOrWhiteSpace(path))
                     continue;
 
-                if (!path.StartsWith(OutputRoot, StringComparison.OrdinalIgnoreCase))
+                if (!path.StartsWith(OutputRoot + "/", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 if (AssetDatabase.DeleteAsset(path))
-                    deleted++;
+                    deletedAssets++;
             }
         }
         finally
@@ -184,7 +184,72 @@ public static class WeaponGroupConfigAssetGenerator
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
+        var deletedEmptyFolders = DeleteEmptyFoldersUnderOutputRoot();
+        Debug.Log($"WeaponGroupConfig: deleted assets={deletedAssets}, deleted empty folders={deletedEmptyFolders}.");
+
+        return deletedAssets;
+    }
+
+    private static int DeleteEmptyFoldersUnderOutputRoot()
+    {
+        var fullRoot = ToFullPath(OutputRoot);
+        if (!Directory.Exists(fullRoot))
+            return 0;
+
+        var deleted = 0;
+        var directories = Directory
+            .GetDirectories(fullRoot, "*", SearchOption.AllDirectories)
+            .OrderByDescending(path => path.Length)
+            .ToArray();
+
+        foreach (var directory in directories)
+        {
+            if (!IsDirectoryEmptyIgnoringMeta(directory))
+                continue;
+
+            var assetPath = ToAssetPath(directory);
+            if (string.IsNullOrWhiteSpace(assetPath) || string.Equals(assetPath, OutputRoot, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (AssetDatabase.DeleteAsset(assetPath))
+            {
+                deleted++;
+            }
+            else
+            {
+                // Резервная очистка для случайных папок вида Ally 1 / Enemy 1,
+                // если Unity не удаляет их через AssetDatabase.
+                Directory.Delete(directory, recursive: false);
+                deleted++;
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
         return deleted;
+    }
+
+    private static bool IsDirectoryEmptyIgnoringMeta(string directory)
+    {
+        foreach (var entry in Directory.GetFileSystemEntries(directory))
+        {
+            if (!entry.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static string ToAssetPath(string fullPath)
+    {
+        var normalizedFullPath = fullPath.Replace("\\", "/");
+        var normalizedDataPath = Application.dataPath.Replace("\\", "/");
+
+        if (!normalizedFullPath.StartsWith(normalizedDataPath, StringComparison.OrdinalIgnoreCase))
+            return string.Empty;
+
+        return "Assets" + normalizedFullPath.Substring(normalizedDataPath.Length);
     }
 
     private static List<ParsedWeaponGroupRow> ValidateRows(
@@ -332,69 +397,22 @@ public static class WeaponGroupConfigAssetGenerator
             if (string.IsNullOrWhiteSpace(weaponId))
                 continue;
 
-            if (!TryResolveWeapon(weaponId, weaponIndex, out var resolvedWeaponId, out var weaponConfig))
+            if (!weaponIndex.TryGetValue(weaponId, out var weaponConfig) || weaponConfig == null)
             {
                 errors.Add($"Row {rowNumber} / {groupId}: WeaponConfig не найден: {weaponId}");
                 continue;
             }
 
-            if (!seen.Add(resolvedWeaponId))
+            if (!seen.Add(weaponId))
             {
-                errors.Add($"Row {rowNumber} / {groupId}: повтор WeaponConfig {resolvedWeaponId} внутри группы.");
+                errors.Add($"Row {rowNumber} / {groupId}: повтор WeaponConfig {weaponId} внутри группы.");
                 continue;
-            }
-
-            if (!string.Equals(weaponId, resolvedWeaponId, StringComparison.OrdinalIgnoreCase))
-            {
-                warnings.Add($"Row {rowNumber} / {groupId}: WeaponConfig id из CSV '{weaponId}' заменён на существующий '{resolvedWeaponId}'.");
             }
 
             result.Add(weaponConfig);
         }
 
         return result;
-    }
-
-    private static bool TryResolveWeapon(
-        string weaponId,
-        IReadOnlyDictionary<string, WeaponConfig> weaponIndex,
-        out string resolvedWeaponId,
-        out WeaponConfig weaponConfig)
-    {
-        resolvedWeaponId = weaponId;
-
-        if (weaponIndex.TryGetValue(weaponId, out weaponConfig) && weaponConfig != null)
-            return true;
-
-        foreach (var candidateId in BuildCompatibilityCandidates(weaponId))
-        {
-            if (weaponIndex.TryGetValue(candidateId, out weaponConfig) && weaponConfig != null)
-            {
-                resolvedWeaponId = candidateId;
-                return true;
-            }
-        }
-
-        weaponConfig = null;
-        return false;
-    }
-
-    private static IEnumerable<string> BuildCompatibilityCandidates(string weaponId)
-    {
-        if (weaponId.StartsWith("weapon_ai_railgun_", StringComparison.OrdinalIgnoreCase))
-            yield return weaponId.Replace("weapon_ai_railgun_", "weapon_ai_rail_");
-
-        if (weaponId.StartsWith("weapon_ai_missile_", StringComparison.OrdinalIgnoreCase))
-            yield return weaponId.Replace("weapon_ai_missile_", "weapon_ai_swarm_missile_");
-
-        if (weaponId.StartsWith("weapon_ai_plasma_", StringComparison.OrdinalIgnoreCase))
-            yield return weaponId.Replace("weapon_ai_plasma_", "weapon_ai_disruptor_");
-
-        if (weaponId.StartsWith("weapon_ancient_", StringComparison.OrdinalIgnoreCase))
-            yield return weaponId.Replace("weapon_ancient_", "weapon_ancients_");
-
-        if (weaponId.StartsWith("weapon_ancients_", StringComparison.OrdinalIgnoreCase))
-            yield return weaponId.Replace("weapon_ancients_", "weapon_ancient_");
     }
 
     private static void WriteSerialized(WeaponGroupConfig asset, ParsedWeaponGroupRow parsedRow)
@@ -445,30 +463,74 @@ public static class WeaponGroupConfigAssetGenerator
         IReadOnlyList<string> row,
         IReadOnlyDictionary<string, int> columnIndex)
     {
-        var level = ParseIntStrict(Get(row, columnIndex, "level"));
         var ownerFolder = groupKind == WeaponGroupKind.Ally
-            ? $"Allies/{allyType}"
-            : $"Enemies/{enemyFaction}";
+            ? $"Ally/{allyType}"
+            : $"Enemy/{enemyFaction}";
 
-        return $"{OutputRoot}/{ownerFolder}/L{level:00}/{id}.asset";
+        return $"{OutputRoot}/{ownerFolder}/{id}.asset";
     }
 
-    private static void EnsureFolder(string folder)
+    private static void PrepareOutputFolders(IReadOnlyCollection<ParsedWeaponGroupRow> parsedRows)
     {
-        if (string.IsNullOrWhiteSpace(folder) || AssetDatabase.IsValidFolder(folder))
+        var folders = parsedRows
+            .Select(row => Path.GetDirectoryName(row.AssetPath)?.Replace("\\", "/"))
+            .Where(folder => !string.IsNullOrWhiteSpace(folder))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(folder => folder, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        foreach (var folder in folders)
+        {
+            EnsureExactFolderOnDisk(folder);
+        }
+
+        // Важно: папки создаются ДО AssetDatabase.StartAssetEditing.
+        // Если создавать и сразу проверять папку внутри StartAssetEditing,
+        // Unity может ещё не видеть её в AssetDatabase.
+        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+
+        foreach (var folder in folders)
+        {
+            AssetDatabase.ImportAsset(folder, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ImportRecursive);
+        }
+
+        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+    }
+
+    private static void EnsureExactFolderOnDisk(string folder)
+    {
+        if (string.IsNullOrWhiteSpace(folder))
             return;
 
-        var parts = folder.Split('/');
-        var current = parts[0];
+        var normalizedFolder = folder.Replace("\\", "/");
+        var fullPath = ToFullPath(normalizedFolder);
 
-        for (var i = 1; i < parts.Length; i++)
+        if (File.Exists(fullPath))
         {
-            var next = $"{current}/{parts[i]}";
-            if (!AssetDatabase.IsValidFolder(next))
-                AssetDatabase.CreateFolder(current, parts[i]);
-
-            current = next;
+            throw new InvalidOperationException(
+                $"Нельзя создать папку '{normalizedFolder}', потому что по этому пути уже есть файл. Удали или переименуй этот файл вручную.");
         }
+
+        // Не используем AssetDatabase.CreateFolder.
+        // Он может создать 'Ally 1', 'Enemy 1' при конфликте имени.
+        // Directory.CreateDirectory создаёт только точный путь и никогда не переименовывает папку.
+        Directory.CreateDirectory(fullPath);
+
+        if (!Directory.Exists(fullPath))
+        {
+            throw new InvalidOperationException($"Не удалось создать папку на диске: {normalizedFolder}");
+        }
+    }
+
+    private static string ToFullPath(string assetPath)
+    {
+        var normalizedAssetPath = assetPath.Replace("\\", "/");
+        var projectRoot = Directory.GetParent(Application.dataPath)?.FullName;
+
+        if (string.IsNullOrWhiteSpace(projectRoot))
+            throw new InvalidOperationException("Не удалось определить корень Unity-проекта.");
+
+        return Path.GetFullPath(Path.Combine(projectRoot, normalizedAssetPath));
     }
 
     private static List<List<string>> ReadCsv(string assetPath, ICollection<string> errors)

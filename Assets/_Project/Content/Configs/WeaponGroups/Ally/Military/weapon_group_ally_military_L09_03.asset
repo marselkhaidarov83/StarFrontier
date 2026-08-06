@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1f5b29ec6984b88b3e77930fb53b24, type: 3}
+  m_Name: weapon_group_ally_military_L09_03
+  m_EditorClassIdentifier: Data::WeaponGroupConfig
+  id: weapon_group_ally_military_L09_03
+  displayName: "\u0412\u043E\u0435\u043D\u043D\u044B\u0435 \u2014 \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    9, \u0432\u0430\u0440\u0438\u0430\u043D\u0442 3"
+  description: "\u0421\u0438\u043B\u044C\u043D\u0435\u0439\u0448\u0438\u0435 \u0441\u043E\u044E\u0437\u043D\u044B\u0435
+    \u0431\u043E\u0435\u0432\u044B\u0435 \u0433\u0440\u0443\u043F\u043F\u044B: \u0442\u044F\u0436\u0451\u043B\u043E\u0435
+    \u0438 \u0434\u0430\u043B\u044C\u043D\u043E\u0431\u043E\u0439\u043D\u043E\u0435
+    \u043E\u0440\u0443\u0436\u0438\u0435, \u0432\u044B\u0441\u043E\u043A\u0438\u0439
+    tier-mix. Strict-level: 9; weapon count: 5; primary focus: \u0442\u044F\u0436\u0451\u043B\u044B\u0439
+    \u0437\u0430\u043B\u043F. Tier-mix intentionally avoids mono-tier groups when
+    weaponCount > 1."
+  icon: {fileID: 0}
+  level: 9
+  groupKind: 0
+  allyType: 10
+  enemyFaction: 0
+  strengthRank: 5
+  strengthOrder: "1 \u2014 strongest ally"
+  weaponOwner: PlayerAndRangers
+  weaponOwnerKey: common
+  variant: 3
+  weaponCount: 5
+  powerScore: 1315
+  tierPattern: Gold + Gold + Silver + Gold + Silver
+  familyPattern: plasma + missile + railgun + laser + pulse
+  weaponConfigs:
+  - {fileID: 11400000, guid: b6670d5704a3c409995c19aa7ad19e06, type: 2}
+  - {fileID: 11400000, guid: 64dd20a78160f426f82faf09723e710f, type: 2}
+  - {fileID: 11400000, guid: d3ec6c495027545058dae6cfde395b70, type: 2}
+  - {fileID: 11400000, guid: 5670cf7884a204c869b335834acb239a, type: 2}
+  - {fileID: 11400000, guid: aeebe6415c09d4f23ac346f351e0aa50, type: 2}

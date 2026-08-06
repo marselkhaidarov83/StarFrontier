@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1f5b29ec6984b88b3e77930fb53b24, type: 3}
+  m_Name: weapon_group_ally_ranger_L09_04
+  m_EditorClassIdentifier: Data::WeaponGroupConfig
+  id: weapon_group_ally_ranger_L09_04
+  displayName: "\u0420\u0435\u0439\u043D\u0434\u0436\u0435\u0440\u044B \u2014 \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    9, \u0432\u0430\u0440\u0438\u0430\u043D\u0442 4"
+  description: "\u041C\u043E\u0431\u0438\u043B\u044C\u043D\u044B\u0435 \u0431\u043E\u0435\u0432\u044B\u0435
+    \u0433\u0440\u0443\u043F\u043F\u044B \u0440\u0435\u0439\u043D\u0434\u0436\u0435\u0440\u043E\u0432:
+    \u0442\u043E\u0447\u043D\u043E\u0441\u0442\u044C, \u0434\u0430\u043B\u044C\u043D\u043E\u0441\u0442\u044C
+    \u0438 \u0443\u043C\u0435\u0440\u0435\u043D\u043D\u043E \u0432\u044B\u0441\u043E\u043A\u0438\u0439
+    tier-mix. Strict-level: 9; weapon count: 5; primary focus: \u0442\u044F\u0436\u0451\u043B\u044B\u0439
+    \u0437\u0430\u043B\u043F. Tier-mix intentionally avoids mono-tier groups when
+    weaponCount > 1."
+  icon: {fileID: 0}
+  level: 9
+  groupKind: 0
+  allyType: 20
+  enemyFaction: 0
+  strengthRank: 4
+  strengthOrder: "2 \u2014 after Military"
+  weaponOwner: PlayerAndRangers
+  weaponOwnerKey: common
+  variant: 4
+  weaponCount: 5
+  powerScore: 915
+  tierPattern: Gold + Silver + Bronze + Silver + Bronze
+  familyPattern: plasma + missile + laser + railgun + pulse
+  weaponConfigs:
+  - {fileID: 11400000, guid: b6670d5704a3c409995c19aa7ad19e06, type: 2}
+  - {fileID: 11400000, guid: 3e283f87ed4be4b27844fd570195741f, type: 2}
+  - {fileID: 11400000, guid: 2c8505a9ac2ce4d42955f9020a7e1520, type: 2}
+  - {fileID: 11400000, guid: d3ec6c495027545058dae6cfde395b70, type: 2}
+  - {fileID: 11400000, guid: 3fe65eb46ec3948cdb7cdc1bd258a98b, type: 2}

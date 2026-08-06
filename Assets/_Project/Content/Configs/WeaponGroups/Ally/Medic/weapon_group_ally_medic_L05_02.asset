@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1f5b29ec6984b88b3e77930fb53b24, type: 3}
+  m_Name: weapon_group_ally_medic_L05_02
+  m_EditorClassIdentifier: Data::WeaponGroupConfig
+  id: weapon_group_ally_medic_L05_02
+  displayName: "\u041C\u0435\u0434\u0438\u043A\u0438 \u2014 \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    5, \u0432\u0430\u0440\u0438\u0430\u043D\u0442 2"
+  description: "\u0417\u0430\u0449\u0438\u0442\u043D\u043E-\u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044E\u0449\u0438\u0435
+    \u0433\u0440\u0443\u043F\u043F\u044B \u043C\u0435\u0434\u0438\u043A\u043E\u0432:
+    \u043E\u0440\u0443\u0436\u0438\u0435 \u0437\u0430\u043C\u0435\u0442\u043D\u043E
+    \u043B\u0443\u0447\u0448\u0435 \u0442\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442\u0430
+    \u0438 \u0433\u0440\u0430\u0436\u0434\u0430\u043D\u0441\u043A\u0438\u0445, \u043D\u043E
+    \u0441\u043B\u0430\u0431\u0435\u0435 \u0440\u0435\u0439\u043D\u0434\u0436\u0435\u0440\u043E\u0432.
+    Strict-level: 5; weapon count: 3; primary focus: \u0442\u044F\u0436\u0451\u043B\u044B\u0439
+    \u0437\u0430\u043B\u043F. Tier-mix intentionally avoids mono-tier groups when
+    weaponCount > 1."
+  icon: {fileID: 0}
+  level: 5
+  groupKind: 0
+  allyType: 30
+  enemyFaction: 0
+  strengthRank: 3
+  strengthOrder: "3 \u2014 after Ranger"
+  weaponOwner: PlayerAndRangers
+  weaponOwnerKey: common
+  variant: 2
+  weaponCount: 3
+  powerScore: 506
+  tierPattern: Silver + Silver + Bronze
+  familyPattern: plasma + laser + pulse
+  weaponConfigs:
+  - {fileID: 11400000, guid: e7bcc199a9d83419a818fd93c2463c34, type: 2}
+  - {fileID: 11400000, guid: 087b74c3246d2408e8b162f322fd1291, type: 2}
+  - {fileID: 11400000, guid: 9257cdb42bcc24256a324c3884c318cc, type: 2}
