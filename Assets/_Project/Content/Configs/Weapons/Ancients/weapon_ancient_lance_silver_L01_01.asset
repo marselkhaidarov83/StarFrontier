@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c80c7aea66b24b2b9f4872e9c5b0088, type: 3}
+  m_Name: weapon_ancient_lance_silver_L01_01
+  m_EditorClassIdentifier: Data::WeaponConfig
+  id: weapon_ancient_lance_silver_L01_01
+  displayName: "\u042D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0435
+    \u043A\u043E\u043F\u044C\u0451"
+  description: "\u0414\u043B\u0438\u043D\u043D\u043E\u0435 \u044D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0435
+    \u043A\u043E\u043F\u044C\u0451. \u0412\u0438\u0437\u0443\u0430\u043B\u044C\u043D\u043E
+    \u043E\u0442\u043B\u0438\u0447\u0430\u0435\u0442\u0441\u044F \u043E\u0442 railgun
+    \u0442\u0435\u043C, \u0447\u0442\u043E \u044D\u0442\u043E \u043D\u0435 \u0442\u043E\u043D\u043A\u0430\u044F
+    \u0438\u0433\u043B\u0430, \u0430 \u0432\u044B\u0442\u044F\u043D\u0443\u0442\u044B\u0439
+    \u043A\u043B\u0438\u043D\u043E\u043A \u044D\u043D\u0435\u0440\u0433\u0438\u0438.
+    IMG: PNG 512\xD7512, transparent background, centered projectile/VFX sprite,
+    pivot center, no text, no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down
+    readable silhouette."
+  icon: {fileID: 0}
+  level: 1
+  equipmentTier: 2
+  cargoSize: 5
+  baseDamageMin: 43
+  baseDamageMax: 53
+  rangeMin: 9.5
+  rangeMax: 10.5
+  energyCostMin: 7
+  energyCostMax: 9
+  projectileLifetimeMin: 1
+  projectileLifetimeMax: 3
+  isHitscan: 0
+  weaponType: 7
+  damageType: 0
+  targetingMode: 0
+  projectilePrefabRef: {fileID: 0}
+  usesAmmo: 0
+  maxAmmoChargesMin: 0
+  maxAmmoChargesMax: 0

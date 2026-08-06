@@ -3,7 +3,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "SystemPopulationConfig",
-    menuName = "StarFrontier/Configs/System Population")]
+    menuName = "StarFrontier/Configs/System/System Population")]
 public sealed class SystemPopulationConfig : BaseConfig
 {
     [Header("Profiles by Galaxy Level")]

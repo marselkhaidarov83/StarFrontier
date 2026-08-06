@@ -2,7 +2,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "GameConfig",
-    menuName = "StarFrontier/Configs/Game Config")]
+    menuName = "StarFrontier/Configs/Game/Game Config")]
 public class GameConfig : ScriptableObject
 {
     [Header("Version")]

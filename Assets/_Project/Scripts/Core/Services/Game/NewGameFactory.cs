@@ -14,7 +14,10 @@ public class NewGameFactory
         var save = new GameRuntimeState
         {
             Player = CreatePlayerProfile(_configService.NewGameConfig),
-            Galaxy = GalaxyRuntimeStateFactory.CreateNewGalaxyRuntimeState(_configService.GalaxyConfig)
+            Galaxy = GalaxyRuntimeStateFactory.CreateNewGalaxyRuntimeState(
+                _configService.GalaxyConfig,
+                Bootstrapper.Instance.SectorAllOpened,
+                Bootstrapper.Instance.RouteAllUnlocked)
         };
         return save;
     }

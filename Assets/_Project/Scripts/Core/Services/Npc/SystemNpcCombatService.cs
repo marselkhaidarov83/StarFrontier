@@ -4,6 +4,8 @@ using UnityEngine;
 
 public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatService
 {
+    private const float TickBasedProjectileSpeed = 0f;
+
     private readonly ISystemNpcRuntimeService _runtimeService;
     private readonly IConfigService _configService;
     private readonly IPlayerCombatTargetService _playerTargetService;
@@ -27,9 +29,6 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     {
         if (starSystem == null)
             return;
-
-        // if (_gameTimeService.IsPaused)
-        //     return;
 
         string systemId = starSystem.Id;
         var npcs = _runtimeService.GetAliveNpcsInSystem(systemId);
@@ -69,7 +68,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             return;
         }
 
-        TryAttack(shooter, quantTick, true);
+        TryAttack(shooter, quantTick, ignoreTickGate: true);
     }
 
     public bool TryGetProjectile(
@@ -124,7 +123,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     private void TryAttack(
         SystemNpcRuntimeState shooter,
         int quantTick,
-        bool ignoreCooldown = false)
+        bool ignoreTickGate = false)
     {
         GalaxyCombatTarget target = FindTarget(shooter);
 
@@ -154,7 +153,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 target,
                 weaponRuntime,
                 quantTick,
-                ignoreCooldown
+                ignoreTickGate
             );
 
             if (fired)
@@ -170,7 +169,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         GalaxyCombatTarget target,
         SystemNpcWeaponRuntimeState weaponRuntime,
         int quantTick,
-        bool ignoreCooldown)
+        bool ignoreTickGate)
     {
         WeaponConfig weaponConfig = _configService.GetWeaponConfigById(
             weaponRuntime.WeaponConfigId
@@ -182,27 +181,39 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             return false;
         }
 
+        WeaponRuntimeStats weaponStats = weaponConfig.RollRuntimeStats(
+            BuildWeaponRollSeed(
+                "npc",
+                shooter.RuntimeNpcId,
+                target.TargetType.ToString(),
+                target.TargetNpcId,
+                weaponRuntime.WeaponConfigId,
+                quantTick.ToString()
+            )
+        );
+
         float distance = Vector3.Distance(
             shooter.CurrentPosition,
             target.Position
         );
 
-        if (distance > weaponConfig.Range)
+        if (distance > weaponStats.Range)
         {
             LogCustom(
                 $"[SystemNpcCombatService] Target out of range. " +
                 $"Shooter: {shooter.RuntimeNpcId}, TargetType: {target.TargetType}, " +
-                $"Distance: {distance:F2}, Range: {weaponConfig.Range:F2}"
+                $"Distance: {distance:F2}, Range: {weaponStats.Range:F2}"
             );
 
             return false;
         }
 
-        if (!ignoreCooldown && !weaponRuntime.CanShootAtTick(quantTick))
+        if (!ignoreTickGate && !weaponRuntime.CanShootAtTick(quantTick))
             return false;
 
-        int cooldownTicks = GetCooldownTicks(weaponConfig);
-        weaponRuntime.MarkShotAtTick(quantTick, cooldownTicks);
+        weaponRuntime.MarkShotAtTick(quantTick, cooldownTicks: 1);
+
+        int projectileLifetimeTicks = Mathf.Max(1, weaponStats.ProjectileLifetime);
 
         var projectile = new GalaxyNpcProjectileRuntimeState
         {
@@ -220,13 +231,16 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             CurrentPosition = shooter.CurrentPosition,
             LastKnownTargetPosition = target.Position,
 
-            Damage = weaponConfig.BaseDamage,
+            Damage = weaponStats.Damage,
 
             CreatedTick = quantTick,
-            ImpactTick = quantTick,
+            ImpactTick = quantTick + projectileLifetimeTicks - 1,
 
             ElapsedSeconds = 0f,
-            LifetimeSeconds = Mathf.Max(0.01f, GameTimeService.SecondsPerDay),
+            LifetimeSeconds = Mathf.Max(
+                0.01f,
+                GameTimeService.SecondsPerDay * projectileLifetimeTicks
+            ),
 
             IsResolved = false
         };
@@ -242,7 +256,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             projectile.WeaponConfigId,
             projectile.StartPosition,
             projectile.LastKnownTargetPosition,
-            weaponConfig.ProjectileSpeed
+            TickBasedProjectileSpeed
         ));
 
         _eventBus.Publish(new CombatProjectileCreatedEvent2A(
@@ -257,7 +271,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         LogCustom(
             $"[SystemNpcCombatService] Projectile created. " +
             $"Projectile: {projectile.ProjectileId}, Shooter: {shooter.RuntimeNpcId}, " +
-            $"TargetType: {target.TargetType}, Target: {target.TargetNpcId}, Damage: {projectile.Damage}"
+            $"TargetType: {target.TargetType}, Target: {target.TargetNpcId}, " +
+            $"Damage: {projectile.Damage}, Range: {weaponStats.Range:F2}, " +
+            $"LifetimeTicks: {projectileLifetimeTicks}"
         );
 
         return true;
@@ -431,22 +447,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             projectile.Damage,
             killedByPlayer: projectile.ShooterType == CombatShooterType.Player,
             damagedByPlayer: projectile.ShooterType == CombatShooterType.Player
-            );
+        );
 
         didHit = true;
-    }
-
-    private int GetCooldownTicks(WeaponConfig weaponConfig)
-    {
-        float secondsPerTick = Mathf.Max(0.01f, GameTimeService.SecondsPerDay);
-
-        if (weaponConfig.Cooldown > 0f)
-            return Mathf.Max(1, Mathf.CeilToInt(weaponConfig.Cooldown / secondsPerTick));
-
-        if (weaponConfig.FireRate > 0f)
-            return Mathf.Max(1, Mathf.CeilToInt((1f / weaponConfig.FireRate) / secondsPerTick));
-
-        return 1;
     }
 
     private GalaxyCombatTarget FindTarget(SystemNpcRuntimeState shooter)
@@ -481,8 +484,6 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 if (playerTarget.IsValid)
                     return playerTarget;
             }
-
-            // return FindNearestNpcTarget(shooter, SystemNpcType.Ally);
         }
 
         return GalaxyCombatTarget.None();
@@ -543,15 +544,17 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     }
 
     public bool TryCreatePlayerProjectile(
-            string targetNpcId,
-            string weaponConfigId,
-            int quantTick)
+        string targetNpcId,
+        string weaponConfigId,
+        int quantTick)
     {
         LogCustom("targetNpcId = " + targetNpcId);
+
         if (string.IsNullOrWhiteSpace(targetNpcId))
             return false;
 
         LogCustom("weaponConfigId = " + weaponConfigId);
+
         if (string.IsNullOrWhiteSpace(weaponConfigId))
             return false;
 
@@ -563,6 +566,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
         LogCustom("target.IsAlive = " + target.IsAlive);
         LogCustom("target.IsOnPlanet = " + target.IsOnPlanet);
+
         if (!target.IsAlive || target.IsOnPlanet)
             return false;
 
@@ -580,23 +584,36 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             return false;
         }
 
+        WeaponRuntimeStats weaponStats = weaponConfig.RollRuntimeStats(
+            BuildWeaponRollSeed(
+                "player",
+                target.RuntimeNpcId,
+                weaponConfigId,
+                quantTick.ToString()
+            )
+        );
+
         Vector3 playerPosition = _playerTargetService.GetPlayerPosition();
+
         LogCustom("playerPosition = " + playerPosition);
         LogCustom("target.CurrentPosition = " + target.CurrentPosition);
 
         float distance = Vector3.Distance(playerPosition, target.CurrentPosition);
-        LogCustom("distance = " + distance);
-        LogCustom("weaponConfig.Range = " + weaponConfig.Range);
 
-        if (distance > weaponConfig.Range)
+        LogCustom("distance = " + distance);
+        LogCustom("weaponStats.Range = " + weaponStats.Range);
+
+        if (distance > weaponStats.Range)
         {
             LogCustom(
                 "[SystemNpcCombatService] Player target out of range. " +
-                $"Distance: {distance:F2}, Range: {weaponConfig.Range:F2}"
+                $"Distance: {distance:F2}, Range: {weaponStats.Range:F2}"
             );
 
             return false;
         }
+
+        int projectileLifetimeTicks = Mathf.Max(1, weaponStats.ProjectileLifetime);
 
         var projectile = new GalaxyNpcProjectileRuntimeState
         {
@@ -616,13 +633,16 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             CurrentPosition = playerPosition,
             LastKnownTargetPosition = target.CurrentPosition,
 
-            Damage = weaponConfig.BaseDamage,
+            Damage = weaponStats.Damage,
 
             CreatedTick = quantTick,
-            ImpactTick = quantTick,
+            ImpactTick = quantTick + projectileLifetimeTicks - 1,
 
             ElapsedSeconds = 0f,
-            LifetimeSeconds = Mathf.Max(0.01f, GameTimeService.SecondsPerDay),
+            LifetimeSeconds = Mathf.Max(
+                0.01f,
+                GameTimeService.SecondsPerDay * projectileLifetimeTicks
+            ),
 
             IsResolved = false
         };
@@ -638,7 +658,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             projectile.WeaponConfigId,
             projectile.StartPosition,
             projectile.LastKnownTargetPosition,
-            weaponConfig.ProjectileSpeed
+            TickBasedProjectileSpeed
         ));
 
         _eventBus.Publish(new CombatProjectileCreatedEvent2A(
@@ -652,9 +672,38 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
         LogCustom(
             "[SystemNpcCombatService] Player projectile created. " +
-            $"Target: {targetNpcId}, Weapon: {weaponConfigId}, Damage: {weaponConfig.BaseDamage}"
+            $"Target: {targetNpcId}, Weapon: {weaponConfigId}, " +
+            $"Damage: {weaponStats.Damage}, Range: {weaponStats.Range:F2}, " +
+            $"LifetimeTicks: {projectileLifetimeTicks}"
         );
 
         return true;
+    }
+
+    private static int BuildWeaponRollSeed(params string[] parts)
+    {
+        unchecked
+        {
+            int hash = 17;
+
+            if (parts == null)
+                return hash;
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+
+                if (string.IsNullOrEmpty(part))
+                {
+                    hash = hash * 31;
+                    continue;
+                }
+
+                for (int j = 0; j < part.Length; j++)
+                    hash = hash * 31 + part[j];
+            }
+
+            return hash;
+        }
     }
 }

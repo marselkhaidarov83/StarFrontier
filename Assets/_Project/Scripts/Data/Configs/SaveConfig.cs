@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SaveConfig", menuName = "StarFrontier/Configs/Save Config")]
+[CreateAssetMenu(fileName = "SaveConfig", menuName = "StarFrontier/Configs/Game/Save Config")]
 public class SaveConfig : ScriptableObject
 {
     [Header("Save Files")]

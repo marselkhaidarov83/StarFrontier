@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "StarSystemConfig", menuName = "StarFrontier/Configs/Star System")]
+[CreateAssetMenu(fileName = "StarSystemConfig", menuName = "StarFrontier/Configs/System/Star System")]
 public class StarSystemConfig : BaseConfig
 {
     [Header("System Data")]

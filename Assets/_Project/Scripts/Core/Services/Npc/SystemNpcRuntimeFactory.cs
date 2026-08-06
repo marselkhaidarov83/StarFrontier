@@ -333,14 +333,30 @@ public static class SystemNpcRuntimeFactory
         if (HasWeapon(npc, weaponConfig.Id))
             return false;
 
+        WeaponRuntimeStats weaponStats =
+            weaponConfig.RollRuntimeStats(
+                BuildWeaponRollSeed(
+                    npc.RuntimeNpcId,
+                    weaponConfig.Id,
+                    npc.Weapons.Count.ToString()
+                )
+            );
+
         npc.Weapons.Add(
             new SystemNpcWeaponRuntimeState
             {
                 WeaponConfigId = weaponConfig.Id,
+
                 LastShotTick = -1,
                 NextAllowedShotTick = 0,
                 CooldownRemainingSeconds = 0f,
-                ShotDistance = weaponConfig.Range
+
+                /*
+                 * В WeaponConfig v0.6 больше нет weaponConfig.Range.
+                 * Дальность выбирается из диапазона rangeMin/rangeMax
+                 * при создании runtime-оружия.
+                 */
+                ShotDistance = weaponStats.Range
             });
 
         return true;
@@ -372,5 +388,33 @@ public static class SystemNpcRuntimeFactory
         }
 
         return false;
+    }
+
+    private static int BuildWeaponRollSeed(
+        params string[] parts)
+    {
+        unchecked
+        {
+            int hash = 17;
+
+            if (parts == null)
+                return hash;
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+
+                if (string.IsNullOrEmpty(part))
+                {
+                    hash = hash * 31;
+                    continue;
+                }
+
+                for (int j = 0; j < part.Length; j++)
+                    hash = hash * 31 + part[j];
+            }
+
+            return hash;
+        }
     }
 }

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c80c7aea66b24b2b9f4872e9c5b0088, type: 3}
+  m_Name: weapon_infected_swarm_silver_L03_01
+  m_EditorClassIdentifier: Data::WeaponConfig
+  id: weapon_infected_swarm_silver_L03_01
+  displayName: "\u0411\u0438\u043E\u0440\u043E\u0439"
+  description: "\u041F\u043B\u043E\u0442\u043D\u044B\u0439 \u0440\u043E\u0439 \u0438\u0437
+    8 \u043C\u0435\u043B\u043A\u0438\u0445 \u0436\u0438\u0432\u044B\u0445 \u0447\u0430\u0441\u0442\u0438\u0446.
+    \u0414\u043E\u043B\u0436\u0435\u043D \u0447\u0438\u0442\u0430\u0442\u044C\u0441\u044F
+    \u043A\u0430\u043A \u0430\u0433\u0440\u0435\u0441\u0441\u0438\u0432\u043D\u0430\u044F
+    \u043C\u0430\u0441\u0441\u0430. IMG: PNG 512\xD7512, transparent background,
+    centered projectile/VFX sprite, pivot center, no text, no watermark, mobile-friendly,
+    stylized sci-fi, pseudo-3D/top-down readable silhouette."
+  icon: {fileID: 0}
+  level: 3
+  equipmentTier: 2
+  cargoSize: 8
+  baseDamageMin: 6
+  baseDamageMax: 8
+  rangeMin: 5.93
+  rangeMax: 6.55
+  energyCostMin: 2
+  energyCostMax: 4
+  projectileLifetimeMin: 3
+  projectileLifetimeMax: 5
+  isHitscan: 0
+  weaponType: 12
+  damageType: 4
+  targetingMode: 0
+  projectilePrefabRef: {fileID: 0}
+  usesAmmo: 0
+  maxAmmoChargesMin: 0
+  maxAmmoChargesMax: 0

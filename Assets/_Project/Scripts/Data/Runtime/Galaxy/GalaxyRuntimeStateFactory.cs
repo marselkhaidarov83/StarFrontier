@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 public static class GalaxyRuntimeStateFactory
 {
-    private static bool _seectorAllOpened = false;
-    private static bool _routeAllUnlocked = false;
-
-    public static GalaxyRuntimeState CreateNewGalaxyRuntimeState(GalaxyConfig config)
+    public static GalaxyRuntimeState CreateNewGalaxyRuntimeState(
+        GalaxyConfig config,
+        bool sectorAllOpened,
+        bool routeAllUnlocked)
     {
         GalaxyRuntimeState state = new GalaxyRuntimeState
         {
@@ -27,7 +27,7 @@ public static class GalaxyRuntimeStateFactory
             SectorRuntimeState sectorState = new SectorRuntimeState
             {
                 SectorId = sectorConfig.Id,
-                IsUnlocked = _seectorAllOpened || sectorConfig.IsUnlocked
+                IsUnlocked = sectorAllOpened || sectorConfig.IsUnlocked
             };
 
             state.Sectors.Add(sectorState);
@@ -72,7 +72,7 @@ public static class GalaxyRuntimeStateFactory
                     RouteRuntimeState routeState = new RouteRuntimeState
                     {
                         RouteId = routeConfig.Id,
-                        IsUnlocked = _routeAllUnlocked || !routeConfig.IsLockedAtStart
+                        IsUnlocked = routeAllUnlocked || !routeConfig.IsLockedAtStart
                     };
 
                     state.Routes.Add(routeState);

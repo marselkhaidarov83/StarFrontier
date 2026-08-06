@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PlanetConfig", menuName = "StarFrontier/Configs/Planet")]
+[CreateAssetMenu(fileName = "PlanetConfig", menuName = "StarFrontier/Configs/System/Planet")]
 public class PlanetConfig : BaseConfig
 {
     [Header("Base Info")]

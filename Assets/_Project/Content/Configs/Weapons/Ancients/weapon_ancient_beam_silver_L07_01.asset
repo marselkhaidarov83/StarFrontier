@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c80c7aea66b24b2b9f4872e9c5b0088, type: 3}
+  m_Name: weapon_ancient_beam_silver_L07_01
+  m_EditorClassIdentifier: Data::WeaponConfig
+  id: weapon_ancient_beam_silver_L07_01
+  displayName: "\u042D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439
+    \u043B\u0443\u0447"
+  description: "\u0422\u043E\u043B\u0441\u0442\u044B\u0439 red/gold/violet \u044D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439
+    \u043B\u0443\u0447 \u0441 \u043A\u043E\u043B\u044C\u0446\u0430\u043C\u0438 \u044D\u043D\u0435\u0440\u0433\u0438\u0438.
+    \u041E\u0449\u0443\u0449\u0430\u0435\u0442\u0441\u044F \u043A\u0430\u043A \u0434\u0440\u0435\u0432\u043D\u044F\u044F
+    \u0442\u0435\u0445\u043D\u043E\u043B\u043E\u0433\u0438\u044F. IMG: PNG 512\xD7512,
+    transparent background, centered projectile/VFX sprite, pivot center, no text,
+    no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down readable silhouette."
+  icon: {fileID: 0}
+  level: 7
+  equipmentTier: 2
+  cargoSize: 9
+  baseDamageMin: 87
+  baseDamageMax: 107
+  rangeMin: 9.23
+  rangeMax: 10.21
+  energyCostMin: 9
+  energyCostMax: 11
+  projectileLifetimeMin: 1
+  projectileLifetimeMax: 1
+  isHitscan: 1
+  weaponType: 6
+  damageType: 0
+  targetingMode: 0
+  projectilePrefabRef: {fileID: 0}
+  usesAmmo: 0
+  maxAmmoChargesMin: 0
+  maxAmmoChargesMax: 0

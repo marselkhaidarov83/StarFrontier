@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SunConfig", menuName = "StarFrontier/Configs/Sun")]
+[CreateAssetMenu(fileName = "SunConfig", menuName = "StarFrontier/Configs/System/Sun")]
 public class SunConfig : BaseConfig
 {
     [Header("Base Stats")]

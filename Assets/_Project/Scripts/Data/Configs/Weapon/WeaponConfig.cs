@@ -5,201 +5,184 @@ using UnityEngine;
 [Serializable]
 public class WeaponConfig : BaseConfig
 {
-    [Header("Base Stats")]
-    [SerializeField] private int baseDamage;
-    [SerializeField] private float range;
-    [SerializeField] private float cooldown;
-    [SerializeField] private float projectileSpeed;
-    [SerializeField] private int energyCost;
-    [SerializeField] private float fireRate;
-    [SerializeField] private float projectileLifetime;
-    [SerializeField] private int level;
+    [Header("Progression")]
+    [SerializeField] [Min(1)] private int level = 1;
+    [SerializeField] private WeaponEquipmentTier equipmentTier = WeaponEquipmentTier.Base;
+
+    [Header("Cargo")]
+    [SerializeField] [Min(1)] private int cargoSize = 1;
+
+    [Header("Base Stats / Randomized Runtime Ranges")]
+    [SerializeField] [Min(1)] private int baseDamageMin = 1;
+    [SerializeField] [Min(1)] private int baseDamageMax = 1;
+
+    [SerializeField] [Min(0f)] private float rangeMin = 1f;
+    [SerializeField] [Min(0f)] private float rangeMax = 1f;
+
+    [SerializeField] [Min(0)] private int energyCostMin = 0;
+    [SerializeField] [Min(0)] private int energyCostMax = 0;
+
+    [SerializeField] [Min(1)] private int projectileLifetimeMin = 1;
+    [SerializeField] [Min(1)] private int projectileLifetimeMax = 1;
 
     [Header("Combat Behavior")]
     [SerializeField] private bool isHitscan;
     [SerializeField] private WeaponType weaponType;
     [SerializeField] private WeaponDamageType damageType;
-    [SerializeField] private WeaponTargetingMode targetingMode;
+    [SerializeField] private WeaponTargetingMode targetingMode = WeaponTargetingMode.SelectedTarget;
 
     [Header("Visuals")]
     [SerializeField] private GameObject projectilePrefabRef;
 
-    [Header("Sprint 4 / Runtime Kind")]
-    [SerializeField] private WeaponRuntimeKind2A runtimeKind2A =
-        WeaponRuntimeKind2A.Pulse;
-
-    [SerializeField] private WeaponOwnerProfile2A ownerProfile2A =
-        WeaponOwnerProfile2A.PlayerAndRangers;
-
-    [Header("Sprint 4 / Tick Damage")]
-    [SerializeField] [Min(1)] private int damagePerCharge = 1;
-
-    [SerializeField] [Min(1)] private int chargesPerTickMin = 1;
-    [SerializeField] [Min(1)] private int chargesPerTickMax = 1;
-
-    [SerializeField] [Min(1)] private int activeTicks = 1;
-
-    [SerializeField] private bool resolvesWithinCurrentTick = true;
-
-    [Header("Sprint 4 / Missile Ammo")]
+    [Header("Ammo")]
     [SerializeField] private bool usesAmmo = false;
-    [SerializeField] [Min(0)] private int maxAmmoCharges = 0;
-    [SerializeField] private bool reloadOnlyOnPlanet = false;
+    [SerializeField] [Min(0)] private int maxAmmoChargesMin = 0;
+    [SerializeField] [Min(0)] private int maxAmmoChargesMax = 0;
 
-    [Header("Sprint 4 / Missile Flight")]
-    [SerializeField] [Min(0f)] private float projectileSpeedPerTick = 0f;
-    [SerializeField] [Min(1)] private int projectileLifetimeTicks = 1;
+    public int Level => level;
+    public WeaponEquipmentTier EquipmentTier => equipmentTier;
 
-    public int BaseDamage => baseDamage;
-    public float Range => range;
-    public float Cooldown => cooldown;
-    public float ProjectileSpeed => projectileSpeed;
-    public int EnergyCost => energyCost;
-    public float FireRate => fireRate;
-    public float ProjectileLifetime => projectileLifetime;
+    public int CargoSize => cargoSize;
+
+    public int BaseDamageMin => baseDamageMin;
+    public int BaseDamageMax => baseDamageMax;
+
+    public float RangeMin => rangeMin;
+    public float RangeMax => rangeMax;
+
+    public int EnergyCostMin => energyCostMin;
+    public int EnergyCostMax => energyCostMax;
+
+    public int ProjectileLifetimeMin => projectileLifetimeMin;
+    public int ProjectileLifetimeMax => projectileLifetimeMax;
+
     public bool IsHitscan => isHitscan;
     public WeaponType WeaponType => weaponType;
     public WeaponDamageType DamageType => damageType;
     public WeaponTargetingMode TargetingMode => targetingMode;
+
     public GameObject ProjectilePrefabRef => projectilePrefabRef;
 
-    public WeaponRuntimeKind2A RuntimeKind2A => runtimeKind2A;
-    public WeaponOwnerProfile2A OwnerProfile2A => ownerProfile2A;
-
-    public int DamagePerCharge => damagePerCharge;
-    public int ChargesPerTickMin => chargesPerTickMin;
-    public int ChargesPerTickMax => chargesPerTickMax;
-    public int ActiveTicks => activeTicks;
-    public bool ResolvesWithinCurrentTick => resolvesWithinCurrentTick;
-
     public bool UsesAmmo => usesAmmo;
-    public int MaxAmmoCharges => maxAmmoCharges;
-    public bool ReloadOnlyOnPlanet => reloadOnlyOnPlanet;
+    public int MaxAmmoChargesMin => maxAmmoChargesMin;
+    public int MaxAmmoChargesMax => maxAmmoChargesMax;
 
-    public float ProjectileSpeedPerTick => projectileSpeedPerTick;
-    public int ProjectileLifetimeTicks => projectileLifetimeTicks;
-
-    public int MaxDamagePerTick =>
-        damagePerCharge * chargesPerTickMax;
-
-    public int GetClampedChargesPerTick(int requestedCharges)
+    public WeaponRuntimeStats RollRuntimeStats()
     {
-        return Mathf.Clamp(
-            requestedCharges,
-            chargesPerTickMin,
-            chargesPerTickMax);
+        return RollRuntimeStats(UnityEngine.Random.Range(int.MinValue, int.MaxValue));
     }
 
-    public bool IsPulse()
+    public WeaponRuntimeStats RollRuntimeStats(int seed)
     {
-        return runtimeKind2A == WeaponRuntimeKind2A.Pulse;
+        System.Random random = new System.Random(seed);
+        return RollRuntimeStats(random);
+    }
+
+    public WeaponRuntimeStats RollRuntimeStats(System.Random random)
+    {
+        if (random == null)
+            random = new System.Random();
+
+        int damage = RollIntInclusive(random, baseDamageMin, baseDamageMax);
+        float range = RollFloat(random, rangeMin, rangeMax);
+        int energyCost = RollIntInclusive(random, energyCostMin, energyCostMax);
+        int projectileLifetime = RollIntInclusive(random, projectileLifetimeMin, projectileLifetimeMax);
+
+        int maxAmmoCharges = usesAmmo
+            ? RollIntInclusive(random, maxAmmoChargesMin, maxAmmoChargesMax)
+            : 0;
+
+        return new WeaponRuntimeStats(
+            Id,
+            level,
+            equipmentTier,
+            cargoSize,
+            damage,
+            range,
+            energyCost,
+            projectileLifetime,
+            isHitscan,
+            weaponType,
+            damageType,
+            targetingMode,
+            usesAmmo,
+            maxAmmoCharges
+        );
     }
 
     public bool IsLaser()
     {
-        return runtimeKind2A == WeaponRuntimeKind2A.Laser;
+        return weaponType == WeaponType.Laser ||
+               weaponType == WeaponType.Beam;
     }
 
     public bool IsMissile()
     {
-        return runtimeKind2A == WeaponRuntimeKind2A.Missile;
+        return weaponType == WeaponType.Missile;
     }
 
-    public bool CanSpendAmmo(
-        int currentAmmoCharges,
-        int requestedCharges)
+    public bool IsPulseLike()
     {
-        if (!usesAmmo)
-            return true;
+        return weaponType == WeaponType.Pulse ||
+               weaponType == WeaponType.Disruptor ||
+               weaponType == WeaponType.Spore ||
+               weaponType == WeaponType.Swarm ||
+               weaponType == WeaponType.Burst;
+    }
 
-        int clampedCharges =
-            GetClampedChargesPerTick(requestedCharges);
+    public bool IsProjectileLike()
+    {
+        return !isHitscan;
+    }
 
-        return currentAmmoCharges >= clampedCharges;
+    private static int RollIntInclusive(System.Random random, int min, int max)
+    {
+        if (max < min)
+            max = min;
+
+        return random.Next(min, max + 1);
+    }
+
+    private static float RollFloat(System.Random random, float min, float max)
+    {
+        if (max < min)
+            max = min;
+
+        double value01 = random.NextDouble();
+        return min + (float)value01 * (max - min);
     }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        damagePerCharge =
-            Mathf.Max(1, damagePerCharge);
+        level = Mathf.Max(1, level);
+        cargoSize = Mathf.Max(1, cargoSize);
 
-        activeTicks =
-            Mathf.Max(1, activeTicks);
+        baseDamageMin = Mathf.Max(1, baseDamageMin);
+        baseDamageMax = Mathf.Max(baseDamageMin, baseDamageMax);
 
-        projectileLifetimeTicks =
-            Mathf.Max(1, projectileLifetimeTicks);
+        rangeMin = Mathf.Max(0f, rangeMin);
+        rangeMax = Mathf.Max(rangeMin, rangeMax);
 
-        switch (runtimeKind2A)
+        energyCostMin = Mathf.Max(0, energyCostMin);
+        energyCostMax = Mathf.Max(energyCostMin, energyCostMax);
+
+        projectileLifetimeMin = Mathf.Max(1, projectileLifetimeMin);
+        projectileLifetimeMax = Mathf.Max(projectileLifetimeMin, projectileLifetimeMax);
+
+        if (weaponType == WeaponType.Missile)
+            usesAmmo = true;
+
+        if (!usesAmmo)
         {
-            case WeaponRuntimeKind2A.Pulse:
-                ValidatePulse();
-                break;
-
-            case WeaponRuntimeKind2A.Laser:
-                ValidateLaser();
-                break;
-
-            case WeaponRuntimeKind2A.Missile:
-                ValidateMissile();
-                break;
+            maxAmmoChargesMin = 0;
+            maxAmmoChargesMax = 0;
         }
-    }
-
-    private void ValidatePulse()
-    {
-        chargesPerTickMin =
-            Mathf.Clamp(chargesPerTickMin, 1, 10);
-
-        chargesPerTickMax =
-            Mathf.Clamp(chargesPerTickMax, chargesPerTickMin, 10);
-
-        activeTicks = 1;
-        resolvesWithinCurrentTick = true;
-
-        usesAmmo = false;
-        maxAmmoCharges = 0;
-        reloadOnlyOnPlanet = false;
-
-        projectileLifetimeTicks = 1;
-    }
-
-    private void ValidateLaser()
-    {
-        chargesPerTickMin = 1;
-        chargesPerTickMax = 1;
-
-        activeTicks = 1;
-        resolvesWithinCurrentTick = true;
-
-        usesAmmo = false;
-        maxAmmoCharges = 0;
-        reloadOnlyOnPlanet = false;
-
-        projectileLifetimeTicks = 1;
-    }
-
-    private void ValidateMissile()
-    {
-        chargesPerTickMin =
-            Mathf.Clamp(chargesPerTickMin, 1, 5);
-
-        chargesPerTickMax =
-            Mathf.Clamp(chargesPerTickMax, chargesPerTickMin, 5);
-
-        activeTicks =
-            Mathf.Max(1, projectileLifetimeTicks);
-
-        resolvesWithinCurrentTick = false;
-
-        usesAmmo = true;
-        reloadOnlyOnPlanet = true;
-
-        maxAmmoCharges =
-            Mathf.Max(chargesPerTickMax, maxAmmoCharges);
-
-        projectileSpeedPerTick =
-            Mathf.Max(0.01f, projectileSpeedPerTick);
+        else
+        {
+            maxAmmoChargesMin = Mathf.Max(1, maxAmmoChargesMin);
+            maxAmmoChargesMax = Mathf.Max(maxAmmoChargesMin, maxAmmoChargesMax);
+        }
     }
 #endif
 }

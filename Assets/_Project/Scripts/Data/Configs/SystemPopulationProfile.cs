@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 [CreateAssetMenu(
     fileName = "SystemPopulationProfile",
-    menuName = "StarFrontier/Configs/System Population Profile")]
+    menuName = "StarFrontier/Configs/System/System Population Profile")]
 public sealed class SystemPopulationProfile : BaseConfig
 {
     [Header("Galaxy Level")]

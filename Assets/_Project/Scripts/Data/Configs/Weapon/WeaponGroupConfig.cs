@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 [CreateAssetMenu(
     fileName = "WeaponGroupConfig",
-    menuName = "StarFrontier/Configs/Npc/WeaponGroupConfig")]
+    menuName = "StarFrontier/Configs/Combat/Weapon Group Config")]
 public sealed class WeaponGroupConfig : BaseConfig
 {
     [Header("Weapons")]

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewGameConfig", menuName = "StarFrontier/Configs/New game")]
+[CreateAssetMenu(fileName = "NewGameConfig", menuName = "StarFrontier/Configs/Game/New game")]
 public class NewGameConfig : BaseConfig
 {
     public StarSystemConfig StartSystem;

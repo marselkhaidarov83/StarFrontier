@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "StationTypeConfig", menuName = "StarFrontier/Configs/Station Type")]
+[CreateAssetMenu(fileName = "StationTypeConfig", menuName = "StarFrontier/Configs/System/Station Type")]
 public class StationTypeConfig : BaseConfig
 {
     [Header("Type")]

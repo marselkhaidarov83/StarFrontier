@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PlanetOrbitConfig", menuName = "StarFrontier/Configs/PlanetOrbit")]
+[CreateAssetMenu(fileName = "PlanetOrbitConfig", menuName = "StarFrontier/Configs/System/Planet Orbit")]
 public class PlanetOrbitConfig : BaseConfig
 {
     [Header("Base Stats")]

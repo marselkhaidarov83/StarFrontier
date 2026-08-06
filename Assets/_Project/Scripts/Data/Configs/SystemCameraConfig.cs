@@ -2,7 +2,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "SystemCameraConfig",
-    menuName = "StarFrontier/Configs/System Camera"
+    menuName = "StarFrontier/Configs/Game/System Camera"
 )]
 public sealed class SystemCameraConfig : ScriptableObject
 {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ShipConfig", menuName = "StarFrontier/Configs/Ship")]
+[CreateAssetMenu(fileName = "ShipConfig", menuName = "StarFrontier/Configs/Ship/Ship")]
 public class ShipConfig : BaseConfig
 {
     [Header("Base Stats")]

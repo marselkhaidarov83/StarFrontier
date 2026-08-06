@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DebugConfig", menuName = "StarFrontier/Configs/Debug Config")]
+[CreateAssetMenu(fileName = "DebugConfig", menuName = "StarFrontier/Configs/Game/Debug Config")]
 public class DebugConfig : ScriptableObject
 {
     [Header("Debug UI")]

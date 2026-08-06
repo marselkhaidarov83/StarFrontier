@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SectorConfig", menuName = "StarFrontier/Configs/Sector")]
+[CreateAssetMenu(fileName = "SectorConfig", menuName = "StarFrontier/Configs/Galaxy/Sector")]
 public class SectorConfig : BaseConfig
 {
     [Header("World Structure")]

@@ -6,8 +6,7 @@ public sealed class AllyBehaviourScenarioEntry
 {
     [Header("Scenario")]
     [SerializeField]
-    private AllyBehaviourScenario scenario =
-        AllyBehaviourScenario.Normal;
+    private AllyBehaviourScenario scenario;
 
     [Header("Behavior Profile")]
     [SerializeField]

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PirateConfig", menuName = "StarFrontier/Configs/Pirate")]
+[CreateAssetMenu(fileName = "PirateConfig", menuName = "StarFrontier/Configs/Npc/Pirate")]
 public class PirateConfig : BaseConfig
 {
     [Header("Base Stats")]
