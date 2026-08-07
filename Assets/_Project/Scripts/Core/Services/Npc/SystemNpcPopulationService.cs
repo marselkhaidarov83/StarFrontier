@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -54,6 +55,126 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     public void ClearRuntimeState()
     {
         RuntimeState.Clear();
+    }
+
+    public void ProcessOfflinePopulation(
+        IReadOnlyList<StarSystemConfig> starSystems,
+        double offlineHours)
+    {
+        if (starSystems == null)
+            return;
+
+        if (offlineHours <= 0d)
+            return;
+
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
+        for (int systemIndex = 0;
+             systemIndex < starSystems.Count;
+             systemIndex++)
+        {
+            StarSystemConfig starSystem =
+                starSystems[systemIndex];
+
+            if (starSystem == null)
+                continue;
+
+            SystemPopulationProfile profile =
+                GetCurrentPopulationProfile(starSystem);
+
+            if (profile == null)
+                continue;
+
+            if (profile.AllySpawnRules == null)
+                continue;
+
+            for (int ruleIndex = 0;
+                 ruleIndex < profile.AllySpawnRules.Length;
+                 ruleIndex++)
+            {
+                AllySpawnRuleConfig rule =
+                    profile.AllySpawnRules[ruleIndex];
+
+                if (rule == null)
+                    continue;
+
+                AllySpawnLevelEntryConfig levelEntry =
+                    rule.GetEntryForGalaxyLevel(currentGalaxyLevel);
+
+                if (levelEntry == null)
+                    continue;
+
+                if (!levelEntry.HasValidAllies())
+                    continue;
+
+                if (levelEntry.OfflineSpawnIntervalHours <= 0f)
+                    continue;
+
+                int offlineSpawnCycles =
+                    Mathf.FloorToInt(
+                        (float)(offlineHours / levelEntry.OfflineSpawnIntervalHours));
+
+                if (offlineSpawnCycles <= 0)
+                    continue;
+
+                IReadOnlyList<AllyGroupEntryConfig> allies =
+                    levelEntry.Allies;
+
+                if (allies == null)
+                    continue;
+
+                for (int allyIndex = 0;
+                     allyIndex < allies.Count;
+                     allyIndex++)
+                {
+                    AllyGroupEntryConfig entry =
+                        allies[allyIndex];
+
+                    if (entry == null)
+                        continue;
+
+                    if (!entry.IsValid())
+                        continue;
+
+                    AllyConfig allyConfig =
+                        entry.AllyConfig;
+
+                    if (allyConfig == null)
+                        continue;
+
+                    if (allyConfig.Level != currentGalaxyLevel)
+                        continue;
+
+                    int aliveCount =
+                        CountAliveAlliesForRule(
+                            starSystem.Id,
+                            rule,
+                            allyConfig);
+
+                    int freeSlots =
+                        entry.MaxCount - aliveCount;
+
+                    if (freeSlots <= 0)
+                        continue;
+
+                    int countToSpawn =
+                        Mathf.Min(
+                            freeSlots,
+                            offlineSpawnCycles);
+
+                    for (int spawnIndex = 0;
+                         spawnIndex < countToSpawn;
+                         spawnIndex++)
+                    {
+                        CreateAlly(
+                            starSystem,
+                            rule,
+                            allyConfig);
+                    }
+                }
+            }
+        }
     }
 
     public int ScheduleRespawn(
@@ -123,21 +244,30 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (profile.AllySpawnRules == null)
             return;
 
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
         foreach (AllySpawnRuleConfig rule in profile.AllySpawnRules)
         {
             if (rule == null)
                 continue;
 
-            if (!rule.HasValidAllies())
+            if (!rule.HasValidAlliesForGalaxyLevel(currentGalaxyLevel))
                 continue;
 
-            if (rule.Allies == null)
+            IReadOnlyList<AllyGroupEntryConfig> allies =
+                rule.GetAlliesForGalaxyLevel(currentGalaxyLevel);
+
+            if (allies == null)
                 continue;
 
-            for (int i = 0; i < rule.Allies.Count; i++)
+            float spawnIntervalSeconds =
+                rule.GetSpawnIntervalSeconds(currentGalaxyLevel);
+
+            for (int i = 0; i < allies.Count; i++)
             {
                 AllyGroupEntryConfig entry =
-                    rule.Allies[i];
+                    allies[i];
 
                 if (entry == null)
                     continue;
@@ -149,6 +279,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                     entry.AllyConfig;
 
                 if (allyConfig == null)
+                    continue;
+
+                if (allyConfig.Level != currentGalaxyLevel)
                     continue;
 
                 int aliveCount =
@@ -204,7 +337,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
                 timer.TimerSeconds += deltaTime;
 
-                if (timer.TimerSeconds < rule.SpawnIntervalSeconds)
+                if (timer.TimerSeconds < spawnIntervalSeconds)
                     continue;
 
                 timer.TimerSeconds = 0f;
@@ -230,12 +363,15 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (profile.EnemyGroupSpawnRules == null)
             return;
 
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
         foreach (EnemyGroupSpawnRuleConfig rule in profile.EnemyGroupSpawnRules)
         {
             if (rule == null)
                 continue;
 
-            if (!rule.HasValidEnemies())
+            if (!rule.HasValidEnemiesForGalaxyLevel(currentGalaxyLevel))
                 continue;
 
             int aliveGroupCount =
@@ -245,8 +381,11 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                         rule.Id)
                     .Count;
 
-            if (aliveGroupCount >= rule.MaxAliveGroupsFromThisRule)
+            if (aliveGroupCount >=
+                rule.GetMaxAliveGroupsForGalaxyLevel(currentGalaxyLevel))
+            {
                 continue;
+            }
 
             SystemPopulationRuleTimerState timer =
                 RuntimeState.GetOrCreateTimer(
@@ -267,8 +406,11 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
             timer.TimerSeconds += deltaTime;
 
-            if (timer.TimerSeconds < rule.SpawnIntervalSeconds)
+            if (timer.TimerSeconds <
+                rule.GetSpawnIntervalSeconds(currentGalaxyLevel))
+            {
                 continue;
+            }
 
             timer.TimerSeconds = 0f;
 
@@ -374,17 +516,26 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (rule == null)
             return;
 
-        if (rule.Enemies == null)
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
+        EnemyGroupSpawnLevelEntryConfig levelEntry =
+            rule.GetEntryForGalaxyLevel(currentGalaxyLevel);
+
+        if (levelEntry == null)
+            return;
+
+        if (levelEntry.Enemies == null)
             return;
 
         string groupRuntimeId =
             Guid.NewGuid().ToString("N");
 
-        int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
-
-        foreach (EnemyGroupEntryConfig entry in rule.Enemies)
+        for (int i = 0; i < levelEntry.Enemies.Count; i++)
         {
+            EnemyGroupEntryConfig entry =
+                levelEntry.Enemies[i];
+
             if (entry == null)
                 continue;
 
@@ -412,10 +563,10 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                     entry.MinCount,
                     entry.MaxCount + 1);
 
-            for (int i = 0; i < count; i++)
+            for (int c = 0; c < count; c++)
             {
                 Vector3 position =
-                    BuildEnemySpawnPosition(rule);
+                    BuildEnemySpawnPosition(starSystem);
 
                 SystemNpcRuntimeState enemy =
                     SystemNpcRuntimeFactory.CreateEnemy(
@@ -435,6 +586,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                     "System: " + starSystem.Id + ", " +
                     "GroupRule: " + rule.Id + ", " +
                     "Config: " + entry.EnemyConfig.Id + ", " +
+                    "Weight: " + entry.Weight + ", " +
                     "GroupRuntimeId: " + groupRuntimeId);
             }
         }
@@ -555,10 +707,16 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     }
 
     private Vector3 BuildEnemySpawnPosition(
-        EnemyGroupSpawnRuleConfig rule)
+        StarSystemConfig starSystem)
     {
+        if (starSystem != null &&
+            starSystem.NpcSpawnPoints != null)
+        {
+            return starSystem.NpcSpawnPoints.PickEnemySpawnPosition();
+        }
+
         Vector3 position =
-            rule.StartPosition;
+            new Vector3(6f, 0f, 0f);
 
         Vector2 randomOffset =
             UnityEngine.Random.insideUnitCircle * randomPosition;
@@ -645,7 +803,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             timerRuleId = BuildAllyTimerKey(
                 rule,
                 _configService.GetAllyConfigById(npc.ConfigId));
-            intervalSeconds = rule.SpawnIntervalSeconds;
+            intervalSeconds = rule.GetSpawnIntervalSeconds(GetCurrentGalaxyLevel());
             return true;
         }
 
@@ -675,7 +833,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 continue;
 
             timerRuleId = rule.Id;
-            intervalSeconds = rule.SpawnIntervalSeconds;
+            intervalSeconds = rule.GetSpawnIntervalSeconds(GetCurrentGalaxyLevel());
             return true;
         }
 

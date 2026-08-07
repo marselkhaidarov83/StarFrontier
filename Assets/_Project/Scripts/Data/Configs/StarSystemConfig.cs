@@ -22,6 +22,7 @@ public class StarSystemConfig : BaseConfig
 
     [Header("Npc")]
     [SerializeField] private SystemPopulationConfig systemPopulation;
+    [SerializeField] private SystemNpcSpawnPointConfig npcSpawnPoints;
 
     [Header("AtStart")]
     [SerializeField] private bool isStartSystem;
@@ -41,6 +42,7 @@ public class StarSystemConfig : BaseConfig
     public MissionTag[] MissionTags => missionTags;
     public Vector3 MapPosition => mapPosition;
     public SystemPopulationConfig SystemPopulation => systemPopulation;
+    public SystemNpcSpawnPointConfig NpcSpawnPoints => npcSpawnPoints;
     public bool IsStartSystem => isStartSystem;
     public bool IsHiddenAtStart => isHiddenAtStart;
     public int RecommendedPower => recommendedPower;

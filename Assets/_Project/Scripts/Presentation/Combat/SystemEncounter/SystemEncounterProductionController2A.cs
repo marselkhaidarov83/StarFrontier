@@ -12,6 +12,8 @@ public sealed class SystemEncounterProductionController2A : MonoBehaviour
     [SerializeField] private EnemyGroupSpawnRuleConfig[] enemyGroupSpawnRules =
         new EnemyGroupSpawnRuleConfig[0];
 
+    [SerializeField] [Range(1, 10)] private int encounterGalaxyLevel = 1;
+
     [SerializeField] private EnemySystemMapEntity enemyPrefab;
 
     [Header("Ally Rules")]
@@ -203,6 +205,9 @@ public sealed class SystemEncounterProductionController2A : MonoBehaviour
         if (enemyGroupSpawnRules == null)
             return null;
 
+        int currentGalaxyLevel =
+            Mathf.Clamp(encounterGalaxyLevel, 1, 10);
+
         for (int i = 0; i < enemyGroupSpawnRules.Length; i++)
         {
             EnemyGroupSpawnRuleConfig rule =
@@ -211,7 +216,7 @@ public sealed class SystemEncounterProductionController2A : MonoBehaviour
             if (rule == null)
                 continue;
 
-            if (rule.HasValidEnemies())
+            if (rule.HasValidEnemiesForGalaxyLevel(currentGalaxyLevel))
                 return rule;
         }
 
@@ -227,8 +232,17 @@ public sealed class SystemEncounterProductionController2A : MonoBehaviour
         if (spawnRule == null)
             return result;
 
+        int currentGalaxyLevel =
+            Mathf.Clamp(encounterGalaxyLevel, 1, 10);
+
+        EnemyGroupSpawnLevelEntryConfig levelEntry =
+            spawnRule.GetEntryForGalaxyLevel(currentGalaxyLevel);
+
+        if (levelEntry == null)
+            return result;
+
         IReadOnlyList<EnemyGroupEntryConfig> enemies =
-            spawnRule.Enemies;
+            levelEntry.Enemies;
 
         if (enemies == null)
             return result;
@@ -254,7 +268,7 @@ public sealed class SystemEncounterProductionController2A : MonoBehaviour
                 result.Add(
                     new EnemySpawnRequest2A(
                         entry.EnemyConfig,
-                        spawnRule.StartPosition));
+                        new Vector3(6f, 0f, 0f)));
             }
         }
 
