@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -46,19 +45,20 @@ public sealed class AllyConfig : BaseConfig
 
     [Header("Ally Role")]
     [SerializeField]
-    private AllyRole2A role =
-        AllyRole2A.Ranger;
+    private AllyRole2A role = AllyRole2A.Ranger;
+
+    [Header("Runtime Names")]
+    [SerializeField]
+    private AllyNamePoolConfig namePool;
 
     [Header("Behavior Scenarios")]
-    [Tooltip(
-        "Scenario enum and reference to the behavior profile.")]
+    [Tooltip("Scenario enum and reference to the behavior profile.")]
     [SerializeField]
-    private NpcBehaviourScenarioEntry[] behaviorScenarios =
-        new NpcBehaviourScenarioEntry[0];
+    private AllyBehaviourScenarioEntry[] behaviorScenarios =
+        new AllyBehaviourScenarioEntry[0];
 
     [Header("Weapon Groups")]
-    [Tooltip(
-        "One random group is selected when a real ally NPC is created.")]
+    [Tooltip("One random group is selected when a real ally NPC is created.")]
     [SerializeField]
     private WeaponGroupConfig[] weaponGroups =
         new WeaponGroupConfig[0];
@@ -67,68 +67,31 @@ public sealed class AllyConfig : BaseConfig
     [SerializeField]
     private Sprite mapSprite;
 
-    public int BaseHullMin =>
-        baseHullMin;
+    public int BaseHullMin => baseHullMin;
+    public int BaseHullMax => baseHullMax;
+    public int BaseShieldMin => baseShieldMin;
+    public int BaseShieldMax => baseShieldMax;
+    public int BaseEnergyMin => baseEnergyMin;
+    public int BaseEnergyMax => baseEnergyMax;
+    public float BaseSpeedMin => baseSpeedMin;
+    public float BaseSpeedMax => baseSpeedMax;
 
-    public int BaseHullMax =>
-        baseHullMax;
+    public int BaseHull => baseHullMin;
+    public int BaseShield => baseShieldMin;
+    public int BaseEnergy => baseEnergyMin;
+    public float BaseSpeed => baseSpeedMin;
 
-    public int BaseShieldMin =>
-        baseShieldMin;
+    public int Level => level;
+    public AllyRole2A Role => role;
+    public AllyNamePoolConfig NamePool => namePool;
 
-    public int BaseShieldMax =>
-        baseShieldMax;
-
-    public int BaseEnergyMin =>
-        baseEnergyMin;
-
-    public int BaseEnergyMax =>
-        baseEnergyMax;
-
-    public float BaseSpeedMin =>
-        baseSpeedMin;
-
-    public float BaseSpeedMax =>
-        baseSpeedMax;
-
-    /*
-     * Legacy read-only properties.
-     * Оставлены, чтобы старый код/тесты не ломались при компиляции.
-     * Реальное создание союзника должно использовать Min/Max.
-     */
-    public int BaseHull =>
-        baseHullMin;
-
-    public int BaseShield =>
-        baseShieldMin;
-
-    public int BaseEnergy =>
-        baseEnergyMin;
-
-    public float BaseSpeed =>
-        baseSpeedMin;
-
-    public int Level =>
-        level;
-
-    public AllyRole2A Role =>
-        role;
-
-    public IReadOnlyList<NpcBehaviourScenarioEntry>
-        BehaviorScenarios =>
+    public IReadOnlyList<AllyBehaviourScenarioEntry> BehaviorScenarios =>
         behaviorScenarios;
 
-    public IReadOnlyList<WeaponGroupConfig>
-        WeaponGroups =>
+    public IReadOnlyList<WeaponGroupConfig> WeaponGroups =>
         weaponGroups;
 
-    /*
-     * Legacy compatibility:
-     * раньше AllyConfig отдавал плоский список оружия.
-     * Теперь возвращается первая валидная группа, если она есть.
-     */
-    public IReadOnlyList<WeaponConfig>
-        WeaponConfigs =>
+    public IReadOnlyList<WeaponConfig> WeaponConfigs =>
         GetFirstValidWeaponGroupWeapons();
 
     public WeaponConfig WeaponConfig
@@ -151,8 +114,24 @@ public sealed class AllyConfig : BaseConfig
         }
     }
 
-    public Sprite MapSprite =>
-        mapSprite;
+    public Sprite MapSprite => mapSprite;
+
+    public string PickRuntimeDisplayName(string runtimeNpcId)
+    {
+        if (namePool != null)
+        {
+            string pickedName =
+                namePool.PickName(runtimeNpcId);
+
+            if (!string.IsNullOrWhiteSpace(pickedName))
+                return pickedName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(DisplayName))
+            return DisplayName;
+
+        return Id;
+    }
 
     public bool TryGetBehaviorScenario(
         AllyBehaviourScenario scenario,
@@ -165,7 +144,7 @@ public sealed class AllyConfig : BaseConfig
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
         {
-            NpcBehaviourScenarioEntry entry =
+            AllyBehaviourScenarioEntry entry =
                 behaviorScenarios[i];
 
             if (entry == null)
@@ -187,24 +166,15 @@ public sealed class AllyConfig : BaseConfig
     public NpcBehaviourScenarioConfig GetBehaviorScenario(
         AllyBehaviourScenario scenario)
     {
-        NpcBehaviourScenarioConfig behaviorConfig;
-
-        if (!TryGetBehaviorScenario(
-                scenario,
-                out behaviorConfig))
-        {
+        if (!TryGetBehaviorScenario(scenario, out NpcBehaviourScenarioConfig behaviorConfig))
             return null;
-        }
 
         return behaviorConfig;
     }
 
-    public bool HasBehaviorScenario(
-        AllyBehaviourScenario scenario)
+    public bool HasBehaviorScenario(AllyBehaviourScenario scenario)
     {
-        return TryGetBehaviorScenario(
-            scenario,
-            out _);
+        return TryGetBehaviorScenario(scenario, out _);
     }
 
     public bool HasDuplicateBehaviorScenarios()
@@ -217,7 +187,7 @@ public sealed class AllyConfig : BaseConfig
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
         {
-            NpcBehaviourScenarioEntry entry =
+            AllyBehaviourScenarioEntry entry =
                 behaviorScenarios[i];
 
             if (entry == null)
@@ -251,8 +221,7 @@ public sealed class AllyConfig : BaseConfig
 
             for (int i = 0; i < weaponGroups.Length; i++)
             {
-                WeaponGroupConfig group =
-                    weaponGroups[i];
+                WeaponGroupConfig group = weaponGroups[i];
 
                 if (group == null)
                     continue;
@@ -278,8 +247,7 @@ public sealed class AllyConfig : BaseConfig
 
             for (int i = 0; i < weaponGroups.Length; i++)
             {
-                WeaponGroupConfig group =
-                    weaponGroups[i];
+                WeaponGroupConfig group = weaponGroups[i];
 
                 if (group == null)
                     continue;
@@ -291,16 +259,14 @@ public sealed class AllyConfig : BaseConfig
         }
     }
 
-    private IReadOnlyList<WeaponConfig>
-        GetFirstValidWeaponGroupWeapons()
+    private IReadOnlyList<WeaponConfig> GetFirstValidWeaponGroupWeapons()
     {
         if (weaponGroups == null)
             return EmptyWeaponConfigs;
 
         for (int i = 0; i < weaponGroups.Length; i++)
         {
-            WeaponGroupConfig group =
-                weaponGroups[i];
+            WeaponGroupConfig group = weaponGroups[i];
 
             if (group == null)
                 continue;
@@ -318,18 +284,12 @@ public sealed class AllyConfig : BaseConfig
     private void OnValidate()
     {
         if (behaviorScenarios == null)
-        {
-            behaviorScenarios =
-                new NpcBehaviourScenarioEntry[0];
-        }
+            behaviorScenarios = new AllyBehaviourScenarioEntry[0];
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
         {
             if (behaviorScenarios[i] == null)
-            {
-                behaviorScenarios[i] =
-                    new NpcBehaviourScenarioEntry();
-            }
+                behaviorScenarios[i] = new AllyBehaviourScenarioEntry();
         }
 
         if (weaponGroups == null)
@@ -339,8 +299,6 @@ public sealed class AllyConfig : BaseConfig
         {
             if (weaponGroups[i] == null)
                 weaponGroups[i] = new WeaponGroupConfig();
-
-            
         }
 
         baseHullMin = Mathf.Max(1, baseHullMin);

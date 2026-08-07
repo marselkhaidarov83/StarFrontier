@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d7741405179f43cebeecaadac0987e8, type: 3}
+  m_Name: ally_ranger_L07_01
+  m_EditorClassIdentifier: Data::AllyConfig
+  id: ally_ranger_L07_01
+  displayName: "\u0420\u0435\u0439\u043D\u0434\u0436\u0435\u0440 \u0443\u0440. 7"
+  description: "\u0420\u0435\u0439\u043D\u0434\u0436\u0435\u0440, \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    7. \u0421\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+    \u043A\u043E\u043D\u0444\u0438\u0433 \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0430:
+    \u0440\u043E\u043B\u044C, \u0443\u0440\u043E\u0432\u0435\u043D\u044C, \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u0438
+    \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
+    \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
+  icon: {fileID: 0}
+  baseHullMin: 216
+  baseHullMax: 249
+  baseShieldMin: 157
+  baseShieldMax: 179
+  baseEnergyMin: 216
+  baseEnergyMax: 240
+  baseSpeedMin: 52.5
+  baseSpeedMax: 56.75
+  level: 7
+  role: 0
+  namePool: {fileID: 11400000, guid: 9a60b2cb449c5430b80aa4d69d0d508b, type: 2}
+  behaviorScenarios:
+  - scenario: 0
+    behaviorConfig: {fileID: 11400000, guid: 056adae86068e4efa95f8b820255b475, type: 2}
+  - scenario: 10
+    behaviorConfig: {fileID: 11400000, guid: 9bda5a7a3de00421ba105c329d2e4f72, type: 2}
+  - scenario: 20
+    behaviorConfig: {fileID: 11400000, guid: c4b421f35b8f04448acf97b4d3494ca7, type: 2}
+  weaponGroups:
+  - {fileID: 11400000, guid: 930b0a5b1b0904299bcd3b7860c0330a, type: 2}
+  - {fileID: 11400000, guid: ffc1a5868d0d64f51930b8d5c496b2c3, type: 2}
+  - {fileID: 11400000, guid: e01a41947f4b4441ca93e2995bcfe19c, type: 2}
+  - {fileID: 11400000, guid: d9f34004a320446d4aa650178787917a, type: 2}
+  - {fileID: 11400000, guid: b35c79a966897424893e401f7f4a4cf0, type: 2}
+  mapSprite: {fileID: 0}

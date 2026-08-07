@@ -8,6 +8,7 @@ public sealed class SystemNpcRuntimeState
     [Header("Identity")]
     public string RuntimeNpcId;
     public SystemNpcType NpcType;
+    public string DisplayName;
 
     public string ConfigId;
     public string SpawnRuleId;
@@ -144,6 +145,7 @@ public sealed class SystemNpcRuntimeState
     public float getShotDistance()
     {
         float distance = 0;
+
         foreach (SystemNpcWeaponRuntimeState item in Weapons)
             distance = Math.Max(distance, item.ShotDistance);
 

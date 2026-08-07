@@ -10,12 +10,12 @@ public sealed class AllyBehaviourScenarioEntry
 
     [Header("Behavior Profile")]
     [SerializeField]
-    private AllyBehaviourScenarioConfig behaviorConfig;
+    private NpcBehaviourScenarioConfig behaviorConfig;
 
     public AllyBehaviourScenario Scenario =>
         scenario;
 
-    public AllyBehaviourScenarioConfig BehaviorConfig =>
+    public NpcBehaviourScenarioConfig BehaviorConfig =>
         behaviorConfig;
 
     public bool IsValid()

@@ -47,6 +47,16 @@ public class EnemyConfig : BaseConfig
     [SerializeField]
     private EnemyArchetype archetype;
 
+    [Header("Runtime Names")]
+    [SerializeField]
+    private EnemyNamePoolConfig namePool;
+
+    [Header("Behavior Scenarios")]
+    [Tooltip("Scenario enum and reference to the behavior profile.")]
+    [SerializeField]
+    private NpcBehaviourScenarioEntry[] behaviorScenarios =
+        new NpcBehaviourScenarioEntry[0];
+
     [Header("Weapon Groups")]
     [SerializeField]
     private WeaponGroupConfig[] weaponGroups =
@@ -82,62 +92,30 @@ public class EnemyConfig : BaseConfig
     [SerializeField]
     private Sprite combatSprite;
 
-    public int BaseHullMin =>
-        baseHullMin;
+    public int BaseHullMin => baseHullMin;
+    public int BaseHullMax => baseHullMax;
+    public int BaseShieldMin => baseShieldMin;
+    public int BaseShieldMax => baseShieldMax;
+    public int BaseEnergyMin => baseEnergyMin;
+    public int BaseEnergyMax => baseEnergyMax;
+    public float BaseSpeedMin => baseSpeedMin;
+    public float BaseSpeedMax => baseSpeedMax;
 
-    public int BaseHullMax =>
-        baseHullMax;
+    public int BaseHull => baseHullMin;
+    public int BaseShield => baseShieldMin;
+    public int BaseEnergy => baseEnergyMin;
+    public float BaseSpeed => baseSpeedMin;
 
-    public int BaseShieldMin =>
-        baseShieldMin;
+    public int Level => level;
+    public EnemyArchetype AiArchetype => archetype;
+    public EnemyNamePoolConfig NamePool => namePool;
 
-    public int BaseShieldMax =>
-        baseShieldMax;
-
-    public int BaseEnergyMin =>
-        baseEnergyMin;
-
-    public int BaseEnergyMax =>
-        baseEnergyMax;
-
-    public float BaseSpeedMin =>
-        baseSpeedMin;
-
-    public float BaseSpeedMax =>
-        baseSpeedMax;
-
-    /*
-     * Legacy read-only properties.
-     * Оставлены, чтобы старый код/тесты не ломались при компиляции.
-     * Реальное создание врага должно использовать Min/Max.
-     */
-    public int BaseHull =>
-        baseHullMin;
-
-    public int BaseShield =>
-        baseShieldMin;
-
-    public int BaseEnergy =>
-        baseEnergyMin;
-
-    public float BaseSpeed =>
-        baseSpeedMin;
-
-    public int Level =>
-        level;
-
-    public EnemyArchetype AiArchetype =>
-        archetype;
+    public IReadOnlyList<NpcBehaviourScenarioEntry> BehaviorScenarios =>
+        behaviorScenarios;
 
     public IReadOnlyList<WeaponGroupConfig> WeaponGroups =>
         weaponGroups;
 
-    /*
-     * Legacy compatibility:
-     * раньше EnemyConfig отдавал плоский список оружия.
-     * Теперь возвращается первая валидная WeaponGroup.
-     * Если группы ещё не заполнены, используется legacyWeaponConfigs.
-     */
     public IReadOnlyList<WeaponConfig> WeaponConfigs =>
         GetFirstValidWeaponGroupWeaponsOrLegacy();
 
@@ -164,33 +142,103 @@ public class EnemyConfig : BaseConfig
         }
     }
 
-    public int CreditRewardMin =>
-        creditRewardMin;
+    public int CreditRewardMin => creditRewardMin;
+    public int CreditRewardMax => creditRewardMax;
+    public int XpRewardMin => xpRewardMin;
+    public int XpRewardMax => xpRewardMax;
 
-    public int CreditRewardMax =>
-        creditRewardMax;
+    public int CreditReward => creditRewardMin;
+    public int XpReward => xpRewardMin;
+    public int DangerTier => dangerTier;
+    public Sprite CombatSprite => combatSprite;
 
-    public int XpRewardMin =>
-        xpRewardMin;
+    public string PickRuntimeDisplayName(string runtimeNpcId)
+    {
+        if (namePool != null)
+        {
+            string pickedName =
+                namePool.PickName(runtimeNpcId);
 
-    public int XpRewardMax =>
-        xpRewardMax;
+            if (!string.IsNullOrWhiteSpace(pickedName))
+                return pickedName;
+        }
 
-    /*
-     * Legacy read-only properties.
-     * Реальное создание врага должно использовать Min/Max.
-     */
-    public int CreditReward =>
-        creditRewardMin;
+        if (!string.IsNullOrWhiteSpace(DisplayName))
+            return DisplayName;
 
-    public int XpReward =>
-        xpRewardMin;
+        return Id;
+    }
 
-    public int DangerTier =>
-        dangerTier;
+    public bool TryGetBehaviorScenario(
+        AllyBehaviourScenario scenario,
+        out NpcBehaviourScenarioConfig behaviorConfig)
+    {
+        behaviorConfig = null;
 
-    public Sprite CombatSprite =>
-        combatSprite;
+        if (behaviorScenarios == null)
+            return false;
+
+        for (int i = 0; i < behaviorScenarios.Length; i++)
+        {
+            NpcBehaviourScenarioEntry entry =
+                behaviorScenarios[i];
+
+            if (entry == null)
+                continue;
+
+            if (!entry.IsValid())
+                continue;
+
+            if (entry.Scenario != scenario)
+                continue;
+
+            behaviorConfig = entry.BehaviorConfig;
+            return true;
+        }
+
+        return false;
+    }
+
+    public NpcBehaviourScenarioConfig GetBehaviorScenario(
+        AllyBehaviourScenario scenario)
+    {
+        if (!TryGetBehaviorScenario(
+                scenario,
+                out NpcBehaviourScenarioConfig behaviorConfig))
+        {
+            return null;
+        }
+
+        return behaviorConfig;
+    }
+
+    public bool HasBehaviorScenario(AllyBehaviourScenario scenario)
+    {
+        return TryGetBehaviorScenario(scenario, out _);
+    }
+
+    public bool HasDuplicateBehaviorScenarios()
+    {
+        if (behaviorScenarios == null)
+            return false;
+
+        HashSet<AllyBehaviourScenario> scenarios =
+            new HashSet<AllyBehaviourScenario>();
+
+        for (int i = 0; i < behaviorScenarios.Length; i++)
+        {
+            NpcBehaviourScenarioEntry entry =
+                behaviorScenarios[i];
+
+            if (entry == null)
+                continue;
+
+            if (!scenarios.Add(entry.Scenario))
+                return true;
+        }
+
+        return false;
+    }
 
     public bool HasWeapons()
     {
@@ -294,6 +342,15 @@ public class EnemyConfig : BaseConfig
 #if UNITY_EDITOR
     private void OnValidate()
     {
+        if (behaviorScenarios == null)
+            behaviorScenarios = new NpcBehaviourScenarioEntry[0];
+
+        for (int i = 0; i < behaviorScenarios.Length; i++)
+        {
+            if (behaviorScenarios[i] == null)
+                behaviorScenarios[i] = new NpcBehaviourScenarioEntry();
+        }
+
         if (weaponGroups == null)
             weaponGroups = new WeaponGroupConfig[0];
 

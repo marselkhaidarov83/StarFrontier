@@ -169,30 +169,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 return SystemNpcBehaviorType.EngageEnemies;
 
             case SystemNpcType.Pirate:
-                // if (HasEnemiesInSystem(npc.CurrentSystemId))
-                // {
-                //     float ver = UnityEngine.Random.Range(0, 100);
-                //     PirateGroupSpawnRuleConfig pirateGroupSpawnRuleConfig = _configService.GetAllySpawnRuleConfigById(npc.SpawnRuleId);
-                //     if (ver < allySpawnRule.EngageEnemiesWeight)
-                //     {
-                //         LogCustom("SystemNpcBehaviorType.EngageEnemies = " + SystemNpcBehaviorType.EngageEnemies);
-                //         return SystemNpcBehaviorType.EngageEnemies;                    
-                //     }
-                // }
-
                 return GetRandomBehaviorType4Pirate(npc);
-            default:
-                if (HasEnemiesInSystem(npc.CurrentSystemId))
-                {
-                    float ver = UnityEngine.Random.Range(0, 100);
-                    AllySpawnRuleConfig allySpawnRule = _configService.GetAllySpawnRuleConfigById(npc.SpawnRuleId);
-                    if (ver < allySpawnRule.EngageEnemiesWeight)
-                    {
-                        LogCustom("SystemNpcBehaviorType.EngageEnemies = " + SystemNpcBehaviorType.EngageEnemies);
-                        return SystemNpcBehaviorType.EngageEnemies;
-                    }
-                }
 
+            default:
                 return GetRandomBehaviorType4Ally(npc);
         }
     }
@@ -246,27 +225,42 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     public SystemNpcBehaviorType GetRandomBehaviorType4Ally(SystemNpcRuntimeState npc)
     {
-        AllySpawnRuleConfig allySpawnRuleConfig = _configService.GetAllySpawnRuleConfigById(npc.SpawnRuleId);
-        List<SystemNpcBehaviorWeight> weights = allySpawnRuleConfig.BehaviorWeights.ToList();
+        if (npc == null)
+            return SystemNpcBehaviorType.StayOnPlanetForDays;
 
-        //Отсекаем невозможные следующие состояния
-        switch (npc.PrevBehavior)
+        AllyConfig allyConfig =
+            _configService.GetAllyConfigById(npc.ConfigId);
+
+        if (allyConfig == null)
+            return SystemNpcBehaviorType.StayOnPlanetForDays;
+
+        AllyBehaviourScenario scenario =
+            ResolveAllyScenario(npc);
+
+        NpcBehaviourScenarioConfig behaviorConfig =
+            allyConfig.GetBehaviorScenario(scenario);
+
+        if (behaviorConfig == null &&
+            scenario != AllyBehaviourScenario.Normal)
         {
-            case SystemNpcBehaviorType.AnnihilateOnPlanet:
-                weights.Clear();
-                break;
-
-            case SystemNpcBehaviorType.EngageEnemies:
-            case SystemNpcBehaviorType.PatrolSystem:
-            case SystemNpcBehaviorType.TravelToAnotherSystem:
-                weights.Remove(weights.First(x => x.BehaviorType == SystemNpcBehaviorType.AnnihilateOnPlanet));
-                weights.Remove(weights.First(x => x.BehaviorType == SystemNpcBehaviorType.StayOnPlanetForDays));
-                break;
-
+            behaviorConfig =
+                allyConfig.GetBehaviorScenario(AllyBehaviourScenario.Normal);
         }
 
+        if (behaviorConfig == null)
+            return SystemNpcBehaviorType.StayOnPlanetForDays;
+
+        List<SystemNpcBehaviorWeight> weights =
+            behaviorConfig.BehaviorWeights
+                .Where(x => x != null && x.Weight > 0)
+                .ToList();
+
+        RemoveImpossibleAllyBehaviors(
+            npc,
+            weights);
+
         if (weights == null || weights.Count == 0)
-            throw new InvalidOperationException("Behavior weights are empty.");
+            return SystemNpcBehaviorType.StayOnPlanetForDays;
 
         int totalWeight = 0;
 
@@ -274,7 +268,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             totalWeight += item.Weight;
 
         if (totalWeight <= 0)
-            throw new InvalidOperationException("Total behavior weight must be greater than zero.");
+            return SystemNpcBehaviorType.StayOnPlanetForDays;
 
         int roll = UnityEngine.Random.Range(0, totalWeight);
         int cumulative = 0;
@@ -288,6 +282,45 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         }
 
         return weights[^1].BehaviorType;
+    }
+
+    private AllyBehaviourScenario ResolveAllyScenario(
+    SystemNpcRuntimeState npc)
+    {
+        if (npc != null &&
+            HasEnemiesInSystem(npc.CurrentSystemId))
+        {
+            return AllyBehaviourScenario.EnemyInvasion;
+        }
+
+        return AllyBehaviourScenario.Normal;
+    }
+
+    private void RemoveImpossibleAllyBehaviors(
+        SystemNpcRuntimeState npc,
+        List<SystemNpcBehaviorWeight> weights)
+    {
+        if (npc == null)
+            return;
+
+        if (weights == null)
+            return;
+
+        switch (npc.PrevBehavior)
+        {
+            case SystemNpcBehaviorType.AnnihilateOnPlanet:
+                weights.Clear();
+                break;
+
+            case SystemNpcBehaviorType.EngageEnemies:
+            case SystemNpcBehaviorType.PatrolSystem:
+            case SystemNpcBehaviorType.TravelToAnotherSystem:
+                weights.RemoveAll(
+                    x => x == null ||
+                         x.BehaviorType == SystemNpcBehaviorType.AnnihilateOnPlanet ||
+                         x.BehaviorType == SystemNpcBehaviorType.StayOnPlanetForDays);
+                break;
+        }
     }
 
     private void ApplyBehavior(

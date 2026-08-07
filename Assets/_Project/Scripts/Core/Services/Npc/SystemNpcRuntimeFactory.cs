@@ -16,39 +16,31 @@ public static class SystemNpcRuntimeFactory
             throw new ArgumentNullException(nameof(config));
 
         int hull =
-            UnityEngine.Random.Range(
-                config.BaseHullMin,
-                config.BaseHullMax + 1);
+            UnityEngine.Random.Range(config.BaseHullMin, config.BaseHullMax + 1);
 
         int shield =
-            UnityEngine.Random.Range(
-                config.BaseShieldMin,
-                config.BaseShieldMax + 1);
+            UnityEngine.Random.Range(config.BaseShieldMin, config.BaseShieldMax + 1);
 
         int energy =
-            UnityEngine.Random.Range(
-                config.BaseEnergyMin,
-                config.BaseEnergyMax + 1);
+            UnityEngine.Random.Range(config.BaseEnergyMin, config.BaseEnergyMax + 1);
 
         float speed =
-            UnityEngine.Random.Range(
-                config.BaseSpeedMin,
-                config.BaseSpeedMax);
+            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax);
 
         int creditReward =
-            UnityEngine.Random.Range(
-                config.CreditRewardMin,
-                config.CreditRewardMax + 1);
+            UnityEngine.Random.Range(config.CreditRewardMin, config.CreditRewardMax + 1);
 
         int xpReward =
-            UnityEngine.Random.Range(
-                config.XpRewardMin,
-                config.XpRewardMax + 1);
+            UnityEngine.Random.Range(config.XpRewardMin, config.XpRewardMax + 1);
+
+        string runtimeNpcId =
+            Guid.NewGuid().ToString("N");
 
         var npc = new SystemNpcRuntimeState
         {
-            RuntimeNpcId = Guid.NewGuid().ToString("N"),
+            RuntimeNpcId = runtimeNpcId,
             NpcType = SystemNpcType.Enemy,
+            DisplayName = config.PickRuntimeDisplayName(runtimeNpcId),
 
             ConfigId = config.Id,
             SpawnRuleId = spawnRuleId,
@@ -86,9 +78,7 @@ public static class SystemNpcRuntimeFactory
             DangerTier = config.DangerTier
         };
 
-        AddRandomEnemyWeaponGroup(
-            npc,
-            config);
+        AddRandomEnemyWeaponGroup(npc, config);
 
         return npc;
     }
@@ -104,10 +94,14 @@ public static class SystemNpcRuntimeFactory
         if (config == null)
             throw new ArgumentNullException(nameof(config));
 
+        string runtimeNpcId =
+            Guid.NewGuid().ToString("N");
+
         var npc = new SystemNpcRuntimeState
         {
-            RuntimeNpcId = Guid.NewGuid().ToString("N"),
+            RuntimeNpcId = runtimeNpcId,
             NpcType = SystemNpcType.Pirate,
+            DisplayName = config.DisplayName,
 
             ConfigId = config.Id,
             SpawnRuleId = spawnRuleId,
@@ -145,9 +139,7 @@ public static class SystemNpcRuntimeFactory
             DangerTier = config.DangerTier
         };
 
-        AddWeapon(
-            npc,
-            config.WeaponConfig);
+        AddWeapon(npc, config.WeaponConfig);
 
         return npc;
     }
@@ -163,10 +155,26 @@ public static class SystemNpcRuntimeFactory
         if (config == null)
             throw new ArgumentNullException(nameof(config));
 
+        int hull =
+            UnityEngine.Random.Range(config.BaseHullMin, config.BaseHullMax + 1);
+
+        int shield =
+            UnityEngine.Random.Range(config.BaseShieldMin, config.BaseShieldMax + 1);
+
+        int energy =
+            UnityEngine.Random.Range(config.BaseEnergyMin, config.BaseEnergyMax + 1);
+
+        float speed =
+            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax);
+
+        string runtimeNpcId =
+            Guid.NewGuid().ToString("N");
+
         var npc = new SystemNpcRuntimeState
         {
-            RuntimeNpcId = Guid.NewGuid().ToString("N"),
+            RuntimeNpcId = runtimeNpcId,
             NpcType = SystemNpcType.Ally,
+            DisplayName = config.PickRuntimeDisplayName(runtimeNpcId),
 
             ConfigId = config.Id,
             SpawnRuleId = spawnRuleId,
@@ -186,16 +194,16 @@ public static class SystemNpcRuntimeFactory
             CurrentBehavior = SystemNpcBehaviorType.StayOnPlanetForDays,
             CombatState = SystemNpcCombatState.None,
 
-            MaxHull = config.BaseHull,
-            CurrentHull = config.BaseHull,
+            MaxHull = hull,
+            CurrentHull = hull,
 
-            MaxShield = config.BaseShield,
-            CurrentShield = config.BaseShield,
+            MaxShield = shield,
+            CurrentShield = shield,
 
-            MaxEnergy = config.BaseEnergy,
-            CurrentEnergy = config.BaseEnergy,
+            MaxEnergy = energy,
+            CurrentEnergy = energy,
 
-            Speed = config.BaseSpeed,
+            Speed = speed,
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
@@ -209,10 +217,7 @@ public static class SystemNpcRuntimeFactory
             DangerTier = 1
         };
 
-        AddWeapons(
-            npc,
-            config.WeaponConfigs,
-            config.WeaponConfig);
+        AddRandomAllyWeaponGroup(npc, config);
 
         return npc;
     }
@@ -221,35 +226,38 @@ public static class SystemNpcRuntimeFactory
         SystemNpcRuntimeState npc,
         EnemyConfig config)
     {
-        if (npc == null)
-            return;
-
-        if (config == null)
+        if (npc == null || config == null)
             return;
 
         WeaponGroupConfig weaponGroup =
-            PickRandomValidWeaponGroup(
-                config.WeaponGroups);
+            PickRandomValidWeaponGroup(config.WeaponGroups);
 
         if (weaponGroup != null)
         {
-            AddWeapons(
-                npc,
-                weaponGroup.WeaponConfigs,
-                null);
-
+            AddWeapons(npc, weaponGroup.WeaponConfigs, null);
             return;
         }
 
-        /*
-         * Safety fallback для старых или ещё не заполненных EnemyConfig:
-         * если WeaponGroups пустой, но legacy WeaponConfigs ещё есть,
-         * добавляем их как прежний плоский набор оружия.
-         */
-        AddWeapons(
-            npc,
-            config.WeaponConfigs,
-            config.WeaponConfig);
+        AddWeapons(npc, config.WeaponConfigs, config.WeaponConfig);
+    }
+
+    private static void AddRandomAllyWeaponGroup(
+        SystemNpcRuntimeState npc,
+        AllyConfig config)
+    {
+        if (npc == null || config == null)
+            return;
+
+        WeaponGroupConfig weaponGroup =
+            PickRandomValidWeaponGroup(config.WeaponGroups);
+
+        if (weaponGroup != null)
+        {
+            AddWeapons(npc, weaponGroup.WeaponConfigs, null);
+            return;
+        }
+
+        AddWeapons(npc, config.WeaponConfigs, config.WeaponConfig);
     }
 
     private static WeaponGroupConfig PickRandomValidWeaponGroup(
@@ -279,9 +287,7 @@ public static class SystemNpcRuntimeFactory
             return null;
 
         int index =
-            UnityEngine.Random.Range(
-                0,
-                validGroups.Count);
+            UnityEngine.Random.Range(0, validGroups.Count);
 
         return validGroups[index];
     }
@@ -305,11 +311,6 @@ public static class SystemNpcRuntimeFactory
             }
         }
 
-        /*
-         * Совместимость со старыми конфигами.
-         * Если список WeaponConfigs пустой, но старое свойство WeaponConfig
-         * что-то возвращает, добавляем это одно оружие.
-         */
         if (!addedAnyWeapon)
             AddWeapon(npc, fallbackWeaponConfig);
     }
@@ -338,24 +339,15 @@ public static class SystemNpcRuntimeFactory
                 BuildWeaponRollSeed(
                     npc.RuntimeNpcId,
                     weaponConfig.Id,
-                    npc.Weapons.Count.ToString()
-                )
-            );
+                    npc.Weapons.Count.ToString()));
 
         npc.Weapons.Add(
             new SystemNpcWeaponRuntimeState
             {
                 WeaponConfigId = weaponConfig.Id,
-
                 LastShotTick = -1,
                 NextAllowedShotTick = 0,
                 CooldownRemainingSeconds = 0f,
-
-                /*
-                 * В WeaponConfig v0.6 больше нет weaponConfig.Range.
-                 * Дальность выбирается из диапазона rangeMin/rangeMax
-                 * при создании runtime-оружия.
-                 */
                 ShotDistance = weaponStats.Range
             });
 
@@ -390,8 +382,7 @@ public static class SystemNpcRuntimeFactory
         return false;
     }
 
-    private static int BuildWeaponRollSeed(
-        params string[] parts)
+    private static int BuildWeaponRollSeed(params string[] parts)
     {
         unchecked
         {
@@ -402,11 +393,12 @@ public static class SystemNpcRuntimeFactory
 
             for (int i = 0; i < parts.Length; i++)
             {
-                string part = parts[i];
+                string part =
+                    parts[i];
 
                 if (string.IsNullOrEmpty(part))
                 {
-                    hash = hash * 31;
+                    hash *= 31;
                     continue;
                 }
 

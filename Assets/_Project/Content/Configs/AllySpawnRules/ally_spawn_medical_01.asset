@@ -1,0 +1,210 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2af2369609ace40fda949980018bc489, type: 3}
+  m_Name: ally_spawn_medical_01
+  m_EditorClassIdentifier: Data::AllySpawnRuleConfig
+  id: ally_spawn_medical_01
+  displayName: "\u0421\u043E\u044E\u0437\u043D\u0438\u043A\u0438: \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0430\u044F
+    \u0441\u0438\u0441\u0442\u0435\u043C\u0430"
+  description: "\u0412 \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u043E\u0439
+    \u0441\u0438\u0441\u0442\u0435\u043C\u0435 \u043C\u0435\u0434\u0438\u043A\u043E\u0432
+    \u043F\u0440\u0438\u043C\u0435\u0440\u043D\u043E \u0432 2 \u0440\u0430\u0437\u0430
+    \u0431\u043E\u043B\u044C\u0448\u0435."
+  icon: {fileID: 0}
+  levelEntries:
+  - galaxyLevel: 1
+    spawnIntervalSeconds: 180
+    offlineSpawnIntervalHours: 2
+    allies:
+    - allyConfig: {fileID: 11400000, guid: 5dfc6e7f0a15f4520a96d260b9959f4d, type: 2}
+      minCount: 1
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: 74ed7608ed0424e4bbac15d014400353, type: 2}
+      minCount: 1
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: c4fa377921d5d4166ba7b66387b1d427, type: 2}
+      minCount: 0
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: 84e9c1d6a242b4cfaa12abcb5aecab52, type: 2}
+      minCount: 1
+      maxCount: 1
+  - galaxyLevel: 2
+    spawnIntervalSeconds: 165
+    offlineSpawnIntervalHours: 3.1
+    allies:
+    - allyConfig: {fileID: 11400000, guid: f82652d970cb3402bb94f3860a7170f4, type: 2}
+      minCount: 1
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: 0d9510e783c234b2ea18719f8a574b1d, type: 2}
+      minCount: 1
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: 55c16c05b122d42bbb453209f2a309d0, type: 2}
+      minCount: 1
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: 6e946ec34e9de43b299e33282c2f81db, type: 2}
+      minCount: 1
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: 56e99121189b04a69b4fa17159c8c202, type: 2}
+      minCount: 1
+      maxCount: 3
+  - galaxyLevel: 3
+    spawnIntervalSeconds: 150
+    offlineSpawnIntervalHours: 4.2
+    allies:
+    - allyConfig: {fileID: 11400000, guid: 93e37b9d68b5544609435a19f944354a, type: 2}
+      minCount: 1
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: c1b033f2d3c354416a13c848b75c08c0, type: 2}
+      minCount: 1
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: f86c84cedf8e245f39254d579bdca73f, type: 2}
+      minCount: 1
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: dff19c4266e0243b4b56c83bb7025075, type: 2}
+      minCount: 1
+      maxCount: 1
+    - allyConfig: {fileID: 11400000, guid: 356440f231bc04abcab9b86606b30643, type: 2}
+      minCount: 2
+      maxCount: 3
+  - galaxyLevel: 4
+    spawnIntervalSeconds: 135
+    offlineSpawnIntervalHours: 5.3
+    allies:
+    - allyConfig: {fileID: 11400000, guid: f2282791604b64c3d901e9f6aa795f1c, type: 2}
+      minCount: 2
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: 1fcc1ab89b7494ef1b619de032d545e3, type: 2}
+      minCount: 1
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: 286244b1bc3dd484ab188713e1f60b94, type: 2}
+      minCount: 1
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: c4b7d3b05337d4427b1c01661e14b9e6, type: 2}
+      minCount: 1
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: 307fa408dbbbd47aca41f19277925ef0, type: 2}
+      minCount: 3
+      maxCount: 5
+  - galaxyLevel: 5
+    spawnIntervalSeconds: 120
+    offlineSpawnIntervalHours: 6.4
+    allies:
+    - allyConfig: {fileID: 11400000, guid: 0de8717d410014bf397d4a365fe7f155, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 224f1058058704506a2a5fffda263c49, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 9212757d78aa3400885cbc8780090dcc, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 8d98875f0c9454119abb39fe40691cbe, type: 2}
+      minCount: 1
+      maxCount: 2
+    - allyConfig: {fileID: 11400000, guid: 840967fed95f44300be710945a15016b, type: 2}
+      minCount: 3
+      maxCount: 5
+  - galaxyLevel: 6
+    spawnIntervalSeconds: 105
+    offlineSpawnIntervalHours: 7.6
+    allies:
+    - allyConfig: {fileID: 11400000, guid: c1a6660eb5e084f188fd21d17cac44e3, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: d9c11c42826274ef0916a7dc8a4ee23f, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 3cbb5d21d2f16403e95ab3b7e28477ea, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 703ce79c9053d4709a78a4ac51ed453d, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 358d2c43cf6234b86bd3155ea79152d4, type: 2}
+      minCount: 3
+      maxCount: 6
+  - galaxyLevel: 7
+    spawnIntervalSeconds: 90
+    offlineSpawnIntervalHours: 8.7
+    allies:
+    - allyConfig: {fileID: 11400000, guid: d8152307d885b4194aa3f6346e21868e, type: 2}
+      minCount: 2
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: 6ded1bf53ef9546ca9f3247212c75423, type: 2}
+      minCount: 2
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: 946d9e2ba8f2649c6a351aaf6c76cb5a, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 76f18d77128cb40bfbc583c56fa8bae4, type: 2}
+      minCount: 2
+      maxCount: 3
+    - allyConfig: {fileID: 11400000, guid: 0622c1faeda8b4b0dbdaa31beb882058, type: 2}
+      minCount: 5
+      maxCount: 7
+  - galaxyLevel: 8
+    spawnIntervalSeconds: 75
+    offlineSpawnIntervalHours: 9.8
+    allies:
+    - allyConfig: {fileID: 11400000, guid: 5de2d9fbc07ad4479bb5a674aac43dcd, type: 2}
+      minCount: 3
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: 28da5a8dbedfe4564a4af6a07d29b777, type: 2}
+      minCount: 3
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: d480c374208ab4e1fb369f8b75907c20, type: 2}
+      minCount: 2
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: 085e68bc5dd9742118dc3f9adacafea5, type: 2}
+      minCount: 2
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: 1ab1768401a8e42978e46853e54ab8c1, type: 2}
+      minCount: 5
+      maxCount: 8
+  - galaxyLevel: 9
+    spawnIntervalSeconds: 60
+    offlineSpawnIntervalHours: 10.9
+    allies:
+    - allyConfig: {fileID: 11400000, guid: 4ad16364204fe4a2995972823ac59c55, type: 2}
+      minCount: 3
+      maxCount: 5
+    - allyConfig: {fileID: 11400000, guid: 37c599e545e3843c3bad5044a7989c92, type: 2}
+      minCount: 3
+      maxCount: 5
+    - allyConfig: {fileID: 11400000, guid: b018b0808b31646a7aca6bf265c24c11, type: 2}
+      minCount: 3
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: 7cfb01ca00b424d368940bccce460930, type: 2}
+      minCount: 2
+      maxCount: 4
+    - allyConfig: {fileID: 11400000, guid: 8de24b941383a4a3ab211ec2d4de7aa0, type: 2}
+      minCount: 5
+      maxCount: 9
+  - galaxyLevel: 10
+    spawnIntervalSeconds: 45
+    offlineSpawnIntervalHours: 12
+    allies:
+    - allyConfig: {fileID: 11400000, guid: 4c2a2051227654d3482411204af5b8ae, type: 2}
+      minCount: 3
+      maxCount: 5
+    - allyConfig: {fileID: 11400000, guid: b8ebb7c39a69b4a98bfb5468d40481ef, type: 2}
+      minCount: 3
+      maxCount: 5
+    - allyConfig: {fileID: 11400000, guid: f88cc513970a144bebeef634edf9355b, type: 2}
+      minCount: 3
+      maxCount: 5
+    - allyConfig: {fileID: 11400000, guid: 8657317f7fea549fda6b0db99d1ec0f7, type: 2}
+      minCount: 3
+      maxCount: 5
+    - allyConfig: {fileID: 11400000, guid: 2e9276e1b756a44f3b4e082daa3eab42, type: 2}
+      minCount: 6
+      maxCount: 10

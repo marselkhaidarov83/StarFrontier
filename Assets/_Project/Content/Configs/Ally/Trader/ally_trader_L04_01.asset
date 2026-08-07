@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d7741405179f43cebeecaadac0987e8, type: 3}
+  m_Name: ally_trader_L04_01
+  m_EditorClassIdentifier: Data::AllyConfig
+  id: ally_trader_L04_01
+  displayName: "\u0422\u043E\u0440\u0433\u043E\u0432\u0435\u0446 \u0443\u0440. 4"
+  description: "\u0422\u043E\u0440\u0433\u043E\u0432\u0435\u0446, \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    4. \u0421\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+    \u043A\u043E\u043D\u0444\u0438\u0433 \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0430:
+    \u0440\u043E\u043B\u044C, \u0443\u0440\u043E\u0432\u0435\u043D\u044C, \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u0438
+    \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
+    \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
+  icon: {fileID: 0}
+  baseHullMin: 133
+  baseHullMax: 157
+  baseShieldMin: 74
+  baseShieldMax: 90
+  baseEnergyMin: 148
+  baseEnergyMax: 166
+  baseSpeedMin: 42.25
+  baseSpeedMax: 45.75
+  level: 4
+  role: 20
+  namePool: {fileID: 11400000, guid: 75f5846a9ffcb4fbda46b0aaf3c5c5d5, type: 2}
+  behaviorScenarios:
+  - scenario: 0
+    behaviorConfig: {fileID: 11400000, guid: 02cf8140ec267464092fe36d0ceb30f9, type: 2}
+  - scenario: 10
+    behaviorConfig: {fileID: 11400000, guid: fed7e063a1c4e4abd90902aa6a6b4e7b, type: 2}
+  weaponGroups:
+  - {fileID: 11400000, guid: 4b18dcb8c5732479fa03a44d3b49e014, type: 2}
+  - {fileID: 11400000, guid: 536cbf14952094e599b8717f7653db3c, type: 2}
+  - {fileID: 11400000, guid: 9b9f0ca29e68746eba1fd07c0db10bb9, type: 2}
+  - {fileID: 11400000, guid: b4a2a0ec840184d90a0cde005cdc016f, type: 2}
+  - {fileID: 11400000, guid: 4c681c84f291a4efa864513a0638389f, type: 2}
+  mapSprite: {fileID: 0}

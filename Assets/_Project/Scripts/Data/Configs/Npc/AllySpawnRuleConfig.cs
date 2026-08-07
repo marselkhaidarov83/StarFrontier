@@ -8,42 +8,120 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Npc/Ally spawn rule")]
 public sealed class AllySpawnRuleConfig : BaseConfig
 {
-    [Header("Allies")]
-    [SerializeField] private AllyGroupEntryConfig[] allies =
-        new AllyGroupEntryConfig[0];
+    [Header("Profiles by Galaxy Level")]
+    [Tooltip("Exactly one entry is expected for every galaxy level from 1 to 10.")]
+    [SerializeField]
+    private AllySpawnLevelEntryConfig[] levelEntries =
+        new AllySpawnLevelEntryConfig[0];
 
-    [Header("Population")]
-    [SerializeField] private float spawnIntervalSeconds = 60f;
+    public IReadOnlyList<AllySpawnLevelEntryConfig> LevelEntries =>
+        levelEntries;
 
-    [Header("Behavior")]
-    [SerializeField] private SystemNpcBehaviorWeight[] behaviorWeights =
-        new SystemNpcBehaviorWeight[0];
+    public AllySpawnLevelEntryConfig GetEntryForGalaxyLevel(
+        int galaxyLevel)
+    {
+        int normalizedLevel =
+            Mathf.Clamp(galaxyLevel, 1, 10);
 
-    [Header("4Enemy")]
-    [SerializeField] private float engageEnemiesWeight = 100f;
+        if (levelEntries == null)
+            return null;
 
-    public IReadOnlyList<AllyGroupEntryConfig> Allies => allies;
+        for (int i = 0; i < levelEntries.Length; i++)
+        {
+            AllySpawnLevelEntryConfig entry =
+                levelEntries[i];
 
-    public float SpawnIntervalSeconds => spawnIntervalSeconds;
+            if (entry == null)
+                continue;
 
-    public IReadOnlyList<SystemNpcBehaviorWeight> BehaviorWeights =>
-        behaviorWeights;
+            if (entry.GalaxyLevel == normalizedLevel)
+                return entry;
+        }
 
-    public float EngageEnemiesWeight => engageEnemiesWeight;
+        return null;
+    }
+
+    public IReadOnlyList<AllyGroupEntryConfig> GetAlliesForGalaxyLevel(
+        int galaxyLevel)
+    {
+        AllySpawnLevelEntryConfig entry =
+            GetEntryForGalaxyLevel(galaxyLevel);
+
+        if (entry == null)
+            return Array.Empty<AllyGroupEntryConfig>();
+
+        return entry.Allies;
+    }
+
+    public float GetSpawnIntervalSeconds(
+        int galaxyLevel)
+    {
+        AllySpawnLevelEntryConfig entry =
+            GetEntryForGalaxyLevel(galaxyLevel);
+
+        if (entry == null)
+            return 0f;
+
+        return entry.SpawnIntervalSeconds;
+    }
+
+    public bool HasValidAlliesForGalaxyLevel(
+        int galaxyLevel)
+    {
+        AllySpawnLevelEntryConfig entry =
+            GetEntryForGalaxyLevel(galaxyLevel);
+
+        if (entry == null)
+            return false;
+
+        return entry.HasValidAllies();
+    }
+
+    public int GetMinAllyCount(
+        int galaxyLevel)
+    {
+        AllySpawnLevelEntryConfig entry =
+            GetEntryForGalaxyLevel(galaxyLevel);
+
+        if (entry == null)
+            return 0;
+
+        return entry.GetMinAllyCount();
+    }
+
+    public int GetMaxAllyCount(
+        int galaxyLevel)
+    {
+        AllySpawnLevelEntryConfig entry =
+            GetEntryForGalaxyLevel(galaxyLevel);
+
+        if (entry == null)
+            return 0;
+
+        return entry.GetMaxAllyCount();
+    }
 
     /*
-     * Старое свойство оставляем для совместимости.
-     * Старый код, который ожидает AllySpawnRuleConfig.AllyConfig,
-     * получит первый непустой AllyConfig из массива Allies.
+     * Legacy compatibility.
+     * Старый код без galaxy level получает набор для L01.
      */
+    public IReadOnlyList<AllyGroupEntryConfig> Allies =>
+        GetAlliesForGalaxyLevel(1);
+
+    public float SpawnIntervalSeconds =>
+        GetSpawnIntervalSeconds(1);
+
     public AllyConfig AllyConfig
     {
         get
         {
+            IReadOnlyList<AllyGroupEntryConfig> allies =
+                GetAlliesForGalaxyLevel(1);
+
             if (allies == null)
                 return null;
 
-            for (int i = 0; i < allies.Length; i++)
+            for (int i = 0; i < allies.Count; i++)
             {
                 if (allies[i] == null)
                     continue;
@@ -56,18 +134,17 @@ public sealed class AllySpawnRuleConfig : BaseConfig
         }
     }
 
-    /*
-     * Старое свойство оставляем для совместимости.
-     * Возвращает MinCount первого валидного союзника.
-     */
     public int MinCount
     {
         get
         {
+            IReadOnlyList<AllyGroupEntryConfig> allies =
+                GetAlliesForGalaxyLevel(1);
+
             if (allies == null)
                 return 0;
 
-            for (int i = 0; i < allies.Length; i++)
+            for (int i = 0; i < allies.Count; i++)
             {
                 if (allies[i] == null)
                     continue;
@@ -82,18 +159,17 @@ public sealed class AllySpawnRuleConfig : BaseConfig
         }
     }
 
-    /*
-     * Старое свойство оставляем для совместимости.
-     * Возвращает MaxCount первого валидного союзника.
-     */
     public int MaxCount
     {
         get
         {
+            IReadOnlyList<AllyGroupEntryConfig> allies =
+                GetAlliesForGalaxyLevel(1);
+
             if (allies == null)
                 return 0;
 
-            for (int i = 0; i < allies.Length; i++)
+            for (int i = 0; i < allies.Count; i++)
             {
                 if (allies[i] == null)
                     continue;
@@ -107,6 +183,74 @@ public sealed class AllySpawnRuleConfig : BaseConfig
             return 0;
         }
     }
+
+    public bool HasValidAllies()
+    {
+        return HasValidAlliesForGalaxyLevel(1);
+    }
+
+    public int GetMinAllyCount()
+    {
+        return GetMinAllyCount(1);
+    }
+
+    public int GetMaxAllyCount()
+    {
+        return GetMaxAllyCount(1);
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (levelEntries == null)
+            levelEntries = new AllySpawnLevelEntryConfig[0];
+
+        for (int i = 0; i < levelEntries.Length; i++)
+        {
+            if (levelEntries[i] == null)
+                levelEntries[i] = new AllySpawnLevelEntryConfig();
+
+            levelEntries[i].Validate(i + 1);
+        }
+    }
+#endif
+}
+
+[Serializable]
+public sealed class AllySpawnLevelEntryConfig
+{
+    [Header("Galaxy Level")]
+    [SerializeField]
+    [Range(1, 10)]
+    private int galaxyLevel = 1;
+
+    [Header("Population")]
+    [SerializeField]
+    [Min(0f)]
+    private float spawnIntervalSeconds = 60f;
+
+    [Header("Offline Population")]
+    [Tooltip("Real-world hours between offline spawn checks while the player is not playing.")]
+    [SerializeField]
+    [Min(0f)]
+    private float offlineSpawnIntervalHours = 6f;
+
+    [Header("Allies")]
+    [SerializeField]
+    private AllyGroupEntryConfig[] allies =
+        new AllyGroupEntryConfig[0];
+
+    public int GalaxyLevel =>
+        galaxyLevel;
+
+    public float SpawnIntervalSeconds =>
+        spawnIntervalSeconds;
+
+    public float OfflineSpawnIntervalHours =>
+        offlineSpawnIntervalHours;
+
+    public IReadOnlyList<AllyGroupEntryConfig> Allies =>
+        allies;
 
     public bool HasValidAllies()
     {
@@ -174,13 +318,16 @@ public sealed class AllySpawnRuleConfig : BaseConfig
     }
 
 #if UNITY_EDITOR
-    private void OnValidate()
+    public void Validate(int fallbackLevel)
     {
+        galaxyLevel =
+            Mathf.Clamp(fallbackLevel, 1, 10);
+
         spawnIntervalSeconds =
             Mathf.Max(0f, spawnIntervalSeconds);
 
-        engageEnemiesWeight =
-            Mathf.Max(0f, engageEnemiesWeight);
+        offlineSpawnIntervalHours =
+            Mathf.Max(0f, offlineSpawnIntervalHours);
 
         if (allies == null)
             allies = new AllyGroupEntryConfig[0];
@@ -192,9 +339,6 @@ public sealed class AllySpawnRuleConfig : BaseConfig
 
             allies[i].Validate();
         }
-
-        if (behaviorWeights == null)
-            behaviorWeights = new SystemNpcBehaviorWeight[0];
     }
 #endif
 }
@@ -202,16 +346,25 @@ public sealed class AllySpawnRuleConfig : BaseConfig
 [Serializable]
 public sealed class AllyGroupEntryConfig
 {
-    [SerializeField] private AllyConfig allyConfig;
+    [SerializeField]
+    private AllyConfig allyConfig;
 
-    [SerializeField] [Min(0)] private int minCount = 1;
-    [SerializeField] [Min(0)] private int maxCount = 1;
+    [SerializeField]
+    [Min(0)]
+    private int minCount = 1;
 
-    public AllyConfig AllyConfig => allyConfig;
+    [SerializeField]
+    [Min(0)]
+    private int maxCount = 1;
 
-    public int MinCount => minCount;
+    public AllyConfig AllyConfig =>
+        allyConfig;
 
-    public int MaxCount => maxCount;
+    public int MinCount =>
+        minCount;
+
+    public int MaxCount =>
+        maxCount;
 
     public bool IsValid()
     {
