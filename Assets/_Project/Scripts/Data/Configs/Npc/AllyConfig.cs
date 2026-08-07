@@ -53,8 +53,8 @@ public sealed class AllyConfig : BaseConfig
     [Tooltip(
         "Scenario enum and reference to the behavior profile.")]
     [SerializeField]
-    private AllyBehaviourScenarioEntry[] behaviorScenarios =
-        new AllyBehaviourScenarioEntry[0];
+    private NpcBehaviourScenarioEntry[] behaviorScenarios =
+        new NpcBehaviourScenarioEntry[0];
 
     [Header("Weapon Groups")]
     [Tooltip(
@@ -114,7 +114,7 @@ public sealed class AllyConfig : BaseConfig
     public AllyRole2A Role =>
         role;
 
-    public IReadOnlyList<AllyBehaviourScenarioEntry>
+    public IReadOnlyList<NpcBehaviourScenarioEntry>
         BehaviorScenarios =>
         behaviorScenarios;
 
@@ -156,7 +156,7 @@ public sealed class AllyConfig : BaseConfig
 
     public bool TryGetBehaviorScenario(
         AllyBehaviourScenario scenario,
-        out AllyBehaviourScenarioConfig behaviorConfig)
+        out NpcBehaviourScenarioConfig behaviorConfig)
     {
         behaviorConfig = null;
 
@@ -165,7 +165,7 @@ public sealed class AllyConfig : BaseConfig
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
         {
-            AllyBehaviourScenarioEntry entry =
+            NpcBehaviourScenarioEntry entry =
                 behaviorScenarios[i];
 
             if (entry == null)
@@ -184,10 +184,10 @@ public sealed class AllyConfig : BaseConfig
         return false;
     }
 
-    public AllyBehaviourScenarioConfig GetBehaviorScenario(
+    public NpcBehaviourScenarioConfig GetBehaviorScenario(
         AllyBehaviourScenario scenario)
     {
-        AllyBehaviourScenarioConfig behaviorConfig;
+        NpcBehaviourScenarioConfig behaviorConfig;
 
         if (!TryGetBehaviorScenario(
                 scenario,
@@ -217,7 +217,7 @@ public sealed class AllyConfig : BaseConfig
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
         {
-            AllyBehaviourScenarioEntry entry =
+            NpcBehaviourScenarioEntry entry =
                 behaviorScenarios[i];
 
             if (entry == null)
@@ -320,7 +320,7 @@ public sealed class AllyConfig : BaseConfig
         if (behaviorScenarios == null)
         {
             behaviorScenarios =
-                new AllyBehaviourScenarioEntry[0];
+                new NpcBehaviourScenarioEntry[0];
         }
 
         for (int i = 0; i < behaviorScenarios.Length; i++)
@@ -328,7 +328,7 @@ public sealed class AllyConfig : BaseConfig
             if (behaviorScenarios[i] == null)
             {
                 behaviorScenarios[i] =
-                    new AllyBehaviourScenarioEntry();
+                    new NpcBehaviourScenarioEntry();
             }
         }
 

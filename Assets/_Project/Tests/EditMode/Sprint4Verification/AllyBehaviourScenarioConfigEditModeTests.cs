@@ -128,7 +128,7 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
             Assert.That(
                 allyConfig.TryGetBehaviorScenario(
                     AllyBehaviourScenario.Normal,
-                    out AllyBehaviourScenarioConfig normalResult),
+                    out NpcBehaviourScenarioConfig normalResult),
                 Is.True);
 
             Assert.That(
@@ -138,7 +138,7 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
             Assert.That(
                 allyConfig.TryGetBehaviorScenario(
                     AllyBehaviourScenario.EnemyInvasion,
-                    out AllyBehaviourScenarioConfig invasionResult),
+                    out NpcBehaviourScenarioConfig invasionResult),
                 Is.True);
 
             Assert.That(
