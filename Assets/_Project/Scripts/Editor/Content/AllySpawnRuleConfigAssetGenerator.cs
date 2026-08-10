@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -26,6 +27,7 @@ public static class AllySpawnRuleConfigAssetGenerator
         int createdOrUpdated = 0;
         int warnings = 0;
         int boundAllies = 0;
+        int errors = 0;
 
         for (int i = 0; i < profiles.Length; i++)
         {
@@ -61,6 +63,9 @@ public static class AllySpawnRuleConfigAssetGenerator
             warnings += profileWarnings;
             boundAllies += profileBoundAllies;
 
+            if (!ValidateRuleInMemory(asset, path))
+                errors++;
+
             EditorUtility.SetDirty(asset);
             createdOrUpdated++;
         }
@@ -73,7 +78,8 @@ public static class AllySpawnRuleConfigAssetGenerator
             "Done. " +
             $"Spawn rules: {createdOrUpdated}. " +
             $"Bound ally entries: {boundAllies}. " +
-            $"Warnings: {warnings}.",
+            $"Warnings: {warnings}. " +
+            $"Errors: {errors}.",
             "OK");
     }
 
@@ -102,58 +108,8 @@ public static class AllySpawnRuleConfigAssetGenerator
 
             checkedAssets++;
 
-            IReadOnlyList<AllySpawnLevelEntryConfig> entries =
-                rule.LevelEntries;
-
-            if (entries == null || entries.Count != 10)
-            {
+            if (!ValidateRuleInMemory(rule, path))
                 errors++;
-                Debug.LogError(
-                    $"AllySpawnRule validation: expected exactly 10 level entries at {path}",
-                    rule);
-            }
-
-            for (int level = 1; level <= 10; level++)
-            {
-                AllySpawnLevelEntryConfig levelEntry =
-                    rule.GetEntryForGalaxyLevel(level);
-
-                if (levelEntry == null)
-                {
-                    errors++;
-                    Debug.LogError(
-                        $"AllySpawnRule validation: missing level {level} at {path}",
-                        rule);
-                    continue;
-                }
-
-                if (!levelEntry.HasValidAllies())
-                {
-                    errors++;
-                    Debug.LogError(
-                        $"AllySpawnRule validation: no valid allies for level {level} at {path}",
-                        rule);
-                }
-
-                int maxCount =
-                    levelEntry.GetMaxAllyCount();
-
-                if (level == 1 && (maxCount < 3 || maxCount > 5))
-                {
-                    errors++;
-                    Debug.LogError(
-                        $"AllySpawnRule validation: L01 max count must be 3-5, actual {maxCount} at {path}",
-                        rule);
-                }
-
-                if (level == 10 && maxCount != 30)
-                {
-                    errors++;
-                    Debug.LogError(
-                        $"AllySpawnRule validation: L10 max count must be 30, actual {maxCount} at {path}",
-                        rule);
-                }
-            }
         }
 
         EditorUtility.DisplayDialog(
@@ -211,59 +167,20 @@ public static class AllySpawnRuleConfigAssetGenerator
         warnings = 0;
         boundAllies = 0;
 
-        SerializedObject serializedObject =
-            new SerializedObject(asset);
+        SetPrivateField(asset, "id", id);
+        SetPrivateField(asset, "displayName", profile.DisplayName);
+        SetPrivateField(asset, "description", profile.Description);
 
-        serializedObject.Update();
-
-        SetString(serializedObject, "id", id);
-        SetString(serializedObject, "displayName", profile.DisplayName);
-        SetString(serializedObject, "description", profile.Description);
-
-        SerializedProperty levelEntriesProperty =
-            serializedObject.FindProperty("levelEntries");
-
-        if (levelEntriesProperty == null || !levelEntriesProperty.isArray)
-            throw new InvalidOperationException("AllySpawnRuleConfig.levelEntries field was not found.");
-
-        levelEntriesProperty.ClearArray();
-        levelEntriesProperty.arraySize = 10;
+        AllySpawnLevelEntryConfig[] levelEntries =
+            new AllySpawnLevelEntryConfig[10];
 
         for (int level = 1; level <= 10; level++)
         {
-            SerializedProperty levelEntryProperty =
-                levelEntriesProperty.GetArrayElementAtIndex(level - 1);
-
-            SerializedProperty galaxyLevelProperty =
-                levelEntryProperty.FindPropertyRelative("galaxyLevel");
-
-            SerializedProperty intervalProperty =
-                levelEntryProperty.FindPropertyRelative("spawnIntervalSeconds");
-
-            SerializedProperty offlineIntervalProperty =
-                levelEntryProperty.FindPropertyRelative("offlineSpawnIntervalHours");
-
-            SerializedProperty alliesProperty =
-                levelEntryProperty.FindPropertyRelative("allies");
-
-            if (galaxyLevelProperty == null ||
-                intervalProperty == null ||
-                offlineIntervalProperty == null ||
-                alliesProperty == null ||
-                !alliesProperty.isArray)
-            {
-                throw new InvalidOperationException("AllySpawnLevelEntryConfig serialized fields were not found.");
-            }
-
-            galaxyLevelProperty.intValue = level;
-            intervalProperty.floatValue = BuildSpawnIntervalSeconds(level);
-            offlineIntervalProperty.floatValue = BuildOfflineSpawnIntervalHours(level);
-
             List<AllyGroupPlan> plans =
                 BuildGroupPlans(profile, level);
 
-            alliesProperty.ClearArray();
-            alliesProperty.arraySize = plans.Count;
+            AllyGroupEntryConfig[] allies =
+                new AllyGroupEntryConfig[plans.Count];
 
             for (int i = 0; i < plans.Count; i++)
             {
@@ -287,24 +204,133 @@ public static class AllySpawnRuleConfigAssetGenerator
                     boundAllies++;
                 }
 
-                SerializedProperty allyEntryProperty =
-                    alliesProperty.GetArrayElementAtIndex(i);
+                AllyGroupEntryConfig allyEntry =
+                    new AllyGroupEntryConfig();
 
-                allyEntryProperty
-                    .FindPropertyRelative("allyConfig")
-                    .objectReferenceValue = allyConfig;
+                SetPrivateField(allyEntry, "allyConfig", allyConfig);
+                SetPrivateField(allyEntry, "minCount", plan.MinCount);
+                SetPrivateField(allyEntry, "maxCount", plan.MaxCount);
 
-                allyEntryProperty
-                    .FindPropertyRelative("minCount")
-                    .intValue = plan.MinCount;
+                allies[i] = allyEntry;
+            }
 
-                allyEntryProperty
-                    .FindPropertyRelative("maxCount")
-                    .intValue = plan.MaxCount;
+            AllySpawnLevelEntryConfig levelEntry =
+                new AllySpawnLevelEntryConfig();
+
+            SetPrivateField(levelEntry, "galaxyLevel", level);
+            SetPrivateField(levelEntry, "spawnIntervalSeconds", BuildSpawnIntervalSeconds(level));
+            SetPrivateField(levelEntry, "offlineSpawnIntervalHours", BuildOfflineSpawnIntervalHours(level));
+            SetPrivateField(levelEntry, "allies", allies);
+
+            levelEntries[level - 1] = levelEntry;
+        }
+
+        SetPrivateField(asset, "levelEntries", levelEntries);
+    }
+
+    private static bool ValidateRuleInMemory(
+        AllySpawnRuleConfig rule,
+        string path)
+    {
+        bool isValid = true;
+
+        IReadOnlyList<AllySpawnLevelEntryConfig> entries =
+            rule.LevelEntries;
+
+        if (entries == null || entries.Count != 10)
+        {
+            Debug.LogError(
+                $"AllySpawnRule validation: expected exactly 10 level entries at {path}",
+                rule);
+            return false;
+        }
+
+        for (int level = 1; level <= 10; level++)
+        {
+            AllySpawnLevelEntryConfig levelEntry =
+                rule.GetEntryForGalaxyLevel(level);
+
+            if (levelEntry == null)
+            {
+                Debug.LogError(
+                    $"AllySpawnRule validation: missing level {level} at {path}",
+                    rule);
+                isValid = false;
+                continue;
+            }
+
+            if (!levelEntry.HasValidAllies())
+            {
+                Debug.LogError(
+                    $"AllySpawnRule validation: no valid allies for level {level} at {path}",
+                    rule);
+                isValid = false;
+            }
+
+            if (!HasEveryRole(levelEntry))
+            {
+                Debug.LogError(
+                    $"AllySpawnRule validation: level {level} must include Ranger, Military, Trader, Science and Medic at {path}",
+                    rule);
+                isValid = false;
+            }
+
+            int maxCount =
+                levelEntry.GetMaxAllyCount();
+
+            if (level == 1 && maxCount != 5)
+            {
+                Debug.LogError(
+                    $"AllySpawnRule validation: L01 max count must be 5 so every ally type is present, actual {maxCount} at {path}",
+                    rule);
+                isValid = false;
+            }
+
+            if (level == 10 && maxCount != 30)
+            {
+                Debug.LogError(
+                    $"AllySpawnRule validation: L10 max count must be 30, actual {maxCount} at {path}",
+                    rule);
+                isValid = false;
             }
         }
 
-        serializedObject.ApplyModifiedProperties();
+        return isValid;
+    }
+
+    private static bool HasEveryRole(
+        AllySpawnLevelEntryConfig levelEntry)
+    {
+        if (levelEntry == null || levelEntry.Allies == null)
+            return false;
+
+        HashSet<AllyRole2A> roles =
+            new HashSet<AllyRole2A>();
+
+        IReadOnlyList<AllyGroupEntryConfig> allies =
+            levelEntry.Allies;
+
+        for (int i = 0; i < allies.Count; i++)
+        {
+            AllyGroupEntryConfig entry =
+                allies[i];
+
+            if (entry == null || entry.AllyConfig == null)
+                continue;
+
+            roles.Add(entry.AllyConfig.Role);
+        }
+
+        AllyRole2A[] expectedRoles =
+            GetRoles();
+
+        for (int i = 0; i < expectedRoles.Length; i++)
+        {
+            if (!roles.Contains(expectedRoles[i]))
+                return false;
+        }
+
+        return true;
     }
 
     private static Dictionary<AllyKey, AllyConfig> LoadAlliesByRoleAndLevel()
@@ -326,27 +352,105 @@ public static class AllySpawnRuleConfigAssetGenerator
             if (config == null)
                 continue;
 
-            if (!IsGeneratedAllyRole(config.Role))
-                continue;
+            AllyRole2A role;
+            int level;
 
-            int level =
-                Mathf.Clamp(config.Level, 1, 10);
-
-            AllyKey key =
-                new AllyKey(config.Role, level);
-
-            if (result.ContainsKey(key))
+            if (!TryParseRoleAndLevelFromPath(path, out role, out level))
             {
-                Debug.LogWarning(
-                    $"AllySpawnRule generator: duplicate AllyConfig for {config.Role} L{level:00}. Keeping first one. Duplicate path: {path}",
-                    config);
-                continue;
+                if (!IsGeneratedAllyRole(config.Role))
+                    continue;
+
+                role = config.Role;
+                level = Mathf.Clamp(config.Level, 1, 10);
             }
 
-            result[key] = config;
+            AddAllyConfig(
+                result,
+                role,
+                level,
+                config,
+                path);
         }
 
         return result;
+    }
+
+    private static void AddAllyConfig(
+        Dictionary<AllyKey, AllyConfig> alliesByRoleAndLevel,
+        AllyRole2A role,
+        int level,
+        AllyConfig config,
+        string path)
+    {
+        AllyKey key =
+            new AllyKey(role, Mathf.Clamp(level, 1, 10));
+
+        if (alliesByRoleAndLevel.ContainsKey(key))
+        {
+            Debug.LogWarning(
+                $"AllySpawnRule generator: duplicate AllyConfig for {role} L{level:00}. Keeping first one. Duplicate path: {path}",
+                config);
+            return;
+        }
+
+        alliesByRoleAndLevel[key] = config;
+    }
+
+    private static bool TryParseRoleAndLevelFromPath(
+        string path,
+        out AllyRole2A role,
+        out int level)
+    {
+        role = AllyRole2A.Ranger;
+        level = 1;
+
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        string lowerPath =
+            path.Replace("\\", "/").ToLowerInvariant();
+
+        bool hasRole = false;
+
+        if (lowerPath.Contains("/ranger/") || lowerPath.Contains("_ranger_"))
+        {
+            role = AllyRole2A.Ranger;
+            hasRole = true;
+        }
+        else if (lowerPath.Contains("/military/") || lowerPath.Contains("_military_"))
+        {
+            role = AllyRole2A.Military;
+            hasRole = true;
+        }
+        else if (lowerPath.Contains("/trader/") || lowerPath.Contains("_trader_"))
+        {
+            role = AllyRole2A.Trader;
+            hasRole = true;
+        }
+        else if (lowerPath.Contains("/science/") || lowerPath.Contains("_science_"))
+        {
+            role = AllyRole2A.Science;
+            hasRole = true;
+        }
+        else if (lowerPath.Contains("/medic/") || lowerPath.Contains("_medic_") || lowerPath.Contains("_medical_"))
+        {
+            role = AllyRole2A.Medic;
+            hasRole = true;
+        }
+
+        if (!hasRole)
+            return false;
+
+        for (int candidate = 1; candidate <= 10; candidate++)
+        {
+            if (!lowerPath.Contains($"l{candidate:00}"))
+                continue;
+
+            level = candidate;
+            return true;
+        }
+
+        return false;
     }
 
     private static AllyConfig FindAllyConfig(
@@ -388,6 +492,8 @@ public static class AllySpawnRuleConfigAssetGenerator
         Dictionary<AllyRole2A, int> maxCounts =
             DistributeCount(maxTotal, weights);
 
+        EnsureEveryRoleHasMaxCount(maxCounts, maxTotal);
+
         List<AllyGroupPlan> result =
             new List<AllyGroupPlan>();
 
@@ -416,6 +522,76 @@ public static class AllySpawnRuleConfigAssetGenerator
                     MinCount = minCount,
                     MaxCount = maxCount
                 });
+        }
+
+        return result;
+    }
+
+    private static void EnsureEveryRoleHasMaxCount(
+        Dictionary<AllyRole2A, int> maxCounts,
+        int maxTotal)
+    {
+        AllyRole2A[] roles =
+            GetRoles();
+
+        if (maxCounts == null || maxTotal < roles.Length)
+            return;
+
+        for (int i = 0; i < roles.Length; i++)
+        {
+            AllyRole2A role =
+                roles[i];
+
+            if (!maxCounts.ContainsKey(role))
+                maxCounts[role] = 0;
+        }
+
+        for (int i = 0; i < roles.Length; i++)
+        {
+            AllyRole2A role =
+                roles[i];
+
+            if (maxCounts[role] > 0)
+                continue;
+
+            AllyRole2A donor =
+                FindLargestDonorRole(maxCounts, roles);
+
+            if (maxCounts[donor] <= 1)
+                break;
+
+            maxCounts[donor]--;
+            maxCounts[role] = 1;
+        }
+    }
+
+    private static AllyRole2A FindLargestDonorRole(
+        Dictionary<AllyRole2A, int> counts,
+        AllyRole2A[] roles)
+    {
+        AllyRole2A result =
+            roles[0];
+
+        int bestCount =
+            counts.TryGetValue(result, out int initialCount)
+                ? initialCount
+                : 0;
+
+        for (int i = 1; i < roles.Length; i++)
+        {
+            AllyRole2A role =
+                roles[i];
+
+            int count =
+                counts.TryGetValue(role, out int roleCount)
+                    ? roleCount
+                    : 0;
+
+            if (count <= bestCount)
+                continue;
+
+            bestCount = count;
+            result = role;
         }
 
         return result;
@@ -511,7 +687,7 @@ public static class AllySpawnRuleConfigAssetGenerator
     private static int BuildMaxTotal(int level)
     {
         return Mathf.RoundToInt(
-            Mathf.Lerp(4f, 30f, (level - 1) / 9f));
+            Mathf.Lerp(5f, 30f, (level - 1) / 9f));
     }
 
     private static float BuildSpawnIntervalSeconds(int level)
@@ -637,18 +813,37 @@ public static class AllySpawnRuleConfigAssetGenerator
         AssetDatabase.CreateFolder(parent, folder);
     }
 
-    private static void SetString(
-        SerializedObject serializedObject,
-        string propertyName,
-        string value)
+    private static void SetPrivateField(
+        object target,
+        string fieldName,
+        object value)
     {
-        SerializedProperty property =
-            serializedObject.FindProperty(propertyName);
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
 
-        if (property == null)
-            throw new InvalidOperationException($"Serialized string field not found: {propertyName}");
+        Type type =
+            target.GetType();
 
-        property.stringValue = value ?? string.Empty;
+        while (type != null)
+        {
+            FieldInfo field =
+                type.GetField(
+                    fieldName,
+                    BindingFlags.Instance |
+                    BindingFlags.NonPublic |
+                    BindingFlags.Public);
+
+            if (field != null)
+            {
+                field.SetValue(target, value);
+                return;
+            }
+
+            type = type.BaseType;
+        }
+
+        throw new InvalidOperationException(
+            $"Serialized field not found: {fieldName} on {target.GetType().Name}");
     }
 
     private sealed class SpawnRuleProfile

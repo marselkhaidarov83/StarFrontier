@@ -31,9 +31,8 @@ MonoBehaviour:
   station: {fileID: 11400000, guid: 495eb7cb764e94a37b58214344de4003, type: 2}
   missionTags: 010000000200000005000000
   mapPosition: {x: 4.3, y: -1}
-  systemPopulation: {fileID: 11400000, guid: ee281ff811dc447b5832d775410c3f07, type: 2}
   systemPopulationRule: {fileID: 11400000, guid: 66c62cc24edfc4f1dbb54807b1cd44e5, type: 2}
-  npcSpawnPoints: {fileID: 0}
+  npcSpawnPoints: {fileID: 11400000, guid: 1d5bc5a3093e84715a7824de582e33e1, type: 2}
   isStartSystem: 0
   isHiddenAtStart: 1
   recommendedPower: 6

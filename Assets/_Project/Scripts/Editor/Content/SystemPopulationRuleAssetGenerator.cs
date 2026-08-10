@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,36 +22,74 @@ public static class SystemPopulationRuleAssetGenerator
         PopulationRuleProfile[] profiles =
             BuildProfiles();
 
-        int createdOrUpdated = 0;
+        int created = 0;
+        int updated = 0;
         int warnings = 0;
+        int errors = 0;
 
-        for (int i = 0; i < profiles.Length; i++)
+        AssetDatabase.StartAssetEditing();
+
+        try
         {
-            PopulationRuleProfile profile =
-                profiles[i];
-
-            string id =
-                $"system_population_rule_{profile.Key}_01";
-
-            string path =
-                $"{OutputRoot}/{id}.asset";
-
-            SystemPopulationRule asset =
-                AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(path);
-
-            if (asset == null)
+            for (int i = 0; i < profiles.Length; i++)
             {
-                asset = ScriptableObject.CreateInstance<SystemPopulationRule>();
-                AssetDatabase.CreateAsset(asset, path);
+                PopulationRuleProfile profile =
+                    profiles[i];
+
+                string id =
+                    $"system_population_rule_{profile.Key}_01";
+
+                string path =
+                    $"{OutputRoot}/{id}.asset";
+
+                SystemPopulationRule asset =
+                    FindExistingPopulationRule(id, path);
+
+                if (asset == null)
+                {
+                    asset =
+                        ScriptableObject.CreateInstance<SystemPopulationRule>();
+
+                    AssetDatabase.CreateAsset(asset, path);
+                    created++;
+                }
+                else
+                {
+                    string currentPath =
+                        AssetDatabase.GetAssetPath(asset);
+
+                    if (!string.Equals(
+                            currentPath,
+                            path,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        string moveError =
+                            AssetDatabase.MoveAsset(currentPath, path);
+
+                        if (!string.IsNullOrWhiteSpace(moveError))
+                        {
+                            throw new InvalidOperationException(
+                                $"Не удалось переместить существующий SystemPopulationRule {id}: {moveError}");
+                        }
+                    }
+
+                    updated++;
+                }
+
+                warnings += WritePopulationRule(
+                    asset,
+                    id,
+                    profile);
+
+                EditorUtility.SetDirty(asset);
+
+                if (!ValidateRuleInMemory(asset, path))
+                    errors++;
             }
-
-            warnings += WritePopulationRule(
-                asset,
-                id,
-                profile);
-
-            EditorUtility.SetDirty(asset);
-            createdOrUpdated++;
+        }
+        finally
+        {
+            AssetDatabase.StopAssetEditing();
         }
 
         AssetDatabase.SaveAssets();
@@ -58,7 +97,7 @@ public static class SystemPopulationRuleAssetGenerator
 
         EditorUtility.DisplayDialog(
             "SystemPopulationRule generator",
-            $"Done. Rules: {createdOrUpdated}. Warnings: {warnings}.",
+            $"Done. Created: {created}. Updated: {updated}. Warnings: {warnings}. Errors: {errors}.",
             "OK");
     }
 
@@ -87,39 +126,8 @@ public static class SystemPopulationRuleAssetGenerator
 
             checkedAssets++;
 
-            if (rule.AllySpawnRules == null ||
-                rule.AllySpawnRules.Length != 1 ||
-                rule.AllySpawnRules[0] == null)
-            {
+            if (!ValidateRuleInMemory(rule, path))
                 errors++;
-                Debug.LogError(
-                    $"SystemPopulationRule validation: exactly one ally spawn rule is required at {path}",
-                    rule);
-            }
-
-            if (rule.EnemyGroupSpawnRuleEntries == null ||
-                rule.EnemyGroupSpawnRuleEntries.Length != 3)
-            {
-                errors++;
-                Debug.LogError(
-                    $"SystemPopulationRule validation: exactly three weighted enemy group spawn rule entries are required at {path}",
-                    rule);
-                continue;
-            }
-
-            for (int e = 0; e < rule.EnemyGroupSpawnRuleEntries.Length; e++)
-            {
-                SystemPopulationEnemyGroupRuleEntry entry =
-                    rule.EnemyGroupSpawnRuleEntries[e];
-
-                if (entry != null && entry.IsValid())
-                    continue;
-
-                errors++;
-                Debug.LogError(
-                    $"SystemPopulationRule validation: missing or invalid weighted enemy group spawn rule entry {e} at {path}",
-                    rule);
-            }
         }
 
         EditorUtility.DisplayDialog(
@@ -140,22 +148,8 @@ public static class SystemPopulationRuleAssetGenerator
             return;
         }
 
-        int deleted = 0;
-
-        string[] guids =
-            AssetDatabase.FindAssets("t:SystemPopulationRule", new[] { OutputRoot });
-
-        for (int i = 0; i < guids.Length; i++)
-        {
-            string path =
-                AssetDatabase.GUIDToAssetPath(guids[i]);
-
-            if (!IsGeneratedPopulationRulePath(path))
-                continue;
-
-            if (AssetDatabase.DeleteAsset(path))
-                deleted++;
-        }
+        int deleted =
+            DeleteGeneratedPopulationRulesWithoutDialog();
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -173,12 +167,9 @@ public static class SystemPopulationRuleAssetGenerator
     {
         int warnings = 0;
 
-        SerializedObject serializedObject =
-            new SerializedObject(asset);
-
-        SetString(serializedObject, "id", id);
-        SetString(serializedObject, "displayName", profile.DisplayName);
-        SetString(serializedObject, "description", profile.Description);
+        SetPrivateField(asset, "id", id);
+        SetPrivateField(asset, "displayName", profile.DisplayName);
+        SetPrivateField(asset, "description", profile.Description);
 
         AllySpawnRuleConfig allyRule =
             FindAllySpawnRule(profile.AllyRuleKey);
@@ -190,74 +181,142 @@ public static class SystemPopulationRuleAssetGenerator
                 $"SystemPopulationRule generator: missing AllySpawnRuleConfig '{profile.AllyRuleKey}'.");
         }
 
-        SerializedProperty alliesProperty =
-            serializedObject.FindProperty("allySpawnRules");
+        SetPrivateField(
+            asset,
+            "allySpawnRules",
+            new[] { allyRule });
 
-        if (alliesProperty == null || !alliesProperty.isArray)
-            throw new InvalidOperationException("SystemPopulationRule.allySpawnRules field was not found.");
-
-        alliesProperty.arraySize = 1;
-        alliesProperty
-            .GetArrayElementAtIndex(0)
-            .objectReferenceValue = allyRule;
-
-        SerializedProperty enemiesProperty =
-            serializedObject.FindProperty("enemyGroupSpawnRuleEntries");
-
-        if (enemiesProperty == null || !enemiesProperty.isArray)
-            throw new InvalidOperationException("SystemPopulationRule.enemyGroupSpawnRuleEntries field was not found.");
-
-        EnemyGroupPlan[] enemyPlans =
+        if (!profile.HasEnemies)
         {
-            new EnemyGroupPlan
-            {
-                RuleId = "enemy_group_spawn_ai_01",
-                Weight = profile.AiWeight
-            },
-            new EnemyGroupPlan
-            {
-                RuleId = "enemy_group_spawn_ancients_01",
-                Weight = profile.AncientsWeight
-            },
-            new EnemyGroupPlan
-            {
-                RuleId = "enemy_group_spawn_infected_01",
-                Weight = profile.InfectedWeight
-            }
-        };
+            SetPrivateField(
+                asset,
+                "enemyGroupSpawnRuleEntries",
+                Array.Empty<SystemPopulationEnemyGroupRuleEntry>());
 
-        enemiesProperty.arraySize = enemyPlans.Length;
-
-        for (int i = 0; i < enemyPlans.Length; i++)
-        {
-            EnemyGroupPlan plan =
-                enemyPlans[i];
-
-            EnemyGroupSpawnRuleConfig enemyRule =
-                FindEnemyGroupSpawnRule(plan.RuleId);
-
-            if (enemyRule == null)
-            {
-                warnings++;
-                Debug.LogWarning(
-                    $"SystemPopulationRule generator: missing EnemyGroupSpawnRuleConfig '{plan.RuleId}' for {id}.");
-            }
-
-            SerializedProperty entryProperty =
-                enemiesProperty.GetArrayElementAtIndex(i);
-
-            entryProperty
-                .FindPropertyRelative("enemyGroupSpawnRule")
-                .objectReferenceValue = enemyRule;
-
-            entryProperty
-                .FindPropertyRelative("weight")
-                .intValue = Mathf.Max(1, plan.Weight);
+            return warnings;
         }
 
-        serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        EnemyGroupSpawnRuleConfig enemyRule =
+            FindEnemyGroupSpawnRule(profile.EnemyGroupRuleKey);
+
+        if (enemyRule == null)
+        {
+            warnings++;
+            Debug.LogWarning(
+                $"SystemPopulationRule generator: missing EnemyGroupSpawnRuleConfig '{profile.EnemyGroupRuleKey}' for {id}.");
+        }
+
+        SystemPopulationEnemyGroupRuleEntry enemyEntry =
+            new SystemPopulationEnemyGroupRuleEntry();
+
+        SetPrivateField(enemyEntry, "enemyGroupSpawnRule", enemyRule);
+        SetPrivateField(enemyEntry, "weight", 1);
+
+        SetPrivateField(
+            asset,
+            "enemyGroupSpawnRuleEntries",
+            new[] { enemyEntry });
 
         return warnings;
+    }
+
+    private static bool ValidateRuleInMemory(
+        SystemPopulationRule rule,
+        string path)
+    {
+        bool isValid = true;
+
+        if (rule.AllySpawnRules == null ||
+            rule.AllySpawnRules.Length != 1 ||
+            rule.AllySpawnRules[0] == null)
+        {
+            Debug.LogError(
+                $"SystemPopulationRule validation: exactly one ally spawn rule is required at {path}",
+                rule);
+            isValid = false;
+        }
+
+        if (rule.EnemyGroupSpawnRuleEntries == null ||
+            rule.EnemyGroupSpawnRuleEntries.Length == 0)
+        {
+            return isValid;
+        }
+
+        if (rule.EnemyGroupSpawnRuleEntries.Length != 1)
+        {
+            Debug.LogError(
+                $"SystemPopulationRule validation: zero or one enemy group spawn rule entry is required at {path}",
+                rule);
+            return false;
+        }
+
+        SystemPopulationEnemyGroupRuleEntry enemyEntry =
+            rule.EnemyGroupSpawnRuleEntries[0];
+
+        if (enemyEntry == null || !enemyEntry.IsValid())
+        {
+            Debug.LogError(
+                $"SystemPopulationRule validation: missing or invalid enemy group spawn rule entry at {path}",
+                rule);
+            isValid = false;
+        }
+        else if (enemyEntry.Weight != 1)
+        {
+            Debug.LogError(
+                $"SystemPopulationRule validation: enemy group spawn rule entry weight must be 1 at {path}",
+                rule);
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private static SystemPopulationRule FindExistingPopulationRule(
+        string id,
+        string path)
+    {
+        SystemPopulationRule asset =
+            AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(path);
+
+        if (asset != null)
+            return asset;
+
+        string[] guids =
+            AssetDatabase.FindAssets("t:SystemPopulationRule", new[] { OutputRoot });
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string candidatePath =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            if (string.IsNullOrWhiteSpace(candidatePath))
+                continue;
+
+            SystemPopulationRule candidate =
+                AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(candidatePath);
+
+            if (candidate == null)
+                continue;
+
+            SerializedObject serialized =
+                new SerializedObject(candidate);
+
+            SerializedProperty idProperty =
+                serialized.FindProperty("id");
+
+            if (idProperty == null)
+                continue;
+
+            if (string.Equals(
+                    idProperty.stringValue,
+                    id,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     private static AllySpawnRuleConfig FindAllySpawnRule(
@@ -312,8 +371,11 @@ public static class SystemPopulationRuleAssetGenerator
         string path,
         string id)
     {
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrEmpty(path) ||
+            string.IsNullOrEmpty(id))
+        {
             return false;
+        }
 
         string lowerPath =
             path.Replace("\\", "/").ToLowerInvariant();
@@ -323,69 +385,124 @@ public static class SystemPopulationRuleAssetGenerator
 
     private static PopulationRuleProfile[] BuildProfiles()
     {
-        return new[]
+        PopulationRuleProfile[] enemyProfiles =
         {
             new PopulationRuleProfile
             {
                 Key = "balanced",
-                DisplayName = "Популяция системы: сбалансированные союзники",
-                Description = "Один balanced ally rule и три вражеских group spawn rules.",
+                DisplayName = "Популяция системы: сбалансированная",
+                Description = "Сбалансированные союзники и сбалансированная вражеская группа.",
                 AllyRuleKey = "ally_spawn_balanced_01",
-                AiWeight = 1,
-                AncientsWeight = 1,
-                InfectedWeight = 1
+                EnemyGroupRuleKey = "enemy_group_spawn_balanced_01",
+                HasEnemies = true
             },
             new PopulationRuleProfile
             {
                 Key = "trade",
                 DisplayName = "Популяция системы: торговцы",
-                Description = "В системе превалируют торговцы.",
+                Description = "В системе превалируют торговцы. Враги используют сбалансированную группу.",
                 AllyRuleKey = "ally_spawn_trade_01",
-                AiWeight = 1,
-                AncientsWeight = 1,
-                InfectedWeight = 1
+                EnemyGroupRuleKey = "enemy_group_spawn_balanced_01",
+                HasEnemies = true
             },
             new PopulationRuleProfile
             {
                 Key = "military",
                 DisplayName = "Популяция системы: военные",
-                Description = "В системе превалируют военные союзники, а враги Древние появляются чаще.",
+                Description = "В системе превалируют военные союзники. Основная вражеская группа: Древние.",
                 AllyRuleKey = "ally_spawn_military_01",
-                AiWeight = 1,
-                AncientsWeight = 2,
-                InfectedWeight = 1
+                EnemyGroupRuleKey = "enemy_group_spawn_ancients_01",
+                HasEnemies = true
             },
             new PopulationRuleProfile
             {
                 Key = "ranger",
                 DisplayName = "Популяция системы: рейнджеры",
-                Description = "В системе превалируют рейнджеры.",
+                Description = "В системе превалируют рейнджеры. Враги используют сбалансированную группу.",
                 AllyRuleKey = "ally_spawn_ranger_01",
-                AiWeight = 1,
-                AncientsWeight = 1,
-                InfectedWeight = 1
+                EnemyGroupRuleKey = "enemy_group_spawn_balanced_01",
+                HasEnemies = true
             },
             new PopulationRuleProfile
             {
                 Key = "medical",
                 DisplayName = "Популяция системы: медики",
-                Description = "В системе превалируют медики, а зараженные враги появляются чаще.",
+                Description = "В системе превалируют медики. Основная вражеская группа: Зараженные.",
                 AllyRuleKey = "ally_spawn_medical_01",
-                AiWeight = 1,
-                AncientsWeight = 1,
-                InfectedWeight = 2
+                EnemyGroupRuleKey = "enemy_group_spawn_infected_01",
+                HasEnemies = true
             },
             new PopulationRuleProfile
             {
                 Key = "science",
                 DisplayName = "Популяция системы: научная база",
-                Description = "В научной системе чаще встречаются научные союзники, а враги ИИ появляются чаще.",
+                Description = "В системе превалируют научные союзники. Основная вражеская группа: ИИ.",
                 AllyRuleKey = "ally_spawn_science_01",
-                AiWeight = 2,
-                AncientsWeight = 1,
-                InfectedWeight = 1
+                EnemyGroupRuleKey = "enemy_group_spawn_ai_01",
+                HasEnemies = true
             }
         };
+
+        PopulationRuleProfile[] noEnemyProfiles =
+            new PopulationRuleProfile[enemyProfiles.Length];
+
+        for (int i = 0; i < enemyProfiles.Length; i++)
+        {
+            PopulationRuleProfile source =
+                enemyProfiles[i];
+
+            noEnemyProfiles[i] =
+                new PopulationRuleProfile
+                {
+                    Key = source.Key + "_no_enemies",
+                    DisplayName = source.DisplayName + " без врагов",
+                    Description = source.Description + " Вражеские группы не создаются.",
+                    AllyRuleKey = source.AllyRuleKey,
+                    EnemyGroupRuleKey = string.Empty,
+                    HasEnemies = false
+                };
+        }
+
+        PopulationRuleProfile[] result =
+            new PopulationRuleProfile[enemyProfiles.Length + noEnemyProfiles.Length];
+
+        Array.Copy(
+            enemyProfiles,
+            0,
+            result,
+            0,
+            enemyProfiles.Length);
+
+        Array.Copy(
+            noEnemyProfiles,
+            0,
+            result,
+            enemyProfiles.Length,
+            noEnemyProfiles.Length);
+
+        return result;
+    }
+
+    private static int DeleteGeneratedPopulationRulesWithoutDialog()
+    {
+        int deleted = 0;
+
+        string[] guids =
+            AssetDatabase.FindAssets("t:SystemPopulationRule", new[] { OutputRoot });
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string path =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            if (!IsGeneratedPopulationRulePath(path))
+                continue;
+
+            if (AssetDatabase.DeleteAsset(path))
+                deleted++;
+        }
+
+        return deleted;
     }
 
     private static bool IsGeneratedPopulationRulePath(
@@ -423,16 +540,37 @@ public static class SystemPopulationRuleAssetGenerator
         }
     }
 
-    private static void SetString(
-        SerializedObject serializedObject,
-        string propertyName,
-        string value)
+    private static void SetPrivateField(
+        object target,
+        string fieldName,
+        object value)
     {
-        SerializedProperty property =
-            serializedObject.FindProperty(propertyName);
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
 
-        if (property != null)
-            property.stringValue = value;
+        Type type =
+            target.GetType();
+
+        while (type != null)
+        {
+            FieldInfo field =
+                type.GetField(
+                    fieldName,
+                    BindingFlags.Instance |
+                    BindingFlags.NonPublic |
+                    BindingFlags.Public);
+
+            if (field != null)
+            {
+                field.SetValue(target, value);
+                return;
+            }
+
+            type = type.BaseType;
+        }
+
+        throw new InvalidOperationException(
+            $"Serialized field not found: {fieldName} on {target.GetType().Name}");
     }
 
     private sealed class PopulationRuleProfile
@@ -441,14 +579,7 @@ public static class SystemPopulationRuleAssetGenerator
         public string DisplayName;
         public string Description;
         public string AllyRuleKey;
-        public int AiWeight;
-        public int AncientsWeight;
-        public int InfectedWeight;
-    }
-
-    private sealed class EnemyGroupPlan
-    {
-        public string RuleId;
-        public int Weight;
+        public string EnemyGroupRuleKey;
+        public bool HasEnemies;
     }
 }

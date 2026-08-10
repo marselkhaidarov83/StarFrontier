@@ -12,4 +12,5 @@ public interface ISystemNpcPopulationService
     // void ForcePopulateSystem(StarSystemConfig starSystem);
     void ClearRuntimeState();
     string CreatePirateGroup(PirateGroupSpawnRuleConfig rule);
+    bool DebugSpawnEnemyAttackGroupInCurrentSystem();
 }

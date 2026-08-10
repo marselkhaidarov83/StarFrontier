@@ -126,8 +126,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             foreach (ParsedAssetRow assetRow in assetRows)
             {
                 NpcBehaviourScenarioConfig asset =
-                    AssetDatabase.LoadAssetAtPath<NpcBehaviourScenarioConfig>(
-                        assetRow.AssetPath);
+                    FindExistingAsset(assetRow);
 
                 if (asset == null)
                 {
@@ -142,6 +141,26 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                 }
                 else
                 {
+                    string currentPath =
+                        AssetDatabase.GetAssetPath(asset);
+
+                    if (!string.Equals(
+                            currentPath,
+                            assetRow.AssetPath,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        string moveError =
+                            AssetDatabase.MoveAsset(
+                                currentPath,
+                                assetRow.AssetPath);
+
+                        if (!string.IsNullOrWhiteSpace(moveError))
+                        {
+                            throw new InvalidOperationException(
+                                $"Не удалось переместить существующий asset {assetRow.AssetId}: {moveError}");
+                        }
+                    }
+
                     updated++;
                 }
 
@@ -171,6 +190,57 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             validatedWeights: weightRows.Count,
             validateOnly: validateOnly,
             startedAt: startedAt);
+    }
+
+    private static NpcBehaviourScenarioConfig FindExistingAsset(
+        ParsedAssetRow assetRow)
+    {
+        NpcBehaviourScenarioConfig asset =
+            AssetDatabase.LoadAssetAtPath<NpcBehaviourScenarioConfig>(
+                assetRow.AssetPath);
+
+        if (asset != null)
+            return asset;
+
+        string[] guids =
+            AssetDatabase.FindAssets(
+                "t:NpcBehaviourScenarioConfig",
+                new[] { OutputRoot });
+
+        foreach (string guid in guids)
+        {
+            string path =
+                AssetDatabase.GUIDToAssetPath(guid);
+
+            if (string.IsNullOrWhiteSpace(path))
+                continue;
+
+            NpcBehaviourScenarioConfig candidate =
+                AssetDatabase.LoadAssetAtPath<NpcBehaviourScenarioConfig>(
+                    path);
+
+            if (candidate == null)
+                continue;
+
+            SerializedObject serialized =
+                new SerializedObject(candidate);
+
+            SerializedProperty idProperty =
+                serialized.FindProperty("id");
+
+            if (idProperty == null)
+                continue;
+
+            if (string.Equals(
+                    idProperty.stringValue,
+                    assetRow.AssetId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     private static List<ParsedAssetRow> ParseAssetRows(
@@ -280,7 +350,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     errors);
 
             engageEnemiesWeight =
-                Mathf.Clamp(engageEnemiesWeight, 0f, 100f);
+                Mathf.Clamp(engageEnemiesWeight, 0f, 1000f);
 
             string assetPath =
                 $"{folder}/{assetId}.asset";
@@ -413,10 +483,10 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     "weight",
                     errors);
 
-            if (weight < 0 || weight > 100)
+            if (weight < 0 || weight > 1000)
             {
                 errors.Add(
-                    $"Weights CSV row {rowNumber} / {assetId}: weight должен быть 0..100, получено {weight}.");
+                    $"Weights CSV row {rowNumber} / {assetId}: weight должен быть 0..1000, получено {weight}.");
             }
 
             ValidateTargetFields(
@@ -437,7 +507,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     targetStationType,
                     targetUnitSide,
                     targetUnitType,
-                    Mathf.Clamp(weight, 0, 100),
+                    Mathf.Clamp(weight, 0, 1000),
                     rowNumber));
         }
 
@@ -522,10 +592,10 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     $"Asset CSV row {assetRow.RowNumber} / {assetRow.AssetId}: сумма weight должна быть больше 0.");
             }
 
-            if (totalWeight != 100)
+            if (totalWeight != 1000)
             {
                 warnings.Add(
-                    $"Asset {assetRow.AssetId}: сумма behavior weight = {totalWeight}, не 100. Это допустимо для weighted random, но проверь баланс.");
+                    $"Asset {assetRow.AssetId}: сумма behavior weight = {totalWeight}, не 1000. Это допустимо для weighted random, но проверь баланс.");
             }
         }
 

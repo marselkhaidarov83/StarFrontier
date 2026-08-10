@@ -22,55 +22,55 @@ MonoBehaviour:
     targetStationType: 0
     targetUnitSide: 10
     targetUnitType: 10
-    weight: 40
+    weight: 100
   - behaviorType: 104
     targetStationType: 50
     targetUnitSide: 0
     targetUnitType: 0
-    weight: 35
+    weight: 1000
   - behaviorType: 102
     targetStationType: 30
     targetUnitSide: 0
     targetUnitType: 0
-    weight: 22
+    weight: 50
   - behaviorType: 101
     targetStationType: 20
     targetUnitSide: 0
     targetUnitType: 0
-    weight: 16
+    weight: 50
   - behaviorType: 103
     targetStationType: 40
     targetUnitSide: 0
     targetUnitType: 0
-    weight: 12
+    weight: 50
   - behaviorType: 100
     targetStationType: 10
     targetUnitSide: 0
     targetUnitType: 0
-    weight: 8
+    weight: 50
   - behaviorType: 204
     targetStationType: 0
     targetUnitSide: 10
     targetUnitType: 60
-    weight: 24
+    weight: 1
   - behaviorType: 203
     targetStationType: 0
     targetUnitSide: 10
     targetUnitType: 50
-    weight: 18
+    weight: 1
   - behaviorType: 202
     targetStationType: 0
     targetUnitSide: 10
     targetUnitType: 40
-    weight: 14
+    weight: 1
   - behaviorType: 201
     targetStationType: 0
     targetUnitSide: 10
     targetUnitType: 30
-    weight: 10
+    weight: 100
   - behaviorType: 200
     targetStationType: 0
     targetUnitSide: 10
     targetUnitType: 20
-    weight: 8
+    weight: 100
   engageEnemiesWeight: 40

@@ -20,7 +20,7 @@ MonoBehaviour:
     \u0440\u043E\u043B\u044C, \u0443\u0440\u043E\u0432\u0435\u043D\u044C, \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u0438
     \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
     \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: b39672fe277b544ea967efe2642e40f7, type: 3}
   baseHullMin: 145
   baseHullMax: 166
   baseShieldMin: 106
@@ -45,4 +45,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f059ee755117a4b06b1f28f589336271, type: 2}
   - {fileID: 11400000, guid: 8036b0d1237b9432fb76e68d9890de9f, type: 2}
   - {fileID: 11400000, guid: 771419ef0f73c4dd997dd31b416be277, type: 2}
-  mapSprite: {fileID: 0}
+  mapSprite: {fileID: 21300000, guid: b39672fe277b544ea967efe2642e40f7, type: 3}

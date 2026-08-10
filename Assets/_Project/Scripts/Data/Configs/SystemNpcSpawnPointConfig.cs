@@ -11,25 +11,30 @@ public sealed class SystemNpcSpawnPointConfig : BaseConfig
         new Vector3(6f, 0f, 0f)
     };
 
-    [SerializeField] [Min(0f)] private float enemyRandomRadius = 200f;
+    [SerializeField] [Min(0f)] private float enemyRandomRadius = 35f;
 
     public Vector3[] EnemySpawnPoints => enemySpawnPoints;
 
     public float EnemyRandomRadius => enemyRandomRadius;
 
-    public Vector3 PickEnemySpawnPosition()
+    public Vector3 PickEnemySpawnBasePosition()
     {
         Vector3 basePosition =
             PickEnemySpawnPoint();
 
-        Vector2 randomOffset =
-            Random.insideUnitCircle * enemyRandomRadius;
-
-        basePosition.x += randomOffset.x;
-        basePosition.y += randomOffset.y;
         basePosition.z = 0f;
 
         return basePosition;
+    }
+
+    public Vector3 PickEnemySpawnPosition()
+    {
+        Vector3 basePosition =
+            PickEnemySpawnBasePosition();
+
+        return BuildTangentialScatterPosition(
+            basePosition,
+            enemyRandomRadius);
     }
 
     private Vector3 PickEnemySpawnPoint()
@@ -41,6 +46,42 @@ public sealed class SystemNpcSpawnPointConfig : BaseConfig
             Random.Range(0, enemySpawnPoints.Length);
 
         return enemySpawnPoints[index];
+    }
+
+    private static Vector3 BuildTangentialScatterPosition(
+        Vector3 basePosition,
+        float scatterRadius)
+    {
+        Vector2 radial =
+            new Vector2(basePosition.x, basePosition.y);
+
+        if (radial.sqrMagnitude <= 0.0001f)
+        {
+            radial = Vector2.right;
+        }
+        else
+        {
+            radial.Normalize();
+        }
+
+        Vector2 tangent =
+            new Vector2(-radial.y, radial.x);
+
+        float tangentOffset =
+            Random.Range(-scatterRadius, scatterRadius);
+
+        float outwardOffset =
+            Random.Range(0f, scatterRadius * 0.25f);
+
+        Vector2 scattered =
+            new Vector2(basePosition.x, basePosition.y) +
+            tangent * tangentOffset +
+            radial * outwardOffset;
+
+        return new Vector3(
+            scattered.x,
+            scattered.y,
+            0f);
     }
 
 #if UNITY_EDITOR

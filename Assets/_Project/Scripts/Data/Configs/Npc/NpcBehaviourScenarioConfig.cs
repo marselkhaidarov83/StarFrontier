@@ -15,8 +15,8 @@ public sealed class NpcBehaviourScenarioConfig : BaseConfig
 
     [Header("Combat")]
     [SerializeField]
-    [Range(0f, 100f)]
-    private float engageEnemiesWeight = 100f;
+    [Range(0f, 1000f)]
+    private float engageEnemiesWeight = 1000f;
 
     public IReadOnlyList<SystemNpcBehaviorWeight> BehaviorWeights =>
         behaviorWeights;
@@ -31,7 +31,7 @@ public sealed class NpcBehaviourScenarioConfig : BaseConfig
             behaviorWeights = new SystemNpcBehaviorWeight[0];
 
         engageEnemiesWeight =
-            Mathf.Clamp(engageEnemiesWeight, 0f, 100f);
+            Mathf.Clamp(engageEnemiesWeight, 0f, 1000f);
     }
 #endif
 }

@@ -208,6 +208,7 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
             return 0;
 
         int count = 0;
+        bool hasValidEntry = false;
 
         for (int i = 0; i < enemies.Length; i++)
         {
@@ -220,10 +221,13 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
             if (!entry.IsValid())
                 continue;
 
-            count += entry.MinCount;
+            if (!hasValidEntry || entry.MinCount < count)
+                count = entry.MinCount;
+
+            hasValidEntry = true;
         }
 
-        return count;
+        return hasValidEntry ? count : 0;
     }
 
     public int GetMaxEnemyCount()
@@ -244,7 +248,7 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
             if (!entry.IsValid())
                 continue;
 
-            count += entry.MaxCount;
+            count = Mathf.Max(count, entry.MaxCount);
         }
 
         return count;

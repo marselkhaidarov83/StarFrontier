@@ -10,6 +10,9 @@ public static class StarSystemPopulationRuleBinder
     private const string PopulationRuleRoot =
         "Assets/_Project/Content/Configs/SystemPopulationRules";
 
+    private const string SectorRoot =
+        "Assets/_Project/Content/Configs/Sectors";
+
     [MenuItem("STAR FRONTIER/Content/09. System Population Rules/Bind rules to StarSystemConfig by station")]
     public static void BindRulesToStarSystemsByStation()
     {
@@ -239,8 +242,14 @@ public static class StarSystemPopulationRuleBinder
         RuleSet rules,
         ref int warnings)
     {
+        bool useNoEnemyRule =
+            IsFirstSectorSystem(starSystem);
+
         if (starSystem == null)
-            return rules.Balanced;
+            return PickEnemyModeRule(
+                rules.Balanced,
+                rules.BalancedNoEnemies,
+                useNoEnemyRule);
 
         StationConfig station =
             starSystem.Station;
@@ -253,25 +262,43 @@ public static class StarSystemPopulationRuleBinder
                 starSystem.Id,
                 starSystem);
 
-            return rules.Balanced;
+            return PickEnemyModeRule(
+                rules.Balanced,
+                rules.BalancedNoEnemies,
+                useNoEnemyRule);
         }
 
         switch (station.StationType)
         {
             case StationType.Trade:
-                return rules.Trade;
+                return PickEnemyModeRule(
+                    rules.Trade,
+                    rules.TradeNoEnemies,
+                    useNoEnemyRule);
 
             case StationType.Military:
-                return rules.Military;
+                return PickEnemyModeRule(
+                    rules.Military,
+                    rules.MilitaryNoEnemies,
+                    useNoEnemyRule);
 
             case StationType.RangerBase:
-                return rules.Ranger;
+                return PickEnemyModeRule(
+                    rules.Ranger,
+                    rules.RangerNoEnemies,
+                    useNoEnemyRule);
 
             case StationType.Medical:
-                return rules.Medical;
+                return PickEnemyModeRule(
+                    rules.Medical,
+                    rules.MedicalNoEnemies,
+                    useNoEnemyRule);
 
             case StationType.Science:
-                return rules.Science;
+                return PickEnemyModeRule(
+                    rules.Science,
+                    rules.ScienceNoEnemies,
+                    useNoEnemyRule);
 
             default:
                 warnings++;
@@ -279,7 +306,10 @@ public static class StarSystemPopulationRuleBinder
                     "StarSystemPopulationRuleBinder: unsupported station type " +
                     station.StationType + ", using balanced rule: " + starSystem.Id,
                     starSystem);
-                return rules.Balanced;
+                return PickEnemyModeRule(
+                    rules.Balanced,
+                    rules.BalancedNoEnemies,
+                    useNoEnemyRule);
         }
     }
 
@@ -292,8 +322,59 @@ public static class StarSystemPopulationRuleBinder
             Military = FindRule("system_population_rule_military_01"),
             Ranger = FindRule("system_population_rule_ranger_01"),
             Medical = FindRule("system_population_rule_medical_01"),
-            Science = FindRule("system_population_rule_science_01")
+            Science = FindRule("system_population_rule_science_01"),
+            BalancedNoEnemies = FindRule("system_population_rule_balanced_no_enemies_01"),
+            TradeNoEnemies = FindRule("system_population_rule_trade_no_enemies_01"),
+            MilitaryNoEnemies = FindRule("system_population_rule_military_no_enemies_01"),
+            RangerNoEnemies = FindRule("system_population_rule_ranger_no_enemies_01"),
+            MedicalNoEnemies = FindRule("system_population_rule_medical_no_enemies_01"),
+            ScienceNoEnemies = FindRule("system_population_rule_science_no_enemies_01")
         };
+    }
+
+    private static SystemPopulationRule PickEnemyModeRule(
+        SystemPopulationRule regularRule,
+        SystemPopulationRule noEnemyRule,
+        bool useNoEnemyRule)
+    {
+        if (useNoEnemyRule && noEnemyRule != null)
+            return noEnemyRule;
+
+        return regularRule;
+    }
+
+    private static bool IsFirstSectorSystem(
+        StarSystemConfig starSystem)
+    {
+        if (starSystem == null)
+            return false;
+
+        string[] guids =
+            AssetDatabase.FindAssets("t:SectorConfig", new[] { SectorRoot });
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string path =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            SectorConfig sector =
+                AssetDatabase.LoadAssetAtPath<SectorConfig>(path);
+
+            if (sector == null ||
+                sector.Systems == null ||
+                sector.Order != 1)
+            {
+                continue;
+            }
+
+            for (int systemIndex = 0; systemIndex < sector.Systems.Length; systemIndex++)
+            {
+                if (sector.Systems[systemIndex] == starSystem)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private static SystemPopulationRule FindRule(
@@ -343,6 +424,12 @@ public static class StarSystemPopulationRuleBinder
         public SystemPopulationRule Ranger;
         public SystemPopulationRule Medical;
         public SystemPopulationRule Science;
+        public SystemPopulationRule BalancedNoEnemies;
+        public SystemPopulationRule TradeNoEnemies;
+        public SystemPopulationRule MilitaryNoEnemies;
+        public SystemPopulationRule RangerNoEnemies;
+        public SystemPopulationRule MedicalNoEnemies;
+        public SystemPopulationRule ScienceNoEnemies;
 
         public bool HasRequiredRules()
         {
@@ -351,7 +438,13 @@ public static class StarSystemPopulationRuleBinder
                    Military != null &&
                    Ranger != null &&
                    Medical != null &&
-                   Science != null;
+                   Science != null &&
+                   BalancedNoEnemies != null &&
+                   TradeNoEnemies != null &&
+                   MilitaryNoEnemies != null &&
+                   RangerNoEnemies != null &&
+                   MedicalNoEnemies != null &&
+                   ScienceNoEnemies != null;
         }
     }
 }

@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 public class Bootstrapper : CustomMonoBehaviour
 {
@@ -29,26 +26,14 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private List<EnemyConfig> enemies;
     [SerializeField] private List<AllyConfig> allies;
     [SerializeField] private List<AllySpawnRuleConfig> allySpawnRuleConfigs;
+    [SerializeField] private List<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules;
+    [SerializeField] private List<SystemPopulationRule> systemPopulationRules;
     [SerializeField] private List<PirateConfig> pirates;
     [SerializeField] private List<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules;
     [SerializeField] private List<ModuleConfig> modules;
     [SerializeField] private List<WeaponConfig> weapons;
     [SerializeField] private List<ItemConfig> items;
 
-#if UNITY_EDITOR
-    [Header("Editor Auto Fill / Weapons")]
-    [SerializeField] private bool autoCollectWeaponsFromFolders = true;
-    [SerializeField] private bool autoAssignDefaultWeaponFolders = true;
-    [SerializeField] private List<DefaultAsset> weaponConfigFolders;
-
-    private static readonly string[] DefaultWeaponFolderPaths =
-    {
-        "Assets/_Project/Content/Configs/Weapons/Common",
-        "Assets/_Project/Content/Configs/Weapons/AI",
-        "Assets/_Project/Content/Configs/Weapons/Infected",
-        "Assets/_Project/Content/Configs/Weapons/Ancients"
-    };
-#endif
 
     [SerializeField] public int MaxAcceptedMissionCount = 3;
 
@@ -56,6 +41,14 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] public bool SectorAllOpened = false;
     [SerializeField] public bool RouteAllUnlocked = false;
     [SerializeField] private bool _globalDebugEnabled;
+
+    [Header("Debug / NPC Population")]
+    [SerializeField] private bool stopAutomaticAllySpawns;
+    [SerializeField] private bool stopAutomaticEnemySpawns;
+    [SerializeField] private bool overrideAutomaticAllySpawnInterval;
+    [SerializeField, Min(0.1f)] private float debugAutomaticAllySpawnIntervalSeconds = 5f;
+    [SerializeField] private bool overrideNpcGalaxyLevel;
+    [SerializeField, Range(1, 10)] private int debugNpcGalaxyLevel = 1;
 
     public static Bootstrapper Instance;
     public IServiceRegistry ServiceRegistry;
@@ -69,6 +62,13 @@ public class Bootstrapper : CustomMonoBehaviour
     private ITickService _tickService;
 
     public bool GlobalDebugEnabled => _globalDebugEnabled;
+    public bool StopAutomaticAllySpawns => stopAutomaticAllySpawns;
+    public bool StopAutomaticEnemySpawns => stopAutomaticEnemySpawns;
+    public bool OverrideAutomaticAllySpawnInterval => overrideAutomaticAllySpawnInterval;
+    public float DebugAutomaticAllySpawnIntervalSeconds =>
+        Mathf.Max(0.1f, debugAutomaticAllySpawnIntervalSeconds);
+    public bool OverrideNpcGalaxyLevel => overrideNpcGalaxyLevel;
+    public int DebugNpcGalaxyLevel => Mathf.Clamp(debugNpcGalaxyLevel, 1, 10);
 
     private void Awake()
     {
@@ -82,10 +82,6 @@ public class Bootstrapper : CustomMonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         LogCustom("Bootstrapper awaked");
-
-#if UNITY_EDITOR
-        RebuildWeaponListFromFoldersIfEnabled();
-#endif
 
         InitializeServiceRegistry();
         InitializeStateMachine();
@@ -232,205 +228,64 @@ public class Bootstrapper : CustomMonoBehaviour
         return service;
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
+
+    [ContextMenu("STAR FRONTIER/Kill All NPCs")]
+    private void DebugKillAllNpcs()
     {
-        if (!autoCollectWeaponsFromFolders)
-            return;
-
-        RebuildWeaponListFromFoldersIfEnabled();
-    }
-
-    [ContextMenu("STAR FRONTIER/Rebuild Weapon List From Folders")]
-    private void RebuildWeaponListFromFolders()
-    {
-        EnsureDefaultWeaponFoldersAssigned();
-
-        if (weaponConfigFolders == null || weaponConfigFolders.Count == 0)
+        if (ServiceRegistry == null)
         {
-            Debug.LogWarning(
-                "[Bootstrapper] WeaponConfig folders are empty. " +
-                "Assign folders manually or keep Auto Assign Default Weapon Folders enabled.");
-
+            Debug.LogWarning("[Bootstrapper] ServiceRegistry is not initialized.");
             return;
         }
 
-        var collectedWeapons =
-            new List<WeaponConfig>();
-
-        var addedGuids =
-            new HashSet<string>(StringComparer.Ordinal);
-
-        for (int i = 0; i < weaponConfigFolders.Count; i++)
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService))
         {
-            DefaultAsset folder =
-                weaponConfigFolders[i];
-
-            if (folder == null)
-                continue;
-
-            string folderPath =
-                AssetDatabase.GetAssetPath(folder);
-
-            if (string.IsNullOrWhiteSpace(folderPath))
-                continue;
-
-            if (!AssetDatabase.IsValidFolder(folderPath))
-            {
-                Debug.LogWarning(
-                    "[Bootstrapper] WeaponConfig folder is not a valid folder: " +
-                    folderPath);
-
-                continue;
-            }
-
-            string[] guids =
-                AssetDatabase.FindAssets(
-                    "t:WeaponConfig",
-                    new[] { folderPath });
-
-            Array.Sort(guids, StringComparer.Ordinal);
-
-            for (int guidIndex = 0; guidIndex < guids.Length; guidIndex++)
-            {
-                string guid =
-                    guids[guidIndex];
-
-                if (!addedGuids.Add(guid))
-                    continue;
-
-                string assetPath =
-                    AssetDatabase.GUIDToAssetPath(guid);
-
-                WeaponConfig weaponConfig =
-                    AssetDatabase.LoadAssetAtPath<WeaponConfig>(assetPath);
-
-                if (weaponConfig == null)
-                    continue;
-
-                collectedWeapons.Add(weaponConfig);
-            }
+            Debug.LogWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return;
         }
 
-        collectedWeapons.Sort(CompareWeaponConfigsById);
+        int npcCount =
+            npcRuntimeService.Npcs != null
+                ? npcRuntimeService.Npcs.Count
+                : 0;
 
-        if (AreSameWeaponLists(weapons, collectedWeapons))
-            return;
+        npcRuntimeService.ClearAll();
 
-        weapons =
-            collectedWeapons;
-
-        EditorUtility.SetDirty(this);
+        if (ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out ISystemNpcPopulationService populationService))
+        {
+            populationService.ClearRuntimeState();
+        }
 
         Debug.Log(
-            "[Bootstrapper] WeaponConfig list rebuilt from folders. Count: " +
-            weapons.Count);
+            "[Bootstrapper] Debug Kill All NPCs completed. Removed NPCs: " +
+            npcCount);
     }
 
-    private void RebuildWeaponListFromFoldersIfEnabled()
+    [ContextMenu("STAR FRONTIER/Spawn Enemy Attack Group In Current System")]
+    private void DebugSpawnEnemyAttackGroupInCurrentSystem()
     {
-        if (!autoCollectWeaponsFromFolders)
-            return;
-
-        RebuildWeaponListFromFolders();
-    }
-
-    private void EnsureDefaultWeaponFoldersAssigned()
-    {
-        if (!autoAssignDefaultWeaponFolders)
-            return;
-
-        if (weaponConfigFolders == null)
-            weaponConfigFolders = new List<DefaultAsset>();
-
-        bool hasAnyAssignedFolder =
-            false;
-
-        for (int i = 0; i < weaponConfigFolders.Count; i++)
+        if (ServiceRegistry == null)
         {
-            if (weaponConfigFolders[i] != null)
-            {
-                hasAnyAssignedFolder = true;
-                break;
-            }
+            Debug.LogWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
         }
 
-        if (hasAnyAssignedFolder)
+        if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out ISystemNpcPopulationService populationService))
+        {
+            Debug.LogWarning("[Bootstrapper] ISystemNpcPopulationService is not registered.");
             return;
-
-        weaponConfigFolders.Clear();
-
-        for (int i = 0; i < DefaultWeaponFolderPaths.Length; i++)
-        {
-            string folderPath =
-                DefaultWeaponFolderPaths[i];
-
-            if (!AssetDatabase.IsValidFolder(folderPath))
-            {
-                Debug.LogWarning(
-                    "[Bootstrapper] Default WeaponConfig folder not found: " +
-                    folderPath);
-
-                continue;
-            }
-
-            DefaultAsset folderAsset =
-                AssetDatabase.LoadAssetAtPath<DefaultAsset>(folderPath);
-
-            if (folderAsset == null)
-            {
-                Debug.LogWarning(
-                    "[Bootstrapper] Default WeaponConfig folder asset not loaded: " +
-                    folderPath);
-
-                continue;
-            }
-
-            weaponConfigFolders.Add(folderAsset);
-        }
-    }
-
-    private static int CompareWeaponConfigsById(
-        WeaponConfig left,
-        WeaponConfig right)
-    {
-        if (ReferenceEquals(left, right))
-            return 0;
-
-        if (left == null)
-            return 1;
-
-        if (right == null)
-            return -1;
-
-        return string.Compare(
-            left.Id,
-            right.Id,
-            StringComparison.Ordinal);
-    }
-
-    private static bool AreSameWeaponLists(
-        List<WeaponConfig> current,
-        List<WeaponConfig> collected)
-    {
-        int currentCount =
-            current == null ? 0 : current.Count;
-
-        int collectedCount =
-            collected == null ? 0 : collected.Count;
-
-        if (currentCount != collectedCount)
-            return false;
-
-        for (int i = 0; i < currentCount; i++)
-        {
-            if (!ReferenceEquals(current[i], collected[i]))
-                return false;
         }
 
-        return true;
+        bool spawned =
+            populationService.DebugSpawnEnemyAttackGroupInCurrentSystem();
+
+        Debug.Log(
+            "[Bootstrapper] Debug Spawn Enemy Attack Group In Current System result: " +
+            spawned);
     }
-#endif
 
     private void StartGameFlow()
     {

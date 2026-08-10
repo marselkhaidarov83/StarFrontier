@@ -20,7 +20,7 @@ public sealed class SystemNpcBehaviorWeight
         NpcBehaviourTargetUnitType.None;
 
     [SerializeField]
-    [Range(0, 100)]
+    [Range(0, 1000)]
     private int weight = 10;
 
     public SystemNpcBehaviorType BehaviorType =>
