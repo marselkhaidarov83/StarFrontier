@@ -12,10 +12,13 @@ public static class AllySpawnRuleConfigAssetGenerator
     private const string AllyConfigRoot =
         "Assets/_Project/Content/Configs/Ally";
 
-    [MenuItem("STAR FRONTIER/Content/Ally Spawn Rules/Create generated AllySpawnRuleConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/06. Ally Spawn Rules/Create generated AllySpawnRuleConfig assets")]
     public static void CreateGeneratedAllySpawnRules()
     {
         EnsureFolder(OutputRoot);
+
+        Dictionary<AllyKey, AllyConfig> alliesByRoleAndLevel =
+            LoadAlliesByRoleAndLevel();
 
         SpawnRuleProfile[] profiles =
             BuildProfiles();
@@ -51,6 +54,7 @@ public static class AllySpawnRuleConfigAssetGenerator
                 asset,
                 id,
                 profile,
+                alliesByRoleAndLevel,
                 out profileWarnings,
                 out profileBoundAllies);
 
@@ -73,7 +77,7 @@ public static class AllySpawnRuleConfigAssetGenerator
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Ally Spawn Rules/Validate generated AllySpawnRuleConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/06. Ally Spawn Rules/Validate generated AllySpawnRuleConfig assets")]
     public static void ValidateGeneratedAllySpawnRules()
     {
         int checkedAssets = 0;
@@ -97,6 +101,17 @@ public static class AllySpawnRuleConfigAssetGenerator
                 continue;
 
             checkedAssets++;
+
+            IReadOnlyList<AllySpawnLevelEntryConfig> entries =
+                rule.LevelEntries;
+
+            if (entries == null || entries.Count != 10)
+            {
+                errors++;
+                Debug.LogError(
+                    $"AllySpawnRule validation: expected exactly 10 level entries at {path}",
+                    rule);
+            }
 
             for (int level = 1; level <= 10; level++)
             {
@@ -147,7 +162,7 @@ public static class AllySpawnRuleConfigAssetGenerator
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Ally Spawn Rules/Delete generated AllySpawnRuleConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/06. Ally Spawn Rules/Delete generated AllySpawnRuleConfig assets")]
     public static void DeleteGeneratedAllySpawnRules()
     {
         if (!EditorUtility.DisplayDialog(
@@ -189,6 +204,7 @@ public static class AllySpawnRuleConfigAssetGenerator
         AllySpawnRuleConfig asset,
         string id,
         SpawnRuleProfile profile,
+        Dictionary<AllyKey, AllyConfig> alliesByRoleAndLevel,
         out int warnings,
         out int boundAllies)
     {
@@ -197,6 +213,8 @@ public static class AllySpawnRuleConfigAssetGenerator
 
         SerializedObject serializedObject =
             new SerializedObject(asset);
+
+        serializedObject.Update();
 
         SetString(serializedObject, "id", id);
         SetString(serializedObject, "displayName", profile.DisplayName);
@@ -208,6 +226,7 @@ public static class AllySpawnRuleConfigAssetGenerator
         if (levelEntriesProperty == null || !levelEntriesProperty.isArray)
             throw new InvalidOperationException("AllySpawnRuleConfig.levelEntries field was not found.");
 
+        levelEntriesProperty.ClearArray();
         levelEntriesProperty.arraySize = 10;
 
         for (int level = 1; level <= 10; level++)
@@ -227,6 +246,15 @@ public static class AllySpawnRuleConfigAssetGenerator
             SerializedProperty alliesProperty =
                 levelEntryProperty.FindPropertyRelative("allies");
 
+            if (galaxyLevelProperty == null ||
+                intervalProperty == null ||
+                offlineIntervalProperty == null ||
+                alliesProperty == null ||
+                !alliesProperty.isArray)
+            {
+                throw new InvalidOperationException("AllySpawnLevelEntryConfig serialized fields were not found.");
+            }
+
             galaxyLevelProperty.intValue = level;
             intervalProperty.floatValue = BuildSpawnIntervalSeconds(level);
             offlineIntervalProperty.floatValue = BuildOfflineSpawnIntervalHours(level);
@@ -234,6 +262,7 @@ public static class AllySpawnRuleConfigAssetGenerator
             List<AllyGroupPlan> plans =
                 BuildGroupPlans(profile, level);
 
+            alliesProperty.ClearArray();
             alliesProperty.arraySize = plans.Count;
 
             for (int i = 0; i < plans.Count; i++)
@@ -242,7 +271,10 @@ public static class AllySpawnRuleConfigAssetGenerator
                     plans[i];
 
                 AllyConfig allyConfig =
-                    FindAllyConfig(plan.Role, level);
+                    FindAllyConfig(
+                        alliesByRoleAndLevel,
+                        plan.Role,
+                        level);
 
                 if (allyConfig == null)
                 {
@@ -272,7 +304,69 @@ public static class AllySpawnRuleConfigAssetGenerator
             }
         }
 
-        serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        serializedObject.ApplyModifiedProperties();
+    }
+
+    private static Dictionary<AllyKey, AllyConfig> LoadAlliesByRoleAndLevel()
+    {
+        Dictionary<AllyKey, AllyConfig> result =
+            new Dictionary<AllyKey, AllyConfig>();
+
+        string[] guids =
+            AssetDatabase.FindAssets("t:AllyConfig", new[] { AllyConfigRoot });
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string path =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            AllyConfig config =
+                AssetDatabase.LoadAssetAtPath<AllyConfig>(path);
+
+            if (config == null)
+                continue;
+
+            if (!IsGeneratedAllyRole(config.Role))
+                continue;
+
+            int level =
+                Mathf.Clamp(config.Level, 1, 10);
+
+            AllyKey key =
+                new AllyKey(config.Role, level);
+
+            if (result.ContainsKey(key))
+            {
+                Debug.LogWarning(
+                    $"AllySpawnRule generator: duplicate AllyConfig for {config.Role} L{level:00}. Keeping first one. Duplicate path: {path}",
+                    config);
+                continue;
+            }
+
+            result[key] = config;
+        }
+
+        return result;
+    }
+
+    private static AllyConfig FindAllyConfig(
+        Dictionary<AllyKey, AllyConfig> alliesByRoleAndLevel,
+        AllyRole2A role,
+        int level)
+    {
+        if (alliesByRoleAndLevel == null)
+            return null;
+
+        AllyConfig result;
+
+        if (alliesByRoleAndLevel.TryGetValue(
+                new AllyKey(role, Mathf.Clamp(level, 1, 10)),
+                out result))
+        {
+            return result;
+        }
+
+        return null;
     }
 
     private static List<AllyGroupPlan> BuildGroupPlans(
@@ -408,74 +502,6 @@ public static class AllySpawnRuleConfigAssetGenerator
         return result;
     }
 
-    private static AllyConfig FindAllyConfig(
-        AllyRole2A role,
-        int level)
-    {
-        string[] guids =
-            AssetDatabase.FindAssets("t:AllyConfig", new[] { AllyConfigRoot });
-
-        for (int i = 0; i < guids.Length; i++)
-        {
-            string path =
-                AssetDatabase.GUIDToAssetPath(guids[i]);
-
-            string lowerPath =
-                path.Replace("\\", "/").ToLowerInvariant();
-
-            if (!IsMatchingAllyConfigPath(lowerPath, role, level))
-                continue;
-
-            AllyConfig config =
-                AssetDatabase.LoadAssetAtPath<AllyConfig>(path);
-
-            if (config != null)
-                return config;
-        }
-
-        return null;
-    }
-
-    private static bool IsMatchingAllyConfigPath(
-        string lowerPath,
-        AllyRole2A role,
-        int level)
-    {
-        if (!lowerPath.Contains("/ally/"))
-            return false;
-
-        if (!lowerPath.Contains($"l{level:00}"))
-            return false;
-
-        switch (role)
-        {
-            case AllyRole2A.Military:
-                return lowerPath.Contains("/military/") ||
-                       lowerPath.Contains("_military_");
-
-            case AllyRole2A.Ranger:
-                return lowerPath.Contains("/ranger/") ||
-                       lowerPath.Contains("_ranger_");
-
-            case AllyRole2A.Trader:
-                return lowerPath.Contains("/trader/") ||
-                       lowerPath.Contains("_trader_");
-
-            case AllyRole2A.CivilianTransport:
-                return lowerPath.Contains("/civiliantransport/") ||
-                       lowerPath.Contains("_civilian_transport_") ||
-                       lowerPath.Contains("_civilian_");
-
-            case AllyRole2A.Medic:
-                return lowerPath.Contains("/medic/") ||
-                       lowerPath.Contains("_medic_") ||
-                       lowerPath.Contains("_medical_");
-
-            default:
-                return false;
-        }
-    }
-
     private static int BuildMinTotal(int level)
     {
         return Mathf.RoundToInt(
@@ -541,10 +567,10 @@ public static class AllySpawnRuleConfigAssetGenerator
             },
             new SpawnRuleProfile
             {
-                Key = "transport",
-                DisplayName = "Союзники: транспортная система",
-                Description = "В транспортной системе гражданского транспорта примерно в 2 раза больше.",
-                DominantRole = AllyRole2A.CivilianTransport
+                Key = "science",
+                DisplayName = "Союзники: научная система",
+                Description = "В научной системе научных союзников примерно в 2 раза больше.",
+                DominantRole = AllyRole2A.Science
             }
         };
     }
@@ -556,9 +582,25 @@ public static class AllySpawnRuleConfigAssetGenerator
             AllyRole2A.Ranger,
             AllyRole2A.Military,
             AllyRole2A.Trader,
-            AllyRole2A.CivilianTransport,
+            AllyRole2A.Science,
             AllyRole2A.Medic
         };
+    }
+
+    private static bool IsGeneratedAllyRole(AllyRole2A role)
+    {
+        switch (role)
+        {
+            case AllyRole2A.Ranger:
+            case AllyRole2A.Military:
+            case AllyRole2A.Trader:
+            case AllyRole2A.Science:
+            case AllyRole2A.Medic:
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     private static bool IsGeneratedSpawnRulePath(string path)
@@ -628,5 +670,37 @@ public static class AllySpawnRuleConfigAssetGenerator
     {
         public AllyRole2A Role;
         public float Remainder;
+    }
+
+    private struct AllyKey : IEquatable<AllyKey>
+    {
+        private readonly AllyRole2A role;
+        private readonly int level;
+
+        public AllyKey(AllyRole2A role, int level)
+        {
+            this.role = role;
+            this.level = level;
+        }
+
+        public bool Equals(AllyKey other)
+        {
+            return role == other.role &&
+                   level == other.level;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is AllyKey other &&
+                   Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((int)role * 397) ^ level;
+            }
+        }
     }
 }

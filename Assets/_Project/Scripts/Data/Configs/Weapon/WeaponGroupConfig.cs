@@ -13,7 +13,7 @@ public enum WeaponGroupAllyType
     Military = 10,
     Ranger = 20,
     Medic = 30,
-    CivilianTransport = 40,
+    Science = 40,
     Trader = 50
 }
 

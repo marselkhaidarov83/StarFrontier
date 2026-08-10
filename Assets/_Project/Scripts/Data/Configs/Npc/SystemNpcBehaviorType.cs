@@ -22,6 +22,6 @@ public enum SystemNpcBehaviorType
     AttackMilitaryAlly = 200,
     AttackRangerAlly = 201,
     AttackTraderAlly = 202,
-    AttackCivilianTransportAlly = 203,
+    AttackScienceAlly = 203,
     AttackMedicAlly = 204
 }

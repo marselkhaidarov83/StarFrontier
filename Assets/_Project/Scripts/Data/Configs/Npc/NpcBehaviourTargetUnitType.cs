@@ -6,7 +6,7 @@ public enum NpcBehaviourTargetUnitType
     Military = 20,
     Ranger = 30,
     Trader = 40,
-    CivilianTransport = 50,
+    Science = 50,
     Medic = 60,
 
     AI = 100,

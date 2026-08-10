@@ -10,7 +10,7 @@ using UnityEngine;
 public static class NpcBehaviourScenarioConfigAssetGenerator
 {
     private const string MenuRoot =
-        "STAR FRONTIER/Content/NPC Behaviour Scenarios/";
+        "STAR FRONTIER/Content/03. NPC Behaviour Scenarios/";
 
     private const string DefaultAssetCsvPath =
         "Assets/_Project/Content/Configs/NpcBehaviourScenarios/STAR_FRONTIER_NpcBehaviourScenarioConfig_assets_v0.2.csv";
@@ -560,7 +560,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             behaviorType == SystemNpcBehaviorType.AttackMilitaryAlly ||
             behaviorType == SystemNpcBehaviorType.AttackRangerAlly ||
             behaviorType == SystemNpcBehaviorType.AttackTraderAlly ||
-            behaviorType == SystemNpcBehaviorType.AttackCivilianTransportAlly ||
+            behaviorType == SystemNpcBehaviorType.AttackScienceAlly ||
             behaviorType == SystemNpcBehaviorType.AttackMedicAlly ||
             behaviorType == SystemNpcBehaviorType.EngageEnemies;
 

@@ -35,7 +35,7 @@ public static class WeaponConfigAssetGenerator
     };
 
     private const string MenuRoot =
-        "STAR FRONTIER/Content/Weapons/";
+        "STAR FRONTIER/Content/01. Weapons/";
 
     [MenuItem(MenuRoot + "Generate WeaponConfig Assets From CSV")]
     public static void GenerateWeaponConfigAssetsFromCsv()

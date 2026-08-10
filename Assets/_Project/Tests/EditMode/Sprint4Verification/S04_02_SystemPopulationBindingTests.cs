@@ -6,21 +6,33 @@ public sealed class S04_02_SystemPopulationBindingTests
     private const string SolariaSystemId =
         "s01_system_solaria_02";
 
-    private const string SolariaPopulationId =
-        "system_population_s01_solaria_01";
+    private const string ExpectedSolariaPopulationRuleId =
+        "system_population_rule_trade_01";
 
-    private const string AllySpawnRuleId =
-        "allySpawnRule_ranger_01";
+    private const string ExpectedSolariaAllySpawnRuleId =
+        "ally_spawn_trade_01";
+
+    private const string VegaReachSystemId =
+        "s01_system_vega_reach_02";
+
+    private const string ExpectedSciencePopulationRuleId =
+        "system_population_rule_science_01";
+
+    private const string ExpectedScienceAllySpawnRuleId =
+        "ally_spawn_transport_01";
+
+    private const string AiEnemyGroupRuleId =
+        "enemy_group_spawn_ai_01";
 
     private static readonly string[] RequiredEnemyGroupRuleIds =
     {
-        "enemyGroupSpawnRule_ancients_01",
-        "enemyGroupSpawnRule_ai_01",
-        "enemyGroupSpawnRule_infected_01"
+        "enemy_group_spawn_ancients_01",
+        "enemy_group_spawn_ai_01",
+        "enemy_group_spawn_infected_01"
     };
 
     [Test]
-    public void Solaria_HasExpectedSystemPopulation()
+    public void Solaria_HasExpectedSystemPopulationRule()
     {
         StarSystemConfig system =
             FindConfigById<StarSystemConfig>(
@@ -31,73 +43,41 @@ public sealed class S04_02_SystemPopulationBindingTests
             "Missing StarSystemConfig: " + SolariaSystemId);
 
         Assert.NotNull(
-            system.SystemPopulation,
-            SolariaSystemId + " must have SystemPopulation assigned.");
+            system.SystemPopulationRule,
+            SolariaSystemId + " must have SystemPopulationRule assigned.");
 
         Assert.AreEqual(
-            SolariaPopulationId,
-            system.SystemPopulation.Id,
-            SolariaSystemId + " must reference " + SolariaPopulationId);
+            ExpectedSolariaPopulationRuleId,
+            system.SystemPopulationRule.Id,
+            SolariaSystemId + " must reference " +
+            ExpectedSolariaPopulationRuleId);
     }
 
     [Test]
-    public void SolariaPopulation_HasGalaxyLevelProfiles()
+    public void SolariaPopulationRule_ReferencesExpectedAllySpawnRule()
     {
-        SystemPopulationConfig population =
-            FindConfigById<SystemPopulationConfig>(
-                SolariaPopulationId);
+        StarSystemConfig system =
+            FindConfigById<StarSystemConfig>(
+                SolariaSystemId);
 
         Assert.NotNull(
-            population,
-            "Missing SystemPopulationConfig: " + SolariaPopulationId);
+            system,
+            "Missing StarSystemConfig: " + SolariaSystemId);
 
         Assert.NotNull(
-            population.LevelProfiles,
-            SolariaPopulationId + " LevelProfiles is null.");
-
-        Assert.AreEqual(
-            10,
-            population.LevelProfiles.Length,
-            SolariaPopulationId + " must have exactly 10 GalaxyLevel profiles.");
-
-        for (int i = 0; i < population.LevelProfiles.Length; i++)
-        {
-            SystemPopulationProfile profile =
-                population.LevelProfiles[i];
-
-            Assert.NotNull(
-                profile,
-                SolariaPopulationId + " has null profile at index " + i);
-
-            Assert.AreEqual(
-                i + 1,
-                profile.GalaxyLevel,
-                SolariaPopulationId + " profile at index " + i +
-                " must have GalaxyLevel " + (i + 1));
-        }
-    }
-
-    [Test]
-    public void SolariaPopulation_ReferencesAllySpawnRuleThroughProfiles()
-    {
-        SystemPopulationConfig population =
-            FindConfigById<SystemPopulationConfig>(
-                SolariaPopulationId);
-
-        Assert.NotNull(
-            population,
-            "Missing SystemPopulationConfig: " + SolariaPopulationId);
+            system.SystemPopulationRule,
+            SolariaSystemId + " must have SystemPopulationRule assigned.");
 
         Assert.IsTrue(
-            HasAllyRuleInAnyProfile(
-                population,
-                AllySpawnRuleId),
-            SolariaPopulationId + " must reference " + AllySpawnRuleId +
-            " through one of its SystemPopulationProfile entries.");
+            HasAllyRule(
+                system.SystemPopulationRule,
+                ExpectedSolariaAllySpawnRuleId),
+            system.SystemPopulationRule.Id + " must reference " +
+            ExpectedSolariaAllySpawnRuleId + ".");
     }
 
     [Test]
-    public void AtLeastOneStarSystem_ReferencesEachRequiredEnemyGroupRuleThroughProfiles()
+    public void AtLeastOneStarSystem_ReferencesEachRequiredEnemyGroupRuleThroughPopulationRule()
     {
         for (int i = 0; i < RequiredEnemyGroupRuleIds.Length; i++)
         {
@@ -111,26 +91,74 @@ public sealed class S04_02_SystemPopulationBindingTests
             Assert.NotNull(
                 system,
                 "No StarSystemConfig references EnemyGroupSpawnRuleConfig " +
-                "through SystemPopulationProfile: " + ruleId);
+                "through SystemPopulationRule: " + ruleId);
         }
     }
 
     [Test]
-    public void SolariaPopulation_HasAtLeastOneEnemyGroupRuleThroughProfiles()
+    public void SolariaPopulationRule_HasAllRequiredEnemyGroupRules()
     {
-        SystemPopulationConfig population =
-            FindConfigById<SystemPopulationConfig>(
-                SolariaPopulationId);
+        StarSystemConfig system =
+            FindConfigById<StarSystemConfig>(
+                SolariaSystemId);
 
         Assert.NotNull(
-            population,
-            "Missing SystemPopulationConfig: " + SolariaPopulationId);
+            system,
+            "Missing StarSystemConfig: " + SolariaSystemId);
+
+        Assert.NotNull(
+            system.SystemPopulationRule,
+            SolariaSystemId + " must have SystemPopulationRule assigned.");
+
+        for (int i = 0; i < RequiredEnemyGroupRuleIds.Length; i++)
+        {
+            string ruleId =
+                RequiredEnemyGroupRuleIds[i];
+
+            Assert.IsTrue(
+                HasEnemyRule(
+                    system.SystemPopulationRule,
+                    ruleId),
+                system.SystemPopulationRule.Id +
+                " must reference enemy group rule " + ruleId);
+        }
+    }
+
+    [Test]
+    public void ScienceSystem_UsesTransportAlliesAndHigherAiEnemyWeight()
+    {
+        StarSystemConfig system =
+            FindConfigById<StarSystemConfig>(
+                VegaReachSystemId);
+
+        Assert.NotNull(
+            system,
+            "Missing StarSystemConfig: " + VegaReachSystemId);
+
+        Assert.NotNull(
+            system.SystemPopulationRule,
+            VegaReachSystemId + " must have SystemPopulationRule assigned.");
+
+        Assert.AreEqual(
+            ExpectedSciencePopulationRuleId,
+            system.SystemPopulationRule.Id,
+            VegaReachSystemId + " must reference " +
+            ExpectedSciencePopulationRuleId);
 
         Assert.IsTrue(
-            HasAnyEnemyRuleInAnyProfile(
-                population),
-            SolariaPopulationId +
-            " must have at least one enemy group rule through LevelProfiles.");
+            HasAllyRule(
+                system.SystemPopulationRule,
+                ExpectedScienceAllySpawnRuleId),
+            system.SystemPopulationRule.Id + " must reference " +
+            ExpectedScienceAllySpawnRuleId + ".");
+
+        Assert.AreEqual(
+            2,
+            GetEnemyGroupRuleWeight(
+                system.SystemPopulationRule,
+                AiEnemyGroupRuleId),
+            system.SystemPopulationRule.Id +
+            " must increase AI enemy group weight for science systems.");
     }
 
     private static StarSystemConfig FindStarSystemReferencingEnemyGroupRule(
@@ -153,11 +181,8 @@ public sealed class S04_02_SystemPopulationBindingTests
             if (system == null)
                 continue;
 
-            if (system.SystemPopulation == null)
-                continue;
-
-            if (HasEnemyRuleInAnyProfile(
-                    system.SystemPopulation,
+            if (HasEnemyRule(
+                    system.SystemPopulationRule,
                     enemyGroupRuleId))
             {
                 return system;
@@ -167,49 +192,20 @@ public sealed class S04_02_SystemPopulationBindingTests
         return null;
     }
 
-    private static bool HasAllyRuleInAnyProfile(
-        SystemPopulationConfig population,
-        string allyRuleId)
-    {
-        if (population == null)
-            return false;
-
-        if (population.LevelProfiles == null)
-            return false;
-
-        for (int i = 0; i < population.LevelProfiles.Length; i++)
-        {
-            SystemPopulationProfile profile =
-                population.LevelProfiles[i];
-
-            if (profile == null)
-                continue;
-
-            if (HasAllyRule(
-                    profile,
-                    allyRuleId))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private static bool HasAllyRule(
-        SystemPopulationProfile profile,
+        SystemPopulationRule populationRule,
         string allyRuleId)
     {
-        if (profile == null)
+        if (populationRule == null)
             return false;
 
-        if (profile.AllySpawnRules == null)
+        if (populationRule.AllySpawnRules == null)
             return false;
 
-        for (int i = 0; i < profile.AllySpawnRules.Length; i++)
+        for (int i = 0; i < populationRule.AllySpawnRules.Length; i++)
         {
             AllySpawnRuleConfig rule =
-                profile.AllySpawnRules[i];
+                populationRule.AllySpawnRules[i];
 
             if (rule == null)
                 continue;
@@ -221,76 +217,20 @@ public sealed class S04_02_SystemPopulationBindingTests
         return false;
     }
 
-    private static bool HasAnyEnemyRuleInAnyProfile(
-        SystemPopulationConfig population)
-    {
-        if (population == null)
-            return false;
-
-        if (population.LevelProfiles == null)
-            return false;
-
-        for (int i = 0; i < population.LevelProfiles.Length; i++)
-        {
-            SystemPopulationProfile profile =
-                population.LevelProfiles[i];
-
-            if (profile == null)
-                continue;
-
-            if (profile.EnemyGroupSpawnRules == null)
-                continue;
-
-            if (profile.EnemyGroupSpawnRules.Length > 0)
-                return true;
-        }
-
-        return false;
-    }
-
-    private static bool HasEnemyRuleInAnyProfile(
-        SystemPopulationConfig population,
-        string enemyGroupRuleId)
-    {
-        if (population == null)
-            return false;
-
-        if (population.LevelProfiles == null)
-            return false;
-
-        for (int i = 0; i < population.LevelProfiles.Length; i++)
-        {
-            SystemPopulationProfile profile =
-                population.LevelProfiles[i];
-
-            if (profile == null)
-                continue;
-
-            if (HasEnemyRule(
-                    profile,
-                    enemyGroupRuleId))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private static bool HasEnemyRule(
-        SystemPopulationProfile profile,
+        SystemPopulationRule populationRule,
         string enemyGroupRuleId)
     {
-        if (profile == null)
+        if (populationRule == null)
             return false;
 
-        if (profile.EnemyGroupSpawnRules == null)
+        if (populationRule.EnemyGroupSpawnRules == null)
             return false;
 
-        for (int i = 0; i < profile.EnemyGroupSpawnRules.Length; i++)
+        for (int i = 0; i < populationRule.EnemyGroupSpawnRules.Length; i++)
         {
             EnemyGroupSpawnRuleConfig rule =
-                profile.EnemyGroupSpawnRules[i];
+                populationRule.EnemyGroupSpawnRules[i];
 
             if (rule == null)
                 continue;
@@ -300,6 +240,36 @@ public sealed class S04_02_SystemPopulationBindingTests
         }
 
         return false;
+    }
+
+    private static int GetEnemyGroupRuleWeight(
+        SystemPopulationRule populationRule,
+        string enemyGroupRuleId)
+    {
+        if (populationRule == null)
+            return 0;
+
+        if (populationRule.EnemyGroupSpawnRuleEntries == null)
+            return 0;
+
+        for (int i = 0; i < populationRule.EnemyGroupSpawnRuleEntries.Length; i++)
+        {
+            SystemPopulationEnemyGroupRuleEntry entry =
+                populationRule.EnemyGroupSpawnRuleEntries[i];
+
+            if (entry == null)
+                continue;
+
+            if (entry.EnemyGroupSpawnRule == null)
+                continue;
+
+            if (entry.EnemyGroupSpawnRule.Id != enemyGroupRuleId)
+                continue;
+
+            return entry.Weight;
+        }
+
+        return 0;
     }
 
     private static T FindConfigById<T>(string id)

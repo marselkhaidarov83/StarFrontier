@@ -7,7 +7,7 @@ public static class SystemNpcSpawnPointConfigAssetGenerator
     private const string OutputRoot =
         "Assets/_Project/Content/Configs/SystemNpcSpawnPoints";
 
-    [MenuItem("STAR FRONTIER/Content/System NPC Spawn Points/Create default SystemNpcSpawnPointConfig asset")]
+    [MenuItem("STAR FRONTIER/Content/10. System NPC Spawn Points/Create default SystemNpcSpawnPointConfig asset")]
     public static void CreateDefaultSystemNpcSpawnPointConfig()
     {
         EnsureFolder(OutputRoot);

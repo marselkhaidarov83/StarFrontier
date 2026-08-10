@@ -5,46 +5,49 @@ using UnityEngine;
 public sealed class SystemPopulationGalaxyLevelEditModeTests
 {
     [Test]
-    public void PopulationConfig_SelectsTheExactGalaxyLevelProfile()
+    public void SystemPopulationRule_IsValidWhenItHasAnySpawnRule()
     {
-        SystemPopulationConfig config =
-            ScriptableObject.CreateInstance<SystemPopulationConfig>();
+        SystemPopulationRule populationRule =
+            ScriptableObject.CreateInstance<SystemPopulationRule>();
 
-        SystemPopulationProfile levelOne =
-            new SystemPopulationProfile();
-
-        SystemPopulationProfile levelFour =
-            new SystemPopulationProfile();
-
-        SetPrivateField(levelOne, "galaxyLevel", 1);
-        SetPrivateField(levelFour, "galaxyLevel", 4);
+        AllySpawnRuleConfig allyRule =
+            ScriptableObject.CreateInstance<AllySpawnRuleConfig>();
 
         SetPrivateField(
-            config,
-            "levelProfiles",
+            populationRule,
+            "allySpawnRules",
             new[]
             {
-                levelOne,
-                levelFour
+                allyRule
             });
 
         Assert.That(
-            config.GetProfileForGalaxyLevel(1),
-            Is.SameAs(levelOne));
+            populationRule.HasAnySpawnRule(),
+            Is.True);
 
         Assert.That(
-            config.GetProfileForGalaxyLevel(4),
-            Is.SameAs(levelFour));
+            populationRule.HasAnyAllySpawnRule(),
+            Is.True);
 
-        Assert.That(
-            config.GetProfileForGalaxyLevel(5),
-            Is.Null);
-
-        Object.DestroyImmediate(config);
+        Object.DestroyImmediate(allyRule);
+        Object.DestroyImmediate(populationRule);
     }
 
     [Test]
-    public void EnemyConfig_IsAllowedOnlyWhenItsLevelEqualsGalaxyLevel()
+    public void SystemPopulationRule_IsInvalidWhenItHasNoSpawnRules()
+    {
+        SystemPopulationRule populationRule =
+            ScriptableObject.CreateInstance<SystemPopulationRule>();
+
+        Assert.That(
+            populationRule.HasAnySpawnRule(),
+            Is.False);
+
+        Object.DestroyImmediate(populationRule);
+    }
+
+    [Test]
+    public void EnemyConfig_LevelCanBeComparedToGalaxyLevel()
     {
         EnemyConfig enemy =
             ScriptableObject.CreateInstance<EnemyConfig>();
@@ -52,18 +55,15 @@ public sealed class SystemPopulationGalaxyLevelEditModeTests
         SetPrivateField(enemy, "level", 4);
 
         Assert.That(
-            SystemPopulationConfig
-                .IsEnemyConfigAllowedForGalaxyLevel(enemy, 4),
+            enemy.Level == 4,
             Is.True);
 
         Assert.That(
-            SystemPopulationConfig
-                .IsEnemyConfigAllowedForGalaxyLevel(enemy, 3),
+            enemy.Level == 3,
             Is.False);
 
         Assert.That(
-            SystemPopulationConfig
-                .IsEnemyConfigAllowedForGalaxyLevel(enemy, 5),
+            enemy.Level == 5,
             Is.False);
 
         Object.DestroyImmediate(enemy);

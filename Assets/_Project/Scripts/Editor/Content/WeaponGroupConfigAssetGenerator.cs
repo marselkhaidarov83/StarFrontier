@@ -9,7 +9,7 @@ using UnityEngine;
 
 public static class WeaponGroupConfigAssetGenerator
 {
-    private const string MenuRoot = "STAR FRONTIER/Content/Weapon Groups/";
+    private const string MenuRoot = "STAR FRONTIER/Content/02. Weapon Groups/";
 
     private const string DefaultCsvPath =
         "Assets/_Project/Content/Configs/WeaponGroups/STAR_FRONTIER_WeaponGroupConfig_400_assets_v1.2_mixed_ally_ranks.csv";

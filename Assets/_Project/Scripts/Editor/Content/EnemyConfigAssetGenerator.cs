@@ -20,7 +20,7 @@ public static class EnemyConfigAssetGenerator
         "Assets/_Project/Content/Configs/NpcBehaviourScenarios/Enemy"
     };
 
-    [MenuItem("STAR FRONTIER/Content/Enemy Configs/Create generated EnemyConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/05. Enemy Configs/Create generated EnemyConfig assets")]
     public static void CreateGeneratedEnemyConfigs()
     {
         EnsureFolder(OutputRoot);
@@ -32,9 +32,11 @@ public static class EnemyConfigAssetGenerator
         Dictionary<string, NpcBehaviourScenarioConfig> scenarios =
             FindScenarioConfigs();
 
-        int createdOrUpdated = 0;
+        int created = 0;
+        int updated = 0;
         int warnings = 0;
         int totalBoundWeaponGroups = 0;
+        int totalBoundScenarios = 0;
 
         foreach (WeaponGroupEnemyFaction faction in GetFactions())
         {
@@ -58,6 +60,11 @@ public static class EnemyConfigAssetGenerator
                 {
                     asset = ScriptableObject.CreateInstance<EnemyConfig>();
                     AssetDatabase.CreateAsset(asset, path);
+                    created++;
+                }
+                else
+                {
+                    updated++;
                 }
 
                 List<WeaponGroupConfig> weaponGroups =
@@ -67,28 +74,27 @@ public static class EnemyConfigAssetGenerator
                 {
                     warnings++;
                     Debug.LogWarning(
-                        $"EnemyConfig generator: no weapon groups for {faction} L{level:00}.");
-                }
-                else
-                {
-                    totalBoundWeaponGroups += weaponGroups.Count;
+                        $"EnemyConfig generator: no weapon groups for {faction} L{level:00}.",
+                        asset);
                 }
 
-                WriteEnemyConfig(
-                    asset,
-                    id,
-                    faction,
-                    level,
-                    scenarios,
-                    weaponGroups,
-                    namePools.TryGetValue(
+                EnemyNamePoolConfig namePool = null;
+                namePools.TryGetValue(faction, out namePool);
+
+                int boundScenarios =
+                    WriteEnemyConfig(
+                        asset,
+                        id,
                         faction,
-                        out EnemyNamePoolConfig namePool)
-                            ? namePool
-                            : null);
+                        level,
+                        scenarios,
+                        weaponGroups,
+                        namePool);
+
+                totalBoundScenarios += boundScenarios;
+                totalBoundWeaponGroups += weaponGroups.Count;
 
                 EditorUtility.SetDirty(asset);
-                createdOrUpdated++;
             }
         }
 
@@ -98,14 +104,16 @@ public static class EnemyConfigAssetGenerator
         EditorUtility.DisplayDialog(
             "EnemyConfig generator",
             "Done. " +
-            $"EnemyConfig assets: {createdOrUpdated}. " +
+            $"Created: {created}. " +
+            $"Updated: {updated}. " +
             $"Enemy scenario refs found: {scenarios.Count}. " +
+            $"Scenario refs bound: {totalBoundScenarios}. " +
             $"Weapon groups bound: {totalBoundWeaponGroups}. " +
             $"Warnings: {warnings}.",
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Enemy Configs/Validate generated EnemyConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/05. Enemy Configs/Validate generated EnemyConfig assets")]
     public static void ValidateGeneratedEnemyConfigs()
     {
         int errors = 0;
@@ -134,6 +142,12 @@ public static class EnemyConfigAssetGenerator
             {
                 errors++;
                 Debug.LogError($"EnemyConfig validation: empty id at {path}", config);
+            }
+
+            if (string.IsNullOrWhiteSpace(config.DisplayName))
+            {
+                errors++;
+                Debug.LogError($"EnemyConfig validation: empty displayName at {path}", config);
             }
 
             if (config.Level < 1 || config.Level > 10)
@@ -211,7 +225,7 @@ public static class EnemyConfigAssetGenerator
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Enemy Configs/Delete generated EnemyConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/05. Enemy Configs/Delete generated EnemyConfig assets")]
     public static void DeleteGeneratedEnemyConfigs()
     {
         if (!EditorUtility.DisplayDialog(
@@ -249,7 +263,7 @@ public static class EnemyConfigAssetGenerator
             "OK");
     }
 
-    private static void WriteEnemyConfig(
+    private static int WriteEnemyConfig(
         EnemyConfig asset,
         string id,
         WeaponGroupEnemyFaction faction,
@@ -264,6 +278,8 @@ public static class EnemyConfigAssetGenerator
         SerializedObject serializedObject =
             new SerializedObject(asset);
 
+        serializedObject.Update();
+
         SetString(serializedObject, "id", id);
         SetString(serializedObject, "displayName", BuildDisplayName(faction, level));
         SetString(serializedObject, "description", BuildDescription(faction, level));
@@ -277,14 +293,15 @@ public static class EnemyConfigAssetGenerator
         SetFloat(serializedObject, "baseSpeedMin", stats.SpeedMin);
         SetFloat(serializedObject, "baseSpeedMax", stats.SpeedMax);
         SetInt(serializedObject, "level", level);
-        SetEnum(serializedObject, "archetype", (int)BuildArchetype(faction));
+        SetEnum(serializedObject, "archetype", BuildArchetype(faction));
         SetObject(serializedObject, "namePool", namePool);
 
-        WriteScenarioEntries(
-            serializedObject,
-            faction,
-            level,
-            scenarios);
+        int boundScenarios =
+            WriteScenarioEntries(
+                serializedObject,
+                faction,
+                level,
+                scenarios);
 
         WriteWeaponGroups(
             serializedObject,
@@ -297,9 +314,12 @@ public static class EnemyConfigAssetGenerator
         SetInt(serializedObject, "dangerTier", stats.DangerTier);
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        asset.name = id;
+
+        return boundScenarios;
     }
 
-    private static void WriteScenarioEntries(
+    private static int WriteScenarioEntries(
         SerializedObject serializedObject,
         WeaponGroupEnemyFaction faction,
         int level,
@@ -316,6 +336,8 @@ public static class EnemyConfigAssetGenerator
 
         array.arraySize = scenarioList.Count;
 
+        int bound = 0;
+
         for (int i = 0; i < scenarioList.Count; i++)
         {
             AllyBehaviourScenario scenario =
@@ -330,6 +352,12 @@ public static class EnemyConfigAssetGenerator
             SerializedProperty behaviorConfigProperty =
                 item.FindPropertyRelative("behaviorConfig");
 
+            if (scenarioProperty == null || behaviorConfigProperty == null)
+            {
+                throw new InvalidOperationException(
+                    "NpcBehaviourScenarioEntry fields scenario/behaviorConfig were not found.");
+            }
+
             scenarioProperty.enumValueIndex =
                 Array.IndexOf(
                     Enum.GetValues(typeof(AllyBehaviourScenario)),
@@ -341,18 +369,18 @@ public static class EnemyConfigAssetGenerator
             string genericKey =
                 BuildGenericScenarioKey(scenario);
 
-            if (!scenarios.TryGetValue(
-                    exactKey,
-                    out NpcBehaviourScenarioConfig behaviorConfig))
-            {
-                scenarios.TryGetValue(
-                    genericKey,
-                    out behaviorConfig);
-            }
+            NpcBehaviourScenarioConfig behaviorConfig = null;
 
-            behaviorConfigProperty.objectReferenceValue =
-                behaviorConfig;
+            if (!scenarios.TryGetValue(exactKey, out behaviorConfig))
+                scenarios.TryGetValue(genericKey, out behaviorConfig);
+
+            behaviorConfigProperty.objectReferenceValue = behaviorConfig;
+
+            if (behaviorConfig != null)
+                bound++;
         }
+
+        return bound;
     }
 
     private static void WriteWeaponGroups(
@@ -400,13 +428,18 @@ public static class EnemyConfigAssetGenerator
             SerializedObject serializedObject =
                 new SerializedObject(asset);
 
+            serializedObject.Update();
+
             SetString(serializedObject, "id", id);
             SetString(serializedObject, "displayName", $"{BuildFactionName(faction)} - пул имён");
             SetString(serializedObject, "description", $"100 имён для врагов фракции {BuildFactionName(faction)}.");
-            SetEnum(serializedObject, "faction", (int)faction);
+            SetEnum(serializedObject, "faction", faction);
 
             SerializedProperty namesProperty =
                 serializedObject.FindProperty("names");
+
+            if (namesProperty == null || !namesProperty.isArray)
+                throw new InvalidOperationException("EnemyNamePoolConfig.names field was not found.");
 
             namesProperty.arraySize = 100;
 
@@ -421,6 +454,7 @@ public static class EnemyConfigAssetGenerator
             }
 
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            asset.name = id;
             EditorUtility.SetDirty(asset);
             result[faction] = asset;
         }
@@ -448,24 +482,16 @@ public static class EnemyConfigAssetGenerator
                 continue;
 
             string lowerPath =
-                path.ToLowerInvariant();
+                path.Replace("\\", "/").ToLowerInvariant();
 
             if (!IsEnemyScenarioPath(lowerPath))
                 continue;
 
-            if (!TryParseScenarioFromPath(
-                    lowerPath,
-                    out AllyBehaviourScenario scenario))
-            {
+            if (!TryParseScenarioFromPath(lowerPath, out AllyBehaviourScenario scenario))
                 continue;
-            }
 
-            if (TryParseFactionFromPath(
-                    lowerPath,
-                    out WeaponGroupEnemyFaction faction) &&
-                TryParseLevelFromPath(
-                    lowerPath,
-                    out int level))
+            if (TryParseFactionFromPath(lowerPath, out WeaponGroupEnemyFaction faction) &&
+                TryParseLevelFromPath(lowerPath, out int level))
             {
                 result[BuildScenarioKey(faction, level, scenario)] = config;
                 continue;
@@ -498,14 +524,8 @@ public static class EnemyConfigAssetGenerator
             if (config == null)
                 continue;
 
-            if (!IsMatchingWeaponGroup(
-                    config,
-                    path,
-                    faction,
-                    level))
-            {
+            if (!IsMatchingWeaponGroup(config, path, faction, level))
                 continue;
-            }
 
             result.Add(config);
         }
@@ -717,12 +737,8 @@ public static class EnemyConfigAssetGenerator
             string factionFolder =
                 $"{OutputRoot}/{GetFactionFolder(faction)}/";
 
-            if (normalizedPath.StartsWith(
-                    factionFolder,
-                    StringComparison.Ordinal))
-            {
+            if (normalizedPath.StartsWith(factionFolder, StringComparison.Ordinal))
                 return true;
-            }
         }
 
         return false;
@@ -772,8 +788,7 @@ public static class EnemyConfigAssetGenerator
     {
         faction = WeaponGroupEnemyFaction.AI;
 
-        if (lowerPath.Contains("/ai/") ||
-            lowerPath.Contains("_ai_"))
+        if (lowerPath.Contains("/ai/") || lowerPath.Contains("_ai_"))
         {
             faction = WeaponGroupEnemyFaction.AI;
             return true;
@@ -788,8 +803,7 @@ public static class EnemyConfigAssetGenerator
             return true;
         }
 
-        if (lowerPath.Contains("/infected/") ||
-            lowerPath.Contains("_infected_"))
+        if (lowerPath.Contains("/infected/") || lowerPath.Contains("_infected_"))
         {
             faction = WeaponGroupEnemyFaction.Infected;
             return true;
@@ -844,12 +858,8 @@ public static class EnemyConfigAssetGenerator
         if (!lowerPath.Contains("/weapongroups/enemy/"))
             return false;
 
-        if (!TryParseFactionFromPath(
-                lowerPath,
-                out WeaponGroupEnemyFaction parsedFaction))
-        {
+        if (!TryParseFactionFromPath(lowerPath, out WeaponGroupEnemyFaction parsedFaction))
             return false;
-        }
 
         if (parsedFaction != faction)
             return false;
@@ -868,8 +878,7 @@ public static class EnemyConfigAssetGenerator
         return $"{GetFactionKey(faction)}|L{level:00}|{scenario}";
     }
 
-    private static string BuildGenericScenarioKey(
-        AllyBehaviourScenario scenario)
+    private static string BuildGenericScenarioKey(AllyBehaviourScenario scenario)
     {
         return $"generic|{scenario}";
     }
@@ -958,11 +967,8 @@ public static class EnemyConfigAssetGenerator
         string folder =
             Path.GetFileName(path);
 
-        if (string.IsNullOrWhiteSpace(parent) ||
-            string.IsNullOrWhiteSpace(folder))
-        {
+        if (string.IsNullOrWhiteSpace(parent) || string.IsNullOrWhiteSpace(folder))
             throw new InvalidOperationException($"Invalid Unity folder path: {path}");
-        }
 
         EnsureFolder(parent);
         AssetDatabase.CreateFolder(parent, folder);
@@ -1013,7 +1019,7 @@ public static class EnemyConfigAssetGenerator
     private static void SetEnum(
         SerializedObject serializedObject,
         string propertyName,
-        int value)
+        Enum value)
     {
         SerializedProperty property =
             serializedObject.FindProperty(propertyName);
@@ -1021,7 +1027,16 @@ public static class EnemyConfigAssetGenerator
         if (property == null)
             throw new InvalidOperationException($"Serialized enum field not found: {propertyName}");
 
-        property.intValue = value;
+        Array enumValues =
+            Enum.GetValues(value.GetType());
+
+        int index =
+            Array.IndexOf(enumValues, value);
+
+        if (index < 0)
+            throw new InvalidOperationException($"Enum value {value} not found for {propertyName}");
+
+        property.enumValueIndex = index;
     }
 
     private static void SetObject(

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f6d0cf26d58490cb27aa5c62e550f0, type: 3}
+  m_Name: system_population_rule_military_01
+  m_EditorClassIdentifier: Data::SystemPopulationRule
+  id: system_population_rule_military_01
+  displayName: "\u041F\u043E\u043F\u0443\u043B\u044F\u0446\u0438\u044F \u0441\u0438\u0441\u0442\u0435\u043C\u044B:
+    \u0432\u043E\u0435\u043D\u043D\u044B\u0435"
+  description: "\u0412 \u0441\u0438\u0441\u0442\u0435\u043C\u0435 \u043F\u0440\u0435\u0432\u0430\u043B\u0438\u0440\u0443\u044E\u0442
+    \u0432\u043E\u0435\u043D\u043D\u044B\u0435 \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0438."
+  icon: {fileID: 0}
+  allySpawnRules:
+  - {fileID: 11400000, guid: a61a1bd8b35364996aef8e67439de709, type: 2}
+  enemyGroupSpawnRules:
+  - {fileID: 11400000, guid: 93c1621b1cc9b4600bb324c1db023873, type: 2}
+  - {fileID: 11400000, guid: bcf1c9904eefc4df4bfb784f169fe4c6, type: 2}
+  - {fileID: 11400000, guid: b3cffafcfa21a48e59df05721bc90b66, type: 2}

@@ -11,7 +11,7 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
     private const string EnemyConfigRoot =
         "Assets/_Project/Content/Configs/Enemies";
 
-    [MenuItem("STAR FRONTIER/Content/Enemy Group Spawn Rules/Create generated EnemyGroupSpawnRuleConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/07. Enemy Group Spawn Rules/Create generated EnemyGroupSpawnRuleConfig assets")]
     public static void CreateGeneratedEnemyGroupSpawnRules()
     {
         EnsureFolder(OutputRoot);
@@ -72,7 +72,7 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Enemy Group Spawn Rules/Validate generated EnemyGroupSpawnRuleConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/07. Enemy Group Spawn Rules/Validate generated EnemyGroupSpawnRuleConfig assets")]
     public static void ValidateGeneratedEnemyGroupSpawnRules()
     {
         int checkedAssets = 0;
@@ -168,7 +168,7 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Enemy Group Spawn Rules/Delete generated EnemyGroupSpawnRuleConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/07. Enemy Group Spawn Rules/Delete generated EnemyGroupSpawnRuleConfig assets")]
     public static void DeleteGeneratedEnemyGroupSpawnRules()
     {
         if (!EditorUtility.DisplayDialog(

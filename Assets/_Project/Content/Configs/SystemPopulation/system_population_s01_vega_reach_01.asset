@@ -16,4 +16,4 @@ MonoBehaviour:
   displayName: system_population_s01_vega_reach_01
   description: 
   icon: {fileID: 0}
-  levelProfiles: []
+  populationRules: []

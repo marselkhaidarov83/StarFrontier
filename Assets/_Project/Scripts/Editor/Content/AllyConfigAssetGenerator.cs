@@ -21,7 +21,7 @@ public static class AllyConfigAssetGenerator
         "Assets/_Project/Content/Configs/AllyBehaviourScenarios"
     };
 
-    [MenuItem("STAR FRONTIER/Content/Ally Configs/Create generated AllyConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/04. Ally Configs/Create generated AllyConfig assets")]
     public static void CreateGeneratedAllyConfigs()
     {
         EnsureFolder(OutputRoot);
@@ -104,7 +104,7 @@ public static class AllyConfigAssetGenerator
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Ally Configs/Validate generated AllyConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/04. Ally Configs/Validate generated AllyConfig assets")]
     public static void ValidateGeneratedAllyConfigs()
     {
         int errors = 0;
@@ -198,7 +198,7 @@ public static class AllyConfigAssetGenerator
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/Ally Configs/Delete generated AllyConfig assets")]
+    [MenuItem("STAR FRONTIER/Content/04. Ally Configs/Delete generated AllyConfig assets")]
     public static void DeleteGeneratedAllyConfigs()
     {
         if (!EditorUtility.DisplayDialog(
@@ -591,14 +591,15 @@ public static class AllyConfigAssetGenerator
                     SpeedMin = 40f
                 };
 
-            case AllyRole2A.CivilianTransport:
+            case AllyRole2A.Science:
                 return new AllyStats
                 {
-                    HullMin = 80,
-                    ShieldMin = 40,
-                    EnergyMin = 80,
-                    SpeedMin = 38f
+                    HullMin = 85,
+                    ShieldMin = 55,
+                    EnergyMin = 130,
+                    SpeedMin = 41f
                 };
+
 
             case AllyRole2A.Medic:
                 return new AllyStats
@@ -638,9 +639,10 @@ public static class AllyConfigAssetGenerator
                 prefix = "Караван";
                 break;
 
-            case AllyRole2A.CivilianTransport:
-                prefix = "Транзит";
+            case AllyRole2A.Science:
+                prefix = "Исследователь";
                 break;
+
 
             case AllyRole2A.Medic:
                 prefix = "Милосердие";
@@ -682,7 +684,7 @@ public static class AllyConfigAssetGenerator
             AllyRole2A.Ranger,
             AllyRole2A.Military,
             AllyRole2A.Trader,
-            AllyRole2A.CivilianTransport,
+            AllyRole2A.Science,
             AllyRole2A.Medic
         };
     }
@@ -782,14 +784,13 @@ public static class AllyConfigAssetGenerator
             return true;
         }
 
-        if (lowerPath.Contains("/civiliantransport/") ||
-            lowerPath.Contains("/civilian_transport/") ||
-            lowerPath.Contains("_civilian_transport_") ||
-            lowerPath.Contains("_civilian_"))
+        if (lowerPath.Contains("/science/") ||
+            lowerPath.Contains("_science_"))
         {
-            role = AllyRole2A.CivilianTransport;
+            role = AllyRole2A.Science;
             return true;
         }
+
 
         if (lowerPath.Contains("/medic/") ||
             lowerPath.Contains("_medic_") ||
@@ -888,8 +889,9 @@ public static class AllyConfigAssetGenerator
             case AllyRole2A.Trader:
                 return WeaponGroupAllyType.Trader;
 
-            case AllyRole2A.CivilianTransport:
-                return WeaponGroupAllyType.CivilianTransport;
+            case AllyRole2A.Science:
+                return WeaponGroupAllyType.Science;
+
 
             case AllyRole2A.Medic:
                 return WeaponGroupAllyType.Medic;
@@ -912,8 +914,9 @@ public static class AllyConfigAssetGenerator
             case AllyRole2A.Trader:
                 return "trader";
 
-            case AllyRole2A.CivilianTransport:
-                return "civilian_transport";
+            case AllyRole2A.Science:
+                return "science";
+
 
             case AllyRole2A.Medic:
                 return "medic";
@@ -936,8 +939,9 @@ public static class AllyConfigAssetGenerator
             case AllyRole2A.Trader:
                 return "Trader";
 
-            case AllyRole2A.CivilianTransport:
-                return "CivilianTransport";
+            case AllyRole2A.Science:
+                return "Science";
+
 
             case AllyRole2A.Medic:
                 return "Medic";
@@ -960,8 +964,9 @@ public static class AllyConfigAssetGenerator
             case AllyRole2A.Trader:
                 return "Торговец";
 
-            case AllyRole2A.CivilianTransport:
-                return "Гражданский транспорт";
+            case AllyRole2A.Science:
+                return "Научный союзник";
+
 
             case AllyRole2A.Medic:
                 return "Медик";

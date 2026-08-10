@@ -170,7 +170,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             case SystemNpcType.Pirate:
                 return GetRandomBehaviorType4Pirate(npc);
-
             default:
                 return GetRandomBehaviorType4Ally(npc);
         }
@@ -247,8 +246,11 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 allyConfig.GetBehaviorScenario(AllyBehaviourScenario.Normal);
         }
 
-        if (behaviorConfig == null)
+        if (behaviorConfig == null ||
+            behaviorConfig.BehaviorWeights == null)
+        {
             return SystemNpcBehaviorType.StayOnPlanetForDays;
+        }
 
         List<SystemNpcBehaviorWeight> weights =
             behaviorConfig.BehaviorWeights
@@ -285,7 +287,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private AllyBehaviourScenario ResolveAllyScenario(
-    SystemNpcRuntimeState npc)
+        SystemNpcRuntimeState npc)
     {
         if (npc != null &&
             HasEnemiesInSystem(npc.CurrentSystemId))
@@ -306,6 +308,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (weights == null)
             return;
 
+        //Отсекаем невозможные следующие состояния
         switch (npc.PrevBehavior)
         {
             case SystemNpcBehaviorType.AnnihilateOnPlanet:
@@ -320,6 +323,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                          x.BehaviorType == SystemNpcBehaviorType.AnnihilateOnPlanet ||
                          x.BehaviorType == SystemNpcBehaviorType.StayOnPlanetForDays);
                 break;
+
         }
     }
 
@@ -382,7 +386,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.IsOnPlanet = false;
 
         StarSystemConfig starSystem = _configService.GetStarSystemConfigById(npc.CurrentSystemId);
-        SystemPopulationConfig config = starSystem.SystemPopulation;
 
         // LogCustom("starSystem = " + npc.CurrentSystemId);
         // LogCustom("starSystem = " + starSystem.Id);
