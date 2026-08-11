@@ -15,6 +15,8 @@ public sealed class AllySystemMapEntity : MonoBehaviour
     private SimpleEventBus _eventBus;
 
     private bool _isBound;
+    private Quaternion _initialRootRotation;
+    private Quaternion _initialSpriteLocalRotation;
 
     public string RuntimeAllyId => runtimeAllyId;
     public bool IsBound => _isBound;
@@ -28,6 +30,11 @@ public sealed class AllySystemMapEntity : MonoBehaviour
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         _movementController = GetComponent<AllySystemMovementController>();
+
+        _initialRootRotation = transform.rotation;
+
+        if (spriteRenderer != null)
+            _initialSpriteLocalRotation = spriteRenderer.transform.localRotation;
     }
 
     private void OnEnable()
@@ -51,6 +58,8 @@ public sealed class AllySystemMapEntity : MonoBehaviour
         if (!_isBound)
             return;
 
+        KeepVisualRotationStable();
+
         _allyService.UpdateAllyPosition(runtimeAllyId, transform.position);
     }
 
@@ -65,6 +74,8 @@ public sealed class AllySystemMapEntity : MonoBehaviour
         runtimeAllyId = runtimeAlly.RuntimeAllyId;
         _isBound = true;
 
+        KeepVisualRotationStable();
+
         if (spriteRenderer != null)
         {
             if (runtimeAlly.AllyConfig != null)
@@ -73,6 +84,7 @@ public sealed class AllySystemMapEntity : MonoBehaviour
             spriteRenderer.sortingLayerName = sortingLayerName;
             spriteRenderer.sortingOrder = sortingOrder;
             spriteRenderer.enabled = true;
+            spriteRenderer.transform.localRotation = _initialSpriteLocalRotation;
         }
 
         if (_movementController != null)
@@ -99,6 +111,14 @@ public sealed class AllySystemMapEntity : MonoBehaviour
             return;
 
         DestroyView();
+    }
+
+    private void KeepVisualRotationStable()
+    {
+        transform.rotation = _initialRootRotation;
+
+        if (spriteRenderer != null)
+            spriteRenderer.transform.localRotation = _initialSpriteLocalRotation;
     }
 
     [ContextMenu("Debug Damage 10")]

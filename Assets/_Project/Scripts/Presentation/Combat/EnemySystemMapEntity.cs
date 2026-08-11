@@ -14,7 +14,6 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
     private SimpleEventBus _simpleEventBus;
     private ISystemEnemyService _enemyService;
     private EnemySystemMovementController _movementController;
-    private WeaponFireController _playerWeaponFireController;
 
     private bool _isBound;
 
@@ -30,7 +29,6 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         _movementController = GetComponent<EnemySystemMovementController>();
-        _playerWeaponFireController = Object.FindFirstObjectByType<WeaponFireController>();
     }
 
     private void Update()
@@ -102,17 +100,6 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
             Debug.LogWarning("[EnemySystemMapEntity] Click ignored: enemy is not bound.");
             return;
         }
-
-        if (_playerWeaponFireController == null)
-            _playerWeaponFireController = Object.FindFirstObjectByType<WeaponFireController>();
-
-        if (_playerWeaponFireController == null)
-        {
-            Debug.LogWarning("[EnemySystemMapEntity] WeaponFireController not found.");
-            return;
-        }
-
-        _playerWeaponFireController.SelectTarget(this);
     }
     public void ApplyDamage(int damage, bool fromPlayer)
     {

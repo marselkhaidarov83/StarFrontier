@@ -153,15 +153,8 @@ public static class WeaponConfigAssetGenerator
         int createdCount = 0;
         int updatedCount = 0;
         int skippedCount = 0;
-        int deletedCount = 0;
 
         var warnings = new List<string>(validationResult.Warnings);
-
-        // ВАЖНО: перед генерацией удаляем старые .asset только из целевых owner-папок.
-        // Корень Assets/_Project/Content/Configs/Weapons не очищается, чтобы случайно не удалить CSV
-        // или другие служебные файлы.
-        deletedCount =
-            DeleteAssetFilesInOwnerFolders(warnings);
 
         AssetDatabase.StartAssetEditing();
 
@@ -181,11 +174,18 @@ public static class WeaponConfigAssetGenerator
                         id,
                         warnings);
 
-                string assetPath =
+                string targetAssetPath =
                     targetFolder + "/" + id + ".asset";
 
+                string assetPath;
+
                 WeaponConfig config =
-                    AssetDatabase.LoadAssetAtPath<WeaponConfig>(assetPath);
+                    FindExistingWeaponConfigAsset(
+                        id,
+                        targetAssetPath,
+                        targetFolder,
+                        warnings,
+                        out assetPath);
 
                 bool created = false;
 
@@ -196,6 +196,26 @@ public static class WeaponConfigAssetGenerator
 
                     AssetDatabase.CreateAsset(config, assetPath);
                     created = true;
+                }
+                else if (!string.Equals(assetPath, targetAssetPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    string moveError =
+                        AssetDatabase.MoveAsset(assetPath, targetAssetPath);
+
+                    if (string.IsNullOrEmpty(moveError))
+                    {
+                        assetPath =
+                            targetAssetPath;
+                    }
+                    else
+                    {
+                        warnings.Add(
+                            RowPrefix(id) +
+                            "Existing asset was updated in place because it could not be moved to target folder. " +
+                            "From: " + assetPath +
+                            ". To: " + targetAssetPath +
+                            ". Error: " + moveError);
+                    }
                 }
 
                 SerializedObject serializedObject =
@@ -251,7 +271,6 @@ public static class WeaponConfigAssetGenerator
 
         string resultMessage =
             "WeaponConfig generation complete." +
-            "\nDeleted before generation: " + deletedCount +
             "\nCreated: " + createdCount +
             "\nUpdated: " + updatedCount +
             "\nSkipped: " + skippedCount +
@@ -270,6 +289,85 @@ public static class WeaponConfigAssetGenerator
         Debug.Log(
             "[WeaponConfigAssetGenerator] " +
             resultMessage);
+    }
+
+    private static WeaponConfig FindExistingWeaponConfigAsset(
+        string id,
+        string targetAssetPath,
+        string targetFolder,
+        List<string> warnings,
+        out string assetPath)
+    {
+        assetPath =
+            targetAssetPath;
+
+        WeaponConfig config =
+            AssetDatabase.LoadAssetAtPath<WeaponConfig>(targetAssetPath);
+
+        if (config != null)
+            return config;
+
+        string fileName =
+            id + ".asset";
+
+        for (int i = 0; i < OwnerOutputFolders.Length; i++)
+        {
+            string candidatePath =
+                OwnerOutputFolders[i] + "/" + fileName;
+
+            if (string.Equals(candidatePath, targetAssetPath, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            config =
+                AssetDatabase.LoadAssetAtPath<WeaponConfig>(candidatePath);
+
+            if (config == null)
+                continue;
+
+            assetPath =
+                candidatePath;
+
+            return config;
+        }
+
+        string[] guids =
+            AssetDatabase.FindAssets(id + " t:WeaponConfig", OwnerOutputFolders);
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string candidatePath =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            if (!IsAssetInOwnerFolder(candidatePath))
+                continue;
+
+            string candidateName =
+                Path.GetFileNameWithoutExtension(candidatePath);
+
+            if (!string.Equals(candidateName, id, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            config =
+                AssetDatabase.LoadAssetAtPath<WeaponConfig>(candidatePath);
+
+            if (config == null)
+                continue;
+
+            assetPath =
+                candidatePath;
+
+            return config;
+        }
+
+        if (!AssetDatabase.IsValidFolder(targetFolder))
+        {
+            warnings.Add(
+                RowPrefix(id) +
+                "Target folder is missing. Asset will be created at requested path after folder creation: " +
+                targetAssetPath);
+        }
+
+        return null;
     }
 
     private static List<string> ApplyRowToWeaponConfig(
@@ -1139,6 +1237,23 @@ public static class WeaponConfigAssetGenerator
         }
 
         return deletedCount;
+    }
+
+    private static bool IsAssetInOwnerFolder(string assetPath)
+    {
+        if (string.IsNullOrWhiteSpace(assetPath))
+            return false;
+
+        for (int i = 0; i < OwnerOutputFolders.Length; i++)
+        {
+            string folderPrefix =
+                OwnerOutputFolders[i] + "/";
+
+            if (assetPath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     private static string GetOutputFolderForWeaponOwner(

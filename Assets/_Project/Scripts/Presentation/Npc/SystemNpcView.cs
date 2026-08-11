@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
 {
-    private const float DirectionThresholdSqrMagnitude = 0.001f;
+    private const float DirectionThresholdSqrMagnitude = 0.0001f;
 
     [Header("View")]
     [SerializeField] private SpriteRenderer spriteRenderer;
@@ -16,13 +16,20 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
     private SimpleEventBus _simpleEventBus;
     private ISystemNpcRuntimeService _runtimeService;
     private IPlayerAttackService _playerAttackService;
-    private Vector3 _lastPosition;
-    private bool _hasLastPosition;
+
+    private Quaternion _initialRootRotation;
+    private Quaternion _initialSpriteLocalRotation;
+    private Quaternion _lastSpriteRotation;
+
+    private bool _isInitialized;
 
     public bool IsBound => !string.IsNullOrWhiteSpace(runtimeNpcId);
 
     private void Initialize()
     {
+        if (_isInitialized)
+            return;
+
         _simpleEventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _runtimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
         _playerAttackService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerAttackService>();
@@ -30,7 +37,17 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
+        _initialRootRotation = transform.rotation;
+
+        if (spriteRenderer != null)
+        {
+            _initialSpriteLocalRotation = spriteRenderer.transform.localRotation;
+            _lastSpriteRotation = _initialSpriteLocalRotation;
+        }
+
         _simpleEventBus.Subscribe<SystemNpcBehaviorChangedEvent>(OnSystemNpcBehaviorChangedEvent);
+
+        _isInitialized = true;
     }
 
     private void OnDestroy()
@@ -44,8 +61,8 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
             return;
 
         gameObject.SetActive(
-                evt.BehaviorType != SystemNpcBehaviorType.StayOnPlanetForDays &&
-                evt.BehaviorType != SystemNpcBehaviorType.AnnihilateOnPlanet);
+            evt.BehaviorType != SystemNpcBehaviorType.StayOnPlanetForDays &&
+            evt.BehaviorType != SystemNpcBehaviorType.AnnihilateOnPlanet);
     }
 
     private void Update()
@@ -58,6 +75,7 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
             Destroy(gameObject);
             return;
         }
+
         systemNpcRuntimeState = npc;
 
         if (!npc.IsAlive)
@@ -67,17 +85,9 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         }
 
         transform.position = npc.CurrentPosition;
+        transform.rotation = _initialRootRotation;
 
-        Vector3 lookDirection =
-            npc.CurrentMovementTargetPosition != Vector3.zero
-                ? npc.CurrentMovementTargetPosition - npc.CurrentPosition
-                : Vector3.zero;
-
-        if (!SetDirection(lookDirection) && _hasLastPosition)
-            SetDirection(transform.position - _lastPosition);
-
-        _lastPosition = transform.position;
-        _hasLastPosition = true;
+        ApplyTickLockedDirection(npc);
     }
 
     public void Bind(SystemNpcRuntimeState npc, Sprite sprite)
@@ -94,72 +104,68 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         npcType = npc.NpcType;
 
         transform.position = npc.CurrentPosition;
-        _lastPosition = npc.CurrentPosition;
-        _hasLastPosition = true;
+        transform.rotation = _initialRootRotation;
 
         if (spriteRenderer != null)
+        {
             spriteRenderer.sprite = sprite;
+            spriteRenderer.transform.localRotation = _lastSpriteRotation;
+        }
 
         gameObject.name = $"SystemNpcView_{npc.NpcType}_{npc.ConfigId}_{npc.RuntimeNpcId}";
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        LogCustom("");
-
         if (!IsBound)
             return;
 
         if (!_runtimeService.TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc))
             return;
 
+        if (!npc.IsAlive)
+            return;
+
         if (!npc.IsEnemy && !npc.IsPirate)
             return;
 
-        LogCustom("runtimeNpcId = " + runtimeNpcId);
         _playerAttackService.SetTarget(runtimeNpcId);
     }
 
-    private bool SetDirection(Vector3 movementDirection)
+    private void ApplyTickLockedDirection(SystemNpcRuntimeState npc)
     {
-        if (!IsFinite(movementDirection) ||
-            movementDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        if (spriteRenderer == null)
+            return;
+
+        Vector3 direction = npc.TickMovementDirection;
+        direction.z = 0f;
+
+        if (IsFinite(direction) &&
+            direction.sqrMagnitude > DirectionThresholdSqrMagnitude)
         {
-            return false;
+            float angle =
+                Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            _lastSpriteRotation =
+                Quaternion.Euler(
+                    0f,
+                    0f,
+                    angle - 90f);
         }
 
-        float angle =
-            Mathf.Atan2(
-                movementDirection.y,
-                movementDirection.x)
-            * Mathf.Rad2Deg;
-
-        if (spriteRenderer != null)
-        {
-            spriteRenderer
-                .transform
-                .localRotation =
-                    Quaternion.Euler(
-                        0f,
-                        0f,
-                        angle - 90f);
-        }
-
-        return true;
+        spriteRenderer.transform.localRotation = _lastSpriteRotation;
     }
 
     private static bool IsFinite(Vector3 value)
     {
-        return
-            IsFinite(value.x) &&
-            IsFinite(value.y) &&
-            IsFinite(value.z);
+        return IsFinite(value.x) &&
+               IsFinite(value.y) &&
+               IsFinite(value.z);
     }
 
     private static bool IsFinite(float value)
     {
-        return
-            !float.IsNaN(value) &&
-            !float.IsInfinity(value);
+        return !float.IsNaN(value) &&
+               !float.IsInfinity(value);
     }
 }

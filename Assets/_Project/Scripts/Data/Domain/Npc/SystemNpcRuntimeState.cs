@@ -36,6 +36,11 @@ public sealed class SystemNpcRuntimeState
     public Vector3 TargetPosition;
     public Vector3 CurrentMovementTargetPosition;
 
+    public Vector3 TickMovementTargetPosition;
+    public Vector3 TickMovementDirection = Vector3.up;
+    public int TickMovementDirectionTick = -1;
+    public bool TickMovementArrived;
+
     [Header("Travel")]
     public SystemNpcTravelState TravelState;
     public float TravelProgress01;
@@ -105,8 +110,8 @@ public sealed class SystemNpcRuntimeState
     }
 
     public void ApplyDamageResult(
-      int currentShield,
-      int currentHull)
+        int currentShield,
+        int currentHull)
     {
         if (!IsAlive)
             return;
@@ -135,7 +140,7 @@ public sealed class SystemNpcRuntimeState
 
     public float getShotDistance()
     {
-        float distance = 0;
+        float distance = 0f;
 
         foreach (SystemNpcWeaponRuntimeState item in Weapons)
             distance = Math.Max(distance, item.ShotDistance);

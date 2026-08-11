@@ -8,12 +8,14 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private const float SunAvoidanceSafetyMargin = 80f;
     private const int SunAvoidanceArcSegments = 18;
     private const float SunAvoidanceDestinationRefreshThreshold = 40f;
+    private const float DirectionThresholdSqrMagnitude = 0.0001f;
 
     private readonly ISystemNpcRuntimeService _runtimeService;
     private readonly ISystemNpcBehaviorService _behaviorService;
     private readonly ISystemNpcMovementRouteService _routeService;
     private readonly IConfigService _configService;
     private readonly SimpleEventBus _eventBus;
+
     private readonly List<Vector3> _sunAvoidancePath = new();
     private readonly Dictionary<string, SunAvoidanceRouteState> _sunAvoidanceRoutes = new();
 
@@ -29,7 +31,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
     public void Tick(StarSystemConfig starSystem, float deltaTime, int currentTick)
     {
-        if (string.IsNullOrWhiteSpace(starSystem.Id))
+        if (starSystem == null || string.IsNullOrWhiteSpace(starSystem.Id))
             return;
 
         if (deltaTime <= 0f)
@@ -37,16 +39,12 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         var npcs = _runtimeService.GetAliveNpcsInSystem(starSystem.Id);
 
-        // LogCustom("npcs.Count = " + npcs.Count);
         for (int i = 0; i < npcs.Count; i++)
         {
             SystemNpcRuntimeState npc = npcs[i];
 
             if (!CanMove(npc))
-            {
-                LogCustom("CanMove = false, npc.RuntimeNpcId = " + npc.RuntimeNpcId);
                 continue;
-            }
 
             TickNpcMovement(npc, deltaTime, currentTick);
         }
@@ -77,29 +75,19 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         float deltaTime,
         int currentTick)
     {
-        LogCustom("");
         if (npc.TargetPosition == Vector3.zero)
         {
             npc.StartPosition = npc.CurrentPosition;
             npc.TravelProgress01 = 0f;
         }
 
-        String linkedSystemId = "";
-        if (npc.TargetSystemId != null)
-            linkedSystemId = npc.TargetSystemId;
-        LogCustom("npc.TargetSystemLink = " + linkedSystemId +
-                " npc.TargetPlanetId = " + npc.TargetPlanetId +
-                " npc.TargetPosition = " + npc.TargetPosition +
-                " npc.CurrentTargetRuntimeNpcId = " + npc.CurrentTargetRuntimeNpcId);
-        Vector3 finalTargetPosition = _routeService.GetNextTargetPosition(npc);
-        npc.TargetPosition = finalTargetPosition;
-        Vector3 movementTargetPosition = GetSunSafeNextTargetPosition(
-            npc,
-            finalTargetPosition);
-        npc.CurrentMovementTargetPosition = movementTargetPosition;
-        // LogCustom("npc.TargetSystemLink = " + linkedSystemId +
-        //         " npc.TargetPlanetId = " + npc.TargetPlanetId +
-        //         " npc.TargetPosition = " + npc.TargetPosition);
+        EnsureTickMovementDirection(npc, currentTick);
+
+        if (npc.TickMovementArrived)
+            return;
+
+        Vector3 finalTargetPosition = npc.TargetPosition;
+        Vector3 movementTargetPosition = npc.TickMovementTargetPosition;
 
         SystemTravelMathResult result = SystemTravelMath.MoveTowards(
             npc.CurrentPosition,
@@ -107,8 +95,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             movementTargetPosition,
             npc.Speed,
             deltaTime,
-            ArrivalDistanceThreshold
-        );
+            ArrivalDistanceThreshold);
 
         npc.CurrentPosition = result.NewPosition;
         npc.TravelProgress01 = result.Progress01;
@@ -116,24 +103,53 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         _eventBus.Publish(new SystemNpcPositionChangedEvent(
             npc.RuntimeNpcId,
             npc.CurrentSystemId,
-            npc.CurrentPosition
-        ));
+            npc.CurrentPosition));
 
         if (result.Arrived &&
             Vector3.Distance(npc.CurrentPosition, finalTargetPosition) >
             ArrivalDistanceThreshold)
         {
             AdvanceSunAvoidanceRoute(npc);
+
             npc.StartPosition = npc.CurrentPosition;
             npc.TravelProgress01 = 0f;
-            npc.CurrentMovementTargetPosition = GetSunSafeNextTargetPosition(
-                npc,
-                finalTargetPosition);
+            npc.TickMovementArrived = true;
+
             return;
         }
 
         if (result.Arrived)
             CompleteMovement(npc, currentTick);
+    }
+
+    private void EnsureTickMovementDirection(
+        SystemNpcRuntimeState npc,
+        int currentTick)
+    {
+        if (npc.TickMovementDirectionTick == currentTick &&
+            npc.TickMovementTargetPosition != Vector3.zero)
+        {
+            return;
+        }
+
+        npc.TickMovementArrived = false;
+
+        Vector3 finalTargetPosition = _routeService.GetNextTargetPosition(npc);
+        npc.TargetPosition = finalTargetPosition;
+
+        Vector3 movementTargetPosition = GetSunSafeNextTargetPosition(
+            npc,
+            finalTargetPosition);
+
+        npc.CurrentMovementTargetPosition = movementTargetPosition;
+        npc.TickMovementTargetPosition = movementTargetPosition;
+        npc.TickMovementDirectionTick = currentTick;
+
+        Vector3 direction = movementTargetPosition - npc.CurrentPosition;
+        direction.z = 0f;
+
+        if (direction.sqrMagnitude > DirectionThresholdSqrMagnitude)
+            npc.TickMovementDirection = direction.normalized;
     }
 
     private Vector3 GetSunSafeNextTargetPosition(
@@ -172,8 +188,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return finalTargetPosition;
 
         while (routeState.WaypointIndex < routeState.Waypoints.Count - 1 &&
-               Vector3.Distance(npc.CurrentPosition, routeState.Waypoints[routeState.WaypointIndex]) <=
-               ArrivalDistanceThreshold)
+               Vector3.Distance(
+                   npc.CurrentPosition,
+                   routeState.Waypoints[routeState.WaypointIndex]) <= ArrivalDistanceThreshold)
         {
             routeState.WaypointIndex++;
         }
@@ -312,29 +329,24 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPosition = Vector3.zero;
         npc.CurrentMovementTargetPosition = Vector3.zero;
+        npc.TickMovementTargetPosition = Vector3.zero;
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
 
         _eventBus.Publish(new SystemNpcTravelStateChangedEvent(
             npc.RuntimeNpcId,
             npc,
             npc.TravelState,
-            npc.CurrentSystemId
-        ));
+            npc.CurrentSystemId));
 
         _behaviorService.CompleteBehavior(npc, currentTick);
 
-        LogCustom($"Movement complete. " +
-            $"NPC: {npc.RuntimeNpcId}, State: {npc.TravelState}, Behavior: {npc.CurrentBehavior}"
-        );
+        LogCustom(
+            $"Movement complete. NPC: {npc.RuntimeNpcId}, State: {npc.TravelState}, Behavior: {npc.CurrentBehavior}");
     }
 
     private void CompleteSystemTravel(SystemNpcRuntimeState npc)
     {
-        // if (!string.IsNullOrWhiteSpace(npc.TargetSystemId))
-        // {
-        //     npc.CurrentSystemId = npc.TargetSystemId;
-        //     npc.TargetSystemId = null;
-        // }
-        LogCustom("started");
         if (!string.IsNullOrWhiteSpace(npc.TargetSystemId))
         {
             npc.CurrentSystemId = npc.TargetSystemId;

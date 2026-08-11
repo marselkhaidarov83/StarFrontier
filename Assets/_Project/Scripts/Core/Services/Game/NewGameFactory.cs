@@ -2,11 +2,11 @@ using System.Collections.Generic;
 
 public class NewGameFactory
 {
-    private IConfigService _configService;
+    private readonly IConfigService _configService;
 
     public NewGameFactory()
     {
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();   
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
     }
 
     public GameRuntimeState CreateNewGame()
@@ -19,21 +19,18 @@ public class NewGameFactory
                 Bootstrapper.Instance.SectorAllOpened,
                 Bootstrapper.Instance.RouteAllUnlocked)
         };
+
         return save;
     }
 
     private PlayerState CreatePlayerProfile(NewGameConfig newGameConfig)
     {
-        var starterShip = CreateStarterShip(newGameConfig);
-
-        var profile = new PlayerState
+        return new PlayerState
         {
             Credits = newGameConfig.StartCredit,
             CurrentSystemId = newGameConfig.StartSystem.Id,
-            PlayerShipState = starterShip
+            PlayerShipState = CreateStarterShip(newGameConfig)
         };
-
-        return profile;
     }
 
     private ShipRuntimeState CreateStarterShip(NewGameConfig newGameConfig)
@@ -47,7 +44,7 @@ public class NewGameFactory
                 {
                     ShipId = "runtime_ship_001",
                     ShipConfigId = "ship_scout_01",
-                    CurrentHull = 70,
+                    CurrentHull = 1000,
                     CurrentShield = 50,
                     CurrentEnergy = 100,
                     CurrentFuel = newGameConfig.CurrentFuel,
@@ -56,8 +53,9 @@ public class NewGameFactory
                     HullCapacity = 100,
                     EquippedWeaponIds = new List<string>
                     {
-                        "weapon_common_pulse_L1_01"
-                    }
+                        "weapon_common_pulse_bronze_L01_01"
+                    },
+                    EquippedModuleIds = new List<string>()
                 },
                 new ShipRuntimeData
                 {
@@ -72,7 +70,7 @@ public class NewGameFactory
                     HullCapacity = 110,
                     EquippedWeaponIds = new List<string>
                     {
-                        "weapon_laser_pulse_01"
+                        "weapon_common_laser_bronze_L01_01"
                     },
                     EquippedModuleIds = new List<string>()
                 },
@@ -89,7 +87,7 @@ public class NewGameFactory
                     HullCapacity = 120,
                     EquippedWeaponIds = new List<string>
                     {
-                        "weapon_missile_light_01"
+                        "weapon_common_missile_bronze_L01_01"
                     },
                     EquippedModuleIds = new List<string>()
                 }

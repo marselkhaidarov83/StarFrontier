@@ -27,8 +27,8 @@ MonoBehaviour:
   cargoSize: 8
   baseDamageMin: 35
   baseDamageMax: 43
-  rangeMin: 8.34
-  rangeMax: 9.21
+  rangeMin: 210.6
+  rangeMax: 234.24
   energyCostMin: 5
   energyCostMax: 7
   projectileLifetimeMin: 2

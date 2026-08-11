@@ -29,4 +29,4 @@ MonoBehaviour:
   - {x: 596.6021, y: 821.1523, z: 0}
   - {x: -596.602, y: 821.1523, z: 0}
   - {x: -965.3224, y: -313.65222, z: 0}
-  enemyRandomRadius: 70
+  enemyRandomRadius: 150
