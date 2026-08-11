@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -25,6 +26,7 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
             BuildProfiles();
 
         int created = 0;
+        int updated = 0;
         int warnings = 0;
         int boundEnemies = 0;
         int errors = 0;
@@ -40,11 +42,43 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
             string path =
                 $"{OutputRoot}/{id}.asset";
 
-            if (AssetDatabase.LoadAssetAtPath<EnemyGroupSpawnRuleConfig>(path) != null)
-                AssetDatabase.DeleteAsset(path);
-
             EnemyGroupSpawnRuleConfig asset =
-                ScriptableObject.CreateInstance<EnemyGroupSpawnRuleConfig>();
+                FindExistingSpawnRule(
+                    id,
+                    path);
+
+            if (asset == null)
+            {
+                asset =
+                    ScriptableObject.CreateInstance<EnemyGroupSpawnRuleConfig>();
+
+                AssetDatabase.CreateAsset(asset, path);
+                created++;
+            }
+            else
+            {
+                string currentPath =
+                    AssetDatabase.GetAssetPath(asset);
+
+                if (!string.Equals(
+                        currentPath,
+                        path,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    string moveError =
+                        AssetDatabase.MoveAsset(
+                            currentPath,
+                            path);
+
+                    if (!string.IsNullOrWhiteSpace(moveError))
+                    {
+                        throw new InvalidOperationException(
+                            $"EnemyGroupSpawnRule generator: failed to move existing asset {id}: {moveError}");
+                    }
+                }
+
+                updated++;
+            }
 
             int profileWarnings;
             int profileBoundEnemies;
@@ -60,14 +94,12 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
             warnings += profileWarnings;
             boundEnemies += profileBoundEnemies;
 
-            AssetDatabase.CreateAsset(asset, path);
             EditorUtility.SetDirty(asset);
             AssetDatabase.SaveAssetIfDirty(asset);
 
             if (!ValidateRuleInMemory(asset, path))
                 errors++;
 
-            created++;
         }
 
         AssetDatabase.SaveAssets();
@@ -76,7 +108,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
         EditorUtility.DisplayDialog(
             "EnemyGroupSpawnRuleConfig generator",
             "Done. " +
-            $"Spawn rules: {created}. " +
+            $"Created: {created}. " +
+            $"Updated: {updated}. " +
             $"Bound enemy entries: {boundEnemies}. " +
             $"Warnings: {warnings}. " +
             $"Errors: {errors}.",
@@ -176,44 +209,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
         for (int level = 1; level <= 10; level++)
         {
-            EnemyGroupEntryConfig[] enemies =
-                new EnemyGroupEntryConfig[3];
-
-            EnemyFaction2A[] factions =
-                GetFactions();
-
-            for (int i = 0; i < factions.Length; i++)
-            {
-                EnemyFaction2A faction =
-                    factions[i];
-
-                EnemyConfig enemyConfig =
-                    FindEnemyConfig(
-                        enemiesByFactionAndLevel,
-                        faction,
-                        level);
-
-                if (enemyConfig == null)
-                {
-                    warnings++;
-                    Debug.LogWarning(
-                        $"EnemyGroupSpawnRule generator: missing EnemyConfig for {faction} L{level:00}.");
-                }
-                else
-                {
-                    boundEnemies++;
-                }
-
-                EnemyGroupEntryConfig enemyEntry =
-                    new EnemyGroupEntryConfig();
-
-                SetPrivateField(enemyEntry, "enemyConfig", enemyConfig);
-                SetPrivateField(enemyEntry, "minCount", BuildMinTotal(level));
-                SetPrivateField(enemyEntry, "maxCount", BuildMaxTotal(level));
-                SetPrivateField(enemyEntry, "weight", BuildEntryWeight(profile, faction));
-
-                enemies[i] = enemyEntry;
-            }
+            int[] enemyLevels =
+                GetEnemyLevelsForGalaxyLevel(level);
 
             EnemyGroupSpawnLevelEntryConfig levelEntry =
                 new EnemyGroupSpawnLevelEntryConfig();
@@ -221,7 +218,16 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
             SetPrivateField(levelEntry, "galaxyLevel", level);
             SetPrivateField(levelEntry, "spawnIntervalSeconds", BuildSpawnIntervalSeconds(level));
             SetPrivateField(levelEntry, "maxAliveGroupsFromThisRule", 1);
-            SetPrivateField(levelEntry, "enemies", enemies);
+            SetPrivateField(
+                levelEntry,
+                "enemyGroups",
+                BuildEnemyGroups(
+                    profile,
+                    level,
+                    enemyLevels,
+                    enemiesByFactionAndLevel,
+                    ref warnings,
+                    ref boundEnemies));
 
             levelEntries[level - 1] = levelEntry;
         }
@@ -272,85 +278,51 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
                 continue;
             }
 
-            IReadOnlyList<EnemyGroupEntryConfig> enemies =
-                levelEntry.Enemies;
-
-            if (enemies == null || enemies.Count != 3)
-            {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: level {level} must contain exactly 3 enemy entries, actual {enemies?.Count ?? 0} at {path}",
-                    rule);
+            if (!ValidateEnemyGroups(rule, levelEntry, level, path))
                 isValid = false;
-                continue;
-            }
 
-            HashSet<EnemyFaction2A> factions =
-                new HashSet<EnemyFaction2A>();
-
-            for (int i = 0; i < enemies.Count; i++)
-            {
-                EnemyGroupEntryConfig entry =
-                    enemies[i];
-
-                if (entry == null || entry.EnemyConfig == null)
-                {
-                    Debug.LogError(
-                        $"EnemyGroupSpawnRule validation: empty enemy entry at level {level}, index {i}, path: {path}",
-                        rule);
-                    isValid = false;
-                    continue;
-                }
-
-                if (entry.EnemyConfig.Level != level)
-                {
-                    Debug.LogError(
-                        $"EnemyGroupSpawnRule validation: level mismatch at {path}. Rule L{level:00}, enemy {entry.EnemyConfig.Id}, enemy L{entry.EnemyConfig.Level:00}.",
-                        rule);
-                    isValid = false;
-                }
-
-                if (TryResolveFaction(entry.EnemyConfig, out EnemyFaction2A faction))
-                    factions.Add(faction);
-
-                if (entry.MinCount != BuildMinTotal(level) ||
-                    entry.MaxCount != BuildMaxTotal(level))
-                {
-                    Debug.LogError(
-                        $"EnemyGroupSpawnRule validation: wrong count at {path}, L{level:00}. Expected {BuildMinTotal(level)}-{BuildMaxTotal(level)}, actual {entry.MinCount}-{entry.MaxCount}.",
-                        rule);
-                    isValid = false;
-                }
-            }
-
-            if (!ContainsAllFactions(factions))
-            {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: level {level} must contain AI, Ancients and Infected at {path}",
-                    rule);
-                isValid = false;
-            }
-
-            int maxCount =
-                levelEntry.GetMaxEnemyCount();
-
-            if (level == 1 && (maxCount < 2 || maxCount > 4))
-            {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: L01 max count must be 2-4, actual {maxCount} at {path}",
-                    rule);
-                isValid = false;
-            }
-
-            if (level == 10 && maxCount != 20)
-            {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: L10 max count must be 20, actual {maxCount} at {path}",
-                    rule);
-                isValid = false;
-            }
         }
 
         return isValid;
+    }
+
+    private static EnemyGroupSpawnRuleConfig FindExistingSpawnRule(
+        string id,
+        string path)
+    {
+        EnemyGroupSpawnRuleConfig asset =
+            AssetDatabase.LoadAssetAtPath<EnemyGroupSpawnRuleConfig>(path);
+
+        if (asset != null)
+            return asset;
+
+        string[] guids =
+            AssetDatabase.FindAssets("t:EnemyGroupSpawnRuleConfig", new[] { OutputRoot });
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string candidatePath =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            if (string.IsNullOrWhiteSpace(candidatePath))
+                continue;
+
+            EnemyGroupSpawnRuleConfig candidate =
+                AssetDatabase.LoadAssetAtPath<EnemyGroupSpawnRuleConfig>(candidatePath);
+
+            if (candidate == null)
+                continue;
+
+            if (string.Equals(
+                    candidate.Id,
+                    id,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     private static Dictionary<EnemyKey, EnemyConfig> LoadEnemiesByFactionAndLevel()
@@ -522,6 +494,332 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
         return true;
     }
 
+    private static Array BuildEnemyGroups(
+        SpawnRuleProfile profile,
+        int galaxyLevel,
+        int[] enemyLevels,
+        Dictionary<EnemyKey, EnemyConfig> enemiesByFactionAndLevel,
+        ref int warnings,
+        ref int boundEnemies)
+    {
+        Type groupType =
+            FindType("EnemyGroupSpawnOptionConfig") ??
+            FindType("EnemyGroupSpawnGroupConfig");
+
+        if (groupType == null)
+            return null;
+
+        EnemyFaction2A[] factions =
+            GetFactions();
+
+        Array groups =
+            Array.CreateInstance(groupType, factions.Length);
+
+        for (int factionIndex = 0; factionIndex < factions.Length; factionIndex++)
+        {
+            EnemyFaction2A faction =
+                factions[factionIndex];
+
+            object group =
+                Activator.CreateInstance(groupType);
+
+            TrySetPrivateField(group, "faction", faction);
+            TrySetPrivateField(group, "weight", BuildEntryWeight(profile, faction));
+            TrySetPrivateField(
+                group,
+                "enemies",
+                BuildEnemyGroupMembers(
+                    faction,
+                    galaxyLevel,
+                    enemyLevels,
+                    enemiesByFactionAndLevel,
+                    ref warnings,
+                    ref boundEnemies));
+
+            groups.SetValue(group, factionIndex);
+        }
+
+        return groups;
+    }
+
+    private static EnemyGroupEntryConfig[] BuildEnemyGroupMembers(
+        EnemyFaction2A faction,
+        int galaxyLevel,
+        int[] enemyLevels,
+        Dictionary<EnemyKey, EnemyConfig> enemiesByFactionAndLevel,
+        ref int warnings,
+        ref int boundEnemies)
+    {
+        EnemyGroupEntryConfig[] enemies =
+            new EnemyGroupEntryConfig[enemyLevels.Length];
+
+        int totalMinCount =
+            BuildMinTotal(galaxyLevel);
+
+        int totalMaxCount =
+            BuildMaxTotal(galaxyLevel);
+
+        for (int enemyLevelIndex = 0; enemyLevelIndex < enemyLevels.Length; enemyLevelIndex++)
+        {
+            int enemyLevel =
+                enemyLevels[enemyLevelIndex];
+
+            EnemyConfig enemyConfig =
+                FindEnemyConfig(
+                    enemiesByFactionAndLevel,
+                    faction,
+                    enemyLevel);
+
+            if (enemyConfig == null)
+            {
+                warnings++;
+                Debug.LogWarning(
+                    $"EnemyGroupSpawnRule generator: missing grouped EnemyConfig for {faction} L{enemyLevel:00} in galaxy L{galaxyLevel:00}.");
+            }
+            else
+            {
+                boundEnemies++;
+            }
+
+            EnemyGroupEntryConfig enemyEntry =
+                new EnemyGroupEntryConfig();
+
+            SetPrivateField(enemyEntry, "enemyConfig", enemyConfig);
+            SetPrivateField(
+                enemyEntry,
+                "minCount",
+                BuildDistributedCount(
+                    totalMinCount,
+                    enemyLevelIndex,
+                    enemyLevels.Length));
+            SetPrivateField(
+                enemyEntry,
+                "maxCount",
+                BuildDistributedCount(
+                    totalMaxCount,
+                    enemyLevelIndex,
+                    enemyLevels.Length));
+            TrySetPrivateField(enemyEntry, "weight", 1);
+
+            enemies[enemyLevelIndex] = enemyEntry;
+        }
+
+        return enemies;
+    }
+
+    private static bool ValidateEnemyGroups(
+        EnemyGroupSpawnRuleConfig rule,
+        EnemyGroupSpawnLevelEntryConfig levelEntry,
+        int galaxyLevel,
+        string path)
+    {
+        object groupsValue =
+            GetMemberValue(levelEntry, "EnemyGroups") ??
+            GetMemberValue(levelEntry, "enemyGroups");
+
+        IReadOnlyList<object> groups =
+            ConvertToObjectList(groupsValue);
+
+        if (groups == null || groups.Count == 0)
+        {
+            Debug.LogError(
+                $"EnemyGroupSpawnRule validation: level {galaxyLevel} must contain enemy groups at {path}",
+                rule);
+            return false;
+        }
+
+        if (groups.Count != GetFactions().Length)
+        {
+            Debug.LogError(
+                $"EnemyGroupSpawnRule validation: level {galaxyLevel} must contain exactly {GetFactions().Length} enemy groups at {path}",
+                rule);
+            return false;
+        }
+
+        bool isValid =
+            true;
+
+        HashSet<EnemyFaction2A> factions =
+            new HashSet<EnemyFaction2A>();
+
+        for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++)
+        {
+            object group =
+                groups[groupIndex];
+
+            if (group == null)
+            {
+                Debug.LogError(
+                    $"EnemyGroupSpawnRule validation: empty enemy group at level {galaxyLevel}, index {groupIndex}, path: {path}",
+                    rule);
+                isValid = false;
+                continue;
+            }
+
+            EnemyFaction2A faction =
+                ResolveEnemyGroupFaction(group);
+
+            factions.Add(faction);
+
+            object enemiesValue =
+                GetMemberValue(group, "Enemies") ??
+                GetMemberValue(group, "enemies");
+
+            IReadOnlyList<EnemyGroupEntryConfig> enemies =
+                ConvertToEnemyEntryList(enemiesValue);
+
+            int[] expectedLevels =
+                GetEnemyLevelsForGalaxyLevel(galaxyLevel);
+
+            if (enemies == null || enemies.Count != expectedLevels.Length)
+            {
+                Debug.LogError(
+                    $"EnemyGroupSpawnRule validation: group {groupIndex} at level {galaxyLevel} must contain enemy levels {DescribeEnemyLevelsForGalaxyLevel(galaxyLevel)} at {path}",
+                    rule);
+                isValid = false;
+                continue;
+            }
+
+            int totalMinCount =
+                0;
+
+            int totalMaxCount =
+                0;
+
+            HashSet<int> enemyLevels =
+                new HashSet<int>();
+
+            for (int enemyIndex = 0; enemyIndex < enemies.Count; enemyIndex++)
+            {
+                EnemyGroupEntryConfig entry =
+                    enemies[enemyIndex];
+
+                if (entry == null || entry.EnemyConfig == null)
+                {
+                    Debug.LogError(
+                        $"EnemyGroupSpawnRule validation: empty grouped enemy entry at level {galaxyLevel}, group {groupIndex}, index {enemyIndex}, path: {path}",
+                        rule);
+                    isValid = false;
+                    continue;
+                }
+
+                enemyLevels.Add(entry.EnemyConfig.Level);
+
+                if (!TryResolveFaction(entry.EnemyConfig, out EnemyFaction2A entryFaction) ||
+                    entryFaction != faction)
+                {
+                    Debug.LogError(
+                        $"EnemyGroupSpawnRule validation: grouped enemy faction mismatch at {path}. Group faction {faction}, enemy {entry.EnemyConfig.Id}.",
+                        rule);
+                    isValid = false;
+                }
+
+                totalMinCount += entry.MinCount;
+                totalMaxCount += entry.MaxCount;
+            }
+
+            if (!ContainsExpectedEnemyLevels(enemyLevels, galaxyLevel))
+            {
+                Debug.LogError(
+                    $"EnemyGroupSpawnRule validation: grouped level {galaxyLevel}, group {groupIndex} must contain enemy levels {DescribeEnemyLevelsForGalaxyLevel(galaxyLevel)} at {path}",
+                    rule);
+                isValid = false;
+            }
+
+            if (totalMinCount != BuildMinTotal(galaxyLevel) ||
+                totalMaxCount != BuildMaxTotal(galaxyLevel))
+            {
+                Debug.LogError(
+                    $"EnemyGroupSpawnRule validation: grouped total count mismatch at {path}, L{galaxyLevel:00}, group {groupIndex}. Expected total {BuildMinTotal(galaxyLevel)}-{BuildMaxTotal(galaxyLevel)}, actual total {totalMinCount}-{totalMaxCount}.",
+                    rule);
+                isValid = false;
+            }
+        }
+
+        if (!ContainsAllFactions(factions))
+        {
+            Debug.LogError(
+                $"EnemyGroupSpawnRule validation: grouped level {galaxyLevel} must contain AI, Ancients and Infected groups at {path}",
+                rule);
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private static int[] GetEnemyLevelsForGalaxyLevel(
+        int galaxyLevel)
+    {
+        int clampedGalaxyLevel =
+            Mathf.Clamp(galaxyLevel, 1, 10);
+
+        List<int> levels =
+            new List<int>();
+
+        for (int offset = 0; offset <= 2; offset++)
+        {
+            int enemyLevel =
+                clampedGalaxyLevel - offset;
+
+            if (enemyLevel < 1)
+                continue;
+
+            levels.Add(enemyLevel);
+        }
+
+        return levels.ToArray();
+    }
+
+    private static bool IsAllowedEnemyLevelForGalaxyLevel(
+        int enemyLevel,
+        int galaxyLevel)
+    {
+        int[] expectedLevels =
+            GetEnemyLevelsForGalaxyLevel(galaxyLevel);
+
+        for (int i = 0; i < expectedLevels.Length; i++)
+        {
+            if (expectedLevels[i] == enemyLevel)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool ContainsExpectedEnemyLevels(
+        HashSet<int> actualLevels,
+        int galaxyLevel)
+    {
+        if (actualLevels == null)
+            return false;
+
+        int[] expectedLevels =
+            GetEnemyLevelsForGalaxyLevel(galaxyLevel);
+
+        for (int i = 0; i < expectedLevels.Length; i++)
+        {
+            if (!actualLevels.Contains(expectedLevels[i]))
+                return false;
+        }
+
+        return actualLevels.Count == expectedLevels.Length;
+    }
+
+    private static string DescribeEnemyLevelsForGalaxyLevel(
+        int galaxyLevel)
+    {
+        int[] expectedLevels =
+            GetEnemyLevelsForGalaxyLevel(galaxyLevel);
+
+        List<string> labels =
+            new List<string>();
+
+        for (int i = 0; i < expectedLevels.Length; i++)
+            labels.Add($"L{expectedLevels[i]:00}");
+
+        return string.Join(", ", labels);
+    }
+
     private static int BuildMinTotal(int level)
     {
         int allyMin =
@@ -542,6 +840,23 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
         return Mathf.Max(
             2,
             Mathf.RoundToInt(allyMax * 2f / 3f));
+    }
+
+    private static int BuildDistributedCount(
+        int totalCount,
+        int entryIndex,
+        int entryCount)
+    {
+        if (entryCount <= 0)
+            return 0;
+
+        int baseCount =
+            totalCount / entryCount;
+
+        int remainder =
+            totalCount % entryCount;
+
+        return baseCount + (entryIndex < remainder ? 1 : 0);
     }
 
     private static float BuildSpawnIntervalSeconds(int level)
@@ -661,6 +976,203 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
         throw new InvalidOperationException(
             $"Serialized field not found: {fieldName} on {target.GetType().Name}");
+    }
+
+    private static bool TrySetPrivateField(
+        object target,
+        string fieldName,
+        object value)
+    {
+        if (target == null)
+            return false;
+
+        FieldInfo field =
+            FindField(
+                target.GetType(),
+                fieldName);
+
+        if (field == null)
+            return false;
+
+        field.SetValue(target, value);
+        return true;
+    }
+
+    private static FieldInfo FindField(
+        Type type,
+        string fieldName)
+    {
+        while (type != null)
+        {
+            FieldInfo field =
+                type.GetField(
+                    fieldName,
+                    BindingFlags.Instance |
+                    BindingFlags.NonPublic |
+                    BindingFlags.Public);
+
+            if (field != null)
+                return field;
+
+            type = type.BaseType;
+        }
+
+        return null;
+    }
+
+    private static Type FindType(
+        string typeName)
+    {
+        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            Type type =
+                assembly.GetType(typeName);
+
+            if (type != null)
+                return type;
+
+            Type[] types;
+
+            try
+            {
+                types =
+                    assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                types =
+                    ex.Types;
+            }
+
+            for (int i = 0; i < types.Length; i++)
+            {
+                type =
+                    types[i];
+
+                if (type != null &&
+                    type.Name == typeName)
+                {
+                    return type;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static object GetMemberValue(
+        object target,
+        string memberName)
+    {
+        if (target == null)
+            return null;
+
+        Type type =
+            target.GetType();
+
+        FieldInfo field =
+            FindField(type, memberName);
+
+        if (field != null)
+            return field.GetValue(target);
+
+        while (type != null)
+        {
+            PropertyInfo property =
+                type.GetProperty(
+                    memberName,
+                    BindingFlags.Instance |
+                    BindingFlags.NonPublic |
+                    BindingFlags.Public);
+
+            if (property != null)
+                return property.GetValue(target);
+
+            type = type.BaseType;
+        }
+
+        return null;
+    }
+
+    private static IReadOnlyList<object> ConvertToObjectList(
+        object value)
+    {
+        if (value == null)
+            return null;
+
+        List<object> result =
+            new List<object>();
+
+        if (value is IEnumerable enumerable)
+        {
+            foreach (object item in enumerable)
+                result.Add(item);
+
+            return result;
+        }
+
+        return null;
+    }
+
+    private static IReadOnlyList<EnemyGroupEntryConfig> ConvertToEnemyEntryList(
+        object value)
+    {
+        if (value == null)
+            return null;
+
+        if (value is IReadOnlyList<EnemyGroupEntryConfig> readOnlyList)
+            return readOnlyList;
+
+        if (value is IEnumerable enumerable)
+        {
+            List<EnemyGroupEntryConfig> result =
+                new List<EnemyGroupEntryConfig>();
+
+            foreach (object item in enumerable)
+            {
+                if (item is EnemyGroupEntryConfig entry)
+                    result.Add(entry);
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
+    private static EnemyFaction2A ResolveEnemyGroupFaction(
+        object group)
+    {
+        object value =
+            GetMemberValue(group, "Faction") ??
+            GetMemberValue(group, "faction");
+
+        if (value is EnemyFaction2A faction)
+            return faction;
+
+        object enemiesValue =
+            GetMemberValue(group, "Enemies") ??
+            GetMemberValue(group, "enemies");
+
+        IReadOnlyList<EnemyGroupEntryConfig> enemies =
+            ConvertToEnemyEntryList(enemiesValue);
+
+        if (enemies != null)
+        {
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                EnemyGroupEntryConfig entry =
+                    enemies[i];
+
+                if (entry != null &&
+                    TryResolveFaction(entry.EnemyConfig, out faction))
+                {
+                    return faction;
+                }
+            }
+        }
+
+        return EnemyFaction2A.AI;
     }
 
     private sealed class SpawnRuleProfile

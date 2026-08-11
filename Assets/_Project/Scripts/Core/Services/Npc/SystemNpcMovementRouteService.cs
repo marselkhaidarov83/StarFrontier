@@ -4,6 +4,8 @@ using Vector3 = UnityEngine.Vector3;
 
 public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMovementRouteService
 {
+    private const float InvalidRoutePointSqrMagnitude = 0.001f;
+
     private readonly IConfigService _configService;
     private readonly IOrbitalMotionService _orbitalMotionService;
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
@@ -52,18 +54,32 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
                       npc.TargetSystemId + ", " +
                       npc.TargetSystemExitPoint);
 
-            return npc.TargetSystemExitPoint;
+            if (!IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetSystemExitPoint))
+                return npc.TargetSystemExitPoint;
+
+            npc.TargetSystemId = null;
+            npc.TargetSystemExitPoint = Vector3.zero;
+            npc.TargetSystemEntryPoint = Vector3.zero;
         }
 
         if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId))
         {
             Vector3 planetPosition = GetPlanetPosition(npc.TargetPlanetId);
             LogCustom("Ally target planet = " + npc.TargetPlanetId + ", " + planetPosition);
-            return planetPosition;
+
+            if (!IsInvalidRoutePoint(planetPosition))
+                return planetPosition;
+
+            npc.TargetPlanetId = null;
         }
 
-        if (npc.TargetPosition != Vector3.zero)
+        if (npc.TargetPosition != Vector3.zero &&
+            !IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetPosition))
+        {
             return npc.TargetPosition;
+        }
+
+        npc.TargetPosition = Vector3.zero;
 
         return GetRandomFallbackPosition(npc);
     }
@@ -79,18 +95,32 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
                       npc.TargetSystemId + ", " +
                       npc.TargetSystemExitPoint);
 
-            return npc.TargetSystemExitPoint;
+            if (!IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetSystemExitPoint))
+                return npc.TargetSystemExitPoint;
+
+            npc.TargetSystemId = null;
+            npc.TargetSystemExitPoint = Vector3.zero;
+            npc.TargetSystemEntryPoint = Vector3.zero;
         }
 
         if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId))
         {
             Vector3 planetPosition = GetPlanetPosition(npc.TargetPlanetId);
             LogCustom("Ally target planet = " + npc.TargetPlanetId + ", " + planetPosition);
-            return planetPosition;
+
+            if (!IsInvalidRoutePoint(planetPosition))
+                return planetPosition;
+
+            npc.TargetPlanetId = null;
         }
 
-        if (npc.TargetPosition != Vector3.zero)
+        if (npc.TargetPosition != Vector3.zero &&
+            !IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetPosition))
+        {
             return npc.TargetPosition;
+        }
+
+        npc.TargetPosition = Vector3.zero;
 
         return GetRandomFallbackPosition(npc);
     }
@@ -286,5 +316,50 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
     {
         Vector2 random = Random.insideUnitCircle * 5f;
         return npc.CurrentPosition + new Vector3(random.x, random.y, -2f);
+    }
+
+    private bool IsInvalidRoutePoint(Vector3 point)
+    {
+        if (!IsFinite(point))
+            return true;
+
+        return point.sqrMagnitude <= InvalidRoutePointSqrMagnitude;
+    }
+
+    private bool IsInvalidSystemPoint(string systemId, Vector3 point)
+    {
+        if (IsInvalidRoutePoint(point))
+            return true;
+
+        StarSystemConfig starSystem =
+            _configService.GetStarSystemConfigById(systemId);
+
+        if (starSystem == null || starSystem.Sun == null)
+            return false;
+
+        SunConfig sun = starSystem.Sun;
+
+        Vector3 sunCenter = new Vector3(
+            sun.LocalOffset.x,
+            sun.LocalOffset.y,
+            point.z);
+
+        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float safeRadius = sunRadius + KeepDistanceRadius;
+
+        return Vector3.Distance(point, sunCenter) <= safeRadius;
+    }
+
+    private static bool IsFinite(Vector3 value)
+    {
+        return IsFinite(value.x) &&
+               IsFinite(value.y) &&
+               IsFinite(value.z);
+    }
+
+    private static bool IsFinite(float value)
+    {
+        return !float.IsNaN(value) &&
+               !float.IsInfinity(value);
     }
 }

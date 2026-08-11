@@ -890,7 +890,7 @@ MonoBehaviour:
   overrideAutomaticAllySpawnInterval: 1
   debugAutomaticAllySpawnIntervalSeconds: 5
   overrideNpcGalaxyLevel: 1
-  debugNpcGalaxyLevel: 10
+  debugNpcGalaxyLevel: 1
 --- !u!4 &860668904
 Transform:
   m_ObjectHideFlags: 0

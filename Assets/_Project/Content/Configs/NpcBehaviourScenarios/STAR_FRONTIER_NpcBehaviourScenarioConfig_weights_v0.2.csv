@@ -49,10 +49,11 @@ ally_behaviour_military_L10_normal,2,Ally,Military,10,Normal,PlanetToPlanetTrave
 ally_behaviour_military_L10_normal,3,Ally,Military,10,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L10_enemy_invasion,1,Ally,Military,10,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L10_enemy_system_invasion,1,Ally,Military,10,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L01_normal,1,Ally,Ranger,1,Normal,CollectDebris,None,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L01_normal,2,Ally,Ranger,1,Normal,AttackMeteorite,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L01_normal,3,Ally,Ranger,1,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L01_normal,4,Ally,Ranger,1,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L01_normal,1,Ally,Ranger,1,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L01_normal,2,Ally,Ranger,1,Normal,CollectDebris,None,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L01_normal,3,Ally,Ranger,1,Normal,AttackMeteorite,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L01_normal,4,Ally,Ranger,1,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L01_normal,5,Ally,Ranger,1,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_invasion,1,Ally,Ranger,1,EnemyInvasion,EngageEnemies,None,Enemy,Any,55,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_invasion,2,Ally,Ranger,1,EnemyInvasion,PlanetToPlanetTravel,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_invasion,3,Ally,Ranger,1,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -60,10 +61,11 @@ ally_behaviour_ranger_L01_enemy_invasion,4,Ally,Ranger,1,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L01_enemy_system_invasion,1,Ally,Ranger,1,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,65,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_system_invasion,2,Ally,Ranger,1,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_system_invasion,3,Ally,Ranger,1,EnemySystemInvasion,CollectDebris,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L02_normal,1,Ally,Ranger,2,Normal,CollectDebris,None,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L02_normal,2,Ally,Ranger,2,Normal,AttackMeteorite,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L02_normal,3,Ally,Ranger,2,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L02_normal,4,Ally,Ranger,2,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L02_normal,1,Ally,Ranger,2,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L02_normal,2,Ally,Ranger,2,Normal,CollectDebris,None,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L02_normal,3,Ally,Ranger,2,Normal,AttackMeteorite,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L02_normal,4,Ally,Ranger,2,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L02_normal,5,Ally,Ranger,2,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_invasion,1,Ally,Ranger,2,EnemyInvasion,EngageEnemies,None,Enemy,Any,55,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_invasion,2,Ally,Ranger,2,EnemyInvasion,PlanetToPlanetTravel,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_invasion,3,Ally,Ranger,2,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -71,10 +73,11 @@ ally_behaviour_ranger_L02_enemy_invasion,4,Ally,Ranger,2,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L02_enemy_system_invasion,1,Ally,Ranger,2,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,65,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_system_invasion,2,Ally,Ranger,2,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_system_invasion,3,Ally,Ranger,2,EnemySystemInvasion,CollectDebris,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L03_normal,1,Ally,Ranger,3,Normal,CollectDebris,None,None,None,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L03_normal,2,Ally,Ranger,3,Normal,AttackMeteorite,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L03_normal,3,Ally,Ranger,3,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L03_normal,4,Ally,Ranger,3,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L03_normal,1,Ally,Ranger,3,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L03_normal,2,Ally,Ranger,3,Normal,CollectDebris,None,None,None,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L03_normal,3,Ally,Ranger,3,Normal,AttackMeteorite,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L03_normal,4,Ally,Ranger,3,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L03_normal,5,Ally,Ranger,3,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_invasion,1,Ally,Ranger,3,EnemyInvasion,EngageEnemies,None,Enemy,Any,56,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_invasion,2,Ally,Ranger,3,EnemyInvasion,PlanetToPlanetTravel,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_invasion,3,Ally,Ranger,3,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -82,10 +85,11 @@ ally_behaviour_ranger_L03_enemy_invasion,4,Ally,Ranger,3,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L03_enemy_system_invasion,1,Ally,Ranger,3,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,66,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_system_invasion,2,Ally,Ranger,3,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_system_invasion,3,Ally,Ranger,3,EnemySystemInvasion,CollectDebris,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L04_normal,1,Ally,Ranger,4,Normal,CollectDebris,None,None,None,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L04_normal,2,Ally,Ranger,4,Normal,AttackMeteorite,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L04_normal,3,Ally,Ranger,4,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L04_normal,4,Ally,Ranger,4,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L04_normal,1,Ally,Ranger,4,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L04_normal,2,Ally,Ranger,4,Normal,CollectDebris,None,None,None,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L04_normal,3,Ally,Ranger,4,Normal,AttackMeteorite,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L04_normal,4,Ally,Ranger,4,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L04_normal,5,Ally,Ranger,4,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_invasion,1,Ally,Ranger,4,EnemyInvasion,EngageEnemies,None,Enemy,Any,56,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_invasion,2,Ally,Ranger,4,EnemyInvasion,PlanetToPlanetTravel,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_invasion,3,Ally,Ranger,4,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -93,10 +97,11 @@ ally_behaviour_ranger_L04_enemy_invasion,4,Ally,Ranger,4,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L04_enemy_system_invasion,1,Ally,Ranger,4,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,66,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_system_invasion,2,Ally,Ranger,4,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_system_invasion,3,Ally,Ranger,4,EnemySystemInvasion,CollectDebris,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L05_normal,1,Ally,Ranger,5,Normal,CollectDebris,None,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L05_normal,2,Ally,Ranger,5,Normal,AttackMeteorite,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L05_normal,3,Ally,Ranger,5,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L05_normal,4,Ally,Ranger,5,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L05_normal,1,Ally,Ranger,5,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L05_normal,2,Ally,Ranger,5,Normal,CollectDebris,None,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L05_normal,3,Ally,Ranger,5,Normal,AttackMeteorite,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L05_normal,4,Ally,Ranger,5,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L05_normal,5,Ally,Ranger,5,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_invasion,1,Ally,Ranger,5,EnemyInvasion,EngageEnemies,None,Enemy,Any,57,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_invasion,2,Ally,Ranger,5,EnemyInvasion,PlanetToPlanetTravel,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_invasion,3,Ally,Ranger,5,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -104,10 +109,11 @@ ally_behaviour_ranger_L05_enemy_invasion,4,Ally,Ranger,5,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L05_enemy_system_invasion,1,Ally,Ranger,5,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,67,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_system_invasion,2,Ally,Ranger,5,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_system_invasion,3,Ally,Ranger,5,EnemySystemInvasion,CollectDebris,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L06_normal,1,Ally,Ranger,6,Normal,CollectDebris,None,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L06_normal,2,Ally,Ranger,6,Normal,AttackMeteorite,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L06_normal,3,Ally,Ranger,6,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L06_normal,4,Ally,Ranger,6,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L06_normal,1,Ally,Ranger,6,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L06_normal,2,Ally,Ranger,6,Normal,CollectDebris,None,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L06_normal,3,Ally,Ranger,6,Normal,AttackMeteorite,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L06_normal,4,Ally,Ranger,6,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L06_normal,5,Ally,Ranger,6,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_invasion,1,Ally,Ranger,6,EnemyInvasion,EngageEnemies,None,Enemy,Any,57,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_invasion,2,Ally,Ranger,6,EnemyInvasion,PlanetToPlanetTravel,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_invasion,3,Ally,Ranger,6,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -115,10 +121,11 @@ ally_behaviour_ranger_L06_enemy_invasion,4,Ally,Ranger,6,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L06_enemy_system_invasion,1,Ally,Ranger,6,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,67,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_system_invasion,2,Ally,Ranger,6,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_system_invasion,3,Ally,Ranger,6,EnemySystemInvasion,CollectDebris,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L07_normal,1,Ally,Ranger,7,Normal,CollectDebris,None,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L07_normal,2,Ally,Ranger,7,Normal,AttackMeteorite,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L07_normal,3,Ally,Ranger,7,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L07_normal,4,Ally,Ranger,7,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L07_normal,1,Ally,Ranger,7,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L07_normal,2,Ally,Ranger,7,Normal,CollectDebris,None,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L07_normal,3,Ally,Ranger,7,Normal,AttackMeteorite,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L07_normal,4,Ally,Ranger,7,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L07_normal,5,Ally,Ranger,7,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_invasion,1,Ally,Ranger,7,EnemyInvasion,EngageEnemies,None,Enemy,Any,58,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_invasion,2,Ally,Ranger,7,EnemyInvasion,PlanetToPlanetTravel,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_invasion,3,Ally,Ranger,7,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -126,10 +133,11 @@ ally_behaviour_ranger_L07_enemy_invasion,4,Ally,Ranger,7,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L07_enemy_system_invasion,1,Ally,Ranger,7,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,68,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_system_invasion,2,Ally,Ranger,7,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_system_invasion,3,Ally,Ranger,7,EnemySystemInvasion,CollectDebris,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L08_normal,1,Ally,Ranger,8,Normal,CollectDebris,None,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L08_normal,2,Ally,Ranger,8,Normal,AttackMeteorite,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L08_normal,3,Ally,Ranger,8,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L08_normal,4,Ally,Ranger,8,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L08_normal,1,Ally,Ranger,8,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L08_normal,2,Ally,Ranger,8,Normal,CollectDebris,None,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L08_normal,3,Ally,Ranger,8,Normal,AttackMeteorite,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L08_normal,4,Ally,Ranger,8,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L08_normal,5,Ally,Ranger,8,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_invasion,1,Ally,Ranger,8,EnemyInvasion,EngageEnemies,None,Enemy,Any,58,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_invasion,2,Ally,Ranger,8,EnemyInvasion,PlanetToPlanetTravel,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_invasion,3,Ally,Ranger,8,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -137,10 +145,11 @@ ally_behaviour_ranger_L08_enemy_invasion,4,Ally,Ranger,8,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L08_enemy_system_invasion,1,Ally,Ranger,8,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,68,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_system_invasion,2,Ally,Ranger,8,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_system_invasion,3,Ally,Ranger,8,EnemySystemInvasion,CollectDebris,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L09_normal,1,Ally,Ranger,9,Normal,CollectDebris,None,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L09_normal,2,Ally,Ranger,9,Normal,AttackMeteorite,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L09_normal,3,Ally,Ranger,9,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L09_normal,4,Ally,Ranger,9,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L09_normal,1,Ally,Ranger,9,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L09_normal,2,Ally,Ranger,9,Normal,CollectDebris,None,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L09_normal,3,Ally,Ranger,9,Normal,AttackMeteorite,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L09_normal,4,Ally,Ranger,9,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L09_normal,5,Ally,Ranger,9,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_invasion,1,Ally,Ranger,9,EnemyInvasion,EngageEnemies,None,Enemy,Any,59,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_invasion,2,Ally,Ranger,9,EnemyInvasion,PlanetToPlanetTravel,None,None,None,13,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_invasion,3,Ally,Ranger,9,EnemyInvasion,TravelToAnotherSystem,None,None,None,13,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -148,10 +157,11 @@ ally_behaviour_ranger_L09_enemy_invasion,4,Ally,Ranger,9,EnemyInvasion,CollectDe
 ally_behaviour_ranger_L09_enemy_system_invasion,1,Ally,Ranger,9,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,69,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_system_invasion,2,Ally,Ranger,9,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,18,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_system_invasion,3,Ally,Ranger,9,EnemySystemInvasion,CollectDebris,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L10_normal,1,Ally,Ranger,10,Normal,CollectDebris,None,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L10_normal,2,Ally,Ranger,10,Normal,AttackMeteorite,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-ally_behaviour_ranger_L10_normal,3,Ally,Ranger,10,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-ally_behaviour_ranger_L10_normal,4,Ally,Ranger,10,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L10_normal,1,Ally,Ranger,10,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L10_normal,2,Ally,Ranger,10,Normal,CollectDebris,None,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L10_normal,3,Ally,Ranger,10,Normal,AttackMeteorite,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+ally_behaviour_ranger_L10_normal,4,Ally,Ranger,10,Normal,PlanetToPlanetTravel,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L10_normal,5,Ally,Ranger,10,Normal,StayOnPlanetForDays,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L10_enemy_invasion,1,Ally,Ranger,10,EnemyInvasion,EngageEnemies,None,Enemy,Any,59,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L10_enemy_invasion,2,Ally,Ranger,10,EnemyInvasion,PlanetToPlanetTravel,None,None,None,13,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L10_enemy_invasion,3,Ally,Ranger,10,EnemyInvasion,TravelToAnotherSystem,None,None,None,13,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
@@ -292,450 +302,450 @@ ally_behaviour_medic_L10_enemy_invasion,1,Ally,Medic,10,EnemyInvasion,StayOnPlan
 enemy_behaviour_ai_L01_normal,1,Enemy,AI,1,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L01_normal,2,Enemy,AI,1,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L01_normal,3,Enemy,AI,1,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L01_enemy_invasion,1,Enemy,AI,1,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L01_enemy_invasion,2,Enemy,AI,1,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,3,Enemy,AI,1,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,4,Enemy,AI,1,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,5,Enemy,AI,1,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,6,Enemy,AI,1,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,7,Enemy,AI,1,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,8,Enemy,AI,1,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,9,Enemy,AI,1,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,10,Enemy,AI,1,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L01_enemy_invasion,11,Enemy,AI,1,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L01_enemy_invasion,1,Enemy,AI,1,EnemyInvasion,EngageEnemies,None,Ally,Any,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L01_enemy_invasion,2,Enemy,AI,1,EnemyInvasion,AttackScienceStation,Science,None,None,35,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,3,Enemy,AI,1,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,4,Enemy,AI,1,EnemyInvasion,AttackTradeStation,Trade,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,5,Enemy,AI,1,EnemyInvasion,AttackMedicalStation,Medical,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,6,Enemy,AI,1,EnemyInvasion,AttackMilitaryStation,Military,None,None,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,7,Enemy,AI,1,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,8,Enemy,AI,1,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,9,Enemy,AI,1,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,10,Enemy,AI,1,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L01_enemy_invasion,11,Enemy,AI,1,EnemyInvasion,AttackScienceAlly,None,Ally,Science,8,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L01_enemy_system_invasion,1,Enemy,AI,1,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L02_normal,1,Enemy,AI,2,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L02_normal,2,Enemy,AI,2,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L02_normal,3,Enemy,AI,2,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L02_enemy_invasion,1,Enemy,AI,2,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L02_enemy_invasion,2,Enemy,AI,2,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,3,Enemy,AI,2,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,4,Enemy,AI,2,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,5,Enemy,AI,2,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,6,Enemy,AI,2,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,7,Enemy,AI,2,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,8,Enemy,AI,2,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,9,Enemy,AI,2,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,10,Enemy,AI,2,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L02_enemy_invasion,11,Enemy,AI,2,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L02_enemy_invasion,1,Enemy,AI,2,EnemyInvasion,EngageEnemies,None,Ally,Any,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L02_enemy_invasion,2,Enemy,AI,2,EnemyInvasion,AttackScienceStation,Science,None,None,35,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,3,Enemy,AI,2,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,4,Enemy,AI,2,EnemyInvasion,AttackTradeStation,Trade,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,5,Enemy,AI,2,EnemyInvasion,AttackMedicalStation,Medical,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,6,Enemy,AI,2,EnemyInvasion,AttackMilitaryStation,Military,None,None,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,7,Enemy,AI,2,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,8,Enemy,AI,2,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,9,Enemy,AI,2,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,10,Enemy,AI,2,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L02_enemy_invasion,11,Enemy,AI,2,EnemyInvasion,AttackScienceAlly,None,Ally,Science,8,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L02_enemy_system_invasion,1,Enemy,AI,2,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L03_normal,1,Enemy,AI,3,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L03_normal,2,Enemy,AI,3,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L03_normal,3,Enemy,AI,3,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L03_enemy_invasion,1,Enemy,AI,3,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L03_enemy_invasion,2,Enemy,AI,3,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,3,Enemy,AI,3,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,4,Enemy,AI,3,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,5,Enemy,AI,3,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,6,Enemy,AI,3,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,7,Enemy,AI,3,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,8,Enemy,AI,3,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,9,Enemy,AI,3,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,10,Enemy,AI,3,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L03_enemy_invasion,11,Enemy,AI,3,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L03_enemy_invasion,1,Enemy,AI,3,EnemyInvasion,EngageEnemies,None,Ally,Any,41,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L03_enemy_invasion,2,Enemy,AI,3,EnemyInvasion,AttackScienceStation,Science,None,None,36,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,3,Enemy,AI,3,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,4,Enemy,AI,3,EnemyInvasion,AttackTradeStation,Trade,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,5,Enemy,AI,3,EnemyInvasion,AttackMedicalStation,Medical,None,None,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,6,Enemy,AI,3,EnemyInvasion,AttackMilitaryStation,Military,None,None,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,7,Enemy,AI,3,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,8,Enemy,AI,3,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,9,Enemy,AI,3,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,10,Enemy,AI,3,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L03_enemy_invasion,11,Enemy,AI,3,EnemyInvasion,AttackScienceAlly,None,Ally,Science,9,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L03_enemy_system_invasion,1,Enemy,AI,3,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L04_normal,1,Enemy,AI,4,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L04_normal,2,Enemy,AI,4,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L04_normal,3,Enemy,AI,4,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L04_enemy_invasion,1,Enemy,AI,4,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L04_enemy_invasion,2,Enemy,AI,4,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,3,Enemy,AI,4,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,4,Enemy,AI,4,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,5,Enemy,AI,4,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,6,Enemy,AI,4,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,7,Enemy,AI,4,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,8,Enemy,AI,4,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,9,Enemy,AI,4,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,10,Enemy,AI,4,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L04_enemy_invasion,11,Enemy,AI,4,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L04_enemy_invasion,1,Enemy,AI,4,EnemyInvasion,EngageEnemies,None,Ally,Any,41,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L04_enemy_invasion,2,Enemy,AI,4,EnemyInvasion,AttackScienceStation,Science,None,None,36,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,3,Enemy,AI,4,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,4,Enemy,AI,4,EnemyInvasion,AttackTradeStation,Trade,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,5,Enemy,AI,4,EnemyInvasion,AttackMedicalStation,Medical,None,None,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,6,Enemy,AI,4,EnemyInvasion,AttackMilitaryStation,Military,None,None,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,7,Enemy,AI,4,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,8,Enemy,AI,4,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,9,Enemy,AI,4,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,10,Enemy,AI,4,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L04_enemy_invasion,11,Enemy,AI,4,EnemyInvasion,AttackScienceAlly,None,Ally,Science,9,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L04_enemy_system_invasion,1,Enemy,AI,4,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L05_normal,1,Enemy,AI,5,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L05_normal,2,Enemy,AI,5,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L05_normal,3,Enemy,AI,5,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L05_enemy_invasion,1,Enemy,AI,5,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L05_enemy_invasion,2,Enemy,AI,5,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,3,Enemy,AI,5,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,4,Enemy,AI,5,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,5,Enemy,AI,5,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,6,Enemy,AI,5,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,7,Enemy,AI,5,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,8,Enemy,AI,5,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,9,Enemy,AI,5,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,10,Enemy,AI,5,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L05_enemy_invasion,11,Enemy,AI,5,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L05_enemy_invasion,1,Enemy,AI,5,EnemyInvasion,EngageEnemies,None,Ally,Any,42,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L05_enemy_invasion,2,Enemy,AI,5,EnemyInvasion,AttackScienceStation,Science,None,None,37,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,3,Enemy,AI,5,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,4,Enemy,AI,5,EnemyInvasion,AttackTradeStation,Trade,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,5,Enemy,AI,5,EnemyInvasion,AttackMedicalStation,Medical,None,None,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,6,Enemy,AI,5,EnemyInvasion,AttackMilitaryStation,Military,None,None,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,7,Enemy,AI,5,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,8,Enemy,AI,5,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,9,Enemy,AI,5,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,10,Enemy,AI,5,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L05_enemy_invasion,11,Enemy,AI,5,EnemyInvasion,AttackScienceAlly,None,Ally,Science,10,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L05_enemy_system_invasion,1,Enemy,AI,5,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L06_normal,1,Enemy,AI,6,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L06_normal,2,Enemy,AI,6,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L06_normal,3,Enemy,AI,6,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L06_enemy_invasion,1,Enemy,AI,6,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L06_enemy_invasion,2,Enemy,AI,6,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,3,Enemy,AI,6,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,4,Enemy,AI,6,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,5,Enemy,AI,6,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,6,Enemy,AI,6,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,7,Enemy,AI,6,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,8,Enemy,AI,6,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,9,Enemy,AI,6,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,10,Enemy,AI,6,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L06_enemy_invasion,11,Enemy,AI,6,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L06_enemy_invasion,1,Enemy,AI,6,EnemyInvasion,EngageEnemies,None,Ally,Any,42,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L06_enemy_invasion,2,Enemy,AI,6,EnemyInvasion,AttackScienceStation,Science,None,None,37,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,3,Enemy,AI,6,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,4,Enemy,AI,6,EnemyInvasion,AttackTradeStation,Trade,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,5,Enemy,AI,6,EnemyInvasion,AttackMedicalStation,Medical,None,None,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,6,Enemy,AI,6,EnemyInvasion,AttackMilitaryStation,Military,None,None,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,7,Enemy,AI,6,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,8,Enemy,AI,6,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,9,Enemy,AI,6,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,10,Enemy,AI,6,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L06_enemy_invasion,11,Enemy,AI,6,EnemyInvasion,AttackScienceAlly,None,Ally,Science,10,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L06_enemy_system_invasion,1,Enemy,AI,6,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L07_normal,1,Enemy,AI,7,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L07_normal,2,Enemy,AI,7,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L07_normal,3,Enemy,AI,7,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L07_enemy_invasion,1,Enemy,AI,7,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L07_enemy_invasion,2,Enemy,AI,7,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,3,Enemy,AI,7,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,4,Enemy,AI,7,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,5,Enemy,AI,7,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,6,Enemy,AI,7,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,7,Enemy,AI,7,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,8,Enemy,AI,7,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,9,Enemy,AI,7,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,10,Enemy,AI,7,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L07_enemy_invasion,11,Enemy,AI,7,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L07_enemy_invasion,1,Enemy,AI,7,EnemyInvasion,EngageEnemies,None,Ally,Any,43,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L07_enemy_invasion,2,Enemy,AI,7,EnemyInvasion,AttackScienceStation,Science,None,None,38,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,3,Enemy,AI,7,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,4,Enemy,AI,7,EnemyInvasion,AttackTradeStation,Trade,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,5,Enemy,AI,7,EnemyInvasion,AttackMedicalStation,Medical,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,6,Enemy,AI,7,EnemyInvasion,AttackMilitaryStation,Military,None,None,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,7,Enemy,AI,7,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,27,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,8,Enemy,AI,7,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,9,Enemy,AI,7,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,10,Enemy,AI,7,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L07_enemy_invasion,11,Enemy,AI,7,EnemyInvasion,AttackScienceAlly,None,Ally,Science,11,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L07_enemy_system_invasion,1,Enemy,AI,7,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L08_normal,1,Enemy,AI,8,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L08_normal,2,Enemy,AI,8,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L08_normal,3,Enemy,AI,8,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L08_enemy_invasion,1,Enemy,AI,8,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L08_enemy_invasion,2,Enemy,AI,8,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,3,Enemy,AI,8,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,4,Enemy,AI,8,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,5,Enemy,AI,8,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,6,Enemy,AI,8,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,7,Enemy,AI,8,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,8,Enemy,AI,8,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,9,Enemy,AI,8,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,10,Enemy,AI,8,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L08_enemy_invasion,11,Enemy,AI,8,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L08_enemy_invasion,1,Enemy,AI,8,EnemyInvasion,EngageEnemies,None,Ally,Any,43,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L08_enemy_invasion,2,Enemy,AI,8,EnemyInvasion,AttackScienceStation,Science,None,None,38,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,3,Enemy,AI,8,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,4,Enemy,AI,8,EnemyInvasion,AttackTradeStation,Trade,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,5,Enemy,AI,8,EnemyInvasion,AttackMedicalStation,Medical,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,6,Enemy,AI,8,EnemyInvasion,AttackMilitaryStation,Military,None,None,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,7,Enemy,AI,8,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,27,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,8,Enemy,AI,8,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,9,Enemy,AI,8,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,10,Enemy,AI,8,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L08_enemy_invasion,11,Enemy,AI,8,EnemyInvasion,AttackScienceAlly,None,Ally,Science,11,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L08_enemy_system_invasion,1,Enemy,AI,8,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L09_normal,1,Enemy,AI,9,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L09_normal,2,Enemy,AI,9,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L09_normal,3,Enemy,AI,9,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L09_enemy_invasion,1,Enemy,AI,9,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L09_enemy_invasion,2,Enemy,AI,9,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,3,Enemy,AI,9,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,4,Enemy,AI,9,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,5,Enemy,AI,9,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,6,Enemy,AI,9,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,7,Enemy,AI,9,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,8,Enemy,AI,9,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,9,Enemy,AI,9,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,10,Enemy,AI,9,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L09_enemy_invasion,11,Enemy,AI,9,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L09_enemy_invasion,1,Enemy,AI,9,EnemyInvasion,EngageEnemies,None,Ally,Any,44,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L09_enemy_invasion,2,Enemy,AI,9,EnemyInvasion,AttackScienceStation,Science,None,None,39,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,3,Enemy,AI,9,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,4,Enemy,AI,9,EnemyInvasion,AttackTradeStation,Trade,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,5,Enemy,AI,9,EnemyInvasion,AttackMedicalStation,Medical,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,6,Enemy,AI,9,EnemyInvasion,AttackMilitaryStation,Military,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,7,Enemy,AI,9,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,28,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,8,Enemy,AI,9,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,9,Enemy,AI,9,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,10,Enemy,AI,9,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L09_enemy_invasion,11,Enemy,AI,9,EnemyInvasion,AttackScienceAlly,None,Ally,Science,12,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L09_enemy_system_invasion,1,Enemy,AI,9,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L10_normal,1,Enemy,AI,10,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L10_normal,2,Enemy,AI,10,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L10_normal,3,Enemy,AI,10,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L10_enemy_invasion,1,Enemy,AI,10,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ai_L10_enemy_invasion,2,Enemy,AI,10,EnemyInvasion,AttackScienceStation,Science,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,3,Enemy,AI,10,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,4,Enemy,AI,10,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,5,Enemy,AI,10,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,6,Enemy,AI,10,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,7,Enemy,AI,10,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,8,Enemy,AI,10,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,9,Enemy,AI,10,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,10,Enemy,AI,10,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ai_L10_enemy_invasion,11,Enemy,AI,10,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L10_enemy_invasion,1,Enemy,AI,10,EnemyInvasion,EngageEnemies,None,Ally,Any,44,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ai_L10_enemy_invasion,2,Enemy,AI,10,EnemyInvasion,AttackScienceStation,Science,None,None,39,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,3,Enemy,AI,10,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,4,Enemy,AI,10,EnemyInvasion,AttackTradeStation,Trade,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,5,Enemy,AI,10,EnemyInvasion,AttackMedicalStation,Medical,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,6,Enemy,AI,10,EnemyInvasion,AttackMilitaryStation,Military,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,7,Enemy,AI,10,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,28,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,8,Enemy,AI,10,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,9,Enemy,AI,10,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,10,Enemy,AI,10,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ai_L10_enemy_invasion,11,Enemy,AI,10,EnemyInvasion,AttackScienceAlly,None,Ally,Science,12,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ai_L10_enemy_system_invasion,1,Enemy,AI,10,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L01_normal,1,Enemy,Ancients,1,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L01_normal,2,Enemy,Ancients,1,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L01_normal,3,Enemy,Ancients,1,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L01_enemy_invasion,1,Enemy,Ancients,1,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L01_enemy_invasion,2,Enemy,Ancients,1,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,3,Enemy,Ancients,1,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,4,Enemy,Ancients,1,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,5,Enemy,Ancients,1,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,6,Enemy,Ancients,1,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,7,Enemy,Ancients,1,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,8,Enemy,Ancients,1,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,9,Enemy,Ancients,1,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L01_enemy_invasion,10,Enemy,Ancients,1,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L01_enemy_invasion,11,Enemy,Ancients,1,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,1,Enemy,Ancients,1,EnemyInvasion,EngageEnemies,None,Ally,Any,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L01_enemy_invasion,2,Enemy,Ancients,1,EnemyInvasion,AttackMilitaryStation,Military,None,None,35,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,3,Enemy,Ancients,1,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,4,Enemy,Ancients,1,EnemyInvasion,AttackScienceStation,Science,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,5,Enemy,Ancients,1,EnemyInvasion,AttackTradeStation,Trade,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,6,Enemy,Ancients,1,EnemyInvasion,AttackMedicalStation,Medical,None,None,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,7,Enemy,Ancients,1,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,8,Enemy,Ancients,1,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,9,Enemy,Ancients,1,EnemyInvasion,AttackScienceAlly,None,Ally,Science,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L01_enemy_invasion,10,Enemy,Ancients,1,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L01_enemy_invasion,11,Enemy,Ancients,1,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L01_enemy_system_invasion,1,Enemy,Ancients,1,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L02_normal,1,Enemy,Ancients,2,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L02_normal,2,Enemy,Ancients,2,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L02_normal,3,Enemy,Ancients,2,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L02_enemy_invasion,1,Enemy,Ancients,2,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L02_enemy_invasion,2,Enemy,Ancients,2,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,3,Enemy,Ancients,2,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,4,Enemy,Ancients,2,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,5,Enemy,Ancients,2,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,6,Enemy,Ancients,2,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,7,Enemy,Ancients,2,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,8,Enemy,Ancients,2,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,9,Enemy,Ancients,2,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L02_enemy_invasion,10,Enemy,Ancients,2,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L02_enemy_invasion,11,Enemy,Ancients,2,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,1,Enemy,Ancients,2,EnemyInvasion,EngageEnemies,None,Ally,Any,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L02_enemy_invasion,2,Enemy,Ancients,2,EnemyInvasion,AttackMilitaryStation,Military,None,None,35,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,3,Enemy,Ancients,2,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,4,Enemy,Ancients,2,EnemyInvasion,AttackScienceStation,Science,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,5,Enemy,Ancients,2,EnemyInvasion,AttackTradeStation,Trade,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,6,Enemy,Ancients,2,EnemyInvasion,AttackMedicalStation,Medical,None,None,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,7,Enemy,Ancients,2,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,8,Enemy,Ancients,2,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,9,Enemy,Ancients,2,EnemyInvasion,AttackScienceAlly,None,Ally,Science,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L02_enemy_invasion,10,Enemy,Ancients,2,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L02_enemy_invasion,11,Enemy,Ancients,2,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L02_enemy_system_invasion,1,Enemy,Ancients,2,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L03_normal,1,Enemy,Ancients,3,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L03_normal,2,Enemy,Ancients,3,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L03_normal,3,Enemy,Ancients,3,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L03_enemy_invasion,1,Enemy,Ancients,3,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L03_enemy_invasion,2,Enemy,Ancients,3,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,3,Enemy,Ancients,3,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,4,Enemy,Ancients,3,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,5,Enemy,Ancients,3,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,6,Enemy,Ancients,3,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,7,Enemy,Ancients,3,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,8,Enemy,Ancients,3,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,9,Enemy,Ancients,3,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L03_enemy_invasion,10,Enemy,Ancients,3,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L03_enemy_invasion,11,Enemy,Ancients,3,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,1,Enemy,Ancients,3,EnemyInvasion,EngageEnemies,None,Ally,Any,41,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L03_enemy_invasion,2,Enemy,Ancients,3,EnemyInvasion,AttackMilitaryStation,Military,None,None,36,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,3,Enemy,Ancients,3,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,4,Enemy,Ancients,3,EnemyInvasion,AttackScienceStation,Science,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,5,Enemy,Ancients,3,EnemyInvasion,AttackTradeStation,Trade,None,None,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,6,Enemy,Ancients,3,EnemyInvasion,AttackMedicalStation,Medical,None,None,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,7,Enemy,Ancients,3,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,8,Enemy,Ancients,3,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,9,Enemy,Ancients,3,EnemyInvasion,AttackScienceAlly,None,Ally,Science,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L03_enemy_invasion,10,Enemy,Ancients,3,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L03_enemy_invasion,11,Enemy,Ancients,3,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L03_enemy_system_invasion,1,Enemy,Ancients,3,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L04_normal,1,Enemy,Ancients,4,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L04_normal,2,Enemy,Ancients,4,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L04_normal,3,Enemy,Ancients,4,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L04_enemy_invasion,1,Enemy,Ancients,4,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L04_enemy_invasion,2,Enemy,Ancients,4,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,3,Enemy,Ancients,4,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,4,Enemy,Ancients,4,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,5,Enemy,Ancients,4,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,6,Enemy,Ancients,4,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,7,Enemy,Ancients,4,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,8,Enemy,Ancients,4,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,9,Enemy,Ancients,4,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L04_enemy_invasion,10,Enemy,Ancients,4,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L04_enemy_invasion,11,Enemy,Ancients,4,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,1,Enemy,Ancients,4,EnemyInvasion,EngageEnemies,None,Ally,Any,41,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L04_enemy_invasion,2,Enemy,Ancients,4,EnemyInvasion,AttackMilitaryStation,Military,None,None,36,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,3,Enemy,Ancients,4,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,4,Enemy,Ancients,4,EnemyInvasion,AttackScienceStation,Science,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,5,Enemy,Ancients,4,EnemyInvasion,AttackTradeStation,Trade,None,None,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,6,Enemy,Ancients,4,EnemyInvasion,AttackMedicalStation,Medical,None,None,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,7,Enemy,Ancients,4,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,8,Enemy,Ancients,4,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,9,Enemy,Ancients,4,EnemyInvasion,AttackScienceAlly,None,Ally,Science,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L04_enemy_invasion,10,Enemy,Ancients,4,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L04_enemy_invasion,11,Enemy,Ancients,4,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L04_enemy_system_invasion,1,Enemy,Ancients,4,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L05_normal,1,Enemy,Ancients,5,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L05_normal,2,Enemy,Ancients,5,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L05_normal,3,Enemy,Ancients,5,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L05_enemy_invasion,1,Enemy,Ancients,5,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L05_enemy_invasion,2,Enemy,Ancients,5,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,3,Enemy,Ancients,5,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,4,Enemy,Ancients,5,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,5,Enemy,Ancients,5,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,6,Enemy,Ancients,5,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,7,Enemy,Ancients,5,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,8,Enemy,Ancients,5,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,9,Enemy,Ancients,5,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L05_enemy_invasion,10,Enemy,Ancients,5,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L05_enemy_invasion,11,Enemy,Ancients,5,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,1,Enemy,Ancients,5,EnemyInvasion,EngageEnemies,None,Ally,Any,42,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L05_enemy_invasion,2,Enemy,Ancients,5,EnemyInvasion,AttackMilitaryStation,Military,None,None,37,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,3,Enemy,Ancients,5,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,4,Enemy,Ancients,5,EnemyInvasion,AttackScienceStation,Science,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,5,Enemy,Ancients,5,EnemyInvasion,AttackTradeStation,Trade,None,None,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,6,Enemy,Ancients,5,EnemyInvasion,AttackMedicalStation,Medical,None,None,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,7,Enemy,Ancients,5,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,8,Enemy,Ancients,5,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,9,Enemy,Ancients,5,EnemyInvasion,AttackScienceAlly,None,Ally,Science,16,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L05_enemy_invasion,10,Enemy,Ancients,5,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L05_enemy_invasion,11,Enemy,Ancients,5,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L05_enemy_system_invasion,1,Enemy,Ancients,5,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L06_normal,1,Enemy,Ancients,6,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L06_normal,2,Enemy,Ancients,6,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L06_normal,3,Enemy,Ancients,6,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L06_enemy_invasion,1,Enemy,Ancients,6,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L06_enemy_invasion,2,Enemy,Ancients,6,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,3,Enemy,Ancients,6,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,4,Enemy,Ancients,6,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,5,Enemy,Ancients,6,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,6,Enemy,Ancients,6,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,7,Enemy,Ancients,6,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,8,Enemy,Ancients,6,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,9,Enemy,Ancients,6,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L06_enemy_invasion,10,Enemy,Ancients,6,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L06_enemy_invasion,11,Enemy,Ancients,6,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,1,Enemy,Ancients,6,EnemyInvasion,EngageEnemies,None,Ally,Any,42,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L06_enemy_invasion,2,Enemy,Ancients,6,EnemyInvasion,AttackMilitaryStation,Military,None,None,37,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,3,Enemy,Ancients,6,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,4,Enemy,Ancients,6,EnemyInvasion,AttackScienceStation,Science,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,5,Enemy,Ancients,6,EnemyInvasion,AttackTradeStation,Trade,None,None,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,6,Enemy,Ancients,6,EnemyInvasion,AttackMedicalStation,Medical,None,None,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,7,Enemy,Ancients,6,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,8,Enemy,Ancients,6,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,9,Enemy,Ancients,6,EnemyInvasion,AttackScienceAlly,None,Ally,Science,16,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L06_enemy_invasion,10,Enemy,Ancients,6,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L06_enemy_invasion,11,Enemy,Ancients,6,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L06_enemy_system_invasion,1,Enemy,Ancients,6,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L07_normal,1,Enemy,Ancients,7,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L07_normal,2,Enemy,Ancients,7,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L07_normal,3,Enemy,Ancients,7,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L07_enemy_invasion,1,Enemy,Ancients,7,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L07_enemy_invasion,2,Enemy,Ancients,7,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,3,Enemy,Ancients,7,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,4,Enemy,Ancients,7,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,5,Enemy,Ancients,7,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,6,Enemy,Ancients,7,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,7,Enemy,Ancients,7,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,8,Enemy,Ancients,7,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,9,Enemy,Ancients,7,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L07_enemy_invasion,10,Enemy,Ancients,7,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L07_enemy_invasion,11,Enemy,Ancients,7,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,1,Enemy,Ancients,7,EnemyInvasion,EngageEnemies,None,Ally,Any,43,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L07_enemy_invasion,2,Enemy,Ancients,7,EnemyInvasion,AttackMilitaryStation,Military,None,None,38,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,3,Enemy,Ancients,7,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,4,Enemy,Ancients,7,EnemyInvasion,AttackScienceStation,Science,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,5,Enemy,Ancients,7,EnemyInvasion,AttackTradeStation,Trade,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,6,Enemy,Ancients,7,EnemyInvasion,AttackMedicalStation,Medical,None,None,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,7,Enemy,Ancients,7,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,27,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,8,Enemy,Ancients,7,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,9,Enemy,Ancients,7,EnemyInvasion,AttackScienceAlly,None,Ally,Science,17,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L07_enemy_invasion,10,Enemy,Ancients,7,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L07_enemy_invasion,11,Enemy,Ancients,7,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L07_enemy_system_invasion,1,Enemy,Ancients,7,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L08_normal,1,Enemy,Ancients,8,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L08_normal,2,Enemy,Ancients,8,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L08_normal,3,Enemy,Ancients,8,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L08_enemy_invasion,1,Enemy,Ancients,8,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L08_enemy_invasion,2,Enemy,Ancients,8,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,3,Enemy,Ancients,8,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,4,Enemy,Ancients,8,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,5,Enemy,Ancients,8,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,6,Enemy,Ancients,8,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,7,Enemy,Ancients,8,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,8,Enemy,Ancients,8,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,9,Enemy,Ancients,8,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L08_enemy_invasion,10,Enemy,Ancients,8,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L08_enemy_invasion,11,Enemy,Ancients,8,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,1,Enemy,Ancients,8,EnemyInvasion,EngageEnemies,None,Ally,Any,43,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L08_enemy_invasion,2,Enemy,Ancients,8,EnemyInvasion,AttackMilitaryStation,Military,None,None,38,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,3,Enemy,Ancients,8,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,4,Enemy,Ancients,8,EnemyInvasion,AttackScienceStation,Science,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,5,Enemy,Ancients,8,EnemyInvasion,AttackTradeStation,Trade,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,6,Enemy,Ancients,8,EnemyInvasion,AttackMedicalStation,Medical,None,None,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,7,Enemy,Ancients,8,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,27,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,8,Enemy,Ancients,8,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,21,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,9,Enemy,Ancients,8,EnemyInvasion,AttackScienceAlly,None,Ally,Science,17,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L08_enemy_invasion,10,Enemy,Ancients,8,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L08_enemy_invasion,11,Enemy,Ancients,8,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L08_enemy_system_invasion,1,Enemy,Ancients,8,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L09_normal,1,Enemy,Ancients,9,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L09_normal,2,Enemy,Ancients,9,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L09_normal,3,Enemy,Ancients,9,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L09_enemy_invasion,1,Enemy,Ancients,9,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L09_enemy_invasion,2,Enemy,Ancients,9,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,3,Enemy,Ancients,9,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,4,Enemy,Ancients,9,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,5,Enemy,Ancients,9,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,6,Enemy,Ancients,9,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,7,Enemy,Ancients,9,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,8,Enemy,Ancients,9,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,9,Enemy,Ancients,9,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L09_enemy_invasion,10,Enemy,Ancients,9,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L09_enemy_invasion,11,Enemy,Ancients,9,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,1,Enemy,Ancients,9,EnemyInvasion,EngageEnemies,None,Ally,Any,44,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L09_enemy_invasion,2,Enemy,Ancients,9,EnemyInvasion,AttackMilitaryStation,Military,None,None,39,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,3,Enemy,Ancients,9,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,4,Enemy,Ancients,9,EnemyInvasion,AttackScienceStation,Science,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,5,Enemy,Ancients,9,EnemyInvasion,AttackTradeStation,Trade,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,6,Enemy,Ancients,9,EnemyInvasion,AttackMedicalStation,Medical,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,7,Enemy,Ancients,9,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,28,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,8,Enemy,Ancients,9,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,9,Enemy,Ancients,9,EnemyInvasion,AttackScienceAlly,None,Ally,Science,18,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L09_enemy_invasion,10,Enemy,Ancients,9,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L09_enemy_invasion,11,Enemy,Ancients,9,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L09_enemy_system_invasion,1,Enemy,Ancients,9,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L10_normal,1,Enemy,Ancients,10,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L10_normal,2,Enemy,Ancients,10,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_ancients_L10_normal,3,Enemy,Ancients,10,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L10_enemy_invasion,1,Enemy,Ancients,10,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L10_enemy_invasion,2,Enemy,Ancients,10,EnemyInvasion,AttackMilitaryStation,Military,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,3,Enemy,Ancients,10,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,4,Enemy,Ancients,10,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,5,Enemy,Ancients,10,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,6,Enemy,Ancients,10,EnemyInvasion,AttackMedicalStation,Medical,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,7,Enemy,Ancients,10,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,8,Enemy,Ancients,10,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,9,Enemy,Ancients,10,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_ancients_L10_enemy_invasion,10,Enemy,Ancients,10,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_ancients_L10_enemy_invasion,11,Enemy,Ancients,10,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,1,Enemy,Ancients,10,EnemyInvasion,EngageEnemies,None,Ally,Any,44,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L10_enemy_invasion,2,Enemy,Ancients,10,EnemyInvasion,AttackMilitaryStation,Military,None,None,39,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,3,Enemy,Ancients,10,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,4,Enemy,Ancients,10,EnemyInvasion,AttackScienceStation,Science,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,5,Enemy,Ancients,10,EnemyInvasion,AttackTradeStation,Trade,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,6,Enemy,Ancients,10,EnemyInvasion,AttackMedicalStation,Medical,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,7,Enemy,Ancients,10,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,28,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,8,Enemy,Ancients,10,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,9,Enemy,Ancients,10,EnemyInvasion,AttackScienceAlly,None,Ally,Science,18,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_ancients_L10_enemy_invasion,10,Enemy,Ancients,10,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_ancients_L10_enemy_invasion,11,Enemy,Ancients,10,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_ancients_L10_enemy_system_invasion,1,Enemy,Ancients,10,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L01_normal,1,Enemy,Infected,1,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L01_normal,2,Enemy,Infected,1,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L01_normal,3,Enemy,Infected,1,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L01_enemy_invasion,1,Enemy,Infected,1,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L01_enemy_invasion,2,Enemy,Infected,1,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,3,Enemy,Infected,1,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,4,Enemy,Infected,1,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,5,Enemy,Infected,1,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,6,Enemy,Infected,1,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,7,Enemy,Infected,1,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,8,Enemy,Infected,1,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L01_enemy_invasion,9,Enemy,Infected,1,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,10,Enemy,Infected,1,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L01_enemy_invasion,11,Enemy,Infected,1,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,1,Enemy,Infected,1,EnemyInvasion,EngageEnemies,None,Ally,Any,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L01_enemy_invasion,2,Enemy,Infected,1,EnemyInvasion,AttackMedicalStation,Medical,None,None,35,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,3,Enemy,Infected,1,EnemyInvasion,AttackTradeStation,Trade,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,4,Enemy,Infected,1,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,5,Enemy,Infected,1,EnemyInvasion,AttackScienceStation,Science,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,6,Enemy,Infected,1,EnemyInvasion,AttackMilitaryStation,Military,None,None,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,7,Enemy,Infected,1,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,8,Enemy,Infected,1,EnemyInvasion,AttackScienceAlly,None,Ally,Science,18,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L01_enemy_invasion,9,Enemy,Infected,1,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,10,Enemy,Infected,1,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L01_enemy_invasion,11,Enemy,Infected,1,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L01_enemy_system_invasion,1,Enemy,Infected,1,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L02_normal,1,Enemy,Infected,2,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L02_normal,2,Enemy,Infected,2,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L02_normal,3,Enemy,Infected,2,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L02_enemy_invasion,1,Enemy,Infected,2,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L02_enemy_invasion,2,Enemy,Infected,2,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,3,Enemy,Infected,2,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,4,Enemy,Infected,2,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,5,Enemy,Infected,2,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,6,Enemy,Infected,2,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,7,Enemy,Infected,2,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,8,Enemy,Infected,2,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L02_enemy_invasion,9,Enemy,Infected,2,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,10,Enemy,Infected,2,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L02_enemy_invasion,11,Enemy,Infected,2,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,1,Enemy,Infected,2,EnemyInvasion,EngageEnemies,None,Ally,Any,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L02_enemy_invasion,2,Enemy,Infected,2,EnemyInvasion,AttackMedicalStation,Medical,None,None,35,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,3,Enemy,Infected,2,EnemyInvasion,AttackTradeStation,Trade,None,None,22,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,4,Enemy,Infected,2,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,5,Enemy,Infected,2,EnemyInvasion,AttackScienceStation,Science,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,6,Enemy,Infected,2,EnemyInvasion,AttackMilitaryStation,Military,None,None,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,7,Enemy,Infected,2,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,8,Enemy,Infected,2,EnemyInvasion,AttackScienceAlly,None,Ally,Science,18,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L02_enemy_invasion,9,Enemy,Infected,2,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,10,Enemy,Infected,2,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L02_enemy_invasion,11,Enemy,Infected,2,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,8,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L02_enemy_system_invasion,1,Enemy,Infected,2,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L03_normal,1,Enemy,Infected,3,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L03_normal,2,Enemy,Infected,3,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L03_normal,3,Enemy,Infected,3,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L03_enemy_invasion,1,Enemy,Infected,3,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L03_enemy_invasion,2,Enemy,Infected,3,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,3,Enemy,Infected,3,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,4,Enemy,Infected,3,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,5,Enemy,Infected,3,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,6,Enemy,Infected,3,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,7,Enemy,Infected,3,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,8,Enemy,Infected,3,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L03_enemy_invasion,9,Enemy,Infected,3,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,10,Enemy,Infected,3,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L03_enemy_invasion,11,Enemy,Infected,3,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,1,Enemy,Infected,3,EnemyInvasion,EngageEnemies,None,Ally,Any,41,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L03_enemy_invasion,2,Enemy,Infected,3,EnemyInvasion,AttackMedicalStation,Medical,None,None,36,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,3,Enemy,Infected,3,EnemyInvasion,AttackTradeStation,Trade,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,4,Enemy,Infected,3,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,5,Enemy,Infected,3,EnemyInvasion,AttackScienceStation,Science,None,None,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,6,Enemy,Infected,3,EnemyInvasion,AttackMilitaryStation,Military,None,None,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,7,Enemy,Infected,3,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,8,Enemy,Infected,3,EnemyInvasion,AttackScienceAlly,None,Ally,Science,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L03_enemy_invasion,9,Enemy,Infected,3,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,10,Enemy,Infected,3,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L03_enemy_invasion,11,Enemy,Infected,3,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L03_enemy_system_invasion,1,Enemy,Infected,3,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L04_normal,1,Enemy,Infected,4,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L04_normal,2,Enemy,Infected,4,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L04_normal,3,Enemy,Infected,4,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L04_enemy_invasion,1,Enemy,Infected,4,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L04_enemy_invasion,2,Enemy,Infected,4,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,3,Enemy,Infected,4,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,4,Enemy,Infected,4,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,5,Enemy,Infected,4,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,6,Enemy,Infected,4,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,7,Enemy,Infected,4,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,8,Enemy,Infected,4,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L04_enemy_invasion,9,Enemy,Infected,4,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,10,Enemy,Infected,4,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L04_enemy_invasion,11,Enemy,Infected,4,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,1,Enemy,Infected,4,EnemyInvasion,EngageEnemies,None,Ally,Any,41,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L04_enemy_invasion,2,Enemy,Infected,4,EnemyInvasion,AttackMedicalStation,Medical,None,None,36,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,3,Enemy,Infected,4,EnemyInvasion,AttackTradeStation,Trade,None,None,23,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,4,Enemy,Infected,4,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,5,Enemy,Infected,4,EnemyInvasion,AttackScienceStation,Science,None,None,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,6,Enemy,Infected,4,EnemyInvasion,AttackMilitaryStation,Military,None,None,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,7,Enemy,Infected,4,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,8,Enemy,Infected,4,EnemyInvasion,AttackScienceAlly,None,Ally,Science,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L04_enemy_invasion,9,Enemy,Infected,4,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,10,Enemy,Infected,4,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L04_enemy_invasion,11,Enemy,Infected,4,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,9,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L04_enemy_system_invasion,1,Enemy,Infected,4,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L05_normal,1,Enemy,Infected,5,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L05_normal,2,Enemy,Infected,5,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L05_normal,3,Enemy,Infected,5,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L05_enemy_invasion,1,Enemy,Infected,5,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L05_enemy_invasion,2,Enemy,Infected,5,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,3,Enemy,Infected,5,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,4,Enemy,Infected,5,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,5,Enemy,Infected,5,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,6,Enemy,Infected,5,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,7,Enemy,Infected,5,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,8,Enemy,Infected,5,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L05_enemy_invasion,9,Enemy,Infected,5,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,10,Enemy,Infected,5,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L05_enemy_invasion,11,Enemy,Infected,5,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,1,Enemy,Infected,5,EnemyInvasion,EngageEnemies,None,Ally,Any,42,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L05_enemy_invasion,2,Enemy,Infected,5,EnemyInvasion,AttackMedicalStation,Medical,None,None,37,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,3,Enemy,Infected,5,EnemyInvasion,AttackTradeStation,Trade,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,4,Enemy,Infected,5,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,5,Enemy,Infected,5,EnemyInvasion,AttackScienceStation,Science,None,None,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,6,Enemy,Infected,5,EnemyInvasion,AttackMilitaryStation,Military,None,None,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,7,Enemy,Infected,5,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,8,Enemy,Infected,5,EnemyInvasion,AttackScienceAlly,None,Ally,Science,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L05_enemy_invasion,9,Enemy,Infected,5,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,10,Enemy,Infected,5,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L05_enemy_invasion,11,Enemy,Infected,5,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L05_enemy_system_invasion,1,Enemy,Infected,5,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L06_normal,1,Enemy,Infected,6,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L06_normal,2,Enemy,Infected,6,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L06_normal,3,Enemy,Infected,6,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L06_enemy_invasion,1,Enemy,Infected,6,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L06_enemy_invasion,2,Enemy,Infected,6,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,3,Enemy,Infected,6,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,4,Enemy,Infected,6,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,5,Enemy,Infected,6,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,6,Enemy,Infected,6,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,7,Enemy,Infected,6,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,8,Enemy,Infected,6,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L06_enemy_invasion,9,Enemy,Infected,6,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,10,Enemy,Infected,6,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L06_enemy_invasion,11,Enemy,Infected,6,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,1,Enemy,Infected,6,EnemyInvasion,EngageEnemies,None,Ally,Any,42,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L06_enemy_invasion,2,Enemy,Infected,6,EnemyInvasion,AttackMedicalStation,Medical,None,None,37,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,3,Enemy,Infected,6,EnemyInvasion,AttackTradeStation,Trade,None,None,24,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,4,Enemy,Infected,6,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,5,Enemy,Infected,6,EnemyInvasion,AttackScienceStation,Science,None,None,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,6,Enemy,Infected,6,EnemyInvasion,AttackMilitaryStation,Military,None,None,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,7,Enemy,Infected,6,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,8,Enemy,Infected,6,EnemyInvasion,AttackScienceAlly,None,Ally,Science,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L06_enemy_invasion,9,Enemy,Infected,6,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,10,Enemy,Infected,6,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L06_enemy_invasion,11,Enemy,Infected,6,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,10,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L06_enemy_system_invasion,1,Enemy,Infected,6,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L07_normal,1,Enemy,Infected,7,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L07_normal,2,Enemy,Infected,7,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L07_normal,3,Enemy,Infected,7,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L07_enemy_invasion,1,Enemy,Infected,7,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L07_enemy_invasion,2,Enemy,Infected,7,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,3,Enemy,Infected,7,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,4,Enemy,Infected,7,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,5,Enemy,Infected,7,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,6,Enemy,Infected,7,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,7,Enemy,Infected,7,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,8,Enemy,Infected,7,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L07_enemy_invasion,9,Enemy,Infected,7,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,10,Enemy,Infected,7,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L07_enemy_invasion,11,Enemy,Infected,7,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,1,Enemy,Infected,7,EnemyInvasion,EngageEnemies,None,Ally,Any,43,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L07_enemy_invasion,2,Enemy,Infected,7,EnemyInvasion,AttackMedicalStation,Medical,None,None,38,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,3,Enemy,Infected,7,EnemyInvasion,AttackTradeStation,Trade,None,None,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,4,Enemy,Infected,7,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,5,Enemy,Infected,7,EnemyInvasion,AttackScienceStation,Science,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,6,Enemy,Infected,7,EnemyInvasion,AttackMilitaryStation,Military,None,None,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,7,Enemy,Infected,7,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,27,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,8,Enemy,Infected,7,EnemyInvasion,AttackScienceAlly,None,Ally,Science,21,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L07_enemy_invasion,9,Enemy,Infected,7,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,10,Enemy,Infected,7,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L07_enemy_invasion,11,Enemy,Infected,7,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L07_enemy_system_invasion,1,Enemy,Infected,7,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L08_normal,1,Enemy,Infected,8,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L08_normal,2,Enemy,Infected,8,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L08_normal,3,Enemy,Infected,8,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L08_enemy_invasion,1,Enemy,Infected,8,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L08_enemy_invasion,2,Enemy,Infected,8,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,3,Enemy,Infected,8,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,4,Enemy,Infected,8,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,5,Enemy,Infected,8,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,6,Enemy,Infected,8,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,7,Enemy,Infected,8,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,8,Enemy,Infected,8,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L08_enemy_invasion,9,Enemy,Infected,8,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,10,Enemy,Infected,8,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L08_enemy_invasion,11,Enemy,Infected,8,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,1,Enemy,Infected,8,EnemyInvasion,EngageEnemies,None,Ally,Any,43,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L08_enemy_invasion,2,Enemy,Infected,8,EnemyInvasion,AttackMedicalStation,Medical,None,None,38,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,3,Enemy,Infected,8,EnemyInvasion,AttackTradeStation,Trade,None,None,25,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,4,Enemy,Infected,8,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,5,Enemy,Infected,8,EnemyInvasion,AttackScienceStation,Science,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,6,Enemy,Infected,8,EnemyInvasion,AttackMilitaryStation,Military,None,None,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,7,Enemy,Infected,8,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,27,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,8,Enemy,Infected,8,EnemyInvasion,AttackScienceAlly,None,Ally,Science,21,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L08_enemy_invasion,9,Enemy,Infected,8,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,10,Enemy,Infected,8,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,13,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L08_enemy_invasion,11,Enemy,Infected,8,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,11,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L08_enemy_system_invasion,1,Enemy,Infected,8,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L09_normal,1,Enemy,Infected,9,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L09_normal,2,Enemy,Infected,9,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L09_normal,3,Enemy,Infected,9,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L09_enemy_invasion,1,Enemy,Infected,9,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L09_enemy_invasion,2,Enemy,Infected,9,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,3,Enemy,Infected,9,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,4,Enemy,Infected,9,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,5,Enemy,Infected,9,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,6,Enemy,Infected,9,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,7,Enemy,Infected,9,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,8,Enemy,Infected,9,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L09_enemy_invasion,9,Enemy,Infected,9,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,10,Enemy,Infected,9,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L09_enemy_invasion,11,Enemy,Infected,9,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,1,Enemy,Infected,9,EnemyInvasion,EngageEnemies,None,Ally,Any,44,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L09_enemy_invasion,2,Enemy,Infected,9,EnemyInvasion,AttackMedicalStation,Medical,None,None,39,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,3,Enemy,Infected,9,EnemyInvasion,AttackTradeStation,Trade,None,None,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,4,Enemy,Infected,9,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,5,Enemy,Infected,9,EnemyInvasion,AttackScienceStation,Science,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,6,Enemy,Infected,9,EnemyInvasion,AttackMilitaryStation,Military,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,7,Enemy,Infected,9,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,28,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,8,Enemy,Infected,9,EnemyInvasion,AttackScienceAlly,None,Ally,Science,22,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L09_enemy_invasion,9,Enemy,Infected,9,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,10,Enemy,Infected,9,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L09_enemy_invasion,11,Enemy,Infected,9,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L09_enemy_system_invasion,1,Enemy,Infected,9,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L10_normal,1,Enemy,Infected,10,Normal,PatrolSystem,None,None,None,40,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L10_normal,2,Enemy,Infected,10,Normal,PlanetToPlanetTravel,None,None,None,35,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 enemy_behaviour_infected_L10_normal,3,Enemy,Infected,10,Normal,StayOnPlanetForDays,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L10_enemy_invasion,1,Enemy,Infected,10,EnemyInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L10_enemy_invasion,2,Enemy,Infected,10,EnemyInvasion,AttackMedicalStation,Medical,None,None,1000,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,3,Enemy,Infected,10,EnemyInvasion,AttackTradeStation,Trade,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,4,Enemy,Infected,10,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,5,Enemy,Infected,10,EnemyInvasion,AttackScienceStation,Science,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,6,Enemy,Infected,10,EnemyInvasion,AttackMilitaryStation,Military,None,None,50,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,7,Enemy,Infected,10,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,8,Enemy,Infected,10,EnemyInvasion,AttackScienceAlly,None,Ally,Science,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
-enemy_behaviour_infected_L10_enemy_invasion,9,Enemy,Infected,10,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,1,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,10,Enemy,Infected,10,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
-enemy_behaviour_infected_L10_enemy_invasion,11,Enemy,Infected,10,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,100,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,1,Enemy,Infected,10,EnemyInvasion,EngageEnemies,None,Ally,Any,44,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L10_enemy_invasion,2,Enemy,Infected,10,EnemyInvasion,AttackMedicalStation,Medical,None,None,39,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,3,Enemy,Infected,10,EnemyInvasion,AttackTradeStation,Trade,None,None,26,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,4,Enemy,Infected,10,EnemyInvasion,AttackRangerBaseStation,RangerBase,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,5,Enemy,Infected,10,EnemyInvasion,AttackScienceStation,Science,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,6,Enemy,Infected,10,EnemyInvasion,AttackMilitaryStation,Military,None,None,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,7,Enemy,Infected,10,EnemyInvasion,AttackMedicAlly,None,Ally,Medic,28,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,8,Enemy,Infected,10,EnemyInvasion,AttackScienceAlly,None,Ally,Science,22,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+enemy_behaviour_infected_L10_enemy_invasion,9,Enemy,Infected,10,EnemyInvasion,AttackTraderAlly,None,Ally,Trader,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,10,Enemy,Infected,10,EnemyInvasion,AttackRangerAlly,None,Ally,Ranger,14,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
+enemy_behaviour_infected_L10_enemy_invasion,11,Enemy,Infected,10,EnemyInvasion,AttackMilitaryAlly,None,Ally,Military,12,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 enemy_behaviour_infected_L10_enemy_system_invasion,1,Enemy,Infected,10,EnemySystemInvasion,EngageEnemies,None,Ally,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.

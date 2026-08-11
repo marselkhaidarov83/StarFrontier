@@ -6,13 +6,18 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 {
     private const int MinStayDays = 1;
     private const int MaxStayDays = 5;
-    private const float offsetPatrol = 600f;
+    private const int PatrolBoundaryPlanetOrdinal = 8;
+    private const float PatrolSunSafetyMargin = 80f;
+    private const float PatrolSunFallbackPadding = 1f;
+    private const int PatrolPointPickAttempts = 20;
+    private const float InvalidRoutePointSqrMagnitude = 0.001f;
 
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
     private readonly SimpleEventBus _eventBus;
     private readonly IConfigService _configService;
     private readonly IRouteService _routeService;
     private readonly IOrbitalMotionService _orbitalMotionService;
+    private readonly ISystemSecurityService _systemSecurityService;
 
     public SystemNpcBehaviorService()
     {
@@ -22,6 +27,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _routeService = Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
+        _systemSecurityService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
     }
 
     public void Tick(StarSystemConfig starSystem, int currentTick)
@@ -168,52 +174,27 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         switch (npc.NpcType)
         {
             case SystemNpcType.Enemy:
-                return SystemNpcBehaviorType.EngageEnemies;
+                return GetRandomBehaviorType4Enemy(npc);
 
             case SystemNpcType.Pirate:
                 return GetRandomBehaviorType4Pirate(npc);
-            default:
-                if (HasEnemiesInSystem(npc.CurrentSystemId))
-                {
-                    AllySpawnRuleConfig allySpawnRule = _configService.GetAllySpawnRuleConfigById(npc.SpawnRuleId);
-                    if (ShouldEngageEnemies(allySpawnRule))
-                    {
-                        LogCustom("SystemNpcBehaviorType.EngageEnemies = " + SystemNpcBehaviorType.EngageEnemies);
-                        return SystemNpcBehaviorType.EngageEnemies;
-                    }
-                }
 
+            default:
                 return GetRandomBehaviorType4Ally(npc);
         }
     }
 
-    private bool ShouldEngageEnemies(AllySpawnRuleConfig allySpawnRule)
+    public SystemNpcBehaviorType GetRandomBehaviorType4Enemy(SystemNpcRuntimeState npc)
     {
-        List<SystemNpcBehaviorWeight> behaviorWeights =
-            GetAllyBehaviorWeights(allySpawnRule);
+        EnemyConfig enemyConfig =
+            _configService.GetEnemyConfigById(npc.ConfigId);
 
-        if (behaviorWeights.Count == 0)
-            return false;
+        NpcBehaviourScenarioConfig behaviorScenario =
+            GetEnemyBehaviorScenario(enemyConfig, ResolveBehaviorScenario(npc));
 
-        int engageWeight = 0;
-        int totalWeight = 0;
-
-        foreach (SystemNpcBehaviorWeight weight in behaviorWeights)
-        {
-            if (weight == null)
-                continue;
-
-            int normalizedWeight = Mathf.Max(0, weight.Weight);
-            totalWeight += normalizedWeight;
-
-            if (weight.BehaviorType == SystemNpcBehaviorType.EngageEnemies)
-                engageWeight += normalizedWeight;
-        }
-
-        if (engageWeight <= 0 || totalWeight <= 0)
-            return false;
-
-        return UnityEngine.Random.Range(0, totalWeight) < engageWeight;
+        return PickScenarioBehavior(
+            behaviorScenario,
+            npc);
     }
 
     public SystemNpcBehaviorType GetRandomBehaviorType4Pirate(SystemNpcRuntimeState npc)
@@ -265,10 +246,134 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     public SystemNpcBehaviorType GetRandomBehaviorType4Ally(SystemNpcRuntimeState npc)
     {
-        AllySpawnRuleConfig allySpawnRuleConfig = _configService.GetAllySpawnRuleConfigById(npc.SpawnRuleId);
-        List<SystemNpcBehaviorWeight> weights = GetAllyBehaviorWeights(allySpawnRuleConfig);
+        AllyConfig allyConfig =
+            _configService.GetAllyConfigById(npc.ConfigId);
 
-        //Отсекаем невозможные следующие состояния
+        NpcBehaviourScenarioConfig behaviorScenario =
+            GetAllyBehaviorScenario(allyConfig, ResolveBehaviorScenario(npc));
+
+        return PickScenarioBehavior(
+            behaviorScenario,
+            npc);
+    }
+
+    private NpcBehaviourScenarioConfig GetAllyBehaviorScenario(
+        AllyConfig allyConfig,
+        AllyBehaviourScenario scenario)
+    {
+        if (allyConfig == null)
+            return null;
+
+        NpcBehaviourScenarioConfig behaviorScenario =
+            allyConfig.GetBehaviorScenario(scenario);
+
+        if (behaviorScenario != null)
+            return behaviorScenario;
+
+        if (scenario != AllyBehaviourScenario.Normal)
+            return allyConfig.GetBehaviorScenario(AllyBehaviourScenario.Normal);
+
+        return null;
+    }
+
+    private NpcBehaviourScenarioConfig GetEnemyBehaviorScenario(
+        EnemyConfig enemyConfig,
+        AllyBehaviourScenario scenario)
+    {
+        if (enemyConfig == null)
+            return null;
+
+        NpcBehaviourScenarioConfig behaviorScenario =
+            enemyConfig.GetBehaviorScenario(scenario);
+
+        if (behaviorScenario != null)
+            return behaviorScenario;
+
+        if (scenario != AllyBehaviourScenario.Normal)
+            return enemyConfig.GetBehaviorScenario(AllyBehaviourScenario.Normal);
+
+        return null;
+    }
+
+    private AllyBehaviourScenario ResolveBehaviorScenario(
+        SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return AllyBehaviourScenario.Normal;
+
+        if (_systemSecurityService != null &&
+            _systemSecurityService.TryGetSystemStatus(
+                npc.CurrentSystemId,
+                out StarSystemStatus systemStatus))
+        {
+            if (systemStatus == StarSystemStatus.Captured)
+                return AllyBehaviourScenario.EnemySystemInvasion;
+
+            if (systemStatus == StarSystemStatus.Threatened ||
+                systemStatus == StarSystemStatus.Invasion)
+                return AllyBehaviourScenario.EnemyInvasion;
+        }
+
+        if (HasEnemiesInSystem(npc.CurrentSystemId))
+            return npc.IsEnemy
+                ? AllyBehaviourScenario.EnemySystemInvasion
+                : AllyBehaviourScenario.EnemyInvasion;
+
+        return AllyBehaviourScenario.Normal;
+    }
+
+    private SystemNpcBehaviorType PickScenarioBehavior(
+        NpcBehaviourScenarioConfig behaviorScenario,
+        SystemNpcRuntimeState npc)
+    {
+        if (behaviorScenario == null)
+            return SystemNpcBehaviorType.None;
+
+        IReadOnlyList<SystemNpcBehaviorWeight> behaviorWeights =
+            behaviorScenario.BehaviorWeights;
+
+        if (behaviorWeights == null || behaviorWeights.Count == 0)
+            return SystemNpcBehaviorType.None;
+
+        List<SystemNpcBehaviorWeight> weights =
+            behaviorWeights
+                .Where(weight => weight != null && weight.Weight > 0)
+                .ToList();
+
+        RemoveImpossibleNextBehaviors(weights, npc);
+
+        if (weights.Count == 0)
+            return SystemNpcBehaviorType.None;
+
+        int totalWeight = 0;
+
+        foreach (SystemNpcBehaviorWeight item in weights)
+            totalWeight += Mathf.Max(0, item.Weight);
+
+        if (totalWeight <= 0)
+            return SystemNpcBehaviorType.None;
+
+        int roll = UnityEngine.Random.Range(0, totalWeight);
+        int cumulative = 0;
+
+        foreach (SystemNpcBehaviorWeight item in weights)
+        {
+            cumulative += Mathf.Max(0, item.Weight);
+
+            if (roll < cumulative)
+                return item.BehaviorType;
+        }
+
+        return weights[^1].BehaviorType;
+    }
+
+    private void RemoveImpossibleNextBehaviors(
+        List<SystemNpcBehaviorWeight> weights,
+        SystemNpcRuntimeState npc)
+    {
+        if (weights == null || npc == null)
+            return;
+
         switch (npc.PrevBehavior)
         {
             case SystemNpcBehaviorType.AnnihilateOnPlanet:
@@ -278,57 +383,11 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             case SystemNpcBehaviorType.EngageEnemies:
             case SystemNpcBehaviorType.PatrolSystem:
             case SystemNpcBehaviorType.TravelToAnotherSystem:
-                weights.RemoveAll(x => x.BehaviorType == SystemNpcBehaviorType.AnnihilateOnPlanet);
-                weights.RemoveAll(x => x.BehaviorType == SystemNpcBehaviorType.StayOnPlanetForDays);
+                weights.RemoveAll(x =>
+                    x.BehaviorType == SystemNpcBehaviorType.AnnihilateOnPlanet ||
+                    x.BehaviorType == SystemNpcBehaviorType.StayOnPlanetForDays);
                 break;
-
         }
-
-        if (weights == null || weights.Count == 0)
-            return SystemNpcBehaviorType.PatrolSystem;
-
-        int totalWeight = 0;
-
-        foreach (SystemNpcBehaviorWeight item in weights)
-            totalWeight += item.Weight;
-
-        if (totalWeight <= 0)
-            return SystemNpcBehaviorType.PatrolSystem;
-
-        int roll = UnityEngine.Random.Range(0, totalWeight);
-        int cumulative = 0;
-
-        foreach (SystemNpcBehaviorWeight item in weights)
-        {
-            cumulative += item.Weight;
-
-            if (roll < cumulative)
-                return item.BehaviorType;
-        }
-
-        return weights[^1].BehaviorType;
-    }
-
-    private List<SystemNpcBehaviorWeight> GetAllyBehaviorWeights(
-        AllySpawnRuleConfig allySpawnRule)
-    {
-        if (allySpawnRule == null)
-            return new List<SystemNpcBehaviorWeight>();
-
-        Type configType = allySpawnRule.GetType();
-        const System.Reflection.BindingFlags flags =
-            System.Reflection.BindingFlags.Instance |
-            System.Reflection.BindingFlags.Public |
-            System.Reflection.BindingFlags.NonPublic;
-
-        object value =
-            configType.GetProperty("BehaviorWeights", flags)?.GetValue(allySpawnRule) ??
-            configType.GetField("behaviorWeights", flags)?.GetValue(allySpawnRule);
-
-        if (value is IEnumerable<SystemNpcBehaviorWeight> behaviorWeights)
-            return behaviorWeights.Where(weight => weight != null).ToList();
-
-        return new List<SystemNpcBehaviorWeight>();
     }
 
     private void ApplyBehavior(
@@ -386,16 +445,25 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupPlanetToPlanetTravel(SystemNpcRuntimeState npc)
     {
+        ClearMovementTargets(npc);
+
         npc.TravelState = SystemNpcTravelState.TravelingInsideSystem;
         npc.IsOnPlanet = false;
 
         StarSystemConfig starSystem = _configService.GetStarSystemConfigById(npc.CurrentSystemId);
 
+        if (starSystem == null || starSystem.PlanetRefs == null)
+        {
+            npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+            SetupPatrolSystem(npc);
+            return;
+        }
+
         // LogCustom("starSystem = " + npc.CurrentSystemId);
         // LogCustom("starSystem = " + starSystem.Id);
         // LogCustom("starSystem.PlanetRefs.Length = " + starSystem.PlanetRefs.Length);
         PlanetConfig[] inhabitedPlanets = starSystem.PlanetRefs
-            .Where(p => p.IsInhabited == true)
+            .Where(p => p != null && p.IsInhabited == true)
             .ToArray();
         inhabitedPlanets = inhabitedPlanets
             .Where(p => p.Id != npc.CurrentPlanetId)
@@ -407,6 +475,13 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             : null;
         // LogCustom("randomPlanet = " + randomPlanet.Id);
 
+        if (randomPlanet == null)
+        {
+            npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+            SetupPatrolSystem(npc);
+            return;
+        }
+
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPlanetId = randomPlanet.Id;
         npc.TravelProgress01 = 0f;
@@ -414,6 +489,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupStayOnPlanet(SystemNpcRuntimeState npc, int currentTick)
     {
+        ClearMovementTargets(npc);
+
         npc.TravelState = SystemNpcTravelState.OnPlanet;
         npc.IsOnPlanet = true;
 
@@ -425,6 +502,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupTravelToAnotherSystem(SystemNpcRuntimeState npc)
     {
+        ClearMovementTargets(npc);
+
         if (!npc.IsAlly)
         {
             SetupLinkedSystemTravel(npc);
@@ -443,11 +522,45 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         StarSystemConfig targetSystem =
             route.GetOtherSystem(npc.CurrentSystemId);
 
+        Vector3 exitPoint =
+            route.GetExitPoint(npc.CurrentSystemId);
+
+        Vector3 entryPoint =
+            targetSystem != null
+                ? route.GetEntryPoint(targetSystem.Id)
+                : Vector3.zero;
+
+        StarSystemConfig currentSystem =
+            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
+
+        if (targetSystem == null ||
+            string.IsNullOrWhiteSpace(targetSystem.Id) ||
+            IsInvalidRoutePoint(currentSystem, exitPoint) ||
+            IsInvalidRoutePoint(targetSystem, entryPoint))
+        {
+            Debug.LogWarning(
+                "[SystemNpcBehaviorService] Ally route travel skipped: " +
+                "invalid target system, exit point, or entry point. NPC: " +
+                npc.RuntimeNpcId +
+                ", CurrentSystem: " +
+                npc.CurrentSystemId +
+                ", Route: " +
+                route.Id +
+                ", ExitPoint: " +
+                exitPoint +
+                ", EntryPoint: " +
+                entryPoint);
+
+            npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+            SetupPatrolSystem(npc);
+            return;
+        }
+
         npc.TravelState = SystemNpcTravelState.TravelingToAnotherSystem;
         npc.IsOnPlanet = false;
         npc.TargetSystemId = targetSystem.Id;
-        npc.TargetSystemExitPoint = route.GetExitPoint(npc.CurrentSystemId);
-        npc.TargetSystemEntryPoint = route.GetEntryPoint(targetSystem.Id);
+        npc.TargetSystemExitPoint = exitPoint;
+        npc.TargetSystemEntryPoint = entryPoint;
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPosition = Vector3.zero;
         npc.TravelProgress01 = 0f;
@@ -455,6 +568,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupLinkedSystemTravel(SystemNpcRuntimeState npc)
     {
+        ClearMovementTargets(npc);
+
         npc.TravelState = SystemNpcTravelState.TravelingToAnotherSystem;
         npc.IsOnPlanet = false;
 
@@ -472,6 +587,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.TargetSystemId = link?.LinkedSystem?.Id;
         npc.TargetSystemExitPoint = link?.ExitPoint ?? Vector3.zero;
         npc.TargetSystemEntryPoint = link?.EntryPoint ?? Vector3.zero;
+
+        if (string.IsNullOrWhiteSpace(npc.TargetSystemId) ||
+            IsInvalidRoutePoint(starSystem, npc.TargetSystemExitPoint) ||
+            IsInvalidRoutePoint(link?.LinkedSystem, npc.TargetSystemEntryPoint))
+        {
+            npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+            SetupPatrolSystem(npc);
+            return;
+        }
+
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPosition = Vector3.zero;
         npc.TravelProgress01 = 0f;
@@ -523,6 +648,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupAnnihilateOnPlanet(SystemNpcRuntimeState npc)
     {
+        ClearMovementTargets(npc);
+
         if (!npc.IsOnPlanet)
         {
             npc.CurrentBehavior = SystemNpcBehaviorType.StayOnPlanetForDays;
@@ -535,14 +662,30 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupEngageEnemies(SystemNpcRuntimeState npc)
     {
+        ClearMovementTargets(npc);
+
         npc.IsOnPlanet = false;
         string targetId = FindCombatTargetId(npc);
 
         // if (string.IsNullOrWhiteSpace(targetId))
         if (string.IsNullOrWhiteSpace(targetId) && npc.IsAlly)
         {
-            npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
-            SetupPatrolSystem(npc);
+            SystemNpcBehaviorType fallbackBehavior =
+                PickScenarioBehaviorExcluding(
+                    GetAllyBehaviorScenario(
+                        _configService.GetAllyConfigById(npc.ConfigId),
+                        ResolveBehaviorScenario(npc)),
+                    npc,
+                    SystemNpcBehaviorType.EngageEnemies);
+
+            if (fallbackBehavior == SystemNpcBehaviorType.None)
+            {
+                ClearBehavior(npc);
+                return;
+            }
+
+            npc.CurrentBehavior = fallbackBehavior;
+            SetupFallbackBehavior(npc, fallbackBehavior);
             return;
         }
 
@@ -553,14 +696,159 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.IsFighting = true;
     }
 
+    private SystemNpcBehaviorType PickScenarioBehaviorExcluding(
+        NpcBehaviourScenarioConfig behaviorScenario,
+        SystemNpcRuntimeState npc,
+        SystemNpcBehaviorType excludedBehavior)
+    {
+        if (behaviorScenario == null || behaviorScenario.BehaviorWeights == null)
+            return SystemNpcBehaviorType.None;
+
+        List<SystemNpcBehaviorWeight> weights =
+            behaviorScenario.BehaviorWeights
+                .Where(weight =>
+                    weight != null &&
+                    weight.Weight > 0 &&
+                    weight.BehaviorType != excludedBehavior)
+                .ToList();
+
+        RemoveImpossibleNextBehaviors(weights, npc);
+
+        if (weights.Count == 0)
+            return SystemNpcBehaviorType.None;
+
+        return PickWeightedBehavior(weights);
+    }
+
+    private SystemNpcBehaviorType PickWeightedBehavior(
+        List<SystemNpcBehaviorWeight> weights)
+    {
+        if (weights == null || weights.Count == 0)
+            return SystemNpcBehaviorType.None;
+
+        int totalWeight = 0;
+
+        foreach (SystemNpcBehaviorWeight item in weights)
+            totalWeight += Mathf.Max(0, item.Weight);
+
+        if (totalWeight <= 0)
+            return SystemNpcBehaviorType.None;
+
+        int roll = UnityEngine.Random.Range(0, totalWeight);
+        int cumulative = 0;
+
+        foreach (SystemNpcBehaviorWeight item in weights)
+        {
+            cumulative += Mathf.Max(0, item.Weight);
+
+            if (roll < cumulative)
+                return item.BehaviorType;
+        }
+
+        return weights[^1].BehaviorType;
+    }
+
+    private void SetupFallbackBehavior(
+        SystemNpcRuntimeState npc,
+        SystemNpcBehaviorType fallbackBehavior)
+    {
+        npc.BehaviorTargetRuntimeNpcId = null;
+        npc.CurrentTargetRuntimeNpcId = null;
+        npc.CombatState = SystemNpcCombatState.None;
+        npc.IsFighting = false;
+
+        switch (fallbackBehavior)
+        {
+            case SystemNpcBehaviorType.PlanetToPlanetTravel:
+                SetupPlanetToPlanetTravel(npc);
+                break;
+
+            case SystemNpcBehaviorType.StayOnPlanetForDays:
+                SetupStayOnPlanet(npc, npc.BehaviorStartedTick);
+                break;
+
+            case SystemNpcBehaviorType.TravelToAnotherSystem:
+                SetupTravelToAnotherSystem(npc);
+                break;
+
+            case SystemNpcBehaviorType.AnnihilateOnPlanet:
+                SetupAnnihilateOnPlanet(npc);
+                break;
+
+            case SystemNpcBehaviorType.PatrolSystem:
+                SetupPatrolSystem(npc);
+                break;
+
+            default:
+                npc.HasActiveBehavior = false;
+                break;
+        }
+    }
+
     private void SetupPatrolSystem(SystemNpcRuntimeState npc)
     {
+        ClearMovementTargets(npc);
+
         npc.TravelState = SystemNpcTravelState.Patrolling;
         npc.IsOnPlanet = false;
 
         npc.StartPosition = npc.CurrentPosition;
-        npc.TargetPosition = RandomOffset(offsetPatrol);
+        npc.TargetPosition = RandomPatrolPosition(npc);
         npc.TravelProgress01 = 0f;
+    }
+
+    private void ClearMovementTargets(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return;
+
+        npc.TargetSystemId = null;
+        npc.TargetSystemExitPoint = Vector3.zero;
+        npc.TargetSystemEntryPoint = Vector3.zero;
+        npc.TargetPlanetId = null;
+        npc.CurrentTargetRuntimeNpcId = null;
+        npc.BehaviorTargetRuntimeNpcId = null;
+        npc.TargetPosition = Vector3.zero;
+        npc.CurrentMovementTargetPosition = Vector3.zero;
+    }
+
+    private bool IsInvalidRoutePoint(
+        StarSystemConfig starSystem,
+        Vector3 point)
+    {
+        if (!IsFinite(point))
+            return true;
+
+        if (point.sqrMagnitude <= InvalidRoutePointSqrMagnitude)
+            return true;
+
+        if (starSystem == null || starSystem.Sun == null)
+            return false;
+
+        SunConfig sun = starSystem.Sun;
+
+        Vector3 sunCenter = new Vector3(
+            sun.LocalOffset.x,
+            sun.LocalOffset.y,
+            point.z);
+
+        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float safeRadius = sunRadius + PatrolSunSafetyMargin;
+
+        return Vector3.Distance(point, sunCenter) <= safeRadius;
+    }
+
+    private static bool IsFinite(Vector3 value)
+    {
+        return IsFinite(value.x) &&
+               IsFinite(value.y) &&
+               IsFinite(value.z);
+    }
+
+    private static bool IsFinite(float value)
+    {
+        return !float.IsNaN(value) &&
+               !float.IsInfinity(value);
     }
 
     private string FindCombatTargetId(SystemNpcRuntimeState npc)
@@ -642,5 +930,117 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     {
         Vector2 random = UnityEngine.Random.insideUnitCircle * radius;
         return new Vector3(random.x, random.y, 0f);
+    }
+
+    private Vector3 RandomPatrolPosition(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return Vector3.zero;
+
+        StarSystemConfig starSystem =
+            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
+
+        if (starSystem == null)
+            return npc.CurrentPosition;
+
+        if (!TryGetPatrolBounds(
+                starSystem,
+                out Vector3 patrolCenter,
+                out float patrolRadius))
+        {
+            return npc.CurrentPosition;
+        }
+
+        return RandomPatrolOffset(starSystem, patrolCenter, patrolRadius);
+    }
+
+    private bool TryGetPatrolBounds(
+        StarSystemConfig starSystem,
+        out Vector3 patrolCenter,
+        out float patrolRadius)
+    {
+        patrolCenter = Vector3.zero;
+        patrolRadius = 0f;
+
+        if (starSystem == null ||
+            starSystem.PlanetRefs == null ||
+            starSystem.PlanetRefs.Length == 0)
+        {
+            return false;
+        }
+
+        List<PlanetOrbitConfig> orbitConfigs =
+            starSystem.PlanetRefs
+                .Where(planet => planet != null && planet.PlanetOrbit != null)
+                .Select(planet => planet.PlanetOrbit)
+                .OrderBy(orbit => orbit.OrbitRadius)
+                .ToList();
+
+        if (orbitConfigs.Count == 0)
+            return false;
+
+        int boundaryIndex = Mathf.Min(
+            PatrolBoundaryPlanetOrdinal - 1,
+            orbitConfigs.Count - 1);
+
+        PlanetOrbitConfig boundaryOrbit = orbitConfigs[boundaryIndex];
+
+        patrolCenter = boundaryOrbit.OrbitCenterOffset;
+        patrolCenter.z = 0f;
+        patrolRadius = Mathf.Max(0f, boundaryOrbit.OrbitRadius);
+
+        return patrolRadius > 0f;
+    }
+
+    private Vector3 RandomPatrolOffset(
+        StarSystemConfig starSystem,
+        Vector3 patrolCenter,
+        float patrolRadius)
+    {
+        if (starSystem == null || starSystem.Sun == null)
+            return patrolCenter + RandomOffset(patrolRadius);
+
+        SunConfig sun = starSystem.Sun;
+        Vector3 sunCenter = new Vector3(
+            sun.LocalOffset.x,
+            sun.LocalOffset.y,
+            0f);
+
+        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float safeRadius = sunRadius + PatrolSunSafetyMargin;
+
+        for (int i = 0; i < PatrolPointPickAttempts; i++)
+        {
+            Vector3 candidate = patrolCenter + RandomOffset(patrolRadius);
+
+            if (Vector3.Distance(candidate, sunCenter) > safeRadius)
+                return candidate;
+        }
+
+        Vector2 direction = UnityEngine.Random.insideUnitCircle.normalized;
+
+        if (direction.sqrMagnitude <= 0.001f)
+            direction = Vector2.right;
+
+        Vector3 fallback = sunCenter + new Vector3(
+            direction.x,
+            direction.y,
+            0f) * (safeRadius + PatrolSunFallbackPadding);
+
+        if (Vector3.Distance(fallback, patrolCenter) > patrolRadius)
+            fallback = patrolCenter +
+                       (fallback - patrolCenter).normalized * patrolRadius;
+
+        if (Vector3.Distance(fallback, sunCenter) <= safeRadius)
+        {
+            Vector3 awayFromSun = patrolCenter - sunCenter;
+
+            if (awayFromSun.sqrMagnitude <= 0.001f)
+                awayFromSun = new Vector3(direction.x, direction.y, 0f);
+
+            fallback = patrolCenter + awayFromSun.normalized * patrolRadius;
+        }
+
+        return fallback;
     }
 }

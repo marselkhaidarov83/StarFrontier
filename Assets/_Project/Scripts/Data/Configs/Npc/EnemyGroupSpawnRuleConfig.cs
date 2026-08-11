@@ -16,18 +16,29 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
     public IReadOnlyList<EnemyGroupSpawnLevelEntryConfig> LevelEntries =>
         levelEntries;
 
-    /*
-     * Legacy compatibility for old editor/debug code.
-     * Runtime spawning should use GetEntryForGalaxyLevel(level).
-     */
     public float SpawnIntervalSeconds =>
         GetSpawnIntervalSeconds(1);
 
     public int MaxAliveGroupsFromThisRule =>
         GetMaxAliveGroupsForGalaxyLevel(1);
 
-    public IReadOnlyList<EnemyGroupEntryConfig> Enemies =>
-        GetEnemiesForGalaxyLevel(1);
+    public IReadOnlyList<EnemyGroupEntryConfig> PickEnemiesForGalaxyLevel(
+        int galaxyLevel)
+    {
+        EnemyGroupSpawnLevelEntryConfig entry =
+            GetEntryForGalaxyLevel(galaxyLevel);
+
+        if (entry == null)
+            return EmptyEnemies;
+
+        IReadOnlyList<EnemyGroupEntryConfig> pickedEnemies =
+            entry.PickEnemies();
+
+        if (pickedEnemies == null)
+            return EmptyEnemies;
+
+        return pickedEnemies;
+    }
 
     public EnemyGroupSpawnLevelEntryConfig GetEntryForGalaxyLevel(
         int galaxyLevel)
@@ -51,18 +62,6 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
         }
 
         return null;
-    }
-
-    public IReadOnlyList<EnemyGroupEntryConfig> GetEnemiesForGalaxyLevel(
-        int galaxyLevel)
-    {
-        EnemyGroupSpawnLevelEntryConfig entry =
-            GetEntryForGalaxyLevel(galaxyLevel);
-
-        if (entry == null || entry.Enemies == null)
-            return EmptyEnemies;
-
-        return entry.Enemies;
     }
 
     public float GetSpawnIntervalSeconds(
@@ -160,6 +159,9 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
 [System.Serializable]
 public sealed class EnemyGroupSpawnLevelEntryConfig
 {
+    private static readonly EnemyGroupEntryConfig[] EmptyEnemies =
+        new EnemyGroupEntryConfig[0];
+
     [SerializeField] [Range(1, 10)] private int galaxyLevel = 1;
 
     [Header("Spawn Timing")]
@@ -168,15 +170,186 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
     [Header("Spawn Limits")]
     [SerializeField] [Min(1)] private int maxAliveGroupsFromThisRule = 1;
 
-    [Header("Enemies")]
-    [SerializeField] private EnemyGroupEntryConfig[] enemies =
-        new EnemyGroupEntryConfig[0];
+    [Header("Enemy Groups")]
+    [SerializeField] private EnemyGroupSpawnOptionConfig[] enemyGroups =
+        new EnemyGroupSpawnOptionConfig[0];
 
     public int GalaxyLevel => galaxyLevel;
 
     public float SpawnIntervalSeconds => spawnIntervalSeconds;
 
     public int MaxAliveGroupsFromThisRule => maxAliveGroupsFromThisRule;
+
+    public IReadOnlyList<EnemyGroupSpawnOptionConfig> EnemyGroups => enemyGroups;
+
+    public bool HasValidEnemies()
+    {
+        return HasValidEnemyGroups();
+    }
+
+    public bool HasValidEnemyGroups()
+    {
+        if (enemyGroups == null || enemyGroups.Length == 0)
+            return false;
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (group == null)
+                continue;
+
+            if (!group.HasValidEnemies())
+                continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public IReadOnlyList<EnemyGroupEntryConfig> PickEnemies()
+    {
+        EnemyGroupSpawnOptionConfig group =
+            PickEnemyGroup();
+
+        if (group != null && group.HasValidEnemies())
+            return group.Enemies;
+
+        return EmptyEnemies;
+    }
+
+    public EnemyGroupSpawnOptionConfig PickEnemyGroup()
+    {
+        if (!HasValidEnemyGroups())
+            return null;
+
+        int totalWeight = 0;
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (group == null || !group.HasValidEnemies())
+                continue;
+
+            totalWeight += Mathf.Max(1, group.Weight);
+        }
+
+        if (totalWeight <= 0)
+            return null;
+
+        int roll =
+            UnityEngine.Random.Range(0, totalWeight);
+
+        int cumulative = 0;
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (group == null || !group.HasValidEnemies())
+                continue;
+
+            cumulative += Mathf.Max(1, group.Weight);
+
+            if (roll < cumulative)
+                return group;
+        }
+
+        return null;
+    }
+
+    public int GetMinEnemyCount()
+    {
+        return GetMinEnemyGroupCount();
+    }
+
+    public int GetMaxEnemyCount()
+    {
+        return GetMaxEnemyGroupCount();
+    }
+
+    private int GetMinEnemyGroupCount()
+    {
+        int count = 0;
+        bool hasValidGroup = false;
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (group == null || !group.HasValidEnemies())
+                continue;
+
+            if (!hasValidGroup || group.GetMinEnemyCount() < count)
+                count = group.GetMinEnemyCount();
+
+            hasValidGroup = true;
+        }
+
+        return hasValidGroup ? count : 0;
+    }
+
+    private int GetMaxEnemyGroupCount()
+    {
+        int count = 0;
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (group == null || !group.HasValidEnemies())
+                continue;
+
+            count = Mathf.Max(
+                count,
+                group.GetMaxEnemyCount());
+        }
+
+        return count;
+    }
+
+#if UNITY_EDITOR
+    public void Validate()
+    {
+        galaxyLevel =
+            Mathf.Clamp(galaxyLevel, 1, 10);
+
+        spawnIntervalSeconds =
+            Mathf.Max(0f, spawnIntervalSeconds);
+
+        maxAliveGroupsFromThisRule =
+            Mathf.Max(1, maxAliveGroupsFromThisRule);
+
+        if (enemyGroups == null)
+            enemyGroups = new EnemyGroupSpawnOptionConfig[0];
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            if (enemyGroups[i] == null)
+                enemyGroups[i] = new EnemyGroupSpawnOptionConfig();
+
+            enemyGroups[i].Validate();
+        }
+    }
+#endif
+}
+
+[System.Serializable]
+public sealed class EnemyGroupSpawnOptionConfig
+{
+    [SerializeField] [Min(1)] private int weight = 1;
+
+    [SerializeField] private EnemyGroupEntryConfig[] enemies =
+        new EnemyGroupEntryConfig[0];
+
+    public int Weight => weight;
 
     public IReadOnlyList<EnemyGroupEntryConfig> Enemies => enemies;
 
@@ -204,33 +377,16 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
 
     public int GetMinEnemyCount()
     {
-        if (enemies == null)
-            return 0;
-
-        int count = 0;
-        bool hasValidEntry = false;
-
-        for (int i = 0; i < enemies.Length; i++)
-        {
-            EnemyGroupEntryConfig entry =
-                enemies[i];
-
-            if (entry == null)
-                continue;
-
-            if (!entry.IsValid())
-                continue;
-
-            if (!hasValidEntry || entry.MinCount < count)
-                count = entry.MinCount;
-
-            hasValidEntry = true;
-        }
-
-        return hasValidEntry ? count : 0;
+        return GetEnemyCount(useMaxCount: false);
     }
 
     public int GetMaxEnemyCount()
+    {
+        return GetEnemyCount(useMaxCount: true);
+    }
+
+    private int GetEnemyCount(
+        bool useMaxCount)
     {
         if (enemies == null)
             return 0;
@@ -242,13 +398,12 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
             EnemyGroupEntryConfig entry =
                 enemies[i];
 
-            if (entry == null)
+            if (entry == null || !entry.IsValid())
                 continue;
 
-            if (!entry.IsValid())
-                continue;
-
-            count = Mathf.Max(count, entry.MaxCount);
+            count += useMaxCount
+                ? entry.MaxCount
+                : entry.MinCount;
         }
 
         return count;
@@ -257,14 +412,8 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
 #if UNITY_EDITOR
     public void Validate()
     {
-        galaxyLevel =
-            Mathf.Clamp(galaxyLevel, 1, 10);
-
-        spawnIntervalSeconds =
-            Mathf.Max(0f, spawnIntervalSeconds);
-
-        maxAliveGroupsFromThisRule =
-            Mathf.Max(1, maxAliveGroupsFromThisRule);
+        weight =
+            Mathf.Max(1, weight);
 
         if (enemies == null)
             enemies = new EnemyGroupEntryConfig[0];

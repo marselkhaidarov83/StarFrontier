@@ -17,6 +17,11 @@ MonoBehaviour:
   description: "Ranger L02: \u043E\u0431\u044B\u0447\u043D\u043E\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435."
   icon: {fileID: 0}
   behaviorWeights:
+  - behaviorType: 22
+    targetStationType: 0
+    targetUnitSide: 0
+    targetUnitType: 0
+    weight: 30
   - behaviorType: 30
     targetStationType: 0
     targetUnitSide: 0

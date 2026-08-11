@@ -174,40 +174,122 @@ public sealed class S04_02_ConfigAssetTests
                 rule.Id + " must have valid enemies.");
 
             Assert.NotNull(
-                rule.Enemies,
-                rule.Id + " Enemies list is null.");
+                rule.LevelEntries,
+                rule.Id + " LevelEntries list is null.");
 
             Assert.AreEqual(
-                1,
-                rule.Enemies.Count,
-                rule.Id + " must contain exactly one enemy entry in latest GitHub config.");
+                10,
+                rule.LevelEntries.Count,
+                rule.Id + " must contain exactly 10 galaxy level entries.");
 
-            EnemyGroupEntryConfig entry =
-                rule.Enemies[0];
-
-            Assert.NotNull(
-                entry,
-                rule.Id + " has null enemy entry.");
+            EnemyGroupSpawnLevelEntryConfig levelOneEntry =
+                rule.GetEntryForGalaxyLevel(1);
 
             Assert.NotNull(
-                entry.EnemyConfig,
-                rule.Id + " has empty EnemyConfig.");
+                levelOneEntry,
+                rule.Id + " has no L01 entry.");
+
+            Assert.NotNull(
+                levelOneEntry.EnemyGroups,
+                rule.Id + " L01 EnemyGroups list is null.");
 
             Assert.AreEqual(
+                3,
+                levelOneEntry.EnemyGroups.Count,
+                rule.Id + " L01 must contain one enemy group per faction.");
+
+            AssertEnemyGroupReferencesExpectedEnemy(
+                rule,
+                levelOneEntry,
                 expectation.EnemyConfigId,
-                entry.EnemyConfig.Id,
-                rule.Id + " references wrong EnemyConfig.");
-
-            Assert.AreEqual(
                 expectation.ExpectedMinCount,
-                entry.MinCount,
-                rule.Id + " has wrong MinCount.");
+                expectation.ExpectedMaxCount);
+
+            EnemyGroupSpawnLevelEntryConfig levelTenEntry =
+                rule.GetEntryForGalaxyLevel(10);
+
+            Assert.NotNull(
+                levelTenEntry,
+                rule.Id + " has no L10 entry.");
+
+            Assert.NotNull(
+                levelTenEntry.EnemyGroups,
+                rule.Id + " L10 EnemyGroups list is null.");
 
             Assert.AreEqual(
-                expectation.ExpectedMaxCount,
-                entry.MaxCount,
-                rule.Id + " has wrong MaxCount.");
+                3,
+                levelTenEntry.EnemyGroups.Count,
+                rule.Id + " L10 must contain one enemy group per faction.");
+
+            for (int groupIndex = 0;
+                 groupIndex < levelTenEntry.EnemyGroups.Count;
+                 groupIndex++)
+            {
+                EnemyGroupSpawnOptionConfig group =
+                    levelTenEntry.EnemyGroups[groupIndex];
+
+                Assert.NotNull(
+                    group,
+                    rule.Id + " L10 has null enemy group at index " + groupIndex);
+
+                Assert.NotNull(
+                    group.Enemies,
+                    rule.Id + " L10 enemy group has null Enemies at index " + groupIndex);
+
+                Assert.AreEqual(
+                    3,
+                    group.Enemies.Count,
+                    rule.Id + " L10 enemy group must contain L10, L09 and L08 entries together.");
+            }
         }
+    }
+
+    private static void AssertEnemyGroupReferencesExpectedEnemy(
+        EnemyGroupSpawnRuleConfig rule,
+        EnemyGroupSpawnLevelEntryConfig levelEntry,
+        string expectedEnemyConfigId,
+        int expectedMinCount,
+        int expectedMaxCount)
+    {
+        for (int groupIndex = 0;
+             groupIndex < levelEntry.EnemyGroups.Count;
+             groupIndex++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                levelEntry.EnemyGroups[groupIndex];
+
+            if (group == null || group.Enemies == null)
+                continue;
+
+            for (int enemyIndex = 0;
+                 enemyIndex < group.Enemies.Count;
+                 enemyIndex++)
+            {
+                EnemyGroupEntryConfig entry =
+                    group.Enemies[enemyIndex];
+
+                if (entry == null || entry.EnemyConfig == null)
+                    continue;
+
+                if (entry.EnemyConfig.Id != expectedEnemyConfigId)
+                    continue;
+
+                Assert.AreEqual(
+                    expectedMinCount,
+                    entry.MinCount,
+                    rule.Id + " has wrong MinCount.");
+
+                Assert.AreEqual(
+                    expectedMaxCount,
+                    entry.MaxCount,
+                    rule.Id + " has wrong MaxCount.");
+
+                return;
+            }
+        }
+
+        Assert.Fail(
+            rule.Id + " does not reference expected EnemyConfig: " + expectedEnemyConfigId);
     }
 
     private static T FindConfigById<T>(string id)

@@ -235,14 +235,8 @@ public sealed class SystemEncounterProductionController2A : MonoBehaviour
         int currentGalaxyLevel =
             Mathf.Clamp(encounterGalaxyLevel, 1, 10);
 
-        EnemyGroupSpawnLevelEntryConfig levelEntry =
-            spawnRule.GetEntryForGalaxyLevel(currentGalaxyLevel);
-
-        if (levelEntry == null)
-            return result;
-
         IReadOnlyList<EnemyGroupEntryConfig> enemies =
-            levelEntry.Enemies;
+            spawnRule.PickEnemiesForGalaxyLevel(currentGalaxyLevel);
 
         if (enemies == null)
             return result;

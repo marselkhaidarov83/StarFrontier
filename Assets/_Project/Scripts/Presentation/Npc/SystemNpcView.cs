@@ -3,6 +3,8 @@ using UnityEngine.EventSystems;
 
 public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
 {
+    private const float DirectionThresholdSqrMagnitude = 0.001f;
+
     [Header("View")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private SystemNpcRuntimeState systemNpcRuntimeState;
@@ -14,6 +16,8 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
     private SimpleEventBus _simpleEventBus;
     private ISystemNpcRuntimeService _runtimeService;
     private IPlayerAttackService _playerAttackService;
+    private Vector3 _lastPosition;
+    private bool _hasLastPosition;
 
     public bool IsBound => !string.IsNullOrWhiteSpace(runtimeNpcId);
 
@@ -63,6 +67,17 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         }
 
         transform.position = npc.CurrentPosition;
+
+        Vector3 lookDirection =
+            npc.CurrentMovementTargetPosition != Vector3.zero
+                ? npc.CurrentMovementTargetPosition - npc.CurrentPosition
+                : Vector3.zero;
+
+        if (!SetDirection(lookDirection) && _hasLastPosition)
+            SetDirection(transform.position - _lastPosition);
+
+        _lastPosition = transform.position;
+        _hasLastPosition = true;
     }
 
     public void Bind(SystemNpcRuntimeState npc, Sprite sprite)
@@ -79,6 +94,8 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         npcType = npc.NpcType;
 
         transform.position = npc.CurrentPosition;
+        _lastPosition = npc.CurrentPosition;
+        _hasLastPosition = true;
 
         if (spriteRenderer != null)
             spriteRenderer.sprite = sprite;
@@ -101,5 +118,48 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
 
         LogCustom("runtimeNpcId = " + runtimeNpcId);
         _playerAttackService.SetTarget(runtimeNpcId);
+    }
+
+    private bool SetDirection(Vector3 movementDirection)
+    {
+        if (!IsFinite(movementDirection) ||
+            movementDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        {
+            return false;
+        }
+
+        float angle =
+            Mathf.Atan2(
+                movementDirection.y,
+                movementDirection.x)
+            * Mathf.Rad2Deg;
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer
+                .transform
+                .localRotation =
+                    Quaternion.Euler(
+                        0f,
+                        0f,
+                        angle - 90f);
+        }
+
+        return true;
+    }
+
+    private static bool IsFinite(Vector3 value)
+    {
+        return
+            IsFinite(value.x) &&
+            IsFinite(value.y) &&
+            IsFinite(value.z);
+    }
+
+    private static bool IsFinite(float value)
+    {
+        return
+            !float.IsNaN(value) &&
+            !float.IsInfinity(value);
     }
 }

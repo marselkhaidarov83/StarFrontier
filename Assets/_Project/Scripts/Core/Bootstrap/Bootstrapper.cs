@@ -287,6 +287,61 @@ public class Bootstrapper : CustomMonoBehaviour
             spawned);
     }
 
+    [ContextMenu("STAR FRONTIER/Spawn Ally Ranger In Current System")]
+    private void DebugSpawnAllyRangerInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Ranger);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Military In Current System")]
+    private void DebugSpawnAllyMilitaryInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Military);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Trader In Current System")]
+    private void DebugSpawnAllyTraderInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Trader);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Science In Current System")]
+    private void DebugSpawnAllyScienceInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Science);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Medic In Current System")]
+    private void DebugSpawnAllyMedicInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Medic);
+    }
+
+    private void DebugSpawnAllyInCurrentSystem(AllyRole2A role)
+    {
+        if (ServiceRegistry == null)
+        {
+            Debug.LogWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out ISystemNpcPopulationService populationService))
+        {
+            Debug.LogWarning("[Bootstrapper] ISystemNpcPopulationService is not registered.");
+            return;
+        }
+
+        bool spawned =
+            populationService.DebugSpawnAllyInCurrentSystem(role);
+
+        Debug.Log(
+            "[Bootstrapper] Debug Spawn Ally In Current System result: " +
+            spawned +
+            ", Role: " +
+            role);
+    }
+
     private void StartGameFlow()
     {
         _gameStateMachine.Enter(new BootstrapState());

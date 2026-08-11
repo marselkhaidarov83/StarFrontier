@@ -13,4 +13,5 @@ public interface ISystemNpcPopulationService
     void ClearRuntimeState();
     string CreatePirateGroup(PirateGroupSpawnRuleConfig rule);
     bool DebugSpawnEnemyAttackGroupInCurrentSystem();
+    bool DebugSpawnAllyInCurrentSystem(AllyRole2A role);
 }

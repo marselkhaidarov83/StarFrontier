@@ -34,6 +34,7 @@ public sealed class SystemNpcRuntimeState
     public Vector3 CurrentPosition;
     public Vector3 StartPosition;
     public Vector3 TargetPosition;
+    public Vector3 CurrentMovementTargetPosition;
 
     [Header("Travel")]
     public SystemNpcTravelState TravelState;
