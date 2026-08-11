@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class Bootstrapper : CustomMonoBehaviour
 {
     [Header("Game")]
@@ -34,7 +33,6 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private List<WeaponConfig> weapons;
     [SerializeField] private List<ItemConfig> items;
 
-
     [SerializeField] public int MaxAcceptedMissionCount = 3;
 
     [Header("Debug")]
@@ -65,10 +63,14 @@ public class Bootstrapper : CustomMonoBehaviour
     public bool StopAutomaticAllySpawns => stopAutomaticAllySpawns;
     public bool StopAutomaticEnemySpawns => stopAutomaticEnemySpawns;
     public bool OverrideAutomaticAllySpawnInterval => overrideAutomaticAllySpawnInterval;
+
     public float DebugAutomaticAllySpawnIntervalSeconds =>
         Mathf.Max(0.1f, debugAutomaticAllySpawnIntervalSeconds);
+
     public bool OverrideNpcGalaxyLevel => overrideNpcGalaxyLevel;
-    public int DebugNpcGalaxyLevel => Mathf.Clamp(debugNpcGalaxyLevel, 1, 10);
+
+    public int DebugNpcGalaxyLevel =>
+        Mathf.Clamp(debugNpcGalaxyLevel, 1, 10);
 
     private void Awake()
     {
@@ -97,7 +99,8 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void InitializeStateMachine()
     {
-        _gameStateMachine = RegisterService<IGameStateMachine, GameStateMachine>();
+        _gameStateMachine =
+            RegisterService<IGameStateMachine, GameStateMachine>();
     }
 
     private void InitializeServices()
@@ -134,8 +137,11 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<ITargetService2A, TargetService2A>();
         RegisterService<ISystemBoundsService, SystemBoundsService2A>();
 
-        _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
-        _shipMovementService = RegisterService<IShipMovementService, ShipMovementService2A>();
+        _playerControlService =
+            RegisterService<IPlayerControlService, PlayerControlService2A>();
+
+        _shipMovementService =
+            RegisterService<IShipMovementService, ShipMovementService2A>();
 
         RegisterService<IPlayerShipSaveSyncService, PlayerShipSaveSyncService2A>();
         RegisterService<ISystemContextService, SystemContextService>();
@@ -155,7 +161,8 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<ISystemTravelService, SystemTravelService>();
         RegisterService<ITravelService, TravelService2A>();
 
-        _interactionService = RegisterService<IInteractionService2A, InteractionService2A>();
+        _interactionService =
+            RegisterService<IInteractionService2A, InteractionService2A>();
 
         RegisterService<IRepairService, RepairService>();
         RegisterService<IRewardService, RewardService>();
@@ -163,6 +170,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IPlanetMissionOfferGenerator, PlanetMissionOfferGenerator>();
         RegisterService<IGovernmentRewardPayoutService, DebugGovernmentRewardPayoutService>();
         RegisterService<IGovernmentRewardService, GovernmentRewardService>();
+        RegisterService<IDamageService2A, DamageService2A>();
         RegisterService<ISystemNpcRuntimeService, SystemNpcRuntimeService>();
         RegisterService<ISystemSecurityService, SystemSecurityService>();
         RegisterService<ISystemNpcPopulationService, SystemNpcPopulationService>();
@@ -171,7 +179,8 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IGalaxyNpcBehaviorService, GalaxyNpcBehaviorService>();
         RegisterService<ISystemNpcSimulationSaveService, SystemNpcSimulationSaveService>();
 
-        _saveService = RegisterService<ISaveService, SaveService2A>();
+        _saveService =
+            RegisterService<ISaveService, SaveService2A>();
 
         RegisterService<IPlayerCombatTargetService, PlayerCombatTargetService>();
         RegisterService<ISystemNpcMovementRouteService, SystemNpcMovementRouteService>();
@@ -186,8 +195,11 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IMissionTracker, MissionTracker>();
         RegisterService<IPlanetGovernmentMissionService, PlanetGovernmentMissionService>();
 
-        _tickService = RegisterService<ITickService, TickService>();
-        _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();
+        _tickService =
+            RegisterService<ITickService, TickService>();
+
+        _gameTimeService =
+            RegisterService<IGameTimeService, GameTimeService>();
 
         _tickService.Register(_gameTimeService, TickOrder.GameTime);
         _tickService.Register(_playerControlService, TickOrder.PlayerControl);
@@ -197,13 +209,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IGameTimePauseScopeService, GameTimePauseScopeService>();
     }
 
-    /// <summary>
-    /// Создаёт сервис через пустой конструктор
-    /// и передаёт его в регистрацию готового экземпляра.
-    /// </summary>
-    private TInterface RegisterService<
-        TInterface,
-        TImplementation>()
+    private TInterface RegisterService<TInterface, TImplementation>()
         where TImplementation : TInterface, new()
     {
         TImplementation service =
@@ -212,36 +218,30 @@ public class Bootstrapper : CustomMonoBehaviour
         return RegisterService<TInterface>(service);
     }
 
-    /// <summary>
-    /// Регистрирует уже созданный экземпляр сервиса.
-    ///
-    /// Используется, когда объект создан заранее
-    /// или требует параметров конструктора.
-    /// </summary>
     private TInterface RegisterService<TInterface>(
         TInterface service)
     {
         ServiceRegistry.Register<TInterface>(service);
 
-        LogCustom($"{service.GetType().Name} registered " + $"as {typeof(TInterface).Name}");
+        LogCustom(
+            $"{service.GetType().Name} registered as {typeof(TInterface).Name}");
 
         return service;
     }
-
 
     [ContextMenu("STAR FRONTIER/Kill All NPCs")]
     private void DebugKillAllNpcs()
     {
         if (ServiceRegistry == null)
         {
-            Debug.LogWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            LogCustom("[Bootstrapper] ServiceRegistry is not initialized.");
             return;
         }
 
         if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
                 out ISystemNpcRuntimeService npcRuntimeService))
         {
-            Debug.LogWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            LogCustom("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
             return;
         }
 
@@ -258,7 +258,7 @@ public class Bootstrapper : CustomMonoBehaviour
             populationService.ClearRuntimeState();
         }
 
-        Debug.Log(
+        LogCustom(
             "[Bootstrapper] Debug Kill All NPCs completed. Removed NPCs: " +
             npcCount);
     }
@@ -268,21 +268,21 @@ public class Bootstrapper : CustomMonoBehaviour
     {
         if (ServiceRegistry == null)
         {
-            Debug.LogWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            LogCustom("[Bootstrapper] ServiceRegistry is not initialized.");
             return;
         }
 
         if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
                 out ISystemNpcPopulationService populationService))
         {
-            Debug.LogWarning("[Bootstrapper] ISystemNpcPopulationService is not registered.");
+            LogCustom("[Bootstrapper] ISystemNpcPopulationService is not registered.");
             return;
         }
 
         bool spawned =
             populationService.DebugSpawnEnemyAttackGroupInCurrentSystem();
 
-        Debug.Log(
+        LogCustom(
             "[Bootstrapper] Debug Spawn Enemy Attack Group In Current System result: " +
             spawned);
     }
@@ -317,25 +317,26 @@ public class Bootstrapper : CustomMonoBehaviour
         DebugSpawnAllyInCurrentSystem(AllyRole2A.Medic);
     }
 
-    private void DebugSpawnAllyInCurrentSystem(AllyRole2A role)
+    private void DebugSpawnAllyInCurrentSystem(
+        AllyRole2A role)
     {
         if (ServiceRegistry == null)
         {
-            Debug.LogWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            LogCustom("[Bootstrapper] ServiceRegistry is not initialized.");
             return;
         }
 
         if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
                 out ISystemNpcPopulationService populationService))
         {
-            Debug.LogWarning("[Bootstrapper] ISystemNpcPopulationService is not registered.");
+            LogCustom("[Bootstrapper] ISystemNpcPopulationService is not registered.");
             return;
         }
 
         bool spawned =
             populationService.DebugSpawnAllyInCurrentSystem(role);
 
-        Debug.Log(
+        LogCustom(
             "[Bootstrapper] Debug Spawn Ally In Current System result: " +
             spawned +
             ", Role: " +
@@ -349,13 +350,11 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void Update()
     {
-        // float deltaTime = Time.deltaTime;
-
-        // _gameTimeService?.Tick(deltaTime);
         _tickService?.Tick(Time.deltaTime);
     }
 
-    private void OnApplicationPause(bool pause)
+    private void OnApplicationPause(
+        bool pause)
     {
         if (!pause)
             return;
@@ -370,7 +369,8 @@ public class Bootstrapper : CustomMonoBehaviour
             SaveCurrentGame("app_quit");
     }
 
-    public void SaveCurrentGame(string reason = "manual")
+    public void SaveCurrentGame(
+        string reason = "manual")
     {
         _saveService.Save();
     }

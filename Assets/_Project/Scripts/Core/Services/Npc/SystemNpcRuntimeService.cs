@@ -6,6 +6,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 {
     private readonly List<SystemNpcRuntimeState> _npcs = new();
     private readonly SimpleEventBus _eventBus;
+    private readonly IDamageService2A _damageService;
 
     public IReadOnlyList<SystemNpcRuntimeState> Npcs => _npcs;
 
@@ -13,6 +14,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     {
         _debugStop = true;
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        _damageService = Bootstrapper.Instance.ServiceRegistry.Get<IDamageService2A>();
     }
 
     public void AddNpc(SystemNpcRuntimeState npc)
@@ -99,7 +101,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             .Select(group => group.First())
             .ToList();
     }
-    
+
     public IReadOnlyList<SystemNpcRuntimeState> GetAliveEnemyGroupsByRule(
         string systemId,
         string groupRuleId)
@@ -132,8 +134,11 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         ));
     }
 
-    public void ApplyDamage(string runtimeNpcId, int damage, bool killedByPlayer,
-            bool damagedByPlayer)
+    public void ApplyDamage(
+    string runtimeNpcId,
+    int damage,
+    bool killedByPlayer,
+    bool damagedByPlayer)
     {
         if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc))
             return;
@@ -141,7 +146,17 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         if (!npc.IsAlive)
             return;
 
-        npc.ApplyDamage(damage);
+        CombatDamageResult2A result = _damageService.ApplyDamage(
+            npc.CurrentShield,
+            npc.CurrentHull,
+            damage);
+
+        if (result.AppliedDamage <= 0)
+            return;
+
+        npc.ApplyDamageResult(
+            result.CurrentShield,
+            result.CurrentHull);
 
         if (killedByPlayer || damagedByPlayer)
         {
@@ -153,15 +168,16 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         _eventBus.Publish(new SystemNpcDamagedEvent(
             npc.RuntimeNpcId,
-            damage,
+            result.AppliedDamage,
             npc.CurrentHull,
-            npc.CurrentShield
-        ));
+            npc.CurrentShield));
 
         LogCustom("npc.IsAlive = " + npc.IsAlive);
+
         if (!npc.IsAlive)
         {
             LogCustom("npc destroyed");
+
             npc.WasKilledByPlayer = killedByPlayer;
             npc.DestroyedAtTick = GetCurrentQuantTick();
             npc.NextRespawnTick = ScheduleRespawn(npc);
@@ -171,13 +187,11 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
                 npc.RuntimeNpcId,
                 npc.NpcType,
                 npc.CurrentSystemId,
-                killedByPlayer
-            ));
+                killedByPlayer));
 
             LogCustom(
                 $"[SystemNpcRuntimeService] NPC destroyed. " +
-                $"Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, KilledByPlayer: {killedByPlayer}"
-            );
+                $"Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, KilledByPlayer: {killedByPlayer}");
         }
     }
 

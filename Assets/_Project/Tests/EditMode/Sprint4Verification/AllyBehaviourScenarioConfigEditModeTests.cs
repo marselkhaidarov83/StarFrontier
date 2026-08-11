@@ -9,48 +9,29 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
     [Test]
     public void AllyBehaviourScenario_ContainsRequiredValues()
     {
-        Assert.That(
-            Enum.IsDefined(
-                typeof(AllyBehaviourScenario),
-                AllyBehaviourScenario.Normal),
-            Is.True);
-
-        Assert.That(
-            Enum.IsDefined(
-                typeof(AllyBehaviourScenario),
-                AllyBehaviourScenario.EnemyInvasion),
-            Is.True);
-
-        Assert.That(
-            Enum.IsDefined(
-                typeof(AllyBehaviourScenario),
-                AllyBehaviourScenario.EnemySystemInvasion),
-            Is.True);
+        Assert.That(Enum.IsDefined(typeof(AllyBehaviourScenario), AllyBehaviourScenario.Normal), Is.True);
+        Assert.That(Enum.IsDefined(typeof(AllyBehaviourScenario), AllyBehaviourScenario.EnemyInvasion), Is.True);
+        Assert.That(Enum.IsDefined(typeof(AllyBehaviourScenario), AllyBehaviourScenario.EnemySystemInvasion), Is.True);
     }
 
     [Test]
     public void AllyBehaviourScenarioConfig_InheritsFromBaseConfig()
     {
         Assert.That(
-            typeof(BaseConfig).IsAssignableFrom(
-                typeof(AllyBehaviourScenarioConfig)),
+            typeof(BaseConfig).IsAssignableFrom(typeof(AllyBehaviourScenarioConfig)),
             Is.True);
     }
 
     [Test]
     public void AllyBehaviourScenarioConfig_DoesNotStoreScenario()
     {
-        FieldInfo scenarioIdField =
-            typeof(AllyBehaviourScenarioConfig).GetField(
-                "scenarioId",
-                BindingFlags.Instance |
-                BindingFlags.NonPublic);
+        FieldInfo scenarioIdField = typeof(AllyBehaviourScenarioConfig).GetField(
+            "scenarioId",
+            BindingFlags.Instance | BindingFlags.NonPublic);
 
-        FieldInfo scenarioField =
-            typeof(AllyBehaviourScenarioConfig).GetField(
-                "scenario",
-                BindingFlags.Instance |
-                BindingFlags.NonPublic);
+        FieldInfo scenarioField = typeof(AllyBehaviourScenarioConfig).GetField(
+            "scenario",
+            BindingFlags.Instance | BindingFlags.NonPublic);
 
         Assert.That(scenarioIdField, Is.Null);
         Assert.That(scenarioField, Is.Null);
@@ -59,58 +40,27 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
     [Test]
     public void AllyConfig_ResolvesBehaviorProfileByEnum()
     {
-        AllyConfig allyConfig =
-            ScriptableObject.CreateInstance<AllyConfig>();
+        AllyConfig allyConfig = ScriptableObject.CreateInstance<AllyConfig>();
 
-        AllyBehaviourScenarioConfig normal =
-            ScriptableObject.CreateInstance<
-                AllyBehaviourScenarioConfig>();
+        NpcBehaviourScenarioConfig normal =
+            ScriptableObject.CreateInstance<NpcBehaviourScenarioConfig>();
 
-        AllyBehaviourScenarioConfig enemyInvasion =
-            ScriptableObject.CreateInstance<
-                AllyBehaviourScenarioConfig>();
+        NpcBehaviourScenarioConfig enemyInvasion =
+            ScriptableObject.CreateInstance<NpcBehaviourScenarioConfig>();
 
-        AllyBehaviourScenarioConfig enemySystemInvasion =
-            ScriptableObject.CreateInstance<
-                AllyBehaviourScenarioConfig>();
+        NpcBehaviourScenarioConfig enemySystemInvasion =
+            ScriptableObject.CreateInstance<NpcBehaviourScenarioConfig>();
 
-        AllyBehaviourScenarioEntry normalEntry =
-            new AllyBehaviourScenarioEntry();
-
-        AllyBehaviourScenarioEntry enemyInvasionEntry =
-            new AllyBehaviourScenarioEntry();
-
-        AllyBehaviourScenarioEntry enemySystemInvasionEntry =
-            new AllyBehaviourScenarioEntry();
-
-        SetPrivateField(
-            normalEntry,
-            "scenario",
-            AllyBehaviourScenario.Normal);
-
-        SetPrivateField(
-            normalEntry,
-            "behaviorConfig",
+        AllyBehaviourScenarioEntry normalEntry = CreateEntry(
+            AllyBehaviourScenario.Normal,
             normal);
 
-        SetPrivateField(
-            enemyInvasionEntry,
-            "scenario",
-            AllyBehaviourScenario.EnemyInvasion);
-
-        SetPrivateField(
-            enemyInvasionEntry,
-            "behaviorConfig",
+        AllyBehaviourScenarioEntry enemyInvasionEntry = CreateEntry(
+            AllyBehaviourScenario.EnemyInvasion,
             enemyInvasion);
 
-        SetPrivateField(
-            enemySystemInvasionEntry,
-            "scenario",
-            AllyBehaviourScenario.EnemySystemInvasion);
-
-        SetPrivateField(
-            enemySystemInvasionEntry,
-            "behaviorConfig",
+        AllyBehaviourScenarioEntry enemySystemInvasionEntry = CreateEntry(
+            AllyBehaviourScenario.EnemySystemInvasion,
             enemySystemInvasion);
 
         SetPrivateField(
@@ -131,9 +81,7 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
                     out NpcBehaviourScenarioConfig normalResult),
                 Is.True);
 
-            Assert.That(
-                normalResult,
-                Is.SameAs(normal));
+            Assert.That(normalResult, Is.SameAs(normal));
 
             Assert.That(
                 allyConfig.TryGetBehaviorScenario(
@@ -141,9 +89,7 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
                     out NpcBehaviourScenarioConfig invasionResult),
                 Is.True);
 
-            Assert.That(
-                invasionResult,
-                Is.SameAs(enemyInvasion));
+            Assert.That(invasionResult, Is.SameAs(enemyInvasion));
 
             Assert.That(
                 allyConfig.GetBehaviorScenario(
@@ -156,58 +102,30 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
         }
         finally
         {
-            UnityEngine.Object.DestroyImmediate(
-                allyConfig);
-
-            UnityEngine.Object.DestroyImmediate(
-                normal);
-
-            UnityEngine.Object.DestroyImmediate(
-                enemyInvasion);
-
-            UnityEngine.Object.DestroyImmediate(
-                enemySystemInvasion);
+            UnityEngine.Object.DestroyImmediate(allyConfig);
+            UnityEngine.Object.DestroyImmediate(normal);
+            UnityEngine.Object.DestroyImmediate(enemyInvasion);
+            UnityEngine.Object.DestroyImmediate(enemySystemInvasion);
         }
     }
 
     [Test]
     public void AllyConfig_DetectsDuplicateScenarios()
     {
-        AllyConfig allyConfig =
-            ScriptableObject.CreateInstance<AllyConfig>();
+        AllyConfig allyConfig = ScriptableObject.CreateInstance<AllyConfig>();
 
-        AllyBehaviourScenarioConfig firstProfile =
-            ScriptableObject.CreateInstance<
-                AllyBehaviourScenarioConfig>();
+        NpcBehaviourScenarioConfig firstProfile =
+            ScriptableObject.CreateInstance<NpcBehaviourScenarioConfig>();
 
-        AllyBehaviourScenarioConfig secondProfile =
-            ScriptableObject.CreateInstance<
-                AllyBehaviourScenarioConfig>();
+        NpcBehaviourScenarioConfig secondProfile =
+            ScriptableObject.CreateInstance<NpcBehaviourScenarioConfig>();
 
-        AllyBehaviourScenarioEntry firstEntry =
-            new AllyBehaviourScenarioEntry();
-
-        AllyBehaviourScenarioEntry secondEntry =
-            new AllyBehaviourScenarioEntry();
-
-        SetPrivateField(
-            firstEntry,
-            "scenario",
-            AllyBehaviourScenario.Normal);
-
-        SetPrivateField(
-            firstEntry,
-            "behaviorConfig",
+        AllyBehaviourScenarioEntry firstEntry = CreateEntry(
+            AllyBehaviourScenario.Normal,
             firstProfile);
 
-        SetPrivateField(
-            secondEntry,
-            "scenario",
-            AllyBehaviourScenario.Normal);
-
-        SetPrivateField(
-            secondEntry,
-            "behaviorConfig",
+        AllyBehaviourScenarioEntry secondEntry = CreateEntry(
+            AllyBehaviourScenario.Normal,
             secondProfile);
 
         SetPrivateField(
@@ -227,39 +145,50 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
         }
         finally
         {
-            UnityEngine.Object.DestroyImmediate(
-                allyConfig);
-
-            UnityEngine.Object.DestroyImmediate(
-                firstProfile);
-
-            UnityEngine.Object.DestroyImmediate(
-                secondProfile);
+            UnityEngine.Object.DestroyImmediate(allyConfig);
+            UnityEngine.Object.DestroyImmediate(firstProfile);
+            UnityEngine.Object.DestroyImmediate(secondProfile);
         }
     }
 
     [Test]
-    public void ExistingAllyConfigAssets_HaveAllThreeScenarios()
+    public void ExistingAllyConfigAssets_HaveExpectedScenarios()
     {
-        string[] expectedIds =
+        AllyConfigScenarioExpectation[] expectations =
         {
-            "ally_civilian_L01_01",
-            "ally_medical_L01_01",
-            "ally_warrior_L01_01",
-            "ally_ranger_L01_01",
-            "ally_trader_L01_01"
+            new AllyConfigScenarioExpectation(
+                "ally_military_L01_01",
+                true),
+
+            new AllyConfigScenarioExpectation(
+                "ally_ranger_L01_01",
+                true),
+
+            new AllyConfigScenarioExpectation(
+                "ally_trader_L01_01",
+                false),
+
+            new AllyConfigScenarioExpectation(
+                "ally_medic_L01_01",
+                false),
+
+            new AllyConfigScenarioExpectation(
+                "ally_science_L01_01",
+                false)
         };
 
-        for (int i = 0; i < expectedIds.Length; i++)
+        for (int i = 0; i < expectations.Length; i++)
         {
+            AllyConfigScenarioExpectation expectation = expectations[i];
+
             AllyConfig config =
                 FindConfigById<AllyConfig>(
-                    expectedIds[i]);
+                    expectation.Id);
 
             Assert.That(
                 config,
                 Is.Not.Null,
-                "Missing AllyConfig: " + expectedIds[i]);
+                "Missing AllyConfig: " + expectation.Id);
 
             Assert.That(
                 config.HasDuplicateBehaviorScenarios(),
@@ -281,10 +210,29 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
             Assert.That(
                 config.HasBehaviorScenario(
                     AllyBehaviourScenario.EnemySystemInvasion),
-                Is.True,
-                config.Id +
-                " is missing enemy_system_invasion.");
+                Is.EqualTo(expectation.RequiresEnemySystemInvasion),
+                config.Id + " has wrong enemy_system_invasion availability.");
         }
+    }
+
+    private static AllyBehaviourScenarioEntry CreateEntry(
+        AllyBehaviourScenario scenario,
+        NpcBehaviourScenarioConfig behaviorConfig)
+    {
+        AllyBehaviourScenarioEntry entry =
+            new AllyBehaviourScenarioEntry();
+
+        SetPrivateField(
+            entry,
+            "scenario",
+            scenario);
+
+        SetPrivateField(
+            entry,
+            "behaviorConfig",
+            behaviorConfig);
+
+        return entry;
     }
 
     private static T FindConfigById<T>(string id)
@@ -331,5 +279,19 @@ public sealed class AllyBehaviourScenarioConfigEditModeTests
             "Private field not found: " + fieldName);
 
         field.SetValue(target, value);
+    }
+
+    private sealed class AllyConfigScenarioExpectation
+    {
+        public AllyConfigScenarioExpectation(
+            string id,
+            bool requiresEnemySystemInvasion)
+        {
+            Id = id;
+            RequiresEnemySystemInvasion = requiresEnemySystemInvasion;
+        }
+
+        public string Id { get; }
+        public bool RequiresEnemySystemInvasion { get; }
     }
 }

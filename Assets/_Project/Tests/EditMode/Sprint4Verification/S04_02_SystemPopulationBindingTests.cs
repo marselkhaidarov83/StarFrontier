@@ -7,7 +7,7 @@ public sealed class S04_02_SystemPopulationBindingTests
         "s01_system_solaria_02";
 
     private const string ExpectedSolariaPopulationRuleId =
-        "system_population_rule_trade_01";
+        "system_population_rule_trade_no_enemies_01";
 
     private const string ExpectedSolariaAllySpawnRuleId =
         "ally_spawn_trade_01";
@@ -16,13 +16,10 @@ public sealed class S04_02_SystemPopulationBindingTests
         "s01_system_vega_reach_02";
 
     private const string ExpectedSciencePopulationRuleId =
-        "system_population_rule_science_01";
+        "system_population_rule_science_no_enemies_01";
 
     private const string ExpectedScienceAllySpawnRuleId =
-        "ally_spawn_transport_01";
-
-    private const string AiEnemyGroupRuleId =
-        "enemy_group_spawn_ai_01";
+        "ally_spawn_science_01";
 
     private static readonly string[] RequiredEnemyGroupRuleIds =
     {
@@ -77,55 +74,7 @@ public sealed class S04_02_SystemPopulationBindingTests
     }
 
     [Test]
-    public void AtLeastOneStarSystem_ReferencesEachRequiredEnemyGroupRuleThroughPopulationRule()
-    {
-        for (int i = 0; i < RequiredEnemyGroupRuleIds.Length; i++)
-        {
-            string ruleId =
-                RequiredEnemyGroupRuleIds[i];
-
-            StarSystemConfig system =
-                FindStarSystemReferencingEnemyGroupRule(
-                    ruleId);
-
-            Assert.NotNull(
-                system,
-                "No StarSystemConfig references EnemyGroupSpawnRuleConfig " +
-                "through SystemPopulationRule: " + ruleId);
-        }
-    }
-
-    [Test]
-    public void SolariaPopulationRule_HasAllRequiredEnemyGroupRules()
-    {
-        StarSystemConfig system =
-            FindConfigById<StarSystemConfig>(
-                SolariaSystemId);
-
-        Assert.NotNull(
-            system,
-            "Missing StarSystemConfig: " + SolariaSystemId);
-
-        Assert.NotNull(
-            system.SystemPopulationRule,
-            SolariaSystemId + " must have SystemPopulationRule assigned.");
-
-        for (int i = 0; i < RequiredEnemyGroupRuleIds.Length; i++)
-        {
-            string ruleId =
-                RequiredEnemyGroupRuleIds[i];
-
-            Assert.IsTrue(
-                HasEnemyRule(
-                    system.SystemPopulationRule,
-                    ruleId),
-                system.SystemPopulationRule.Id +
-                " must reference enemy group rule " + ruleId);
-        }
-    }
-
-    [Test]
-    public void ScienceSystem_UsesTransportAlliesAndHigherAiEnemyWeight()
+    public void ScienceSystem_UsesExpectedNoEnemiesPopulationRule()
     {
         StarSystemConfig system =
             FindConfigById<StarSystemConfig>(
@@ -151,14 +100,25 @@ public sealed class S04_02_SystemPopulationBindingTests
                 ExpectedScienceAllySpawnRuleId),
             system.SystemPopulationRule.Id + " must reference " +
             ExpectedScienceAllySpawnRuleId + ".");
+    }
 
-        Assert.AreEqual(
-            2,
-            GetEnemyGroupRuleWeight(
-                system.SystemPopulationRule,
-                AiEnemyGroupRuleId),
-            system.SystemPopulationRule.Id +
-            " must increase AI enemy group weight for science systems.");
+    [Test]
+    public void AtLeastOneStarSystem_ReferencesEachRequiredEnemyGroupRuleThroughPopulationRule()
+    {
+        for (int i = 0; i < RequiredEnemyGroupRuleIds.Length; i++)
+        {
+            string ruleId =
+                RequiredEnemyGroupRuleIds[i];
+
+            StarSystemConfig system =
+                FindStarSystemReferencingEnemyGroupRule(
+                    ruleId);
+
+            Assert.NotNull(
+                system,
+                "No StarSystemConfig references EnemyGroupSpawnRuleConfig " +
+                "through SystemPopulationRule: " + ruleId);
+        }
     }
 
     private static StarSystemConfig FindStarSystemReferencingEnemyGroupRule(
@@ -240,36 +200,6 @@ public sealed class S04_02_SystemPopulationBindingTests
         }
 
         return false;
-    }
-
-    private static int GetEnemyGroupRuleWeight(
-        SystemPopulationRule populationRule,
-        string enemyGroupRuleId)
-    {
-        if (populationRule == null)
-            return 0;
-
-        if (populationRule.EnemyGroupSpawnRuleEntries == null)
-            return 0;
-
-        for (int i = 0; i < populationRule.EnemyGroupSpawnRuleEntries.Length; i++)
-        {
-            SystemPopulationEnemyGroupRuleEntry entry =
-                populationRule.EnemyGroupSpawnRuleEntries[i];
-
-            if (entry == null)
-                continue;
-
-            if (entry.EnemyGroupSpawnRule == null)
-                continue;
-
-            if (entry.EnemyGroupSpawnRule.Id != enemyGroupRuleId)
-                continue;
-
-            return entry.Weight;
-        }
-
-        return 0;
     }
 
     private static T FindConfigById<T>(string id)

@@ -21,7 +21,7 @@ public static class SystemNpcSpawnPointConfigAssetGenerator
         200f;
 
     private const float EnemyRandomRadius =
-        35f;
+        150f;
 
     [MenuItem("STAR FRONTIER/Content/10. System NPC Spawn Points/Create generated SystemNpcSpawnPointConfig assets")]
     public static void CreateGeneratedSystemNpcSpawnPointConfigs()

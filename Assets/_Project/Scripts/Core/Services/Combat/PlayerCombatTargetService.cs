@@ -4,135 +4,78 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
 {
     private readonly IGameSessionService _gameSessionService;
     private readonly SimpleEventBus _eventBus;
-    private readonly ISaveService _saveService;
+    private readonly IDamageService2A _damageService;
 
     public PlayerCombatTargetService()
     {
         _debugStop = true;
-
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
+        _damageService = Bootstrapper.Instance.ServiceRegistry.Get<IDamageService2A>();
     }
 
     public bool IsPlayerAvailableInSystem(string systemId)
     {
-        if (_gameSessionService?.State?.Player == null)
-            return false;
-
+        if (_gameSessionService?.State?.Player == null) return false;
         PlayerState profile = _gameSessionService.State.Player;
-
-        if (profile.CurrentSystemId != systemId)
-            return false;
-
-        // Если игрок сидит на планете, его нельзя атаковать в космосе.
-        if (profile.IsOnPlanet())
-            return false;
+        if (profile.CurrentSystemId != systemId) return false;
+        if (profile.IsOnPlanet()) return false;
 
         ShipRuntimeData activeShip = GetActiveShip();
-
-        if (activeShip == null)
-            return false;
-
-        if (activeShip.CurrentHull <= 0)
-            return false;
-
-        return true;
+        return activeShip != null && activeShip.CurrentHull > 0;
     }
 
     public Vector3 GetPlayerPosition()
     {
-        if (_gameSessionService?.State?.Player == null)
-            return Vector3.zero;
-
+        if (_gameSessionService?.State?.Player == null) return Vector3.zero;
         Vector3 position = _gameSessionService.State.Player.SystemMapShipPosition;
         position.z = 0f;
-
         return position;
     }
 
     public void ApplyDamage(int damage)
     {
-        if (damage <= 0)
-            return;
-
         ShipRuntimeData activeShip = GetActiveShip();
+        if (activeShip == null) return;
 
-        if (activeShip == null)
-        {
-            Debug.LogWarning("[PlayerCombatTargetService] Cannot apply damage: active ship is null.");
-            return;
-        }
+        CombatDamageResult2A result = _damageService.ApplyDamage(
+            activeShip.CurrentShield,
+            activeShip.CurrentHull,
+            damage);
 
-        if (activeShip.CurrentHull <= 0)
-        {
-            Debug.Log("[PlayerCombatTargetService] Damage ignored: player ship already destroyed.");
-            return;
-        }
+        if (result.AppliedDamage <= 0) return;
 
-        int initialShield = activeShip.CurrentShield;
-        int initialHull = activeShip.CurrentHull;
-
-        int remainingDamage = damage;
-
-        if (activeShip.CurrentShield > 0)
-        {
-            int shieldDamage = Mathf.Min(activeShip.CurrentShield, remainingDamage);
-
-            activeShip.CurrentShield -= shieldDamage;
-            remainingDamage -= shieldDamage;
-        }
-
-        if (remainingDamage > 0)
-        {
-            activeShip.CurrentHull -= remainingDamage;
-
-            if (activeShip.CurrentHull < 0)
-                activeShip.CurrentHull = 0;
-        }
-
-        Debug.Log(
-            "[PlayerCombatTargetService] Player damaged. " +
-            $"Damage: {damage}, " +
-            $"Shield: {initialShield} -> {activeShip.CurrentShield}, " +
-            $"Hull: {initialHull} -> {activeShip.CurrentHull}"
-        );
+        activeShip.CurrentShield = result.CurrentShield;
+        activeShip.CurrentHull = result.CurrentHull;
 
         _eventBus.Publish(new PlayerDamagedByNpcEvent(
-            damage,
+            result.AppliedDamage,
             activeShip.CurrentShield,
-            activeShip.CurrentHull
-        ));
+            activeShip.CurrentHull));
 
         _eventBus.Publish(new CombatDamageEvent2A(
             "player",
             true,
-            damage,
+            result.AppliedDamage,
             activeShip.CurrentShield,
             activeShip.CurrentHull));
 
-        if (activeShip.CurrentHull <= 0)
+        if (result.IsDestroyed)
         {
             _eventBus.Publish(new PlayerShipDestroyedByNpcEvent());
-
             _eventBus.Publish(new CombatTargetDestroyedEvent2A(
                 string.Empty,
                 _gameSessionService.State.Player.CurrentSystemId,
                 "player",
                 "npc"));
-
-            Debug.Log("[PlayerCombatTargetService] Player ship destroyed by NPC.");
         }
 
         _eventBus.Publish(new SaveNeedEvent());
-        // _saveService.Save();
     }
 
     private ShipRuntimeData GetActiveShip()
     {
-        if (_gameSessionService?.State?.Player == null)
-            return null;
-
+        if (_gameSessionService?.State?.Player == null) return null;
         return _gameSessionService.State.Player.GetActiveShip();
     }
 }

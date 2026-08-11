@@ -15,12 +15,12 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
     private static readonly string[] AllyConfigIds =
     {
         "ally_ranger_L01_01",
-        "ally_warrior_L01_01",
+        "ally_military_L01_01",
         "ally_trader_L01_01"
     };
 
     [Test]
-    public void EnemyRuntimeFactory_CopiesAllConfiguredWeapons()
+    public void EnemyRuntimeFactory_CopiesOneValidConfiguredWeaponGroup()
     {
         for (int i = 0; i < EnemyConfigIds.Length; i++)
         {
@@ -47,20 +47,16 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
                 SystemNpcType.Enemy,
                 npc.NpcType);
 
-            Assert.AreEqual(
-                config.WeaponCount,
-                npc.Weapons.Count,
-                config.Id + " runtime weapon count must match EnemyConfig.WeaponCount.");
-
-            AssertRuntimeWeaponsMatchConfigWeapons(
+            AssertRuntimeWeaponsMatchOneValidWeaponGroup(
                 config.Id,
+                config.WeaponGroups,
                 config.WeaponConfigs,
                 npc.Weapons);
         }
     }
 
     [Test]
-    public void AllyRuntimeFactory_CopiesAllConfiguredWeapons()
+    public void AllyRuntimeFactory_CopiesOneValidConfiguredWeaponGroup()
     {
         for (int i = 0; i < AllyConfigIds.Length; i++)
         {
@@ -87,51 +83,75 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
                 SystemNpcType.Ally,
                 npc.NpcType);
 
-            Assert.AreEqual(
-                config.WeaponCount,
-                npc.Weapons.Count,
-                config.Id + " runtime weapon count must match AllyConfig.WeaponCount.");
-
-            AssertRuntimeWeaponsMatchConfigWeapons(
+            AssertRuntimeWeaponsMatchOneValidWeaponGroup(
                 config.Id,
+                config.WeaponGroups,
                 config.WeaponConfigs,
                 npc.Weapons);
         }
     }
 
-    private static void AssertRuntimeWeaponsMatchConfigWeapons(
+    private static void AssertRuntimeWeaponsMatchOneValidWeaponGroup(
         string ownerConfigId,
-        IReadOnlyList<WeaponConfig> configWeapons,
+        IReadOnlyList<WeaponGroupConfig> weaponGroups,
+        IReadOnlyList<WeaponConfig> fallbackConfigWeapons,
         IReadOnlyList<SystemNpcWeaponRuntimeState> runtimeWeapons)
     {
-        Assert.NotNull(
-            configWeapons,
-            ownerConfigId + " config weapon list is null.");
-
         Assert.NotNull(
             runtimeWeapons,
             ownerConfigId + " runtime weapon list is null.");
 
-        HashSet<string> expectedWeaponIds =
-            new HashSet<string>();
-
-        for (int i = 0; i < configWeapons.Count; i++)
-        {
-            WeaponConfig weaponConfig =
-                configWeapons[i];
-
-            if (weaponConfig == null)
-                continue;
-
-            Assert.IsFalse(
-                string.IsNullOrWhiteSpace(weaponConfig.Id),
-                ownerConfigId + " has configured weapon without Id.");
-
-            expectedWeaponIds.Add(
-                weaponConfig.Id);
-        }
+        Assert.Greater(
+            runtimeWeapons.Count,
+            0,
+            ownerConfigId + " runtime must have at least one weapon.");
 
         HashSet<string> actualWeaponIds =
+            BuildRuntimeWeaponIdSet(
+                ownerConfigId,
+                runtimeWeapons);
+
+        if (weaponGroups != null)
+        {
+            for (int i = 0; i < weaponGroups.Count; i++)
+            {
+                WeaponGroupConfig group =
+                    weaponGroups[i];
+
+                if (group == null)
+                    continue;
+
+                if (!group.IsValid())
+                    continue;
+
+                HashSet<string> groupWeaponIds =
+                    BuildConfigWeaponIdSet(
+                        group.Id,
+                        group.WeaponConfigs);
+
+                if (SetsAreEqual(groupWeaponIds, actualWeaponIds))
+                    return;
+            }
+        }
+
+        HashSet<string> fallbackWeaponIds =
+            BuildConfigWeaponIdSet(
+                ownerConfigId,
+                fallbackConfigWeapons);
+
+        if (SetsAreEqual(fallbackWeaponIds, actualWeaponIds))
+            return;
+
+        Assert.Fail(
+            ownerConfigId +
+            " runtime weapons do not match any valid configured WeaponGroupConfig.");
+    }
+
+    private static HashSet<string> BuildRuntimeWeaponIdSet(
+        string ownerConfigId,
+        IReadOnlyList<SystemNpcWeaponRuntimeState> runtimeWeapons)
+    {
+        HashSet<string> result =
             new HashSet<string>();
 
         for (int i = 0; i < runtimeWeapons.Count; i++)
@@ -148,7 +168,7 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
                 ownerConfigId + " has runtime weapon without WeaponConfigId.");
 
             Assert.IsTrue(
-                actualWeaponIds.Add(runtimeWeapon.WeaponConfigId),
+                result.Add(runtimeWeapon.WeaponConfigId),
                 ownerConfigId + " has duplicated runtime weapon: " + runtimeWeapon.WeaponConfigId);
 
             Assert.GreaterOrEqual(
@@ -157,17 +177,58 @@ public sealed class S04_02_RuntimeFactoryWeaponTests
                 ownerConfigId + " has negative ShotDistance for " + runtimeWeapon.WeaponConfigId);
         }
 
-        Assert.AreEqual(
-            expectedWeaponIds.Count,
-            actualWeaponIds.Count,
-            ownerConfigId + " runtime weapon id count does not match config weapon id count.");
+        return result;
+    }
 
-        foreach (string expectedId in expectedWeaponIds)
+    private static HashSet<string> BuildConfigWeaponIdSet(
+        string ownerConfigId,
+        IReadOnlyList<WeaponConfig> configWeapons)
+    {
+        HashSet<string> result =
+            new HashSet<string>();
+
+        if (configWeapons == null)
+            return result;
+
+        for (int i = 0; i < configWeapons.Count; i++)
         {
-            Assert.IsTrue(
-                actualWeaponIds.Contains(expectedId),
-                ownerConfigId + " runtime weapons missing: " + expectedId);
+            WeaponConfig weaponConfig =
+                configWeapons[i];
+
+            if (weaponConfig == null)
+                continue;
+
+            Assert.IsFalse(
+                string.IsNullOrWhiteSpace(weaponConfig.Id),
+                ownerConfigId + " has configured weapon without Id.");
+
+            result.Add(
+                weaponConfig.Id);
         }
+
+        return result;
+    }
+
+    private static bool SetsAreEqual(
+        HashSet<string> expected,
+        HashSet<string> actual)
+    {
+        if (expected == null || actual == null)
+            return false;
+
+        if (expected.Count == 0)
+            return false;
+
+        if (expected.Count != actual.Count)
+            return false;
+
+        foreach (string expectedId in expected)
+        {
+            if (!actual.Contains(expectedId))
+                return false;
+        }
+
+        return true;
     }
 
     private static T FindConfigById<T>(string id)

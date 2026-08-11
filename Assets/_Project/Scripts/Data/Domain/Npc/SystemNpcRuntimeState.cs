@@ -104,25 +104,15 @@ public sealed class SystemNpcRuntimeState
         return IsAlive && !IsOnPlanet && LifeState == SystemNpcLifeState.Alive;
     }
 
-    public void ApplyDamage(int damage)
+    public void ApplyDamageResult(
+      int currentShield,
+      int currentHull)
     {
         if (!IsAlive)
             return;
 
-        if (damage <= 0)
-            return;
-
-        int remainingDamage = damage;
-
-        if (CurrentShield > 0)
-        {
-            int shieldDamage = Mathf.Min(CurrentShield, remainingDamage);
-            CurrentShield -= shieldDamage;
-            remainingDamage -= shieldDamage;
-        }
-
-        if (remainingDamage > 0)
-            CurrentHull -= remainingDamage;
+        CurrentShield = Mathf.Max(0, currentShield);
+        CurrentHull = Mathf.Max(0, currentHull);
 
         if (CurrentHull <= 0)
         {

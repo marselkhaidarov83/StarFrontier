@@ -4,7 +4,7 @@ using UnityEditor;
 public sealed class S04_02_ConfigAssetTests
 {
     private const string AllySpawnRuleId =
-        "allySpawnRule_ranger_01";
+        "ally_spawn_ranger_01";
 
     private static readonly AllyExpectation[] RequiredAllies =
     {
@@ -14,7 +14,7 @@ public sealed class S04_02_ConfigAssetTests
             1),
 
         new AllyExpectation(
-            "ally_warrior_L01_01",
+            "ally_military_L01_01",
             AllyRole2A.Military,
             2),
 
@@ -27,22 +27,22 @@ public sealed class S04_02_ConfigAssetTests
     private static readonly EnemyRuleExpectation[] RequiredEnemyRules =
     {
         new EnemyRuleExpectation(
-            "enemyGroupSpawnRule_ancients_01",
+            "enemy_group_spawn_ancients_01",
             "enemy_ancients_L01_01",
-            1,
-            5),
+            2,
+            3),
 
         new EnemyRuleExpectation(
-            "enemyGroupSpawnRule_ai_01",
+            "enemy_group_spawn_ai_01",
             "enemy_ai_L01_01",
-            1,
-            5),
+            2,
+            3),
 
         new EnemyRuleExpectation(
-            "enemyGroupSpawnRule_infected_01",
+            "enemy_group_spawn_infected_01",
             "enemy_infected_L01_01",
-            1,
-            5)
+            2,
+            3)
     };
 
     [Test]
