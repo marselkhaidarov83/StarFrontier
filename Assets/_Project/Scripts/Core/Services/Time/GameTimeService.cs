@@ -1,7 +1,6 @@
-using System.Collections;
 using UnityEngine;
 
-//Сервис пошаговых тиков
+// Сервис пошаговых тиков.
 public sealed class GameTimeService : CustomService, IGameTimeService
 {
     private readonly SimpleEventBus _eventBus;
@@ -10,10 +9,13 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private readonly IGalaxyPopulationService _galaxyPopulationService;
     private readonly IGalaxyNpcMovementService _galaxyNpcMovementService;
     private readonly IGalaxyNpcCombatService _galaxyNpcCombatService;
+    private readonly ISystemEnemyService _systemEnemyService;
     private readonly ISaveService _saveService;
+
     private int _previousTick = 0;
 
     public GameTimeState State { get; }
+
     public int CurrentQuantTick => State.CurrentQuantTick;
     public bool IsPaused => State.IsPaused;
     public float SimulationTimeSeconds => State.SimulationTimeSeconds;
@@ -23,13 +25,16 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     public GameTimeService()
     {
         _debugStop = true;
+
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
         _galaxyPopulationService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyPopulationService>();
         _galaxyNpcMovementService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcMovementService>();
         _galaxyNpcCombatService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcCombatService>();
+        _systemEnemyService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyService>();
         _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
+
         State = new GameTimeState();
     }
 
@@ -51,16 +56,12 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
     public void StepOneDay()
     {
-        // State.SimulationTimeSeconds += State.SecondsPerDay;
-        // TickAllServices(State.SecondsPerDay);
-        // AdvanceOneQuantTick();
     }
 
     public void Tick(float deltaTime)
     {
         TickSaveServices(deltaTime);
 
-        // Делаем, чтобы могли додвигаться шаг
         if (State.IsPaused && State.Accumulator == 0)
             return;
 
@@ -72,6 +73,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
         State.SimulationTimeSeconds += deltaTime;
         State.Accumulator += deltaTime;
+
         TickAllServices(deltaTime);
 
         if (State.Accumulator < GameTimeState.SecondsPerDay)
@@ -83,7 +85,6 @@ public sealed class GameTimeService : CustomService, IGameTimeService
             AdvanceOneQuantTick();
         }
 
-        // Делаем, чтобы могли додвигаться шаг
         if (State.IsPaused)
             State.Accumulator = 0;
     }
@@ -95,8 +96,8 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
     private void TickAllServices(float deltaTime)
     {
-        //Вызываем все сервисы, которые зависят от внутриигрового времени
         _galaxyNpcCombatService.Tick(deltaTime);
+        _systemEnemyService.TickSystemMapCombat(deltaTime);
         _orbitalMotionService.Tick(deltaTime);
         _systemTravelService.Tick(deltaTime, State.CurrentQuantTick);
         _galaxyPopulationService.Tick(deltaTime);
@@ -106,7 +107,6 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private void AdvanceOneQuantTick()
     {
         _previousTick = State.CurrentQuantTick;
-        // State.CurrentQuantTick++;
 
         _eventBus.Publish(new GameTimeQuantumAdvancedEvent(State.CurrentQuantTick));
         _eventBus.Publish(new GameDayChangedEvent(_previousTick, State.CurrentQuantTick));
@@ -132,39 +132,18 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
     public void RestoreTimeFromSave(GameRuntimeState state)
     {
-        if (state == null)
+        if (state == null || state.Meta == null)
             return;
 
-        if (state.Meta == null)
-            return;
-
-        int restoredDay = state.Meta.CurrentGameDay;
-
-        if (restoredDay <= 0)
-            restoredDay = 1;
-
-        State.CurrentQuantTick = restoredDay;
+        State.CurrentQuantTick = Mathf.Max(1, state.Meta.CurrentGameDay);
         State.SimulationTimeSeconds = Mathf.Max(0f, state.Meta.GameSimulationTimeSeconds);
         State.Accumulator = Mathf.Clamp(
             state.Meta.GameTimeAccumulator,
             0f,
             GameTimeState.SecondsPerDay
         );
+        State.IsPaused = state.Meta.IsGameTimePaused;
 
-        // Важно:
-        // День восстанавливаем из сохранения,
-        // но режим Play/Pause при загрузке НЕ восстанавливаем.
-        // Любая загрузка игры всегда начинается с Pause.
-        SetPaused(true);
-
-        _previousTick = State.CurrentQuantTick - 1;
-
-        LogCustom(
-            "[GameTimeService] Time restored from save. " +
-            "Day = " + State.CurrentQuantTick +
-            " | Accumulator = " + State.Accumulator +
-            " | IsPaused = " + State.IsPaused +
-            " | SavedPauseStateIgnored = " + state.Meta.IsGameTimePaused
-        );
+        _previousTick = State.CurrentQuantTick;
     }
 }

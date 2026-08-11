@@ -1,29 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-    public interface ISystemEnemyService
-    {
-        IReadOnlyList<SystemEnemyRuntimeState> Enemies { get; }
+public interface ISystemEnemyService
+{
+    IReadOnlyList<SystemEnemyRuntimeState> Enemies { get; }
 
-        SystemEnemyRuntimeState CreateEnemy(
-            EnemyConfig enemyConfig,
-            string systemId,
-            Vector3 position);
+    SystemEnemyRuntimeState CreateEnemy(
+        EnemyConfig enemyConfig,
+        string systemId,
+        Vector3 position);
 
-        void RestoreEnemy(SystemEnemyRuntimeState enemy);
-        void RestoreEnemies(IEnumerable<SystemEnemyRuntimeState> enemies);
+    void RestoreEnemy(SystemEnemyRuntimeState enemy);
+    void RestoreEnemies(IEnumerable<SystemEnemyRuntimeState> enemies);
 
-        bool TryGetEnemy(string runtimeEnemyId, out SystemEnemyRuntimeState enemy);
+    bool TryGetEnemy(string runtimeEnemyId, out SystemEnemyRuntimeState enemy);
 
-        IReadOnlyList<SystemEnemyRuntimeState> GetAliveEnemiesInSystem(string systemId);
+    IReadOnlyList<SystemEnemyRuntimeState> GetAliveEnemiesInSystem(string systemId);
 
-        void UpdateEnemyPosition(string runtimeEnemyId, Vector3 position);
+    void UpdateEnemyPosition(string runtimeEnemyId, Vector3 position);
 
-        void ApplyDamage(
-            string runtimeEnemyId,
-            int damage,
-            bool fromPlayer);
+    void ApplyDamage(
+        string runtimeEnemyId,
+        int damage,
+        bool fromPlayer);
 
-        void ClearSystemEnemies(string systemId);
-        void ClearAll();
-    }
+    void TickSystemMapCombat(float deltaTime);
+
+    void ClearSystemEnemies(string systemId);
+    void ClearAll();
+}
