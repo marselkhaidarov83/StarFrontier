@@ -27,8 +27,14 @@ MonoBehaviour:
   baseShieldMax: 110
   baseEnergyMin: 176
   baseEnergyMax: 200
+  baseEnergyRegen: 9.2
   baseSpeedMin: 46.5
   baseSpeedMax: 50.75
+  baseAcceleration: 5.4
+  baseTurnRate: 94
+  baseCargoCapacity: 53
+  weaponSlotCount: 1
+  moduleSlotCount: 2
   level: 7
   role: 40
   namePool: {fileID: 11400000, guid: 93175c2ff076542a384dc8fb723c02a7, type: 2}
@@ -44,3 +50,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a75e713c269134737a3612ea2ff0068f, type: 2}
   - {fileID: 11400000, guid: 05c571efcaa234a209addcd433bcc5ae, type: 2}
   mapSprite: {fileID: 21300000, guid: 20125391eb5e74850a8f34ba6a8597b3, type: 3}
+  combatSprite: {fileID: 21300000, guid: 20125391eb5e74850a8f34ba6a8597b3, type: 3}

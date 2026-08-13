@@ -61,7 +61,7 @@ public sealed class AllyConfig : BaseConfig
     private int moduleSlotCount = 0;
 
     [SerializeField]
-    [Range(1, 10)]
+    [Range(0, 10)]
     private int level = 1;
 
     [Header("Ally Role")]
@@ -351,7 +351,7 @@ public sealed class AllyConfig : BaseConfig
         weaponSlotCount = Mathf.Max(0, weaponSlotCount);
         moduleSlotCount = Mathf.Max(0, moduleSlotCount);
 
-        level = Mathf.Clamp(level, 1, 10);
+        level = Mathf.Clamp(level, 0, 10);
     }
 #endif
 }

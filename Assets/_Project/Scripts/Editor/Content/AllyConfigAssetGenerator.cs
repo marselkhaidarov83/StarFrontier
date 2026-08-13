@@ -54,7 +54,12 @@ public static class AllyConfigAssetGenerator
 
             EnsureFolder(roleFolder);
 
-            for (int level = 1; level <= 10; level++)
+            int firstLevel =
+                role == AllyRole2A.Ranger
+                    ? 0
+                    : 1;
+
+            for (int level = firstLevel; level <= 10; level++)
             {
                 string id =
                     $"ally_{GetRoleKey(role)}_L{level:00}_01";
@@ -91,7 +96,8 @@ public static class AllyConfigAssetGenerator
                 List<WeaponGroupConfig> weaponGroups =
                     FindWeaponGroups(role, level);
 
-                if (weaponGroups.Count == 0)
+                if (weaponGroups.Count == 0 &&
+                    !IsRangerLevelZero(role, level))
                 {
                     warnings++;
                     Debug.LogWarning(
@@ -164,7 +170,7 @@ public static class AllyConfigAssetGenerator
                 Debug.LogError($"AllyConfig validation: empty id at {path}", config);
             }
 
-            if (config.Level < 1 || config.Level > 10)
+            if (!IsAllowedGeneratedLevel(config.Role, config.Level))
             {
                 errors++;
                 Debug.LogError($"AllyConfig validation: invalid level at {path}", config);
@@ -214,7 +220,8 @@ public static class AllyConfigAssetGenerator
                 }
             }
 
-            if (config.WeaponGroupCount == 0)
+            if (config.WeaponGroupCount == 0 &&
+                !IsRangerLevelZero(config.Role, config.Level))
             {
                 errors++;
                 Debug.LogError($"AllyConfig validation: no valid weapon groups at {path}", config);
@@ -535,6 +542,15 @@ public static class AllyConfigAssetGenerator
 
         foreach (AllyRole2A role in GetRoles())
         {
+            if (role == AllyRole2A.Ranger)
+            {
+                Sprite levelZeroSprite =
+                    FindRangerLevelZeroMapSprite();
+
+                if (levelZeroSprite != null)
+                    result[BuildSpriteKey(role, 0)] = levelZeroSprite;
+            }
+
             for (int level = 1; level <= 10; level++)
             {
                 Sprite sprite =
@@ -550,6 +566,36 @@ public static class AllyConfigAssetGenerator
         }
 
         return result;
+    }
+
+    private static Sprite FindRangerLevelZeroMapSprite()
+    {
+        List<string> paths =
+            FindArtShipAssetPaths("t:Texture2D");
+
+        paths.Sort(StringComparer.Ordinal);
+
+        for (int i = 0; i < paths.Count; i++)
+        {
+            string fileName =
+                Path.GetFileNameWithoutExtension(paths[i]);
+
+            if (!string.Equals(
+                    fileName,
+                    "ally_ranger_level_00_01",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            Sprite sprite =
+                FindFirstSpriteAtPath(paths[i]);
+
+            if (sprite != null)
+                return sprite;
+        }
+
+        return null;
     }
 
     private static string BuildSpriteKey(
@@ -903,6 +949,9 @@ public static class AllyConfigAssetGenerator
 
     private static AllyStats BuildStats(AllyRole2A role, int level)
     {
+        if (IsRangerLevelZero(role, level))
+            return BuildRangerLevelZeroStats();
+
         AllyStats baseStats =
             GetBaseStats(role);
 
@@ -946,6 +995,28 @@ public static class AllyConfigAssetGenerator
             CargoCapacity = cargoCapacity,
             WeaponSlotCount = baseStats.WeaponSlotCount,
             ModuleSlotCount = baseStats.ModuleSlotCount
+        };
+    }
+
+    private static AllyStats BuildRangerLevelZeroStats()
+    {
+        return new AllyStats
+        {
+            HullMin = 75,
+            HullMax = 90,
+            ShieldMin = 35,
+            ShieldMax = 45,
+            EnergyMin = 70,
+            EnergyMax = 85,
+            EnergyRegen = 6f,
+            SpeedMin = 42f,
+            SpeedMax = 45f,
+            Acceleration = 4f,
+            TurnRate = 95f,
+            CargoCapacity = 18,
+            CargoPerLevel = 0,
+            WeaponSlotCount = 0,
+            ModuleSlotCount = 0
         };
     }
 
@@ -1240,7 +1311,7 @@ public static class AllyConfigAssetGenerator
     {
         level = 0;
 
-        for (int i = 1; i <= 10; i++)
+        for (int i = 0; i <= 10; i++)
         {
             string token =
                 $"l{i:00}";
@@ -1253,6 +1324,24 @@ public static class AllyConfigAssetGenerator
         }
 
         return false;
+    }
+
+    private static bool IsAllowedGeneratedLevel(
+        AllyRole2A role,
+        int level)
+    {
+        if (IsRangerLevelZero(role, level))
+            return true;
+
+        return level >= 1 && level <= 10;
+    }
+
+    private static bool IsRangerLevelZero(
+        AllyRole2A role,
+        int level)
+    {
+        return role == AllyRole2A.Ranger &&
+               level == 0;
     }
 
     private static bool IsMatchingWeaponGroup(
