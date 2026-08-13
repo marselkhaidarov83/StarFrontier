@@ -7,6 +7,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     private readonly List<SystemNpcRuntimeState> _npcs = new();
     private readonly SimpleEventBus _eventBus;
     private readonly IDamageService2A _damageService;
+    private readonly ISystemEncounterService _encounterService;
 
     public IReadOnlyList<SystemNpcRuntimeState> Npcs => _npcs;
 
@@ -14,7 +15,8 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     {
         _debugStop = true;
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _damageService = Bootstrapper.Instance.ServiceRegistry.Get<IDamageService2A>();
+        _damageService = ResolveDamageService();
+        _encounterService = ResolveEncounterService();
     }
 
     public void AddNpc(SystemNpcRuntimeState npc)
@@ -31,13 +33,10 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             npc.RuntimeNpcId,
             npc.NpcType,
             npc.ConfigId,
-            npc.CurrentSystemId
-        ));
+            npc.CurrentSystemId));
 
         LogCustom(
-            $"[SystemNpcRuntimeService] NPC added. " +
-            $"Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}");
-        LogCustom("_npcs.Count = " + _npcs.Count);
+            $"[SystemNpcRuntimeService] NPC added. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}");
     }
 
     public bool TryGetNpc(string runtimeNpcId, out SystemNpcRuntimeState npc)
@@ -130,15 +129,14 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         _eventBus.Publish(new SystemNpcPositionChangedEvent(
             npc.RuntimeNpcId,
             npc.CurrentSystemId,
-            npc.CurrentPosition
-        ));
+            npc.CurrentPosition));
     }
 
     public void ApplyDamage(
-    string runtimeNpcId,
-    int damage,
-    bool killedByPlayer,
-    bool damagedByPlayer)
+        string runtimeNpcId,
+        int damage,
+        bool killedByPlayer,
+        bool damagedByPlayer)
     {
         if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc))
             return;
@@ -172,27 +170,8 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             npc.CurrentHull,
             npc.CurrentShield));
 
-        LogCustom("npc.IsAlive = " + npc.IsAlive);
-
         if (!npc.IsAlive)
-        {
-            LogCustom("npc destroyed");
-
-            npc.WasKilledByPlayer = killedByPlayer;
-            npc.DestroyedAtTick = GetCurrentQuantTick();
-            npc.NextRespawnTick = ScheduleRespawn(npc);
-
-            _eventBus.Publish(new SystemNpcDestroyedEvent(
-                npc.GroupRuntimeId,
-                npc.RuntimeNpcId,
-                npc.NpcType,
-                npc.CurrentSystemId,
-                killedByPlayer));
-
-            LogCustom(
-                $"[SystemNpcRuntimeService] NPC destroyed. " +
-                $"Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, KilledByPlayer: {killedByPlayer}");
-        }
+            DestroyNpc(npc, killedByPlayer);
     }
 
     public void ClearAll()
@@ -212,13 +191,10 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             npc.RuntimeNpcId,
             npc.NpcType,
             npc.ConfigId,
-            npc.CurrentSystemId
-        ));
+            npc.CurrentSystemId));
 
         LogCustom(
-            $"[SystemNpcRuntimeService] NPC restored. " +
-            $"Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}, Alive: {npc.IsAlive}"
-        );
+            $"[SystemNpcRuntimeService] NPC restored. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}, Alive: {npc.IsAlive}");
     }
 
     public void RestoreNpcs(IEnumerable<SystemNpcRuntimeState> npcs)
@@ -230,19 +206,38 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             RestoreNpc(npc);
     }
 
+    private void DestroyNpc(
+        SystemNpcRuntimeState npc,
+        bool killedByPlayer)
+    {
+        npc.WasKilledByPlayer = killedByPlayer;
+        npc.DestroyedAtTick = GetCurrentQuantTick();
+        npc.NextRespawnTick = ScheduleRespawn(npc);
+
+        if (npc.IsEnemy && _encounterService != null)
+            _encounterService.RegisterEnemyDestroyed(killedByPlayer);
+
+        _eventBus.Publish(new SystemNpcDestroyedEvent(
+            npc.GroupRuntimeId,
+            npc.RuntimeNpcId,
+            npc.NpcType,
+            npc.CurrentSystemId,
+            killedByPlayer,
+            npc.CurrentPosition));
+
+        LogCustom(
+            $"[SystemNpcRuntimeService] NPC destroyed. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, KilledByPlayer: {killedByPlayer}");
+    }
+
     private int GetCurrentQuantTick()
     {
         if (Bootstrapper.Instance == null ||
             Bootstrapper.Instance.ServiceRegistry == null)
-        {
             return 1;
-        }
 
         if (Bootstrapper.Instance.ServiceRegistry.TryGet<IGameTimeService>(
                 out IGameTimeService gameTimeService))
-        {
             return Mathf.Max(1, gameTimeService.CurrentQuantTick);
-        }
 
         return 1;
     }
@@ -254,16 +249,12 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         if (Bootstrapper.Instance == null ||
             Bootstrapper.Instance.ServiceRegistry == null)
-        {
             return 0;
-        }
 
         if (!Bootstrapper.Instance.ServiceRegistry.TryGet<
                 ISystemNpcPopulationService>(
                 out ISystemNpcPopulationService populationService))
-        {
             return 0;
-        }
 
         int nextRespawnTick = populationService.ScheduleRespawn(
             npc,
@@ -271,9 +262,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         if (nextRespawnTick <= 0 ||
             string.IsNullOrWhiteSpace(npc.GroupRuntimeId))
-        {
             return nextRespawnTick;
-        }
 
         for (int i = 0; i < _npcs.Count; i++)
         {
@@ -289,5 +278,25 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         }
 
         return nextRespawnTick;
+    }
+
+    private static IDamageService2A ResolveDamageService()
+    {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out IDamageService2A damageService))
+            return damageService;
+
+        return new DamageService2A();
+    }
+
+    private static ISystemEncounterService ResolveEncounterService()
+    {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out ISystemEncounterService encounterService))
+            return encounterService;
+
+        return null;
     }
 }

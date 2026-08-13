@@ -3,153 +3,131 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-    public sealed class SystemAllyService : ISystemAllyService
+public sealed class SystemAllyService : ISystemAllyService
+{
+    private readonly List<SystemAllyRuntimeState> _allies = new();
+
+    private readonly SimpleEventBus _eventBus;
+    private readonly ISystemEncounterService _encounterService;
+    private readonly IDamageService2A _damageService;
+
+    public IReadOnlyList<SystemAllyRuntimeState> Allies => _allies;
+
+    public SystemAllyService()
     {
-        private readonly List<SystemAllyRuntimeState> _allies = new();
+        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        _encounterService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
+        _damageService = ResolveDamageService();
+    }
 
-        private readonly SimpleEventBus _eventBus;
-        private readonly ISystemEncounterService _encounterService;
+    public SystemAllyRuntimeState CreateAlly(
+        AllyConfig allyConfig,
+        string systemId,
+        Vector3 position)
+    {
+        if (allyConfig == null)
+            throw new ArgumentNullException(nameof(allyConfig));
 
-        public IReadOnlyList<SystemAllyRuntimeState> Allies => _allies;
+        if (string.IsNullOrWhiteSpace(allyConfig.Id))
+            throw new ArgumentException("AllyConfig.Id is empty.", nameof(allyConfig));
 
-        public SystemAllyService()
+        if (string.IsNullOrWhiteSpace(systemId))
+            throw new ArgumentException("SystemId is empty.", nameof(systemId));
+
+        var ally = new SystemAllyRuntimeState
         {
-            _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-            _encounterService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
-        }
+            RuntimeAllyId = Guid.NewGuid().ToString("N"),
 
-        public SystemAllyRuntimeState CreateAlly(
-            AllyConfig allyConfig,
-            string systemId,
-            Vector3 position)
-        {
-            if (allyConfig == null)
-                throw new ArgumentNullException(nameof(allyConfig));
+            AllyConfigId = allyConfig.Id,
+            AllyConfig = allyConfig,
 
-            if (string.IsNullOrWhiteSpace(allyConfig.Id))
-                throw new ArgumentException("AllyConfig.Id is empty.", nameof(allyConfig));
+            SystemId = systemId,
+            Position = position,
 
-            if (string.IsNullOrWhiteSpace(systemId))
-                throw new ArgumentException("SystemId is empty.", nameof(systemId));
+            CurrentHull = allyConfig.BaseHull,
+            CurrentShield = allyConfig.BaseShield,
+            CurrentEnergy = allyConfig.BaseEnergy,
 
-            var ally = new SystemAllyRuntimeState
-            {
-                RuntimeAllyId = Guid.NewGuid().ToString("N"),
+            IsAlive = true
+        };
 
-                AllyConfigId = allyConfig.Id,
-                AllyConfig = allyConfig,
+        _allies.Add(ally);
 
-                SystemId = systemId,
-                Position = position,
+        _eventBus.Publish(new SystemAllyCreatedEvent(
+            ally.RuntimeAllyId,
+            ally.AllyConfigId,
+            ally.SystemId,
+            ally.Position));
 
-                CurrentHull = allyConfig.BaseHull,
-                CurrentShield = allyConfig.BaseShield,
-                CurrentEnergy = allyConfig.BaseEnergy,
+        return ally;
+    }
 
-                IsAlive = true
-            };
+    public bool TryGetAlly(string runtimeAllyId, out SystemAllyRuntimeState ally)
+    {
+        ally = _allies.FirstOrDefault(x => x.RuntimeAllyId == runtimeAllyId);
+        return ally != null;
+    }
 
-            _allies.Add(ally);
+    public IReadOnlyList<SystemAllyRuntimeState> GetAliveAlliesInSystem(string systemId)
+    {
+        return _allies
+            .Where(x => x.SystemId == systemId && x.IsAlive)
+            .ToList();
+    }
 
-            _eventBus.Publish(new SystemAllyCreatedEvent(
-                ally.RuntimeAllyId,
-                ally.AllyConfigId,
-                ally.SystemId,
-                ally.Position));
+    public void UpdateAllyPosition(string runtimeAllyId, Vector3 position)
+    {
+        if (!TryGetAlly(runtimeAllyId, out var ally))
+            return;
 
-            return ally;
-        }
+        if (!ally.IsAlive)
+            return;
 
-        public bool TryGetAlly(string runtimeAllyId, out SystemAllyRuntimeState ally)
-        {
-            ally = _allies.FirstOrDefault(x => x.RuntimeAllyId == runtimeAllyId);
-            return ally != null;
-        }
+        ally.Position = position;
 
-        public IReadOnlyList<SystemAllyRuntimeState> GetAliveAlliesInSystem(string systemId)
-        {
-            return _allies
-                .Where(x => x.SystemId == systemId && x.IsAlive)
-                .ToList();
-        }
+        _eventBus.Publish(new SystemAllyPositionChangedEvent(
+            ally.RuntimeAllyId,
+            ally.Position));
+    }
 
-        public void UpdateAllyPosition(string runtimeAllyId, Vector3 position)
-        {
-            if (!TryGetAlly(runtimeAllyId, out var ally))
-                return;
+    public void ApplyDamage(string runtimeAllyId, int damage)
+    {
+        if (!TryGetAlly(runtimeAllyId, out var ally))
+            return;
 
-            if (!ally.IsAlive)
-                return;
+        if (!ally.IsAlive)
+            return;
 
-            ally.Position = position;
+        CombatDamageResult2A result = _damageService.ApplyDamage(
+            ally.CurrentShield,
+            ally.CurrentHull,
+            damage);
 
-            _eventBus.Publish(new SystemAllyPositionChangedEvent(
-                ally.RuntimeAllyId,
-                ally.Position));
-        }
+        if (result.AppliedDamage <= 0)
+            return;
 
-        public void ApplyDamage(string runtimeAllyId, int damage)
-        {
-            if (damage <= 0)
-                return;
+        ally.CurrentShield = result.CurrentShield;
+        ally.CurrentHull = result.CurrentHull;
 
-            if (!TryGetAlly(runtimeAllyId, out var ally))
-                return;
+        _eventBus.Publish(new SystemAllyDamagedEvent(
+            ally.RuntimeAllyId,
+            result.AppliedDamage,
+            ally.CurrentHull,
+            ally.CurrentShield));
 
-            if (!ally.IsAlive)
-                return;
+        if (result.IsDestroyed)
+            DestroyAlly(ally);
+    }
 
-            int remainingDamage = damage;
+    public void ClearSystemAllies(string systemId)
+    {
+        _allies.RemoveAll(x => x.SystemId == systemId);
+    }
 
-            if (ally.CurrentShield > 0)
-            {
-                int shieldDamage = Mathf.Min(ally.CurrentShield, remainingDamage);
-                ally.CurrentShield -= shieldDamage;
-                remainingDamage -= shieldDamage;
-            }
-
-            if (remainingDamage > 0)
-                ally.CurrentHull -= remainingDamage;
-
-            _eventBus.Publish(new SystemAllyDamagedEvent(
-                ally.RuntimeAllyId,
-                damage,
-                ally.CurrentHull,
-                ally.CurrentShield));
-
-            Debug.Log(
-                $"[SystemAllyService] Damage: {damage}, Ally: {ally.AllyConfigId}, Hull: {ally.CurrentHull}, Shield: {ally.CurrentShield}"
-            );
-
-            if (ally.CurrentHull <= 0)
-                DestroyAlly(ally);
-        }
-
-        public void ClearSystemAllies(string systemId)
-        {
-            _allies.RemoveAll(x => x.SystemId == systemId);
-        }
-
-        public void ClearAll()
-        {
-            _allies.Clear();
-        }
-
-        private void DestroyAlly(SystemAllyRuntimeState ally)
-        {
-            if (!ally.IsAlive)
-                return;
-
-            ally.IsAlive = false;
-            ally.CurrentHull = 0;
-
-            _encounterService.RegisterAllyDestroyed();
-
-            _eventBus.Publish(new SystemAllyDestroyedEvent(
-                ally.RuntimeAllyId,
-                ally.AllyConfigId,
-                ally.SystemId));
-        }
+    public void ClearAll()
+    {
+        _allies.Clear();
+    }
 
     public void RestoreAlly(SystemAllyRuntimeState ally)
     {
@@ -173,5 +151,33 @@ using UnityEngine;
 
         foreach (var ally in allies)
             RestoreAlly(ally);
-    }        
+    }
+
+    private void DestroyAlly(SystemAllyRuntimeState ally)
+    {
+        if (!ally.IsAlive)
+            return;
+
+        ally.IsAlive = false;
+        ally.CurrentHull = 0;
+
+        _encounterService.RegisterAllyDestroyed();
+
+        _eventBus.Publish(new SystemAllyDestroyedEvent(
+            ally.RuntimeAllyId,
+            ally.AllyConfigId,
+            ally.SystemId));
+    }
+
+    private static IDamageService2A ResolveDamageService()
+    {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out IDamageService2A damageService))
+        {
+            return damageService;
+        }
+
+        return new DamageService2A();
+    }
 }

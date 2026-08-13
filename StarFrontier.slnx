@@ -1,15 +1,15 @@
 ﻿<Solution>
   <Project Path="Data.csproj" />
   <Project Path="Core.csproj" />
-  <Project Path="Presentation.csproj" />
   <Project Path="Editor.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Presentation.csproj" />
   <Project Path="Sprint3Verification.csproj" />
   <Project Path="Tools.csproj" />
   <Project Path="Sprint1Verification.csproj" />
   <Project Path="Sprint4Verification.csproj" />
   <Project Path="Sprint5Verification.csproj" />
   <Project Path="Sprint3Validation.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Sprint2Verification.csproj" />
   <Project Path="Audit.csproj" />
   <Project Path="Assembly-CSharp.csproj" />

@@ -13,6 +13,7 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
 
     private readonly SimpleEventBus _eventBus;
     private readonly ISystemEncounterService _encounterService;
+    private readonly IDamageService2A _damageService;
 
     private IPlayerCombatTargetService _playerTargetService;
 
@@ -20,11 +21,9 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
 
     public SystemEnemyService()
     {
-        _eventBus =
-            Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-
-        _encounterService =
-            Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
+        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        _encounterService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
+        _damageService = ResolveDamageService();
     }
 
     public SystemEnemyRuntimeState CreateEnemy(
@@ -124,46 +123,37 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
         int damage,
         bool fromPlayer)
     {
-        if (damage <= 0)
-            return;
-
         if (!TryGetEnemy(runtimeEnemyId, out var enemy))
             return;
 
         if (!enemy.IsAlive)
             return;
 
-        int remainingDamage = damage;
+        CombatDamageResult2A result = _damageService.ApplyDamage(
+            enemy.CurrentShield,
+            enemy.CurrentHull,
+            damage);
 
-        if (enemy.CurrentShield > 0)
-        {
-            int shieldDamage =
-                Mathf.Min(enemy.CurrentShield, remainingDamage);
+        if (result.AppliedDamage <= 0)
+            return;
 
-            enemy.CurrentShield -= shieldDamage;
-            remainingDamage -= shieldDamage;
-        }
-
-        if (remainingDamage > 0)
-            enemy.CurrentHull -= remainingDamage;
-
-        if (enemy.CurrentHull < 0)
-            enemy.CurrentHull = 0;
+        enemy.CurrentShield = result.CurrentShield;
+        enemy.CurrentHull = result.CurrentHull;
 
         _eventBus.Publish(new SystemEnemyDamagedEvent(
             enemy.RuntimeEnemyId,
-            damage,
+            result.AppliedDamage,
             enemy.CurrentHull,
             enemy.CurrentShield));
 
         _eventBus.Publish(new CombatDamageEvent2A(
             enemy.RuntimeEnemyId,
             false,
-            damage,
+            result.AppliedDamage,
             enemy.CurrentShield,
             enemy.CurrentHull));
 
-        if (enemy.CurrentHull <= 0)
+        if (result.IsDestroyed)
             DestroyEnemy(enemy, fromPlayer);
     }
 
@@ -175,8 +165,7 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
         if (!ResolvePlayerTargetService())
             return;
 
-        ActiveSystemEncounter encounter =
-            _encounterService.Current;
+        ActiveSystemEncounter encounter = _encounterService.Current;
 
         if (encounter == null)
             return;
@@ -184,13 +173,11 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
         if (!_playerTargetService.IsPlayerAvailableInSystem(encounter.SystemId))
             return;
 
-        Vector3 playerPosition =
-            _playerTargetService.GetPlayerPosition();
+        Vector3 playerPosition = _playerTargetService.GetPlayerPosition();
 
         for (int i = 0; i < _enemies.Count; i++)
         {
-            SystemEnemyRuntimeState enemy =
-                _enemies[i];
+            SystemEnemyRuntimeState enemy = _enemies[i];
 
             if (enemy == null)
                 continue;
@@ -205,14 +192,12 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
             enemy.CurrentTargetId = "player";
             enemy.TickAttackTimer(deltaTime);
 
-            float distance =
-                Vector3.Distance(enemy.Position, playerPosition);
+            float distance = Vector3.Distance(enemy.Position, playerPosition);
 
             if (!enemy.CanAttack(distance))
                 continue;
 
-            string projectileId =
-                Guid.NewGuid().ToString("N");
+            string projectileId = Guid.NewGuid().ToString("N");
 
             _eventBus.Publish(new CombatProjectileCreatedEvent2A(
                 projectileId,
@@ -303,5 +288,17 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
 
         return Bootstrapper.Instance.ServiceRegistry.TryGet(
             out _playerTargetService);
+    }
+
+    private static IDamageService2A ResolveDamageService()
+    {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out IDamageService2A damageService))
+        {
+            return damageService;
+        }
+
+        return new DamageService2A();
     }
 }

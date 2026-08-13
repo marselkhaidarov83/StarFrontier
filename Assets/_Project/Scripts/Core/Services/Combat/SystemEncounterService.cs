@@ -123,8 +123,20 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
 
     public void RegisterPlayerDestroyed()
     {
-        if (!HasActiveEncounter)
+        if (Current == null)
+        {
+            Debug.LogWarning("[SystemEncounterService] Player destroyed ignored: Current encounter is null.");
             return;
+        }
+
+        if (Current.State != SystemEncounterState.Active)
+        {
+            Debug.LogWarning(
+                "[SystemEncounterService] Player destroyed ignored: encounter is not Active. " +
+                $"Current state: {Current.State}, Encounter: {Current.EncounterId}, System: {Current.SystemId}");
+
+            return;
+        }
 
         Current.PlayerDestroyed = true;
 

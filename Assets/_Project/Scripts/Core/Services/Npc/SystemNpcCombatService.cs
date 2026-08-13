@@ -10,6 +10,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     private readonly IConfigService _configService;
     private readonly IPlayerCombatTargetService _playerTargetService;
     private readonly SimpleEventBus _eventBus;
+    private readonly ISystemEncounterService _encounterService;
 
     private readonly List<GalaxyNpcProjectileRuntimeState> _activeProjectiles = new();
 
@@ -21,8 +22,55 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _playerTargetService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerCombatTargetService>();
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
+        _encounterService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
 
         _eventBus.Subscribe<GameDayChangedEvent>(OnGameDayChanged);
+    }
+
+    private void EnsureEncounterForPlayerAttack(
+        SystemNpcRuntimeState shooter,
+        GalaxyCombatTarget target)
+    {
+        if (shooter == null)
+            return;
+
+        if (target.TargetType != CombatTargetType.Player)
+            return;
+
+        if (_encounterService.HasActiveEncounter)
+            return;
+
+        IReadOnlyList<SystemNpcRuntimeState> enemies =
+            _runtimeService.GetAliveNpcsInSystemByType(
+                shooter.CurrentSystemId,
+                SystemNpcType.Enemy);
+
+        IReadOnlyList<SystemNpcRuntimeState> allies =
+            _runtimeService.GetAliveNpcsInSystemByType(
+                shooter.CurrentSystemId,
+                SystemNpcType.Ally);
+
+        int enemyCount = Mathf.Max(1, enemies.Count);
+        int allyCount = allies != null ? allies.Count : 0;
+
+        string encounterId =
+            "encounter_" +
+            shooter.CurrentSystemId +
+            "_" +
+            shooter.GroupRuntimeId +
+            "_" +
+            shooter.RuntimeNpcId;
+
+        _encounterService.StartEncounter(
+            encounterId,
+            shooter.CurrentSystemId,
+            enemyCount,
+            allyCount);
+
+        Debug.Log(
+            "[SystemNpcCombatService] Auto-started encounter for NPC player attack. " +
+            $"Encounter: {encounterId}, System: {shooter.CurrentSystemId}, " +
+            $"Enemies: {enemyCount}, Allies: {allyCount}");
     }
 
     public void Tick(StarSystemConfig starSystem, int quantTick)
@@ -215,6 +263,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
         int projectileLifetimeTicks = Mathf.Max(1, weaponStats.ProjectileLifetime);
 
+        EnsureEncounterForPlayerAttack(shooter, target);
         var projectile = new GalaxyNpcProjectileRuntimeState
         {
             ProjectileId = Guid.NewGuid().ToString("N"),

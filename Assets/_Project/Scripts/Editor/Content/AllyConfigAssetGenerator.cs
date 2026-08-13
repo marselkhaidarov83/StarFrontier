@@ -15,6 +15,14 @@ public static class AllyConfigAssetGenerator
     private const string WeaponGroupsRoot =
         "Assets/_Project/Content/Configs/WeaponGroups/Ally";
 
+    private static readonly string[] ArtShipRootCandidates =
+    {
+        "Assets/_Project/Art_ships",
+        "Assets/Art_ships",
+        "Assets/_Project/Art/Art_ships",
+        "Assets/Art/Art_ships"
+    };
+
     private static readonly string[] ScenarioRoots =
     {
         "Assets/_Project/Content/Configs/NpcBehaviourScenarios/Ally",
@@ -33,9 +41,13 @@ public static class AllyConfigAssetGenerator
         Dictionary<string, NpcBehaviourScenarioConfig> scenarios =
             FindScenarioConfigs();
 
+        Dictionary<AllyRole2A, Sprite> mapSprites =
+            FindMapSprites();
+
         int createdOrUpdated = 0;
         int warnings = 0;
         int totalBoundWeaponGroups = 0;
+        int totalBoundSprites = 0;
 
         foreach (AllyRole2A role in GetRoles())
         {
@@ -53,12 +65,29 @@ public static class AllyConfigAssetGenerator
                     $"{roleFolder}/{id}.asset";
 
                 AllyConfig asset =
-                    AssetDatabase.LoadAssetAtPath<AllyConfig>(path);
+                    FindExistingAsset<AllyConfig>(
+                        id,
+                        path,
+                        OutputRoot);
 
                 if (asset == null)
                 {
                     asset = ScriptableObject.CreateInstance<AllyConfig>();
                     AssetDatabase.CreateAsset(asset, path);
+                }
+
+                Sprite mapSprite = null;
+
+                if (mapSprites.TryGetValue(role, out mapSprite))
+                {
+                    totalBoundSprites++;
+                }
+                else
+                {
+                    warnings++;
+                    Debug.LogWarning(
+                        $"AllyConfig generator: no map sprite found in Art_ships for {role}.",
+                        asset);
                 }
 
                 List<WeaponGroupConfig> weaponGroups =
@@ -82,6 +111,7 @@ public static class AllyConfigAssetGenerator
                     level,
                     scenarios,
                     weaponGroups,
+                    mapSprite,
                     namePools.TryGetValue(role, out AllyNamePoolConfig namePool)
                         ? namePool
                         : null);
@@ -100,6 +130,7 @@ public static class AllyConfigAssetGenerator
             $"AllyConfig assets: {createdOrUpdated}. " +
             $"Ally scenario refs found: {scenarios.Count}. " +
             $"Weapon groups bound: {totalBoundWeaponGroups}. " +
+            $"Map sprites bound: {totalBoundSprites}. " +
             $"Warnings: {warnings}.",
             "OK");
     }
@@ -190,6 +221,19 @@ public static class AllyConfigAssetGenerator
                 errors++;
                 Debug.LogError($"AllyConfig validation: name pool has less than 100 names at {path}", config);
             }
+
+            SerializedObject serializedConfig =
+                new SerializedObject(config);
+
+            SerializedProperty mapSpriteProperty =
+                serializedConfig.FindProperty("mapSprite");
+
+            if (mapSpriteProperty == null ||
+                mapSpriteProperty.objectReferenceValue == null)
+            {
+                errors++;
+                Debug.LogError($"AllyConfig validation: mapSprite is not assigned at {path}", config);
+            }
         }
 
         EditorUtility.DisplayDialog(
@@ -243,6 +287,7 @@ public static class AllyConfigAssetGenerator
         int level,
         Dictionary<string, NpcBehaviourScenarioConfig> scenarios,
         List<WeaponGroupConfig> weaponGroups,
+        Sprite mapSprite,
         AllyNamePoolConfig namePool)
     {
         AllyStats stats =
@@ -265,6 +310,7 @@ public static class AllyConfigAssetGenerator
         SetFloat(serializedObject, "baseSpeedMax", stats.SpeedMax);
         SetInt(serializedObject, "level", level);
         SetEnum(serializedObject, "role", (int)role);
+        SetObject(serializedObject, "mapSprite", mapSprite);
         SetObject(serializedObject, "namePool", namePool);
 
         WriteScenarioEntries(
@@ -278,6 +324,7 @@ public static class AllyConfigAssetGenerator
             weaponGroups);
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        asset.name = id;
     }
 
     private static void WriteScenarioEntries(
@@ -369,7 +416,10 @@ public static class AllyConfigAssetGenerator
                 $"{NamePoolRoot}/{id}.asset";
 
             AllyNamePoolConfig asset =
-                AssetDatabase.LoadAssetAtPath<AllyNamePoolConfig>(path);
+                FindExistingAsset<AllyNamePoolConfig>(
+                    id,
+                    path,
+                    NamePoolRoot);
 
             if (asset == null)
             {
@@ -455,6 +505,169 @@ public static class AllyConfigAssetGenerator
         }
 
         return result;
+    }
+
+    private static Dictionary<AllyRole2A, Sprite> FindMapSprites()
+    {
+        Dictionary<AllyRole2A, Sprite> result =
+            new Dictionary<AllyRole2A, Sprite>();
+
+        List<string> paths =
+            FindArtShipAssetPaths("t:Sprite");
+
+        paths.Sort(StringComparer.Ordinal);
+
+        for (int i = 0; i < paths.Count; i++)
+        {
+            string path =
+                paths[i];
+
+            UnityEngine.Object[] assets =
+                AssetDatabase.LoadAllAssetsAtPath(path);
+
+            for (int assetIndex = 0; assetIndex < assets.Length; assetIndex++)
+            {
+                Sprite sprite =
+                    assets[assetIndex] as Sprite;
+
+                if (sprite == null)
+                    continue;
+
+                string searchable =
+                    (path + "_" + sprite.name + "_")
+                    .Replace("\\", "/")
+                    .ToLowerInvariant();
+
+                if (!TryParseRoleFromPath(searchable, out AllyRole2A role))
+                    continue;
+
+                if (!result.ContainsKey(role))
+                    result[role] = sprite;
+            }
+        }
+
+        return result;
+    }
+
+    private static List<string> FindArtShipAssetPaths(string filter)
+    {
+        List<string> validRoots =
+            new List<string>();
+
+        for (int i = 0; i < ArtShipRootCandidates.Length; i++)
+        {
+            string root =
+                ArtShipRootCandidates[i];
+
+            if (AssetDatabase.IsValidFolder(root))
+                validRoots.Add(root);
+        }
+
+        List<string> result =
+            new List<string>();
+
+        string[] guids =
+            validRoots.Count > 0
+                ? AssetDatabase.FindAssets(filter, validRoots.ToArray())
+                : AssetDatabase.FindAssets(filter);
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string path =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            string lowerPath =
+                path.Replace("\\", "/").ToLowerInvariant();
+
+            if (validRoots.Count == 0 &&
+                !lowerPath.Contains("/art_ships/"))
+            {
+                continue;
+            }
+
+            if (!result.Contains(path))
+                result.Add(path);
+        }
+
+        return result;
+    }
+
+    private static T FindExistingAsset<T>(
+        string id,
+        string preferredPath,
+        string searchRoot)
+        where T : UnityEngine.Object
+    {
+        T preferredAsset =
+            AssetDatabase.LoadAssetAtPath<T>(preferredPath);
+
+        if (preferredAsset != null)
+            return preferredAsset;
+
+        string[] guids =
+            AssetDatabase.FindAssets(
+                $"t:{typeof(T).Name}",
+                new[] { searchRoot });
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string path =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            T asset =
+                AssetDatabase.LoadAssetAtPath<T>(path);
+
+            if (asset == null)
+                continue;
+
+            if (IsAssetIdMatch(asset, path, id))
+                return asset;
+        }
+
+        return null;
+    }
+
+    private static bool IsAssetIdMatch(
+        UnityEngine.Object asset,
+        string path,
+        string expectedId)
+    {
+        if (asset == null ||
+            string.IsNullOrWhiteSpace(expectedId))
+        {
+            return false;
+        }
+
+        if (string.Equals(
+                asset.name,
+                expectedId,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        string fileName =
+            Path.GetFileNameWithoutExtension(path);
+
+        if (string.Equals(
+                fileName,
+                expectedId,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        SerializedObject serializedObject =
+            new SerializedObject(asset);
+
+        SerializedProperty idProperty =
+            serializedObject.FindProperty("id");
+
+        return idProperty != null &&
+               string.Equals(
+                   idProperty.stringValue,
+                   expectedId,
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private static List<WeaponGroupConfig> FindWeaponGroups(

@@ -43,4 +43,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 798c2ebf5a44d4d04a02d937364a2a50, type: 2}
   - {fileID: 11400000, guid: d62eb6496d88e4a0aba0128822026b16, type: 2}
   - {fileID: 11400000, guid: fcfc2799bdee54f7e8c71d64bd1ae926, type: 2}
-  mapSprite: {fileID: 21300000, guid: bb501432dfcda41e8b2fb1d33754d338, type: 3}
+  mapSprite: {fileID: 0}
