@@ -19,6 +19,7 @@ public sealed class ConfigService : IConfigService
     public InteractionConfig InteractionConfig { get; }
     public SystemHudConfig SystemHudConfig { get; }
     public SystemVisualConfig SystemVisualConfig { get; }
+    public AllyConfig StarterAllyConfig { get; }
 
     private readonly IReadOnlyList<SectorConfig> _sectors;
     private readonly Dictionary<string, SectorConfig> _sectorsById;
@@ -50,6 +51,7 @@ public sealed class ConfigService : IConfigService
                         SaveConfig saveConfig,
                         GalaxyConfig galaxyConfig,
                         NewGameConfig newGameConfig,
+                        AllyConfig starterAllyConfig,
                         IEnumerable<SectorConfig> sectors,
                         IEnumerable<StarSystemConfig> starSystems,
                         IEnumerable<PlanetConfig> planets,
@@ -67,6 +69,7 @@ public sealed class ConfigService : IConfigService
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
+        StarterAllyConfig = starterAllyConfig;
 
         BuildIndex(sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
@@ -95,6 +98,7 @@ public sealed class ConfigService : IConfigService
                         InteractionConfig interactionConfig,
                         SystemHudConfig systemHudConfig,
                         SystemVisualConfig systemVisualConfig,
+                        AllyConfig starterAllyConfig,
                         IEnumerable<ItemConfig> items,
                         IEnumerable<EnemyConfig> enemies,
                         IEnumerable<AllyConfig> allies,
@@ -116,6 +120,7 @@ public sealed class ConfigService : IConfigService
         InteractionConfig = interactionConfig;
         SystemHudConfig = systemHudConfig;
         SystemVisualConfig = systemVisualConfig;
+        StarterAllyConfig = starterAllyConfig;
         
         List<StarSystemConfig> starSystems = new();
         List<PlanetConfig> planets = new();

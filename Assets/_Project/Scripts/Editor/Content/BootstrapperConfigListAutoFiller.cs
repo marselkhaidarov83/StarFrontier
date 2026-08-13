@@ -16,6 +16,9 @@ public static class BootstrapperConfigListAutoFiller
     private const string BootstrapperScriptPath =
         "Assets/_Project/Scripts/Core/Bootstrap/Bootstrapper.cs";
 
+    private const string StarterAllyConfigId =
+        "ally_ranger_L01_01";
+
     [MenuItem(MenuRoot + "/Fill NPC and combat config lists from assets")]
     public static void FillAllBootstrappersFromAssets()
     {
@@ -41,6 +44,11 @@ public static class BootstrapperConfigListAutoFiller
         List<AllyConfig> allies =
             LoadAssetsSortedById<AllyConfig>();
 
+        AllyConfig starterAllyConfig =
+            FindById(
+                allies,
+                StarterAllyConfigId);
+
         List<AllySpawnRuleConfig> allySpawnRuleConfigs =
             LoadAssetsSortedById<AllySpawnRuleConfig>();
 
@@ -64,6 +72,7 @@ public static class BootstrapperConfigListAutoFiller
                 bootstrapper,
                 weapons,
                 enemies,
+                starterAllyConfig,
                 allies,
                 allySpawnRuleConfigs,
                 enemyGroupSpawnRules,
@@ -186,6 +195,7 @@ public static class BootstrapperConfigListAutoFiller
         MonoBehaviour bootstrapper,
         IReadOnlyList<WeaponConfig> weapons,
         IReadOnlyList<EnemyConfig> enemies,
+        AllyConfig starterAllyConfig,
         IReadOnlyList<AllyConfig> allies,
         IReadOnlyList<AllySpawnRuleConfig> allySpawnRuleConfigs,
         IReadOnlyList<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules,
@@ -207,6 +217,11 @@ public static class BootstrapperConfigListAutoFiller
             serializedObject,
             "enemies",
             enemies);
+
+        AssignObjectReference(
+            serializedObject,
+            "starterAllyConfig",
+            starterAllyConfig);
 
         AssignObjectList(
             serializedObject,
@@ -232,6 +247,27 @@ public static class BootstrapperConfigListAutoFiller
 
         EditorUtility.SetDirty(bootstrapper);
         PrefabUtility.RecordPrefabInstancePropertyModifications(bootstrapper);
+    }
+
+    private static void AssignObjectReference<TAsset>(
+        SerializedObject serializedObject,
+        string propertyName,
+        TAsset asset)
+        where TAsset : UnityEngine.Object
+    {
+        SerializedProperty property =
+            serializedObject.FindProperty(propertyName);
+
+        if (property == null)
+        {
+            Debug.LogError(
+                "[BootstrapperConfigListAutoFiller] Field not found on Bootstrapper: " +
+                propertyName);
+
+            return;
+        }
+
+        property.objectReferenceValue = asset;
     }
 
     private static void AssignObjectList<TAsset>(
@@ -306,6 +342,29 @@ public static class BootstrapperConfigListAutoFiller
         assets.Sort(CompareBaseConfigs);
 
         return assets;
+    }
+
+    private static TAsset FindById<TAsset>(
+        IReadOnlyList<TAsset> assets,
+        string id)
+        where TAsset : BaseConfig
+    {
+        if (assets == null)
+            return null;
+
+        for (int i = 0; i < assets.Count; i++)
+        {
+            TAsset asset =
+                assets[i];
+
+            if (asset == null)
+                continue;
+
+            if (asset.Id == id)
+                return asset;
+        }
+
+        return null;
     }
 
     private static int CompareBaseConfigs<TAsset>(

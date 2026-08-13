@@ -456,10 +456,7 @@ MonoBehaviour:
   systemHudConfig: {fileID: 11400000, guid: 28d7a2f86e70c457ab50c89e22dc7c73, type: 2}
   systemVisualConfig: {fileID: 11400000, guid: 0d8b1a6dc71c44bcdab3fda74bcd01d9, type: 2}
   galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
-  ships:
-  - {fileID: 11400000, guid: e7dbcdc25d859411990de39f023083bc, type: 2}
-  - {fileID: 11400000, guid: 124aa3e84adcd4de9a71347b84f62060, type: 2}
-  - {fileID: 11400000, guid: aedcb48ad00a14affb12ffb030f56466, type: 2}
+  starterAllyConfig: {fileID: 11400000, guid: b38c585c5d5da4b4bbdb9c161074da22, type: 2}
   enemies:
   - {fileID: 11400000, guid: 78172c88849d445a38e39ed596230ceb, type: 2}
   - {fileID: 11400000, guid: dba55c967cfe8461d81e255c35f5cec1, type: 2}
