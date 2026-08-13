@@ -4,7 +4,7 @@ public static class ShipSlotRules
 {
     public static HangarOperationResult CanEquipWeapon(
         ShipRuntimeData shipState,
-        ShipConfig shipData,
+        AllyConfig shipData,
         WeaponConfig weaponData,
         string weaponId)
     {
@@ -44,7 +44,7 @@ public static class ShipSlotRules
 
     public static HangarOperationResult CanEquipModule(
         ShipRuntimeData shipState,
-        ShipConfig shipData,
+        AllyConfig shipData,
         ModuleConfig moduleData,
         string moduleId)
     {

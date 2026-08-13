@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Рассчитывает итоговые параметры корабля
-/// из ShipConfig и установленных модулей.
+/// из AllyConfig и установленных модулей.
 ///
 /// Сервис не зависит от Bootstrapper,
 /// не обращается к сцене и не является ITickable.
@@ -12,25 +12,25 @@ using UnityEngine;
 public sealed class ShipStatsService : IShipStatsService
 {
     public ShipFinalStats CalculateFromConfig(
-        ShipConfig shipConfig)
+        AllyConfig allyConfig)
     {
         return Calculate(
-            shipConfig,
+            allyConfig,
             null);
     }
 
     public ShipFinalStats Calculate(
-        ShipConfig shipConfig,
+        AllyConfig allyConfig,
         IEnumerable<ModuleConfig> equippedModules)
     {
-        if (shipConfig == null)
+        if (allyConfig == null)
         {
             throw new ArgumentNullException(
-                nameof(shipConfig));
+                nameof(allyConfig));
         }
 
         ShipStatsAccumulator accumulator =
-            ShipStatsAccumulator.FromConfig(shipConfig);
+            ShipStatsAccumulator.FromConfig(allyConfig);
 
         if (equippedModules != null)
         {
@@ -126,10 +126,6 @@ public sealed class ShipStatsService : IShipStatsService
                 accumulator.CargoCapacity += value;
                 break;
 
-            /*
-             * В проекте нет ресурса энергии корабля.
-             * Legacy-модификаторы энергии игнорируются.
-             */
             case ShipStatType.Energy:
             case ShipStatType.EnergyRegen:
                 break;
@@ -144,10 +140,6 @@ public sealed class ShipStatsService : IShipStatsService
         ShipStatType statType,
         float value)
     {
-        /*
-         * value = 0.2 означает +20%.
-         * value = -0.1 означает -10%.
-         */
         float multiplier =
             1f + value;
 
@@ -177,10 +169,6 @@ public sealed class ShipStatsService : IShipStatsService
                 accumulator.CargoCapacity *= multiplier;
                 break;
 
-            /*
-             * В проекте нет ресурса энергии корабля.
-             * Legacy-модификаторы энергии игнорируются.
-             */
             case ShipStatType.Energy:
             case ShipStatType.EnergyRegen:
                 break;
@@ -196,7 +184,7 @@ public sealed class ShipStatsService : IShipStatsService
         {
         }
 
-        public string ShipConfigId { get; private set; }
+        public string AllyConfigId { get; private set; }
 
         public float MaxHull { get; set; }
 
@@ -217,20 +205,20 @@ public sealed class ShipStatsService : IShipStatsService
         public Sprite CombatSprite { get; private set; }
 
         public static ShipStatsAccumulator FromConfig(
-            ShipConfig shipConfig)
+            AllyConfig allyConfig)
         {
             return new ShipStatsAccumulator
             {
-                ShipConfigId = shipConfig.Id,
-                MaxHull = shipConfig.BaseHull,
-                MaxShield = shipConfig.BaseShield,
-                MaxSpeed = shipConfig.BaseSpeed,
-                Acceleration = shipConfig.BaseAcceleration,
-                TurnRate = shipConfig.BaseTurnRate,
-                CargoCapacity = shipConfig.BaseCargoCapacity,
-                WeaponSlotCount = shipConfig.WeaponSlotCount,
-                ModuleSlotCount = shipConfig.ModuleSlotCount,
-                CombatSprite = shipConfig.CombatSprite
+                AllyConfigId = allyConfig.Id,
+                MaxHull = allyConfig.BaseHull,
+                MaxShield = allyConfig.BaseShield,
+                MaxSpeed = allyConfig.BaseSpeed,
+                Acceleration = allyConfig.BaseAcceleration,
+                TurnRate = allyConfig.BaseTurnRate,
+                CargoCapacity = allyConfig.BaseCargoCapacity,
+                WeaponSlotCount = allyConfig.WeaponSlotCount,
+                ModuleSlotCount = allyConfig.ModuleSlotCount,
+                CombatSprite = allyConfig.CombatSprite
             };
         }
 
@@ -249,7 +237,7 @@ public sealed class ShipStatsService : IShipStatsService
         public ShipFinalStats ToFinalStats()
         {
             return new ShipFinalStats(
-                ShipConfigId,
+                AllyConfigId,
                 Mathf.RoundToInt(MaxHull),
                 Mathf.RoundToInt(MaxShield),
                 MaxSpeed,

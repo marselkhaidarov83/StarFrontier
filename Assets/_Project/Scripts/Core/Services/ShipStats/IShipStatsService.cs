@@ -6,16 +6,16 @@ using System.Collections.Generic;
 public interface IShipStatsService
 {
     /// <summary>
-    /// Рассчитывает параметры только из базового ShipConfig.
+    /// Рассчитывает параметры только из базового AllyConfig.
     /// </summary>
     ShipFinalStats CalculateFromConfig(
-        ShipConfig shipConfig);
+        AllyConfig allyConfig);
 
     /// <summary>
-    /// Рассчитывает параметры из ShipConfig
+    /// Рассчитывает параметры из AllyConfig
     /// и списка установленных модулей.
     /// </summary>
     ShipFinalStats Calculate(
-        ShipConfig shipConfig,
+        AllyConfig allyConfig,
         IEnumerable<ModuleConfig> equippedModules);
 }

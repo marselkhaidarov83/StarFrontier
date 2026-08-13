@@ -177,7 +177,13 @@ public static class AllyConfigAssetGenerator
                 config.BaseEnergyMin < 0 ||
                 config.BaseEnergyMax < config.BaseEnergyMin ||
                 config.BaseSpeedMin <= 0f ||
-                config.BaseSpeedMax < config.BaseSpeedMin)
+                config.BaseSpeedMax < config.BaseSpeedMin ||
+                config.BaseEnergyRegen < 0f ||
+                config.BaseAcceleration <= 0f ||
+                config.BaseTurnRate <= 0f ||
+                config.BaseCargoCapacity < 0 ||
+                config.WeaponSlotCount < 0 ||
+                config.ModuleSlotCount < 0)
             {
                 errors++;
                 Debug.LogError($"AllyConfig validation: invalid stat range at {path}", config);
@@ -231,6 +237,16 @@ public static class AllyConfigAssetGenerator
             {
                 errors++;
                 Debug.LogError($"AllyConfig validation: mapSprite is not assigned at {path}", config);
+            }
+
+            SerializedProperty combatSpriteProperty =
+                serializedConfig.FindProperty("combatSprite");
+
+            if (combatSpriteProperty == null ||
+                combatSpriteProperty.objectReferenceValue == null)
+            {
+                errors++;
+                Debug.LogError($"AllyConfig validation: combatSprite is not assigned at {path}", config);
             }
         }
 
@@ -304,11 +320,18 @@ public static class AllyConfigAssetGenerator
         SetInt(serializedObject, "baseShieldMax", stats.ShieldMax);
         SetInt(serializedObject, "baseEnergyMin", stats.EnergyMin);
         SetInt(serializedObject, "baseEnergyMax", stats.EnergyMax);
+        SetFloat(serializedObject, "baseEnergyRegen", stats.EnergyRegen);
         SetFloat(serializedObject, "baseSpeedMin", stats.SpeedMin);
         SetFloat(serializedObject, "baseSpeedMax", stats.SpeedMax);
+        SetFloat(serializedObject, "baseAcceleration", stats.Acceleration);
+        SetFloat(serializedObject, "baseTurnRate", stats.TurnRate);
+        SetInt(serializedObject, "baseCargoCapacity", stats.CargoCapacity);
+        SetInt(serializedObject, "weaponSlotCount", stats.WeaponSlotCount);
+        SetInt(serializedObject, "moduleSlotCount", stats.ModuleSlotCount);
         SetInt(serializedObject, "level", level);
         SetEnum(serializedObject, "role", (int)role);
         SetObject(serializedObject, "mapSprite", mapSprite);
+        SetObject(serializedObject, "combatSprite", mapSprite);
         SetObject(serializedObject, "namePool", namePool);
 
         WriteScenarioEntries(
@@ -898,6 +921,15 @@ public static class AllyConfigAssetGenerator
         float speedMin =
             baseStats.SpeedMin + 0.75f * (level - 1);
 
+        float acceleration =
+            baseStats.Acceleration + 0.15f * (level - 1);
+
+        float turnRate =
+            baseStats.TurnRate + 1.5f * (level - 1);
+
+        int cargoCapacity =
+            baseStats.CargoCapacity + Mathf.Max(0, level - 1) * baseStats.CargoPerLevel;
+
         return new AllyStats
         {
             HullMin = hullMin,
@@ -906,8 +938,14 @@ public static class AllyConfigAssetGenerator
             ShieldMax = shieldMin + Mathf.RoundToInt(8 + level * 2),
             EnergyMin = energyMin,
             EnergyMax = energyMin + Mathf.RoundToInt(10 + level * 2),
+            EnergyRegen = Round(baseStats.EnergyRegen + 0.2f * (level - 1)),
             SpeedMin = Round(speedMin),
-            SpeedMax = Round(speedMin + 2.5f + level * 0.25f)
+            SpeedMax = Round(speedMin + 2.5f + level * 0.25f),
+            Acceleration = Round(acceleration),
+            TurnRate = Round(turnRate),
+            CargoCapacity = cargoCapacity,
+            WeaponSlotCount = baseStats.WeaponSlotCount,
+            ModuleSlotCount = baseStats.ModuleSlotCount
         };
     }
 
@@ -921,7 +959,14 @@ public static class AllyConfigAssetGenerator
                     HullMin = 140,
                     ShieldMin = 100,
                     EnergyMin = 120,
-                    SpeedMin = 45f
+                    EnergyRegen = 8f,
+                    SpeedMin = 45f,
+                    Acceleration = 5f,
+                    TurnRate = 90f,
+                    CargoCapacity = 24,
+                    CargoPerLevel = 2,
+                    WeaponSlotCount = 2,
+                    ModuleSlotCount = 2
                 };
 
             case AllyRole2A.Ranger:
@@ -930,7 +975,14 @@ public static class AllyConfigAssetGenerator
                     HullMin = 110,
                     ShieldMin = 80,
                     EnergyMin = 110,
-                    SpeedMin = 48f
+                    EnergyRegen = 10f,
+                    SpeedMin = 48f,
+                    Acceleration = 6f,
+                    TurnRate = 120f,
+                    CargoCapacity = 30,
+                    CargoPerLevel = 2,
+                    WeaponSlotCount = 1,
+                    ModuleSlotCount = 2
                 };
 
             case AllyRole2A.Trader:
@@ -939,7 +991,14 @@ public static class AllyConfigAssetGenerator
                     HullMin = 90,
                     ShieldMin = 50,
                     EnergyMin = 100,
-                    SpeedMin = 40f
+                    EnergyRegen = 7f,
+                    SpeedMin = 40f,
+                    Acceleration = 3.5f,
+                    TurnRate = 65f,
+                    CargoCapacity = 90,
+                    CargoPerLevel = 6,
+                    WeaponSlotCount = 1,
+                    ModuleSlotCount = 3
                 };
 
             case AllyRole2A.Science:
@@ -948,7 +1007,14 @@ public static class AllyConfigAssetGenerator
                     HullMin = 85,
                     ShieldMin = 55,
                     EnergyMin = 130,
-                    SpeedMin = 41f
+                    EnergyRegen = 9f,
+                    SpeedMin = 41f,
+                    Acceleration = 4f,
+                    TurnRate = 75f,
+                    CargoCapacity = 45,
+                    CargoPerLevel = 3,
+                    WeaponSlotCount = 1,
+                    ModuleSlotCount = 3
                 };
 
 
@@ -958,7 +1024,14 @@ public static class AllyConfigAssetGenerator
                     HullMin = 75,
                     ShieldMin = 45,
                     EnergyMin = 90,
-                    SpeedMin = 42f
+                    EnergyRegen = 8f,
+                    SpeedMin = 42f,
+                    Acceleration = 4.5f,
+                    TurnRate = 85f,
+                    CargoCapacity = 35,
+                    CargoPerLevel = 3,
+                    WeaponSlotCount = 1,
+                    ModuleSlotCount = 2
                 };
 
             default:
@@ -967,7 +1040,14 @@ public static class AllyConfigAssetGenerator
                     HullMin = 80,
                     ShieldMin = 40,
                     EnergyMin = 80,
-                    SpeedMin = 40f
+                    EnergyRegen = 6f,
+                    SpeedMin = 40f,
+                    Acceleration = 4f,
+                    TurnRate = 80f,
+                    CargoCapacity = 20,
+                    CargoPerLevel = 2,
+                    WeaponSlotCount = 1,
+                    ModuleSlotCount = 1
                 };
         }
     }
@@ -1441,7 +1521,14 @@ public static class AllyConfigAssetGenerator
         public int ShieldMax;
         public int EnergyMin;
         public int EnergyMax;
+        public float EnergyRegen;
         public float SpeedMin;
         public float SpeedMax;
+        public float Acceleration;
+        public float TurnRate;
+        public int CargoCapacity;
+        public int CargoPerLevel;
+        public int WeaponSlotCount;
+        public int ModuleSlotCount;
     }
 }

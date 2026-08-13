@@ -32,12 +32,33 @@ public sealed class AllyConfig : BaseConfig
     [SerializeField]
     private int baseEnergyMax = 50;
 
+    [SerializeField]
+    private float baseEnergyRegen = 0f;
+
     [FormerlySerializedAs("baseSpeed")]
     [SerializeField]
     private float baseSpeedMin = 2f;
 
     [SerializeField]
     private float baseSpeedMax = 2f;
+
+    [Header("Movement")]
+    [SerializeField]
+    private float baseAcceleration = 1f;
+
+    [SerializeField]
+    private float baseTurnRate = 90f;
+
+    [Header("Capacity")]
+    [SerializeField]
+    private int baseCargoCapacity = 0;
+
+    [Header("Slots")]
+    [SerializeField]
+    private int weaponSlotCount = 1;
+
+    [SerializeField]
+    private int moduleSlotCount = 0;
 
     [SerializeField]
     [Range(1, 10)]
@@ -67,6 +88,9 @@ public sealed class AllyConfig : BaseConfig
     [SerializeField]
     private Sprite mapSprite;
 
+    [SerializeField]
+    private Sprite combatSprite;
+
     public int BaseHullMin => baseHullMin;
     public int BaseHullMax => baseHullMax;
     public int BaseShieldMin => baseShieldMin;
@@ -79,7 +103,13 @@ public sealed class AllyConfig : BaseConfig
     public int BaseHull => baseHullMin;
     public int BaseShield => baseShieldMin;
     public int BaseEnergy => baseEnergyMin;
+    public float BaseEnergyRegen => baseEnergyRegen;
     public float BaseSpeed => baseSpeedMin;
+    public float BaseAcceleration => baseAcceleration;
+    public float BaseTurnRate => baseTurnRate;
+    public int BaseCargoCapacity => baseCargoCapacity;
+    public int WeaponSlotCount => weaponSlotCount;
+    public int ModuleSlotCount => moduleSlotCount;
 
     public int Level => level;
     public AllyRole2A Role => role;
@@ -115,6 +145,7 @@ public sealed class AllyConfig : BaseConfig
     }
 
     public Sprite MapSprite => mapSprite;
+    public Sprite CombatSprite => combatSprite != null ? combatSprite : mapSprite;
 
     public string PickRuntimeDisplayName(string runtimeNpcId)
     {
@@ -309,9 +340,16 @@ public sealed class AllyConfig : BaseConfig
 
         baseEnergyMin = Mathf.Max(0, baseEnergyMin);
         baseEnergyMax = Mathf.Max(baseEnergyMin, baseEnergyMax);
+        baseEnergyRegen = Mathf.Max(0f, baseEnergyRegen);
 
         baseSpeedMin = Mathf.Max(0f, baseSpeedMin);
         baseSpeedMax = Mathf.Max(baseSpeedMin, baseSpeedMax);
+
+        baseAcceleration = Mathf.Max(0f, baseAcceleration);
+        baseTurnRate = Mathf.Max(0f, baseTurnRate);
+        baseCargoCapacity = Mathf.Max(0, baseCargoCapacity);
+        weaponSlotCount = Mathf.Max(0, weaponSlotCount);
+        moduleSlotCount = Mathf.Max(0, moduleSlotCount);
 
         level = Mathf.Clamp(level, 1, 10);
     }

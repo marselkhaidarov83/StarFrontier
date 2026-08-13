@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ShipRuntimeData
 {
     public string ShipId;
-    public string ShipConfigId;
+    public string AllyConfigId;
 
     public int CurrentHull;
     public int HullCapacity;
@@ -18,5 +18,5 @@ public class ShipRuntimeData
     public List<string> EquippedModuleIds = new();
 
     public RuntimeCargoInventory Cargo = new ();
-    public int CargoCapacity; //грузоподъемность корабля
+    public int CargoCapacity;
 }

@@ -21,7 +21,6 @@ public class Bootstrapper : CustomMonoBehaviour
 
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
-    [SerializeField] private List<ShipConfig> ships;
     [SerializeField] private List<EnemyConfig> enemies;
     [SerializeField] private List<AllyConfig> allies;
     [SerializeField] private List<AllySpawnRuleConfig> allySpawnRuleConfigs;
@@ -123,7 +122,6 @@ public class Bootstrapper : CustomMonoBehaviour
                 systemHudConfig,
                 systemVisualConfig,
                 items,
-                ships,
                 enemies,
                 allies,
                 allySpawnRuleConfigs,

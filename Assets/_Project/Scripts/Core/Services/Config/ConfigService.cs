@@ -28,8 +28,6 @@ public sealed class ConfigService : IConfigService
     private readonly Dictionary<string, PlanetConfig> _planetsById;
     private readonly IReadOnlyList<ItemConfig> _items;
     private readonly Dictionary<string, ItemConfig> _itemsById;
-    private readonly IReadOnlyList<ShipConfig> _ships;
-    private readonly Dictionary<string, ShipConfig> _shipsById;
     private readonly IReadOnlyList<EnemyConfig> _enemies;
     private readonly Dictionary<string, EnemyConfig> _enemiesById;
     private readonly IReadOnlyList<AllyConfig> _allies;
@@ -56,7 +54,6 @@ public sealed class ConfigService : IConfigService
                         IEnumerable<StarSystemConfig> starSystems,
                         IEnumerable<PlanetConfig> planets,
                         IEnumerable<ItemConfig> items,
-                        IEnumerable<ShipConfig> ships,
                         IEnumerable<EnemyConfig> enemies,
                         IEnumerable<AllyConfig> allies,
                         IEnumerable<AllySpawnRuleConfig> allySpawnRules,
@@ -75,7 +72,6 @@ public sealed class ConfigService : IConfigService
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
         BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
         BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));
-        BuildIndex(ships, out _ships, out _shipsById, nameof(ShipConfig));
         BuildIndex(enemies, out _enemies, out _enemiesById, nameof(EnemyConfig));
         BuildIndex(allies, out _allies, out _alliesById, nameof(AllyConfig));
         BuildIndex(allySpawnRules, out _allySpawnRules, out _allySpawnRulesById, nameof(AllySpawnRuleConfig));
@@ -100,7 +96,6 @@ public sealed class ConfigService : IConfigService
                         SystemHudConfig systemHudConfig,
                         SystemVisualConfig systemVisualConfig,
                         IEnumerable<ItemConfig> items,
-                        IEnumerable<ShipConfig> ships,
                         IEnumerable<EnemyConfig> enemies,
                         IEnumerable<AllyConfig> allies,
                         IEnumerable<AllySpawnRuleConfig> allySpawnRules,
@@ -136,7 +131,6 @@ public sealed class ConfigService : IConfigService
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
         BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
         BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));
-        BuildIndex(ships, out _ships, out _shipsById, nameof(ShipConfig));
         BuildIndex(enemies, out _enemies, out _enemiesById, nameof(EnemyConfig));
         BuildIndex(allies, out _allies, out _alliesById, nameof(AllyConfig));
         BuildIndex(allySpawnRules, out _allySpawnRules, out _allySpawnRulesById, nameof(AllySpawnRuleConfig));
@@ -307,19 +301,9 @@ public sealed class ConfigService : IConfigService
         return config;
     }
 
-    public IReadOnlyList<ShipConfig> GetAllShips()
+    public IReadOnlyList<AllyConfig> GetAllAllies()
     {
-        return _ships;
-    }
-    public ShipConfig GetShipConfigById(string id)
-    {
-        ShipConfig config;
-
-        if (string.IsNullOrWhiteSpace(id))
-            return null;
-
-        _shipsById.TryGetValue(id.Trim(), out config);
-        return config;
+        return _allies;
     }
 
     public EnemyConfig GetEnemyConfigById(string id)

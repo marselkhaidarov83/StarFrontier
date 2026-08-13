@@ -43,51 +43,17 @@ public class NewGameFactory
                 new ShipRuntimeData
                 {
                     ShipId = "runtime_ship_001",
-                    ShipConfigId = "ship_scout_01",
-                    CurrentHull = 1000,
-                    CurrentShield = 50,
-                    CurrentEnergy = 100,
+                    AllyConfigId = "ally_ranger_L01_01",
+                    CurrentHull = 110,
+                    CurrentShield = 80,
+                    CurrentEnergy = 110,
                     CurrentFuel = newGameConfig.CurrentFuel,
                     FuelCapacity = newGameConfig.FuelCapacity,
-                    CargoCapacity = 5,
-                    HullCapacity = 100,
-                    EquippedWeaponIds = new List<string>
-                    {
-                        "weapon_common_pulse_bronze_L01_01"
-                    },
-                    EquippedModuleIds = new List<string>()
-                },
-                new ShipRuntimeData
-                {
-                    ShipId = "runtime_ship_002",
-                    ShipConfigId = "ship_frigate_01",
-                    CurrentHull = 80,
-                    CurrentShield = 60,
-                    CurrentEnergy = 110,
-                    CurrentFuel = 4,
-                    FuelCapacity = 25,
-                    CargoCapacity = 6,
+                    CargoCapacity = 30,
                     HullCapacity = 110,
                     EquippedWeaponIds = new List<string>
                     {
-                        "weapon_common_laser_bronze_L01_01"
-                    },
-                    EquippedModuleIds = new List<string>()
-                },
-                new ShipRuntimeData
-                {
-                    ShipId = "runtime_ship_003",
-                    ShipConfigId = "ship_trader_01",
-                    CurrentHull = 90,
-                    CurrentShield = 70,
-                    CurrentEnergy = 120,
-                    CurrentFuel = 5,
-                    FuelCapacity = 30,
-                    CargoCapacity = 10,
-                    HullCapacity = 120,
-                    EquippedWeaponIds = new List<string>
-                    {
-                        "weapon_common_missile_bronze_L01_01"
+                        "weapon_common_pulse_bronze_L01_01"
                     },
                     EquippedModuleIds = new List<string>()
                 }

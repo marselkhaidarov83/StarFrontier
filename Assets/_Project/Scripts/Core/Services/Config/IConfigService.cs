@@ -16,7 +16,6 @@ public interface IConfigService
     SystemHudConfig SystemHudConfig { get; }
     SystemVisualConfig SystemVisualConfig { get; }
 
-
     IReadOnlyList<SectorConfig> GetAllSectors();
 
     StarSystemLink GetCurrentStarSystemLink(string targetSystemId);
@@ -33,9 +32,7 @@ public interface IConfigService
     IReadOnlyList<ItemConfig> GetAllItems();
     ItemConfig GetItemConfigById(string id);
 
-    IReadOnlyList<ShipConfig> GetAllShips();
-    ShipConfig GetShipConfigById(string shipId);
-
+    IReadOnlyList<AllyConfig> GetAllAllies();
     EnemyConfig GetEnemyConfigById(string id);
     AllyConfig GetAllyConfigById(string id);
     PirateConfig GetPirateConfigById(string id);

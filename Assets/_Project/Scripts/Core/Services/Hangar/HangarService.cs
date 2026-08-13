@@ -24,16 +24,14 @@ public class HangarService : IHangarService
         return _gameSessionService.State.Player.PlayerShipState.GetActiveShip();
     }
 
-    public ShipConfig GetActiveShipData()
+    public AllyConfig GetActiveShipData()
     {
         var activeShip = GetActiveShipState();
 
         if (activeShip == null)
             return null;
 
-        return _configService.GetShipConfigById(activeShip.ShipConfigId);
-        // _configService.TryGetById(activeShip.ShipId, out ShipData shipData);
-        // return shipData;
+        return _configService.GetAllyConfigById(activeShip.AllyConfigId);
     }
 
     public ShipStats GetActiveShipStats()
@@ -56,13 +54,13 @@ public class HangarService : IHangarService
             return HangarOperationResult.Fail(HangarError.ShipNotFound);
 
         ShipRuntimeData shipRuntime = _gameSessionService.State.Player.PlayerShipState.GetOwnedShip(shipId);
-        // if (!_gameSessionService.CurrentSave.PlayerProfile.PlayerShipState.OwnsShip(shipId))
+
         if (shipRuntime == null)
             return HangarOperationResult.Fail(HangarError.ShipNotOwned);
 
-        // ShipConfig shipData = _configService.GetShipConfigById(shipId);
-        ShipConfig shipData = _configService.GetShipConfigById(shipRuntime.ShipConfigId);
-        // if (!_configService.TryGetById(shipId, out ShipData shipData))
+        AllyConfig shipData =
+            _configService.GetAllyConfigById(shipRuntime.AllyConfigId);
+
         if (shipData == null)
             return HangarOperationResult.Fail(HangarError.ShipNotFound);
 
@@ -82,17 +80,17 @@ public class HangarService : IHangarService
         var shipData = GetActiveShipData();
 
         Debug.Log("[HangarService] EquipWeapon " + weaponId);
+
         WeaponConfig weaponData = _configService.GetWeaponConfigById(weaponId);
-        // if (!_configService.TryGetById(weaponId, out WeaponData weaponData))
-            // weaponData = null;
+
         Debug.Log("[HangarService] weaponData " + weaponData);
 
         var result = ShipSlotRules.CanEquipWeapon(
             activeShip,
             shipData,
             weaponData,
-            weaponId
-        );
+            weaponId);
+
         Debug.Log("[HangarService] CanEquipWeapon " + result.Error);
 
         if (!result.Success)
@@ -112,8 +110,7 @@ public class HangarService : IHangarService
 
         var result = ShipSlotRules.CanUnequipWeapon(
             activeShip,
-            weaponId
-        );
+            weaponId);
 
         if (!result.Success)
             return result;
@@ -131,16 +128,14 @@ public class HangarService : IHangarService
         var activeShip = GetActiveShipState();
         var shipData = GetActiveShipData();
 
-        ModuleConfig moduleData = _configService.GetModuleConfigById(moduleId);
-        // if (!_configService.TryGetById(moduleId, out ModuleData moduleData))
-        //     moduleData = null;
+        ModuleConfig moduleData =
+            _configService.GetModuleConfigById(moduleId);
 
         var result = ShipSlotRules.CanEquipModule(
             activeShip,
             shipData,
             moduleData,
-            moduleId
-        );
+            moduleId);
 
         if (!result.Success)
             return result;
@@ -160,8 +155,7 @@ public class HangarService : IHangarService
 
         var result = ShipSlotRules.CanUnequipModule(
             activeShip,
-            moduleId
-        );
+            moduleId);
 
         if (!result.Success)
             return result;
@@ -200,11 +194,11 @@ public class HangarService : IHangarService
         try
         {
             _eventBus.Publish(new SaveNeedEvent());
-            UnityEngine.Debug.Log($"[HangarService] Autosaved after: {operationName}");
+            Debug.Log($"[HangarService] Autosaved after: {operationName}");
         }
-        catch (System.Exception exception)
+        catch (Exception exception)
         {
-            UnityEngine.Debug.LogError($"[HangarService] Autosave failed after {operationName}: {exception.Message}");
+            Debug.LogError($"[HangarService] Autosave failed after {operationName}: {exception.Message}");
         }
-    }    
+    }
 }

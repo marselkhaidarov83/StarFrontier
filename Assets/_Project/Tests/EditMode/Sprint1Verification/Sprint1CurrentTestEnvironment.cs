@@ -63,8 +63,7 @@ namespace StarFrontier.Tests.Sprint1
         public PlanetConfig GetCurrentPlanetConfig() => null;
         public IReadOnlyList<ItemConfig> GetAllItems() => new List<ItemConfig>();
         public ItemConfig GetItemConfigById(string id) => null;
-        public IReadOnlyList<ShipConfig> GetAllShips() => new List<ShipConfig>();
-        public ShipConfig GetShipConfigById(string id) => null;
+        public IReadOnlyList<AllyConfig> GetAllAllies() => new List<AllyConfig>();
         public EnemyConfig GetEnemyConfigById(string id) => null;
         public AllyConfig GetAllyConfigById(string id) => null;
         public PirateConfig GetPirateConfigById(string id) => null;
