@@ -43,9 +43,9 @@ public class EnemyConfig : BaseConfig
     [Range(1, 10)]
     private int level = 1;
 
-    [Header("Combat Role")]
-    [SerializeField]
-    private EnemyArchetype archetype;
+    // [Header("Combat Role")]
+    // [SerializeField]
+    // private EnemyArchetype archetype;
 
     [Header("Runtime Names")]
     [SerializeField]
@@ -107,7 +107,7 @@ public class EnemyConfig : BaseConfig
     public float BaseSpeed => baseSpeedMin;
 
     public int Level => level;
-    public EnemyArchetype AiArchetype => archetype;
+    // public EnemyArchetype AiArchetype => archetype;
     public EnemyNamePoolConfig NamePool => namePool;
 
     public IReadOnlyList<NpcBehaviourScenarioEntry> BehaviorScenarios =>

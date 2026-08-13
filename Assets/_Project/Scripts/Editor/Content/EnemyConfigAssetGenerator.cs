@@ -15,13 +15,8 @@ public static class EnemyConfigAssetGenerator
     private const string WeaponGroupsRoot =
         "Assets/_Project/Content/Configs/WeaponGroups/Enemy";
 
-    private static readonly string[] ArtShipRootCandidates =
-    {
-        "Assets/_Project/Art_ships",
-        "Assets/Art_ships",
-        "Assets/_Project/Art/Art_ships",
-        "Assets/Art/Art_ships"
-    };
+    private const string EnemyArtRoot =
+        "Assets/Art/Ships";
 
     private static readonly string[] ScenarioRoots =
     {
@@ -40,15 +35,15 @@ public static class EnemyConfigAssetGenerator
         Dictionary<string, NpcBehaviourScenarioConfig> scenarios =
             FindScenarioConfigs();
 
-        Dictionary<WeaponGroupEnemyFaction, Sprite> mapSprites =
-            FindMapSprites();
+        Dictionary<string, Sprite> combatSprites =
+            FindCombatSprites();
 
         int created = 0;
         int updated = 0;
         int warnings = 0;
         int totalBoundWeaponGroups = 0;
         int totalBoundScenarios = 0;
-        int totalBoundSprites = 0;
+        int totalBoundCombatSprites = 0;
 
         foreach (WeaponGroupEnemyFaction faction in GetFactions())
         {
@@ -82,17 +77,17 @@ public static class EnemyConfigAssetGenerator
                     updated++;
                 }
 
-                Sprite mapSprite = null;
+                Sprite combatSprite = null;
 
-                if (mapSprites.TryGetValue(faction, out mapSprite))
+                if (combatSprites.TryGetValue(BuildSpriteKey(faction, level), out combatSprite))
                 {
-                    totalBoundSprites++;
+                    totalBoundCombatSprites++;
                 }
                 else
                 {
                     warnings++;
                     Debug.LogWarning(
-                        $"EnemyConfig generator: no map sprite found in Art_ships for {faction}.",
+                        $"EnemyConfig generator: no combatSprite found in {GetEnemyArtFolder(faction)} for {faction} L{level:00}.",
                         asset);
                 }
 
@@ -118,7 +113,7 @@ public static class EnemyConfigAssetGenerator
                         level,
                         scenarios,
                         weaponGroups,
-                        mapSprite,
+                        combatSprite,
                         namePool);
 
                 totalBoundScenarios += boundScenarios;
@@ -139,7 +134,7 @@ public static class EnemyConfigAssetGenerator
             $"Enemy scenario refs found: {scenarios.Count}. " +
             $"Scenario refs bound: {totalBoundScenarios}. " +
             $"Weapon groups bound: {totalBoundWeaponGroups}. " +
-            $"Map sprites bound: {totalBoundSprites}. " +
+            $"Combat sprites bound: {totalBoundCombatSprites}. " +
             $"Warnings: {warnings}.",
             "OK");
     }
@@ -252,14 +247,14 @@ public static class EnemyConfigAssetGenerator
             SerializedObject serializedConfig =
                 new SerializedObject(config);
 
-            SerializedProperty mapSpriteProperty =
-                serializedConfig.FindProperty("mapSprite");
+            SerializedProperty combatSpriteProperty =
+                serializedConfig.FindProperty("combatSprite");
 
-            if (mapSpriteProperty == null ||
-                mapSpriteProperty.objectReferenceValue == null)
+            if (combatSpriteProperty == null ||
+                combatSpriteProperty.objectReferenceValue == null)
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: mapSprite is not assigned at {path}", config);
+                Debug.LogError($"EnemyConfig validation: combatSprite is not assigned at {path}", config);
             }
         }
 
@@ -314,7 +309,7 @@ public static class EnemyConfigAssetGenerator
         int level,
         Dictionary<string, NpcBehaviourScenarioConfig> scenarios,
         List<WeaponGroupConfig> weaponGroups,
-        Sprite mapSprite,
+        Sprite combatSprite,
         EnemyNamePoolConfig namePool)
     {
         EnemyStats stats =
@@ -338,8 +333,8 @@ public static class EnemyConfigAssetGenerator
         SetFloat(serializedObject, "baseSpeedMin", stats.SpeedMin);
         SetFloat(serializedObject, "baseSpeedMax", stats.SpeedMax);
         SetInt(serializedObject, "level", level);
-        SetEnum(serializedObject, "archetype", BuildArchetype(faction));
-        SetObject(serializedObject, "mapSprite", mapSprite);
+        // SetEnum(serializedObject, "archetype", BuildArchetype(faction));
+        SetObject(serializedObject, "combatSprite", combatSprite);
         SetObject(serializedObject, "namePool", namePool);
 
         int boundScenarios =
@@ -552,83 +547,161 @@ public static class EnemyConfigAssetGenerator
         return result;
     }
 
-    private static Dictionary<WeaponGroupEnemyFaction, Sprite> FindMapSprites()
+    private static Dictionary<string, Sprite> FindCombatSprites()
     {
-        Dictionary<WeaponGroupEnemyFaction, Sprite> result =
-            new Dictionary<WeaponGroupEnemyFaction, Sprite>();
+        Dictionary<string, Sprite> result =
+            new Dictionary<string, Sprite>();
 
-        List<string> paths =
-            FindArtShipAssetPaths("t:Sprite");
-
-        paths.Sort(StringComparer.Ordinal);
-
-        for (int i = 0; i < paths.Count; i++)
+        foreach (WeaponGroupEnemyFaction faction in GetFactions())
         {
-            string path =
-                paths[i];
-
-            UnityEngine.Object[] assets =
-                AssetDatabase.LoadAllAssetsAtPath(path);
-
-            for (int assetIndex = 0; assetIndex < assets.Length; assetIndex++)
+            for (int level = 1; level <= 10; level++)
             {
                 Sprite sprite =
-                    assets[assetIndex] as Sprite;
+                    FindCombatSpriteByFactionAndLevel(
+                        faction,
+                        level);
 
                 if (sprite == null)
                     continue;
 
-                string searchable =
-                    (path + "_" + sprite.name + "_")
-                    .Replace("\\", "/")
-                    .ToLowerInvariant();
-
-                if (!TryParseFactionFromPath(searchable, out WeaponGroupEnemyFaction faction))
-                    continue;
-
-                if (!result.ContainsKey(faction))
-                    result[faction] = sprite;
+                result[BuildSpriteKey(faction, level)] = sprite;
             }
         }
 
         return result;
     }
 
-    private static List<string> FindArtShipAssetPaths(string filter)
+    private static string BuildSpriteKey(
+        WeaponGroupEnemyFaction faction,
+        int level)
     {
-        List<string> validRoots =
-            new List<string>();
+        return $"{GetFactionKey(faction)}|L{level:00}";
+    }
 
-        for (int i = 0; i < ArtShipRootCandidates.Length; i++)
+    private static Sprite FindFirstSpriteAtPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        Sprite sprite =
+            AssetDatabase.LoadAssetAtPath<Sprite>(path);
+
+        if (sprite != null)
+            return sprite;
+
+        UnityEngine.Object[] assets =
+            AssetDatabase.LoadAllAssetsAtPath(path);
+
+        for (int i = 0; i < assets.Length; i++)
         {
-            string root =
-                ArtShipRootCandidates[i];
+            sprite = assets[i] as Sprite;
 
-            if (AssetDatabase.IsValidFolder(root))
-                validRoots.Add(root);
+            if (sprite != null)
+                return sprite;
         }
 
+        return null;
+    }
+
+    private static Sprite FindCombatSpriteByFactionAndLevel(
+        WeaponGroupEnemyFaction faction,
+        int level)
+    {
+        string folder =
+            GetEnemyArtFolder(faction);
+
+        if (!AssetDatabase.IsValidFolder(folder))
+            return null;
+
+        List<string> paths =
+            FindSpriteAssetPathsInFolder(folder);
+
+        paths.Sort(StringComparer.Ordinal);
+
+        for (int i = 0; i < paths.Count; i++)
+        {
+            if (!TryParseFirstNumberFromFileName(paths[i], out int spriteLevel) ||
+                spriteLevel != level)
+            {
+                continue;
+            }
+
+            Sprite sprite =
+                FindFirstSpriteAtPath(paths[i]);
+
+            if (sprite != null)
+                return sprite;
+        }
+
+        return null;
+    }
+
+    private static string GetEnemyArtFolder(WeaponGroupEnemyFaction faction)
+    {
+        switch (faction)
+        {
+            case WeaponGroupEnemyFaction.AI:
+                return $"{EnemyArtRoot}/Enemy_AI";
+
+            case WeaponGroupEnemyFaction.Ancients:
+                return $"{EnemyArtRoot}/Enemy_Ancient";
+
+            case WeaponGroupEnemyFaction.Infected:
+                return $"{EnemyArtRoot}/Enemy_Infected";
+
+            default:
+                return $"{EnemyArtRoot}/Enemy_{GetFactionFolder(faction)}";
+        }
+    }
+
+    private static bool TryParseFirstNumberFromFileName(
+        string path,
+        out int number)
+    {
+        number = 0;
+
+        string fileName =
+            Path.GetFileNameWithoutExtension(path);
+
+        if (string.IsNullOrWhiteSpace(fileName))
+            return false;
+
+        for (int i = 0; i < fileName.Length; i++)
+        {
+            if (!char.IsDigit(fileName[i]))
+                continue;
+
+            int startIndex = i;
+
+            while (i < fileName.Length &&
+                   char.IsDigit(fileName[i]))
+            {
+                i++;
+            }
+
+            string token =
+                fileName.Substring(startIndex, i - startIndex);
+
+            return int.TryParse(token, out number);
+        }
+
+        return false;
+    }
+
+    private static List<string> FindSpriteAssetPathsInFolder(string folder)
+    {
         List<string> result =
             new List<string>();
 
         string[] guids =
-            validRoots.Count > 0
-                ? AssetDatabase.FindAssets(filter, validRoots.ToArray())
-                : AssetDatabase.FindAssets(filter);
+            AssetDatabase.FindAssets(
+                "t:Texture2D",
+                new[] { folder });
 
         for (int i = 0; i < guids.Length; i++)
         {
             string path =
                 AssetDatabase.GUIDToAssetPath(guids[i]);
-
-            string lowerPath =
-                path.Replace("\\", "/").ToLowerInvariant();
-
-            if (validRoots.Count == 0 &&
-                !lowerPath.Contains("/art_ships/"))
-            {
-                continue;
-            }
 
             if (!result.Contains(path))
                 result.Add(path);

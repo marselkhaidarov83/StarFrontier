@@ -17,10 +17,8 @@ public static class AllyConfigAssetGenerator
 
     private static readonly string[] ArtShipRootCandidates =
     {
-        "Assets/_Project/Art_ships",
         "Assets/Art_ships",
-        "Assets/_Project/Art/Art_ships",
-        "Assets/Art/Art_ships"
+        "Assets/Art/Ships"
     };
 
     private static readonly string[] ScenarioRoots =
@@ -41,7 +39,7 @@ public static class AllyConfigAssetGenerator
         Dictionary<string, NpcBehaviourScenarioConfig> scenarios =
             FindScenarioConfigs();
 
-        Dictionary<AllyRole2A, Sprite> mapSprites =
+        Dictionary<string, Sprite> mapSprites =
             FindMapSprites();
 
         int createdOrUpdated = 0;
@@ -78,7 +76,7 @@ public static class AllyConfigAssetGenerator
 
                 Sprite mapSprite = null;
 
-                if (mapSprites.TryGetValue(role, out mapSprite))
+                if (mapSprites.TryGetValue(BuildSpriteKey(role, level), out mapSprite))
                 {
                     totalBoundSprites++;
                 }
@@ -86,7 +84,7 @@ public static class AllyConfigAssetGenerator
                 {
                     warnings++;
                     Debug.LogWarning(
-                        $"AllyConfig generator: no map sprite found in Art_ships for {role}.",
+                        $"AllyConfig generator: no map sprite found in ally* art folders for {role} L{level:00}.",
                         asset);
                 }
 
@@ -507,46 +505,170 @@ public static class AllyConfigAssetGenerator
         return result;
     }
 
-    private static Dictionary<AllyRole2A, Sprite> FindMapSprites()
+    private static Dictionary<string, Sprite> FindMapSprites()
     {
-        Dictionary<AllyRole2A, Sprite> result =
-            new Dictionary<AllyRole2A, Sprite>();
+        Dictionary<string, Sprite> result =
+            new Dictionary<string, Sprite>();
 
+        foreach (AllyRole2A role in GetRoles())
+        {
+            for (int level = 1; level <= 10; level++)
+            {
+                Sprite sprite =
+                    FindMapSpriteByTokens(
+                        BuildMapSpriteTokens(role),
+                        level);
+
+                if (sprite == null)
+                    continue;
+
+                result[BuildSpriteKey(role, level)] = sprite;
+            }
+        }
+
+        return result;
+    }
+
+    private static string BuildSpriteKey(
+        AllyRole2A role,
+        int level)
+    {
+        return $"{GetRoleKey(role)}|L{level:00}";
+    }
+
+    private static string[] BuildMapSpriteTokens(AllyRole2A role)
+    {
+        switch (role)
+        {
+            case AllyRole2A.Ranger:
+                return new[] { "ranger" };
+
+            case AllyRole2A.Military:
+                return new[] { "military" };
+
+            case AllyRole2A.Trader:
+                return new[] { "trader" };
+
+            case AllyRole2A.Science:
+                return new[] { "science" };
+
+            case AllyRole2A.Medic:
+                return new[] { "medic" };
+
+            default:
+                return new[] { GetRoleKey(role) };
+        }
+    }
+
+    private static Sprite FindFirstSpriteAtPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        Sprite sprite =
+            AssetDatabase.LoadAssetAtPath<Sprite>(path);
+
+        if (sprite != null)
+            return sprite;
+
+        UnityEngine.Object[] assets =
+            AssetDatabase.LoadAllAssetsAtPath(path);
+
+        for (int i = 0; i < assets.Length; i++)
+        {
+            sprite = assets[i] as Sprite;
+
+            if (sprite != null)
+                return sprite;
+        }
+
+        return null;
+    }
+
+    private static Sprite FindMapSpriteByTokens(
+        string[] tokens,
+        int level)
+    {
         List<string> paths =
-            FindArtShipAssetPaths("t:Sprite");
+            FindArtShipAssetPaths("t:Texture2D");
 
         paths.Sort(StringComparer.Ordinal);
 
         for (int i = 0; i < paths.Count; i++)
         {
-            string path =
-                paths[i];
+            string searchable =
+                paths[i].Replace("\\", "/").ToLowerInvariant();
 
-            UnityEngine.Object[] assets =
-                AssetDatabase.LoadAllAssetsAtPath(path);
-
-            for (int assetIndex = 0; assetIndex < assets.Length; assetIndex++)
+            if (!TryParseFirstNumberFromFileName(paths[i], out int spriteLevel) ||
+                spriteLevel != level)
             {
-                Sprite sprite =
-                    assets[assetIndex] as Sprite;
-
-                if (sprite == null)
-                    continue;
-
-                string searchable =
-                    (path + "_" + sprite.name + "_")
-                    .Replace("\\", "/")
-                    .ToLowerInvariant();
-
-                if (!TryParseRoleFromPath(searchable, out AllyRole2A role))
-                    continue;
-
-                if (!result.ContainsKey(role))
-                    result[role] = sprite;
+                continue;
             }
+
+            if (!ContainsAllTokens(searchable, tokens))
+                continue;
+
+            Sprite sprite =
+                FindFirstSpriteAtPath(paths[i]);
+
+            if (sprite != null)
+                return sprite;
         }
 
-        return result;
+        return null;
+    }
+
+    private static bool TryParseFirstNumberFromFileName(
+        string path,
+        out int number)
+    {
+        number = 0;
+
+        string fileName =
+            Path.GetFileNameWithoutExtension(path);
+
+        if (string.IsNullOrWhiteSpace(fileName))
+            return false;
+
+        for (int i = 0; i < fileName.Length; i++)
+        {
+            if (!char.IsDigit(fileName[i]))
+                continue;
+
+            int startIndex = i;
+
+            while (i < fileName.Length &&
+                   char.IsDigit(fileName[i]))
+            {
+                i++;
+            }
+
+            string token =
+                fileName.Substring(startIndex, i - startIndex);
+
+            return int.TryParse(token, out number);
+        }
+
+        return false;
+    }
+
+    private static bool ContainsAllTokens(
+        string value,
+        string[] tokens)
+    {
+        if (string.IsNullOrWhiteSpace(value) ||
+            tokens == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < tokens.Length; i++)
+        {
+            if (!value.Contains(tokens[i].ToLowerInvariant()))
+                return false;
+        }
+
+        return true;
     }
 
     private static List<string> FindArtShipAssetPaths(string filter)
@@ -579,8 +701,7 @@ public static class AllyConfigAssetGenerator
             string lowerPath =
                 path.Replace("\\", "/").ToLowerInvariant();
 
-            if (validRoots.Count == 0 &&
-                !lowerPath.Contains("/art_ships/"))
+            if (!IsAllyArtShipPath(lowerPath))
             {
                 continue;
             }
@@ -590,6 +711,23 @@ public static class AllyConfigAssetGenerator
         }
 
         return result;
+    }
+
+    private static bool IsAllyArtShipPath(string lowerPath)
+    {
+        if (string.IsNullOrWhiteSpace(lowerPath))
+            return false;
+
+        string[] parts =
+            lowerPath.Replace("\\", "/").Split('/');
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            if (parts[i].StartsWith("ally", StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
     }
 
     private static T FindExistingAsset<T>(

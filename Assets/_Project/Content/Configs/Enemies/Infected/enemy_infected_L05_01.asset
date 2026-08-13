@@ -31,7 +31,6 @@ MonoBehaviour:
   baseSpeedMin: 53.2
   baseSpeedMax: 57.45
   level: 5
-  archetype: 0
   namePool: {fileID: 11400000, guid: d20bf73a13fb94eb1af0365eb82f9c47, type: 2}
   behaviorScenarios:
   - scenario: 0
@@ -52,4 +51,4 @@ MonoBehaviour:
   xpRewardMin: 41
   xpRewardMax: 62
   dangerTier: 3
-  combatSprite: {fileID: 21300000, guid: 72211b5bfcffe45dabcfe0580de75f44, type: 3}
+  combatSprite: {fileID: 21300000, guid: 6c200bd23edab427cb9a76a3b9a15612, type: 3}
