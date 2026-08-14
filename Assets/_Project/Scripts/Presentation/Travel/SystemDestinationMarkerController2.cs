@@ -154,18 +154,6 @@ public sealed class SystemDestinationMarkerController2 :
         HideAll();
         ResolveVisualConfig();
 
-        if (mapPointDestinationMarker != null)
-        {
-            mapPointDestinationMarker.position =
-                position;
-        }
-
-        if (mapPointDestinationObject != null)
-        {
-            mapPointDestinationObject.SetActive(
-                true);
-        }
-
         SetLegacyFramePosition(
             position);
 

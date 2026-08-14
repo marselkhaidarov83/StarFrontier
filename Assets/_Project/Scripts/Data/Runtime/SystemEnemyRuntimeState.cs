@@ -16,6 +16,8 @@ public sealed class SystemEnemyRuntimeState
     public int CurrentShield;
     public int CurrentEnergy;
 
+    public int Speed;
+
     public bool IsAlive;
     public bool WasKilledByPlayer;
 

@@ -34,10 +34,10 @@ public class EnemyConfig : BaseConfig
 
     [FormerlySerializedAs("baseSpeed")]
     [SerializeField]
-    private float baseSpeedMin = 0f;
+    private int baseSpeedMin = 0;
 
     [SerializeField]
-    private float baseSpeedMax = 0f;
+    private int baseSpeedMax = 0;
 
     [SerializeField]
     [Range(1, 10)]
@@ -102,13 +102,13 @@ public class EnemyConfig : BaseConfig
     public int BaseShieldMax => baseShieldMax;
     public int BaseEnergyMin => baseEnergyMin;
     public int BaseEnergyMax => baseEnergyMax;
-    public float BaseSpeedMin => baseSpeedMin;
-    public float BaseSpeedMax => baseSpeedMax;
+    public int BaseSpeedMin => baseSpeedMin;
+    public int BaseSpeedMax => baseSpeedMax;
 
     public int BaseHull => baseHullMin;
     public int BaseShield => baseShieldMin;
     public int BaseEnergy => baseEnergyMin;
-    public float BaseSpeed => baseSpeedMin;
+    public int BaseSpeed => baseSpeedMin;
 
     public int Level => level;
     // public EnemyArchetype AiArchetype => archetype;
@@ -371,7 +371,7 @@ public class EnemyConfig : BaseConfig
         baseEnergyMin = Mathf.Max(0, baseEnergyMin);
         baseEnergyMax = Mathf.Max(baseEnergyMin, baseEnergyMax);
 
-        baseSpeedMin = Mathf.Max(0f, baseSpeedMin);
+        baseSpeedMin = Mathf.Max(0, baseSpeedMin);
         baseSpeedMax = Mathf.Max(baseSpeedMin, baseSpeedMax);
 
         level = Mathf.Clamp(level, 1, 10);

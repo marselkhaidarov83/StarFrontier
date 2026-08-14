@@ -6,14 +6,14 @@ using UnityEngine;
 
 public static class EnemyConfigAssetGenerator
 {
-    private const float MinGeneratedShipSpeed =
-        100f;
+    private const int MinGeneratedShipSpeed =
+        100;
 
-    private const float MaxGeneratedShipSpeed =
-        500f;
+    private const int MaxGeneratedShipSpeed =
+        500;
 
-    private const float GeneratedShipSpeedRange =
-        40f;
+    private const int GeneratedShipSpeedRange =
+        40;
 
     private const float MinGeneratedVisualSize =
         27f;
@@ -203,7 +203,7 @@ public static class EnemyConfigAssetGenerator
                 config.BaseShieldMax < config.BaseShieldMin ||
                 config.BaseEnergyMin < 0 ||
                 config.BaseEnergyMax < config.BaseEnergyMin ||
-                config.BaseSpeedMin <= 0f ||
+                config.BaseSpeedMin <= 0 ||
                 config.BaseSpeedMax < config.BaseSpeedMin)
             {
                 errors++;
@@ -345,8 +345,8 @@ public static class EnemyConfigAssetGenerator
         SetInt(serializedObject, "baseShieldMax", stats.ShieldMax);
         SetInt(serializedObject, "baseEnergyMin", stats.EnergyMin);
         SetInt(serializedObject, "baseEnergyMax", stats.EnergyMax);
-        SetFloat(serializedObject, "baseSpeedMin", stats.SpeedMin);
-        SetFloat(serializedObject, "baseSpeedMax", stats.SpeedMax);
+        SetInt(serializedObject, "baseSpeedMin", stats.SpeedMin);
+        SetInt(serializedObject, "baseSpeedMax", stats.SpeedMax);
         SetInt(serializedObject, "level", level);
         // SetEnum(serializedObject, "archetype", BuildArchetype(faction));
         SetObject(serializedObject, "combatSprite", combatSprite);
@@ -877,8 +877,8 @@ public static class EnemyConfigAssetGenerator
 
         CalculateGeneratedShipSpeedRange(
             level,
-            out float speedMin,
-            out float speedMax);
+            out int speedMin,
+            out int speedMax);
 
         int creditRewardMin =
             Mathf.RoundToInt(baseStats.CreditRewardMin * growth);
@@ -917,7 +917,7 @@ public static class EnemyConfigAssetGenerator
                     HullMin = 90,
                     ShieldMin = 110,
                     EnergyMin = 120,
-                    SpeedMin = 45f,
+                    SpeedMin = 45,
                     CreditRewardMin = 150,
                     XpRewardMin = 20
                 };
@@ -928,7 +928,7 @@ public static class EnemyConfigAssetGenerator
                     HullMin = 130,
                     ShieldMin = 140,
                     EnergyMin = 150,
-                    SpeedMin = 38f,
+                    SpeedMin = 38,
                     CreditRewardMin = 220,
                     XpRewardMin = 30
                 };
@@ -939,7 +939,7 @@ public static class EnemyConfigAssetGenerator
                     HullMin = 120,
                     ShieldMin = 70,
                     EnergyMin = 100,
-                    SpeedMin = 50f,
+                    SpeedMin = 50,
                     CreditRewardMin = 180,
                     XpRewardMin = 24
                 };
@@ -950,7 +950,7 @@ public static class EnemyConfigAssetGenerator
                     HullMin = 90,
                     ShieldMin = 80,
                     EnergyMin = 100,
-                    SpeedMin = 42f,
+                    SpeedMin = 42,
                     CreditRewardMin = 150,
                     XpRewardMin = 20
                 };
@@ -959,8 +959,8 @@ public static class EnemyConfigAssetGenerator
 
     private static void CalculateGeneratedShipSpeedRange(
         int level,
-        out float speedMin,
-        out float speedMax)
+        out int speedMin,
+        out int speedMax)
     {
         if (level <= 1)
         {
@@ -984,7 +984,7 @@ public static class EnemyConfigAssetGenerator
             (safeLevel - 1f) / 9f;
 
         speedMax =
-            Round(
+            Mathf.RoundToInt(
                 Mathf.Lerp(
                     MinGeneratedShipSpeed +
                     GeneratedShipSpeedRange,
@@ -992,7 +992,7 @@ public static class EnemyConfigAssetGenerator
                     progress));
 
         speedMin =
-            Round(
+            Mathf.RoundToInt(
                 Mathf.Lerp(
                     MinGeneratedShipSpeed,
                     MaxGeneratedShipSpeed -
@@ -1425,8 +1425,8 @@ public static class EnemyConfigAssetGenerator
         public int ShieldMax;
         public int EnergyMin;
         public int EnergyMax;
-        public float SpeedMin;
-        public float SpeedMax;
+        public int SpeedMin;
+        public int SpeedMax;
         public int CreditRewardMin;
         public int CreditRewardMax;
         public int XpRewardMin;

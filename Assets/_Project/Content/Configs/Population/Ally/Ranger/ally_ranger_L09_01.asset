@@ -30,9 +30,12 @@ MonoBehaviour:
   baseEnergyRegen: 11.6
   baseSpeedMin: 420
   baseSpeedMax: 460
-  baseAcceleration: 7.2
-  baseTurnRate: 132
-  baseCargoCapacity: 46
+  baseAccelerationMin: 7.2
+  baseAccelerationMax: 7.7
+  baseTurnRateMin: 132
+  baseTurnRateMax: 142
+  baseCargoCapacityMin: 46
+  baseCargoCapacityMax: 50
   weaponSlotCount: 1
   moduleSlotCount: 2
   level: 9

@@ -60,6 +60,7 @@ using UnityEngine;
                     CurrentHull = enemy.CurrentHull,
                     CurrentShield = enemy.CurrentShield,
                     CurrentEnergy = enemy.CurrentEnergy,
+                    Speed = enemy.Speed,
                     IsAlive = enemy.IsAlive,
                     WasKilledByPlayer = enemy.WasKilledByPlayer
                 });
@@ -76,6 +77,10 @@ using UnityEngine;
                     CurrentHull = ally.CurrentHull,
                     CurrentShield = ally.CurrentShield,
                     CurrentEnergy = ally.CurrentEnergy,
+                    Speed = ally.Speed,
+                    Acceleration = ally.Acceleration,
+                    TurnRate = ally.TurnRate,
+                    CargoCapacity = ally.CargoCapacity,
                     IsAlive = ally.IsAlive
                 });
             }
@@ -136,9 +141,22 @@ using UnityEngine;
                     EnemyConfig = enemyConfig,
                     SystemId = enemySave.SystemId,
                     Position = enemySave.Position,
-                    CurrentHull = enemySave.CurrentHull,
-                    CurrentShield = enemySave.CurrentShield,
-                    CurrentEnergy = enemySave.CurrentEnergy,
+                    CurrentHull = ValidateIntRange(
+                        enemySave.CurrentHull,
+                        enemyConfig.BaseHullMin,
+                        enemyConfig.BaseHullMax),
+                    CurrentShield = ValidateIntRange(
+                        enemySave.CurrentShield,
+                        enemyConfig.BaseShieldMin,
+                        enemyConfig.BaseShieldMax),
+                    CurrentEnergy = ValidateIntRange(
+                        enemySave.CurrentEnergy,
+                        enemyConfig.BaseEnergyMin,
+                        enemyConfig.BaseEnergyMax),
+                    Speed = ValidateIntRange(
+                        enemySave.Speed,
+                        enemyConfig.BaseSpeedMin,
+                        enemyConfig.BaseSpeedMax),
                     IsAlive = enemySave.IsAlive,
                     WasKilledByPlayer = enemySave.WasKilledByPlayer
                 });
@@ -163,9 +181,34 @@ using UnityEngine;
                     AllyConfig = allyConfig,
                     SystemId = allySave.SystemId,
                     Position = allySave.Position,
-                    CurrentHull = allySave.CurrentHull,
-                    CurrentShield = allySave.CurrentShield,
-                    CurrentEnergy = allySave.CurrentEnergy,
+                    CurrentHull = ValidateIntRange(
+                        allySave.CurrentHull,
+                        allyConfig.BaseHullMin,
+                        allyConfig.BaseHullMax),
+                    CurrentShield = ValidateIntRange(
+                        allySave.CurrentShield,
+                        allyConfig.BaseShieldMin,
+                        allyConfig.BaseShieldMax),
+                    CurrentEnergy = ValidateIntRange(
+                        allySave.CurrentEnergy,
+                        allyConfig.BaseEnergyMin,
+                        allyConfig.BaseEnergyMax),
+                    Speed = ValidateIntRange(
+                        allySave.Speed,
+                        allyConfig.BaseSpeedMin,
+                        allyConfig.BaseSpeedMax),
+                    Acceleration = ValidateFloatRange(
+                        allySave.Acceleration,
+                        allyConfig.BaseAccelerationMin,
+                        allyConfig.BaseAccelerationMax),
+                    TurnRate = ValidateFloatRange(
+                        allySave.TurnRate,
+                        allyConfig.BaseTurnRateMin,
+                        allyConfig.BaseTurnRateMax),
+                    CargoCapacity = ValidateIntRange(
+                        allySave.CargoCapacity,
+                        allyConfig.BaseCargoCapacityMin,
+                        allyConfig.BaseCargoCapacityMax),
                     IsAlive = allySave.IsAlive
                 });
             }
@@ -174,5 +217,25 @@ using UnityEngine;
             _allyService.RestoreAllies(restoredAllies);
 
             Debug.Log("[SystemEncounterSaveService] Restored encounter save data.");
+        }
+
+        private static int ValidateIntRange(
+            int value,
+            int min,
+            int max)
+        {
+            return value < min || value > max
+                ? min
+                : value;
+        }
+
+        private static float ValidateFloatRange(
+            float value,
+            float min,
+            float max)
+        {
+            return value < min || value > max
+                ? min
+                : value;
         }
     }

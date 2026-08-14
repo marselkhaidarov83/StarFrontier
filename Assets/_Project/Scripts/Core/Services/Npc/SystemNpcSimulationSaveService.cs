@@ -5,12 +5,14 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 {
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
     private readonly ISystemNpcPopulationService _populationService;
+    private readonly IConfigService _configService;
 
     public SystemNpcSimulationSaveService()
     {
         _debugStop = true;
         _npcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
         _populationService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcPopulationService>();
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
     }
 
     public SystemNpcSimulationSaveData Capture()
@@ -247,6 +249,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             DangerTier = save.DangerTier
         };
 
+        ValidateRuntimeStatsFromConfig(npc);
+
         if (save.Weapons == null)
             return npc;
 
@@ -265,6 +269,67 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
         // ApplyRestoreLocationMutationIfNeeded(npc);
 
         return npc;
+    }
+
+    private void ValidateRuntimeStatsFromConfig(SystemNpcRuntimeState npc)
+    {
+        if (npc == null || string.IsNullOrWhiteSpace(npc.ConfigId))
+            return;
+
+        if (npc.IsAlly)
+        {
+            AllyConfig config =
+                _configService.GetAllyConfigById(npc.ConfigId);
+
+            if (config == null)
+                return;
+
+            npc.MaxHull = ValidateIntRange(npc.MaxHull, config.BaseHullMin, config.BaseHullMax);
+            npc.CurrentHull = ValidateIntRange(npc.CurrentHull, config.BaseHullMin, config.BaseHullMax);
+            npc.MaxShield = ValidateIntRange(npc.MaxShield, config.BaseShieldMin, config.BaseShieldMax);
+            npc.CurrentShield = ValidateIntRange(npc.CurrentShield, config.BaseShieldMin, config.BaseShieldMax);
+            npc.MaxEnergy = ValidateIntRange(npc.MaxEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
+            npc.CurrentEnergy = ValidateIntRange(npc.CurrentEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
+            npc.Speed = ValidateIntRange(npc.Speed, config.BaseSpeedMin, config.BaseSpeedMax);
+            return;
+        }
+
+        if (npc.IsEnemy)
+        {
+            EnemyConfig config =
+                _configService.GetEnemyConfigById(npc.ConfigId);
+
+            if (config == null)
+                return;
+
+            npc.MaxHull = ValidateIntRange(npc.MaxHull, config.BaseHullMin, config.BaseHullMax);
+            npc.CurrentHull = ValidateIntRange(npc.CurrentHull, config.BaseHullMin, config.BaseHullMax);
+            npc.MaxShield = ValidateIntRange(npc.MaxShield, config.BaseShieldMin, config.BaseShieldMax);
+            npc.CurrentShield = ValidateIntRange(npc.CurrentShield, config.BaseShieldMin, config.BaseShieldMax);
+            npc.MaxEnergy = ValidateIntRange(npc.MaxEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
+            npc.CurrentEnergy = ValidateIntRange(npc.CurrentEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
+            npc.Speed = ValidateIntRange(npc.Speed, config.BaseSpeedMin, config.BaseSpeedMax);
+        }
+    }
+
+    private static int ValidateIntRange(
+        int value,
+        int min,
+        int max)
+    {
+        return value < min || value > max
+            ? min
+            : value;
+    }
+
+    private static float ValidateFloatRange(
+        float value,
+        float min,
+        float max)
+    {
+        return value < min || value > max
+            ? min
+            : value;
     }
 
     private void ApplyRestoreLocationMutationIfNeeded(SystemNpcRuntimeState npc)

@@ -6,14 +6,14 @@ using UnityEngine;
 
 public static class AllyConfigAssetGenerator
 {
-    private const float MinGeneratedShipSpeed =
-        100f;
+    private const int MinGeneratedShipSpeed =
+        100;
 
-    private const float MaxGeneratedShipSpeed =
-        500f;
+    private const int MaxGeneratedShipSpeed =
+        500;
 
-    private const float GeneratedShipSpeedRange =
-        40f;
+    private const int GeneratedShipSpeedRange =
+        40;
 
     private const float MinGeneratedVisualSize =
         27f;
@@ -200,12 +200,15 @@ public static class AllyConfigAssetGenerator
                 config.BaseShieldMax < config.BaseShieldMin ||
                 config.BaseEnergyMin < 0 ||
                 config.BaseEnergyMax < config.BaseEnergyMin ||
-                config.BaseSpeedMin <= 0f ||
+                config.BaseSpeedMin <= 0 ||
                 config.BaseSpeedMax < config.BaseSpeedMin ||
                 config.BaseEnergyRegen < 0f ||
-                config.BaseAcceleration <= 0f ||
-                config.BaseTurnRate <= 0f ||
-                config.BaseCargoCapacity < 0 ||
+                config.BaseAccelerationMin <= 0f ||
+                config.BaseAccelerationMax < config.BaseAccelerationMin ||
+                config.BaseTurnRateMin <= 0f ||
+                config.BaseTurnRateMax < config.BaseTurnRateMin ||
+                config.BaseCargoCapacityMin < 0 ||
+                config.BaseCargoCapacityMax < config.BaseCargoCapacityMin ||
                 config.WeaponSlotCount < 0 ||
                 config.ModuleSlotCount < 0)
             {
@@ -346,11 +349,14 @@ public static class AllyConfigAssetGenerator
         SetInt(serializedObject, "baseEnergyMin", stats.EnergyMin);
         SetInt(serializedObject, "baseEnergyMax", stats.EnergyMax);
         SetFloat(serializedObject, "baseEnergyRegen", stats.EnergyRegen);
-        SetFloat(serializedObject, "baseSpeedMin", stats.SpeedMin);
-        SetFloat(serializedObject, "baseSpeedMax", stats.SpeedMax);
-        SetFloat(serializedObject, "baseAcceleration", stats.Acceleration);
-        SetFloat(serializedObject, "baseTurnRate", stats.TurnRate);
-        SetInt(serializedObject, "baseCargoCapacity", stats.CargoCapacity);
+        SetInt(serializedObject, "baseSpeedMin", stats.SpeedMin);
+        SetInt(serializedObject, "baseSpeedMax", stats.SpeedMax);
+        SetFloat(serializedObject, "baseAccelerationMin", stats.AccelerationMin);
+        SetFloat(serializedObject, "baseAccelerationMax", stats.AccelerationMax);
+        SetFloat(serializedObject, "baseTurnRateMin", stats.TurnRateMin);
+        SetFloat(serializedObject, "baseTurnRateMax", stats.TurnRateMax);
+        SetInt(serializedObject, "baseCargoCapacityMin", stats.CargoCapacityMin);
+        SetInt(serializedObject, "baseCargoCapacityMax", stats.CargoCapacityMax);
         SetInt(serializedObject, "weaponSlotCount", stats.WeaponSlotCount);
         SetInt(serializedObject, "moduleSlotCount", stats.ModuleSlotCount);
         SetInt(serializedObject, "level", level);
@@ -988,8 +994,8 @@ public static class AllyConfigAssetGenerator
 
         CalculateGeneratedShipSpeedRange(
             level,
-            out float speedMin,
-            out float speedMax);
+            out int speedMin,
+            out int speedMax);
 
         float acceleration =
             baseStats.Acceleration + 0.15f * (level - 1);
@@ -1011,9 +1017,12 @@ public static class AllyConfigAssetGenerator
             EnergyRegen = Round(baseStats.EnergyRegen + 0.2f * (level - 1)),
             SpeedMin = speedMin,
             SpeedMax = speedMax,
-            Acceleration = Round(acceleration),
-            TurnRate = Round(turnRate),
-            CargoCapacity = cargoCapacity,
+            AccelerationMin = Round(acceleration),
+            AccelerationMax = Round(acceleration + 0.5f),
+            TurnRateMin = Round(turnRate),
+            TurnRateMax = Round(turnRate + 10f),
+            CargoCapacityMin = cargoCapacity,
+            CargoCapacityMax = cargoCapacity + Mathf.Max(4, baseStats.CargoPerLevel * 2),
             WeaponSlotCount = baseStats.WeaponSlotCount,
             ModuleSlotCount = baseStats.ModuleSlotCount
         };
@@ -1032,9 +1041,12 @@ public static class AllyConfigAssetGenerator
             EnergyRegen = 6f,
             SpeedMin = MinGeneratedShipSpeed,
             SpeedMax = MinGeneratedShipSpeed,
-            Acceleration = 4f,
-            TurnRate = 95f,
-            CargoCapacity = 18,
+            AccelerationMin = 4f,
+            AccelerationMax = 4.5f,
+            TurnRateMin = 95f,
+            TurnRateMax = 105f,
+            CargoCapacityMin = 18,
+            CargoCapacityMax = 22,
             CargoPerLevel = 0,
             WeaponSlotCount = 0,
             ModuleSlotCount = 0
@@ -1052,7 +1064,7 @@ public static class AllyConfigAssetGenerator
                     ShieldMin = 100,
                     EnergyMin = 120,
                     EnergyRegen = 8f,
-                    SpeedMin = 45f,
+                    SpeedMin = 45,
                     Acceleration = 5f,
                     TurnRate = 90f,
                     CargoCapacity = 24,
@@ -1068,7 +1080,7 @@ public static class AllyConfigAssetGenerator
                     ShieldMin = 80,
                     EnergyMin = 110,
                     EnergyRegen = 10f,
-                    SpeedMin = 48f,
+                    SpeedMin = 48,
                     Acceleration = 6f,
                     TurnRate = 120f,
                     CargoCapacity = 30,
@@ -1084,7 +1096,7 @@ public static class AllyConfigAssetGenerator
                     ShieldMin = 50,
                     EnergyMin = 100,
                     EnergyRegen = 7f,
-                    SpeedMin = 40f,
+                    SpeedMin = 40,
                     Acceleration = 3.5f,
                     TurnRate = 65f,
                     CargoCapacity = 90,
@@ -1100,7 +1112,7 @@ public static class AllyConfigAssetGenerator
                     ShieldMin = 55,
                     EnergyMin = 130,
                     EnergyRegen = 9f,
-                    SpeedMin = 41f,
+                    SpeedMin = 41,
                     Acceleration = 4f,
                     TurnRate = 75f,
                     CargoCapacity = 45,
@@ -1117,7 +1129,7 @@ public static class AllyConfigAssetGenerator
                     ShieldMin = 45,
                     EnergyMin = 90,
                     EnergyRegen = 8f,
-                    SpeedMin = 42f,
+                    SpeedMin = 42,
                     Acceleration = 4.5f,
                     TurnRate = 85f,
                     CargoCapacity = 35,
@@ -1133,7 +1145,7 @@ public static class AllyConfigAssetGenerator
                     ShieldMin = 40,
                     EnergyMin = 80,
                     EnergyRegen = 6f,
-                    SpeedMin = 40f,
+                    SpeedMin = 40,
                     Acceleration = 4f,
                     TurnRate = 80f,
                     CargoCapacity = 20,
@@ -1146,8 +1158,8 @@ public static class AllyConfigAssetGenerator
 
     private static void CalculateGeneratedShipSpeedRange(
         int level,
-        out float speedMin,
-        out float speedMax)
+        out int speedMin,
+        out int speedMax)
     {
         if (level <= 1)
         {
@@ -1171,7 +1183,7 @@ public static class AllyConfigAssetGenerator
             (safeLevel - 1f) / 9f;
 
         speedMax =
-            Round(
+            Mathf.RoundToInt(
                 Mathf.Lerp(
                     MinGeneratedShipSpeed +
                     GeneratedShipSpeedRange,
@@ -1179,7 +1191,7 @@ public static class AllyConfigAssetGenerator
                     progress));
 
         speedMin =
-            Round(
+            Mathf.RoundToInt(
                 Mathf.Lerp(
                     MinGeneratedShipSpeed,
                     MaxGeneratedShipSpeed -
@@ -1698,11 +1710,17 @@ public static class AllyConfigAssetGenerator
         public int EnergyMin;
         public int EnergyMax;
         public float EnergyRegen;
-        public float SpeedMin;
-        public float SpeedMax;
+        public int SpeedMin;
+        public int SpeedMax;
         public float Acceleration;
         public float TurnRate;
         public int CargoCapacity;
+        public float AccelerationMin;
+        public float AccelerationMax;
+        public float TurnRateMin;
+        public float TurnRateMax;
+        public int CargoCapacityMin;
+        public int CargoCapacityMax;
         public int CargoPerLevel;
         public int WeaponSlotCount;
         public int ModuleSlotCount;

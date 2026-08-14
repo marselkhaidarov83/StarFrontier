@@ -77,6 +77,24 @@ public sealed class TargetMarkerView2A :
         RefreshVisual();
     }
 
+    public void ConfigureMarker(
+        GameObject root,
+        SpriteRenderer renderer)
+    {
+        markerRoot =
+            root;
+
+        markerRenderer =
+            renderer;
+
+        _baseMarkerScaleCaptured =
+            false;
+
+        CaptureBaseMarkerScale();
+        SetMarkerVisible(false);
+        RefreshVisual();
+    }
+
     public void SetAvailable(
         bool available)
     {

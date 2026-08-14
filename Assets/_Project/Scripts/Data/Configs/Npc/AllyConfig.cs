@@ -37,21 +37,33 @@ public sealed class AllyConfig : BaseConfig
 
     [FormerlySerializedAs("baseSpeed")]
     [SerializeField]
-    private float baseSpeedMin = 2f;
+    private int baseSpeedMin = 2;
 
     [SerializeField]
-    private float baseSpeedMax = 2f;
+    private int baseSpeedMax = 2;
 
     [Header("Movement")]
+    [FormerlySerializedAs("baseAcceleration")]
     [SerializeField]
-    private float baseAcceleration = 1f;
+    private float baseAccelerationMin = 1f;
 
     [SerializeField]
-    private float baseTurnRate = 90f;
+    private float baseAccelerationMax = 1f;
+
+    [FormerlySerializedAs("baseTurnRate")]
+    [SerializeField]
+    private float baseTurnRateMin = 90f;
+
+    [SerializeField]
+    private float baseTurnRateMax = 90f;
 
     [Header("Capacity")]
+    [FormerlySerializedAs("baseCargoCapacity")]
     [SerializeField]
-    private int baseCargoCapacity = 0;
+    private int baseCargoCapacityMin = 0;
+
+    [SerializeField]
+    private int baseCargoCapacityMax = 0;
 
     [Header("Slots")]
     [SerializeField]
@@ -101,17 +113,24 @@ public sealed class AllyConfig : BaseConfig
     public int BaseShieldMax => baseShieldMax;
     public int BaseEnergyMin => baseEnergyMin;
     public int BaseEnergyMax => baseEnergyMax;
-    public float BaseSpeedMin => baseSpeedMin;
-    public float BaseSpeedMax => baseSpeedMax;
+    public int BaseSpeedMin => baseSpeedMin;
+    public int BaseSpeedMax => baseSpeedMax;
 
     public int BaseHull => baseHullMin;
     public int BaseShield => baseShieldMin;
     public int BaseEnergy => baseEnergyMin;
     public float BaseEnergyRegen => baseEnergyRegen;
-    public float BaseSpeed => baseSpeedMin;
-    public float BaseAcceleration => baseAcceleration;
-    public float BaseTurnRate => baseTurnRate;
-    public int BaseCargoCapacity => baseCargoCapacity;
+    public int BaseSpeed => baseSpeedMin;
+    public float BaseAccelerationMin => baseAccelerationMin;
+    public float BaseAccelerationMax => baseAccelerationMax;
+    public float BaseTurnRateMin => baseTurnRateMin;
+    public float BaseTurnRateMax => baseTurnRateMax;
+    public int BaseCargoCapacityMin => baseCargoCapacityMin;
+    public int BaseCargoCapacityMax => baseCargoCapacityMax;
+
+    public float BaseAcceleration => baseAccelerationMin;
+    public float BaseTurnRate => baseTurnRateMin;
+    public int BaseCargoCapacity => baseCargoCapacityMin;
     public int WeaponSlotCount => weaponSlotCount;
     public int ModuleSlotCount => moduleSlotCount;
 
@@ -347,12 +366,17 @@ public sealed class AllyConfig : BaseConfig
         baseEnergyMax = Mathf.Max(baseEnergyMin, baseEnergyMax);
         baseEnergyRegen = Mathf.Max(0f, baseEnergyRegen);
 
-        baseSpeedMin = Mathf.Max(0f, baseSpeedMin);
+        baseSpeedMin = Mathf.Max(0, baseSpeedMin);
         baseSpeedMax = Mathf.Max(baseSpeedMin, baseSpeedMax);
 
-        baseAcceleration = Mathf.Max(0f, baseAcceleration);
-        baseTurnRate = Mathf.Max(0f, baseTurnRate);
-        baseCargoCapacity = Mathf.Max(0, baseCargoCapacity);
+        baseAccelerationMin = Mathf.Max(0f, baseAccelerationMin);
+        baseAccelerationMax = Mathf.Max(baseAccelerationMin, baseAccelerationMax);
+
+        baseTurnRateMin = Mathf.Max(0f, baseTurnRateMin);
+        baseTurnRateMax = Mathf.Max(baseTurnRateMin, baseTurnRateMax);
+
+        baseCargoCapacityMin = Mathf.Max(0, baseCargoCapacityMin);
+        baseCargoCapacityMax = Mathf.Max(baseCargoCapacityMin, baseCargoCapacityMax);
         weaponSlotCount = Mathf.Max(0, weaponSlotCount);
         moduleSlotCount = Mathf.Max(0, moduleSlotCount);
 

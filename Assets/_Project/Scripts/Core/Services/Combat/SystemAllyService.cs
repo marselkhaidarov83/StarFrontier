@@ -44,9 +44,13 @@ public sealed class SystemAllyService : ISystemAllyService
             SystemId = systemId,
             Position = position,
 
-            CurrentHull = allyConfig.BaseHull,
-            CurrentShield = allyConfig.BaseShield,
-            CurrentEnergy = allyConfig.BaseEnergy,
+            CurrentHull = RandomInt(allyConfig.BaseHullMin, allyConfig.BaseHullMax),
+            CurrentShield = RandomInt(allyConfig.BaseShieldMin, allyConfig.BaseShieldMax),
+            CurrentEnergy = RandomInt(allyConfig.BaseEnergyMin, allyConfig.BaseEnergyMax),
+            Speed = RandomInt(allyConfig.BaseSpeedMin, allyConfig.BaseSpeedMax),
+            Acceleration = RandomFloat(allyConfig.BaseAccelerationMin, allyConfig.BaseAccelerationMax),
+            TurnRate = RandomFloat(allyConfig.BaseTurnRateMin, allyConfig.BaseTurnRateMax),
+            CargoCapacity = RandomInt(allyConfig.BaseCargoCapacityMin, allyConfig.BaseCargoCapacityMax),
 
             IsAlive = true
         };
@@ -179,5 +183,19 @@ public sealed class SystemAllyService : ISystemAllyService
         }
 
         return new DamageService2A();
+    }
+
+    private static int RandomInt(int min, int max)
+    {
+        int safeMin = Mathf.Min(min, max);
+        int safeMax = Mathf.Max(min, max);
+        return UnityEngine.Random.Range(safeMin, safeMax + 1);
+    }
+
+    private static float RandomFloat(float min, float max)
+    {
+        float safeMin = Mathf.Min(min, max);
+        float safeMax = Mathf.Max(min, max);
+        return UnityEngine.Random.Range(safeMin, safeMax);
     }
 }

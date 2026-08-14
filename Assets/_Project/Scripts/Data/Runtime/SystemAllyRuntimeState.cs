@@ -17,5 +17,10 @@ using UnityEngine;
         public int CurrentShield;
         public int CurrentEnergy;
 
+        public int Speed;
+        public float Acceleration;
+        public float TurnRate;
+        public int CargoCapacity;
+
         public bool IsAlive;
     }

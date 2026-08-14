@@ -24,8 +24,8 @@ public static class SystemNpcRuntimeFactory
         int energy =
             UnityEngine.Random.Range(config.BaseEnergyMin, config.BaseEnergyMax + 1);
 
-        float speed =
-            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax);
+        int speed =
+            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax + 1);
 
         int creditReward =
             UnityEngine.Random.Range(config.CreditRewardMin, config.CreditRewardMax + 1);
@@ -127,7 +127,7 @@ public static class SystemNpcRuntimeFactory
             MaxEnergy = config.BaseEnergy,
             CurrentEnergy = config.BaseEnergy,
 
-            Speed = config.BaseSpeed,
+            Speed = Mathf.RoundToInt(config.BaseSpeed),
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
@@ -164,8 +164,8 @@ public static class SystemNpcRuntimeFactory
         int energy =
             UnityEngine.Random.Range(config.BaseEnergyMin, config.BaseEnergyMax + 1);
 
-        float speed =
-            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax);
+        int speed =
+            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax + 1);
 
         string runtimeNpcId =
             Guid.NewGuid().ToString("N");

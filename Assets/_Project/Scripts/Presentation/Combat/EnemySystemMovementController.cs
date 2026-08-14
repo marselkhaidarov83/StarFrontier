@@ -58,10 +58,10 @@ using UnityEngine;
 
         public void ApplyRuntimeConfig(SystemEnemyRuntimeState runtimeEnemy)
         {
-            if (runtimeEnemy == null || runtimeEnemy.EnemyConfig == null)
+            if (runtimeEnemy == null)
                 return;
 
-            _mover.SetSpeed(runtimeEnemy.EnemyConfig.BaseSpeed);
+            _mover.SetSpeed(runtimeEnemy.Speed);
             _mover.SetStopDistance(pointReachedDistance);
         }
 

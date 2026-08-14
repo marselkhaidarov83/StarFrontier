@@ -77,7 +77,7 @@ public sealed class SystemNpcRuntimeState
     public int MaxEnergy;
     public int CurrentEnergy;
 
-    public float Speed;
+    public int Speed;
 
     [Header("Life")]
     public SystemNpcLifeState LifeState;

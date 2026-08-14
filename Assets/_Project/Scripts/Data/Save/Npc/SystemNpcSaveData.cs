@@ -59,7 +59,7 @@ public sealed class SystemNpcSaveData
     public int MaxEnergy;
     public int CurrentEnergy;
 
-    public float Speed;
+    public int Speed;
 
     public SystemNpcLifeState LifeState;
     public bool IsAlive;

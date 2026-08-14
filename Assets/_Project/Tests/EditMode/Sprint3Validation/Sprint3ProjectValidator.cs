@@ -394,8 +394,8 @@ public static class Sprint3ProjectValidator
 
             ValidatePositive(report, serialized, path, true, "baseHull");
             ValidatePositive(report, serialized, path, true, "baseSpeed");
-            ValidatePositive(report, serialized, path, true, "baseAcceleration");
-            ValidatePositive(report, serialized, path, true, "baseTurnRate");
+            ValidatePositive(report, serialized, path, true, "baseAccelerationMin");
+            ValidatePositive(report, serialized, path, true, "baseTurnRateMin");
 
             SerializedProperty sprite = serialized.FindProperty("combatSprite");
             if (sprite != null &&

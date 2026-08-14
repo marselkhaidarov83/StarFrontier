@@ -17,12 +17,18 @@ public class AllyConfigValidator : IConfigValidator<AllyConfig>
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseEnergyRegen must be >= 0.", config));
         if (config.BaseSpeed <= 0f)
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseSpeed must be > 0.", config));
-        if (config.BaseAcceleration <= 0f)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseAcceleration must be > 0.", config));
-        if (config.BaseTurnRate <= 0f)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseTurnRate must be > 0.", config));
-        if (config.BaseCargoCapacity < 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseCargoCapacity must be >= 0.", config));
+        if (config.BaseAccelerationMin <= 0f)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseAccelerationMin must be > 0.", config));
+        if (config.BaseAccelerationMax < config.BaseAccelerationMin)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseAccelerationMax must be >= BaseAccelerationMin.", config));
+        if (config.BaseTurnRateMin <= 0f)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseTurnRateMin must be > 0.", config));
+        if (config.BaseTurnRateMax < config.BaseTurnRateMin)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseTurnRateMax must be >= BaseTurnRateMin.", config));
+        if (config.BaseCargoCapacityMin < 0)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseCargoCapacityMin must be >= 0.", config));
+        if (config.BaseCargoCapacityMax < config.BaseCargoCapacityMin)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseCargoCapacityMax must be >= BaseCargoCapacityMin.", config));
         if (config.WeaponSlotCount < 0)
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "WeaponSlotCount must be >= 0.", config));
         if (config.ModuleSlotCount < 0)

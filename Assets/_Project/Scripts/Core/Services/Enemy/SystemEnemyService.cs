@@ -50,9 +50,10 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
             SystemId = systemId,
             Position = position,
 
-            CurrentHull = enemyConfig.BaseHull,
-            CurrentShield = enemyConfig.BaseShield,
-            CurrentEnergy = enemyConfig.BaseEnergy,
+            CurrentHull = RandomInt(enemyConfig.BaseHullMin, enemyConfig.BaseHullMax),
+            CurrentShield = RandomInt(enemyConfig.BaseShieldMin, enemyConfig.BaseShieldMax),
+            CurrentEnergy = RandomInt(enemyConfig.BaseEnergyMin, enemyConfig.BaseEnergyMax),
+            Speed = RandomInt(enemyConfig.BaseSpeedMin, enemyConfig.BaseSpeedMax),
 
             IsAlive = true,
             WasKilledByPlayer = false,
@@ -300,5 +301,19 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
         }
 
         return new DamageService2A();
+    }
+
+    private static int RandomInt(int min, int max)
+    {
+        int safeMin = Mathf.Min(min, max);
+        int safeMax = Mathf.Max(min, max);
+        return UnityEngine.Random.Range(safeMin, safeMax + 1);
+    }
+
+    private static float RandomFloat(float min, float max)
+    {
+        float safeMin = Mathf.Min(min, max);
+        float safeMax = Mathf.Max(min, max);
+        return UnityEngine.Random.Range(safeMin, safeMax);
     }
 }
