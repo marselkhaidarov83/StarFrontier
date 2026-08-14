@@ -21,7 +21,6 @@ public class Bootstrapper : CustomMonoBehaviour
 
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
-    [SerializeField] private AllyConfig starterAllyConfig;
     [SerializeField] private List<EnemyConfig> enemies;
     [SerializeField] private List<AllyConfig> allies;
     [SerializeField] private List<AllySpawnRuleConfig> allySpawnRuleConfigs;
@@ -122,7 +121,6 @@ public class Bootstrapper : CustomMonoBehaviour
                 interactionConfig,
                 systemHudConfig,
                 systemVisualConfig,
-                starterAllyConfig,
                 items,
                 enemies,
                 allies,

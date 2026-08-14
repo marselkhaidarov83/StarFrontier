@@ -68,6 +68,9 @@ public class SystemTravelDestination
     public string PlanetId;
     public PlanetConfig PlanetData;
 
+    public string StationId;
+    public StationConfig StationData;
+
     public string TargetSystemId;
     public StarSystemConfig TargetSystemConfig;
 
@@ -100,6 +103,19 @@ public class SystemTravelDestination
             Type = TravelDestinationType.Planet,
             PlanetData = planetData,
             PlanetId = planetData != null ? planetData.Id : string.Empty
+        };
+    }
+
+    public static SystemTravelDestination Station(StationConfig stationData)
+    {
+        return new SystemTravelDestination
+        {
+            Type = TravelDestinationType.Station,
+            StationData = stationData,
+            StationId = stationData != null ? stationData.Id : string.Empty,
+            FixedMapPosition = stationData != null
+                ? stationData.LocalOffset
+                : Vector2.zero
         };
     }
 

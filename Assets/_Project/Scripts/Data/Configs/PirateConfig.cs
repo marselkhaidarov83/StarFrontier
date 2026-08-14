@@ -20,6 +20,7 @@ public class PirateConfig : BaseConfig
 
     [Header("Visuals")]
     [SerializeField] private Sprite combatSprite;
+    [SerializeField] [Min(0f)] private float visualSize = 48f;
 
     public int BaseHull => baseHull;
     public int BaseShield => baseShield;
@@ -31,4 +32,5 @@ public class PirateConfig : BaseConfig
     public int XpReward => xpReward;
     public int DangerTier => dangerTier;
     public Sprite CombatSprite => combatSprite;
+    public float VisualSize => visualSize;
 }

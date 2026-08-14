@@ -16,9 +16,6 @@ public static class BootstrapperConfigListAutoFiller
     private const string BootstrapperScriptPath =
         "Assets/_Project/Scripts/Core/Bootstrap/Bootstrapper.cs";
 
-    private const string StarterAllyConfigId =
-        "ally_ranger_L01_01";
-
     [MenuItem(MenuRoot + "/Fill NPC and combat config lists from assets")]
     public static void FillAllBootstrappersFromAssets()
     {
@@ -44,11 +41,6 @@ public static class BootstrapperConfigListAutoFiller
         List<AllyConfig> allies =
             LoadAssetsSortedById<AllyConfig>();
 
-        AllyConfig starterAllyConfig =
-            FindById(
-                allies,
-                StarterAllyConfigId);
-
         List<AllySpawnRuleConfig> allySpawnRuleConfigs =
             LoadAssetsSortedById<AllySpawnRuleConfig>();
 
@@ -72,7 +64,6 @@ public static class BootstrapperConfigListAutoFiller
                 bootstrapper,
                 weapons,
                 enemies,
-                starterAllyConfig,
                 allies,
                 allySpawnRuleConfigs,
                 enemyGroupSpawnRules,
@@ -195,7 +186,6 @@ public static class BootstrapperConfigListAutoFiller
         MonoBehaviour bootstrapper,
         IReadOnlyList<WeaponConfig> weapons,
         IReadOnlyList<EnemyConfig> enemies,
-        AllyConfig starterAllyConfig,
         IReadOnlyList<AllyConfig> allies,
         IReadOnlyList<AllySpawnRuleConfig> allySpawnRuleConfigs,
         IReadOnlyList<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules,
@@ -217,11 +207,6 @@ public static class BootstrapperConfigListAutoFiller
             serializedObject,
             "enemies",
             enemies);
-
-        AssignObjectReference(
-            serializedObject,
-            "starterAllyConfig",
-            starterAllyConfig);
 
         AssignObjectList(
             serializedObject,

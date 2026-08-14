@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 535f865655d64484c93a265bcc225b94, type: 3}
+  m_Name: enemy_ai_L05_01
+  m_EditorClassIdentifier: Data::EnemyConfig
+  id: enemy_ai_L05_01
+  displayName: "\u0418\u0418 \u0443\u0440. 5"
+  description: "\u0418\u0418, \u0443\u0440\u043E\u0432\u0435\u043D\u044C 5. \u0421\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+    \u043A\u043E\u043D\u0444\u0438\u0433 \u0432\u0440\u0430\u0433\u0430: \u0444\u0440\u0430\u043A\u0446\u0438\u044F,
+    \u0443\u0440\u043E\u0432\u0435\u043D\u044C, \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u0438
+    \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
+    \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
+  icon: {fileID: 21300000, guid: 7b83f75e6042c45c4ad4fa313be160ef, type: 3}
+  baseHullMin: 155
+  baseHullMax: 189
+  baseShieldMin: 189
+  baseShieldMax: 214
+  baseEnergyMin: 206
+  baseEnergyMax: 233
+  baseSpeedMin: 260
+  baseSpeedMax: 300
+  level: 5
+  namePool: {fileID: 11400000, guid: 613fa630b41564704a9b564665b37965, type: 2}
+  behaviorScenarios:
+  - scenario: 0
+    behaviorConfig: {fileID: 11400000, guid: e5d77024396664b9e90d7384f8c67e3e, type: 2}
+  - scenario: 10
+    behaviorConfig: {fileID: 11400000, guid: 39d7d7a2eb8cd49d6ab03adc49032e73, type: 2}
+  - scenario: 20
+    behaviorConfig: {fileID: 11400000, guid: b9a954a3064ed4592b55fde0c86c61fd, type: 2}
+  weaponGroups:
+  - {fileID: 11400000, guid: d4f6e8864805340019ef176fba700a6e, type: 2}
+  - {fileID: 11400000, guid: 2928c8a73873f45f0a472e9a250ef53d, type: 2}
+  - {fileID: 11400000, guid: 1b3cae80bbeff40da8a117527a25f9f3, type: 2}
+  - {fileID: 11400000, guid: 2840560053eda45f8b09f2cc42768302, type: 2}
+  - {fileID: 11400000, guid: 2e84af3c163f445cf8ecff1c2551d8ba, type: 2}
+  legacyWeaponConfigs: []
+  creditRewardMin: 258
+  creditRewardMax: 423
+  xpRewardMin: 34
+  xpRewardMax: 55
+  dangerTier: 3
+  combatSprite: {fileID: 21300000, guid: 97a52bbe117e84e75935967790d12a7b, type: 3}
+  visualSize: 31

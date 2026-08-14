@@ -7,18 +7,21 @@ public class RouteExitMapChangedEvent
     public string ToSystemId { get; }
     public Vector3 ExitPoint { get; }
     public Vector3 EntryPoint { get; }
+    public float VisualSize { get; }
 
     public RouteExitMapChangedEvent(
         RouteConfig routeConfig,
         string fromSystemId,
         string toSystemId,
         Vector3 exitPoint,
-        Vector3 entryPoint)
+        Vector3 entryPoint,
+        float visualSize = 0f)
     {
         RouteConfig = routeConfig;
         FromSystemId = fromSystemId;
         ToSystemId = toSystemId;
         ExitPoint = exitPoint;
         EntryPoint = entryPoint;
+        VisualSize = visualSize;
     }
 }

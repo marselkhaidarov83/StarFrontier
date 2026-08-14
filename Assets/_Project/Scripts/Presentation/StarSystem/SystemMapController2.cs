@@ -11,16 +11,20 @@ public class SystemMapController2 : CustomMonoBehaviour
     [SerializeField] private GameObject systemBackground;
     [SerializeField] private Transform sunContainer;
     [SerializeField] private Transform planetContainer;
+    [SerializeField] private Transform stationContainer;
     [SerializeField] private Transform exitContainer;
     [SerializeField] private GameObject systemMapSunPrefab;
     [SerializeField] private GameObject systemMapPlanetPrefab;
+    [SerializeField] private GameObject systemMapStationPrefab;
     [SerializeField] private GameObject systemMapExitPrefab;
 
     private SimpleEventBus eventBus;
     private IGameSessionService gameSessionService;
     private IConfigService configService;
+    private SystemVisualConfig systemVisualConfig;
 
     private readonly List<GameObject> _spawnedPlanets = new();
+    private readonly List<GameObject> _spawnedStations = new();
     private readonly List<GameObject> _spawnedExits = new();
     private GameObject _spawnedSun;
 
@@ -29,6 +33,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        systemVisualConfig = configService != null
+            ? configService.SystemVisualConfig
+            : null;
         SubscribeToEvents();
 
         if (IsDebug())
@@ -67,10 +74,62 @@ public class SystemMapController2 : CustomMonoBehaviour
 
         SpawnSun(starSystem);
         SpawnPlanets(starSystem);
+        SpawnStation(starSystem);
         SpawnExits2(starSystem);
 
         if (IsDebug())
             Debug.Log($"[SystemMapController2] system map builded");
+    }
+
+    private void SpawnStation(StarSystemConfig starSystem)
+    {
+        if (starSystem == null ||
+            starSystem.Station == null)
+        {
+            return;
+        }
+
+        if (!starSystem.Station.IsActive)
+        {
+            return;
+        }
+
+        if (systemMapStationPrefab == null)
+        {
+            if (IsDebug())
+                Debug.LogError("[SystemMapController2] systemMapStationPrefab is null");
+
+            return;
+        }
+
+        Transform parent =
+            stationContainer != null
+                ? stationContainer
+                : planetContainer;
+
+        GameObject instance =
+            Instantiate(
+                systemMapStationPrefab,
+                parent);
+
+        instance.transform.SetSiblingIndex(0);
+        _spawnedStations.Add(instance);
+
+        StationNodeView2A stationNodeView =
+            instance.GetComponent<StationNodeView2A>();
+
+        if (stationNodeView == null)
+        {
+            stationNodeView =
+                instance.AddComponent<StationNodeView2A>();
+        }
+
+        stationNodeView.Initialize(
+            starSystem.Station,
+            systemVisualConfig);
+
+        if (IsDebug())
+            Debug.Log("[SystemMapController2] station builded");
     }
 
     private void SpawnSun(StarSystemConfig starSystem)
@@ -91,7 +150,10 @@ public class SystemMapController2 : CustomMonoBehaviour
 
         _spawnedSun = Instantiate(systemMapSunPrefab, sunContainer);
         _spawnedSun.transform.SetSiblingIndex(0);
-        _spawnedSun.GetComponent<SunNodeView>().Initialize(starSystem.Sun, null);
+        _spawnedSun.GetComponent<SunNodeView>().Initialize(
+            starSystem.Sun,
+            null,
+            systemVisualConfig);
 
         if (IsDebug())
             Debug.Log($"[SystemMapController2] sun builded");
@@ -142,7 +204,9 @@ public class SystemMapController2 : CustomMonoBehaviour
             PlanetNodeView2 planetNodeView = instance.GetComponent<PlanetNodeView2>();
             // PlanetSelectableView selectableView = instance.GetComponent<PlanetSelectableView>();
 
-            planetNodeView.Initialize(planet);
+            planetNodeView.Initialize(
+                planet,
+                systemVisualConfig);
 
             // selectableView.Initialize(planet);
             // planetSelectableViews.Add(selectableView);
@@ -340,7 +404,8 @@ public class SystemMapController2 : CustomMonoBehaviour
                 currentSystemId,
                 targetSystem.Id,
                 endpointConfig,
-                center
+                center,
+                systemVisualConfig
             );
         }
 
@@ -426,6 +491,13 @@ public class SystemMapController2 : CustomMonoBehaviour
                 Destroy(planet);
         }
         _spawnedPlanets.Clear();
+
+        foreach (var station in _spawnedStations)
+        {
+            if (station != null)
+                Destroy(station);
+        }
+        _spawnedStations.Clear();
 
         foreach (var exit in _spawnedExits)
         {

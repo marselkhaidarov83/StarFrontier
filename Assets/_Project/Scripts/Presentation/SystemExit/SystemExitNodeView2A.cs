@@ -71,7 +71,8 @@ public sealed class SystemExitNodeView2A :
         string currentSystemId,
         string targetSystemId,
         RouteEndpointConfig endpointConfig,
-        Vector2 center)
+        Vector2 center,
+        SystemVisualConfig visualConfig = null)
     {
         ResolveRuntimeDependencies();
 
@@ -155,7 +156,10 @@ public sealed class SystemExitNodeView2A :
 
             SpriteRendererSizeUtility.SetWorldSize(
                 systemExitImage,
-                size);
+                visualConfig != null
+                    ? visualConfig.GetSystemExitWorldSize(
+                        _endpointConfig)
+                    : size);
         }
 
         /*
@@ -440,7 +444,8 @@ public sealed class SystemExitNodeView2A :
                 _targetSystemId,
                 _endpointConfig.ExitPoint,
                 _routeConfig.GetEntryPoint(
-                    _targetSystemId)));
+                    _targetSystemId),
+                _endpointConfig.VisualSize));
     }
 
     private void ResolveRuntimeDependencies()

@@ -9,6 +9,7 @@ public interface ISystemTravelService
     void SetCurrentPosition(Vector3 position);
 
     void SetPlanetDestination(PlanetConfig planetData);
+    void SetStationDestination(StationConfig stationData);
     void SetMapPointDestination(Vector3 mapPosition);
     void SetSystemExitDestination(StarSystemLink link);
     void SetSystemExitDestination(RouteExitMapChangedEvent evt);

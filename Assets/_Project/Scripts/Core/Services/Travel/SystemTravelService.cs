@@ -332,6 +332,33 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         StartTravelAutomaticallyIfPossible();
     }
 
+    public void SetStationDestination(StationConfig stationData)
+    {
+        if (stationData == null)
+        {
+            Debug.LogWarning("[SystemTravelService] Cannot set station destination: stationData is null.");
+            return;
+        }
+
+        State.Destination = SystemTravelDestination.Station(stationData);
+        State.DestinationPosition = stationData.LocalOffset;
+        State.Status = SystemTravelStatus.DestinationSelected;
+        State.TravelProgress01 = 0f;
+
+        _eventBus.Publish(new DestinationSelectedEvent(
+            TravelDestinationType.Station,
+            State.DestinationPosition,
+            string.Empty,
+            string.Empty,
+            stationData.Id
+        ));
+
+        LogCustom($"Station destination selected: {stationData.Id}");
+        LogCustom("State = " + State);
+
+        StartTravelAutomaticallyIfPossible();
+    }
+
     public void SetMapPointDestination(Vector3 mapPosition)
     {
         State.Destination = SystemTravelDestination.MapPoint(mapPosition);
@@ -622,6 +649,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             // return new Vector3(0, 0, 0);
 
             case TravelDestinationType.MapPoint:
+                return State.Destination.FixedMapPosition;
+
+            case TravelDestinationType.Station:
                 return State.Destination.FixedMapPosition;
 
             case TravelDestinationType.SystemExit:
@@ -992,7 +1022,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             from.z
         );
 
-        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float sunRadius = Mathf.Max(0f, GetSunWorldSize(sun) * 0.5f);
         float avoidanceRadius = sunRadius + SunAvoidanceSafetyMargin;
 
         SystemTravelSunAvoidancePath2A.BuildPath(
@@ -1003,6 +1033,21 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             avoidanceRadius,
             SunAvoidanceArcSegments
         );
+    }
+
+    private float GetSunWorldSize(SunConfig sun)
+    {
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            return _configService
+                .SystemVisualConfig
+                .GetSunWorldSize(sun);
+        }
+
+        return sun != null
+            ? sun.VisualSize
+            : 0f;
     }
 
     private Vector3 CalculateNextTravelPositionByPath(

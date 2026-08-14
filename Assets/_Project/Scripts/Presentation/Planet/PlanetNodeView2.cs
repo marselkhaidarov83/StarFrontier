@@ -12,7 +12,9 @@ public class PlanetNodeView2 : CustomMonoBehaviour
 
     private PlanetConfig _planet;
 
-    public void Initialize(PlanetConfig planet)
+    public void Initialize(
+        PlanetConfig planet,
+        SystemVisualConfig visualConfig = null)
     {
         _planet = planet;
 
@@ -21,7 +23,9 @@ public class PlanetNodeView2 : CustomMonoBehaviour
 
         SpriteRendererSizeUtility.SetWorldSize(
             planetImage,
-            _planet.PlanetOrbit.PlanetVisualSize
+            visualConfig != null
+                ? visualConfig.GetPlanetWorldSize(_planet)
+                : _planet.VisualSize
         );
 
         planetImageObject.GetComponent<PlanetSelectableView2>().Initialize(_planet);

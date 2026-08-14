@@ -142,8 +142,11 @@ public sealed class GameTimeService : CustomService, IGameTimeService
             0f,
             GameTimeState.SecondsPerDay
         );
-        State.IsPaused = state.Meta.IsGameTimePaused;
+        State.IsPaused = true;
+        state.Meta.IsGameTimePaused = true;
 
         _previousTick = State.CurrentQuantTick;
+
+        _eventBus.Publish(new GameTimePauseChangedEvent(State.IsPaused));
     }
 }

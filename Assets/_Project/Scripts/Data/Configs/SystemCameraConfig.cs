@@ -16,6 +16,12 @@ public sealed class SystemCameraConfig : ScriptableObject
     [SerializeField] private float minOrthographicSize = 650f;
     [SerializeField] private float maxOrthographicSize = 1900f;
 
+    [Header("New Game Start Frame")]
+    [SerializeField] private bool useNewGameStartFrame = true;
+    [SerializeField] [Range(0.01f, 0.49f)] private float startFrameShipBottomViewportPercent = 0.2f;
+    [SerializeField] [Range(0.51f, 0.99f)] private float startFrameSunBottomViewportPercent = 0.8f;
+    [SerializeField] [Min(1f)] private float startFrameMinOrthographicSize = 1f;
+
     [Header("System Bounds")]
     [SerializeField] private float boundsPadding = 320f;
     [SerializeField] private float sunExtraPadding = 220f;
@@ -34,6 +40,13 @@ public sealed class SystemCameraConfig : ScriptableObject
     public float DefaultOrthographicSize => Mathf.Max(1f, defaultOrthographicSize);
     public float MinOrthographicSize => Mathf.Max(1f, minOrthographicSize);
     public float MaxOrthographicSize => Mathf.Max(MinOrthographicSize, maxOrthographicSize);
+    public bool UseNewGameStartFrame => useNewGameStartFrame;
+    public float StartFrameShipBottomViewportPercent =>
+        Mathf.Clamp(startFrameShipBottomViewportPercent, 0.01f, 0.49f);
+    public float StartFrameSunBottomViewportPercent =>
+        Mathf.Clamp(startFrameSunBottomViewportPercent, 0.51f, 0.99f);
+    public float StartFrameMinOrthographicSize =>
+        Mathf.Max(1f, startFrameMinOrthographicSize);
 
     public float BoundsPadding => Mathf.Max(0f, boundsPadding);
     public float SunExtraPadding => Mathf.Max(0f, sunExtraPadding);

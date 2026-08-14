@@ -49,9 +49,11 @@ public sealed class SystemDestinationMarkerController2 :
     private PlanetConfig _currentPlanet;
 
     private bool _isPlanetDestinationVisible;
+    private SystemVisualConfig _systemVisualConfig;
 
     private void Awake()
     {
+        ResolveVisualConfig();
         SetLegacyFrameVisible(false);
     }
 
@@ -96,6 +98,8 @@ public sealed class SystemDestinationMarkerController2 :
                 ? planet
                 : _currentPlanet;
 
+        ResolveVisualConfig();
+
         if (planetDestinationMarker != null)
         {
             planetDestinationMarker.position =
@@ -109,9 +113,11 @@ public sealed class SystemDestinationMarkerController2 :
             effectivePlanet.PlanetOrbit != null)
         {
             SetLegacyFrameSize(
-                effectivePlanet
-                    .PlanetOrbit
-                    .PlanetVisualSize);
+                _systemVisualConfig != null
+                    ? _systemVisualConfig.GetPlanetWorldSize(
+                        effectivePlanet)
+                    : effectivePlanet
+                        .VisualSize);
         }
     }
 
@@ -119,6 +125,8 @@ public sealed class SystemDestinationMarkerController2 :
         Vector3 position)
     {
         HideAll();
+
+        ResolveVisualConfig();
 
         if (mapPointDestinationMarker != null)
         {
@@ -134,6 +142,41 @@ public sealed class SystemDestinationMarkerController2 :
 
         SetLegacyFramePosition(
             position);
+
+        SetLegacyFrameVisible(
+            true);
+    }
+
+    public void ShowStationDestination(
+        Vector3 position,
+        StationConfig station)
+    {
+        HideAll();
+        ResolveVisualConfig();
+
+        if (mapPointDestinationMarker != null)
+        {
+            mapPointDestinationMarker.position =
+                position;
+        }
+
+        if (mapPointDestinationObject != null)
+        {
+            mapPointDestinationObject.SetActive(
+                true);
+        }
+
+        SetLegacyFramePosition(
+            position);
+
+        if (station != null)
+        {
+            SetLegacyFrameSize(
+                _systemVisualConfig != null
+                    ? _systemVisualConfig.GetStationWorldSize(
+                        station)
+                    : station.VisualSize);
+        }
 
         SetLegacyFrameVisible(
             true);
@@ -157,7 +200,11 @@ public sealed class SystemDestinationMarkerController2 :
             evt.ExitPoint);
 
         SetLegacyFrameSize(
-            systemExitTargetFrameSize);
+            _systemVisualConfig != null &&
+            evt.VisualSize > 0f
+                ? _systemVisualConfig.UnitsToWorldSize(
+                    evt.VisualSize)
+                : systemExitTargetFrameSize);
 
         SetLegacyFrameVisible(
             true);
@@ -223,5 +270,33 @@ public sealed class SystemDestinationMarkerController2 :
         SpriteRendererSizeUtility.SetWorldSize(
             selectedTargetFrameSprite,
             worldSize);
+    }
+
+    private void ResolveVisualConfig()
+    {
+        if (_systemVisualConfig != null)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return;
+        }
+
+        try
+        {
+            IConfigService configService =
+                Bootstrapper.Instance
+                    .ServiceRegistry
+                    .Get<IConfigService>();
+
+            _systemVisualConfig = configService != null
+                ? configService.SystemVisualConfig
+                : null;
+        }
+        catch
+        {
+            _systemVisualConfig = null;
+        }
     }
 }

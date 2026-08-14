@@ -37,10 +37,10 @@ public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
             "Assets/_Project/Content/Configs/Sprint3/playerControlConfig_01.asset"),
         new RequiredConfig(
             "ShipMovementConfig",
-            "Assets/_Project/Content/Configs/Ships/shipMovementConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/shipMovementConfig_01.asset"),
         new RequiredConfig(
             "SystemCameraConfig",
-            "Assets/_Project/Content/Configs/Sprint3/systemCameraConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/systemCameraConfig_01.asset"),
         new RequiredConfig(
             "TargetingConfig",
             "Assets/_Project/Content/Configs/Sprint3/targetingConfig_01.asset"),

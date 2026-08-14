@@ -344,10 +344,25 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
             sun.LocalOffset.y,
             point.z);
 
-        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float sunRadius = Mathf.Max(0f, GetSunWorldSize(sun) * 0.5f);
         float safeRadius = sunRadius + KeepDistanceRadius;
 
         return Vector3.Distance(point, sunCenter) <= safeRadius;
+    }
+
+    private float GetSunWorldSize(SunConfig sun)
+    {
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            return _configService
+                .SystemVisualConfig
+                .GetSunWorldSize(sun);
+        }
+
+        return sun != null
+            ? sun.VisualSize
+            : 0f;
     }
 
     private static bool IsFinite(Vector3 value)

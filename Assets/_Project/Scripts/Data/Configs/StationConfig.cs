@@ -23,6 +23,10 @@ public class StationConfig : BaseConfig
     [SerializeField] private Sprite shadowSpriteOverride;
     [SerializeField] private bool overrideVisualSize;
     [SerializeField] private float visualSizeOverride = 180f;
+
+    [Header("Map Placement")]
+    [SerializeField] private PlanetOrbitConfig stationOrbit;
+    [SerializeField] private float orbitAngleDegrees;
     [SerializeField] private bool overrideLocalOffset;
     [SerializeField] private Vector2 localOffsetOverride = Vector2.zero;
 
@@ -87,7 +91,12 @@ public class StationConfig : BaseConfig
             ? stationTypeConfig.VisualSize
             : 180f;
 
-    public Vector2 LocalOffset => overrideLocalOffset
+    public PlanetOrbitConfig StationOrbit => stationOrbit;
+    public float OrbitAngleDegrees => orbitAngleDegrees;
+
+    public Vector2 LocalOffset => stationOrbit != null
+        ? CalculateOrbitLocalOffset(stationOrbit, orbitAngleDegrees)
+        : overrideLocalOffset
         ? localOffsetOverride
         : stationTypeConfig != null
             ? stationTypeConfig.LocalOffset
@@ -96,6 +105,21 @@ public class StationConfig : BaseConfig
     public Sprite EffectiveIcon => stationTypeConfig != null
         ? stationTypeConfig.Icon
         : Icon;
+
+    private static Vector2 CalculateOrbitLocalOffset(PlanetOrbitConfig orbitConfig, float angleDegrees)
+    {
+        if (orbitConfig == null)
+        {
+            return Vector2.zero;
+        }
+
+        float radians = angleDegrees * Mathf.Deg2Rad;
+        float radius = Mathf.Max(0f, orbitConfig.OrbitRadius);
+
+        return new Vector2(
+            Mathf.Cos(radians) * radius,
+            Mathf.Sin(radians) * radius);
+    }
 
 #if UNITY_EDITOR
     private void OnValidate()

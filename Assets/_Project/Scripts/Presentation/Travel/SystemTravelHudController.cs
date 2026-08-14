@@ -681,6 +681,12 @@ public sealed class SystemTravelHudController :
                     GetPlanetDisplayName(
                         evt.PlanetId);
 
+            case TravelDestinationType.Station:
+                return
+                    "станция " +
+                    GetStationDisplayName(
+                        evt.StationId);
+
             case TravelDestinationType.MapPoint:
                 return "космос";
 
@@ -717,6 +723,13 @@ public sealed class SystemTravelHudController :
                     GetPlanetDisplayName(
                         state.Destination
                             .PlanetId);
+
+            case TravelDestinationType.Station:
+                return
+                    "станция " +
+                    GetStationDisplayName(
+                        state.Destination
+                            .StationId);
 
             case TravelDestinationType.MapPoint:
                 return "космос";
@@ -783,6 +796,31 @@ public sealed class SystemTravelHudController :
         return systemConfig.Id;
     }
 
+    private string GetStationDisplayName(
+        string stationId)
+    {
+        if (string.IsNullOrWhiteSpace(
+                stationId))
+        {
+            return "неизвестная";
+        }
+
+        StationConfig stationConfig =
+            FindStationConfig(
+                stationId);
+
+        if (stationConfig == null)
+            return stationId;
+
+        if (!string.IsNullOrWhiteSpace(
+                stationConfig.DisplayName))
+        {
+            return stationConfig.DisplayName;
+        }
+
+        return stationConfig.Id;
+    }
+
     private PlanetConfig FindPlanetConfig(
         string planetId)
     {
@@ -822,6 +860,40 @@ public sealed class SystemTravelHudController :
                 {
                     return planetConfig;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    private StationConfig FindStationConfig(
+        string stationId)
+    {
+        if (_configService == null)
+            return null;
+
+        IReadOnlyList<StarSystemConfig>
+            systems =
+                _configService
+                    .GetAllStarSystems();
+
+        if (systems == null)
+            return null;
+
+        foreach (
+            StarSystemConfig systemConfig
+            in systems)
+        {
+            if (systemConfig == null ||
+                systemConfig.Station == null)
+            {
+                continue;
+            }
+
+            if (systemConfig.Station.Id ==
+                stationId)
+            {
+                return systemConfig.Station;
             }
         }
 

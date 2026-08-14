@@ -561,6 +561,8 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
         Vector3 exitPoint = routeConfig.GetExitPoint(currentSystemId);
         Vector3 entryPoint = routeConfig.GetEntryPoint(_nextSystemId);
+        RouteEndpointConfig departureEndpoint =
+            routeConfig.GetDepartureEndpoint(currentSystemId);
 
         LogCustom(
             "[GalaxySystemInfoPanel2A] Route exit selected. Route = " +
@@ -580,7 +582,10 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             currentSystemId,
             _nextSystemId,
             exitPoint,
-            entryPoint
+            entryPoint,
+            departureEndpoint != null
+                ? departureEndpoint.VisualSize
+                : 0f
         ));
         _gameStateMachine.Enter(new SystemState());
         // _eventBus.Publish(new StarSystemEnteredEvent(currentSystemId));

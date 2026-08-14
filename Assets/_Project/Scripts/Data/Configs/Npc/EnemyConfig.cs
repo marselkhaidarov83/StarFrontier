@@ -92,6 +92,10 @@ public class EnemyConfig : BaseConfig
     [SerializeField]
     private Sprite combatSprite;
 
+    [SerializeField]
+    [Min(0f)]
+    private float visualSize = 48f;
+
     public int BaseHullMin => baseHullMin;
     public int BaseHullMax => baseHullMax;
     public int BaseShieldMin => baseShieldMin;
@@ -151,6 +155,7 @@ public class EnemyConfig : BaseConfig
     public int XpReward => xpRewardMin;
     public int DangerTier => dangerTier;
     public Sprite CombatSprite => combatSprite;
+    public float VisualSize => visualSize;
 
     public string PickRuntimeDisplayName(string runtimeNpcId)
     {

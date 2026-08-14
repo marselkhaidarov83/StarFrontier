@@ -39,6 +39,46 @@ public sealed class Pseudo3DDepthByY2 : MonoBehaviour
         ApplyDepth();
     }
 
+    public void SetBaseWorldSize(
+        SpriteRenderer referenceRenderer,
+        float targetSize)
+    {
+        if (referenceRenderer == null ||
+            referenceRenderer.sprite == null)
+        {
+            return;
+        }
+
+        Vector2 spriteWorldSize =
+            referenceRenderer
+                .sprite
+                .bounds
+                .size;
+
+        float maxSide =
+            Mathf.Max(
+                spriteWorldSize.x,
+                spriteWorldSize.y);
+
+        if (maxSide <= 0f)
+            return;
+
+        float scale =
+            Mathf.Max(0f, targetSize) /
+            maxSide;
+
+        _baseScale =
+            new Vector3(
+                scale,
+                scale,
+                transform.localScale.z);
+
+        _initialized =
+            true;
+
+        ApplyDepth();
+    }
+
     private void InitializeIfNeeded()
     {
         if (_initialized)

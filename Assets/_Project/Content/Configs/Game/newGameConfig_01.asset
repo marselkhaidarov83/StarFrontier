@@ -17,6 +17,8 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   StartSystem: {fileID: 11400000, guid: 79cf3b4bb4bd444ac9a26a63576072f6, type: 2}
+  StarterShipConfig: {fileID: 11400000, guid: 4c2a2051227654d3482411204af5b8ae, type: 2}
+  StartShipPosition: {x: 0, y: -950, z: 0}
   StartCredit: 999999
   CurrentFuel: 1000
   FuelCapacity: 1000

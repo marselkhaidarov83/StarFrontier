@@ -13,6 +13,7 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
 
     private SimpleEventBus _simpleEventBus;
     private ISystemEnemyService _enemyService;
+    private IConfigService _configService;
     private EnemySystemMovementController _movementController;
 
     private bool _isBound;
@@ -24,6 +25,10 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
     {
         _simpleEventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _enemyService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyService>();
+        Bootstrapper.Instance
+            .ServiceRegistry
+            .TryGet<IConfigService>(
+                out _configService);
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -80,7 +85,26 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
         if (spriteRenderer != null)
         {
             if (runtimeEnemy.EnemyConfig != null)
+            {
                 spriteRenderer.sprite = runtimeEnemy.EnemyConfig.CombatSprite;
+
+                if (_configService != null &&
+                    _configService.SystemVisualConfig != null)
+                {
+                    float worldSize =
+                        _configService
+                            .SystemVisualConfig
+                            .GetEnemyWorldSize(
+                                runtimeEnemy.EnemyConfig);
+
+                    if (worldSize > 0f)
+                    {
+                        SpriteRendererSizeUtility.SetWorldSize(
+                            spriteRenderer,
+                            worldSize);
+                    }
+                }
+            }
 
             spriteRenderer.sortingLayerName = sortingLayerName;
             spriteRenderer.sortingOrder = sortingOrder;

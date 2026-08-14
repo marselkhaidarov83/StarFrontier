@@ -75,6 +75,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         {
             _simpleEventBus.Subscribe<RouteExitMapChangedEvent>(OnRouteExitMapChanged);
             _simpleEventBus.Subscribe<PlanetSelectedEvent>(OnPlanetSelected);
+            _simpleEventBus.Subscribe<StationSelectedEvent>(OnStationSelected);
             _simpleEventBus.Subscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
             _simpleEventBus.Subscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
         }
@@ -89,6 +90,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         {
             _simpleEventBus.Unsubscribe<RouteExitMapChangedEvent>(OnRouteExitMapChanged);
             _simpleEventBus.Unsubscribe<PlanetSelectedEvent>(OnPlanetSelected);
+            _simpleEventBus.Unsubscribe<StationSelectedEvent>(OnStationSelected);
             _simpleEventBus.Unsubscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
             _simpleEventBus.Unsubscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
         }
@@ -148,6 +150,40 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             markerController.ShowPlanetDestination(position, planetData);
 
         LogCustom("Planet selected: " + planetData.Id);
+    }
+
+    private void OnStationSelected(StationSelectedEvent evt)
+    {
+        LogCustom("Station clicked");
+
+        if (_systemTravelService == null)
+            return;
+
+        if (evt == null || evt.Station == null)
+            return;
+
+        _selectedPlanetView = null;
+        _selectedPlanetData = null;
+
+        StationConfig stationData = evt.Station;
+
+        _systemTravelService.SetStationDestination(
+            stationData);
+
+        Vector3 position =
+            new Vector3(
+                stationData.LocalOffset.x,
+                stationData.LocalOffset.y,
+                0f);
+
+        if (markerController != null)
+        {
+            markerController.ShowStationDestination(
+                position,
+                stationData);
+        }
+
+        LogCustom("Station selected: " + stationData.Id);
     }
 
     private PlanetSelectableView2 FindPlanetView(string planetId)

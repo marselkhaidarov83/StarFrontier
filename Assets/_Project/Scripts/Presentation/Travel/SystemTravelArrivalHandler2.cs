@@ -40,6 +40,10 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
                 HandlePlanetArrival(evt);
                 break;
 
+            case TravelDestinationType.Station:
+                HandleStationArrival(evt);
+                break;
+
             case TravelDestinationType.MapPoint:
                 HandleMapPointArrival(evt);
                 break;
@@ -68,6 +72,18 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
         _eventBus.Publish(new PlanetEnteredEvent(evt.PlanetId));
 
         // Позже в E1-S7-006 здесь будет MetaSceneRouter.OpenPlanetScreen(evt.PlanetId)
+    }
+
+    private void HandleStationArrival(SystemTravelCompletedEvent evt)
+    {
+        Debug.Log(
+            "[SystemTravelArrivalHandler] Arrived at station point: " +
+            evt.FinalPosition);
+
+        if (arrivalFlash != null)
+            arrivalFlash.Play(evt.FinalPosition);
+
+        // Пока ничего не открываем. Корабль просто стоит у станции.
     }
 
     private void HandleMapPointArrival(SystemTravelCompletedEvent evt)

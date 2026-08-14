@@ -832,7 +832,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             sun.LocalOffset.y,
             point.z);
 
-        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float sunRadius = Mathf.Max(0f, GetSunWorldSize(sun) * 0.5f);
         float safeRadius = sunRadius + PatrolSunSafetyMargin;
 
         return Vector3.Distance(point, sunCenter) <= safeRadius;
@@ -926,6 +926,21 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             x.CurrentSystemId == systemId);
     }
 
+    private float GetSunWorldSize(SunConfig sun)
+    {
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            return _configService
+                .SystemVisualConfig
+                .GetSunWorldSize(sun);
+        }
+
+        return sun != null
+            ? sun.VisualSize
+            : 0f;
+    }
+
     private Vector3 RandomOffset(float radius)
     {
         Vector2 random = UnityEngine.Random.insideUnitCircle * radius;
@@ -1006,7 +1021,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             sun.LocalOffset.y,
             0f);
 
-        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float sunRadius = Mathf.Max(0f, GetSunWorldSize(sun) * 0.5f);
         float safeRadius = sunRadius + PatrolSunSafetyMargin;
 
         for (int i = 0; i < PatrolPointPickAttempts; i++)

@@ -263,9 +263,11 @@ MonoBehaviour:
   systemBackground: {fileID: 411531481}
   sunContainer: {fileID: 2033273962}
   planetContainer: {fileID: 1429718582}
+  stationContainer: {fileID: 535141426}
   exitContainer: {fileID: 584959708}
   systemMapSunPrefab: {fileID: 2615460552967337954, guid: bcaa36454d4654568ad4c2d28f890bee, type: 3}
   systemMapPlanetPrefab: {fileID: 2992302129176740718, guid: c918fa3d9088245bf9d564a9ee0e88ad, type: 3}
+  systemMapStationPrefab: {fileID: 3552063389598160733, guid: 12d937efbf1dd4875a92393746fb6fa9, type: 3}
   systemMapExitPrefab: {fileID: 2992302129176740718, guid: 71337909dd6bf4caba9743b2dbcf43ae, type: 3}
 --- !u!114 &10713354
 MonoBehaviour:

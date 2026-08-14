@@ -91,6 +91,10 @@ public sealed class AllyConfig : BaseConfig
     [SerializeField]
     private Sprite combatSprite;
 
+    [SerializeField]
+    [Min(0f)]
+    private float visualSize = 48f;
+
     public int BaseHullMin => baseHullMin;
     public int BaseHullMax => baseHullMax;
     public int BaseShieldMin => baseShieldMin;
@@ -146,6 +150,7 @@ public sealed class AllyConfig : BaseConfig
 
     public Sprite MapSprite => mapSprite;
     public Sprite CombatSprite => combatSprite != null ? combatSprite : mapSprite;
+    public float VisualSize => visualSize;
 
     public string PickRuntimeDisplayName(string runtimeNpcId)
     {

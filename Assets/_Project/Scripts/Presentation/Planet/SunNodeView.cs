@@ -6,7 +6,10 @@ public class SunNodeView : MonoBehaviour
     
     private SunConfig _sun;
 
-    public void Initialize(SunConfig sun, System.Action<string> onClick)
+    public void Initialize(
+        SunConfig sun,
+        System.Action<string> onClick,
+        SystemVisualConfig visualConfig = null)
     {
         _sun = sun;
 
@@ -15,7 +18,9 @@ public class SunNodeView : MonoBehaviour
 
         SpriteRendererSizeUtility.SetWorldSize(
             sunImage,
-            _sun.VisualSize
+            visualConfig != null
+                ? visualConfig.GetSunWorldSize(_sun)
+                : _sun.VisualSize
         );
     }
 }

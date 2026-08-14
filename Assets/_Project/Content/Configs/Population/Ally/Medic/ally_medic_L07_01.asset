@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d7741405179f43cebeecaadac0987e8, type: 3}
+  m_Name: ally_medic_L07_01
+  m_EditorClassIdentifier: Data::AllyConfig
+  id: ally_medic_L07_01
+  displayName: "\u041C\u0435\u0434\u0438\u043A \u0443\u0440. 7"
+  description: "\u041C\u0435\u0434\u0438\u043A, \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    7. \u0421\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+    \u043A\u043E\u043D\u0444\u0438\u0433 \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0430:
+    \u0440\u043E\u043B\u044C, \u0443\u0440\u043E\u0432\u0435\u043D\u044C, \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u0438
+    \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
+    \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
+  icon: {fileID: 21300000, guid: bb501432dfcda41e8b2fb1d33754d338, type: 3}
+  baseHullMin: 147
+  baseHullMax: 180
+  baseShieldMin: 88
+  baseShieldMax: 110
+  baseEnergyMin: 176
+  baseEnergyMax: 200
+  baseEnergyRegen: 9.2
+  baseSpeedMin: 340
+  baseSpeedMax: 380
+  baseAcceleration: 5.4
+  baseTurnRate: 94
+  baseCargoCapacity: 53
+  weaponSlotCount: 1
+  moduleSlotCount: 2
+  level: 7
+  role: 40
+  namePool: {fileID: 11400000, guid: 93175c2ff076542a384dc8fb723c02a7, type: 2}
+  behaviorScenarios:
+  - scenario: 0
+    behaviorConfig: {fileID: 11400000, guid: 3e55330b3356e472db8f3a6f4ab179c0, type: 2}
+  - scenario: 10
+    behaviorConfig: {fileID: 11400000, guid: 3c6a50e7d910f40c88921c85a2e75462, type: 2}
+  weaponGroups:
+  - {fileID: 11400000, guid: 78606d4d8549d431fb9953fdb49d5816, type: 2}
+  - {fileID: 11400000, guid: d1e5e8cc0ac74430e93adba9219b28ba, type: 2}
+  - {fileID: 11400000, guid: cc35c8eef567b4e74a984e2e6d2abbe7, type: 2}
+  - {fileID: 11400000, guid: a75e713c269134737a3612ea2ff0068f, type: 2}
+  - {fileID: 11400000, guid: 05c571efcaa234a209addcd433bcc5ae, type: 2}
+  mapSprite: {fileID: 21300000, guid: 20125391eb5e74850a8f34ba6a8597b3, type: 3}
+  combatSprite: {fileID: 21300000, guid: 20125391eb5e74850a8f34ba6a8597b3, type: 3}
+  visualSize: 33

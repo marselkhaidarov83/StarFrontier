@@ -6,11 +6,26 @@ using UnityEngine;
 
 public static class EnemyConfigAssetGenerator
 {
+    private const float MinGeneratedShipSpeed =
+        100f;
+
+    private const float MaxGeneratedShipSpeed =
+        500f;
+
+    private const float GeneratedShipSpeedRange =
+        40f;
+
+    private const float MinGeneratedVisualSize =
+        27f;
+
+    private const float MaxGeneratedVisualSize =
+        36f;
+
     private const string OutputRoot =
-        "Assets/_Project/Content/Configs/Enemies";
+        "Assets/_Project/Content/Configs/Population/Enemies";
 
     private const string NamePoolRoot =
-        "Assets/_Project/Content/Configs/EnemyNames";
+        "Assets/_Project/Content/Configs/Population/EnemyNames";
 
     private const string WeaponGroupsRoot =
         "Assets/_Project/Content/Configs/WeaponGroups/Enemy";
@@ -336,6 +351,7 @@ public static class EnemyConfigAssetGenerator
         // SetEnum(serializedObject, "archetype", BuildArchetype(faction));
         SetObject(serializedObject, "combatSprite", combatSprite);
         SetObject(serializedObject, "namePool", namePool);
+        SetFloat(serializedObject, "visualSize", CalculateGeneratedVisualSize(level));
 
         int boundScenarios =
             WriteScenarioEntries(
@@ -859,8 +875,10 @@ public static class EnemyConfigAssetGenerator
         int energyMin =
             Mathf.RoundToInt(baseStats.EnergyMin * growth);
 
-        float speedMin =
-            baseStats.SpeedMin + 0.8f * (level - 1);
+        CalculateGeneratedShipSpeedRange(
+            level,
+            out float speedMin,
+            out float speedMax);
 
         int creditRewardMin =
             Mathf.RoundToInt(baseStats.CreditRewardMin * growth);
@@ -879,8 +897,8 @@ public static class EnemyConfigAssetGenerator
             ShieldMax = shieldMin + Mathf.RoundToInt(10 + level * 3),
             EnergyMin = energyMin,
             EnergyMax = energyMin + Mathf.RoundToInt(12 + level * 3),
-            SpeedMin = Round(speedMin),
-            SpeedMax = Round(speedMin + 2.75f + level * 0.3f),
+            SpeedMin = speedMin,
+            SpeedMax = speedMax,
             CreditRewardMin = creditRewardMin,
             CreditRewardMax = creditRewardMin + 40 + level * 25,
             XpRewardMin = xpRewardMin,
@@ -937,6 +955,67 @@ public static class EnemyConfigAssetGenerator
                     XpRewardMin = 20
                 };
         }
+    }
+
+    private static void CalculateGeneratedShipSpeedRange(
+        int level,
+        out float speedMin,
+        out float speedMax)
+    {
+        if (level <= 1)
+        {
+            speedMin =
+                MinGeneratedShipSpeed;
+
+            speedMax =
+                MinGeneratedShipSpeed +
+                GeneratedShipSpeedRange;
+
+            return;
+        }
+
+        float safeLevel =
+            Mathf.Clamp(
+                level,
+                1,
+                10);
+
+        float progress =
+            (safeLevel - 1f) / 9f;
+
+        speedMax =
+            Round(
+                Mathf.Lerp(
+                    MinGeneratedShipSpeed +
+                    GeneratedShipSpeedRange,
+                    MaxGeneratedShipSpeed,
+                    progress));
+
+        speedMin =
+            Round(
+                Mathf.Lerp(
+                    MinGeneratedShipSpeed,
+                    MaxGeneratedShipSpeed -
+                    GeneratedShipSpeedRange,
+                    progress));
+    }
+
+    private static float CalculateGeneratedVisualSize(int level)
+    {
+        float safeLevel =
+            Mathf.Clamp(
+                level,
+                1,
+                10);
+
+        float progress =
+            (safeLevel - 1f) / 9f;
+
+        return Round(
+            Mathf.Lerp(
+                MinGeneratedVisualSize,
+                MaxGeneratedVisualSize,
+                progress));
     }
 
     private static EnemyArchetype BuildArchetype(

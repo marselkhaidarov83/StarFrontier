@@ -90,7 +90,10 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         ApplyTickLockedDirection(npc);
     }
 
-    public void Bind(SystemNpcRuntimeState npc, Sprite sprite)
+    public void Bind(
+        SystemNpcRuntimeState npc,
+        Sprite sprite,
+        float worldSize = 0f)
     {
         Initialize();
 
@@ -109,6 +112,14 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         if (spriteRenderer != null)
         {
             spriteRenderer.sprite = sprite;
+
+            if (worldSize > 0f)
+            {
+                SpriteRendererSizeUtility.SetWorldSize(
+                    spriteRenderer,
+                    worldSize);
+            }
+
             spriteRenderer.transform.localRotation = _lastSpriteRotation;
         }
 

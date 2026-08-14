@@ -6,11 +6,29 @@ using UnityEngine;
 
 public static class AllyConfigAssetGenerator
 {
+    private const float MinGeneratedShipSpeed =
+        100f;
+
+    private const float MaxGeneratedShipSpeed =
+        500f;
+
+    private const float GeneratedShipSpeedRange =
+        40f;
+
+    private const float MinGeneratedVisualSize =
+        27f;
+
+    private const float MaxGeneratedVisualSize =
+        36f;
+
+    private const float RangerLevelZeroVisualSize =
+        15f;
+
     private const string OutputRoot =
-        "Assets/_Project/Content/Configs/Ally";
+        "Assets/_Project/Content/Configs/Population/Ally";
 
     private const string NamePoolRoot =
-        "Assets/_Project/Content/Configs/AllyNames";
+        "Assets/_Project/Content/Configs/Population/AllyNames";
 
     private const string WeaponGroupsRoot =
         "Assets/_Project/Content/Configs/WeaponGroups/Ally";
@@ -340,6 +358,7 @@ public static class AllyConfigAssetGenerator
         SetObject(serializedObject, "mapSprite", mapSprite);
         SetObject(serializedObject, "combatSprite", mapSprite);
         SetObject(serializedObject, "namePool", namePool);
+        SetFloat(serializedObject, "visualSize", CalculateGeneratedVisualSize(role, level));
 
         WriteScenarioEntries(
             serializedObject,
@@ -967,8 +986,10 @@ public static class AllyConfigAssetGenerator
         int energyMin =
             Mathf.RoundToInt(baseStats.EnergyMin * growth);
 
-        float speedMin =
-            baseStats.SpeedMin + 0.75f * (level - 1);
+        CalculateGeneratedShipSpeedRange(
+            level,
+            out float speedMin,
+            out float speedMax);
 
         float acceleration =
             baseStats.Acceleration + 0.15f * (level - 1);
@@ -988,8 +1009,8 @@ public static class AllyConfigAssetGenerator
             EnergyMin = energyMin,
             EnergyMax = energyMin + Mathf.RoundToInt(10 + level * 2),
             EnergyRegen = Round(baseStats.EnergyRegen + 0.2f * (level - 1)),
-            SpeedMin = Round(speedMin),
-            SpeedMax = Round(speedMin + 2.5f + level * 0.25f),
+            SpeedMin = speedMin,
+            SpeedMax = speedMax,
             Acceleration = Round(acceleration),
             TurnRate = Round(turnRate),
             CargoCapacity = cargoCapacity,
@@ -1009,8 +1030,8 @@ public static class AllyConfigAssetGenerator
             EnergyMin = 70,
             EnergyMax = 85,
             EnergyRegen = 6f,
-            SpeedMin = 42f,
-            SpeedMax = 45f,
+            SpeedMin = MinGeneratedShipSpeed,
+            SpeedMax = MinGeneratedShipSpeed,
             Acceleration = 4f,
             TurnRate = 95f,
             CargoCapacity = 18,
@@ -1121,6 +1142,72 @@ public static class AllyConfigAssetGenerator
                     ModuleSlotCount = 1
                 };
         }
+    }
+
+    private static void CalculateGeneratedShipSpeedRange(
+        int level,
+        out float speedMin,
+        out float speedMax)
+    {
+        if (level <= 1)
+        {
+            speedMin =
+                MinGeneratedShipSpeed;
+
+            speedMax =
+                MinGeneratedShipSpeed +
+                GeneratedShipSpeedRange;
+
+            return;
+        }
+
+        float safeLevel =
+            Mathf.Clamp(
+                level,
+                1,
+                10);
+
+        float progress =
+            (safeLevel - 1f) / 9f;
+
+        speedMax =
+            Round(
+                Mathf.Lerp(
+                    MinGeneratedShipSpeed +
+                    GeneratedShipSpeedRange,
+                    MaxGeneratedShipSpeed,
+                    progress));
+
+        speedMin =
+            Round(
+                Mathf.Lerp(
+                    MinGeneratedShipSpeed,
+                    MaxGeneratedShipSpeed -
+                    GeneratedShipSpeedRange,
+                    progress));
+    }
+
+    private static float CalculateGeneratedVisualSize(
+        AllyRole2A role,
+        int level)
+    {
+        if (IsRangerLevelZero(role, level))
+            return RangerLevelZeroVisualSize;
+
+        float safeLevel =
+            Mathf.Clamp(
+                level,
+                1,
+                10);
+
+        float progress =
+            (safeLevel - 1f) / 9f;
+
+        return Round(
+            Mathf.Lerp(
+                MinGeneratedVisualSize,
+                MaxGeneratedVisualSize,
+                progress));
     }
 
     private static string[] BuildNames(AllyRole2A role)

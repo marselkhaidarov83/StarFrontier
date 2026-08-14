@@ -8,7 +8,6 @@ public class PlanetOrbitConfig : BaseConfig
     [SerializeField] private float startAngleDeg = 0f;
     [SerializeField] private float orbitSpeedDegPerSec = 10f;
     [SerializeField] private Vector3 orbitCenterOffset = new Vector3(0, 0, -2);
-    [SerializeField] private float planetVisualSize = 96f;
     [SerializeField] private int direction = 1;
 
     [Header("Orbit Visual")]
@@ -18,7 +17,6 @@ public class PlanetOrbitConfig : BaseConfig
     public float StartAngleDeg => startAngleDeg;
     public float OrbitSpeedDegPerSec => orbitSpeedDegPerSec;
     public Vector3 OrbitCenterOffset => orbitCenterOffset;
-    public float PlanetVisualSize => planetVisualSize;
     public int Direction => direction;
 
     public int OrbitDotCount => orbitDotCount;

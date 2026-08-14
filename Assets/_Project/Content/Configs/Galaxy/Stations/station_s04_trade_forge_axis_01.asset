@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7729758a18e2e43cfbd15e9474806693, type: 3}
+  m_Name: station_s04_trade_forge_axis_01
+  m_EditorClassIdentifier: Data::StationConfig
+  id: station_s04_trade_forge_axis_01
+  displayName: "\u0411\u0438\u0440\u0436\u0430 \u041E\u0441\u0438 \u041A\u0443\u0437\u043D\u0438"
+  description: "\u0422\u043E\u0440\u0433\u043E\u0432\u0430\u044F \u0441\u0442\u0430\u043D\u0446\u0438\u044F
+    \u0441\u0438\u0441\u0442\u0435\u043C\u044B Forge Axis, \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u044E\u0449\u0430\u044F
+    \u043F\u0440\u043E\u043C\u044B\u0448\u043B\u0435\u043D\u043D\u044B\u0435 \u043F\u043E\u0441\u0442\u0430\u0432\u043A\u0438"
+  icon: {fileID: 0}
+  stationTypeConfig: {fileID: 11400000, guid: ef12221a7aea04dfb9c5cc9ac1560266, type: 2}
+  isMainStation: 1
+  isActive: 1
+  isDestroyed: 0
+  visibleAtStart: 0
+  marketProfileOverride: {fileID: 0}
+  missionPoolOverride: {fileID: 0}
+  encounterProfileOverride: {fileID: 0}
+  stationSpriteOverride: {fileID: 0}
+  destroyedSpriteOverride: {fileID: 0}
+  shadowSpriteOverride: {fileID: 0}
+  overrideVisualSize: 0
+  visualSizeOverride: 40
+  stationOrbit: {fileID: 11400000, guid: 0b23757ea72e2474c9c8c5d56bf5ce81, type: 2}
+  orbitAngleDegrees: 283.02
+  overrideLocalOffset: 1
+  localOffsetOverride: {x: 199.38, y: -862.25}

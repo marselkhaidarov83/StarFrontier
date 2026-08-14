@@ -456,7 +456,6 @@ MonoBehaviour:
   systemHudConfig: {fileID: 11400000, guid: 28d7a2f86e70c457ab50c89e22dc7c73, type: 2}
   systemVisualConfig: {fileID: 11400000, guid: 0d8b1a6dc71c44bcdab3fda74bcd01d9, type: 2}
   galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
-  starterAllyConfig: {fileID: 11400000, guid: b38c585c5d5da4b4bbdb9c161074da22, type: 2}
   enemies:
   - {fileID: 11400000, guid: 78172c88849d445a38e39ed596230ceb, type: 2}
   - {fileID: 11400000, guid: dba55c967cfe8461d81e255c35f5cec1, type: 2}
@@ -539,6 +538,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d480c374208ab4e1fb369f8b75907c20, type: 2}
   - {fileID: 11400000, guid: b018b0808b31646a7aca6bf265c24c11, type: 2}
   - {fileID: 11400000, guid: f88cc513970a144bebeef634edf9355b, type: 2}
+  - {fileID: 11400000, guid: b38c585c5d5da4b4bbdb9c161074da22, type: 2}
   allySpawnRuleConfigs:
   - {fileID: 11400000, guid: c67a4e81e89f84cfc85f5059e6b97c40, type: 2}
   - {fileID: 11400000, guid: d77212ae157ca44d8a3c7f57e2644034, type: 2}

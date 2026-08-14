@@ -175,7 +175,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             sun.LocalOffset.y,
             npc.CurrentPosition.z);
 
-        float sunRadius = Mathf.Max(0f, sun.VisualSize * 0.5f);
+        float sunRadius = Mathf.Max(0f, GetSunWorldSize(sun) * 0.5f);
         float avoidanceRadius = sunRadius + SunAvoidanceSafetyMargin;
 
         SunAvoidanceRouteState routeState = GetOrCreateSunAvoidanceRoute(
@@ -199,6 +199,21 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return finalTargetPosition;
 
         return routeState.Waypoints[routeState.WaypointIndex];
+    }
+
+    private float GetSunWorldSize(SunConfig sun)
+    {
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            return _configService
+                .SystemVisualConfig
+                .GetSunWorldSize(sun);
+        }
+
+        return sun != null
+            ? sun.VisualSize
+            : 0f;
     }
 
     private SunAvoidanceRouteState GetOrCreateSunAvoidanceRoute(

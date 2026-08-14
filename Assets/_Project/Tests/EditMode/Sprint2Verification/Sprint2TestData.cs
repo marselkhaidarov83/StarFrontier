@@ -10,7 +10,7 @@ namespace StarFrontier.Tests.Sprint2
     internal static class Sprint2TestData
     {
         internal const string CanonicalGalaxyId = "galaxyConfig_01";
-        internal const string RoutesFolder = "Assets/_Project/Content/Configs/Routes";
+        internal const string RoutesFolder = "Assets/_Project/Content/Configs/Galaxy/Routes";
 
         internal static GalaxyConfig LoadCanonicalGalaxy()
         {
