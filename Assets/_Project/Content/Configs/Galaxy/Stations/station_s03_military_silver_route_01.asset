@@ -34,6 +34,6 @@ MonoBehaviour:
   overrideVisualSize: 0
   visualSizeOverride: 40
   stationOrbit: {fileID: 11400000, guid: 79655ca45334f496e9a71640d93262d0, type: 2}
-  orbitAngleDegrees: 307.74
+  orbitAngleDegrees: 270
   overrideLocalOffset: 1
   localOffsetOverride: {x: 612.08, y: -790.8}

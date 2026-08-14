@@ -882,9 +882,9 @@ MonoBehaviour:
   SectorAllOpened: 1
   RouteAllUnlocked: 1
   _globalDebugEnabled: 1
-  stopAutomaticAllySpawns: 1
-  stopAutomaticEnemySpawns: 1
-  overrideAutomaticAllySpawnInterval: 1
+  stopAutomaticAllySpawns: 0
+  stopAutomaticEnemySpawns: 0
+  overrideAutomaticAllySpawnInterval: 0
   debugAutomaticAllySpawnIntervalSeconds: 5
   overrideNpcGalaxyLevel: 1
   debugNpcGalaxyLevel: 1
