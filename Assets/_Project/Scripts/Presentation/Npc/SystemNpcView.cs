@@ -16,6 +16,7 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
     private SimpleEventBus _simpleEventBus;
     private ISystemNpcRuntimeService _runtimeService;
     private IPlayerAttackService _playerAttackService;
+    private ISystemTravelService _systemTravelService;
 
     private Quaternion _initialRootRotation;
     private Quaternion _initialSpriteLocalRotation;
@@ -24,6 +25,8 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
     private bool _isInitialized;
 
     public bool IsBound => !string.IsNullOrWhiteSpace(runtimeNpcId);
+    public string RuntimeNpcId => runtimeNpcId;
+    public float WorldSize { get; private set; }
 
     private void Initialize()
     {
@@ -33,6 +36,7 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         _simpleEventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _runtimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
         _playerAttackService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerAttackService>();
+        _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -105,6 +109,7 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
 
         runtimeNpcId = npc.RuntimeNpcId;
         npcType = npc.NpcType;
+        WorldSize = worldSize;
 
         transform.position = npc.CurrentPosition;
         transform.rotation = _initialRootRotation;
@@ -138,7 +143,11 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
             return;
 
         if (!npc.IsEnemy && !npc.IsPirate)
+        {
+            _playerAttackService?.ClearSelectedTargetIfNoAssignedWeapons();
+            _systemTravelService?.SetNpcDestination(runtimeNpcId);
             return;
+        }
 
         _playerAttackService.SetTarget(runtimeNpcId);
     }

@@ -4,5 +4,6 @@ public enum TravelDestinationType
     Planet,
     Station,
     MapPoint,
+    Npc,
     SystemExit
 }

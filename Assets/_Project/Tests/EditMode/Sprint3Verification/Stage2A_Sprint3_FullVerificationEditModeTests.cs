@@ -34,7 +34,7 @@ public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
     {
         new RequiredConfig(
             "PlayerControlConfig",
-            "Assets/_Project/Content/Configs/Sprint3/playerControlConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/playerControlConfig_01.asset"),
         new RequiredConfig(
             "ShipMovementConfig",
             "Assets/_Project/Content/Configs/Game/shipMovementConfig_01.asset"),
@@ -43,10 +43,10 @@ public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
             "Assets/_Project/Content/Configs/Game/systemCameraConfig_01.asset"),
         new RequiredConfig(
             "TargetingConfig",
-            "Assets/_Project/Content/Configs/Sprint3/targetingConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/targetingConfig_01.asset"),
         new RequiredConfig(
             "InteractionConfig",
-            "Assets/_Project/Content/Configs/Sprint3/interactionConfig_01.asset")
+            "Assets/_Project/Content/Configs/Game/interactionConfig_01.asset")
     };
 
     private static readonly string[] RequiredValidationSources =

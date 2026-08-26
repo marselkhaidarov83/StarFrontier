@@ -11,6 +11,7 @@ public interface ISystemTravelService
     void SetPlanetDestination(PlanetConfig planetData);
     void SetStationDestination(StationConfig stationData);
     void SetMapPointDestination(Vector3 mapPosition);
+    void SetNpcDestination(string runtimeNpcId);
     void SetSystemExitDestination(StarSystemLink link);
     void SetSystemExitDestination(RouteExitMapChangedEvent evt);
 

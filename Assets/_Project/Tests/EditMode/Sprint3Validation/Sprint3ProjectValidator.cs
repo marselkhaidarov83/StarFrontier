@@ -21,7 +21,7 @@ public static class Sprint3ProjectValidator
     {
         new(
             "PlayerControlConfig",
-            "Assets/_Project/Content/Configs/Sprint3/playerControlConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/playerControlConfig_01.asset"),
         new(
             "ShipMovementConfig",
             "Assets/_Project/Content/Configs/Game/shipMovementConfig_01.asset"),
@@ -30,10 +30,10 @@ public static class Sprint3ProjectValidator
             "Assets/_Project/Content/Configs/Game/systemCameraConfig_01.asset"),
         new(
             "TargetingConfig",
-            "Assets/_Project/Content/Configs/Sprint3/targetingConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/targetingConfig_01.asset"),
         new(
             "InteractionConfig",
-            "Assets/_Project/Content/Configs/Sprint3/interactionConfig_01.asset")
+            "Assets/_Project/Content/Configs/Game/interactionConfig_01.asset")
     };
 
     private static readonly string[] NonNegativeNameTokens =

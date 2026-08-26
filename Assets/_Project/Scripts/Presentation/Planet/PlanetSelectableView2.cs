@@ -28,6 +28,9 @@ public sealed class PlanetSelectableView2 :
     private ITargetService2A
         _targetService;
 
+    private IPlayerAttackService
+        _playerAttackService;
+
     public void Initialize(
         PlanetConfig planet)
     {
@@ -40,6 +43,10 @@ public sealed class PlanetSelectableView2 :
             Bootstrapper.Instance
                 .ServiceRegistry
                 .Get<ITargetService2A>();
+
+        Bootstrapper.Instance
+            .ServiceRegistry
+            .TryGet(out _playerAttackService);
 
         _planet =
             planet;
@@ -81,6 +88,17 @@ public sealed class PlanetSelectableView2 :
                     .ServiceRegistry
                     .Get<ITargetService2A>();
         }
+
+        if (_playerAttackService == null &&
+            Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null)
+        {
+            Bootstrapper.Instance
+                .ServiceRegistry
+                .TryGet(out _playerAttackService);
+        }
+
+        _playerAttackService?.ClearSelectedTargetIfNoAssignedWeapons();
 
         Vector3 position =
             transform.position;

@@ -71,6 +71,8 @@ public class SystemTravelDestination
     public string StationId;
     public StationConfig StationData;
 
+    public string RuntimeNpcId;
+
     public string TargetSystemId;
     public StarSystemConfig TargetSystemConfig;
 
@@ -125,6 +127,18 @@ public class SystemTravelDestination
         {
             Type = TravelDestinationType.MapPoint,
             FixedMapPosition = position
+        };
+    }
+
+    public static SystemTravelDestination Npc(
+        string runtimeNpcId,
+        Vector3 currentPosition)
+    {
+        return new SystemTravelDestination
+        {
+            Type = TravelDestinationType.Npc,
+            RuntimeNpcId = runtimeNpcId ?? string.Empty,
+            FixedMapPosition = currentPosition
         };
     }
 

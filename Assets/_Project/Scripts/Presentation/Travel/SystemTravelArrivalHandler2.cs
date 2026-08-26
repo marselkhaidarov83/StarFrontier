@@ -48,6 +48,10 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
                 HandleMapPointArrival(evt);
                 break;
 
+            case TravelDestinationType.Npc:
+                HandleNpcArrival(evt);
+                break;
+
             case TravelDestinationType.SystemExit:
                 HandleSystemExitArrival(evt);
                 break;
@@ -94,6 +98,18 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
             arrivalFlash.Play(evt.FinalPosition);
 
         // Ничего не открываем. Корабль просто стоит.
+    }
+
+    private void HandleNpcArrival(SystemTravelCompletedEvent evt)
+    {
+        Debug.Log(
+            "[SystemTravelArrivalHandler] Arrived at NPC point: " +
+            evt.FinalPosition);
+
+        if (arrivalFlash != null)
+            arrivalFlash.Play(evt.FinalPosition);
+
+        // Ничего не открываем. Корабль просто стоит рядом с NPC.
     }
 
     private void HandleSystemExitArrival(SystemTravelCompletedEvent evt)

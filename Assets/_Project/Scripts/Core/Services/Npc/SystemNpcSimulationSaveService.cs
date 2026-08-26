@@ -171,7 +171,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             {
                 WeaponConfigId = weapon.WeaponConfigId,
                 LastShotTick = weapon.LastShotTick,
-                CooldownRemainingSeconds = weapon.CooldownRemainingSeconds
+                CooldownRemainingSeconds = weapon.CooldownRemainingSeconds,
+                ShotDistance = weapon.ShotDistance
             });
         }
 
@@ -249,6 +250,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             DangerTier = save.DangerTier
         };
 
+        RestoreRuntimeDisplayName(npc);
         ValidateRuntimeStatsFromConfig(npc);
 
         if (save.Weapons == null)
@@ -262,13 +264,62 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             {
                 WeaponConfigId = weaponSave.WeaponConfigId,
                 LastShotTick = weaponSave.LastShotTick,
-                CooldownRemainingSeconds = weaponSave.CooldownRemainingSeconds
+                CooldownRemainingSeconds = weaponSave.CooldownRemainingSeconds,
+                ShotDistance = ResolveRestoredWeaponShotDistance(weaponSave)
             });
         }
 
         // ApplyRestoreLocationMutationIfNeeded(npc);
 
         return npc;
+    }
+
+    private float ResolveRestoredWeaponShotDistance(
+        SystemNpcWeaponSaveData weaponSave)
+    {
+        if (weaponSave == null)
+            return 0f;
+
+        if (weaponSave.ShotDistance > 0f)
+            return weaponSave.ShotDistance;
+
+        if (string.IsNullOrWhiteSpace(weaponSave.WeaponConfigId))
+            return 0f;
+
+        WeaponConfig weaponConfig =
+            _configService.GetWeaponConfigById(
+                weaponSave.WeaponConfigId);
+
+        if (weaponConfig == null)
+            return 0f;
+
+        return weaponConfig.RangeMax;
+    }
+
+    private void RestoreRuntimeDisplayName(SystemNpcRuntimeState npc)
+    {
+        if (npc == null || string.IsNullOrWhiteSpace(npc.ConfigId))
+            return;
+
+        if (npc.IsEnemy)
+        {
+            EnemyConfig config =
+                _configService.GetEnemyConfigById(npc.ConfigId);
+
+            if (config != null)
+                npc.DisplayName = config.PickRuntimeDisplayName(npc.RuntimeNpcId);
+
+            return;
+        }
+
+        if (npc.IsAlly)
+        {
+            AllyConfig config =
+                _configService.GetAllyConfigById(npc.ConfigId);
+
+            if (config != null)
+                npc.DisplayName = config.PickRuntimeDisplayName(npc.RuntimeNpcId);
+        }
     }
 
     private void ValidateRuntimeStatsFromConfig(SystemNpcRuntimeState npc)

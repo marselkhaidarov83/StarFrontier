@@ -7,6 +7,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private const int SunAvoidanceArcSegments = 18;
 
     private readonly List<Vector3> _travelPathBuffer = new List<Vector3>(32);
+    private readonly List<Vector3> _tickLockedNpcPathBuffer = new List<Vector3>(32);
     private readonly List<Vector3> _routePreviewPathBuffer = new List<Vector3>(64);
     private const float ArrivalDistanceThreshold = 3f;
 
@@ -16,6 +17,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private readonly IHangarService _hangarService;
     private readonly IConfigService _configService;
     private readonly IShipMovementService _shipMovementService;
+    private readonly ITargetService2A _targetService;
+    private ISystemNpcRuntimeService _npcRuntimeService;
+
+    private int _tickLockedNpcPathWaypointIndex = 1;
+    private int _lastNpcDestinationRefreshTick = -1;
 
     public SystemTravelState State { get; }
 
@@ -30,8 +36,28 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _hangarService = Bootstrapper.Instance.ServiceRegistry.Get<IHangarService>();
         _shipMovementService = Bootstrapper.Instance.ServiceRegistry.Get<IShipMovementService>();
 
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out ITargetService2A targetService))
+        {
+            _targetService = targetService;
+        }
+
         State = new SystemTravelState();
         _eventBus.Subscribe<TravelFinishedEvent>(OnTravelFinished);
+        _eventBus.Subscribe<GameTickStartedEvent>(OnGameTickStarted);
+        _eventBus.Subscribe<GameTimeQuantumAdvancedEvent>(OnGameTimeQuantumAdvanced);
+    }
+
+    private void OnGameTickStarted(GameTickStartedEvent evt)
+    {
+        RefreshNpcDestinationAtTickStart(evt.CurrentTick);
+    }
+
+    private void OnGameTimeQuantumAdvanced(GameTimeQuantumAdvancedEvent evt)
+    {
+        RefreshNpcDestinationAtTickStart(
+            evt.CurrentDay + 1,
+            force: true);
     }
 
     private void ApplyShipPositionAfterSystemJump(
@@ -379,6 +405,60 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         StartTravelAutomaticallyIfPossible();
     }
 
+    public void SetNpcDestination(string runtimeNpcId)
+    {
+        if (!TryGetNpcDestinationPosition(runtimeNpcId, out Vector3 npcPosition))
+        {
+            Debug.LogWarning(
+                "[SystemTravelService] Cannot set NPC destination: NPC is missing or inactive. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        ClearPreviousTravelSelectionForNpcDestination();
+
+        State.Destination = SystemTravelDestination.Npc(
+            runtimeNpcId,
+            npcPosition);
+
+        State.DestinationPosition = npcPosition;
+        State.Status = SystemTravelStatus.DestinationSelected;
+        State.TravelProgress01 = 0f;
+        _lastNpcDestinationRefreshTick = -1;
+
+        RebuildTickLockedNpcPath();
+
+        _eventBus.Publish(new DestinationSelectedEvent(
+            TravelDestinationType.Npc,
+            npcPosition,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            runtimeNpcId
+        ));
+
+        LogCustom($"NPC destination selected: {runtimeNpcId}");
+        LogCustom("State = " + State);
+
+        StartTravelAutomaticallyIfPossible();
+    }
+
+    private void ClearPreviousTravelSelectionForNpcDestination()
+    {
+        if (State.Status == SystemTravelStatus.Flying ||
+            State.Status == SystemTravelStatus.DestinationSelected)
+        {
+            CancelTravel();
+        }
+        else
+        {
+            _eventBus.Publish(new SystemTravelCancelledEvent());
+        }
+
+        _targetService?.ClearTarget();
+    }
+
     public void SetSystemExitDestination(StarSystemLink link)
     {
         if (link == null)
@@ -464,9 +544,19 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         State.StartPosition = State.GetCurrentPosition();
         State.DestinationPosition = GetCurrentDestinationPosition();
-        State.TravelDistance = Vector3.Distance(State.StartPosition, State.DestinationPosition);
         State.TravelProgress01 = 0f;
         State.Status = SystemTravelStatus.Flying;
+
+        if (IsNpcDestination())
+        {
+            RebuildTickLockedNpcPath();
+        }
+        else
+        {
+            State.TravelDistance = Vector3.Distance(
+                State.StartPosition,
+                State.DestinationPosition);
+        }
 
         _eventBus.Publish(new SystemTravelStartedEvent(
             State.Destination.Type,
@@ -523,6 +613,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         State.DestinationPosition = GetCurrentDestinationPosition();
 
+        if (State.Status != SystemTravelStatus.Flying)
+            return;
+
         Vector3 direction = State.DestinationPosition - State.GetCurrentPosition();
         float distanceToDestination = direction.magnitude;
 
@@ -534,6 +627,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (distanceToDestination <= ArrivalDistanceThreshold)
         {
+            if (IsNpcDestination())
+            {
+                PublishTravelProgress(1f);
+                return;
+            }
+
             CompleteTravel();
             return;
         }
@@ -545,14 +644,19 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             State.GetCurrentPosition(),
             State.DestinationPosition,
             movementDistance,
-            out destinationReached
-        );
+            out destinationReached);
 
         State.SetCurrentPosition(nextPosition);
 
         if (destinationReached ||
             Vector3.Distance(State.GetCurrentPosition(), State.DestinationPosition) <= ArrivalDistanceThreshold)
         {
+            if (IsNpcDestination())
+            {
+                PublishTravelProgress(1f);
+                return;
+            }
+
             CompleteTravel();
             return;
         }
@@ -570,13 +674,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             State.TravelProgress01 = 1f;
         }
 
-        // LogCustom("State.TravelProgress01 = " + State.TravelProgress01);
-        _gameSessionService.State.Player.SystemMapShipPosition = State.GetCurrentPosition();
-        _eventBus.Publish(new SystemTravelProgressChangedEvent(
-            State.GetCurrentPosition(),
-            State.DestinationPosition,
-            State.TravelProgress01
-        ));
+        PublishTravelProgress(State.TravelProgress01);
     }
 
     private void StartTravelAutomaticallyIfPossible()
@@ -653,6 +751,18 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
             case TravelDestinationType.Station:
                 return State.Destination.FixedMapPosition;
+
+            case TravelDestinationType.Npc:
+                if (TryGetNpcDestinationPosition(
+                        State.Destination.RuntimeNpcId,
+                        out Vector3 npcPosition))
+                {
+                    State.DestinationPosition = npcPosition;
+                    State.Destination.FixedMapPosition = npcPosition;
+                    return npcPosition;
+                }
+
+                return State.DestinationPosition;
 
             case TravelDestinationType.SystemExit:
                 return State.Destination.FixedMapPosition;
@@ -743,8 +853,10 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (
             State.Destination != null &&
-            State.Destination.Type ==
-                TravelDestinationType.Planet)
+            (State.Destination.Type ==
+                TravelDestinationType.Planet ||
+             State.Destination.Type ==
+                TravelDestinationType.Npc))
         {
             BuildLivePlanetRoutePreview2A(
                 preview,
@@ -1096,6 +1208,176 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         destinationReached = true;
         return destinationPosition;
+    }
+
+    private Vector3 CalculateNextTravelPositionByTickLockedNpcPath(
+        Vector3 currentPosition,
+        float movementDistance,
+        out bool destinationReached)
+    {
+        destinationReached = false;
+
+        if (_tickLockedNpcPathBuffer == null ||
+            _tickLockedNpcPathBuffer.Count <= 1)
+        {
+            destinationReached = true;
+            return State.DestinationPosition;
+        }
+
+        if (_tickLockedNpcPathWaypointIndex < 1)
+            _tickLockedNpcPathWaypointIndex = 1;
+
+        Vector3 position = currentPosition;
+        float remainingMovement = movementDistance;
+
+        while (_tickLockedNpcPathWaypointIndex < _tickLockedNpcPathBuffer.Count)
+        {
+            Vector3 waypoint =
+                _tickLockedNpcPathBuffer[_tickLockedNpcPathWaypointIndex];
+
+            Vector3 segment = waypoint - position;
+            float segmentDistance = segment.magnitude;
+
+            if (segmentDistance <= ArrivalDistanceThreshold)
+            {
+                position = waypoint;
+                _tickLockedNpcPathWaypointIndex++;
+                continue;
+            }
+
+            if (remainingMovement >= segmentDistance)
+            {
+                position = waypoint;
+                remainingMovement -= segmentDistance;
+                _tickLockedNpcPathWaypointIndex++;
+                continue;
+            }
+
+            return position + segment.normalized * remainingMovement;
+        }
+
+        destinationReached = true;
+        return State.DestinationPosition;
+    }
+
+    private void RefreshNpcDestinationAtTickStart(
+        int quantTick,
+        bool force = false)
+    {
+        if (State == null ||
+            State.Destination == null ||
+            State.Destination.Type != TravelDestinationType.Npc)
+        {
+            return;
+        }
+
+        if (!force &&
+            _lastNpcDestinationRefreshTick == quantTick)
+            return;
+
+        string runtimeNpcId = State.Destination.RuntimeNpcId;
+
+        if (!TryGetNpcDestinationPosition(
+                runtimeNpcId,
+                out Vector3 npcPosition))
+        {
+            CancelTravel();
+            return;
+        }
+
+        State.DestinationPosition = npcPosition;
+        State.Destination.FixedMapPosition = npcPosition;
+
+        RebuildTickLockedNpcPath();
+
+        _lastNpcDestinationRefreshTick = quantTick;
+    }
+
+    private void RebuildTickLockedNpcPath()
+    {
+        State.StartPosition = State.GetCurrentPosition();
+
+        BuildCurrentTravelPath(
+            State.StartPosition,
+            State.DestinationPosition,
+            _tickLockedNpcPathBuffer);
+
+        State.TravelDistance =
+            GetPathLength(_tickLockedNpcPathBuffer);
+
+        _tickLockedNpcPathWaypointIndex = 1;
+    }
+
+    private bool IsNpcDestination()
+    {
+        return State != null &&
+               State.Destination != null &&
+               State.Destination.Type == TravelDestinationType.Npc;
+    }
+
+    private void PublishTravelProgress(float progress01)
+    {
+        State.TravelProgress01 = Mathf.Clamp01(progress01);
+
+        if (_gameSessionService != null &&
+            _gameSessionService.State != null &&
+            _gameSessionService.State.Player != null)
+        {
+            _gameSessionService.State.Player.SystemMapShipPosition =
+                State.GetCurrentPosition();
+        }
+
+        _eventBus.Publish(new SystemTravelProgressChangedEvent(
+            State.GetCurrentPosition(),
+            State.DestinationPosition,
+            State.TravelProgress01
+        ));
+    }
+
+    private bool TryGetNpcDestinationPosition(
+        string runtimeNpcId,
+        out Vector3 position)
+    {
+        position = Vector3.zero;
+
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+            return false;
+
+        if (!TryResolveNpcRuntimeService())
+            return false;
+
+        if (!_npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc))
+        {
+            return false;
+        }
+
+        if (npc == null ||
+            !npc.IsAlive ||
+            npc.IsOnPlanet)
+        {
+            return false;
+        }
+
+        position = npc.CurrentPosition;
+        position.z = -2f;
+        return true;
+    }
+
+    private bool TryResolveNpcRuntimeService()
+    {
+        if (_npcRuntimeService != null)
+            return true;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return false;
+        }
+
+        return Bootstrapper.Instance.ServiceRegistry.TryGet(
+            out _npcRuntimeService);
     }
 
     private float GetPathLength(List<Vector3> path)

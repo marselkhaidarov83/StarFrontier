@@ -44,6 +44,7 @@ public sealed class ShipClickCancelMovement2A :
     private IPlayerControlService _playerControlService;
     private ISystemTravelService _systemTravelService;
     private IShipMovementService _shipMovementService;
+    private IPlayerAttackService _playerAttackService;
 
     private Coroutine _feedbackRoutine;
     private Vector3 _feedbackBaseScale = Vector3.one;
@@ -89,6 +90,8 @@ public sealed class ShipClickCancelMovement2A :
         eventData?.Use();
 
         TryResolveServices();
+
+        _playerAttackService?.ClearSelectedTargetIfNoAssignedWeapons();
 
         if (_systemTravelService != null)
         {
@@ -171,6 +174,9 @@ public sealed class ShipClickCancelMovement2A :
 
         Bootstrapper.Instance.ServiceRegistry.TryGet(
             out _shipMovementService);
+
+        Bootstrapper.Instance.ServiceRegistry.TryGet(
+            out _playerAttackService);
 
         return _systemTravelService != null;
     }

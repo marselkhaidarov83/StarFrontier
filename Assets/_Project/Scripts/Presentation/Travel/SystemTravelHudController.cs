@@ -690,6 +690,12 @@ public sealed class SystemTravelHudController :
             case TravelDestinationType.MapPoint:
                 return "космос";
 
+            case TravelDestinationType.Npc:
+                return
+                    "NPC " +
+                    GetNpcDisplayName(
+                        evt.RuntimeNpcId);
+
             case TravelDestinationType.SystemExit:
                 return
                     "система " +
@@ -733,6 +739,13 @@ public sealed class SystemTravelHudController :
 
             case TravelDestinationType.MapPoint:
                 return "космос";
+
+            case TravelDestinationType.Npc:
+                return
+                    "NPC " +
+                    GetNpcDisplayName(
+                        state.Destination
+                            .RuntimeNpcId);
 
             case TravelDestinationType.SystemExit:
                 return
@@ -794,6 +807,28 @@ public sealed class SystemTravelHudController :
         }
 
         return systemConfig.Id;
+    }
+
+    private string GetNpcDisplayName(
+        string runtimeNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+            return "цель";
+
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out ISystemNpcRuntimeService npcRuntimeService) &&
+            npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) &&
+            npc != null &&
+            !string.IsNullOrWhiteSpace(npc.DisplayName))
+        {
+            return npc.DisplayName.Trim();
+        }
+
+        return runtimeNpcId;
     }
 
     private string GetStationDisplayName(
