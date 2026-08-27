@@ -101,6 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8356499601850987191}
   - component: {fileID: 5466342931177470382}
+  - component: {fileID: 6823117034892156041}
   m_Layer: 12
   m_Name: NpcProjectilePrefab_01
   m_TagString: Player
@@ -138,3 +139,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Presentation::GalaxyNpcProjectileView
   spriteRenderer: {fileID: 9210901141780574594}
   rotationOffsetDegrees: -90
+--- !u!114 &6823117034892156041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4285806045932523860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f03793aa842a466eae7e4ba5b70adcf, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  defaultSpeed: 12
+  maxLifetime: 3

@@ -6,6 +6,7 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
     private readonly SimpleEventBus _eventBus;
     private readonly IDamageService2A _damageService;
     private readonly ISystemEncounterService _encounterService;
+    private readonly IConfigService _configService;
 
     public PlayerCombatTargetService()
     {
@@ -15,6 +16,7 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _damageService = ResolveDamageService();
         _encounterService = ResolveEncounterService();
+        _configService = ResolveConfigService();
     }
 
     public bool IsPlayerAvailableInSystem(string systemId)
@@ -48,18 +50,50 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
 
     public void ApplyDamage(int damage)
     {
+        if (IsGodModeEnabled())
+        {
+            LogCustom(
+                "[PlayerCombatTargetService] Damage blocked by player god mode. " +
+                "RequestedDamage: " +
+                damage);
+
+            return;
+        }
+
         ShipRuntimeData activeShip = GetActiveShip();
 
         if (activeShip == null)
+        {
+            LogCustom("[PlayerCombatTargetService] Damage ignored: active ship is null.");
             return;
+        }
+
+        if (activeShip.CurrentHull <= 0)
+        {
+            LogCustom(
+                "[PlayerCombatTargetService] Damage ignored: active ship is already destroyed. " +
+                "ShipId: " +
+                activeShip.ShipId);
+
+            return;
+        }
 
         CombatDamageResult2A result = _damageService.ApplyDamage(
             activeShip.CurrentShield,
             activeShip.CurrentHull,
-            damage);
+            Mathf.Max(1, damage));
 
         if (result.AppliedDamage <= 0)
+        {
+            LogCustom(
+                "[PlayerCombatTargetService] Damage ignored: applied damage is zero. " +
+                "ShipId: " +
+                activeShip.ShipId +
+                ", RequestedDamage: " +
+                damage);
+
             return;
+        }
 
         activeShip.CurrentShield = result.CurrentShield;
         activeShip.CurrentHull = result.CurrentHull;
@@ -68,6 +102,17 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             result.AppliedDamage,
             activeShip.CurrentShield,
             activeShip.CurrentHull));
+
+        _eventBus.Publish(new PlayerCombatStatsChangedEvent(
+            activeShip.CurrentHull,
+            Mathf.Max(0, activeShip.HullCapacity),
+            activeShip.CurrentShield,
+            GetActiveShipShieldCapacity(activeShip),
+            activeShip.CurrentEnergy,
+            activeShip.CurrentEnergy));
+
+        _eventBus.Publish(new ShipStatsChangedEvent(
+            activeShip.ShipId));
 
         _eventBus.Publish(new CombatDamageEvent2A(
             "player",
@@ -80,6 +125,17 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             RegisterPlayerDestroyed();
 
         _eventBus.Publish(new SaveNeedEvent());
+
+        LogCustom(
+            "[PlayerCombatTargetService] Player damaged. " +
+            "ShipId: " +
+            activeShip.ShipId +
+            ", AppliedDamage: " +
+            result.AppliedDamage +
+            ", CurrentShield: " +
+            activeShip.CurrentShield +
+            ", CurrentHull: " +
+            activeShip.CurrentHull);
     }
 
     private void RegisterPlayerDestroyed()
@@ -107,6 +163,35 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
         return _gameSessionService.State.Player.GetActiveShip();
     }
 
+    private int GetActiveShipShieldCapacity(
+        ShipRuntimeData activeShip)
+    {
+        if (activeShip == null ||
+            _configService == null ||
+            string.IsNullOrWhiteSpace(activeShip.AllyConfigId))
+        {
+            return Mathf.Max(0, activeShip?.CurrentShield ?? 0);
+        }
+
+        AllyConfig activeShipConfig =
+            _configService.GetAllyConfigById(
+                activeShip.AllyConfigId);
+
+        if (activeShipConfig == null)
+            return Mathf.Max(0, activeShip.CurrentShield);
+
+        return Mathf.Max(
+            activeShip.CurrentShield,
+            activeShipConfig.BaseShieldMax);
+    }
+
+    private bool IsGodModeEnabled()
+    {
+        return _configService != null &&
+               _configService.DebugConfig != null &&
+               _configService.DebugConfig.enableGodMode;
+    }
+
     private static IDamageService2A ResolveDamageService()
     {
         if (Bootstrapper.Instance != null &&
@@ -126,6 +211,18 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             Bootstrapper.Instance.ServiceRegistry.TryGet(out ISystemEncounterService encounterService))
         {
             return encounterService;
+        }
+
+        return null;
+    }
+
+    private static IConfigService ResolveConfigService()
+    {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out IConfigService configService))
+        {
+            return configService;
         }
 
         return null;

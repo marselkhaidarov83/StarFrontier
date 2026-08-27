@@ -14,6 +14,27 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
     private readonly List<GalaxyNpcProjectileRuntimeState> _activeProjectiles = new();
 
+    public int ActiveProjectileCount
+    {
+        get
+        {
+            int count = 0;
+
+            for (int i = 0; i < _activeProjectiles.Count; i++)
+            {
+                GalaxyNpcProjectileRuntimeState projectile =
+                    _activeProjectiles[i];
+
+                if (projectile == null || projectile.IsResolved)
+                    continue;
+
+                count++;
+            }
+
+            return count;
+        }
+    }
+
     public SystemNpcCombatService()
     {
         _debugStop = true;

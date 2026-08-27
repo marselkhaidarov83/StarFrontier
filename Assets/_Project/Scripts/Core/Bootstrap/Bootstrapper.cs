@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class Bootstrapper : CustomMonoBehaviour
@@ -46,6 +47,11 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField, Min(0.1f)] private float debugAutomaticAllySpawnIntervalSeconds = 5f;
     [SerializeField] private bool overrideNpcGalaxyLevel;
     [SerializeField, Range(1, 10)] private int debugNpcGalaxyLevel = 1;
+
+    [Header("Debug / Combat Damage")]
+    [SerializeField] private string debugCombatTargetRuntimeNpcId;
+    [SerializeField, Min(1)] private int debugCombatTargetDamage = 10;
+    [SerializeField, Min(1)] private int debugCombatPlayerDamage = 10;
 
     public static Bootstrapper Instance;
     public IServiceRegistry ServiceRegistry;
@@ -339,6 +345,725 @@ public class Bootstrapper : CustomMonoBehaviour
             spawned +
             ", Role: " +
             role);
+    }
+
+    [ContextMenu("STAR FRONTIER/Damage First Enemy In Current System")]
+    private void DebugDamageFirstEnemyInCurrentSystem()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        string runtimeNpcId =
+            FindFirstAliveEnemyRuntimeIdInCurrentSystem(
+                npcRuntimeService,
+                configService);
+
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "No alive enemy was found in current system.");
+
+            return;
+        }
+
+        DamageDebugTarget(
+            npcRuntimeService,
+            runtimeNpcId,
+            debugCombatTargetDamage);
+    }
+
+    [ContextMenu("STAR FRONTIER/Damage Target NPC By Runtime ID")]
+    private void DebugDamageTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "debugCombatTargetRuntimeNpcId is empty.");
+
+            return;
+        }
+
+        DamageDebugTarget(
+            npcRuntimeService,
+            debugCombatTargetRuntimeNpcId,
+            debugCombatTargetDamage);
+    }
+
+    [ContextMenu("STAR FRONTIER/Damage Player")]
+    private void DebugDamagePlayer()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        int safeDamage =
+            Mathf.Max(1, debugCombatPlayerDamage);
+
+        ShipRuntimeData activeShipBefore =
+            GetDebugActiveShip();
+
+        if (activeShipBefore == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug Damage Player failed. " +
+                "Active ship is null.");
+
+            return;
+        }
+
+        int shieldBefore =
+            activeShipBefore.CurrentShield;
+
+        int hullBefore =
+            activeShipBefore.CurrentHull;
+
+        playerCombatTargetService.ApplyDamage(safeDamage);
+
+        ShipRuntimeData activeShipAfter =
+            GetDebugActiveShip();
+
+        if (activeShipAfter == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug Damage Player finished, " +
+                "but active ship is null after damage.");
+
+            return;
+        }
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Damage Player requested. " +
+            "Damage: " +
+            safeDamage +
+            ", Shield: " +
+            shieldBefore +
+            " -> " +
+            activeShipAfter.CurrentShield +
+            ", Hull: " +
+            hullBefore +
+            " -> " +
+            activeShipAfter.CurrentHull);
+    }
+
+    [ContextMenu("STAR FRONTIER/Kill First Enemy In Current System")]
+    private void DebugKillFirstEnemyInCurrentSystem()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        string runtimeNpcId =
+            FindFirstAliveEnemyRuntimeIdInCurrentSystem(
+                npcRuntimeService,
+                configService);
+
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "No alive enemy was found in current system.");
+
+            return;
+        }
+
+        KillDebugEnemy(
+            npcRuntimeService,
+            runtimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Kill Target NPC By Runtime ID")]
+    private void DebugKillTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "debugCombatTargetRuntimeNpcId is empty.");
+
+            return;
+        }
+
+        KillDebugEnemy(
+            npcRuntimeService,
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Reset Current Encounter")]
+    private void DebugResetCurrentEncounter()
+    {
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemEncounterService>(
+                out ISystemEncounterService encounterService) ||
+            encounterService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemEncounterService is not registered.");
+            return;
+        }
+
+        encounterService.ClearEncounter();
+
+        DebugCombatLog("[Bootstrapper] Debug Reset Current Encounter completed.");
+    }
+
+    [ContextMenu("STAR FRONTIER/Enable Player God Mode")]
+    private void DebugEnablePlayerGodMode()
+    {
+        SetDebugPlayerGodMode(true);
+    }
+
+    [ContextMenu("STAR FRONTIER/Disable Player God Mode")]
+    private void DebugDisablePlayerGodMode()
+    {
+        SetDebugPlayerGodMode(false);
+    }
+
+    private void SetDebugPlayerGodMode(
+        bool enabled)
+    {
+        if (debugConfig == null)
+        {
+            DebugCombatWarning("[Bootstrapper] DebugConfig is not assigned.");
+            return;
+        }
+
+        debugConfig.enableGodMode = enabled;
+
+        DebugCombatLog(
+            "[Bootstrapper] Player God Mode: " +
+            enabled);
+    }
+
+    [ContextMenu("STAR FRONTIER/Print Combat Debug State")]
+    private void DebugPrintCombatState()
+    {
+        StringBuilder text =
+            new StringBuilder(512);
+
+        text.AppendLine("[Bootstrapper] Combat Debug State");
+
+        AppendDebugEncounterState(text);
+        AppendDebugPlayerState(text);
+        AppendDebugTargetState(text);
+        AppendDebugNpcCombatState(text);
+
+        DebugCombatLog(text.ToString());
+    }
+
+    private void DebugCombatLog(
+        string message)
+    {
+        Debug.unityLogger.Log(
+            LogType.Log,
+            (object)message,
+            this);
+    }
+
+    private void DebugCombatWarning(
+        string message)
+    {
+        Debug.unityLogger.Log(
+            LogType.Warning,
+            (object)message,
+            this);
+    }
+
+    private void AppendDebugEncounterState(
+        StringBuilder text)
+    {
+        if (ServiceRegistry == null)
+        {
+            text.AppendLine("Encounter: ServiceRegistry unavailable");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemEncounterService>(
+                out ISystemEncounterService encounterService) ||
+            encounterService == null)
+        {
+            text.AppendLine("Encounter: service unavailable");
+            return;
+        }
+
+        ActiveSystemEncounter encounter =
+            encounterService.Current;
+
+        if (encounter == null)
+        {
+            text.AppendLine("Encounter: none");
+            return;
+        }
+
+        text.Append("Encounter: ")
+            .Append(encounter.EncounterId)
+            .Append(", System: ")
+            .Append(encounter.SystemId)
+            .Append(", State: ")
+            .Append(encounter.State)
+            .Append(", EnemiesAlive: ")
+            .Append(encounter.EnemiesAlive)
+            .Append(", AlliesAlive: ")
+            .Append(encounter.AlliesAlive)
+            .Append(", PlayerKills: ")
+            .Append(encounter.PlayerKills)
+            .Append(", DefeatReason: ")
+            .AppendLine(encounter.DefeatReason.ToString());
+    }
+
+    private void AppendDebugPlayerState(
+        StringBuilder text)
+    {
+        ShipRuntimeData activeShip =
+            GetDebugActiveShip();
+
+        if (activeShip == null)
+        {
+            text.AppendLine("Player: active ship unavailable");
+            return;
+        }
+
+        ShipStats stats =
+            GetDebugActiveShipStats();
+
+        int maxHull =
+            stats != null
+                ? stats.MaxHull
+                : activeShip.HullCapacity;
+
+        int maxShield =
+            stats != null
+                ? stats.MaxShield
+                : activeShip.CurrentShield;
+
+        text.Append("Player: ShipId: ")
+            .Append(activeShip.ShipId)
+            .Append(", Hull: ")
+            .Append(activeShip.CurrentHull)
+            .Append(" / ")
+            .Append(maxHull)
+            .Append(", Shield: ")
+            .Append(activeShip.CurrentShield)
+            .Append(" / ")
+            .Append(maxShield)
+            .Append(", Energy: ")
+            .Append(activeShip.CurrentEnergy)
+            .AppendLine();
+    }
+
+    private void AppendDebugTargetState(
+        StringBuilder text)
+    {
+        if (ServiceRegistry == null)
+        {
+            text.AppendLine("Target: ServiceRegistry unavailable");
+            return;
+        }
+
+        if (ServiceRegistry.TryGet<IPlayerAttackService>(
+                out IPlayerAttackService playerAttackService) &&
+            playerAttackService != null &&
+            !string.IsNullOrWhiteSpace(playerAttackService.CurrentTargetNpcId))
+        {
+            AppendDebugNpcTarget(
+                text,
+                "PlayerAttack target",
+                playerAttackService.CurrentTargetNpcId);
+
+            return;
+        }
+
+        if (ServiceRegistry.TryGet<ITargetService2A>(
+                out ITargetService2A targetService) &&
+            targetService != null &&
+            targetService.State != null &&
+            targetService.State.HasTarget)
+        {
+            text.Append("Targeting target: ")
+                .Append(targetService.State.CurrentTargetId)
+                .Append(", Type: ")
+                .Append(targetService.State.CurrentTargetType)
+                .Append(", Distance: ")
+                .Append(targetService.State.CurrentTargetDistance.ToString("0.0"))
+                .Append(", InRange: ")
+                .Append(targetService.State.IsTargetInRange)
+                .AppendLine();
+
+            AppendDebugNpcTarget(
+                text,
+                "Targeting NPC state",
+                targetService.State.CurrentTargetId);
+
+            return;
+        }
+
+        text.AppendLine("Target: none");
+    }
+
+    private void AppendDebugNpcTarget(
+        StringBuilder text,
+        string label,
+        string runtimeNpcId)
+    {
+        if (ServiceRegistry == null)
+            return;
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService) ||
+            npcRuntimeService == null)
+        {
+            text.Append(label)
+                .AppendLine(": NPC runtime service unavailable");
+
+            return;
+        }
+
+        if (!npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            text.Append(label)
+                .Append(": not found. RuntimeNpcId: ")
+                .AppendLine(runtimeNpcId);
+
+            return;
+        }
+
+        text.Append(label)
+            .Append(": ")
+            .Append(npc.DisplayName)
+            .Append(", RuntimeNpcId: ")
+            .Append(npc.RuntimeNpcId)
+            .Append(", Type: ")
+            .Append(npc.NpcType)
+            .Append(", Hull: ")
+            .Append(npc.CurrentHull)
+            .Append(" / ")
+            .Append(npc.MaxHull)
+            .Append(", Shield: ")
+            .Append(npc.CurrentShield)
+            .Append(" / ")
+            .Append(npc.MaxShield)
+            .Append(", CombatState: ")
+            .Append(npc.CombatState)
+            .Append(", Alive: ")
+            .Append(npc.IsAlive)
+            .AppendLine();
+    }
+
+    private void AppendDebugNpcCombatState(
+        StringBuilder text)
+    {
+        if (ServiceRegistry == null)
+        {
+            text.AppendLine("NPC Combat: ServiceRegistry unavailable");
+            return;
+        }
+
+        int activeProjectiles = 0;
+
+        if (ServiceRegistry.TryGet<ISystemNpcCombatService>(
+                out ISystemNpcCombatService npcCombatService) &&
+            npcCombatService != null)
+        {
+            activeProjectiles =
+                npcCombatService.ActiveProjectileCount;
+        }
+
+        int activeEnemies = 0;
+        string currentSystemId = "unavailable";
+
+        if (ServiceRegistry.TryGet<IConfigService>(
+                out IConfigService configService) &&
+            ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService) &&
+            configService != null &&
+            npcRuntimeService != null)
+        {
+            StarSystemConfig currentSystem =
+                configService.GetCurrentSystemConfig();
+
+            if (currentSystem != null &&
+                !string.IsNullOrWhiteSpace(currentSystem.Id))
+            {
+                currentSystemId =
+                    currentSystem.Id;
+
+                IReadOnlyList<SystemNpcRuntimeState> enemies =
+                    npcRuntimeService.GetAliveNpcsInSystemByType(
+                        currentSystem.Id,
+                        SystemNpcType.Enemy);
+
+                activeEnemies =
+                    enemies != null
+                        ? enemies.Count
+                        : 0;
+            }
+        }
+
+        text.Append("NPC Combat: System: ")
+            .Append(currentSystemId)
+            .Append(", ActiveEnemies: ")
+            .Append(activeEnemies)
+            .Append(", ActiveProjectiles: ")
+            .Append(activeProjectiles)
+            .AppendLine();
+    }
+
+    private bool TryGetDebugCombatServices(
+        out ISystemNpcRuntimeService npcRuntimeService,
+        out IPlayerCombatTargetService playerCombatTargetService,
+        out IConfigService configService)
+    {
+        npcRuntimeService = null;
+        playerCombatTargetService = null;
+        configService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService))
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<IPlayerCombatTargetService>(
+                out playerCombatTargetService))
+        {
+            DebugCombatWarning("[Bootstrapper] IPlayerCombatTargetService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<IConfigService>(
+                out configService))
+        {
+            DebugCombatWarning("[Bootstrapper] IConfigService is not registered.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private string FindFirstAliveEnemyRuntimeIdInCurrentSystem(
+        ISystemNpcRuntimeService npcRuntimeService,
+        IConfigService configService)
+    {
+        StarSystemConfig currentSystem =
+            configService.GetCurrentSystemConfig();
+
+        if (currentSystem == null ||
+            string.IsNullOrWhiteSpace(currentSystem.Id))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "Current system was not resolved.");
+
+            return null;
+        }
+
+        IReadOnlyList<SystemNpcRuntimeState> enemies =
+            npcRuntimeService.GetAliveNpcsInSystemByType(
+                currentSystem.Id,
+                SystemNpcType.Enemy);
+
+        if (enemies == null || enemies.Count == 0)
+            return null;
+
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            SystemNpcRuntimeState enemy =
+                enemies[i];
+
+            if (enemy == null)
+                continue;
+
+            if (!enemy.IsAlive ||
+                enemy.LifeState != SystemNpcLifeState.Alive)
+            {
+                continue;
+            }
+
+            return enemy.RuntimeNpcId;
+        }
+
+        return null;
+    }
+
+    private void DamageDebugTarget(
+        ISystemNpcRuntimeService npcRuntimeService,
+        string runtimeNpcId,
+        int damage)
+    {
+        if (!npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "NPC was not found. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        if (!npc.IsAlive ||
+            npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "NPC is not alive. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        int safeDamage =
+            Mathf.Max(1, damage);
+
+        npcRuntimeService.ApplyDamage(
+            runtimeNpcId,
+            safeDamage,
+            true,
+            true);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Damage Target completed. " +
+            "RuntimeNpcId: " +
+            runtimeNpcId +
+            ", Damage: " +
+            safeDamage);
+    }
+
+    private void KillDebugEnemy(
+        ISystemNpcRuntimeService npcRuntimeService,
+        string runtimeNpcId)
+    {
+        if (!npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "NPC was not found. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        if (!npc.IsEnemy)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "NPC is not an enemy. RuntimeNpcId: " +
+                runtimeNpcId +
+                ", Type: " +
+                npc.NpcType);
+
+            return;
+        }
+
+        if (!npc.IsAlive ||
+            npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "Enemy is not alive. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        int lethalDamage =
+            Mathf.Max(
+                npc.CurrentHull + npc.CurrentShield,
+                999999);
+
+        npcRuntimeService.ApplyDamage(
+            runtimeNpcId,
+            lethalDamage,
+            true,
+            true);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Kill Enemy completed. " +
+            "RuntimeNpcId: " +
+            runtimeNpcId +
+            ", Damage: " +
+            lethalDamage);
+    }
+
+    private ShipRuntimeData GetDebugActiveShip()
+    {
+        if (ServiceRegistry == null)
+            return null;
+
+        if (!ServiceRegistry.TryGet<IGameSessionService>(
+                out IGameSessionService gameSessionService) ||
+            gameSessionService == null ||
+            gameSessionService.State == null ||
+            gameSessionService.State.Player == null)
+        {
+            return null;
+        }
+
+        return gameSessionService.State.Player.GetActiveShip();
+    }
+
+    private ShipStats GetDebugActiveShipStats()
+    {
+        if (ServiceRegistry == null)
+            return null;
+
+        if (!ServiceRegistry.TryGet<IHangarService>(
+                out IHangarService hangarService) ||
+            hangarService == null)
+        {
+            return null;
+        }
+
+        return hangarService.GetActiveShipStats();
     }
 
     private void StartGameFlow()

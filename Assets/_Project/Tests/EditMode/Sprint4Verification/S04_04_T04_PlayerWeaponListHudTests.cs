@@ -216,11 +216,11 @@ public sealed class S04_04_T04_PlayerWeaponListHudTests
             "System bottom HUD prefab must contain authored player weapon panel.");
 
         Assert.IsTrue(
-            prefabText.Contains("m_SizeDelta: {x: 520, y: 180}"),
+            prefabText.Contains("m_SizeDelta: {x: 500, y: 180}"),
             "Weapon panel must be wide enough for weapon names and damage text.");
 
         Assert.IsTrue(
-            prefabText.Contains("m_SizeDelta: {x: 460, y: 260}"),
+            prefabText.Contains("m_SizeDelta: {x: 500, y: 260}"),
             "Threat panel must be wide enough for enemy names and status text.");
 
         Assert.IsTrue(

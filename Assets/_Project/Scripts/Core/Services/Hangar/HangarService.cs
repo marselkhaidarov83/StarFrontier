@@ -173,14 +173,19 @@ public class HangarService : IHangarService
     {
         var activeShip = GetActiveShipState();
         var shipData = GetActiveShipData();
+        var stats = GetActiveShipStats();
 
-        if (activeShip == null || shipData == null)
+        if (activeShip == null || shipData == null || stats == null)
             return HangarOperationResult.Fail(HangarError.ActiveShipMissing);
 
-        if (activeShip.CurrentHull >= shipData.BaseHull)
+        if (activeShip.CurrentHull >= stats.MaxHull &&
+            activeShip.CurrentShield >= stats.MaxShield)
+        {
             return HangarOperationResult.Ok();
+        }
 
-        activeShip.CurrentHull = shipData.BaseHull;
+        activeShip.CurrentHull = stats.MaxHull;
+        activeShip.CurrentShield = stats.MaxShield;
 
         _eventBus.Publish(new ShipRepairedEvent(activeShip.ShipId));
         _eventBus.Publish(new ShipStatsChangedEvent(activeShip.ShipId));

@@ -12,6 +12,7 @@ public sealed class PlayerCombatEntity : MonoBehaviour
     private SimpleEventBus _eventBus;
     private ISystemEncounterService _encounterService;
     private IDamageService2A _damageService;
+    private IConfigService _configService;
 
     public PlayerCombatRuntimeState State => _state;
     public bool IsAlive => _state.IsAlive;
@@ -21,6 +22,7 @@ public sealed class PlayerCombatEntity : MonoBehaviour
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _encounterService = ResolveEncounterService();
         _damageService = ResolveDamageService();
+        _configService = ResolveConfigService();
 
         _state.Init(maxHull, maxShield, maxEnergy);
 
@@ -29,6 +31,17 @@ public sealed class PlayerCombatEntity : MonoBehaviour
 
     public void ApplyDamage(int damage)
     {
+        if (IsGodModeEnabled())
+        {
+            Debug.Log(
+                "[PlayerCombatEntity] Damage blocked by player god mode. " +
+                "RequestedDamage: " +
+                damage,
+                this);
+
+            return;
+        }
+
         if (!_state.IsAlive)
             return;
 
@@ -70,6 +83,13 @@ public sealed class PlayerCombatEntity : MonoBehaviour
         PublishStatsChanged();
     }
 
+    private bool IsGodModeEnabled()
+    {
+        return _configService != null &&
+               _configService.DebugConfig != null &&
+               _configService.DebugConfig.enableGodMode;
+    }
+
     private void PublishStatsChanged()
     {
         _eventBus.Publish(new PlayerCombatStatsChangedEvent(
@@ -100,6 +120,18 @@ public sealed class PlayerCombatEntity : MonoBehaviour
             Bootstrapper.Instance.ServiceRegistry.TryGet(out ISystemEncounterService encounterService))
         {
             return encounterService;
+        }
+
+        return null;
+    }
+
+    private static IConfigService ResolveConfigService()
+    {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out IConfigService configService))
+        {
+            return configService;
         }
 
         return null;

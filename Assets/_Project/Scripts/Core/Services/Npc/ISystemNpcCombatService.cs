@@ -1,5 +1,7 @@
 public interface ISystemNpcCombatService
 {
+    int ActiveProjectileCount { get; }
+
     void Tick(StarSystemConfig starSystem, int quantTick);
     void TickProjectiles(float deltaTime);
 

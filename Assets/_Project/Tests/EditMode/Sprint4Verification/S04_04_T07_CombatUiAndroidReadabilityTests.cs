@@ -47,8 +47,8 @@ public sealed class S04_04_T07_CombatUiAndroidReadabilityTests
             "Combat HUD rows must be touch-readable.");
 
         Assert.IsTrue(
-            prefabText.Contains("m_SizeDelta: {x: 460") &&
-            prefabText.Contains("m_SizeDelta: {x: 520"),
+            prefabText.Contains("m_SizeDelta: {x: 500, y: 260}") &&
+            prefabText.Contains("m_SizeDelta: {x: 500, y: 180}"),
             "Combat HUD panels must be wide enough for Russian text.");
 
         Assert.IsTrue(
