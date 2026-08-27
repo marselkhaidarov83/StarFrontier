@@ -1,6 +1,9 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public sealed class PlayerSystemMapShipView : MonoBehaviour
+public sealed class PlayerSystemMapShipView :
+    MonoBehaviour,
+    IPointerClickHandler
 {
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Collider2D shipCollider;
@@ -82,5 +85,11 @@ public sealed class PlayerSystemMapShipView : MonoBehaviour
             return null;
 
         return _gameSessionService.State.Player.PlayerShipState.GetActiveShip();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        _eventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
     }
 }

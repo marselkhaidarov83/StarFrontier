@@ -117,13 +117,19 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"[EnemySystemMapEntity] Pointer click received on {name}");
+        _simpleEventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
 
         if (!_isBound)
         {
             Debug.LogWarning("[EnemySystemMapEntity] Click ignored: enemy is not bound.");
             return;
         }
+
+        _simpleEventBus?.Publish(
+            new SystemSelectedTargetInfoPanelRequestedEvent2A(
+                runtimeEnemyId,
+                SystemGameplayTargetType.Enemy));
     }
     public void ApplyDamage(int damage, bool fromPlayer)
     {

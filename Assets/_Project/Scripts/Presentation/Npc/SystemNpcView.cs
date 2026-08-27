@@ -136,11 +136,21 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         if (!IsBound)
             return;
 
+        _simpleEventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
+
         if (!_runtimeService.TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc))
             return;
 
         if (!npc.IsAlive)
             return;
+
+        _simpleEventBus?.Publish(
+            new SystemSelectedTargetInfoPanelRequestedEvent2A(
+                runtimeNpcId,
+                npc.IsHostileToPlayer
+                    ? SystemGameplayTargetType.Enemy
+                    : SystemGameplayTargetType.Ally));
 
         if (!npc.IsEnemy && !npc.IsPirate)
         {

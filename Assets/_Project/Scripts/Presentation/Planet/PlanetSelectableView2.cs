@@ -81,6 +81,9 @@ public sealed class PlanetSelectableView2 :
             return;
         }
 
+        _simpleEventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
+
         if (_targetService == null)
         {
             _targetService =

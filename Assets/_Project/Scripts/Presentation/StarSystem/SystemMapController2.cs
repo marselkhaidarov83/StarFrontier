@@ -152,11 +152,17 @@ public class SystemMapController2 : CustomMonoBehaviour
         _spawnedSun.transform.SetSiblingIndex(0);
         _spawnedSun.GetComponent<SunNodeView>().Initialize(
             starSystem.Sun,
-            null,
+            OnSunClicked,
             systemVisualConfig);
 
         if (IsDebug())
             Debug.Log($"[SystemMapController2] sun builded");
+    }
+
+    private void OnSunClicked(string sunId)
+    {
+        eventBus?.Publish(
+            new SystemObjectsPanelRequestedEvent2A());
     }
 
     private void SpawnPlanets(StarSystemConfig starSystem)

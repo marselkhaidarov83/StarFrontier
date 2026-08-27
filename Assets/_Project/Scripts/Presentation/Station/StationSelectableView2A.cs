@@ -37,6 +37,9 @@ public sealed class StationSelectableView2A :
 
         ResolveServices();
 
+        _eventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
+
         Vector3 position =
             transform.position;
 

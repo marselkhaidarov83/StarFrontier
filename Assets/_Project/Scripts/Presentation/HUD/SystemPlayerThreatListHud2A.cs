@@ -501,7 +501,17 @@ public sealed class SystemPlayerThreatListHud2A :
         SystemNpcRuntimeState threat = _threats[rowIndex];
 
         if (_playerAttackService != null && threat != null)
+        {
             _playerAttackService.SetTarget(threat.RuntimeNpcId);
+
+            _eventBus?.Publish(
+                new SystemObjectsPanelCloseRequestedEvent2A());
+
+            _eventBus?.Publish(
+                new SystemSelectedTargetInfoPanelRequestedEvent2A(
+                    threat.RuntimeNpcId,
+                    SystemGameplayTargetType.Enemy));
+        }
 
         LogThreatDebug(
             "Row clicked index=" + rowIndex +

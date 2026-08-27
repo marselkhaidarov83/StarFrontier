@@ -249,6 +249,9 @@ public sealed class SystemExitNodeView2A :
         ResolveRuntimeDependencies();
         ResolveSelectableView();
 
+        _simpleEventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
+
         /*
          * На случай повторной инициализации
          * ещё раз запрещаем второму компоненту
