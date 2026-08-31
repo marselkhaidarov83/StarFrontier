@@ -122,6 +122,10 @@ public sealed class ShipStatsService : IShipStatsService
                 accumulator.TurnRate += value;
                 break;
 
+            case ShipStatType.TurnRadius:
+                accumulator.TurnRadius += value;
+                break;
+
             case ShipStatType.CargoCapacity:
                 accumulator.CargoCapacity += value;
                 break;
@@ -165,6 +169,10 @@ public sealed class ShipStatsService : IShipStatsService
                 accumulator.TurnRate *= multiplier;
                 break;
 
+            case ShipStatType.TurnRadius:
+                accumulator.TurnRadius *= multiplier;
+                break;
+
             case ShipStatType.CargoCapacity:
                 accumulator.CargoCapacity *= multiplier;
                 break;
@@ -196,6 +204,8 @@ public sealed class ShipStatsService : IShipStatsService
 
         public float TurnRate { get; set; }
 
+        public float TurnRadius { get; set; }
+
         public float CargoCapacity { get; set; }
 
         public int WeaponSlotCount { get; private set; }
@@ -215,6 +225,7 @@ public sealed class ShipStatsService : IShipStatsService
                 MaxSpeed = allyConfig.BaseSpeed,
                 Acceleration = allyConfig.BaseAcceleration,
                 TurnRate = allyConfig.BaseTurnRate,
+                TurnRadius = allyConfig.TurnRadius,
                 CargoCapacity = allyConfig.BaseCargoCapacity,
                 WeaponSlotCount = allyConfig.WeaponSlotCount,
                 ModuleSlotCount = allyConfig.ModuleSlotCount,
@@ -230,6 +241,7 @@ public sealed class ShipStatsService : IShipStatsService
             MaxSpeed = Mathf.Max(0f, MaxSpeed);
             Acceleration = Mathf.Max(0f, Acceleration);
             TurnRate = Mathf.Max(0f, TurnRate);
+            TurnRadius = Mathf.Max(0f, TurnRadius);
 
             CargoCapacity = Mathf.Max(0f, CargoCapacity);
         }
@@ -243,6 +255,7 @@ public sealed class ShipStatsService : IShipStatsService
                 MaxSpeed,
                 Acceleration,
                 TurnRate,
+                TurnRadius,
                 Mathf.RoundToInt(CargoCapacity),
                 WeaponSlotCount,
                 ModuleSlotCount,

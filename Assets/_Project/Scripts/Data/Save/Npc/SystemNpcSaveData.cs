@@ -27,6 +27,8 @@ public sealed class SystemNpcSaveData
     public Vector3 CurrentPosition;
     public Vector3 StartPosition;
     public Vector3 TargetPosition;
+    public Vector3 FacingDirection;
+    public float TurnRadius;
 
     public SystemNpcTravelState TravelState;
     public float TravelProgress01;

@@ -38,6 +38,8 @@ public sealed class SystemNpcRuntimeState
 
     public Vector3 TickMovementTargetPosition;
     public Vector3 TickMovementDirection = Vector3.up;
+    public Vector3 FacingDirection = Vector3.up;
+    public float TurnRadius = 60f;
     public int TickMovementDirectionTick = -1;
     public bool TickMovementArrived;
 

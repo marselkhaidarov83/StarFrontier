@@ -39,6 +39,11 @@ public class EnemyConfig : BaseConfig
     [SerializeField]
     private int baseSpeedMax = 0;
 
+    [Header("Movement")]
+    [SerializeField]
+    [Min(0f)]
+    private float turnRadius = 60f;
+
     [SerializeField]
     [Range(1, 10)]
     private int level = 1;
@@ -104,6 +109,7 @@ public class EnemyConfig : BaseConfig
     public int BaseEnergyMax => baseEnergyMax;
     public int BaseSpeedMin => baseSpeedMin;
     public int BaseSpeedMax => baseSpeedMax;
+    public float TurnRadius => turnRadius;
 
     public int BaseHull => baseHullMin;
     public int BaseShield => baseShieldMin;

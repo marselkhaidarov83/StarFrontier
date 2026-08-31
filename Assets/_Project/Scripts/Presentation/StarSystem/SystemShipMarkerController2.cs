@@ -341,12 +341,15 @@ _systemTravelService
 
         if (updateDirection)
         {
-            Vector3 movementDelta =
-                shipPosition -
-                _lastShipPosition;
+            if (!TryApplyRuntimeFacingDirection())
+            {
+                Vector3 movementDelta =
+                    shipPosition -
+                    _lastShipPosition;
 
-            SetDirection(
-                movementDelta);
+                SetDirection(
+                    movementDelta);
+            }
         }
 
         /*
@@ -359,11 +362,16 @@ _systemTravelService
 
     private void ApplyMovementFacingDirection()
     {
+        TryApplyRuntimeFacingDirection();
+    }
+
+    private bool TryApplyRuntimeFacingDirection()
+    {
         if (_shipMovementService == null)
-            return;
+            return false;
 
         if (_shipMovementService.State == null)
-            return;
+            return false;
 
         Vector2 facingDirection =
             _shipMovementService
@@ -373,7 +381,7 @@ _systemTravelService
         if (facingDirection.sqrMagnitude <=
             0.0001f)
         {
-            return;
+            return false;
         }
 
         SetDirection(
@@ -381,6 +389,8 @@ _systemTravelService
                 facingDirection.x,
                 facingDirection.y,
                 0f));
+
+        return true;
     }
 
     public void SetDirection(

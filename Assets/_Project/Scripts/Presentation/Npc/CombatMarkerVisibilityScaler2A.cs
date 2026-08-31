@@ -91,7 +91,7 @@ public sealed class CombatMarkerVisibilityScaler2A : MonoBehaviour
             return;
 
         _playerView =
-            FindObjectOfType<PlayerSystemMapShipView>();
+            FindFirstObjectByType<PlayerSystemMapShipView>();
     }
 
     private void ResolveServices()
@@ -258,7 +258,8 @@ public sealed class CombatMarkerVisibilityScaler2A : MonoBehaviour
     private bool ShouldHideStatusByDensity()
     {
         CombatMarkerVisibilityScaler2A[] markers =
-            FindObjectsOfType<CombatMarkerVisibilityScaler2A>();
+            FindObjectsByType<CombatMarkerVisibilityScaler2A>(
+                FindObjectsSortMode.None);
 
         int nearbyCount = 0;
 

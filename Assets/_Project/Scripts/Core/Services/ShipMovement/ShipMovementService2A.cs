@@ -179,16 +179,38 @@ public sealed class ShipMovementService2A : IShipMovementService
                 ? acceleration
                 : GetDeceleration();
 
-        Vector2 desiredVelocity =
+        float desiredSpeed =
             hasMoveInput
-                ? moveInput * maxSpeed
-                : Vector2.zero;
+                ? moveInput.magnitude * maxSpeed
+                : 0f;
+
+        float newSpeed =
+            Mathf.MoveTowards(
+                movementState.CurrentSpeed,
+                desiredSpeed,
+                deceleration * deltaTime);
+
+        Vector2 targetFacingDirection =
+            GetTargetFacingDirection(
+                movementState,
+                moveInput,
+                movementState.Velocity,
+                hasMoveInput);
+
+        Vector2 newFacingDirection =
+            TurnRadiusRouteMath2A.RotateTowardsByTravelDistance(
+                movementState.FacingDirection,
+                targetFacingDirection,
+                newSpeed * deltaTime,
+                GetTurnRadius());
 
         Vector2 newVelocity =
-            Vector2.MoveTowards(
-                movementState.Velocity,
-                desiredVelocity,
-                deceleration * deltaTime);
+            newFacingDirection * newSpeed;
+
+        Vector2 desiredVelocity =
+            hasMoveInput
+                ? targetFacingDirection * desiredSpeed
+                : Vector2.zero;
 
         if (newVelocity.sqrMagnitude <
             VelocityThresholdSqrMagnitude)
@@ -204,19 +226,6 @@ public sealed class ShipMovementService2A : IShipMovementService
             ClampPositionAndVelocity(
                 ref newPosition,
                 ref newVelocity);
-
-        Vector2 targetFacingDirection =
-            GetTargetFacingDirection(
-                movementState,
-                moveInput,
-                newVelocity,
-                hasMoveInput);
-
-        Vector2 newFacingDirection =
-            RotateTowards(
-                movementState.FacingDirection,
-                targetFacingDirection,
-                GetTurnRate() * deltaTime);
 
         movementState.SetPosition(newPosition);
 
@@ -280,6 +289,14 @@ public sealed class ShipMovementService2A : IShipMovementService
             return Mathf.Max(0f, _shipStats.TurnRate);
 
         return Mathf.Max(0f, _shipMovementConfig.TurnSpeedDegrees);
+    }
+
+    private float GetTurnRadius()
+    {
+        if (_shipStats != null)
+            return Mathf.Max(0f, _shipStats.TurnRadius);
+
+        return 0f;
     }
 
     private float GetDeceleration()

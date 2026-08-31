@@ -52,6 +52,8 @@ public static class SystemNpcRuntimeFactory
 
             CurrentPosition = position,
             TargetPosition = position,
+            FacingDirection = Vector3.up,
+            TurnRadius = config.TurnRadius,
 
             TravelState = SystemNpcTravelState.Idle,
             CurrentBehavior = SystemNpcBehaviorType.EngageEnemies,
@@ -113,6 +115,8 @@ public static class SystemNpcRuntimeFactory
 
             CurrentPosition = position,
             TargetPosition = position,
+            FacingDirection = Vector3.up,
+            TurnRadius = config.TurnRadius,
 
             TravelState = SystemNpcTravelState.OnPlanet,
             CurrentBehavior = SystemNpcBehaviorType.StayOnPlanetForDays,
@@ -188,6 +192,8 @@ public static class SystemNpcRuntimeFactory
             StartPosition = position,
             CurrentPosition = position,
             TargetPosition = position,
+            FacingDirection = Vector3.up,
+            TurnRadius = config.TurnRadius,
             TravelProgress01 = 1f,
 
             TravelState = SystemNpcTravelState.OnPlanet,

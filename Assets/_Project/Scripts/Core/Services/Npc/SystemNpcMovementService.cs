@@ -89,23 +89,40 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         Vector3 finalTargetPosition = npc.TargetPosition;
         Vector3 movementTargetPosition = npc.TickMovementTargetPosition;
 
-        SystemTravelMathResult result = SystemTravelMath.MoveTowards(
-            npc.CurrentPosition,
-            npc.StartPosition,
-            movementTargetPosition,
-            npc.Speed,
-            deltaTime,
-            ArrivalDistanceThreshold);
+        Vector2 facingDirection =
+            new Vector2(
+                npc.FacingDirection.x,
+                npc.FacingDirection.y);
 
-        npc.CurrentPosition = result.NewPosition;
-        npc.TravelProgress01 = result.Progress01;
+        bool arrived;
+        Vector3 newPosition =
+            TurnRadiusRouteMath2A.MoveWithTurnRadius(
+                npc.CurrentPosition,
+                movementTargetPosition,
+                ref facingDirection,
+                Mathf.Max(0f, npc.Speed) * deltaTime,
+                npc.TurnRadius,
+                ArrivalDistanceThreshold,
+                out arrived);
+
+        npc.CurrentPosition = newPosition;
+        npc.FacingDirection =
+            new Vector3(
+                facingDirection.x,
+                facingDirection.y,
+                0f);
+        npc.TravelProgress01 =
+            CalculateProgress01(
+                npc.StartPosition,
+                movementTargetPosition,
+                npc.CurrentPosition);
 
         _eventBus.Publish(new SystemNpcPositionChangedEvent(
             npc.RuntimeNpcId,
             npc.CurrentSystemId,
             npc.CurrentPosition));
 
-        if (result.Arrived &&
+        if (arrived &&
             Vector3.Distance(npc.CurrentPosition, finalTargetPosition) >
             ArrivalDistanceThreshold)
         {
@@ -118,7 +135,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return;
         }
 
-        if (result.Arrived)
+        if (arrived)
             CompleteMovement(npc, currentTick);
     }
 
@@ -150,6 +167,31 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         if (direction.sqrMagnitude > DirectionThresholdSqrMagnitude)
             npc.TickMovementDirection = direction.normalized;
+
+        if (npc.FacingDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+            npc.FacingDirection = npc.TickMovementDirection;
+    }
+
+    private float CalculateProgress01(
+        Vector3 startPosition,
+        Vector3 destinationPosition,
+        Vector3 currentPosition)
+    {
+        float totalDistance =
+            Vector3.Distance(
+                startPosition,
+                destinationPosition);
+
+        if (totalDistance <= ArrivalDistanceThreshold)
+            return 1f;
+
+        float remainingDistance =
+            Vector3.Distance(
+                currentPosition,
+                destinationPosition);
+
+        return Mathf.Clamp01(
+            1f - remainingDistance / totalDistance);
     }
 
     private Vector3 GetSunSafeNextTargetPosition(

@@ -18,6 +18,12 @@ MonoBehaviour:
   brakingDeceleration: 30
   turnSpeedDegrees: 240
   rotationSmoothing: 0.18
+  routeTurnRadiusAdjustmentStepPercent: 5
+  routeSpeedAdjustmentStepPercent: 2.5
+  minRouteTurnRadiusAdjustmentFactor: 0.05
+  routeNearDistanceTurnRadiusMultiplier: 0.75
+  routeForwardSectorAngleDegrees: 60
+  routeBehindSectorAngleDegrees: 135
   visualTiltAmount: 0.18
   visualBankAmount: 0.25
   visualTiltReturnSpeed: 8

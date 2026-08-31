@@ -3,6 +3,7 @@ using UnityEngine;
 public interface ISystemTravelService
 {
     SystemTravelState State { get; }
+    float CurrentEffectiveTravelSpeed { get; }
 
     void SetCurrentSystem(string systemId);
     void SetCurrentPlanet(string planetId, Vector3 planetPosition);

@@ -142,6 +142,12 @@ public sealed class SystemTravelHudController :
     private bool _buttonsSubscribed;
     private bool _eventsSubscribed;
 
+    public bool UsesMovementRuntimeState =>
+        usesMovementRuntimeState;
+
+    public bool UsesLegacyTravelSpeed =>
+        usesLegacyTravelSpeed;
+
     private void Start()
     {
         ResolveServices();
@@ -1061,7 +1067,7 @@ public sealed class SystemTravelHudController :
             statusLabel +
             "  •  Скорость: " +
             currentSpeed.ToString(
-                "0.0");
+                "0");
 
         if (!force &&
             nextText ==
@@ -1091,6 +1097,18 @@ public sealed class SystemTravelHudController :
             return 0f;
         }
 
+        float travelSpeed =
+            GetLegacyTravelSpeed();
+
+        if (travelSpeed >
+            SpeedEpsilon)
+        {
+            usesLegacyTravelSpeed =
+                true;
+
+            return travelSpeed;
+        }
+
         if (_shipMovementService != null &&
             _shipMovementService.IsEnabled &&
             _shipMovementService.State != null)
@@ -1107,17 +1125,7 @@ public sealed class SystemTravelHudController :
             return movementSpeed;
         }
 
-        float legacySpeed =
-            GetLegacyTravelSpeed();
-
-        if (legacySpeed >
-            SpeedEpsilon)
-        {
-            usesLegacyTravelSpeed =
-                true;
-        }
-
-        return legacySpeed;
+        return 0f;
     }
 
     private float GetLegacyTravelSpeed()
@@ -1134,18 +1142,8 @@ public sealed class SystemTravelHudController :
             return 0f;
         }
 
-        if (_hangarService == null)
-            return 0f;
-
-        var activeShipStats =
-            _hangarService
-                .GetActiveShipStats();
-
-        if (activeShipStats == null)
-            return 0f;
-
         return SanitizeSpeed(
-            activeShipStats.Speed);
+            _travelService.CurrentEffectiveTravelSpeed);
     }
 
     private static float SanitizeSpeed(

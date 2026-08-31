@@ -120,6 +120,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             CurrentPosition = npc.CurrentPosition,
             StartPosition = npc.StartPosition,
             TargetPosition = npc.TargetPosition,
+            FacingDirection = npc.FacingDirection,
+            TurnRadius = npc.TurnRadius,
 
             TravelState = npc.TravelState,
             TravelProgress01 = npc.TravelProgress01,
@@ -205,6 +207,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             CurrentPosition = save.CurrentPosition,
             StartPosition = save.StartPosition,
             TargetPosition = save.TargetPosition,
+            FacingDirection = save.FacingDirection,
+            TurnRadius = save.TurnRadius,
 
             TravelState = save.TravelState,
             TravelProgress01 = save.TravelProgress01,
@@ -342,6 +346,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             npc.MaxEnergy = ValidateIntRange(npc.MaxEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
             npc.CurrentEnergy = ValidateIntRange(npc.CurrentEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
             npc.Speed = ValidateIntRange(npc.Speed, config.BaseSpeedMin, config.BaseSpeedMax);
+            npc.TurnRadius = ValidateTurnRadius(npc.TurnRadius, config.TurnRadius);
             return;
         }
 
@@ -360,7 +365,22 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             npc.MaxEnergy = ValidateIntRange(npc.MaxEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
             npc.CurrentEnergy = ValidateIntRange(npc.CurrentEnergy, config.BaseEnergyMin, config.BaseEnergyMax);
             npc.Speed = ValidateIntRange(npc.Speed, config.BaseSpeedMin, config.BaseSpeedMax);
+            npc.TurnRadius = ValidateTurnRadius(npc.TurnRadius, config.TurnRadius);
         }
+    }
+
+    private static float ValidateTurnRadius(
+        float value,
+        float fallback)
+    {
+        if (float.IsNaN(value) ||
+            float.IsInfinity(value) ||
+            value <= 0f)
+        {
+            return Mathf.Max(0f, fallback);
+        }
+
+        return value;
     }
 
     private static int ValidateIntRange(

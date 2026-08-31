@@ -57,6 +57,10 @@ public sealed class AllyConfig : BaseConfig
     [SerializeField]
     private float baseTurnRateMax = 90f;
 
+    [SerializeField]
+    [Min(0f)]
+    private float turnRadius = 60f;
+
     [Header("Capacity")]
     [FormerlySerializedAs("baseCargoCapacity")]
     [SerializeField]
@@ -125,6 +129,7 @@ public sealed class AllyConfig : BaseConfig
     public float BaseAccelerationMax => baseAccelerationMax;
     public float BaseTurnRateMin => baseTurnRateMin;
     public float BaseTurnRateMax => baseTurnRateMax;
+    public float TurnRadius => turnRadius;
     public int BaseCargoCapacityMin => baseCargoCapacityMin;
     public int BaseCargoCapacityMax => baseCargoCapacityMax;
 

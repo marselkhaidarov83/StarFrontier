@@ -167,8 +167,15 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         if (spriteRenderer == null)
             return;
 
-        Vector3 direction = npc.TickMovementDirection;
+        Vector3 direction = npc.FacingDirection;
         direction.z = 0f;
+
+        if (!IsFinite(direction) ||
+            direction.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        {
+            direction = npc.TickMovementDirection;
+            direction.z = 0f;
+        }
 
         if (IsFinite(direction) &&
             direction.sqrMagnitude > DirectionThresholdSqrMagnitude)

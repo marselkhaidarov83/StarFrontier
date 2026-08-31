@@ -34,6 +34,7 @@ MonoBehaviour:
   baseAccelerationMax: 5.75
   baseTurnRateMin: 92.5
   baseTurnRateMax: 102.5
+  turnRadius: 300
   baseCargoCapacityMin: 50
   baseCargoCapacityMax: 54
   weaponSlotCount: 1

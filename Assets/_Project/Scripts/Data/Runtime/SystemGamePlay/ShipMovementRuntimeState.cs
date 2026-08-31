@@ -46,6 +46,31 @@ public sealed class ShipMovementRuntimeState
             FacingDirection = velocity.normalized;
     }
 
+    public void SetRouteMotion(
+        Vector2 position,
+        Vector2 facingDirection,
+        float speed)
+    {
+        SetPosition(position);
+
+        Vector2 safeFacingDirection =
+            IsFinite(facingDirection) &&
+            facingDirection.sqrMagnitude > 0.0001f
+                ? facingDirection.normalized
+                : FacingDirection;
+
+        SetFacingDirection(safeFacingDirection);
+
+        Vector2 velocity =
+            safeFacingDirection *
+            Mathf.Max(0f, speed);
+
+        Velocity = velocity;
+        DesiredVelocity = velocity;
+        CurrentSpeed = velocity.magnitude;
+        IsMoving = CurrentSpeed > 0.001f;
+    }
+
     public void SetRotation(float rotationDegrees)
     {
         RotationDegrees = rotationDegrees;

@@ -30,6 +30,7 @@ MonoBehaviour:
   baseEnergyMax: 304
   baseSpeedMin: 460
   baseSpeedMax: 500
+  turnRadius: 300
   level: 10
   namePool: {fileID: 11400000, guid: d20bf73a13fb94eb1af0365eb82f9c47, type: 2}
   behaviorScenarios:

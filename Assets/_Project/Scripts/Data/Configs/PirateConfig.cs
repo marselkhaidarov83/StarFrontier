@@ -8,6 +8,7 @@ public class PirateConfig : BaseConfig
     [SerializeField] private int baseShield;
     [SerializeField] private int baseEnergy;
     [SerializeField] private float baseSpeed;
+    [SerializeField] [Min(0f)] private float turnRadius = 60f;
 
     [Header("Combat Role")]
     [SerializeField] private EnemyArchetype archetype;
@@ -26,6 +27,7 @@ public class PirateConfig : BaseConfig
     public int BaseShield => baseShield;
     public int BaseEnergy => baseEnergy;
     public float BaseSpeed => baseSpeed;
+    public float TurnRadius => turnRadius;
     public EnemyArchetype AiArchetype => archetype;
     public WeaponConfig WeaponConfig => weaponConfig;
     public int CreditReward => creditReward;

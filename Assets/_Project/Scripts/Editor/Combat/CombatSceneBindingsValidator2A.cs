@@ -326,7 +326,9 @@ public static class CombatSceneBindingsValidator2A
         where T : Object
     {
         T[] objects =
-            Object.FindObjectsOfType<T>(true);
+            Object.FindObjectsByType<T>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None);
 
         if (objects == null ||
             objects.Length == 0)
