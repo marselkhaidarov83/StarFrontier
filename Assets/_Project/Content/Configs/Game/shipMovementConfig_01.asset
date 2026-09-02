@@ -21,9 +21,19 @@ MonoBehaviour:
   routeTurnRadiusAdjustmentStepPercent: 5
   routeSpeedAdjustmentStepPercent: 2.5
   minRouteTurnRadiusAdjustmentFactor: 0.05
+  routeSubstepsPerTick: 10
+  routeStraightExitAngleDegrees: 10
+  minRouteTurnRadiusAbsolute: 45
+  movingDestinationRouteRefreshBlockedInitialTicks: 2
+  movingDestinationRouteRefreshesPerTick: 5
   routeNearDistanceTurnRadiusMultiplier: 0.75
   routeForwardSectorAngleDegrees: 60
-  routeBehindSectorAngleDegrees: 135
+  routeBehindSectorAngleDegrees: 105
+  routeBehindSmallTurnAngleToleranceDegrees: 75
+  sunDestinationForbiddenRadiusMultiplier: 1.5
+  sunTangentTolerancePercent: 5
+  sunAvoidanceRoutePaddingStep: 5
+  sunAvoidanceRoutePaddingMax: 40
   visualTiltAmount: 0.18
   visualBankAmount: 0.25
   visualTiltReturnSpeed: 8

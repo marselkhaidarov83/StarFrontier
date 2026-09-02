@@ -152,14 +152,15 @@ public static class TurnRadiusRouteMath2A
     }
 
     public static bool TryBuildWaypointPreviewPath(
-        List<Vector3> result,
-        IReadOnlyList<Vector3> waypoints,
-        Vector2 startFacingDirection,
-        float movementDistancePerStep,
-        float turnRadius,
-        float arrivalDistanceThreshold,
-        int maxSteps,
-        float intermediateWaypointArrivalDistanceThreshold = -1f)
+     List<Vector3> result,
+     IReadOnlyList<Vector3> waypoints,
+     Vector2 startFacingDirection,
+     float movementDistancePerStep,
+     float turnRadius,
+     float arrivalDistanceThreshold,
+     int maxSteps,
+     float intermediateWaypointArrivalDistanceThreshold = -1f,
+     float straightExitAngleDegrees = 0f)
     {
         if (result == null)
             return false;
@@ -200,6 +201,12 @@ public static class TurnRadiusRouteMath2A
         int safeMaxSteps =
             Mathf.Max(1, maxSteps);
 
+        Vector3 finalDestination =
+            waypoints[waypoints.Count - 1];
+
+        bool routeHasIntermediateWaypoints =
+            waypoints.Count > 2;
+
         for (int i = 0; i < safeMaxSteps; i++)
         {
             float pathProgress =
@@ -226,6 +233,7 @@ public static class TurnRadiusRouteMath2A
                     targetDistance);
 
             bool arrivedAtWaypoint;
+
             currentPosition =
                 MoveWithTurnRadius(
                     currentPosition,
@@ -243,6 +251,22 @@ public static class TurnRadiusRouteMath2A
 
             if (arrivedAtWaypoint)
                 return true;
+
+            bool canUseStraightExit =
+                !routeHasIntermediateWaypoints ||
+                isFinalTarget;
+
+            if (canUseStraightExit &&
+                CanExitStraightToFinalTarget(
+                    currentPosition,
+                    facingDirection,
+                    finalDestination,
+                    straightExitAngleDegrees,
+                    arrivalDistanceThreshold))
+            {
+                result.Add(finalDestination);
+                return true;
+            }
 
             float currentPathProgress =
                 GetClosestDistanceOnPath(
@@ -610,5 +634,46 @@ public static class TurnRadiusRouteMath2A
     {
         return !float.IsNaN(value) &&
                !float.IsInfinity(value);
+    }
+
+    private static bool CanExitStraightToFinalTarget(
+    Vector3 currentPosition,
+    Vector2 facingDirection,
+    Vector3 finalDestination,
+    float straightExitAngleDegrees,
+    float arrivalDistanceThreshold)
+    {
+        if (straightExitAngleDegrees <= 0f)
+            return false;
+
+        Vector3 toFinal3 =
+            finalDestination - currentPosition;
+
+        toFinal3.z = 0f;
+
+        float distanceToFinal =
+            toFinal3.magnitude;
+
+        if (distanceToFinal <= arrivalDistanceThreshold)
+            return true;
+
+        Vector2 toFinal =
+            new Vector2(
+                toFinal3.x,
+                toFinal3.y);
+
+        if (toFinal.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+            return true;
+
+        Vector2 safeFacing =
+            NormalizeDirectionOrUp(
+                facingDirection);
+
+        float angleToFinal =
+            Vector2.Angle(
+                safeFacing,
+                toFinal.normalized);
+
+        return angleToFinal <= straightExitAngleDegrees;
     }
 }

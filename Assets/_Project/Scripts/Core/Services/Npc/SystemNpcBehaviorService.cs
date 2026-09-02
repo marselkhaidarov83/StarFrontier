@@ -123,14 +123,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (npc.BehaviorEndsTick <= 0)
             return;
 
-        LogCustom("npc.RuntimeNpcId = " + npc.RuntimeNpcId);
-        LogCustom("npc.CurrentPlanetId = " + npc.CurrentPlanetId);
-        if (!string.IsNullOrEmpty(npc.CurrentPlanetId))
-        {
-            PlanetConfig planetConfig = _configService.GetPlanetConfigById(npc.CurrentPlanetId);
-            LogCustom("planetConfig = " + planetConfig);
-            npc.CurrentPosition = _orbitalMotionService.GetPlanetCurrentPosition(planetConfig.PlanetOrbit);
-        }
+        SyncNpcPositionWithCurrentPlanet(
+            npc,
+            false);
 
         if (currentTick < npc.BehaviorEndsTick)
             return;
@@ -445,12 +440,20 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupPlanetToPlanetTravel(SystemNpcRuntimeState npc)
     {
+        SyncNpcPositionWithCurrentPlanet(
+            npc,
+            true);
+
+        string previousPlanetId =
+            npc.CurrentPlanetId;
+
         ClearMovementTargets(npc);
 
         npc.TravelState = SystemNpcTravelState.TravelingInsideSystem;
         npc.IsOnPlanet = false;
 
-        StarSystemConfig starSystem = _configService.GetStarSystemConfigById(npc.CurrentSystemId);
+        StarSystemConfig starSystem =
+            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
 
         if (starSystem == null || starSystem.PlanetRefs == null)
         {
@@ -459,21 +462,17 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
         }
 
-        // LogCustom("starSystem = " + npc.CurrentSystemId);
-        // LogCustom("starSystem = " + starSystem.Id);
-        // LogCustom("starSystem.PlanetRefs.Length = " + starSystem.PlanetRefs.Length);
         PlanetConfig[] inhabitedPlanets = starSystem.PlanetRefs
             .Where(p => p != null && p.IsInhabited == true)
             .ToArray();
+
         inhabitedPlanets = inhabitedPlanets
-            .Where(p => p.Id != npc.CurrentPlanetId)
+            .Where(p => p.Id != previousPlanetId)
             .ToArray();
 
-        // LogCustom("inhabitedPlanets.Length = " + inhabitedPlanets.Length);
         PlanetConfig randomPlanet = inhabitedPlanets.Length > 0
             ? inhabitedPlanets[UnityEngine.Random.Range(0, inhabitedPlanets.Length)]
             : null;
-        // LogCustom("randomPlanet = " + randomPlanet.Id);
 
         if (randomPlanet == null)
         {
@@ -502,6 +501,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupTravelToAnotherSystem(SystemNpcRuntimeState npc)
     {
+        SyncNpcPositionWithCurrentPlanet(
+            npc,
+            true);
+
         ClearMovementTargets(npc);
 
         if (!npc.IsAlly)
@@ -510,7 +513,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
         }
 
-        RouteConfig route = PickUnlockedRouteFromSystem(npc.CurrentSystemId);
+        RouteConfig route =
+            PickUnlockedRouteFromSystem(npc.CurrentSystemId);
 
         if (route == null)
         {
@@ -568,6 +572,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupLinkedSystemTravel(SystemNpcRuntimeState npc)
     {
+        SyncNpcPositionWithCurrentPlanet(
+            npc,
+            true);
+
         ClearMovementTargets(npc);
 
         npc.TravelState = SystemNpcTravelState.TravelingToAnotherSystem;
@@ -662,12 +670,17 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupEngageEnemies(SystemNpcRuntimeState npc)
     {
+        SyncNpcPositionWithCurrentPlanet(
+            npc,
+            true);
+
         ClearMovementTargets(npc);
 
         npc.IsOnPlanet = false;
-        string targetId = FindCombatTargetId(npc);
 
-        // if (string.IsNullOrWhiteSpace(targetId))
+        string targetId =
+            FindCombatTargetId(npc);
+
         if (string.IsNullOrWhiteSpace(targetId) && npc.IsAlly)
         {
             SystemNpcBehaviorType fallbackBehavior =
@@ -689,11 +702,61 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
         }
 
-        npc.BehaviorTargetRuntimeNpcId = targetId;
         npc.CurrentTargetRuntimeNpcId = targetId;
+        npc.BehaviorTargetRuntimeNpcId = targetId;
         npc.TravelState = SystemNpcTravelState.EngagingEnemy;
         npc.CombatState = SystemNpcCombatState.HasTarget;
         npc.IsFighting = true;
+    }
+
+    private bool SyncNpcPositionWithCurrentPlanet(
+    SystemNpcRuntimeState npc,
+    bool publishPositionChanged)
+    {
+        if (npc == null)
+            return false;
+
+        if (!npc.IsOnPlanet)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(npc.CurrentPlanetId))
+            return false;
+
+        if (_configService == null ||
+            _orbitalMotionService == null)
+        {
+            return false;
+        }
+
+        PlanetConfig planetConfig =
+            _configService.GetPlanetConfigById(npc.CurrentPlanetId);
+
+        if (planetConfig == null ||
+            planetConfig.PlanetOrbit == null)
+        {
+            return false;
+        }
+
+        float previousZ =
+            npc.CurrentPosition.z;
+
+        Vector3 planetPosition =
+            _orbitalMotionService.GetPlanetCurrentPosition(
+                planetConfig.PlanetOrbit);
+
+        planetPosition.z = previousZ;
+        npc.CurrentPosition = planetPosition;
+
+        if (publishPositionChanged && _eventBus != null)
+        {
+            _eventBus.Publish(
+                new SystemNpcPositionChangedEvent(
+                    npc.RuntimeNpcId,
+                    npc.CurrentSystemId,
+                    npc.CurrentPosition));
+        }
+
+        return true;
     }
 
     private SystemNpcBehaviorType PickScenarioBehaviorExcluding(
@@ -787,6 +850,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupPatrolSystem(SystemNpcRuntimeState npc)
     {
+        SyncNpcPositionWithCurrentPlanet(
+            npc,
+            true);
+
         ClearMovementTargets(npc);
 
         npc.TravelState = SystemNpcTravelState.Patrolling;

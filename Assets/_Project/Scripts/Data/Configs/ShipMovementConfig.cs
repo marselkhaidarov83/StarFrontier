@@ -44,6 +44,29 @@ public sealed class ShipMovementConfig : ScriptableObject
     [Range(0.01f, 1f)]
     private float minRouteTurnRadiusAdjustmentFactor = 0.05f;
 
+    [SerializeField]
+    [Range(1, 30)]
+    private int routeSubstepsPerTick = 10;
+
+    [SerializeField]
+    [Range(0f, 15f)]
+    private float routeStraightExitAngleDegrees = 3f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float minRouteTurnRadiusAbsolute = 30f;
+
+    [SerializeField]
+    [Range(0, 30)]
+    private int movingDestinationRouteRefreshBlockedInitialSlots = 2;
+
+    [SerializeField]
+    [Range(1, 60)]
+    private int movingDestinationRouteRefreshesPerTick = 10;
+    [SerializeField]
+    [Range(0, 10)]
+    private int movingDestinationRouteRefreshBlockedInitialTicks = 1;
+
     [Header("Travel Route Classification")]
     [SerializeField]
     [Range(0.1f, 5f)]
@@ -56,6 +79,27 @@ public sealed class ShipMovementConfig : ScriptableObject
     [SerializeField]
     [Range(1f, 179f)]
     private float routeBehindSectorAngleDegrees = 135f;
+
+    [SerializeField]
+    [Range(0f, 90f)]
+    private float routeBehindSmallTurnAngleToleranceDegrees = 15f;
+
+    [Header("Travel Sun Safety")]
+    [SerializeField]
+    [Range(1f, 3f)]
+    private float sunDestinationForbiddenRadiusMultiplier = 1.2f;
+
+    [SerializeField]
+    [Range(0f, 25f)]
+    private float sunTangentTolerancePercent = 5f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float sunAvoidanceRoutePaddingStep = 5f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float sunAvoidanceRoutePaddingMax = 40f;
 
     [Header("Pseudo 3D")]
     [SerializeField]
@@ -84,6 +128,7 @@ public sealed class ShipMovementConfig : ScriptableObject
 
     public float TurnSpeedDegrees => turnSpeedDegrees;
     public float RotationSmoothing => rotationSmoothing;
+
     public float RouteTurnRadiusAdjustmentStepPercent =>
         Mathf.Clamp(routeTurnRadiusAdjustmentStepPercent, 0.1f, 50f);
 
@@ -102,10 +147,42 @@ public sealed class ShipMovementConfig : ScriptableObject
     public float RouteBehindSectorAngleDegrees =>
         Mathf.Clamp(routeBehindSectorAngleDegrees, 1f, 179f);
 
+    public float SunDestinationForbiddenRadiusMultiplier =>
+        Mathf.Clamp(sunDestinationForbiddenRadiusMultiplier, 1f, 3f);
+
+    public float SunTangentTolerancePercent =>
+        Mathf.Clamp(sunTangentTolerancePercent, 0f, 25f);
+
     public float VisualTiltAmount => visualTiltAmount;
     public float VisualBankAmount => visualBankAmount;
     public float VisualTiltReturnSpeed => visualTiltReturnSpeed;
 
     public bool ClampToSystemBounds => clampToSystemBounds;
     public Vector2 SystemBoundsHalfSize => systemBoundsHalfSize;
+    public int RouteSubstepsPerTick =>
+    Mathf.Clamp(routeSubstepsPerTick, 1, 30);
+
+    public float RouteStraightExitAngleDegrees =>
+    Mathf.Clamp(routeStraightExitAngleDegrees, 0f, 15f);
+
+    public float RouteBehindSmallTurnAngleToleranceDegrees =>
+    Mathf.Clamp(routeBehindSmallTurnAngleToleranceDegrees, 0f, 90f);
+
+    public float MinRouteTurnRadiusAbsolute =>
+    Mathf.Max(0f, minRouteTurnRadiusAbsolute);
+
+    public float SunAvoidanceRoutePaddingStep =>
+    Mathf.Max(0f, sunAvoidanceRoutePaddingStep);
+
+    public float SunAvoidanceRoutePaddingMax =>
+        Mathf.Max(0f, sunAvoidanceRoutePaddingMax);
+
+    public int MovingDestinationRouteRefreshBlockedInitialSlots =>
+        Mathf.Clamp(movingDestinationRouteRefreshBlockedInitialSlots, 0, 30);
+
+    public int MovingDestinationRouteRefreshesPerTick =>
+        Mathf.Clamp(movingDestinationRouteRefreshesPerTick, 1, 10);
+
+    public int MovingDestinationRouteRefreshBlockedInitialTicks =>
+        Mathf.Clamp(movingDestinationRouteRefreshBlockedInitialTicks, 0, 10);
 }

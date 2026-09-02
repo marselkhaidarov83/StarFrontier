@@ -222,6 +222,16 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
         _systemTravelService.SetMapPointDestination(mapPosition);
 
+        if (_systemTravelService.State == null ||
+            _systemTravelService.State.Destination == null ||
+            _systemTravelService.State.Destination.Type != TravelDestinationType.MapPoint)
+        {
+            if (markerController != null)
+                markerController.HideAll();
+
+            return;
+        }
+
         if (markerController != null)
             markerController.ShowMapPointDestination(mapPosition);
 

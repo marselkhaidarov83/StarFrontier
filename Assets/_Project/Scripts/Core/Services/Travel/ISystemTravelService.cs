@@ -4,6 +4,8 @@ public interface ISystemTravelService
 {
     SystemTravelState State { get; }
     float CurrentEffectiveTravelSpeed { get; }
+    int NpcFollowModeIndex { get; }
+    int NpcFollowModeNumber { get; }
 
     void SetCurrentSystem(string systemId);
     void SetCurrentPlanet(string planetId, Vector3 planetPosition);
@@ -21,6 +23,9 @@ public interface ISystemTravelService
     void Tick(float deltaTime, int quantTick);
     void CompleteTravel();
 
+    void CycleNpcFollowMode();
+    float GetNpcFollowModeDistance();
+
     Vector3 GetCurrentDestinationPosition();
 
     TravelRoutePreview2A GetCurrentRoutePreview2A(
@@ -28,4 +33,7 @@ public interface ISystemTravelService
         int maxBigDots,
         int maxSmallDots,
         float secondsPerTick);
+
+    SystemRouteSectorDebugInfo2A GetRouteSectorDebugInfo2A(
+        Vector3 targetPosition);
 }

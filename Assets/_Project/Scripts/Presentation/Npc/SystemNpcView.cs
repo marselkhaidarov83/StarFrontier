@@ -64,9 +64,24 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         if (evt.RuntimeNpcId != runtimeNpcId)
             return;
 
-        gameObject.SetActive(
+        bool shouldBeActive =
             evt.BehaviorType != SystemNpcBehaviorType.StayOnPlanetForDays &&
-            evt.BehaviorType != SystemNpcBehaviorType.AnnihilateOnPlanet);
+            evt.BehaviorType != SystemNpcBehaviorType.AnnihilateOnPlanet;
+
+        if (shouldBeActive &&
+            _runtimeService != null &&
+            _runtimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) &&
+            npc != null)
+        {
+            transform.position = npc.CurrentPosition;
+            transform.rotation = _initialRootRotation;
+
+            ApplyTickLockedDirection(npc);
+        }
+
+        gameObject.SetActive(shouldBeActive);
     }
 
     private void Update()

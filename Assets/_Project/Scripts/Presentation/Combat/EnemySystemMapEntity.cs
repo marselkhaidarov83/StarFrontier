@@ -130,7 +130,16 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
             new SystemSelectedTargetInfoPanelRequestedEvent2A(
                 runtimeEnemyId,
                 SystemGameplayTargetType.Enemy));
+
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemTravelService>(
+                out ISystemTravelService travelService))
+        {
+            travelService.SetNpcDestination(runtimeEnemyId);
+        }
     }
+    
     public void ApplyDamage(int damage, bool fromPlayer)
     {
         if (!_isBound)
