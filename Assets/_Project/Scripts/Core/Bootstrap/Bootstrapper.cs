@@ -19,6 +19,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private InteractionConfig interactionConfig;
     [SerializeField] private SystemHudConfig systemHudConfig;
     [SerializeField] private SystemVisualConfig systemVisualConfig;
+    [SerializeField] private CombatFxVisualConfig combatFxVisualConfig;
 
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
@@ -52,6 +53,13 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private string debugCombatTargetRuntimeNpcId;
     [SerializeField, Min(1)] private int debugCombatTargetDamage = 10;
     [SerializeField, Min(1)] private int debugCombatPlayerDamage = 10;
+    [SerializeField, Min(0.1f)] private float debugNpcOfflineStepHours = 1f;
+
+    [Header("Debug / NPC Stress")]
+    [SerializeField, Min(1)] private int debugNpcStressSpawnAttempts = 25;
+    [SerializeField, Min(1)] private int debugNpcStressSpawnWaves = 1;
+    [SerializeField] private bool debugNpcStressSpawnAllies = true;
+    [SerializeField] private bool debugNpcStressSpawnEnemyGroups = true;
 
     public static Bootstrapper Instance;
     public IServiceRegistry ServiceRegistry;
@@ -134,7 +142,8 @@ public class Bootstrapper : CustomMonoBehaviour
                 pirates,
                 pirateGroupSpawnRules,
                 modules,
-                weapons));
+                weapons,
+                combatFxVisualConfig));
 
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
@@ -182,6 +191,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<ISystemNpcBehaviorService, SystemNpcBehaviorService>();
         RegisterService<IGalaxyNpcBehaviorService, GalaxyNpcBehaviorService>();
         RegisterService<ISystemNpcSimulationSaveService, SystemNpcSimulationSaveService>();
+        RegisterService<ISystemNpcOfflineRelocationService, SystemNpcOfflineRelocationService>();
 
         _saveService =
             RegisterService<ISaveService, SaveService2A>();
@@ -347,6 +357,157 @@ public class Bootstrapper : CustomMonoBehaviour
             role);
     }
 
+    [ContextMenu("STAR FRONTIER/Stress Spawn NPC")]
+    private void DebugStressSpawnNpcs()
+    {
+        if (!TryGetDebugNpcStressServices(
+                out ISystemNpcPopulationService populationService,
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        if (!debugNpcStressSpawnAllies &&
+            !debugNpcStressSpawnEnemyGroups)
+        {
+            DebugCombatWarning("[Bootstrapper] NPC stress spawn skipped. No spawn type is enabled.");
+            return;
+        }
+
+        int beforeCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        int spawnedCommands = 0;
+        int failedCommands = 0;
+
+        int waveCount =
+            Mathf.Max(1, debugNpcStressSpawnWaves);
+
+        int attemptsPerWave =
+            Mathf.Max(1, debugNpcStressSpawnAttempts);
+
+        for (int wave = 0; wave < waveCount; wave++)
+        {
+            RunDebugNpcStressSpawnWave(
+                populationService,
+                attemptsPerWave,
+                ref spawnedCommands,
+                ref failedCommands);
+        }
+
+        int afterCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC Stress Spawn completed. " +
+            "Waves: " + waveCount +
+            ", AttemptsPerWave: " + attemptsPerWave +
+            ", SuccessfulCommands: " + spawnedCommands +
+            ", FailedCommands: " + failedCommands +
+            ", NpcCountBefore: " + beforeCount +
+            ", NpcCountAfter: " + afterCount +
+            ", Delta: " + (afterCount - beforeCount));
+    }
+
+    [ContextMenu("STAR FRONTIER/Stress Spawn NPC Wave")]
+    private void DebugStressSpawnNpcWave()
+    {
+        if (!TryGetDebugNpcStressServices(
+                out ISystemNpcPopulationService populationService,
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        int beforeCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        int spawnedCommands = 0;
+        int failedCommands = 0;
+
+        RunDebugNpcStressSpawnWave(
+            populationService,
+            Mathf.Max(1, debugNpcStressSpawnAttempts),
+            ref spawnedCommands,
+            ref failedCommands);
+
+        int afterCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC Stress Spawn Wave completed. " +
+            "Attempts: " + Mathf.Max(1, debugNpcStressSpawnAttempts) +
+            ", SuccessfulCommands: " + spawnedCommands +
+            ", FailedCommands: " + failedCommands +
+            ", NpcCountBefore: " + beforeCount +
+            ", NpcCountAfter: " + afterCount +
+            ", Delta: " + (afterCount - beforeCount));
+    }
+
+    [ContextMenu("STAR FRONTIER/Print NPC Runtime Count")]
+    private void DebugPrintNpcRuntimeCount()
+    {
+        if (!TryGetDebugNpcRuntimeServiceWithoutTarget(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC Runtime Count: " +
+            GetDebugNpcRuntimeCount(npcRuntimeService));
+    }
+
+    [ContextMenu("STAR FRONTIER/Validate NPC Runtime State")]
+    private void DebugValidateNpcRuntimeState()
+    {
+        if (!TryGetDebugNpcRuntimeServiceWithoutTarget(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        if (ServiceRegistry == null ||
+            !ServiceRegistry.TryGet<IConfigService>(
+                out IConfigService configService) ||
+            configService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] NPC validation failed. IConfigService is not registered.");
+            return;
+        }
+
+        int checkedCount = 0;
+        int issueCount = 0;
+
+        IReadOnlyList<SystemNpcRuntimeState> npcs =
+            npcRuntimeService.Npcs;
+
+        if (npcs == null || npcs.Count == 0)
+        {
+            DebugCombatLog("[Bootstrapper] NPC validation completed. NPCs: none.");
+            return;
+        }
+
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                npcs[i];
+
+            checkedCount++;
+
+            ValidateDebugNpcRuntimeState(
+                npc,
+                i,
+                configService,
+                ref issueCount);
+        }
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC validation completed. " +
+            "Checked: " + checkedCount +
+            ", Issues: " + issueCount);
+    }
+
     [ContextMenu("STAR FRONTIER/Damage First Enemy In Current System")]
     private void DebugDamageFirstEnemyInCurrentSystem()
     {
@@ -494,29 +655,136 @@ public class Bootstrapper : CustomMonoBehaviour
             runtimeNpcId);
     }
 
-    [ContextMenu("STAR FRONTIER/Kill Target NPC By Runtime ID")]
-    private void DebugKillTargetNpcByRuntimeId()
+    private bool TryGetDebugNpcRuntimeService(
+        out ISystemNpcRuntimeService npcRuntimeService)
     {
-        if (!TryGetDebugCombatServices(
-                out ISystemNpcRuntimeService npcRuntimeService,
-                out IPlayerCombatTargetService playerCombatTargetService,
-                out IConfigService configService))
+        npcRuntimeService = null;
+
+        if (ServiceRegistry == null)
         {
-            return;
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService))
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
         {
-            DebugCombatWarning(
-                "[Bootstrapper] Debug kill enemy failed. " +
-                "debugCombatTargetRuntimeNpcId is empty.");
+            DebugCombatWarning("[Bootstrapper] debugCombatTargetRuntimeNpcId is empty.");
+            return false;
+        }
 
+        return true;
+    }
+
+    [ContextMenu("STAR FRONTIER/Kill Target NPC By Runtime ID")]
+    private void DebugKillTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
             return;
         }
 
-        KillDebugEnemy(
-            npcRuntimeService,
+        bool killed =
+            npcRuntimeService.KillNpc(
+                debugCombatTargetRuntimeNpcId,
+                true);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Kill Target NPC result: " +
+            killed +
+            ", RuntimeNpcId: " +
             debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Despawn Target NPC By Runtime ID")]
+    private void DebugDespawnTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        bool despawned =
+            npcRuntimeService.DespawnNpc(
+                debugCombatTargetRuntimeNpcId);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Despawn Target NPC result: " +
+            despawned +
+            ", RuntimeNpcId: " +
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Reset Target NPC By Runtime ID")]
+    private void DebugResetTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        bool reset =
+            npcRuntimeService.ResetNpc(
+                debugCombatTargetRuntimeNpcId);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Reset Target NPC result: " +
+            reset +
+            ", RuntimeNpcId: " +
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Force Target NPC Route To Linked System")]
+    private void DebugForceTargetNpcRouteToLinkedSystem()
+    {
+        if (!TryGetDebugNpcOfflineServices(
+                out ISystemNpcOfflineRelocationService offlineRelocationService,
+                out IGameSessionService gameSessionService))
+        {
+            return;
+        }
+
+        bool forced =
+            offlineRelocationService.DebugForceTargetNpcRoute(
+                debugCombatTargetRuntimeNpcId,
+                gameSessionService.State);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Force Target NPC Route result: " +
+            forced +
+            ", RuntimeNpcId: " +
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Run NPC Offline Step")]
+    private void DebugRunNpcOfflineStep()
+    {
+        if (!TryGetDebugNpcOfflineServices(
+                out ISystemNpcOfflineRelocationService offlineRelocationService,
+                out IGameSessionService gameSessionService))
+        {
+            return;
+        }
+
+        bool moved =
+            offlineRelocationService.DebugProcessOfflineStep(
+                gameSessionService.State,
+                debugNpcOfflineStepHours);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug NPC Offline Step result: " +
+            moved +
+            ", Hours: " +
+            debugNpcOfflineStepHours.ToString("0.00"));
     }
 
     [ContextMenu("STAR FRONTIER/Reset Current Encounter")]
@@ -567,6 +835,94 @@ public class Bootstrapper : CustomMonoBehaviour
         DebugCombatLog(
             "[Bootstrapper] Player God Mode: " +
             enabled);
+    }
+
+    [ContextMenu("STAR FRONTIER/Print All NPC Debug State")]
+    private void DebugPrintAllNpcDebugState()
+    {
+        if (!TryGetDebugNpcRuntimeServiceWithoutTarget(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        StringBuilder text =
+            new StringBuilder(2048);
+
+        text.AppendLine("[Bootstrapper] NPC Debug State");
+
+        if (npcRuntimeService.Npcs == null ||
+            npcRuntimeService.Npcs.Count == 0)
+        {
+            text.AppendLine("NPCs: none");
+            DebugCombatLog(text.ToString());
+            return;
+        }
+
+        for (int i = 0; i < npcRuntimeService.Npcs.Count; i++)
+        {
+            AppendNpcDebugState(
+                text,
+                npcRuntimeService.Npcs[i],
+                i);
+        }
+
+        DebugCombatLog(text.ToString());
+    }
+
+    [ContextMenu("STAR FRONTIER/Print Target NPC Debug State")]
+    private void DebugPrintTargetNpcDebugState()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        if (!npcRuntimeService.TryGetNpc(
+                debugCombatTargetRuntimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Target NPC debug failed. NPC was not found. RuntimeNpcId: " +
+                debugCombatTargetRuntimeNpcId);
+
+            return;
+        }
+
+        StringBuilder text =
+            new StringBuilder(1024);
+
+        text.AppendLine("[Bootstrapper] Target NPC Debug State");
+
+        AppendNpcDebugState(
+            text,
+            npc,
+            0);
+
+        DebugCombatLog(text.ToString());
+    }
+
+    private bool TryGetDebugNpcRuntimeServiceWithoutTarget(
+        out ISystemNpcRuntimeService npcRuntimeService)
+    {
+        npcRuntimeService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService))
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
+        }
+
+        return true;
     }
 
     [ContextMenu("STAR FRONTIER/Print Combat Debug State")]
@@ -786,63 +1142,138 @@ public class Bootstrapper : CustomMonoBehaviour
             .AppendLine();
     }
 
-    private void AppendDebugNpcCombatState(
-        StringBuilder text)
+    private void AppendNpcDebugState(
+    StringBuilder text,
+    SystemNpcRuntimeState npc,
+    int index)
     {
-        if (ServiceRegistry == null)
+        if (npc == null)
         {
-            text.AppendLine("NPC Combat: ServiceRegistry unavailable");
+            text.Append("#")
+                .Append(index)
+                .AppendLine(": null NPC");
             return;
         }
 
-        int activeProjectiles = 0;
-
-        if (ServiceRegistry.TryGet<ISystemNpcCombatService>(
-                out ISystemNpcCombatService npcCombatService) &&
-            npcCombatService != null)
-        {
-            activeProjectiles =
-                npcCombatService.ActiveProjectileCount;
-        }
-
-        int activeEnemies = 0;
-        string currentSystemId = "unavailable";
-
-        if (ServiceRegistry.TryGet<IConfigService>(
-                out IConfigService configService) &&
-            ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
-                out ISystemNpcRuntimeService npcRuntimeService) &&
-            configService != null &&
-            npcRuntimeService != null)
-        {
-            StarSystemConfig currentSystem =
-                configService.GetCurrentSystemConfig();
-
-            if (currentSystem != null &&
-                !string.IsNullOrWhiteSpace(currentSystem.Id))
-            {
-                currentSystemId =
-                    currentSystem.Id;
-
-                IReadOnlyList<SystemNpcRuntimeState> enemies =
-                    npcRuntimeService.GetAliveNpcsInSystemByType(
-                        currentSystem.Id,
-                        SystemNpcType.Enemy);
-
-                activeEnemies =
-                    enemies != null
-                        ? enemies.Count
-                        : 0;
-            }
-        }
-
-        text.Append("NPC Combat: System: ")
-            .Append(currentSystemId)
-            .Append(", ActiveEnemies: ")
-            .Append(activeEnemies)
-            .Append(", ActiveProjectiles: ")
-            .Append(activeProjectiles)
+        text.Append("#")
+            .Append(index)
+            .Append(": ")
+            .Append(npc.DisplayName)
+            .Append(", RuntimeNpcId: ")
+            .Append(npc.RuntimeNpcId)
+            .Append(", Type: ")
+            .Append(npc.NpcType)
+            .Append(", Role: ")
+            .Append(npc.AllyRole)
+            .Append(", Faction: ")
+            .Append(BuildDebugNpcFaction(npc))
             .AppendLine();
+
+        text.Append("  Route: OriginSystem: ")
+            .Append(npc.OriginSystemId)
+            .Append(", CurrentSystem: ")
+            .Append(npc.CurrentSystemId)
+            .Append(", TargetSystem: ")
+            .Append(npc.TargetSystemId)
+            .Append(", CurrentPlanet: ")
+            .Append(npc.CurrentPlanetId)
+            .Append(", TargetPlanet: ")
+            .Append(npc.TargetPlanetId)
+            .Append(", TravelState: ")
+            .Append(npc.TravelState)
+            .AppendLine();
+
+        text.Append("  Target: CurrentTargetRuntimeNpcId: ")
+            .Append(npc.CurrentTargetRuntimeNpcId)
+            .Append(", BehaviorTargetRuntimeNpcId: ")
+            .Append(npc.BehaviorTargetRuntimeNpcId)
+            .AppendLine();
+
+        text.Append("  State: LifeState: ")
+            .Append(npc.LifeState)
+            .Append(", IsAlive: ")
+            .Append(npc.IsAlive)
+            .Append(", Behavior: ")
+            .Append(npc.CurrentBehavior)
+            .Append(", PrevBehavior: ")
+            .Append(npc.PrevBehavior)
+            .Append(", CombatState: ")
+            .Append(npc.CombatState)
+            .Append(", IsFighting: ")
+            .Append(npc.IsFighting)
+            .AppendLine();
+
+        text.Append("  Timers: BehaviorStartedTick: ")
+            .Append(npc.BehaviorStartedTick)
+            .Append(", BehaviorEndsTick: ")
+            .Append(npc.BehaviorEndsTick)
+            .Append(", TravelStartTick: ")
+            .Append(npc.TravelStartTick)
+            .Append(", TravelEndTick: ")
+            .Append(npc.TravelEndTick)
+            .Append(", DestroyedAtTick: ")
+            .Append(npc.DestroyedAtTick)
+            .Append(", NextRespawnTick: ")
+            .Append(npc.NextRespawnTick)
+            .AppendLine();
+    }
+
+    private string BuildDebugNpcFaction(
+        SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return "Unknown";
+
+        if (npc.IsEnemy)
+            return "Enemy";
+
+        if (npc.IsPirate)
+            return "Pirate";
+
+        if (npc.IsAlly)
+            return "Civilization";
+
+        return "Unknown";
+    }
+
+    private void AppendDebugNpcCombatState(
+    StringBuilder text)
+    {
+        if (ServiceRegistry == null)
+        {
+            text.AppendLine("NPC Debug: ServiceRegistry unavailable");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService) ||
+            npcRuntimeService == null)
+        {
+            text.AppendLine("NPC Debug: runtime service unavailable");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            text.AppendLine("NPC Debug: target RuntimeNpcId is empty");
+            return;
+        }
+
+        if (!npcRuntimeService.TryGetNpc(
+                debugCombatTargetRuntimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            text.Append("NPC Debug: target not found. RuntimeNpcId: ")
+                .AppendLine(debugCombatTargetRuntimeNpcId);
+
+            return;
+        }
+
+        AppendNpcDebugState(
+            text,
+            npc,
+            0);
     }
 
     private bool TryGetDebugCombatServices(
@@ -1096,5 +1527,324 @@ public class Bootstrapper : CustomMonoBehaviour
         string reason = "manual")
     {
         _saveService.Save();
+    }
+
+    private bool TryGetDebugNpcOfflineServices(
+    out ISystemNpcOfflineRelocationService offlineRelocationService,
+    out IGameSessionService gameSessionService)
+    {
+        offlineRelocationService = null;
+        gameSessionService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcOfflineRelocationService>(
+                out offlineRelocationService) ||
+            offlineRelocationService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcOfflineRelocationService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<IGameSessionService>(
+                out gameSessionService) ||
+            gameSessionService == null ||
+            gameSessionService.State == null)
+        {
+            DebugCombatWarning("[Bootstrapper] IGameSessionService state is unavailable.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            DebugCombatWarning("[Bootstrapper] debugCombatTargetRuntimeNpcId is empty.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void RunDebugNpcStressSpawnWave(
+    ISystemNpcPopulationService populationService,
+    int attempts,
+    ref int spawnedCommands,
+    ref int failedCommands)
+    {
+        AllyRole2A[] allyRoles =
+        {
+        AllyRole2A.Ranger,
+        AllyRole2A.Military,
+        AllyRole2A.Trader,
+        AllyRole2A.Science,
+        AllyRole2A.Medic
+    };
+
+        for (int i = 0; i < attempts; i++)
+        {
+            bool spawned;
+
+            if (debugNpcStressSpawnAllies &&
+                debugNpcStressSpawnEnemyGroups)
+            {
+                if (i % 2 == 0)
+                {
+                    AllyRole2A role =
+                        allyRoles[i % allyRoles.Length];
+
+                    spawned =
+                        populationService.DebugSpawnAllyInCurrentSystem(role);
+                }
+                else
+                {
+                    spawned =
+                        populationService.DebugSpawnEnemyAttackGroupInCurrentSystem();
+                }
+            }
+            else if (debugNpcStressSpawnAllies)
+            {
+                AllyRole2A role =
+                    allyRoles[i % allyRoles.Length];
+
+                spawned =
+                    populationService.DebugSpawnAllyInCurrentSystem(role);
+            }
+            else
+            {
+                spawned =
+                    populationService.DebugSpawnEnemyAttackGroupInCurrentSystem();
+            }
+
+            if (spawned)
+                spawnedCommands++;
+            else
+                failedCommands++;
+        }
+    }
+
+    private bool TryGetDebugNpcStressServices(
+        out ISystemNpcPopulationService populationService,
+        out ISystemNpcRuntimeService npcRuntimeService)
+    {
+        populationService = null;
+        npcRuntimeService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out populationService) ||
+            populationService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcPopulationService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService) ||
+            npcRuntimeService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private int GetDebugNpcRuntimeCount(
+        ISystemNpcRuntimeService npcRuntimeService)
+    {
+        if (npcRuntimeService == null ||
+            npcRuntimeService.Npcs == null)
+        {
+            return 0;
+        }
+
+        return npcRuntimeService.Npcs.Count;
+    }
+
+    private void ValidateDebugNpcRuntimeState(
+    SystemNpcRuntimeState npc,
+    int index,
+    IConfigService configService,
+    ref int issueCount)
+    {
+        if (npc == null)
+        {
+            issueCount++;
+            DebugCombatWarning("[Bootstrapper] NPC validation issue. Index: " + index + ", NPC is null.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(npc.RuntimeNpcId))
+        {
+            issueCount++;
+            DebugCombatWarning("[Bootstrapper] NPC validation issue. RuntimeNpcId is empty. Index: " + index);
+        }
+
+        if (string.IsNullOrWhiteSpace(npc.ConfigId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. ConfigId is empty. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+        else if (!IsDebugNpcConfigValid(npc, configService))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. Config not found. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", Type: " +
+                npc.NpcType +
+                ", ConfigId: " +
+                npc.ConfigId);
+        }
+
+        if (string.IsNullOrWhiteSpace(npc.CurrentSystemId) ||
+            configService.GetStarSystemConfigById(npc.CurrentSystemId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. CurrentSystemId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", CurrentSystemId: " +
+                npc.CurrentSystemId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(npc.TargetSystemId) &&
+            configService.GetStarSystemConfigById(npc.TargetSystemId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. TargetSystemId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", TargetSystemId: " +
+                npc.TargetSystemId);
+        }
+
+        if (npc.IsOnPlanet &&
+            string.IsNullOrWhiteSpace(npc.CurrentPlanetId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. NPC is on planet but CurrentPlanetId is empty. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(npc.CurrentPlanetId) &&
+            configService.GetPlanetConfigById(npc.CurrentPlanetId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. CurrentPlanetId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", CurrentPlanetId: " +
+                npc.CurrentPlanetId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId) &&
+            configService.GetPlanetConfigById(npc.TargetPlanetId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. TargetPlanetId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", TargetPlanetId: " +
+                npc.TargetPlanetId);
+        }
+
+        if (npc.IsAlive &&
+            npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. IsAlive=true but LifeState is not Alive. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", LifeState: " +
+                npc.LifeState);
+        }
+
+        if (!npc.IsAlive &&
+            npc.LifeState == SystemNpcLifeState.Alive)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. IsAlive=false but LifeState is Alive. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (npc.CurrentHull < 0 ||
+            npc.CurrentShield < 0 ||
+            npc.CurrentEnergy < 0)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. Negative stats. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", Hull: " +
+                npc.CurrentHull +
+                ", Shield: " +
+                npc.CurrentShield +
+                ", Energy: " +
+                npc.CurrentEnergy);
+        }
+
+        if (npc.CurrentHull > npc.MaxHull ||
+            npc.CurrentShield > npc.MaxShield ||
+            npc.CurrentEnergy > npc.MaxEnergy)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. Current stats exceed max stats. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (npc.TravelState == SystemNpcTravelState.TravelingToAnotherSystem &&
+            string.IsNullOrWhiteSpace(npc.TargetSystemId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. TravelingToAnotherSystem without TargetSystemId. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (npc.IsFighting &&
+            string.IsNullOrWhiteSpace(npc.CurrentTargetRuntimeNpcId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. IsFighting=true but CurrentTargetRuntimeNpcId is empty. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+    }
+
+    private bool IsDebugNpcConfigValid(
+        SystemNpcRuntimeState npc,
+        IConfigService configService)
+    {
+        if (npc == null ||
+            configService == null ||
+            string.IsNullOrWhiteSpace(npc.ConfigId))
+        {
+            return false;
+        }
+
+        if (npc.IsEnemy)
+            return configService.GetEnemyConfigById(npc.ConfigId) != null;
+
+        if (npc.IsAlly)
+            return configService.GetAllyConfigById(npc.ConfigId) != null;
+
+        if (npc.IsPirate)
+            return configService.GetPirateConfigById(npc.ConfigId) != null;
+
+        return false;
     }
 }

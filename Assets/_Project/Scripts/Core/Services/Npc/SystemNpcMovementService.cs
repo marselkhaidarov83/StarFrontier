@@ -26,8 +26,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
     public SystemNpcMovementService()
     {
-        _debugEnabled = true;
-        _debugStop = false;
+        // _debugEnabled = true;
+        _debugStop = true;
 
         _runtimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
         _behaviorService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcBehaviorService>();
@@ -1053,10 +1053,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
     private void CompleteMovement(SystemNpcRuntimeState npc, int currentTick)
     {
-        ClearSunAvoidanceRoute(npc.RuntimeNpcId);
-
         npc.CurrentPosition = npc.TargetPosition;
         npc.TravelProgress01 = 1f;
+
+        bool completedSystemTravel =
+            npc.TravelState == SystemNpcTravelState.TravelingToAnotherSystem;
 
         switch (npc.TravelState)
         {
@@ -1080,11 +1081,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         }
 
         npc.StartPosition = npc.CurrentPosition;
-        npc.TargetPosition = Vector3.zero;
-        npc.CurrentMovementTargetPosition = Vector3.zero;
-        npc.TickMovementTargetPosition = Vector3.zero;
-        npc.TickMovementDirectionTick = -1;
-        npc.TickMovementArrived = false;
+
+        if (!completedSystemTravel)
+            npc.TargetPosition = Vector3.zero;
 
         _eventBus.Publish(new SystemNpcTravelStateChangedEvent(
             npc.RuntimeNpcId,
@@ -1095,23 +1094,94 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         _behaviorService.CompleteBehavior(npc, currentTick);
 
         LogCustom(
-            $"Movement complete. NPC: {npc.RuntimeNpcId}, State: {npc.TravelState}, Behavior: {npc.CurrentBehavior}");
+            "Movement complete. " +
+            "NPC: " + npc.RuntimeNpcId + ", " +
+            "State: " + npc.TravelState + ", " +
+            "Behavior: " + npc.CurrentBehavior);
     }
 
     private void CompleteSystemTravel(SystemNpcRuntimeState npc)
     {
+        if (npc == null)
+            return;
+
+        LogCustom("started");
+
         if (!string.IsNullOrWhiteSpace(npc.TargetSystemId))
         {
-            npc.CurrentSystemId = npc.TargetSystemId;
+            string arrivedSystemId =
+                npc.TargetSystemId;
+
+            npc.CurrentSystemId = arrivedSystemId;
             npc.CurrentPosition = npc.TargetSystemEntryPoint;
 
             npc.TargetSystemId = null;
             npc.TargetSystemExitPoint = Vector3.zero;
             npc.TargetSystemEntryPoint = Vector3.zero;
+
+            ApplyInitialFacingToSun(npc, arrivedSystemId);
         }
 
         npc.IsOnPlanet = false;
         npc.TravelState = SystemNpcTravelState.Idle;
+    }
+
+    private void ApplyInitialFacingToSun(
+    SystemNpcRuntimeState npc,
+    string systemId)
+    {
+        if (npc == null)
+            return;
+
+        Vector3 directionToSun =
+            ResolveDirectionToSun(
+                systemId,
+                npc.CurrentPosition);
+
+        npc.FacingDirection = directionToSun;
+        npc.TickMovementDirection = directionToSun;
+
+        npc.StartPosition = npc.CurrentPosition;
+        npc.TargetPosition = npc.CurrentPosition + directionToSun;
+        npc.CurrentMovementTargetPosition = npc.TargetPosition;
+        npc.TickMovementTargetPosition = npc.TargetPosition;
+
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
+        npc.TravelProgress01 = 0f;
+    }
+
+    private Vector3 ResolveDirectionToSun(
+    string systemId,
+    Vector3 currentPosition)
+    {
+        if (_configService == null)
+            return Vector3.up;
+
+        StarSystemConfig starSystem =
+            _configService.GetStarSystemConfigById(systemId);
+
+        if (starSystem == null || starSystem.Sun == null)
+            return Vector3.up;
+
+        Vector2 sunOffset =
+            starSystem.Sun.LocalOffset;
+
+        Vector3 sunPosition =
+            new Vector3(
+                sunOffset.x,
+                sunOffset.y,
+                currentPosition.z);
+
+        Vector3 directionToSun =
+            sunPosition - currentPosition;
+
+        directionToSun.z = 0f;
+
+        if (directionToSun.sqrMagnitude < 0.0001f)
+            return Vector3.up;
+
+        return directionToSun.normalized;
     }
 
     private sealed class SunAvoidanceRouteState

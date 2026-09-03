@@ -592,26 +592,21 @@ public sealed class TravelService2A :
         return direct || reverse;
     }
 
-    private bool IsRouteUnlocked(
-        RouteConfig routeConfig)
+    private bool IsRouteUnlocked(RouteConfig routeConfig)
     {
         if (routeConfig == null)
             return false;
 
-        RouteRuntimeState routeState =
-            FindRouteRuntimeState(
-                routeConfig.Id);
+        if (routeConfig.FromSystem == null || routeConfig.ToSystem == null)
+            return false;
 
-        if (routeState != null)
-            return routeState.IsUnlocked;
+        IRouteService routeService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
 
-        /*
-         * Защита старых сохранений
-         * и временных тестовых State.
-         */
-        return routeConfig
-                   .IsLockedAtStart ==
-               false;
+        return routeService.HasUnlockedRoute(
+            routeConfig.FromSystem.Id,
+            routeConfig.ToSystem.Id
+        );
     }
 
     private RouteRuntimeState

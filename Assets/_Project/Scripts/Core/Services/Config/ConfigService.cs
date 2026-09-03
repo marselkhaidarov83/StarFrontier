@@ -19,6 +19,7 @@ public sealed class ConfigService : IConfigService
     public InteractionConfig InteractionConfig { get; }
     public SystemHudConfig SystemHudConfig { get; }
     public SystemVisualConfig SystemVisualConfig { get; }
+    public CombatFxVisualConfig CombatFxVisualConfig { get; }
 
     private readonly IReadOnlyList<SectorConfig> _sectors;
     private readonly Dictionary<string, SectorConfig> _sectorsById;
@@ -46,27 +47,29 @@ public sealed class ConfigService : IConfigService
     private readonly IGameSessionService gameSessionService;
 
     public ConfigService(GameConfig gameConfig,
-                        DebugConfig debugConfig,
-                        SaveConfig saveConfig,
-                        GalaxyConfig galaxyConfig,
-                        NewGameConfig newGameConfig,
-                        IEnumerable<SectorConfig> sectors,
-                        IEnumerable<StarSystemConfig> starSystems,
-                        IEnumerable<PlanetConfig> planets,
-                        IEnumerable<ItemConfig> items,
-                        IEnumerable<EnemyConfig> enemies,
-                        IEnumerable<AllyConfig> allies,
-                        IEnumerable<AllySpawnRuleConfig> allySpawnRules,
-                        IEnumerable<PirateConfig> pirates,
-                        IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
-                        IEnumerable<ModuleConfig> modules,
-                        IEnumerable<WeaponConfig> weapons)
+                    DebugConfig debugConfig,
+                    SaveConfig saveConfig,
+                    GalaxyConfig galaxyConfig,
+                    NewGameConfig newGameConfig,
+                    IEnumerable<SectorConfig> sectors,
+                    IEnumerable<StarSystemConfig> starSystems,
+                    IEnumerable<PlanetConfig> planets,
+                    IEnumerable<ItemConfig> items,
+                    IEnumerable<EnemyConfig> enemies,
+                    IEnumerable<AllyConfig> allies,
+                    IEnumerable<AllySpawnRuleConfig> allySpawnRules,
+                    IEnumerable<PirateConfig> pirates,
+                    IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
+                    IEnumerable<ModuleConfig> modules,
+                    IEnumerable<WeaponConfig> weapons,
+                    CombatFxVisualConfig combatFxVisualConfig = null)
     {
         GameConfig = gameConfig;
         DebugConfig = debugConfig;
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
+        CombatFxVisualConfig = combatFxVisualConfig;
 
         BuildIndex(sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
@@ -84,25 +87,26 @@ public sealed class ConfigService : IConfigService
     }
 
     public ConfigService(GameConfig gameConfig,
-                        DebugConfig debugConfig,
-                        SaveConfig saveConfig,
-                        GalaxyConfig galaxyConfig,
-                        NewGameConfig newGameConfig,
-                        PlayerControlConfig playerControlConfig,
-                        ShipMovementConfig shipMovementConfig,
-                        SystemCameraConfig systemCameraConfig,
-                        TargetingConfig targetingConfig,
-                        InteractionConfig interactionConfig,
-                        SystemHudConfig systemHudConfig,
-                        SystemVisualConfig systemVisualConfig,
-                        IEnumerable<ItemConfig> items,
-                        IEnumerable<EnemyConfig> enemies,
-                        IEnumerable<AllyConfig> allies,
-                        IEnumerable<AllySpawnRuleConfig> allySpawnRules,
-                        IEnumerable<PirateConfig> pirates,
-                        IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
-                        IEnumerable<ModuleConfig> modules,
-                        IEnumerable<WeaponConfig> weapons)
+                    DebugConfig debugConfig,
+                    SaveConfig saveConfig,
+                    GalaxyConfig galaxyConfig,
+                    NewGameConfig newGameConfig,
+                    PlayerControlConfig playerControlConfig,
+                    ShipMovementConfig shipMovementConfig,
+                    SystemCameraConfig systemCameraConfig,
+                    TargetingConfig targetingConfig,
+                    InteractionConfig interactionConfig,
+                    SystemHudConfig systemHudConfig,
+                    SystemVisualConfig systemVisualConfig,
+                    IEnumerable<ItemConfig> items,
+                    IEnumerable<EnemyConfig> enemies,
+                    IEnumerable<AllyConfig> allies,
+                    IEnumerable<AllySpawnRuleConfig> allySpawnRules,
+                    IEnumerable<PirateConfig> pirates,
+                    IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
+                    IEnumerable<ModuleConfig> modules,
+                    IEnumerable<WeaponConfig> weapons,
+                    CombatFxVisualConfig combatFxVisualConfig = null)
     {
         GameConfig = gameConfig;
         DebugConfig = debugConfig;
@@ -116,16 +120,21 @@ public sealed class ConfigService : IConfigService
         InteractionConfig = interactionConfig;
         SystemHudConfig = systemHudConfig;
         SystemVisualConfig = systemVisualConfig;
-        
+        CombatFxVisualConfig = combatFxVisualConfig;
+
         List<StarSystemConfig> starSystems = new();
         List<PlanetConfig> planets = new();
+
         foreach (SectorConfig sector in galaxyConfig.Sectors)
+        {
             foreach (StarSystemConfig starSystem in sector.Systems)
             {
                 starSystems.Add(starSystem);
+
                 foreach (PlanetConfig planet in starSystem.PlanetRefs)
                     planets.Add(planet);
             }
+        }
 
         BuildIndex(galaxyConfig.Sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));

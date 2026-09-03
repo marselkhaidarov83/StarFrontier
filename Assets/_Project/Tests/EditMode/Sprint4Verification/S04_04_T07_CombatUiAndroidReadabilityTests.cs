@@ -28,7 +28,7 @@ public sealed class S04_04_T07_CombatUiAndroidReadabilityTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Hud/PF_SystemHudBottomRoot.prefab");
+                "Assets/_Project/Prefabs/Hud/PF_SystemHudBottomRoot.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("m_Name: PlayerThreatListPanel"),

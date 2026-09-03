@@ -1,3 +1,5 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -648,3 +650,5 @@ public sealed class SystemRouteSectorDebugVisualizer2A : MonoBehaviour
         return direction.normalized;
     }
 }
+
+#endif

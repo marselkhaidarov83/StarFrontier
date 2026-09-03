@@ -2235,9 +2235,14 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             State.GetCurrentPosition();
 
         bool destinationReached;
-        Vector3 nextPosition = CalculateNextTravelPositionOnActiveRoute(
-            movementDistance,
-            out destinationReached);
+
+        Vector3 nextPosition = IsNpcDestination()
+            ? CalculateNextTravelPositionByTickLockedNpcPath(
+                movementDistance,
+                out destinationReached)
+            : CalculateNextTravelPositionOnActiveRoute(
+                movementDistance,
+                out destinationReached);
 
         State.SetCurrentPosition(nextPosition);
 
@@ -2306,6 +2311,15 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         PublishTravelProgress(State.TravelProgress01);
 
         TryRefreshActiveRouteForMovingDestination(quantTick);
+    }
+
+    private Vector3 CalculateNextTravelPositionByTickLockedNpcPath(
+        float movementDistance,
+        out bool destinationReached)
+    {
+        return CalculateNextTravelPositionOnActiveRoute(
+            movementDistance,
+            out destinationReached);
     }
 
     private void StartTravelAutomaticallyIfPossible()
@@ -5981,9 +5995,7 @@ int maxSmallDots)
             GetPathLength(_routePreviewPathBuffer);
 
         bool requiresSunAvoidance =
-            routeClassification.RequiresSunAvoidance ||
-            RouteCaseUsesSunAvoidance(
-                routeClassification.DestinationCase);
+            routeClassification.RequiresSunAvoidance;
 
         bool useNearSideFallback =
             ShouldUseNearSideStartTurnInPlaceFallback(routeClassification);
@@ -6085,11 +6097,17 @@ int maxSmallDots)
 
             bool directRouteAvoidsSun =
                 directRouteBuilt &&
-                RoutePathAvoidsSunForWaypoints(
-                    _routeProbePathBuffer,
-                    _directTravelPathBuffer,
-                    obstacle,
-                    routeClassification.DestinationCase);
+                (
+                    requiresSunAvoidance
+                        ? RoutePathAvoidsSunForWaypoints(
+                            _routeProbePathBuffer,
+                            _directTravelPathBuffer,
+                            obstacle,
+                            routeClassification.DestinationCase)
+                        : RoutePathAvoidsSunBody(
+                            _routeProbePathBuffer,
+                            obstacle)
+                );
 
             LogMapPointAdjustmentTrace(
                 "ProbeDirect",

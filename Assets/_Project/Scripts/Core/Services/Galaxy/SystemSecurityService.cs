@@ -52,8 +52,8 @@ public sealed class SystemSecurityService :
     }
 
     public bool SetSystemStatus(
-        string systemId,
-        StarSystemStatus newStatus)
+    string systemId,
+    StarSystemStatus newStatus)
     {
         StarSystemRuntimeState systemState =
             FindSystemState(systemId);
@@ -104,5 +104,14 @@ public sealed class SystemSecurityService :
         return gameState.Galaxy.Systems.FirstOrDefault(
             system => system != null &&
                       system.SystemId == systemId);
+    }
+
+    public bool TrySetSystemStableByNpcAutonomy(string systemId)
+    {
+        LogCustom(
+            "[SystemSecurityService] NPC autonomous liberation is blocked " +
+            "until decision C-05. System: " + systemId);
+
+        return false;
     }
 }

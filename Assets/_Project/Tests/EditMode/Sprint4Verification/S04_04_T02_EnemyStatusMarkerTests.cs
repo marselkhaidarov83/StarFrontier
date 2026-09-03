@@ -56,7 +56,7 @@ public sealed class S04_04_T02_EnemyStatusMarkerTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Npc/NpcPrefab_01.prefab");
+                "Assets/_Project/Prefabs/Npc/NpcPrefab_01.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("CombatEnemyStatusMarkerView2A"),

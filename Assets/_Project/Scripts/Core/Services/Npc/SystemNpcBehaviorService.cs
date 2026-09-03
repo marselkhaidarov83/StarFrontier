@@ -32,30 +32,68 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     public void Tick(StarSystemConfig starSystem, int currentTick)
     {
-        // LogCustom("StarSystem = " + starSystem.Id);
-        if (string.IsNullOrWhiteSpace(starSystem.Id))
+        if (starSystem == null || string.IsNullOrWhiteSpace(starSystem.Id))
             return;
 
         var npcs = _npcRuntimeService.GetAliveNpcsInSystem(starSystem.Id);
-        // LogCustom("npcs.Count = " + npcs.Count);
+        bool hasEnemiesInSystem = HasEnemiesInSystem(starSystem.Id);
 
         for (int i = 0; i < npcs.Count; i++)
         {
             SystemNpcRuntimeState npc = npcs[i];
+
             if (npc == null || !npc.IsAlive)
                 continue;
 
-            // if (!npc.HasActiveBehavior)
-            if (!npc.HasActiveBehavior || HasEnemiesInSystem(npc.CurrentSystemId))
+            if (!npc.HasActiveBehavior)
             {
                 AssignBehavior(npc, currentTick);
-                // LogCustom("npc.RuntimeNpcId = " + npc.RuntimeNpcId + " AssignBehavior");
                 continue;
             }
 
-            // LogCustom("npc.RuntimeNpcId = " + npc.RuntimeNpcId + " TickActiveBehavior");
+            if (ShouldInterruptForThreat(npc, hasEnemiesInSystem))
+            {
+                AssignBehavior(npc, currentTick);
+                continue;
+            }
+
             TickActiveBehavior(npc, currentTick);
         }
+    }
+
+    private bool ShouldInterruptForThreat(
+    SystemNpcRuntimeState npc,
+    bool hasEnemiesInSystem)
+    {
+        if (npc == null || !npc.IsAlive)
+            return false;
+
+        if (!hasEnemiesInSystem)
+            return false;
+
+        if (!CanNpcReactToThreats(npc))
+            return false;
+
+        if (npc.CurrentBehavior == SystemNpcBehaviorType.EngageEnemies ||
+            npc.TravelState == SystemNpcTravelState.EngagingEnemy)
+            return false;
+
+        return !string.IsNullOrWhiteSpace(FindCombatTargetId(npc));
+    }
+
+    private bool CanNpcReactToThreats(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return false;
+
+        if (npc.IsEnemy)
+            return true;
+
+        if (!npc.IsAlly)
+            return false;
+
+        return npc.AllyRole == AllyRole2A.Military ||
+               npc.AllyRole == AllyRole2A.Ranger;
     }
 
     public void AssignBehavior(SystemNpcRuntimeState npc, int currentTick)
@@ -147,11 +185,25 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void TickEngageEnemies(SystemNpcRuntimeState npc, int currentTick)
     {
+        if (npc == null || !npc.IsAlive)
+            return;
+
         string targetId = FindCombatTargetId(npc);
 
-        // if (string.IsNullOrWhiteSpace(targetId))
         if (string.IsNullOrWhiteSpace(targetId) && npc.IsAlly)
         {
+            npc.CurrentTargetRuntimeNpcId = null;
+            npc.BehaviorTargetRuntimeNpcId = null;
+            npc.CombatState = SystemNpcCombatState.None;
+            npc.IsFighting = false;
+
+            if (CanNpcPatrolSystem(npc))
+            {
+                npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+                SetupPatrolSystem(npc);
+                return;
+            }
+
             CompleteBehavior(npc, currentTick);
             return;
         }
@@ -291,9 +343,12 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private AllyBehaviourScenario ResolveBehaviorScenario(
-        SystemNpcRuntimeState npc)
+     SystemNpcRuntimeState npc)
     {
         if (npc == null)
+            return AllyBehaviourScenario.Normal;
+
+        if (npc.IsAlly && !CanNpcReactToThreats(npc))
             return AllyBehaviourScenario.Normal;
 
         if (_systemSecurityService != null &&
@@ -318,8 +373,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private SystemNpcBehaviorType PickScenarioBehavior(
-        NpcBehaviourScenarioConfig behaviorScenario,
-        SystemNpcRuntimeState npc)
+    NpcBehaviourScenarioConfig behaviorScenario,
+    SystemNpcRuntimeState npc)
     {
         if (behaviorScenario == null)
             return SystemNpcBehaviorType.None;
@@ -336,6 +391,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 .ToList();
 
         RemoveImpossibleNextBehaviors(weights, npc);
+        RemoveRoleForbiddenBehaviors(weights, npc);
 
         if (weights.Count == 0)
             return SystemNpcBehaviorType.None;
@@ -360,6 +416,40 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         }
 
         return weights[^1].BehaviorType;
+    }
+
+    private void RemoveRoleForbiddenBehaviors(
+    List<SystemNpcBehaviorWeight> weights,
+    SystemNpcRuntimeState npc)
+    {
+        if (weights == null || npc == null)
+            return;
+
+        if (!CanNpcPatrolSystem(npc))
+        {
+            weights.RemoveAll(weight =>
+                weight != null &&
+                weight.BehaviorType == SystemNpcBehaviorType.PatrolSystem);
+        }
+
+        if (npc.IsAlly && !CanNpcReactToThreats(npc))
+        {
+            weights.RemoveAll(weight =>
+                weight != null &&
+                weight.BehaviorType == SystemNpcBehaviorType.EngageEnemies);
+        }
+    }
+
+    private bool CanNpcPatrolSystem(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return false;
+
+        if (!npc.IsAlly)
+            return false;
+
+        return npc.AllyRole == AllyRole2A.Military ||
+               npc.AllyRole == AllyRole2A.Ranger;
     }
 
     private void RemoveImpossibleNextBehaviors(
@@ -501,20 +591,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupTravelToAnotherSystem(SystemNpcRuntimeState npc)
     {
-        SyncNpcPositionWithCurrentPlanet(
-            npc,
-            true);
+        StarSystemConfig currentSystem =
+            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
 
-        ClearMovementTargets(npc);
-
-        if (!npc.IsAlly)
-        {
-            SetupLinkedSystemTravel(npc);
-            return;
-        }
-
-        RouteConfig route =
-            PickUnlockedRouteFromSystem(npc.CurrentSystemId);
+        RouteConfig route = FindUnlockedRouteFromCurrentSystem(currentSystem);
 
         if (route == null)
         {
@@ -523,38 +603,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
         }
 
-        StarSystemConfig targetSystem =
-            route.GetOtherSystem(npc.CurrentSystemId);
+        StarSystemConfig targetSystem = route.GetOtherSystem(currentSystem.Id);
 
-        Vector3 exitPoint =
-            route.GetExitPoint(npc.CurrentSystemId);
-
-        Vector3 entryPoint =
-            targetSystem != null
-                ? route.GetEntryPoint(targetSystem.Id)
-                : Vector3.zero;
-
-        StarSystemConfig currentSystem =
-            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
-
-        if (targetSystem == null ||
-            string.IsNullOrWhiteSpace(targetSystem.Id) ||
-            IsInvalidRoutePoint(currentSystem, exitPoint) ||
-            IsInvalidRoutePoint(targetSystem, entryPoint))
+        if (targetSystem == null)
         {
-            Debug.LogWarning(
-                "[SystemNpcBehaviorService] Ally route travel skipped: " +
-                "invalid target system, exit point, or entry point. NPC: " +
-                npc.RuntimeNpcId +
-                ", CurrentSystem: " +
-                npc.CurrentSystemId +
-                ", Route: " +
-                route.Id +
-                ", ExitPoint: " +
-                exitPoint +
-                ", EntryPoint: " +
-                entryPoint);
-
             npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
             SetupPatrolSystem(npc);
             return;
@@ -562,12 +614,49 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         npc.TravelState = SystemNpcTravelState.TravelingToAnotherSystem;
         npc.IsOnPlanet = false;
+
         npc.TargetSystemId = targetSystem.Id;
-        npc.TargetSystemExitPoint = exitPoint;
-        npc.TargetSystemEntryPoint = entryPoint;
+        npc.TargetSystemExitPoint = route.GetExitPoint(currentSystem.Id);
+        npc.TargetSystemEntryPoint = route.GetEntryPoint(targetSystem.Id);
+
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPosition = Vector3.zero;
+        npc.TargetPlanetId = null;
+        npc.CurrentTargetRuntimeNpcId = null;
         npc.TravelProgress01 = 0f;
+    }
+
+
+    private RouteConfig FindUnlockedRouteFromCurrentSystem(StarSystemConfig currentSystem)
+    {
+        if (currentSystem == null || currentSystem.Routes == null)
+            return null;
+
+        IRouteService routeService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
+
+        List<RouteConfig> availableRoutes = new();
+
+        foreach (RouteConfig route in currentSystem.Routes)
+        {
+            if (route == null)
+                continue;
+
+            StarSystemConfig targetSystem = route.GetOtherSystem(currentSystem.Id);
+
+            if (targetSystem == null)
+                continue;
+
+            if (!routeService.HasUnlockedRoute(currentSystem.Id, targetSystem.Id))
+                continue;
+
+            availableRoutes.Add(route);
+        }
+
+        if (availableRoutes.Count == 0)
+            return null;
+
+        return availableRoutes[UnityEngine.Random.Range(0, availableRoutes.Count)];
     }
 
     private void SetupLinkedSystemTravel(SystemNpcRuntimeState npc)
@@ -670,6 +759,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupEngageEnemies(SystemNpcRuntimeState npc)
     {
+        if (npc == null || !npc.IsAlive)
+            return;
+
         SyncNpcPositionWithCurrentPlanet(
             npc,
             true);
@@ -678,16 +770,13 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         npc.IsOnPlanet = false;
 
-        string targetId =
-            FindCombatTargetId(npc);
-
-        if (string.IsNullOrWhiteSpace(targetId) && npc.IsAlly)
+        if (!CanNpcReactToThreats(npc))
         {
             SystemNpcBehaviorType fallbackBehavior =
                 PickScenarioBehaviorExcluding(
                     GetAllyBehaviorScenario(
                         _configService.GetAllyConfigById(npc.ConfigId),
-                        ResolveBehaviorScenario(npc)),
+                        AllyBehaviourScenario.Normal),
                     npc,
                     SystemNpcBehaviorType.EngageEnemies);
 
@@ -702,12 +791,33 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
         }
 
+        string targetId = FindCombatTargetId(npc);
+
+        if (string.IsNullOrWhiteSpace(targetId) && npc.IsAlly)
+        {
+            npc.CurrentTargetRuntimeNpcId = null;
+            npc.BehaviorTargetRuntimeNpcId = null;
+            npc.CombatState = SystemNpcCombatState.None;
+            npc.IsFighting = false;
+
+            if (CanNpcPatrolSystem(npc))
+            {
+                npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+                SetupPatrolSystem(npc);
+                return;
+            }
+
+            ClearBehavior(npc);
+            return;
+        }
+
         npc.CurrentTargetRuntimeNpcId = targetId;
         npc.BehaviorTargetRuntimeNpcId = targetId;
         npc.TravelState = SystemNpcTravelState.EngagingEnemy;
         npc.CombatState = SystemNpcCombatState.HasTarget;
         npc.IsFighting = true;
     }
+
 
     private bool SyncNpcPositionWithCurrentPlanet(
     SystemNpcRuntimeState npc,
@@ -850,18 +960,53 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupPatrolSystem(SystemNpcRuntimeState npc)
     {
+        if (!CanNpcPatrolSystem(npc))
+        {
+            ClearBehavior(npc);
+            return;
+        }
+
         SyncNpcPositionWithCurrentPlanet(
             npc,
             true);
 
         ClearMovementTargets(npc);
 
+        Vector3 patrolTargetPosition =
+            RandomPatrolPosition(npc);
+
+        if (!IsFinite(patrolTargetPosition))
+        {
+            ClearBehavior(npc);
+            return;
+        }
+
+        if (Vector3.Distance(npc.CurrentPosition, patrolTargetPosition) <= 0.1f)
+        {
+            ClearBehavior(npc);
+            return;
+        }
+
         npc.TravelState = SystemNpcTravelState.Patrolling;
         npc.IsOnPlanet = false;
 
         npc.StartPosition = npc.CurrentPosition;
-        npc.TargetPosition = RandomPatrolPosition(npc);
+        npc.TargetPosition = patrolTargetPosition;
+        npc.CurrentMovementTargetPosition = patrolTargetPosition;
+        npc.TickMovementTargetPosition = patrolTargetPosition;
         npc.TravelProgress01 = 0f;
+
+        Vector3 patrolDirection =
+            patrolTargetPosition - npc.CurrentPosition;
+
+        patrolDirection.z = 0f;
+
+        if (patrolDirection.sqrMagnitude > 0.0001f)
+        {
+            patrolDirection.Normalize();
+            npc.FacingDirection = patrolDirection;
+            npc.TickMovementDirection = patrolDirection;
+        }
     }
 
     private void ClearMovementTargets(SystemNpcRuntimeState npc)
@@ -920,69 +1065,62 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private string FindCombatTargetId(SystemNpcRuntimeState npc)
     {
+        if (npc == null || !npc.IsAlive)
+            return null;
+
         float shotDistance = npc.getShotDistance();
+
+        if (shotDistance <= 0f)
+            return null;
 
         if (npc.IsEnemy)
         {
-            List<SystemNpcRuntimeState> list = new();
+            List<SystemNpcRuntimeState> targets = new();
+
             foreach (SystemNpcRuntimeState npcRuntimeState in _npcRuntimeService.Npcs)
             {
+                if (npcRuntimeState == null)
+                    continue;
+
                 if (npcRuntimeState.IsAlive &&
                     npcRuntimeState.IsAlly &&
                     npcRuntimeState.CurrentSystemId == npc.CurrentSystemId &&
                     npcRuntimeState.IsAvailableForCombat() &&
-                    Vector3.Distance(npc.CurrentPosition, npcRuntimeState.CurrentPosition) <= shotDistance &&
-                    shotDistance != 0f)
-                    list.Add(npcRuntimeState);
+                    Vector3.Distance(npc.CurrentPosition, npcRuntimeState.CurrentPosition) <= shotDistance)
+                {
+                    targets.Add(npcRuntimeState);
+                }
             }
 
-            SystemNpcRuntimeState allyTarget = null;
-            if (list.Count > 0)
-                allyTarget = list[UnityEngine.Random.Range(0, list.Count)];
+            if (targets.Count == 0)
+                return null;
 
-            // SystemNpcRuntimeState allyTarget = _npcRuntimeService.Npcs.FirstOrDefault(x =>
-            //     x.IsAlive &&
-            //     x.IsAlly &&
-            //     x.CurrentSystemId == npc.CurrentSystemId &&
-            //     x.IsAvailableForCombat());
-
-            return allyTarget?.RuntimeNpcId;
+            return targets[UnityEngine.Random.Range(0, targets.Count)].RuntimeNpcId;
         }
-        else
+
+        if (!CanNpcReactToThreats(npc))
+            return null;
+
+        List<SystemNpcRuntimeState> enemyTargets = new();
+
+        foreach (SystemNpcRuntimeState npcRuntimeState in _npcRuntimeService.Npcs)
         {
-            List<SystemNpcRuntimeState> list = new();
-            foreach (SystemNpcRuntimeState npcRuntimeState in _npcRuntimeService.Npcs)
+            if (npcRuntimeState == null)
+                continue;
+
+            if (npcRuntimeState.IsAlive &&
+                npcRuntimeState.IsEnemy &&
+                npcRuntimeState.CurrentSystemId == npc.CurrentSystemId &&
+                npcRuntimeState.IsAvailableForCombat())
             {
-                if (npcRuntimeState.IsAlive &&
-                    npcRuntimeState.IsEnemy &&
-                    npcRuntimeState.CurrentSystemId == npc.CurrentSystemId &&
-                    npcRuntimeState.IsAvailableForCombat() &&
-                    // Vector3.Distance(npc.CurrentPosition, npcRuntimeState.CurrentPosition) <= shotDistance &&
-                    shotDistance != 0f)
-                    list.Add(npcRuntimeState);
+                enemyTargets.Add(npcRuntimeState);
             }
-
-            SystemNpcRuntimeState enemyTarget = null;
-            LogCustom("list.Count = " + list.Count);
-            if (list.Count > 0)
-                enemyTarget = list[UnityEngine.Random.Range(0, list.Count)];
-
-            // SystemNpcRuntimeState allyTarget = _npcRuntimeService.Npcs.FirstOrDefault(x =>
-            //     x.IsAlive &&
-            //     x.IsAlly &&
-            //     x.CurrentSystemId == npc.CurrentSystemId &&
-            //     x.IsAvailableForCombat());
-
-            return enemyTarget?.RuntimeNpcId;
         }
 
-        // SystemNpcRuntimeState enemyTarget = _npcRuntimeService.Npcs.FirstOrDefault(x =>
-        //     x.IsAlive &&
-        //     x.IsEnemy &&
-        //     x.CurrentSystemId == npc.CurrentSystemId &&
-        //     x.IsAvailableForCombat());
+        if (enemyTargets.Count == 0)
+            return null;
 
-        // return enemyTarget?.RuntimeNpcId;
+        return enemyTargets[UnityEngine.Random.Range(0, enemyTargets.Count)].RuntimeNpcId;
     }
 
     private bool HasEnemiesInSystem(string systemId)

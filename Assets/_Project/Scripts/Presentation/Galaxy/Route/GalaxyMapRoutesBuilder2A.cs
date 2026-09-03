@@ -552,19 +552,17 @@ public class GalaxyMapRoutesBuilder2A : CustomMonoBehaviour
 
         StarSystemRuntimeState fromState = FindSystemState(fromSystemId);
         StarSystemRuntimeState toState = FindSystemState(toSystemId);
-        RouteRuntimeState routeState = FindRouteState(routeConfig.Id);
 
         bool fromDiscovered = fromState != null && fromState.IsDiscovered;
         bool toDiscovered = toState != null && toState.IsDiscovered;
 
-        bool routeUnlocked;
+        if (!fromDiscovered || !toDiscovered)
+            return GalaxyMapRouteVisualState.Hidden;
 
-        if (routeState != null)
-            routeUnlocked = routeState.IsUnlocked;
-        else
-            routeUnlocked = routeConfig.IsLockedAtStart == false;
+        IRouteService routeService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
 
-        if (!fromDiscovered || !toDiscovered || !routeUnlocked)
+        if (!routeService.HasUnlockedRoute(fromSystemId, toSystemId))
             return GalaxyMapRouteVisualState.Hidden;
 
         return GalaxyMapRouteVisualState.Normal;
@@ -596,12 +594,35 @@ public class GalaxyMapRoutesBuilder2A : CustomMonoBehaviour
 
     private bool CanUseRouteInPath(string routeId)
     {
-        RouteRuntimeState routeState = FindRouteState(routeId);
+        RouteConfig routeConfig = FindRouteConfigById(routeId);
 
-        if (routeState == null)
-            return true;
+        if (routeConfig == null)
+            return false;
 
-        return routeState.IsUnlocked;
+        string fromSystemId = GetRouteFromSystemId(routeConfig);
+        string toSystemId = GetRouteToSystemId(routeConfig);
+
+        IRouteService routeService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
+
+        return routeService.HasUnlockedRoute(fromSystemId, toSystemId);
+    }
+
+    private RouteConfig FindRouteConfigById(string routeId)
+    {
+        if (string.IsNullOrWhiteSpace(routeId))
+            return null;
+
+        foreach (RouteConfig routeConfig in _routeConfigsByKey.Values)
+        {
+            if (routeConfig == null)
+                continue;
+
+            if (routeConfig.Id == routeId)
+                return routeConfig;
+        }
+
+        return null;
     }
 
     private StarSystemRuntimeState FindSystemState(string systemId)

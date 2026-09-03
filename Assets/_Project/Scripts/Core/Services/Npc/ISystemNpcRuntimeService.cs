@@ -32,6 +32,12 @@ public interface ISystemNpcRuntimeService
 
     void ApplyDamage(string runtimeNpcId, int damage, bool killedByPlayer, bool damagedByPlayer);
 
+    bool DespawnNpc(string runtimeNpcId);
+
+    bool KillNpc(string runtimeNpcId, bool killedByPlayer);
+
+    bool ResetNpc(string runtimeNpcId);
+
     void ClearAll();
 
     void RestoreNpc(SystemNpcRuntimeState npc);

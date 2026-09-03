@@ -8,7 +8,7 @@ public sealed class S04_04_SystemObjectsListHudTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Hud/PF_HudTopRoot.prefab");
+                "Assets/_Project/Prefabs/Hud/PF_HudTopRoot.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("SystemObjectsListHud2A"),
@@ -144,7 +144,7 @@ public sealed class S04_04_SystemObjectsListHudTests
 
         string sunPrefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Sun/PF_SystemMapSun_Pseudo3D.prefab");
+                "Assets/_Project/Prefabs/Sun/PF_SystemMapSun_Pseudo3D.prefab");
 
         Assert.IsTrue(
             sunSelectableText.Contains("IPointerClickHandler"),
@@ -232,7 +232,7 @@ public sealed class S04_04_SystemObjectsListHudTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Hud/PF_HudTopRoot.prefab");
+                "Assets/_Project/Prefabs/Hud/PF_HudTopRoot.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("SystemSelectedTargetInfoHud2A"),

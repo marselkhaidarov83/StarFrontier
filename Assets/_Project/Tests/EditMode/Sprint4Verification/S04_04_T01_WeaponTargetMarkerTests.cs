@@ -77,7 +77,7 @@ public sealed class S04_04_T01_WeaponTargetMarkerTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Npc/NpcPrefab_01.prefab");
+                "Assets/_Project/Prefabs/Npc/NpcPrefab_01.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("CombatWeaponTargetMarkerView2A"),

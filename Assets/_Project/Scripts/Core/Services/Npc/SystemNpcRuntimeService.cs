@@ -207,23 +207,24 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     }
 
     private void DestroyNpc(
-        SystemNpcRuntimeState npc,
-        bool killedByPlayer)
+    SystemNpcRuntimeState npc,
+    bool killedByPlayer)
     {
         npc.WasKilledByPlayer = killedByPlayer;
         npc.DestroyedAtTick = GetCurrentQuantTick();
         npc.NextRespawnTick = ScheduleRespawn(npc);
 
-        if (npc.IsEnemy && _encounterService != null)
-            _encounterService.RegisterEnemyDestroyed(killedByPlayer);
+        if (_encounterService != null)
+        {
+            if (npc.IsEnemy)
+                _encounterService.RegisterEnemyDestroyed(killedByPlayer);
+            else if (npc.IsAlly)
+                _encounterService.RegisterAllyDestroyed();
+        }
 
-        _eventBus.Publish(new SystemNpcDestroyedEvent(
-            npc.GroupRuntimeId,
-            npc.RuntimeNpcId,
-            npc.NpcType,
-            npc.CurrentSystemId,
-            killedByPlayer,
-            npc.CurrentPosition));
+        PublishNpcDestroyedEvent(
+            npc,
+            killedByPlayer);
 
         LogCustom(
             $"[SystemNpcRuntimeService] NPC destroyed. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, KilledByPlayer: {killedByPlayer}");
@@ -299,4 +300,165 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         return null;
     }
+
+    public bool DespawnNpc(string runtimeNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            Debug.LogWarning("[SystemNpcRuntimeService] DespawnNpc failed. RuntimeNpcId is empty.");
+            return false;
+        }
+
+        if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) || npc == null)
+        {
+            Debug.LogWarning(
+                "[SystemNpcRuntimeService] DespawnNpc failed. NPC not found. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return false;
+        }
+
+        _npcs.Remove(npc);
+
+        PublishNpcDestroyedEvent(
+            npc,
+            false);
+
+        LogCustom(
+            $"[SystemNpcRuntimeService] NPC despawned. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}");
+
+        return true;
+    }
+
+    private void PublishNpcDestroyedEvent(
+    SystemNpcRuntimeState npc,
+    bool killedByPlayer)
+    {
+        if (npc == null)
+            return;
+
+        _eventBus.Publish(new SystemNpcDestroyedEvent(
+            npc.GroupRuntimeId,
+            npc.RuntimeNpcId,
+            npc.NpcType,
+            npc.CurrentSystemId,
+            killedByPlayer,
+            npc.CurrentPosition));
+    }
+
+    public bool KillNpc(string runtimeNpcId, bool killedByPlayer)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            Debug.LogWarning("[SystemNpcRuntimeService] KillNpc failed. RuntimeNpcId is empty.");
+            return false;
+        }
+
+        if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) || npc == null)
+        {
+            Debug.LogWarning(
+                "[SystemNpcRuntimeService] KillNpc failed. NPC not found. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return false;
+        }
+
+        if (!npc.IsAlive || npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            Debug.LogWarning(
+                "[SystemNpcRuntimeService] KillNpc failed. NPC is not alive. RuntimeNpcId: " +
+                runtimeNpcId +
+                ", LifeState: " +
+                npc.LifeState);
+
+            return false;
+        }
+
+        int lethalDamage =
+            Mathf.Max(
+                npc.CurrentHull + npc.CurrentShield,
+                999999);
+
+        ApplyDamage(
+            runtimeNpcId,
+            lethalDamage,
+            killedByPlayer,
+            true);
+
+        return !npc.IsAlive ||
+               npc.LifeState == SystemNpcLifeState.Destroyed;
+    }
+
+    public bool ResetNpc(string runtimeNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            Debug.LogWarning("[SystemNpcRuntimeService] ResetNpc failed. RuntimeNpcId is empty.");
+            return false;
+        }
+
+        if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) || npc == null)
+        {
+            Debug.LogWarning(
+                "[SystemNpcRuntimeService] ResetNpc failed. NPC not found. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return false;
+        }
+
+        npc.IsAlive = true;
+        npc.LifeState = SystemNpcLifeState.Alive;
+        npc.DestroyedAtTick = 0;
+        npc.NextRespawnTick = 0;
+
+        npc.CurrentHull = npc.MaxHull;
+        npc.CurrentShield = npc.MaxShield;
+        npc.CurrentEnergy = npc.MaxEnergy;
+
+        npc.WasKilledByPlayer = false;
+        npc.WasDamagedByPlayer = false;
+        npc.IsFighting = false;
+        npc.IsAggressiveToPlayer = false;
+
+        npc.CurrentTargetRuntimeNpcId = null;
+        npc.BehaviorTargetRuntimeNpcId = null;
+
+        npc.PrevBehavior = SystemNpcBehaviorType.None;
+
+        npc.CurrentBehavior = npc.IsEnemy
+            ? SystemNpcBehaviorType.EngageEnemies
+            : SystemNpcBehaviorType.StayOnPlanetForDays;
+
+        npc.CombatState = npc.IsEnemy
+            ? SystemNpcCombatState.SearchingTarget
+            : SystemNpcCombatState.None;
+
+        npc.TravelState = npc.IsOnPlanet
+            ? SystemNpcTravelState.OnPlanet
+            : SystemNpcTravelState.Idle;
+
+        npc.StartPosition = npc.CurrentPosition;
+        npc.TargetPosition = npc.CurrentPosition;
+        npc.CurrentMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementArrived = true;
+
+        _eventBus.Publish(new SystemNpcCreatedEvent(
+            npc.RuntimeNpcId,
+            npc.NpcType,
+            npc.ConfigId,
+            npc.CurrentSystemId));
+
+        _eventBus.Publish(new SystemNpcPositionChangedEvent(
+            npc.RuntimeNpcId,
+            npc.CurrentSystemId,
+            npc.CurrentPosition));
+
+        LogCustom(
+            $"[SystemNpcRuntimeService] NPC reset. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}");
+
+        return true;
+    }
+
+
 }

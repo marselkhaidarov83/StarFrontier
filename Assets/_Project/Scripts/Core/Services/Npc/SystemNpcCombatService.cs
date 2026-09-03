@@ -234,11 +234,11 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     }
 
     private bool TryCreateProjectile(
-        SystemNpcRuntimeState shooter,
-        GalaxyCombatTarget target,
-        SystemNpcWeaponRuntimeState weaponRuntime,
-        int quantTick,
-        bool ignoreTickGate)
+    SystemNpcRuntimeState shooter,
+    GalaxyCombatTarget target,
+    SystemNpcWeaponRuntimeState weaponRuntime,
+    int quantTick,
+    bool ignoreTickGate)
     {
         WeaponConfig weaponConfig = _configService.GetWeaponConfigById(
             weaponRuntime.WeaponConfigId
@@ -285,11 +285,14 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         int projectileLifetimeTicks = Mathf.Max(1, weaponStats.ProjectileLifetime);
 
         EnsureEncounterForPlayerAttack(shooter, target);
+
         var projectile = new GalaxyNpcProjectileRuntimeState
         {
             ProjectileId = Guid.NewGuid().ToString("N"),
 
             SystemId = shooter.CurrentSystemId,
+
+            ShooterType = CombatShooterType.Npc,
             ShooterNpcId = shooter.RuntimeNpcId,
 
             TargetType = target.TargetType,

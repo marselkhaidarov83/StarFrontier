@@ -11,4 +11,6 @@ public interface ISystemSecurityService
         StarSystemStatus newStatus);
 
     bool CaptureSystem(string systemId);
+
+    bool TrySetSystemStableByNpcAutonomy(string systemId);
 }

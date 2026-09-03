@@ -205,7 +205,7 @@ public sealed class S04_04_T04_PlayerWeaponListHudTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Hud/PF_SystemHudBottomRoot.prefab");
+                "Assets/_Project/Prefabs/Hud/PF_SystemHudBottomRoot.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("SystemPlayerWeaponListHud2A"),
@@ -236,7 +236,9 @@ public sealed class S04_04_T04_PlayerWeaponListHudTests
             "Weapon panel header must have a colored background like the threat panel header.");
 
         Assert.IsTrue(
-            prefabText.Contains("m_text: ОРУЖИЕ 0/0"),
+            prefabText.Contains("m_text: ОРУЖИЕ 0/0") ||
+            prefabText.Contains("m_text: \"\\u041E\\u0420\\u0423\\u0416\\u0418\\u0415 0/0\"") ||
+            prefabText.Contains("m_text: \"\\u041e\\u0420\\u0423\\u0416\\u0418\\u0415 0/0\""),
             "Weapon panel header prefab text must use weapon count format.");
 
         Assert.IsTrue(

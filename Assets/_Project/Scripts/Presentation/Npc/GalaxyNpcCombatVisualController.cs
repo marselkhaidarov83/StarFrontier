@@ -22,6 +22,8 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
     private readonly Queue<GalaxyNpcTimedFxView> _explosionFxPool = new();
 
     private SimpleEventBus _eventBus;
+    private ISystemNpcRuntimeService _runtimeService;
+    private IConfigService _configService;
     private bool _isSubscribed;
 
     public int ActiveProjectileCount => _activeProjectiles.Count;
@@ -62,6 +64,9 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
         if (!bootstrapper.ServiceRegistry.TryGet(out _eventBus) || _eventBus == null)
             return;
 
+        bootstrapper.ServiceRegistry.TryGet(out _runtimeService);
+        bootstrapper.ServiceRegistry.TryGet(out _configService);
+
         _eventBus.Subscribe<GalaxyNpcProjectileCreatedEvent>(OnProjectileCreated);
         _eventBus.Subscribe<GalaxyNpcProjectileImpactEvent>(OnProjectileImpact);
         _eventBus.Subscribe<SystemNpcDestroyedEvent>(OnNpcDestroyed);
@@ -91,13 +96,91 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
     {
         CompleteProjectile(evt.ProjectileId);
 
-        if (evt.DidHit)
-            SpawnHitFx(evt.HitPosition);
+        if (!evt.DidHit)
+            return;
+
+        Color fxColor = ResolveNpcFxColor(
+            evt.TargetNpcId,
+            evt.TargetType,
+            null);
+
+        SpawnHitFx(evt.HitPosition, fxColor);
+    }
+
+    private Color ResolveNpcFxColor(
+    string runtimeNpcId,
+    CombatTargetType targetType,
+    SystemNpcType? fallbackNpcType)
+    {
+        CombatFxVisualConfig config = ResolveCombatFxVisualConfig();
+
+        if (config == null)
+            return Color.white;
+
+        if (targetType == CombatTargetType.Player)
+            return config.ResolvePlayerColor();
+
+        if (_runtimeService != null &&
+            !string.IsNullOrWhiteSpace(runtimeNpcId) &&
+            _runtimeService.TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) &&
+            npc != null)
+        {
+            return config.ResolveNpcColor(
+                npc.NpcType,
+                npc.ConfigId);
+        }
+
+        if (fallbackNpcType.HasValue)
+        {
+            return config.ResolveNpcColor(
+                fallbackNpcType.Value,
+                string.Empty);
+        }
+
+        return config.DefaultEnemyColor;
+    }
+
+    private static Color ResolveEnemyFxColor(string configId)
+    {
+        string normalizedId = string.IsNullOrWhiteSpace(configId)
+            ? string.Empty
+            : configId.ToLowerInvariant();
+
+        if (normalizedId.Contains("enemy_ai"))
+            return new Color(1f, 0.22f, 0.16f, 1f);
+
+        if (normalizedId.Contains("enemy_ancients"))
+            return new Color(1f, 0.72f, 0.18f, 1f);
+
+        if (normalizedId.Contains("enemy_infected"))
+            return new Color(0.62f, 1f, 0.22f, 1f);
+
+        return ResolveDefaultEnemyFxColor();
+    }
+
+    private static Color ResolveAllyFxColor()
+    {
+        return new Color(0.35f, 0.88f, 1f, 1f);
+    }
+
+    private static Color ResolvePirateFxColor()
+    {
+        return new Color(1f, 0.42f, 0.12f, 1f);
+    }
+
+    private static Color ResolveDefaultEnemyFxColor()
+    {
+        return new Color(1f, 0.25f, 0.18f, 1f);
     }
 
     private void OnNpcDestroyed(SystemNpcDestroyedEvent evt)
     {
-        SpawnExplosionFx(evt.Position);
+        Color fxColor = ResolveNpcFxColor(
+            evt.RuntimeNpcId,
+            CombatTargetType.Npc,
+            evt.NpcType);
+
+        SpawnExplosionFx(evt.Position, fxColor);
     }
 
     public GalaxyNpcProjectileView SpawnProjectile(GalaxyNpcProjectileCreatedEvent evt)
@@ -137,12 +220,61 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
 
     public GalaxyNpcTimedFxView SpawnHitFx(Vector3 position)
     {
-        return SpawnFx(position, hitFxPrefab, _hitFxPool, hitFxLifetimeSeconds);
+        return SpawnHitFx(position, ResolveFallbackFxColor());
+    }
+
+    private Color ResolveFallbackFxColor()
+    {
+        CombatFxVisualConfig config = ResolveCombatFxVisualConfig();
+
+        if (config == null)
+            return Color.white;
+
+        return config.DefaultEnemyColor;
+    }
+
+    private CombatFxVisualConfig ResolveCombatFxVisualConfig()
+    {
+        if (_configService != null)
+            return _configService.CombatFxVisualConfig;
+
+        Bootstrapper bootstrapper = Bootstrapper.Instance;
+
+        if (bootstrapper == null || bootstrapper.ServiceRegistry == null)
+            return null;
+
+        if (!bootstrapper.ServiceRegistry.TryGet(out _configService) ||
+            _configService == null)
+        {
+            return null;
+        }
+
+        return _configService.CombatFxVisualConfig;
+    }
+
+    public GalaxyNpcTimedFxView SpawnHitFx(Vector3 position, Color tint)
+    {
+        return SpawnFx(
+            position,
+            hitFxPrefab,
+            _hitFxPool,
+            hitFxLifetimeSeconds,
+            tint);
     }
 
     public GalaxyNpcTimedFxView SpawnExplosionFx(Vector3 position)
     {
-        return SpawnFx(position, explosionFxPrefab, _explosionFxPool, explosionFxLifetimeSeconds);
+        return SpawnExplosionFx(position, ResolveFallbackFxColor());
+    }
+
+    public GalaxyNpcTimedFxView SpawnExplosionFx(Vector3 position, Color tint)
+    {
+        return SpawnFx(
+            position,
+            explosionFxPrefab,
+            _explosionFxPool,
+            explosionFxLifetimeSeconds,
+            tint);
     }
 
     public void ReturnFxToPool(GalaxyNpcTimedFxView fx)
@@ -176,10 +308,11 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
     }
 
     private GalaxyNpcTimedFxView SpawnFx(
-        Vector3 position,
-        GalaxyNpcTimedFxView prefab,
-        Queue<GalaxyNpcTimedFxView> pool,
-        float lifetimeSeconds)
+    Vector3 position,
+    GalaxyNpcTimedFxView prefab,
+    Queue<GalaxyNpcTimedFxView> pool,
+    float lifetimeSeconds,
+    Color tint)
     {
         if (prefab == null)
             return null;
@@ -192,7 +325,7 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
         if (fx == null)
             fx = Instantiate(prefab, fxRoot);
 
-        fx.Init(this, position, lifetimeSeconds);
+        fx.Init(this, position, lifetimeSeconds, tint);
         return fx;
     }
 

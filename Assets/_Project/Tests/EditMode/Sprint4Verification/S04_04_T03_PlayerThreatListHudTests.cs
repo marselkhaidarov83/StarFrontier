@@ -212,7 +212,7 @@ public sealed class S04_04_T03_PlayerThreatListHudTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Hud/PF_SystemHudBottomRoot.prefab");
+                "Assets/_Project/Prefabs/Hud/PF_SystemHudBottomRoot.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("SystemPlayerThreatListHud2A"),
@@ -247,7 +247,9 @@ public sealed class S04_04_T03_PlayerThreatListHudTests
             "Threat list HUD component must bind the authored clickable rows button.");
 
         Assert.IsTrue(
-            prefabText.Contains("m_text: УГРОЗЫ - 0"),
+            prefabText.Contains("m_text: УГРОЗЫ - 0") ||
+            prefabText.Contains("m_text: \"\\u0423\\u0413\\u0420\\u041e\\u0417\\u042b - 0\"") ||
+            prefabText.Contains("m_text: \"\\u0423\\u0413\\u0420\\u041E\\u0417\\u042B - 0\""),
             "Threat list HUD prefab must show Russian title text in the authored header.");
 
         Assert.IsTrue(

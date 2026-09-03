@@ -108,25 +108,28 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
             OriginSystemId = npc.OriginSystemId,
             CurrentSystemId = npc.CurrentSystemId,
-            // TargetSystemId = npc.TargetSystemId,
-            TargetSystemId = npc.TargetSystemId,
-            TargetSystemExitPoint = npc.TargetSystemExitPoint,
-            TargetSystemEntryPoint = npc.TargetSystemEntryPoint,
 
-            CurrentPlanetId = npc.CurrentPlanetId,
-            TargetPlanetId = npc.TargetPlanetId,
+            TargetSystemId = null,
+            TargetSystemExitPoint = Vector3.zero,
+            TargetSystemEntryPoint = Vector3.zero,
+
+            CurrentPlanetId = npc.IsOnPlanet ? npc.CurrentPlanetId : null,
+            TargetPlanetId = null,
             IsOnPlanet = npc.IsOnPlanet,
 
             CurrentPosition = npc.CurrentPosition,
-            StartPosition = npc.StartPosition,
-            TargetPosition = npc.TargetPosition,
+            StartPosition = npc.CurrentPosition,
+            TargetPosition = npc.CurrentPosition,
             FacingDirection = npc.FacingDirection,
             TurnRadius = npc.TurnRadius,
 
-            TravelState = npc.TravelState,
-            TravelProgress01 = npc.TravelProgress01,
-            TravelStartTick = npc.TravelStartTick,
-            TravelEndTick = npc.TravelEndTick,
+            TravelState = npc.IsOnPlanet
+                ? SystemNpcTravelState.OnPlanet
+                : SystemNpcTravelState.Idle,
+
+            TravelProgress01 = 0f,
+            TravelStartTick = 0,
+            TravelEndTick = 0,
 
             PrevBehavior = npc.PrevBehavior,
             CurrentBehavior = npc.CurrentBehavior,
@@ -137,11 +140,11 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
             DaysToStayOnPlanet = npc.DaysToStayOnPlanet,
             DaysStayedOnPlanet = npc.DaysStayedOnPlanet,
-            BehaviorTargetRuntimeNpcId = npc.BehaviorTargetRuntimeNpcId,
+            BehaviorTargetRuntimeNpcId = null,
 
-            CombatState = npc.CombatState,
-            CurrentTargetRuntimeNpcId = npc.CurrentTargetRuntimeNpcId,
-            IsFighting = npc.IsFighting,
+            CombatState = SystemNpcCombatState.None,
+            CurrentTargetRuntimeNpcId = null,
+            IsFighting = false,
             IsAggressiveToPlayer = npc.IsAggressiveToPlayer,
             WasDamagedByPlayer = npc.WasDamagedByPlayer,
 
@@ -196,24 +199,28 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
             OriginSystemId = save.OriginSystemId,
             CurrentSystemId = save.CurrentSystemId,
-            TargetSystemId = save.TargetSystemId,
-            TargetSystemExitPoint = save.TargetSystemExitPoint,
-            TargetSystemEntryPoint = save.TargetSystemEntryPoint,
 
-            CurrentPlanetId = save.CurrentPlanetId,
-            TargetPlanetId = save.TargetPlanetId,
+            TargetSystemId = null,
+            TargetSystemExitPoint = Vector3.zero,
+            TargetSystemEntryPoint = Vector3.zero,
+
+            CurrentPlanetId = save.IsOnPlanet ? save.CurrentPlanetId : null,
+            TargetPlanetId = null,
             IsOnPlanet = save.IsOnPlanet,
 
             CurrentPosition = save.CurrentPosition,
-            StartPosition = save.StartPosition,
-            TargetPosition = save.TargetPosition,
+            StartPosition = save.CurrentPosition,
+            TargetPosition = save.CurrentPosition,
             FacingDirection = save.FacingDirection,
             TurnRadius = save.TurnRadius,
 
-            TravelState = save.TravelState,
-            TravelProgress01 = save.TravelProgress01,
-            TravelStartTick = save.TravelStartTick,
-            TravelEndTick = save.TravelEndTick,
+            TravelState = save.IsOnPlanet
+                ? SystemNpcTravelState.OnPlanet
+                : SystemNpcTravelState.Idle,
+
+            TravelProgress01 = 0f,
+            TravelStartTick = 0,
+            TravelEndTick = 0,
 
             PrevBehavior = save.PrevBehavior,
             CurrentBehavior = save.CurrentBehavior,
@@ -224,11 +231,11 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
             DaysToStayOnPlanet = save.DaysToStayOnPlanet,
             DaysStayedOnPlanet = save.DaysStayedOnPlanet,
-            BehaviorTargetRuntimeNpcId = save.BehaviorTargetRuntimeNpcId,
+            BehaviorTargetRuntimeNpcId = null,
 
-            CombatState = save.CombatState,
-            CurrentTargetRuntimeNpcId = save.CurrentTargetRuntimeNpcId,
-            IsFighting = save.IsFighting,
+            CombatState = SystemNpcCombatState.None,
+            CurrentTargetRuntimeNpcId = null,
+            IsFighting = false,
             IsAggressiveToPlayer = save.IsAggressiveToPlayer,
             WasDamagedByPlayer = save.WasDamagedByPlayer,
 
@@ -254,6 +261,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             DangerTier = save.DangerTier
         };
 
+        NormalizeRestoredNpcActivity(npc);
+
         RestoreRuntimeDisplayName(npc);
         ValidateRuntimeStatsFromConfig(npc);
 
@@ -264,6 +273,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
         {
             if (weaponSave == null)
                 continue;
+
             npc.Weapons.Add(new SystemNpcWeaponRuntimeState
             {
                 WeaponConfigId = weaponSave.WeaponConfigId,
@@ -273,9 +283,83 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             });
         }
 
-        // ApplyRestoreLocationMutationIfNeeded(npc);
-
         return npc;
+    }
+
+    private void NormalizeRestoredNpcActivity(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return;
+
+        ClearRestoredTargets(npc);
+        ResetRestoredMovementTargetsToCurrentPosition(npc);
+
+        if (!npc.IsAlive)
+        {
+            npc.HasActiveBehavior = false;
+            npc.CurrentBehavior = SystemNpcBehaviorType.None;
+            npc.TravelState = SystemNpcTravelState.Idle;
+            return;
+        }
+
+        if (ShouldDropRestoredBehavior(npc.CurrentBehavior))
+        {
+            npc.PrevBehavior = npc.CurrentBehavior;
+            npc.CurrentBehavior = SystemNpcBehaviorType.None;
+            npc.HasActiveBehavior = false;
+            npc.BehaviorStartedTick = 0;
+            npc.BehaviorEndsTick = 0;
+            npc.DaysToStayOnPlanet = 0;
+            npc.DaysStayedOnPlanet = 0;
+        }
+
+        npc.TravelState = npc.IsOnPlanet
+            ? SystemNpcTravelState.OnPlanet
+            : SystemNpcTravelState.Idle;
+    }
+
+    private static bool ShouldDropRestoredBehavior(
+    SystemNpcBehaviorType behavior)
+    {
+        switch (behavior)
+        {
+            case SystemNpcBehaviorType.StayOnPlanetForDays:
+            case SystemNpcBehaviorType.AnnihilateOnPlanet:
+                return false;
+
+            default:
+                return true;
+        }
+    }
+
+    private static void ClearRestoredTargets(SystemNpcRuntimeState npc)
+    {
+        npc.TargetSystemId = null;
+        npc.TargetSystemExitPoint = Vector3.zero;
+        npc.TargetSystemEntryPoint = Vector3.zero;
+
+        npc.TargetPlanetId = null;
+        npc.CurrentTargetRuntimeNpcId = null;
+        npc.BehaviorTargetRuntimeNpcId = null;
+
+        npc.CombatState = SystemNpcCombatState.None;
+        npc.IsFighting = false;
+    }
+    private static void ResetRestoredMovementTargetsToCurrentPosition(
+        SystemNpcRuntimeState npc)
+    {
+        npc.StartPosition = npc.CurrentPosition;
+        npc.TargetPosition = npc.CurrentPosition;
+        npc.CurrentMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementArrived = true;
+        npc.TickMovementDirectionTick = -1;
+
+        if (npc.FacingDirection.sqrMagnitude <= 0.0001f)
+            npc.FacingDirection = Vector3.up;
+
+        npc.FacingDirection.Normalize();
+        npc.TickMovementDirection = npc.FacingDirection;
     }
 
     private float ResolveRestoredWeaponShotDistance(

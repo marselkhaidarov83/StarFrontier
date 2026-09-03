@@ -613,8 +613,8 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     }
 
     private void CreateEnemyGroup(
-        StarSystemConfig starSystem,
-        EnemyGroupSpawnRuleConfig rule)
+    StarSystemConfig starSystem,
+    EnemyGroupSpawnRuleConfig rule)
     {
         if (starSystem == null)
             return;
@@ -622,56 +622,38 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (rule == null)
             return;
 
+        string groupRuntimeId =
+            Guid.NewGuid().ToString("N");
+
         int currentGalaxyLevel =
             GetCurrentGalaxyLevel();
 
-        IReadOnlyList<EnemyGroupEntryConfig> selectedEntries =
+        IReadOnlyList<EnemyGroupEntryConfig> enemies =
             rule.PickEnemiesForGalaxyLevel(currentGalaxyLevel);
 
-        if (selectedEntries == null || selectedEntries.Count == 0)
+        if (enemies == null || enemies.Count == 0)
             return;
-
-        string groupRuntimeId =
-            Guid.NewGuid().ToString("N");
 
         Vector3 groupSpawnBasePosition =
             PickEnemyGroupSpawnBasePosition(starSystem);
 
-        for (int entryIndex = 0;
-             entryIndex < selectedEntries.Count;
-             entryIndex++)
+        for (int entryIndex = 0; entryIndex < enemies.Count; entryIndex++)
         {
             EnemyGroupEntryConfig entry =
-                selectedEntries[entryIndex];
+                enemies[entryIndex];
 
-            if (entry == null)
+            if (entry == null || !entry.IsValid())
                 continue;
 
             if (entry.EnemyConfig == null)
                 continue;
-
-            if (!entry.IsValid())
-                continue;
-
-            if (!IsEnemyConfigAllowedForGalaxyLevel(
-                    entry.EnemyConfig,
-                    currentGalaxyLevel))
-            {
-                LogCustom(
-                    "[SystemPopulationService] Enemy entry skipped because " +
-                    "its level is not allowed for current GalaxyLevel. " +
-                    "Config: " + entry.EnemyConfig.Id +
-                    ", ConfigLevel: " + entry.EnemyConfig.Level +
-                    ", GalaxyLevel: " + currentGalaxyLevel);
-                continue;
-            }
 
             int count =
                 UnityEngine.Random.Range(
                     entry.MinCount,
                     entry.MaxCount + 1);
 
-            for (int c = 0; c < count; c++)
+            for (int i = 0; i < count; i++)
             {
                 Vector3 position =
                     BuildEnemySpawnPosition(
@@ -687,6 +669,8 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                         rule.Id,
                         groupRuntimeId);
 
+                ApplyInitialFacingToSun(enemy, starSystem);
+
                 enemy.CanChangeLocationOnRestore = false;
 
                 _npcRuntimeService.AddNpc(enemy);
@@ -696,11 +680,62 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                     "System: " + starSystem.Id + ", " +
                     "GroupRule: " + rule.Id + ", " +
                     "Config: " + entry.EnemyConfig.Id + ", " +
-                    "ConfigLevel: " + entry.EnemyConfig.Level + ", " +
-                    "GalaxyLevel: " + currentGalaxyLevel + ", " +
-                    "GroupRuntimeId: " + groupRuntimeId);
+                    "GroupRuntimeId: " + groupRuntimeId + ", " +
+                    "GalaxyLevel: " + currentGalaxyLevel);
             }
         }
+    }
+
+    private void ApplyInitialFacingToSun(
+    SystemNpcRuntimeState npc,
+    StarSystemConfig starSystem)
+    {
+        if (npc == null)
+            return;
+
+        Vector3 directionToSun =
+            ResolveDirectionToSun(
+                starSystem,
+                npc.CurrentPosition);
+
+        npc.FacingDirection = directionToSun;
+        npc.TickMovementDirection = directionToSun;
+
+        npc.StartPosition = npc.CurrentPosition;
+        npc.TargetPosition = npc.CurrentPosition + directionToSun;
+        npc.CurrentMovementTargetPosition = npc.TargetPosition;
+        npc.TickMovementTargetPosition = npc.TargetPosition;
+
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
+        npc.TravelProgress01 = 0f;
+    }
+
+    private Vector3 ResolveDirectionToSun(
+    StarSystemConfig starSystem,
+    Vector3 currentPosition)
+    {
+        if (starSystem == null || starSystem.Sun == null)
+            return Vector3.up;
+
+        Vector2 sunOffset =
+            starSystem.Sun.LocalOffset;
+
+        Vector3 sunPosition =
+            new Vector3(
+                sunOffset.x,
+                sunOffset.y,
+                currentPosition.z);
+
+        Vector3 directionToSun =
+            sunPosition - currentPosition;
+
+        directionToSun.z = 0f;
+
+        if (directionToSun.sqrMagnitude < 0.0001f)
+            return Vector3.up;
+
+        return directionToSun.normalized;
     }
 
     public bool DebugSpawnEnemyAttackGroupInCurrentSystem()
@@ -1336,5 +1371,24 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         }
 
         return 1;
+    }
+
+    public void EnsureMinimumAlliesInSystem(StarSystemConfig starSystem)
+    {
+        if (starSystem == null)
+            return;
+
+        if (StopAutomaticAllySpawns)
+            return;
+
+        if (GetCurrentPopulationRule(starSystem) == null)
+            return;
+
+        if (_npcRuntimeService.GetAliveEnemyGroupsInSystem(starSystem.Id).Count > 0)
+            return;
+
+        TickAllies(
+            starSystem,
+            0.01f);
     }
 }

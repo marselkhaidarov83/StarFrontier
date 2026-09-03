@@ -49,6 +49,7 @@ namespace StarFrontier.Tests.Sprint1
         public InteractionConfig InteractionConfig => null;
         public SystemHudConfig SystemHudConfig => null;
         public SystemVisualConfig SystemVisualConfig => null;
+        public CombatFxVisualConfig CombatFxVisualConfig => null;
         public TestConfigService(SaveConfig saveConfig) { SaveConfig = saveConfig; }
         public IReadOnlyList<SectorConfig> GetAllSectors() => new List<SectorConfig>();
         public StarSystemLink GetCurrentStarSystemLink(string id) => null;

@@ -8,7 +8,7 @@ public sealed class S04_04_T08_CombatUiMarkerLifecycleTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Npc/NpcPrefab_01.prefab");
+                "Assets/_Project/Prefabs/Npc/NpcPrefab_01.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("m_Name: CombatWeaponTargetMarker"),
@@ -52,7 +52,7 @@ public sealed class S04_04_T08_CombatUiMarkerLifecycleTests
     {
         string prefabText =
             ReadProjectFile(
-                "Assets/_Project/Prefabs/UI/Hud/PF_SystemHudBottomRoot.prefab");
+                "Assets/_Project/Prefabs/Hud/PF_SystemHudBottomRoot.prefab");
 
         Assert.IsTrue(
             prefabText.Contains("SystemPlayerThreatListHud2A"),

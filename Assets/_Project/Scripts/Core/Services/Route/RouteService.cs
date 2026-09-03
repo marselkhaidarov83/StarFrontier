@@ -16,23 +16,151 @@ public class RouteService : CustomService, IRouteService
     private void GalaxyRuntimeStateUpdate()
     {
         if (_galaxyRuntimeState == null && Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State != null)
-            _galaxyRuntimeState = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State.Galaxy;        
+            _galaxyRuntimeState = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State.Galaxy;
     }
 
     public bool IsRouteUnlocked(string routeId)
     {
-        RouteRuntimeState routeState = FindRouteState(routeId);
-        return routeState != null && routeState.IsUnlocked;
+        if (string.IsNullOrWhiteSpace(routeId))
+            return false;
+
+        RouteConfig routeConfig = FindRouteConfigById(routeId);
+
+        if (routeConfig == null)
+            return false;
+
+        return IsRouteAvailable(routeConfig);
     }
 
     public bool HasUnlockedRoute(string fromSystemId, string toSystemId)
     {
-        string routeId = FindRouteId(fromSystemId, toSystemId);
-
-        if (string.IsNullOrEmpty(routeId))
+        if (string.IsNullOrWhiteSpace(fromSystemId))
             return false;
 
-        return IsRouteUnlocked(routeId);
+        if (string.IsNullOrWhiteSpace(toSystemId))
+            return false;
+
+        RouteConfig routeConfig = FindRouteConfig(fromSystemId, toSystemId);
+
+        if (routeConfig == null)
+            return false;
+
+        return IsRouteAvailable(routeConfig);
+    }
+
+    private bool IsRouteAvailable(RouteConfig routeConfig)
+    {
+        if (routeConfig == null)
+            return false;
+
+        if (!IsRouteStateUnlocked(routeConfig))
+            return false;
+
+        if (routeConfig.FromSystem == null || routeConfig.ToSystem == null)
+            return false;
+
+        if (!IsSystemSectorUnlocked(routeConfig.FromSystem.Id))
+            return false;
+
+        if (!IsSystemSectorUnlocked(routeConfig.ToSystem.Id))
+            return false;
+
+        return true;
+    }
+
+    private bool IsRouteStateUnlocked(RouteConfig routeConfig)
+    {
+        GalaxyRuntimeStateUpdate();
+
+        RouteRuntimeState routeState = FindRouteState(routeConfig.Id);
+
+        if (routeState != null)
+            return routeState.IsUnlocked;
+
+        return routeConfig.IsLockedAtStart == false;
+    }
+
+    private bool IsSystemSectorUnlocked(string systemId)
+    {
+        GalaxyRuntimeStateUpdate();
+
+        if (string.IsNullOrWhiteSpace(systemId))
+            return false;
+
+        foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
+        {
+            if (sectorConfig == null || sectorConfig.Systems == null)
+                continue;
+
+            bool containsSystem = sectorConfig.Systems.Any(
+                systemConfig => systemConfig != null && systemConfig.Id == systemId
+            );
+
+            if (!containsSystem)
+                continue;
+
+            SectorRuntimeState sectorState = _galaxyRuntimeState?.Sectors?
+                .FirstOrDefault(state => state != null && state.SectorId == sectorConfig.Id);
+
+            if (sectorState != null)
+                return sectorState.IsUnlocked;
+
+            return sectorConfig.IsUnlocked;
+        }
+
+        return false;
+    }
+
+    private RouteConfig FindRouteConfig(string fromSystemId, string toSystemId)
+    {
+        foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
+        {
+            if (sectorConfig == null || sectorConfig.Systems == null)
+                continue;
+
+            foreach (StarSystemConfig systemConfig in sectorConfig.Systems)
+            {
+                if (systemConfig == null || systemConfig.Routes == null)
+                    continue;
+
+                foreach (RouteConfig routeConfig in systemConfig.Routes)
+                {
+                    if (routeConfig == null)
+                        continue;
+
+                    if (routeConfig.ConnectsSystems(fromSystemId, toSystemId))
+                        return routeConfig;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private RouteConfig FindRouteConfigById(string routeId)
+    {
+        foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
+        {
+            if (sectorConfig == null || sectorConfig.Systems == null)
+                continue;
+
+            foreach (StarSystemConfig systemConfig in sectorConfig.Systems)
+            {
+                if (systemConfig == null || systemConfig.Routes == null)
+                    continue;
+
+                foreach (RouteConfig routeConfig in systemConfig.Routes)
+                {
+                    if (routeConfig == null)
+                        continue;
+
+                    if (routeConfig.Id == routeId)
+                        return routeConfig;
+                }
+            }
+        }
+
+        return null;
     }
 
     public string FindRouteId(string fromSystemId, string toSystemId)

@@ -464,26 +464,16 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (routeConfig == null)
             return false;
 
-        if (gameSessionService == null ||
-            gameSessionService.State == null ||
-            gameSessionService.State.Galaxy == null ||
-            gameSessionService.State.Galaxy.Routes == null)
-        {
-            return routeConfig.IsLockedAtStart == false;
-        }
+        if (routeConfig.FromSystem == null || routeConfig.ToSystem == null)
+            return false;
 
-        foreach (RouteRuntimeState routeState in gameSessionService.State.Galaxy.Routes)
-        {
-            if (routeState == null)
-                continue;
+        IRouteService routeService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
 
-            if (routeState.RouteId != routeConfig.Id)
-                continue;
-
-            return routeState.IsUnlocked;
-        }
-
-        return routeConfig.IsLockedAtStart == false;
+        return routeService.HasUnlockedRoute(
+            routeConfig.FromSystem.Id,
+            routeConfig.ToSystem.Id
+        );
     }
 
     private void ClearMap()

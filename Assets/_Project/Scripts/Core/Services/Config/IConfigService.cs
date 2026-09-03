@@ -15,6 +15,7 @@ public interface IConfigService
     InteractionConfig InteractionConfig { get; }
     SystemHudConfig SystemHudConfig { get; }
     SystemVisualConfig SystemVisualConfig { get; }
+    CombatFxVisualConfig CombatFxVisualConfig { get; }
 
     IReadOnlyList<SectorConfig> GetAllSectors();
 
