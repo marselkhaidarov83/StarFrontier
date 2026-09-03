@@ -20,6 +20,7 @@ public sealed class ConfigService : IConfigService
     public SystemHudConfig SystemHudConfig { get; }
     public SystemVisualConfig SystemVisualConfig { get; }
     public CombatFxVisualConfig CombatFxVisualConfig { get; }
+    public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig { get; }
 
     private readonly IReadOnlyList<SectorConfig> _sectors;
     private readonly Dictionary<string, SectorConfig> _sectorsById;
@@ -46,7 +47,7 @@ public sealed class ConfigService : IConfigService
 
     private readonly IGameSessionService gameSessionService;
 
-    public ConfigService(GameConfig gameConfig,
+        public ConfigService(GameConfig gameConfig,
                     DebugConfig debugConfig,
                     SaveConfig saveConfig,
                     GalaxyConfig galaxyConfig,
@@ -62,7 +63,8 @@ public sealed class ConfigService : IConfigService
                     IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
                     IEnumerable<ModuleConfig> modules,
                     IEnumerable<WeaponConfig> weapons,
-                    CombatFxVisualConfig combatFxVisualConfig = null)
+                    CombatFxVisualConfig combatFxVisualConfig = null,
+                    NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
         DebugConfig = debugConfig;
@@ -70,6 +72,7 @@ public sealed class ConfigService : IConfigService
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
         CombatFxVisualConfig = combatFxVisualConfig;
+        NpcBehaviourTransitionMatrixConfig = npcBehaviourTransitionMatrixConfig;
 
         BuildIndex(sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
@@ -86,7 +89,7 @@ public sealed class ConfigService : IConfigService
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
     }
 
-    public ConfigService(GameConfig gameConfig,
+        public ConfigService(GameConfig gameConfig,
                     DebugConfig debugConfig,
                     SaveConfig saveConfig,
                     GalaxyConfig galaxyConfig,
@@ -106,7 +109,8 @@ public sealed class ConfigService : IConfigService
                     IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
                     IEnumerable<ModuleConfig> modules,
                     IEnumerable<WeaponConfig> weapons,
-                    CombatFxVisualConfig combatFxVisualConfig = null)
+                    CombatFxVisualConfig combatFxVisualConfig = null,
+                    NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
         DebugConfig = debugConfig;
@@ -121,6 +125,7 @@ public sealed class ConfigService : IConfigService
         SystemHudConfig = systemHudConfig;
         SystemVisualConfig = systemVisualConfig;
         CombatFxVisualConfig = combatFxVisualConfig;
+        NpcBehaviourTransitionMatrixConfig = npcBehaviourTransitionMatrixConfig;
 
         List<StarSystemConfig> starSystems = new();
         List<PlanetConfig> planets = new();

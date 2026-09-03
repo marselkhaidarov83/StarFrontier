@@ -20,6 +20,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private SystemHudConfig systemHudConfig;
     [SerializeField] private SystemVisualConfig systemVisualConfig;
     [SerializeField] private CombatFxVisualConfig combatFxVisualConfig;
+    [SerializeField] private NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig;
 
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
@@ -143,7 +144,8 @@ public class Bootstrapper : CustomMonoBehaviour
                 pirateGroupSpawnRules,
                 modules,
                 weapons,
-                combatFxVisualConfig));
+                combatFxVisualConfig,
+                npcBehaviourTransitionMatrixConfig));
 
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();

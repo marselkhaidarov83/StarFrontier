@@ -373,8 +373,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private SystemNpcBehaviorType PickScenarioBehavior(
-    NpcBehaviourScenarioConfig behaviorScenario,
-    SystemNpcRuntimeState npc)
+NpcBehaviourScenarioConfig behaviorScenario,
+SystemNpcRuntimeState npc)
     {
         if (behaviorScenario == null)
             return SystemNpcBehaviorType.None;
@@ -453,26 +453,133 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private void RemoveImpossibleNextBehaviors(
-        List<SystemNpcBehaviorWeight> weights,
-        SystemNpcRuntimeState npc)
+    List<SystemNpcBehaviorWeight> weights,
+    SystemNpcRuntimeState npc)
     {
         if (weights == null || npc == null)
             return;
 
-        switch (npc.PrevBehavior)
-        {
-            case SystemNpcBehaviorType.AnnihilateOnPlanet:
-                weights.Clear();
-                break;
+        RemoveTransitionMatrixForbiddenBehaviors(weights, npc);
+        RemoveUnavailableNextBehaviors(weights, npc);
+    }
 
-            case SystemNpcBehaviorType.EngageEnemies:
-            case SystemNpcBehaviorType.PatrolSystem:
-            case SystemNpcBehaviorType.TravelToAnotherSystem:
-                weights.RemoveAll(x =>
-                    x.BehaviorType == SystemNpcBehaviorType.AnnihilateOnPlanet ||
-                    x.BehaviorType == SystemNpcBehaviorType.StayOnPlanetForDays);
-                break;
+    private void RemoveTransitionMatrixForbiddenBehaviors(
+        List<SystemNpcBehaviorWeight> weights,
+        SystemNpcRuntimeState npc)
+    {
+        NpcBehaviourTransitionMatrixConfig transitionMatrix =
+            _configService != null
+                ? _configService.NpcBehaviourTransitionMatrixConfig
+                : null;
+
+        if (transitionMatrix == null)
+            return;
+
+        weights.RemoveAll(weight =>
+            weight == null ||
+            !transitionMatrix.IsNextBehaviorAllowed(
+                npc.PrevBehavior,
+                weight.BehaviorType));
+    }
+
+    private void RemoveUnavailableNextBehaviors(
+        List<SystemNpcBehaviorWeight> weights,
+        SystemNpcRuntimeState npc)
+    {
+        weights.RemoveAll(weight =>
+            weight == null ||
+            !CanUseBehaviorInCurrentConditions(
+                npc,
+                weight.BehaviorType));
+    }
+
+    private bool CanUseBehaviorInCurrentConditions(
+        SystemNpcRuntimeState npc,
+        SystemNpcBehaviorType behaviorType)
+    {
+        switch (behaviorType)
+        {
+            case SystemNpcBehaviorType.AttackMeteorite:
+                return false;
+
+            case SystemNpcBehaviorType.AttackMilitaryStation:
+                return HasAliveStation(npc, StationType.Military);
+
+            case SystemNpcBehaviorType.AttackRangerBaseStation:
+                return HasAliveStation(npc, StationType.RangerBase);
+
+            case SystemNpcBehaviorType.AttackTradeStation:
+                return HasAliveStation(npc, StationType.Trade);
+
+            case SystemNpcBehaviorType.AttackScienceStation:
+                return HasAliveStation(npc, StationType.Science);
+
+            case SystemNpcBehaviorType.AttackMedicalStation:
+                return HasAliveStation(npc, StationType.Medical);
+
+            case SystemNpcBehaviorType.AttackMilitaryAlly:
+                return HasAliveAlly(npc, AllyRole2A.Military);
+
+            case SystemNpcBehaviorType.AttackRangerAlly:
+                return HasAliveAlly(npc, AllyRole2A.Ranger);
+
+            case SystemNpcBehaviorType.AttackTraderAlly:
+                return HasAliveAlly(npc, AllyRole2A.Trader);
+
+            case SystemNpcBehaviorType.AttackScienceAlly:
+                return HasAliveAlly(npc, AllyRole2A.Science);
+
+            case SystemNpcBehaviorType.AttackMedicAlly:
+                return HasAliveAlly(npc, AllyRole2A.Medic);
+
+            default:
+                return true;
         }
+    }
+
+    private bool HasAliveStation(
+        SystemNpcRuntimeState npc,
+        StationType stationType)
+    {
+        if (npc == null ||
+            _configService == null ||
+            string.IsNullOrWhiteSpace(npc.CurrentSystemId))
+        {
+            return false;
+        }
+
+        StarSystemConfig starSystem =
+            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
+
+        StationConfig station = starSystem != null
+            ? starSystem.Station
+            : null;
+
+        return station != null &&
+               station.IsActive &&
+               !station.IsDestroyed &&
+               station.StationType == stationType;
+    }
+
+    private bool HasAliveAlly(
+        SystemNpcRuntimeState npc,
+        AllyRole2A allyRole)
+    {
+        if (npc == null ||
+            _npcRuntimeService == null ||
+            _npcRuntimeService.Npcs == null ||
+            string.IsNullOrWhiteSpace(npc.CurrentSystemId))
+        {
+            return false;
+        }
+
+        return _npcRuntimeService.Npcs.Any(candidate =>
+            candidate != null &&
+            candidate.IsAlive &&
+            candidate.IsAlly &&
+            candidate.CurrentSystemId == npc.CurrentSystemId &&
+            candidate.RuntimeNpcId != npc.RuntimeNpcId &&
+            candidate.AllyRole == allyRole);
     }
 
     private void ApplyBehavior(

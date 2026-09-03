@@ -16,6 +16,7 @@ public interface IConfigService
     SystemHudConfig SystemHudConfig { get; }
     SystemVisualConfig SystemVisualConfig { get; }
     CombatFxVisualConfig CombatFxVisualConfig { get; }
+    NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig { get; }
 
     IReadOnlyList<SectorConfig> GetAllSectors();
 
