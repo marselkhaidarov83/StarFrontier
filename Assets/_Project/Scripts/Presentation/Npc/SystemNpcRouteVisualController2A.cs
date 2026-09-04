@@ -10,6 +10,7 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
     private const int RoutePlanMaxSteps = 8192;
     private const float DirectionThresholdSqrMagnitude = 0.0001f;
 
+
     [Header("View")]
     [SerializeField] private TravelLineView2A npcRouteLineView;
     [SerializeField] private TravelLineView2A playerRouteLineView;
@@ -57,6 +58,9 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
 
     [Header("Fallback")]
     [SerializeField] private float fallbackSecondsPerTick = 1f;
+    [SerializeField] private float routeRefreshIntervalSeconds = 0.15f;
+
+    private float _nextRouteRefreshTime;
 
     private int _hideRouteRequestedFrame = -1;
 
@@ -75,6 +79,9 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
     private IConfigService _configService;
     private ISystemEnemyService _enemyService;
     private IPlayerCombatTargetService _playerCombatTargetService;
+    private ISystemShipRouteService2A _shipRouteService;
+    private readonly SystemShipRouteResult2A _legacyEnemyRouteBuildResult =
+        new SystemShipRouteResult2A();
 
     private ITargetService2A _targetService;
     private ISystemTravelService _travelService;
@@ -201,10 +208,6 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
             }
             else
             {
-                LogCustom(
-                    "[NpcRouteDebug] LateUpdate hide route | Frame = " +
-                    Time.frameCount);
-
                 HideRoute();
                 _hideRouteRequestedFrame = -1;
                 return;
@@ -214,11 +217,18 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
         if (string.IsNullOrWhiteSpace(_selectedNpcId))
             return;
 
+        if (Time.unscaledTime < _nextRouteRefreshTime)
+            return;
+
+        _nextRouteRefreshTime =
+            Time.unscaledTime +
+            Mathf.Max(0.02f, routeRefreshIntervalSeconds);
+
         RefreshRoute();
     }
 
     private void OnTargetInfoPanelRequested(
-    SystemSelectedTargetInfoPanelRequestedEvent2A evt)
+     SystemSelectedTargetInfoPanelRequestedEvent2A evt)
     {
         _hideRouteRequestedFrame = -1;
 
@@ -254,6 +264,7 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
             _selectedNpcId = evt.TargetId;
             _selectedTargetIsLegacyEnemy = false;
 
+            _nextRouteRefreshTime = 0f;
             RefreshRoute();
             return;
         }
@@ -279,6 +290,7 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
             _selectedNpcId = evt.TargetId;
             _selectedTargetIsLegacyEnemy = true;
 
+            _nextRouteRefreshTime = 0f;
             RefreshRoute();
             return;
         }
@@ -630,6 +642,9 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
 
         Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemTravelService>(
             out _travelService);
+
+        Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemShipRouteService2A>(
+            out _shipRouteService);
     }
 
     private void GetRouteDotColors(
@@ -844,8 +859,8 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
     }
 
     private bool TryBuildLegacyEnemyRoutePreview(
-      SystemEnemyRuntimeState enemy,
-      TravelRoutePreview2A preview)
+    SystemEnemyRuntimeState enemy,
+    TravelRoutePreview2A preview)
     {
         if (preview == null)
             return false;
@@ -855,72 +870,16 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
         if (enemy == null || !enemy.IsAlive)
             return false;
 
-        if (_playerCombatTargetService == null)
+        if (!TryFindLegacyEnemyMovementController(
+                enemy.RuntimeEnemyId,
+                out EnemySystemMovementController movementController))
         {
-            LogCustom("[NpcRouteDebug] Legacy enemy route failed: player target service is null.");
+            LogCustom(
+                "[NpcRouteDebug] Legacy enemy route failed: movement controller not found. Enemy=" +
+                enemy.RuntimeEnemyId);
+
             return false;
         }
-
-        Vector3 destinationPosition =
-            _playerCombatTargetService.GetPlayerPosition();
-
-        destinationPosition.z = enemy.Position.z;
-
-        if (Vector3.Distance(
-                enemy.Position,
-                destinationPosition) <= ArrivalDistanceThreshold)
-        {
-            return false;
-        }
-
-        LegacyEnemyPreviewRouteState routeState =
-            GetOrCreateLegacyEnemyPreviewRouteState(enemy.RuntimeEnemyId);
-
-        bool shouldRebuild =
-            ShouldRebuildLegacyEnemyPreviewRoute(
-                routeState,
-                enemy,
-                destinationPosition);
-
-        if (shouldRebuild)
-        {
-            if (!TryBuildLegacyEnemyRoutePath(
-                    enemy,
-                    destinationPosition,
-                    _legacyEnemyRoutePath))
-            {
-                LogCustom("[NpcRouteDebug] Legacy enemy route failed: path was not built.");
-                return false;
-            }
-
-            routeState.Path.Clear();
-            routeState.Path.AddRange(_legacyEnemyRoutePath);
-            routeState.Destination = destinationPosition;
-            routeState.LastEnemyPosition = enemy.Position;
-            routeState.DistanceTravelled = 0f;
-        }
-        else
-        {
-            AccumulateLegacyEnemyPreviewDistance(
-                routeState,
-                enemy);
-        }
-
-        float totalPathLength =
-            GetPathLength(routeState.Path);
-
-        if (totalPathLength <= ArrivalDistanceThreshold)
-            return false;
-
-        routeState.DistanceTravelled =
-            Mathf.Clamp(
-                routeState.DistanceTravelled,
-                0f,
-                totalPathLength);
-
-        float distancePerTick =
-            Mathf.Max(0.01f, enemy.Speed) *
-            Mathf.Max(0.01f, GetSecondsPerTick());
 
         float safeSmallDotSpacing =
             npcRouteLineView != null
@@ -937,116 +896,121 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
                 ? Mathf.Max(0, npcRouteLineView.MaxSmallDots)
                 : 900;
 
-        float passedDistance =
-            Mathf.Clamp(
-                routeState.DistanceTravelled,
-                0f,
-                totalPathLength);
+        return movementController.TryBuildRoutePreview2A(
+            preview,
+            safeSmallDotSpacing,
+            safeMaxBigDots,
+            safeMaxSmallDots,
+            GetSecondsPerTick());
+    }
 
-        float firstBigDotDistance =
-            Mathf.Floor(passedDistance / distancePerTick) *
-            distancePerTick +
-            distancePerTick;
+    private bool TryFindLegacyEnemyMovementController(
+    string runtimeEnemyId,
+    out EnemySystemMovementController movementController)
+    {
+        movementController = null;
 
-        for (int visibleTickIndex = 1; visibleTickIndex <= safeMaxBigDots; visibleTickIndex++)
+        if (string.IsNullOrWhiteSpace(runtimeEnemyId))
+            return false;
+
+#if UNITY_2023_1_OR_NEWER
+        EnemySystemMapEntity[] enemyViews =
+            Object.FindObjectsByType<EnemySystemMapEntity>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+#else
+    EnemySystemMapEntity[] enemyViews =
+        Object.FindObjectsOfType<EnemySystemMapEntity>();
+#endif
+
+        for (int i = 0; i < enemyViews.Length; i++)
         {
-            float intervalStartDistance =
-                Mathf.Clamp(
-                    firstBigDotDistance -
-                    distancePerTick +
-                    (visibleTickIndex - 1) * distancePerTick,
-                    0f,
-                    totalPathLength);
+            EnemySystemMapEntity enemyView = enemyViews[i];
 
-            float distanceAtTick =
-                Mathf.Clamp(
-                    firstBigDotDistance +
-                    (visibleTickIndex - 1) * distancePerTick,
-                    0f,
-                    totalPathLength);
-
-            if (distanceAtTick <= passedDistance + 0.001f)
+            if (enemyView == null ||
+                !enemyView.IsBound ||
+                enemyView.RuntimeEnemyId != runtimeEnemyId)
+            {
                 continue;
+            }
 
-            AddSmallRoutePreviewDots(
-                preview,
-                routeState.Path,
-                intervalStartDistance,
-                distanceAtTick,
-                passedDistance,
-                visibleTickIndex,
-                safeSmallDotSpacing,
-                safeMaxSmallDots);
+            movementController =
+                enemyView.GetComponent<EnemySystemMovementController>();
 
-            preview.AddBigDot(
-                GetPointOnPathAtDistance(
-                    routeState.Path,
-                    distanceAtTick),
-                visibleTickIndex);
-
-            if (distanceAtTick >= totalPathLength)
-                break;
+            return movementController != null;
         }
 
-        return preview.HasDots;
+        return false;
     }
 
     private bool TryBuildLegacyEnemyRoutePath(
-        SystemEnemyRuntimeState enemy,
-        Vector3 destinationPosition,
-        List<Vector3> routePath)
+     SystemEnemyRuntimeState enemy,
+     Vector3 destinationPosition,
+     List<Vector3> routePath)
     {
         if (enemy == null || routePath == null)
             return false;
 
         routePath.Clear();
 
-        BuildLegacyEnemyTravelWaypoints(
-            enemy,
-            destinationPosition,
-            _legacyEnemyRouteWaypoints);
+        if (_shipRouteService == null)
+        {
+            LogCustom("[NpcRouteDebug] Legacy enemy route failed: ship route service is null.");
+            return false;
+        }
 
-        Vector2 facingDirection =
-            GetLegacyEnemyFacingDirection(
-                enemy,
-                destinationPosition);
+        SystemShipRouteRequest2A request =
+            new SystemShipRouteRequest2A
+            {
+                SystemId = enemy.SystemId,
+                StartPosition = enemy.Position,
+                DestinationPosition = destinationPosition,
+                StartFacingDirection = GetLegacyEnemyFacingDirection(
+                    enemy,
+                    destinationPosition),
+                TargetKind = SystemShipRouteTargetKind2A.Enemy,
+                Settings = CreateLegacyEnemyRouteSettings(enemy)
+            };
 
-        float speed =
-            Mathf.Max(0.01f, enemy.Speed);
+        if (!_shipRouteService.TryBuildRoute(
+                request,
+                _legacyEnemyRouteBuildResult))
+        {
+            return false;
+        }
 
-        float turnRadius =
-            enemy.EnemyConfig != null
+        routePath.AddRange(_legacyEnemyRouteBuildResult.Path);
+
+        return routePath.Count > 1;
+    }
+
+    private SystemShipRouteSettings2A CreateLegacyEnemyRouteSettings(
+    SystemEnemyRuntimeState enemy)
+    {
+        ShipMovementConfig movementConfig =
+            _configService != null
+                ? _configService.ShipMovementConfig
+                : null;
+
+        return new SystemShipRouteSettings2A
+        {
+            Speed = Mathf.Max(0.01f, enemy != null ? enemy.Speed : 0f),
+            TurnRadius = enemy != null && enemy.EnemyConfig != null
                 ? Mathf.Max(0f, enemy.EnemyConfig.TurnRadius)
-                : 0f;
-
-        float routeStepDistance =
-            GetRoutePlanStepDistance(speed);
-
-        float waypointPathLength =
-            GetPathLength(_legacyEnemyRouteWaypoints);
-
-        int maxSteps =
-            GetRoutePlanMaxSteps(
-                waypointPathLength,
-                turnRadius,
-                routeStepDistance);
-
-        bool routeBuilt =
-            TurnRadiusRouteMath2A.TryBuildWaypointPreviewPath(
-                routePath,
-                _legacyEnemyRouteWaypoints,
-                facingDirection,
-                routeStepDistance,
-                turnRadius,
-                ArrivalDistanceThreshold,
-                maxSteps,
-                GetIntermediateWaypointArrivalDistanceThreshold(
-                    _legacyEnemyRouteWaypoints,
-                    routeStepDistance),
-                GetRouteStraightExitAngleDegrees());
-
-        return routeBuilt &&
-               routePath.Count > 1;
+                : 0f,
+            ArrivalDistanceThreshold = ArrivalDistanceThreshold,
+            SunAvoidanceSafetyMargin = SunAvoidanceSafetyMargin,
+            SunAvoidanceArcSegments = SunAvoidanceArcSegments,
+            AllowSunAvoidance = true,
+            RouteSubstepsPerTick = movementConfig != null ? movementConfig.RouteSubstepsPerTick : 10,
+            RouteStraightExitAngleDegrees = movementConfig != null ? movementConfig.RouteStraightExitAngleDegrees : 3f,
+            TurnRadiusAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteTurnRadiusAdjustmentStepPercent : 5f,
+            SpeedAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteSpeedAdjustmentStepPercent : 2.5f,
+            MinTurnRadiusAdjustmentFactor = movementConfig != null ? movementConfig.MinRouteTurnRadiusAdjustmentFactor : 0.05f,
+            MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f,
+            MaxRoutePlanSteps = RoutePlanMaxSteps,
+            SunAvoidanceTurnRouteReserveMultiplier = 1.5f
+        };
     }
 
     private void BuildLegacyEnemyTravelWaypoints(

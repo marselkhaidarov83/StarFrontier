@@ -17,6 +17,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
     public SystemNpcMovementRouteService()
     {
+        _debugEnabled = false;
         _debugStop = true;
 
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
@@ -24,6 +25,8 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _npcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
         _playerCombatTargetService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerCombatTargetService>();
+
+        LogCustom("[NPC-ROUTE-DEBUG] Service debug enabled.");
     }
 
     public Vector3 GetNextTargetPosition(SystemNpcRuntimeState npc)
@@ -46,7 +49,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
     private Vector3 GetAllyTargetPosition(SystemNpcRuntimeState npc)
     {
         if (TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition))
-            return GetApproachPosition(npc.CurrentPosition, npcTargetPosition, KeepDistanceRadius);
+            return GetCombatApproachPosition(npc, npcTargetPosition);
 
         if (npc.TargetSystemId != null)
         {
@@ -87,11 +90,11 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
     private Vector3 GetPirateTargetPosition(SystemNpcRuntimeState npc)
     {
         if (TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition))
-            return GetApproachPosition(npc.CurrentPosition, npcTargetPosition, KeepDistanceRadius);
+            return GetCombatApproachPosition(npc, npcTargetPosition);
 
         if (npc.TargetSystemId != null)
         {
-            LogCustom("Ally target system link = " +
+            LogCustom("Pirate target system link = " +
                       npc.TargetSystemId + ", " +
                       npc.TargetSystemExitPoint);
 
@@ -106,7 +109,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId))
         {
             Vector3 planetPosition = GetPlanetPosition(npc.TargetPlanetId);
-            LogCustom("Ally target planet = " + npc.TargetPlanetId + ", " + planetPosition);
+            LogCustom("Pirate target planet = " + npc.TargetPlanetId + ", " + planetPosition);
 
             if (!IsInvalidRoutePoint(planetPosition))
                 return planetPosition;
@@ -127,21 +130,18 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
     private Vector3 GetEnemyTargetPosition(SystemNpcRuntimeState npc)
     {
-        // 1. Враг сначала сближается с союзником.
         if (TryFindNearestAllyPosition(npc, out Vector3 allyPosition))
         {
             LogCustom("Enemy target = nearest ally");
-            return GetApproachPosition(npc.CurrentPosition, allyPosition, KeepDistanceRadius);
+            return GetCombatApproachPosition(npc, allyPosition);
         }
 
-        // 2. Если союзников нет, враг сближается с игроком.
         if (TryGetPlayerPositionInSameSystem(npc, out Vector3 playerPosition))
         {
             LogCustom("Enemy target = player");
-            return GetApproachPosition(npc.CurrentPosition, playerPosition, KeepDistanceRadius);
+            return GetCombatApproachPosition(npc, playerPosition);
         }
 
-        // 3. Если игрока нет, враг летит к ближайшей inhabited planet.
         if (TryFindNearestInhabitedPlanetPosition(npc, out Vector3 planetPosition))
         {
             LogCustom("Enemy target = nearest inhabited planet");
@@ -297,19 +297,87 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
     }
 
     private Vector3 GetApproachPosition(
-        Vector3 currentPosition,
-        Vector3 targetPosition,
-        float radius)
+    Vector3 currentPosition,
+    Vector3 targetPosition,
+    float radius)
     {
-        float distance = Vector3.Distance(currentPosition, targetPosition);
+        Vector3 fromTargetToCurrent =
+            currentPosition - targetPosition;
 
-        if (distance < radius)
+        fromTargetToCurrent.z = 0f;
+
+        if (fromTargetToCurrent.sqrMagnitude <= 0.0001f)
+            fromTargetToCurrent = Vector3.up;
+
+        float safeRadius =
+            Mathf.Max(0f, radius);
+
+        Vector3 approachPosition =
+            targetPosition +
+            fromTargetToCurrent.normalized * safeRadius;
+
+        approachPosition.z = -2f;
+
+        return approachPosition;
+    }
+
+    private Vector3 GetCombatApproachPosition(
+        SystemNpcRuntimeState npc,
+        Vector3 targetPosition)
+    {
+        if (npc == null)
+            return targetPosition;
+
+        float combatRange =
+            GetAllWeaponsCanShootRange(npc);
+
+        Vector3 approachPosition =
+            GetApproachPosition(
+                npc.CurrentPosition,
+                targetPosition,
+                combatRange);
+
+        return approachPosition;
+    }
+
+    private float GetAllWeaponsCanShootRange(SystemNpcRuntimeState npc)
+    {
+        if (npc == null ||
+            npc.Weapons == null ||
+            npc.Weapons.Count == 0)
         {
-            Vector2 randomOffset = Random.insideUnitCircle * radius;
-            return targetPosition + new Vector3(randomOffset.x, randomOffset.y, 0f);
+            return KeepDistanceRadius;
         }
 
-        return targetPosition;
+        float minRange = float.MaxValue;
+
+        for (int i = 0; i < npc.Weapons.Count; i++)
+        {
+            SystemNpcWeaponRuntimeState weapon = npc.Weapons[i];
+
+            if (weapon == null ||
+                weapon.ShotDistance <= 0f)
+            {
+                continue;
+            }
+
+            minRange =
+                Mathf.Min(
+                    minRange,
+                    weapon.ShotDistance);
+        }
+
+        if (minRange == float.MaxValue)
+            return KeepDistanceRadius;
+
+        return Mathf.Max(
+            ArrivalSafeDistance(),
+            minRange * 0.9f);
+    }
+
+    private float ArrivalSafeDistance()
+    {
+        return 3f;
     }
 
     private Vector3 GetRandomFallbackPosition(SystemNpcRuntimeState npc)

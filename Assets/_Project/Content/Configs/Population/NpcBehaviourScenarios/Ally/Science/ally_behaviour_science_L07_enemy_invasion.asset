@@ -23,4 +23,9 @@ MonoBehaviour:
     targetUnitSide: 0
     targetUnitType: 0
     weight: 100
+  - behaviorType: 21
+    targetStationType: 0
+    targetUnitSide: 0
+    targetUnitType: 0
+    weight: 1
   engageEnemiesWeight: 0

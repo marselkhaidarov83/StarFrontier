@@ -53,19 +53,33 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
 
     private void OnSystemNpcTravelStateChangedEvent(SystemNpcTravelStateChangedEvent evt)
     {
-        if (evt.TravelState.Equals(SystemNpcTravelState.TravelingToAnotherSystem))
+        if (evt.TravelState == SystemNpcTravelState.OnPlanet)
+        {
+            RemoveView(evt.RuntimeNpcId);
+            return;
+        }
+
+        if (evt.Npc != null &&
+            (evt.Npc.IsOnPlanet ||
+             evt.Npc.TravelState == SystemNpcTravelState.OnPlanet))
+        {
+            RemoveView(evt.RuntimeNpcId);
+            return;
+        }
+
+        if (evt.TravelState == SystemNpcTravelState.TravelingToAnotherSystem)
         {
             if (evt.DestinationSystemId != GetCurrentSystemId())
             {
                 RemoveView(evt.RuntimeNpcId);
-                return;        
-            }
-            else
-            {
-                CreateViewIfNeeded(evt.Npc);
                 return;
-            }            
+            }
+
+            CreateViewIfNeeded(evt.Npc);
+            return;
         }
+
+        CreateViewIfNeeded(evt.Npc);
     }
 
     private void Start()
@@ -148,6 +162,13 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
         if (npc == null || !npc.IsAlive)
             return;
 
+        if (npc.IsOnPlanet ||
+            npc.TravelState == SystemNpcTravelState.OnPlanet)
+        {
+            RemoveView(npc.RuntimeNpcId);
+            return;
+        }
+
         string currentSystemId = GetCurrentSystemId();
 
         if (npc.CurrentSystemId != currentSystemId)
@@ -171,6 +192,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
             Quaternion.identity,
             npc.NpcType == SystemNpcType.Enemy ? enemyRoot : allyRoot
         );
+
         view.Bind(
             npc,
             sprite,

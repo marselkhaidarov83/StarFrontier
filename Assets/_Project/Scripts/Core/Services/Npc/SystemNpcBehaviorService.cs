@@ -21,13 +21,17 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     public SystemNpcBehaviorService()
     {
-        _debugStop = true;
+        _debugEnabled = true;
+        _debugStop = false;
+
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _npcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _routeService = Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _systemSecurityService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
+
+        LogCustom("[NPC-MILITARY-BEHAVIOR] Service debug enabled.");
     }
 
     public void Tick(StarSystemConfig starSystem, int currentTick)
@@ -101,18 +105,82 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (npc == null || !npc.IsAlive)
             return;
 
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] Assign start. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", System=" + npc.CurrentSystemId +
+                ", CurrentPlanet=" + npc.CurrentPlanetId +
+                ", TargetPlanet=" + npc.TargetPlanetId +
+                ", IsOnPlanet=" + npc.IsOnPlanet +
+                ", PrevBehavior=" + npc.PrevBehavior +
+                ", CurrentBehavior=" + npc.CurrentBehavior +
+                ", TravelState=" + npc.TravelState +
+                ", Position=" + npc.CurrentPosition +
+                ", TargetPosition=" + npc.TargetPosition +
+                ", Tick=" + currentTick);
+        }
+
         SystemNpcBehaviorType nextBehavior = PickFallbackBehavior(npc);
 
-        // LogCustom(
-        //     $"NPC: {npc.RuntimeNpcId}, Type: {npc.NpcType}, CurrentBehavior: {npc.CurrentBehavior}, NextBehavior: {nextBehavior}");
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] Assign picked. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", PrevBehavior=" + npc.PrevBehavior +
+                ", PickedBehavior=" + nextBehavior +
+                ", Tick=" + currentTick);
+        }
 
         ApplyBehavior(npc, nextBehavior, currentTick);
+    }
+
+    private void NormalizeInvalidBehaviorTransitionContext(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return;
+
+        bool hasKnownCurrentPlanet =
+            npc.IsOnPlanet &&
+            !string.IsNullOrWhiteSpace(npc.CurrentPlanetId);
+
+        if (npc.PrevBehavior != SystemNpcBehaviorType.PlanetToPlanetTravel)
+            return;
+
+        if (hasKnownCurrentPlanet)
+            return;
+
+        LogCustom(
+            "[NPC-BEHAVIOR-DEBUG] Invalid previous PlanetToPlanetTravel context fixed. " +
+            "Npc=" + npc.RuntimeNpcId +
+            ", PrevBehavior=" + npc.PrevBehavior +
+            ", CurrentBehavior=" + npc.CurrentBehavior +
+            ", TravelState=" + npc.TravelState +
+            ", IsOnPlanet=" + npc.IsOnPlanet +
+            ", CurrentPlanet=" + npc.CurrentPlanetId);
+
+        npc.PrevBehavior = SystemNpcBehaviorType.None;
     }
 
     public void CompleteBehavior(SystemNpcRuntimeState npc, int currentTick)
     {
         if (npc == null)
             return;
+
+        LogCustom(
+            "[NPC-BEHAVIOR-DEBUG] CompleteBehavior before clear. " +
+            "Npc=" + npc.RuntimeNpcId +
+            ", PrevBehavior=" + npc.PrevBehavior +
+            ", CurrentBehavior=" + npc.CurrentBehavior +
+            ", TravelState=" + npc.TravelState +
+            ", IsOnPlanet=" + npc.IsOnPlanet +
+            ", CurrentPlanet=" + npc.CurrentPlanetId +
+            ", TargetPlanet=" + npc.TargetPlanetId +
+            ", Position=" + npc.CurrentPosition +
+            ", TargetPosition=" + npc.TargetPosition +
+            ", Tick=" + currentTick);
 
         ClearBehavior(npc);
         AssignBehavior(npc, currentTick);
@@ -373,8 +441,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private SystemNpcBehaviorType PickScenarioBehavior(
-NpcBehaviourScenarioConfig behaviorScenario,
-SystemNpcRuntimeState npc)
+    NpcBehaviourScenarioConfig behaviorScenario,
+    SystemNpcRuntimeState npc)
     {
         if (behaviorScenario == null)
             return SystemNpcBehaviorType.None;
@@ -390,8 +458,28 @@ SystemNpcRuntimeState npc)
                 .Where(weight => weight != null && weight.Weight > 0)
                 .ToList();
 
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] Pick weights before filters. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", PrevBehavior=" + npc.PrevBehavior +
+                ", Scenario=" + behaviorScenario.Id +
+                ", Weights=" + FormatBehaviorWeightsForDebug(weights));
+        }
+
         RemoveImpossibleNextBehaviors(weights, npc);
         RemoveRoleForbiddenBehaviors(weights, npc);
+
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] Pick weights after filters. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", PrevBehavior=" + npc.PrevBehavior +
+                ", Scenario=" + behaviorScenario.Id +
+                ", Weights=" + FormatBehaviorWeightsForDebug(weights));
+        }
 
         if (weights.Count == 0)
             return SystemNpcBehaviorType.None;
@@ -412,10 +500,34 @@ SystemNpcRuntimeState npc)
             cumulative += Mathf.Max(0, item.Weight);
 
             if (roll < cumulative)
+            {
+                if (IsMilitaryDebugNpc(npc))
+                {
+                    LogCustom(
+                        "[NPC-MILITARY-BEHAVIOR] Pick result. " +
+                        "Npc=" + npc.RuntimeNpcId +
+                        ", Roll=" + roll +
+                        ", TotalWeight=" + totalWeight +
+                        ", PickedBehavior=" + item.BehaviorType);
+                }
+
                 return item.BehaviorType;
+            }
         }
 
         return weights[^1].BehaviorType;
+    }
+
+    private string FormatBehaviorWeightsForDebug(
+    IReadOnlyList<SystemNpcBehaviorWeight> weights)
+    {
+        if (weights == null || weights.Count == 0)
+            return "empty";
+
+        return string.Join(
+            "; ",
+            weights.Select(weight =>
+                weight.BehaviorType + "=" + weight.Weight));
     }
 
     private void RemoveRoleForbiddenBehaviors(
@@ -494,11 +606,17 @@ SystemNpcRuntimeState npc)
     }
 
     private bool CanUseBehaviorInCurrentConditions(
-        SystemNpcRuntimeState npc,
-        SystemNpcBehaviorType behaviorType)
+    SystemNpcRuntimeState npc,
+    SystemNpcBehaviorType behaviorType)
     {
         switch (behaviorType)
         {
+            case SystemNpcBehaviorType.StayOnPlanetForDays:
+                return IsNpcOnKnownPlanet(npc);
+
+            case SystemNpcBehaviorType.AnnihilateOnPlanet:
+                return IsNpcOnKnownPlanet(npc);
+
             case SystemNpcBehaviorType.AttackMeteorite:
                 return false;
 
@@ -535,6 +653,13 @@ SystemNpcRuntimeState npc)
             default:
                 return true;
         }
+    }
+
+    private bool IsNpcOnKnownPlanet(SystemNpcRuntimeState npc)
+    {
+        return npc != null &&
+               npc.IsOnPlanet &&
+               !string.IsNullOrWhiteSpace(npc.CurrentPlanetId);
     }
 
     private bool HasAliveStation(
@@ -583,18 +708,38 @@ SystemNpcRuntimeState npc)
     }
 
     private void ApplyBehavior(
-        SystemNpcRuntimeState npc,
-        SystemNpcBehaviorType nextBehavior,
-        int currentTick)
+    SystemNpcRuntimeState npc,
+    SystemNpcBehaviorType nextBehavior,
+    int currentTick)
     {
+        if (npc == null)
+            return;
+
+        SystemNpcBehaviorType previousBehaviorBeforeApply =
+            npc.PrevBehavior;
+
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] ApplyBehavior start. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", PrevBehavior=" + npc.PrevBehavior +
+                ", NextBehavior=" + nextBehavior +
+                ", CurrentBehaviorBefore=" + npc.CurrentBehavior +
+                ", TravelStateBefore=" + npc.TravelState +
+                ", IsOnPlanetBefore=" + npc.IsOnPlanet +
+                ", CurrentPlanetBefore=" + npc.CurrentPlanetId +
+                ", TargetPlanetBefore=" + npc.TargetPlanetId +
+                ", PositionBefore=" + npc.CurrentPosition +
+                ", TargetPositionBefore=" + npc.TargetPosition +
+                ", Tick=" + currentTick);
+        }
+
         npc.CurrentBehavior = nextBehavior;
         npc.HasActiveBehavior = true;
         npc.BehaviorStartedTick = currentTick;
         npc.BehaviorEndsTick = 0;
         npc.BehaviorTargetRuntimeNpcId = null;
-
-        // LogCustom(
-        //     $"NPC: {npc.RuntimeNpcId}, Type: {npc.NpcType}, CurrentBehavior: {npc.CurrentBehavior}, NextBehavior: {nextBehavior}");
 
         switch (nextBehavior)
         {
@@ -627,22 +772,67 @@ SystemNpcRuntimeState npc)
                 break;
         }
 
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] ApplyBehavior after setup BEFORE event. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", PrevBehaviorBeforeApply=" + previousBehaviorBeforeApply +
+                ", CurrentBehavior=" + npc.CurrentBehavior +
+                ", HasActiveBehavior=" + npc.HasActiveBehavior +
+                ", TravelState=" + npc.TravelState +
+                ", IsOnPlanet=" + npc.IsOnPlanet +
+                ", CurrentPlanet=" + npc.CurrentPlanetId +
+                ", TargetPlanet=" + npc.TargetPlanetId +
+                ", StartPosition=" + npc.StartPosition +
+                ", CurrentPosition=" + npc.CurrentPosition +
+                ", TargetPosition=" + npc.TargetPosition +
+                ", CurrentMovementTargetPosition=" + npc.CurrentMovementTargetPosition +
+                ", TickMovementTargetPosition=" + npc.TickMovementTargetPosition +
+                ", BehaviorEndsTick=" + npc.BehaviorEndsTick +
+                ", Tick=" + currentTick);
+        }
+
         _eventBus.Publish(new SystemNpcBehaviorChangedEvent(
             npc.RuntimeNpcId,
             npc.CurrentBehavior
         ));
+
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] ApplyBehavior event published. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", PublishedBehavior=" + npc.CurrentBehavior +
+                ", TravelState=" + npc.TravelState +
+                ", IsOnPlanet=" + npc.IsOnPlanet +
+                ", CurrentPlanet=" + npc.CurrentPlanetId +
+                ", TargetPlanet=" + npc.TargetPlanetId +
+                ", Position=" + npc.CurrentPosition +
+                ", TargetPosition=" + npc.TargetPosition +
+                ", Tick=" + currentTick);
+        }
+
         LogCustom(
             $"NPC: {npc.RuntimeNpcId}, Type: {npc.NpcType}, CurrentBehavior: {npc.CurrentBehavior}, TargetPlanet: {npc.TargetPlanetId}");
     }
 
     private void SetupPlanetToPlanetTravel(SystemNpcRuntimeState npc)
     {
-        SyncNpcPositionWithCurrentPlanet(
-            npc,
-            true);
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] SetupPlanetToPlanetTravel start. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", CurrentPlanet=" + npc.CurrentPlanetId +
+                ", Position=" + npc.CurrentPosition +
+                ", TargetPosition=" + npc.TargetPosition +
+                ", TravelState=" + npc.TravelState);
+        }
 
-        string previousPlanetId =
-            npc.CurrentPlanetId;
+        SyncNpcPositionWithCurrentPlanet(npc, true);
+
+        string previousPlanetId = npc.CurrentPlanetId;
 
         ClearMovementTargets(npc);
 
@@ -654,6 +844,9 @@ SystemNpcRuntimeState npc)
 
         if (starSystem == null || starSystem.PlanetRefs == null)
         {
+            if (IsMilitaryDebugNpc(npc))
+                LogCustom("[NPC-MILITARY-BEHAVIOR] Planet travel fallback: starSystem or planets missing.");
+
             npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
             SetupPatrolSystem(npc);
             return;
@@ -661,9 +854,6 @@ SystemNpcRuntimeState npc)
 
         PlanetConfig[] inhabitedPlanets = starSystem.PlanetRefs
             .Where(p => p != null && p.IsInhabited == true)
-            .ToArray();
-
-        inhabitedPlanets = inhabitedPlanets
             .Where(p => p.Id != previousPlanetId)
             .ToArray();
 
@@ -673,18 +863,71 @@ SystemNpcRuntimeState npc)
 
         if (randomPlanet == null)
         {
+            if (IsMilitaryDebugNpc(npc))
+            {
+                LogCustom(
+                    "[NPC-MILITARY-BEHAVIOR] Planet travel fallback: no target planet. " +
+                    "PreviousPlanet=" + previousPlanetId);
+            }
+
             npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
             SetupPatrolSystem(npc);
             return;
         }
 
+        Vector3 planetPosition = _orbitalMotionService != null &&
+                                 randomPlanet.PlanetOrbit != null
+            ? _orbitalMotionService.GetPlanetCurrentPosition(randomPlanet.PlanetOrbit)
+            : Vector3.zero;
+
+        planetPosition.z = npc.CurrentPosition.z;
+
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPlanetId = randomPlanet.Id;
+        npc.TargetPosition = planetPosition;
+        npc.CurrentMovementTargetPosition = planetPosition;
+        npc.TickMovementTargetPosition = planetPosition;
         npc.TravelProgress01 = 0f;
+
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] SetupPlanetToPlanetTravel target set. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", FromPlanet=" + previousPlanetId +
+                ", ToPlanet=" + randomPlanet.Id +
+                ", StartPosition=" + npc.StartPosition +
+                ", PlanetPosition=" + planetPosition +
+                ", Distance=" + Vector3.Distance(npc.StartPosition, planetPosition) +
+                ", Speed=" + npc.Speed);
+        }
     }
 
     private void SetupStayOnPlanet(SystemNpcRuntimeState npc, int currentTick)
     {
+        if (!IsNpcOnKnownPlanet(npc))
+        {
+            LogCustom(
+                "[NPC-BEHAVIOR-DEBUG] StayOnPlanet rejected: NPC is not on known planet. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", PrevBehavior=" + npc.PrevBehavior +
+                ", TravelState=" + npc.TravelState +
+                ", IsOnPlanet=" + npc.IsOnPlanet +
+                ", CurrentPlanet=" + npc.CurrentPlanetId);
+
+            npc.PrevBehavior = SystemNpcBehaviorType.None;
+
+            if (CanNpcPatrolSystem(npc))
+            {
+                npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+                SetupPatrolSystem(npc);
+                return;
+            }
+
+            ClearBehavior(npc);
+            return;
+        }
+
         ClearMovementTargets(npc);
 
         npc.TravelState = SystemNpcTravelState.OnPlanet;
@@ -698,6 +941,25 @@ SystemNpcRuntimeState npc)
 
     private void SetupTravelToAnotherSystem(SystemNpcRuntimeState npc)
     {
+        if (npc == null)
+            return;
+
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] SetupTravelToAnotherSystem start. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", CurrentSystem=" + npc.CurrentSystemId +
+                ", CurrentPlanet=" + npc.CurrentPlanetId +
+                ", IsOnPlanet=" + npc.IsOnPlanet +
+                ", Position=" + npc.CurrentPosition +
+                ", TravelState=" + npc.TravelState);
+        }
+
+        SyncNpcPositionWithCurrentPlanet(
+            npc,
+            true);
+
         StarSystemConfig currentSystem =
             _configService.GetStarSystemConfigById(npc.CurrentSystemId);
 
@@ -719,20 +981,59 @@ SystemNpcRuntimeState npc)
             return;
         }
 
+        Vector3 exitPoint = route.GetExitPoint(currentSystem.Id);
+        Vector3 entryPoint = route.GetEntryPoint(targetSystem.Id);
+
+        if (IsInvalidRoutePoint(currentSystem, exitPoint) ||
+            IsInvalidRoutePoint(targetSystem, entryPoint))
+        {
+            npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+            SetupPatrolSystem(npc);
+            return;
+        }
+
+        ClearMovementTargets(npc);
+
         npc.TravelState = SystemNpcTravelState.TravelingToAnotherSystem;
         npc.IsOnPlanet = false;
+        npc.CurrentPlanetId = null;
 
         npc.TargetSystemId = targetSystem.Id;
-        npc.TargetSystemExitPoint = route.GetExitPoint(currentSystem.Id);
-        npc.TargetSystemEntryPoint = route.GetEntryPoint(targetSystem.Id);
+        npc.TargetSystemExitPoint = exitPoint;
+        npc.TargetSystemEntryPoint = entryPoint;
 
         npc.StartPosition = npc.CurrentPosition;
-        npc.TargetPosition = Vector3.zero;
-        npc.TargetPlanetId = null;
-        npc.CurrentTargetRuntimeNpcId = null;
+        npc.TargetPosition = exitPoint;
+        npc.CurrentMovementTargetPosition = exitPoint;
+        npc.TickMovementTargetPosition = exitPoint;
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
         npc.TravelProgress01 = 0f;
-    }
 
+        Vector3 direction = exitPoint - npc.CurrentPosition;
+        direction.z = 0f;
+
+        if (direction.sqrMagnitude > 0.0001f)
+        {
+            direction.Normalize();
+            npc.FacingDirection = direction;
+            npc.TickMovementDirection = direction;
+        }
+
+        if (IsMilitaryDebugNpc(npc))
+        {
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] SetupTravelToAnotherSystem target set. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", FromSystem=" + currentSystem.Id +
+                ", ToSystem=" + targetSystem.Id +
+                ", StartPosition=" + npc.StartPosition +
+                ", ExitPoint=" + npc.TargetSystemExitPoint +
+                ", EntryPoint=" + npc.TargetSystemEntryPoint +
+                ", DistanceToExit=" + Vector3.Distance(npc.StartPosition, npc.TargetSystemExitPoint) +
+                ", Speed=" + npc.Speed);
+        }
+    }
 
     private RouteConfig FindUnlockedRouteFromCurrentSystem(StarSystemConfig currentSystem)
     {
@@ -1088,6 +1389,14 @@ SystemNpcRuntimeState npc)
             return;
         }
 
+        patrolTargetPosition.z = -2f;
+
+        Vector3 currentPosition =
+            npc.CurrentPosition;
+
+        currentPosition.z = -2f;
+        npc.CurrentPosition = currentPosition;
+
         if (Vector3.Distance(npc.CurrentPosition, patrolTargetPosition) <= 0.1f)
         {
             ClearBehavior(npc);
@@ -1099,20 +1408,23 @@ SystemNpcRuntimeState npc)
 
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPosition = patrolTargetPosition;
-        npc.CurrentMovementTargetPosition = patrolTargetPosition;
-        npc.TickMovementTargetPosition = patrolTargetPosition;
+
+        npc.CurrentMovementTargetPosition = Vector3.zero;
+        npc.TickMovementTargetPosition = Vector3.zero;
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
+
         npc.TravelProgress01 = 0f;
 
-        Vector3 patrolDirection =
-            patrolTargetPosition - npc.CurrentPosition;
-
-        patrolDirection.z = 0f;
-
-        if (patrolDirection.sqrMagnitude > 0.0001f)
+        if (IsMilitaryDebugNpc(npc))
         {
-            patrolDirection.Normalize();
-            npc.FacingDirection = patrolDirection;
-            npc.TickMovementDirection = patrolDirection;
+            LogCustom(
+                "[NPC-MILITARY-BEHAVIOR] SetupPatrolSystem route target assigned without forced facing. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", CurrentPosition=" + npc.CurrentPosition +
+                ", PatrolTarget=" + patrolTargetPosition +
+                ", FacingDirectionKept=" + npc.FacingDirection +
+                ", TickMovementDirectionKept=" + npc.TickMovementDirection);
         }
     }
 
@@ -1369,5 +1681,12 @@ SystemNpcRuntimeState npc)
         }
 
         return fallback;
+    }
+
+    private bool IsMilitaryDebugNpc(SystemNpcRuntimeState npc)
+    {
+        return npc != null &&
+               npc.IsAlly &&
+               npc.AllyRole == AllyRole2A.Military;
     }
 }

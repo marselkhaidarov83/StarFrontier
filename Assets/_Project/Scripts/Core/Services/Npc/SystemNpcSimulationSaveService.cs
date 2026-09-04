@@ -297,14 +297,21 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
         if (!npc.IsAlive)
         {
             npc.HasActiveBehavior = false;
+            npc.PrevBehavior = SystemNpcBehaviorType.None;
             npc.CurrentBehavior = SystemNpcBehaviorType.None;
             npc.TravelState = SystemNpcTravelState.Idle;
             return;
         }
 
+        if (npc.IsOnPlanet && string.IsNullOrWhiteSpace(npc.CurrentPlanetId))
+        {
+            npc.IsOnPlanet = false;
+            npc.CurrentPlanetId = null;
+        }
+
         if (ShouldDropRestoredBehavior(npc.CurrentBehavior))
         {
-            npc.PrevBehavior = npc.CurrentBehavior;
+            npc.PrevBehavior = SystemNpcBehaviorType.None;
             npc.CurrentBehavior = SystemNpcBehaviorType.None;
             npc.HasActiveBehavior = false;
             npc.BehaviorStartedTick = 0;

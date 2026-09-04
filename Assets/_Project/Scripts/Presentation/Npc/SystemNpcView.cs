@@ -64,16 +64,41 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         if (evt.RuntimeNpcId != runtimeNpcId)
             return;
 
+        SystemNpcRuntimeState npc = null;
+
+        if (_runtimeService != null)
+            _runtimeService.TryGetNpc(runtimeNpcId, out npc);
+
+        bool isMilitary =
+            npc != null &&
+            npc.IsAlly &&
+            npc.AllyRole == AllyRole2A.Military;
+
+        bool wasActive =
+            gameObject.activeSelf;
+
         bool shouldBeActive =
             evt.BehaviorType != SystemNpcBehaviorType.StayOnPlanetForDays &&
             evt.BehaviorType != SystemNpcBehaviorType.AnnihilateOnPlanet;
 
-        if (shouldBeActive &&
-            _runtimeService != null &&
-            _runtimeService.TryGetNpc(
-                runtimeNpcId,
-                out SystemNpcRuntimeState npc) &&
-            npc != null)
+        if (isMilitary)
+        {
+            LogCustom(
+                "[NPC-MILITARY-VIEW] BehaviorChanged received. " +
+                "Npc=" + runtimeNpcId +
+                ", EventBehavior=" + evt.BehaviorType +
+                ", WasActive=" + wasActive +
+                ", ShouldBeActive=" + shouldBeActive +
+                ", RuntimeBehavior=" + npc.CurrentBehavior +
+                ", TravelState=" + npc.TravelState +
+                ", IsOnPlanet=" + npc.IsOnPlanet +
+                ", CurrentPlanet=" + npc.CurrentPlanetId +
+                ", TargetPlanet=" + npc.TargetPlanetId +
+                ", RuntimePosition=" + npc.CurrentPosition +
+                ", ViewPositionBefore=" + transform.position);
+        }
+
+        if (shouldBeActive && npc != null)
         {
             transform.position = npc.CurrentPosition;
             transform.rotation = _initialRootRotation;
@@ -82,6 +107,17 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
         }
 
         gameObject.SetActive(shouldBeActive);
+
+        if (isMilitary)
+        {
+            LogCustom(
+                "[NPC-MILITARY-VIEW] BehaviorChanged applied. " +
+                "Npc=" + runtimeNpcId +
+                ", EventBehavior=" + evt.BehaviorType +
+                ", ActiveAfter=" + gameObject.activeSelf +
+                ", RuntimePosition=" + npc.CurrentPosition +
+                ", ViewPositionAfter=" + transform.position);
+        }
     }
 
     private void Update()

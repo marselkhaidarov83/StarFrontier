@@ -152,30 +152,41 @@ public static class TurnRadiusRouteMath2A
     }
 
     public static bool TryBuildWaypointPreviewPath(
-     List<Vector3> result,
-     IReadOnlyList<Vector3> waypoints,
-     Vector2 startFacingDirection,
-     float movementDistancePerStep,
-     float turnRadius,
-     float arrivalDistanceThreshold,
-     int maxSteps,
-     float intermediateWaypointArrivalDistanceThreshold = -1f,
-     float straightExitAngleDegrees = 0f)
+    List<Vector3> result,
+    IReadOnlyList<Vector3> waypoints,
+    Vector2 startFacingDirection,
+    float movementDistancePerStep,
+    float turnRadius,
+    float arrivalDistanceThreshold,
+    int maxSteps,
+    float intermediateWaypointArrivalDistanceThreshold = -1f,
+    float straightExitAngleDegrees = 0f,
+    System.Action<string> debugLog = null,
+    string debugPrefix = "")
     {
         if (result == null)
+        {
+            debugLog?.Invoke(debugPrefix + " Result list is null.");
             return false;
+        }
 
         result.Clear();
 
         if (waypoints == null || waypoints.Count == 0)
+        {
+            debugLog?.Invoke(debugPrefix + " Waypoints are empty.");
             return false;
+        }
 
         Vector3 currentPosition = waypoints[0];
         currentPosition.z = -2f;
         result.Add(currentPosition);
 
         if (waypoints.Count == 1)
+        {
+            debugLog?.Invoke(debugPrefix + " Single waypoint route accepted.");
             return true;
+        }
 
         Vector2 facingDirection =
             NormalizeDirectionOrUp(startFacingDirection);
@@ -186,6 +197,13 @@ public static class TurnRadiusRouteMath2A
         if (pathLength <= arrivalDistanceThreshold)
         {
             result.Add(waypoints[waypoints.Count - 1]);
+
+            debugLog?.Invoke(
+                debugPrefix +
+                " Path accepted: pathLength <= arrival threshold. " +
+                "PathLength=" + pathLength +
+                ", ArrivalThreshold=" + arrivalDistanceThreshold);
+
             return true;
         }
 
@@ -198,6 +216,12 @@ public static class TurnRadiusRouteMath2A
         float lastPathProgress =
             0f;
 
+        float bestDistanceToFinal =
+            float.MaxValue;
+
+        float bestPathProgress =
+            0f;
+
         int safeMaxSteps =
             Mathf.Max(1, maxSteps);
 
@@ -207,14 +231,33 @@ public static class TurnRadiusRouteMath2A
         bool routeHasIntermediateWaypoints =
             waypoints.Count > 2;
 
+        debugLog?.Invoke(
+            debugPrefix +
+            " Start. " +
+            "WaypointCount=" + waypoints.Count +
+            ", PathLength=" + pathLength +
+            ", StartPosition=" + currentPosition +
+            ", FinalDestination=" + finalDestination +
+            ", StartFacing=" + facingDirection +
+            ", MovementDistancePerStep=" + movementDistancePerStep +
+            ", TurnRadius=" + turnRadius +
+            ", ArrivalThreshold=" + arrivalDistanceThreshold +
+            ", IntermediateThreshold=" + intermediateWaypointArrivalDistanceThreshold +
+            ", StraightExitAngleDegrees=" + straightExitAngleDegrees +
+            ", LookAheadDistance=" + lookAheadDistance +
+            ", MaxSteps=" + safeMaxSteps);
+
         for (int i = 0; i < safeMaxSteps; i++)
         {
+            float pathProgressBefore =
+                GetClosestDistanceOnPath(
+                    waypoints,
+                    currentPosition);
+
             float pathProgress =
                 Mathf.Max(
                     lastPathProgress,
-                    GetClosestDistanceOnPath(
-                        waypoints,
-                        currentPosition));
+                    pathProgressBefore);
 
             lastPathProgress =
                 pathProgress;
@@ -231,6 +274,12 @@ public static class TurnRadiusRouteMath2A
                 GetPointOnPathAtDistance(
                     waypoints,
                     targetDistance);
+
+            Vector3 positionBeforeMove =
+                currentPosition;
+
+            Vector2 facingBeforeMove =
+                facingDirection;
 
             bool arrivedAtWaypoint;
 
@@ -249,29 +298,95 @@ public static class TurnRadiusRouteMath2A
 
             result.Add(currentPosition);
 
-            if (arrivedAtWaypoint)
-                return true;
-
-            bool canUseStraightExit =
-                !routeHasIntermediateWaypoints ||
-                isFinalTarget;
-
-            if (canUseStraightExit &&
-                CanExitStraightToFinalTarget(
+            float currentDistanceToFinal =
+                Vector3.Distance(
                     currentPosition,
-                    facingDirection,
-                    finalDestination,
-                    straightExitAngleDegrees,
-                    arrivalDistanceThreshold))
-            {
-                result.Add(finalDestination);
-                return true;
-            }
+                    finalDestination);
 
             float currentPathProgress =
                 GetClosestDistanceOnPath(
                     waypoints,
                     currentPosition);
+
+            if (currentDistanceToFinal < bestDistanceToFinal)
+                bestDistanceToFinal = currentDistanceToFinal;
+
+            if (currentPathProgress > bestPathProgress)
+                bestPathProgress = currentPathProgress;
+
+            bool shouldLogStep =
+                debugLog != null &&
+                (i < 12 ||
+                 i % 64 == 0 ||
+                 i >= safeMaxSteps - 5 ||
+                 arrivedAtWaypoint ||
+                 currentDistanceToFinal <= arrivalDistanceThreshold * 4f);
+
+            if (shouldLogStep)
+            {
+                debugLog.Invoke(
+                    debugPrefix +
+                    " Step. " +
+                    "Step=" + i +
+                    ", PositionBefore=" + positionBeforeMove +
+                    ", PositionAfter=" + currentPosition +
+                    ", TargetPoint=" + targetPoint +
+                    ", FacingBefore=" + facingBeforeMove +
+                    ", FacingAfter=" + facingDirection +
+                    ", PathProgressBefore=" + pathProgressBefore +
+                    ", PathProgressUsed=" + pathProgress +
+                    ", CurrentPathProgress=" + currentPathProgress +
+                    ", TargetDistanceOnPath=" + targetDistance +
+                    ", IsFinalTarget=" + isFinalTarget +
+                    ", ArrivedAtWaypoint=" + arrivedAtWaypoint +
+                    ", DistanceToFinal=" + currentDistanceToFinal +
+                    ", BestDistanceToFinal=" + bestDistanceToFinal +
+                    ", BestPathProgress=" + bestPathProgress);
+            }
+
+            if (arrivedAtWaypoint)
+            {
+                debugLog?.Invoke(
+                    debugPrefix +
+                    " Success: arrived at waypoint/final target. " +
+                    "Step=" + i +
+                    ", CurrentPosition=" + currentPosition +
+                    ", FinalDestination=" + finalDestination +
+                    ", DistanceToFinal=" + currentDistanceToFinal +
+                    ", ResultCount=" + result.Count);
+
+                return true;
+            }
+
+            bool canUseStraightExit =
+                !routeHasIntermediateWaypoints ||
+                isFinalTarget;
+
+            bool canExitStraight =
+                canUseStraightExit &&
+                CanExitStraightToFinalTarget(
+                    currentPosition,
+                    facingDirection,
+                    finalDestination,
+                    straightExitAngleDegrees,
+                    arrivalDistanceThreshold);
+
+            if (canExitStraight)
+            {
+                result.Add(finalDestination);
+
+                debugLog?.Invoke(
+                    debugPrefix +
+                    " Success: straight exit to final target. " +
+                    "Step=" + i +
+                    ", CurrentPosition=" + currentPosition +
+                    ", FinalDestination=" + finalDestination +
+                    ", DistanceToFinal=" + currentDistanceToFinal +
+                    ", StraightExitAngleDegrees=" + straightExitAngleDegrees +
+                    ", ResultCount=" + result.Count);
+
+                return true;
+            }
 
             if (currentPathProgress > lastPathProgress)
                 lastPathProgress = currentPathProgress;
@@ -282,9 +397,36 @@ public static class TurnRadiusRouteMath2A
                     waypoints[waypoints.Count - 1]) <= arrivalDistanceThreshold)
             {
                 result.Add(waypoints[waypoints.Count - 1]);
+
+                debugLog?.Invoke(
+                    debugPrefix +
+                    " Success: path progress and distance reached final. " +
+                    "Step=" + i +
+                    ", LastPathProgress=" + lastPathProgress +
+                    ", PathLength=" + pathLength +
+                    ", CurrentPosition=" + currentPosition +
+                    ", FinalDestination=" + finalDestination +
+                    ", ResultCount=" + result.Count);
+
                 return true;
             }
         }
+
+        debugLog?.Invoke(
+            debugPrefix +
+            " Failed: max steps reached. " +
+            "MaxSteps=" + safeMaxSteps +
+            ", ResultCount=" + result.Count +
+            ", LastPosition=" + result[result.Count - 1] +
+            ", FinalDestination=" + finalDestination +
+            ", LastDistanceToFinal=" + Vector3.Distance(result[result.Count - 1], finalDestination) +
+            ", BestDistanceToFinal=" + bestDistanceToFinal +
+            ", LastPathProgress=" + lastPathProgress +
+            ", BestPathProgress=" + bestPathProgress +
+            ", PathLength=" + pathLength +
+            ", LookAheadDistance=" + lookAheadDistance +
+            ", MovementDistancePerStep=" + movementDistancePerStep +
+            ", TurnRadius=" + turnRadius);
 
         return false;
     }
@@ -306,29 +448,6 @@ public static class TurnRadiusRouteMath2A
                 threshold),
             Mathf.Max(0.01f, movementDistancePerStep),
             PreviewMaxLookAheadDistance);
-    }
-
-    private static float GetPathLength(
-        IReadOnlyList<Vector3> path)
-    {
-        if (path == null ||
-            path.Count <= 1)
-        {
-            return 0f;
-        }
-
-        float length =
-            0f;
-
-        for (int i = 1; i < path.Count; i++)
-        {
-            length +=
-                Vector3.Distance(
-                    path[i - 1],
-                    path[i]);
-        }
-
-        return length;
     }
 
     private static float GetClosestDistanceOnPath(
@@ -675,5 +794,213 @@ public static class TurnRadiusRouteMath2A
                 toFinal.normalized);
 
         return angleToFinal <= straightExitAngleDegrees;
+    }
+
+    public static bool TryBuildLimitedWaypointPreviewPath(
+    List<Vector3> result,
+    IReadOnlyList<Vector3> waypoints,
+    Vector2 startFacingDirection,
+    float movementDistancePerStep,
+    float turnRadius,
+    float arrivalDistanceThreshold,
+    int routePlanMaxSteps,
+    float sunAvoidanceTurnRouteReserveMultiplier,
+    out int maxSteps,
+    out float intermediateWaypointArrivalDistanceThreshold,
+    out float routeLength,
+    out float maxAllowedRouteLength,
+    float straightExitAngleDegrees = 0f,
+    System.Action<string> debugLog = null,
+    string debugPrefix = "")
+    {
+        maxSteps = GetRoutePlanMaxSteps(
+            waypoints,
+            GetPathLength(waypoints),
+            turnRadius,
+            movementDistancePerStep,
+            routePlanMaxSteps);
+
+        intermediateWaypointArrivalDistanceThreshold =
+            GetIntermediateWaypointArrivalDistanceThreshold(
+                waypoints,
+                movementDistancePerStep,
+                arrivalDistanceThreshold);
+
+        bool routeBuilt =
+            TryBuildWaypointPreviewPath(
+                result,
+                waypoints,
+                startFacingDirection,
+                movementDistancePerStep,
+                turnRadius,
+                arrivalDistanceThreshold,
+                maxSteps,
+                intermediateWaypointArrivalDistanceThreshold,
+                straightExitAngleDegrees,
+                debugLog,
+                debugPrefix);
+
+        routeLength = GetPathLength(result);
+
+        maxAllowedRouteLength =
+            GetMaxAllowedRouteLength(
+                waypoints,
+                GetPathLength(waypoints),
+                turnRadius,
+                movementDistancePerStep,
+                startFacingDirection,
+                sunAvoidanceTurnRouteReserveMultiplier);
+
+        if (!routeBuilt)
+            return false;
+
+        if (maxAllowedRouteLength > 0f &&
+            routeLength > maxAllowedRouteLength)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static int GetRoutePlanMaxSteps(
+        IReadOnlyList<Vector3> waypoints,
+        float waypointPathLength,
+        float turnRadius,
+        float routeStepDistance,
+        int routePlanMaxSteps)
+    {
+        int maneuverCount =
+            Mathf.Max(
+                1,
+                waypoints != null
+                    ? waypoints.Count - 1
+                    : 1);
+
+        float maneuverReserveMultiplier =
+            waypoints != null && waypoints.Count > 2
+                ? 4f
+                : 1f;
+
+        float estimatedRouteLength =
+            Mathf.Max(0f, waypointPathLength) +
+            Mathf.Max(0f, turnRadius) *
+            Mathf.PI *
+            2f *
+            maneuverCount *
+            maneuverReserveMultiplier;
+
+        return Mathf.Clamp(
+            Mathf.CeilToInt(
+                estimatedRouteLength /
+                Mathf.Max(0.01f, routeStepDistance)) + maneuverCount + 4,
+            1,
+            Mathf.Max(1, routePlanMaxSteps));
+    }
+
+    public static float GetIntermediateWaypointArrivalDistanceThreshold(
+        IReadOnlyList<Vector3> waypoints,
+        float routeStepDistance,
+        float arrivalDistanceThreshold)
+    {
+        if (waypoints == null ||
+            waypoints.Count <= 2)
+        {
+            return arrivalDistanceThreshold;
+        }
+
+        return Mathf.Max(
+            arrivalDistanceThreshold,
+            routeStepDistance * 2f);
+    }
+
+    public static float GetMaxAllowedRouteLength(
+        IReadOnlyList<Vector3> waypoints,
+        float waypointPathLength,
+        float turnRadius,
+        float routeStepDistance,
+        Vector2 startFacingDirection,
+        float sunAvoidanceTurnRouteReserveMultiplier)
+    {
+        float turnReserveLength =
+            GetTurnReserveLength(
+                waypoints,
+                startFacingDirection,
+                turnRadius);
+
+        if (waypoints == null ||
+            waypoints.Count <= 2)
+        {
+            return waypointPathLength +
+                   turnReserveLength * 1.25f +
+                   routeStepDistance * 4f;
+        }
+
+        return waypointPathLength +
+               turnReserveLength *
+               Mathf.Max(1f, sunAvoidanceTurnRouteReserveMultiplier) +
+               routeStepDistance *
+               Mathf.Max(1, waypoints.Count + 4);
+    }
+
+    public static float GetTurnReserveLength(
+        IReadOnlyList<Vector3> waypoints,
+        Vector2 startFacingDirection,
+        float turnRadius)
+    {
+        if (waypoints == null ||
+            waypoints.Count <= 1 ||
+            turnRadius <= 0f)
+        {
+            return 0f;
+        }
+
+        Vector2 facingDirection =
+            NormalizeDirectionOrUp(startFacingDirection);
+
+        float turnReserveLength = 0f;
+
+        for (int i = 1; i < waypoints.Count; i++)
+        {
+            Vector3 segment3 = waypoints[i] - waypoints[i - 1];
+
+            Vector2 segment =
+                new Vector2(
+                    segment3.x,
+                    segment3.y);
+
+            if (segment.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+                continue;
+
+            Vector2 segmentDirection = segment.normalized;
+
+            turnReserveLength +=
+                Vector2.Angle(
+                    facingDirection,
+                    segmentDirection) *
+                Mathf.Deg2Rad *
+                turnRadius;
+
+            facingDirection = segmentDirection;
+        }
+
+        return turnReserveLength;
+    }
+
+    public static float GetPathLength(
+        IReadOnlyList<Vector3> path)
+    {
+        if (path == null ||
+            path.Count <= 1)
+        {
+            return 0f;
+        }
+
+        float length = 0f;
+
+        for (int i = 1; i < path.Count; i++)
+            length += Vector3.Distance(path[i - 1], path[i]);
+
+        return length;
     }
 }

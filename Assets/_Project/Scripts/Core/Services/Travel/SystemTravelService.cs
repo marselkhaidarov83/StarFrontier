@@ -178,6 +178,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private readonly IConfigService _configService;
     private readonly IShipMovementService _shipMovementService;
     private readonly IShipStatsService _shipStatsService;
+    private readonly ISystemShipRouteService2A _shipRouteService;
+    private readonly SystemShipRouteResult2A _playerShipRouteBuildResult = new();
     private readonly ITargetService2A _targetService;
     private ISystemNpcRuntimeService _npcRuntimeService;
     private ISystemEnemyService _enemyService;
@@ -221,6 +223,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _hangarService = Bootstrapper.Instance.ServiceRegistry.Get<IHangarService>();
         _shipMovementService = Bootstrapper.Instance.ServiceRegistry.Get<IShipMovementService>();
         _shipStatsService = Bootstrapper.Instance.ServiceRegistry.Get<IShipStatsService>();
+        _shipRouteService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemShipRouteService2A>();
 
         if (Bootstrapper.Instance.ServiceRegistry.TryGet(
                 out ITargetService2A targetService))
@@ -820,7 +823,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         _mapPointRouteTraceFrameCount = 0;
 
-        if (IsMapPointDestination())
+        bool shouldTraceRouteBuild =
+            IsMapPointDestination() ||
+            IsNpcDestination();
+
+        if (shouldTraceRouteBuild)
         {
             _mapPointRouteBuildId++;
             _isMapPointRouteBuildTraceEnabled = true;
@@ -835,7 +842,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _activeRouteDestinationCase =
             routeClassification.DestinationCase;
 
-        if (IsMapPointDestination())
+        if (shouldTraceRouteBuild)
         {
             LogMapPointRouteCaseTrace(routeClassification);
 
@@ -858,38 +865,40 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 return;
             }
 
+            _isMapPointRouteBuildTraceEnabled = false;
+
             ResetFailedTravelToDestinationSelected();
             return;
         }
 
-        RouteAdjustment routeAdjustment =
-            ResolveRouteAdjustment(
-                State.StartPosition,
-                State.DestinationPosition,
-                _routePreviewStartFacingDirection);
+        SystemShipRouteRequest2A routeRequest =
+            new SystemShipRouteRequest2A
+            {
+                SystemId = GetCurrentPlayerSystemId(),
+                StartPosition = State.StartPosition,
+                DestinationPosition = State.DestinationPosition,
+                StartFacingDirection = _routePreviewStartFacingDirection,
+                TargetKind = GetCurrentShipRouteTargetKind2A(),
+                Settings = CreatePlayerShipRouteSettings2A()
+            };
 
-        _routeTurnAdjustmentFactor =
-            routeAdjustment.TurnFactor;
+        bool routeBuilt =
+            _shipRouteService != null &&
+            _shipRouteService.TryBuildRoute(
+                routeRequest,
+                _playerShipRouteBuildResult);
 
-        _routeSpeedAdjustmentFactor =
-            routeAdjustment.SpeedFactor;
-
-        if (routeAdjustment.HasBuiltRoute)
+        if (routeBuilt)
         {
             CopyRoutePath(
-                _routeProbePathBuffer,
+                _playerShipRouteBuildResult.Path,
                 _activeTravelRoutePath);
-        }
-        else
-        {
-            RebuildTravelRoutePath(
-                _activeTravelRoutePath,
-                State.StartPosition,
-                State.DestinationPosition,
-                _routePreviewStartFacingDirection,
-                GetAdjustedShipTurnRadius(_routeTurnAdjustmentFactor),
-                GetCurrentEffectiveTravelSpeed(),
-                routeAdjustment.MaxAllowedRouteLength);
+
+            _routeTurnAdjustmentFactor =
+                Mathf.Clamp01(_playerShipRouteBuildResult.TurnRadiusFactor);
+
+            _routeSpeedAdjustmentFactor =
+                Mathf.Clamp01(_playerShipRouteBuildResult.SpeedFactor);
         }
 
         RebuildActiveTravelRoutePlan(
@@ -912,12 +921,20 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         {
             Debug.LogWarning("[SystemTravelService] Cannot start travel: route could not be built.");
 
+            LogRouteDebugSnapshot(
+                "Route build failed",
+                State.StartPosition,
+                State.DestinationPosition,
+                _routePreviewStartFacingDirection);
+
             if (IsMapPointDestination())
             {
                 RejectMapPointTravelDestination(
                     "route could not be built");
                 return;
             }
+
+            _isMapPointRouteBuildTraceEnabled = false;
 
             ResetFailedTravelToDestinationSelected();
             return;
@@ -929,7 +946,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         State.TravelDistance =
             GetPathLength(_activeTravelRoutePath);
 
-        if (IsMapPointDestination())
+        if (shouldTraceRouteBuild)
         {
             LogRouteDebugSnapshot(
                 "After route build",
@@ -947,6 +964,64 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         LogCustom("Travel started.");
         LogCustom("State = " + State);
+    }
+
+    private SystemShipRouteSettings2A CreatePlayerShipRouteSettings2A()
+    {
+        ShipMovementConfig movementConfig =
+            _configService != null
+                ? _configService.ShipMovementConfig
+                : null;
+
+        return new SystemShipRouteSettings2A
+        {
+            Speed = Mathf.Max(0.01f, GetCurrentShipTravelSpeed()),
+            TurnRadius = Mathf.Max(0f, GetCurrentShipTurnRadius()),
+            ArrivalDistanceThreshold = ArrivalDistanceThreshold,
+            SunAvoidanceSafetyMargin = SunAvoidanceSafetyMargin,
+            SunAvoidanceArcSegments = SunAvoidanceArcSegments,
+            AllowSunAvoidance = true,
+            RouteSubstepsPerTick = movementConfig != null ? movementConfig.RouteSubstepsPerTick : 10,
+            RouteStraightExitAngleDegrees = movementConfig != null ? movementConfig.RouteStraightExitAngleDegrees : 3f,
+            TurnRadiusAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteTurnRadiusAdjustmentStepPercent : 5f,
+            SpeedAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteSpeedAdjustmentStepPercent : 2.5f,
+            MinTurnRadiusAdjustmentFactor = movementConfig != null ? movementConfig.MinRouteTurnRadiusAdjustmentFactor : 0.05f,
+            MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f,
+            MaxRoutePlanSteps = RoutePlanMaxSteps,
+            SunAvoidanceTurnRouteReserveMultiplier = SunAvoidanceTurnRouteReserveMultiplier,
+            DebugLog = null,
+            DebugPrefix = string.Empty
+            // DebugLog = message => LogCustom(message),
+            // DebugPrefix = "[PLAYER-ROUTE] "
+        };
+    }
+
+    private SystemShipRouteTargetKind2A GetCurrentShipRouteTargetKind2A()
+    {
+        if (State == null ||
+            State.Destination == null)
+        {
+            return SystemShipRouteTargetKind2A.MapPoint;
+        }
+
+        switch (State.Destination.Type)
+        {
+            case TravelDestinationType.Planet:
+                return SystemShipRouteTargetKind2A.Planet;
+
+            case TravelDestinationType.Station:
+                return SystemShipRouteTargetKind2A.Station;
+
+            case TravelDestinationType.SystemExit:
+                return SystemShipRouteTargetKind2A.SystemExit;
+
+            case TravelDestinationType.Npc:
+                return SystemShipRouteTargetKind2A.Npc;
+
+            case TravelDestinationType.MapPoint:
+            default:
+                return SystemShipRouteTargetKind2A.MapPoint;
+        }
     }
 
     private void RebuildActiveTravelRoutePlan(
@@ -1196,7 +1271,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     }
 
     private Vector3 GetNpcFollowDestinationPosition(
-        Vector3 npcPosition)
+     Vector3 npcPosition)
     {
         float followDistance =
             Mathf.Max(
@@ -1240,7 +1315,59 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         followPosition.z =
             shipPosition.z;
 
-        return followPosition;
+        return PushPositionOutsideSunBlockingRadius(
+            followPosition,
+            shipPosition);
+    }
+
+    private Vector3 PushPositionOutsideSunBlockingRadius(
+    Vector3 position,
+    Vector3 fallbackDirectionSource)
+    {
+        SunAvoidanceObstacle obstacle =
+            GetSunAvoidanceObstacle(
+                position.z,
+                position);
+
+        if (!obstacle.HasObstacle ||
+            obstacle.BlockingRadius <= 0f)
+        {
+            return position;
+        }
+
+        Vector2 fromSunToPosition =
+            new Vector2(
+                position.x - obstacle.Center.x,
+                position.y - obstacle.Center.y);
+
+        float safeDistance =
+            obstacle.BlockingRadius +
+            Mathf.Max(ArrivalDistanceThreshold, RouteSegmentEpsilon);
+
+        if (fromSunToPosition.magnitude >= safeDistance)
+            return position;
+
+        if (fromSunToPosition.sqrMagnitude <= RouteSegmentEpsilon)
+        {
+            fromSunToPosition =
+                new Vector2(
+                    fallbackDirectionSource.x - obstacle.Center.x,
+                    fallbackDirectionSource.y - obstacle.Center.y);
+        }
+
+        if (fromSunToPosition.sqrMagnitude <= RouteSegmentEpsilon)
+            fromSunToPosition = Vector2.up;
+
+        Vector2 safePosition =
+            new Vector2(
+                obstacle.Center.x,
+                obstacle.Center.y) +
+            fromSunToPosition.normalized * safeDistance;
+
+        return new Vector3(
+            safePosition.x,
+            safePosition.y,
+            position.z);
     }
 
     private float GetCurrentShipTravelSpeed()
@@ -1514,15 +1641,15 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     bool targetInsideSunSafety,
     bool targetInsideSunBody)
     {
+        if (targetInsideSunBody)
+            return RouteDestinationCase.ForbiddenDestination;
+
         if (State != null &&
             State.Destination != null &&
             State.Destination.Type == TravelDestinationType.Npc)
         {
             return RouteDestinationCase.MovingTarget;
         }
-
-        if (targetInsideSunBody)
-            return RouteDestinationCase.ForbiddenDestination;
 
         if (startInsideSunSafety)
         {
@@ -6935,8 +7062,8 @@ int maxSmallDots)
 
     private bool ShouldLogMapPointRouteBuildTrace()
     {
-        return IsMapPointDestination() &&
-               _isMapPointRouteBuildTraceEnabled;
+        return _isMapPointRouteBuildTraceEnabled &&
+               (IsMapPointDestination() || IsNpcDestination());
     }
 
     private void PublishTravelProgress(float progress01)
