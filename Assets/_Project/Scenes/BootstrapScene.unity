@@ -882,7 +882,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d75f4106697cd44e2856cdf8c0ed902a, type: 2}
   MaxAcceptedMissionCount: 3
   SectorAllOpened: 1
-  RouteAllUnlocked: 1
+  RouteAllUnlocked: 0
   _globalDebugEnabled: 1
   stopAutomaticAllySpawns: 1
   stopAutomaticEnemySpawns: 1

@@ -40,7 +40,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
 
         var npcs = _npcRuntimeService.GetAliveNpcsInSystem(starSystem.Id);
-        bool hasEnemiesInSystem = HasEnemiesInSystem(starSystem.Id);
 
         for (int i = 0; i < npcs.Count; i++)
         {
@@ -49,20 +48,36 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             if (npc == null || !npc.IsAlive)
                 continue;
 
+            AllyBehaviourScenario resolvedScenario =
+                ResolveBehaviorScenario(npc);
+
             if (!npc.HasActiveBehavior)
             {
-                AssignBehavior(npc, currentTick);
+                AssignBehavior(npc, currentTick, resolvedScenario);
                 continue;
             }
 
-            if (ShouldInterruptForThreat(npc, hasEnemiesInSystem))
+            if (ShouldReassignForScenarioChange(npc, resolvedScenario))
             {
-                AssignBehavior(npc, currentTick);
+                AssignBehavior(npc, currentTick, resolvedScenario);
                 continue;
             }
 
             TickActiveBehavior(npc, currentTick);
         }
+    }
+
+    private bool ShouldReassignForScenarioChange(
+    SystemNpcRuntimeState npc,
+    AllyBehaviourScenario resolvedScenario)
+    {
+        if (npc == null || !npc.IsAlive)
+            return false;
+
+        if (npc.CurrentBehaviorScenario == resolvedScenario)
+            return false;
+
+        return true;
     }
 
     private bool ShouldInterruptForThreat(
@@ -102,37 +117,24 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     public void AssignBehavior(SystemNpcRuntimeState npc, int currentTick)
     {
+        AssignBehavior(
+            npc,
+            currentTick,
+            ResolveBehaviorScenario(npc));
+    }
+
+    private void AssignBehavior(
+        SystemNpcRuntimeState npc,
+        int currentTick,
+        AllyBehaviourScenario resolvedScenario)
+    {
         if (npc == null || !npc.IsAlive)
             return;
 
-        if (IsMilitaryDebugNpc(npc))
-        {
-            LogCustom(
-                "[NPC-MILITARY-BEHAVIOR] Assign start. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", System=" + npc.CurrentSystemId +
-                ", CurrentPlanet=" + npc.CurrentPlanetId +
-                ", TargetPlanet=" + npc.TargetPlanetId +
-                ", IsOnPlanet=" + npc.IsOnPlanet +
-                ", PrevBehavior=" + npc.PrevBehavior +
-                ", CurrentBehavior=" + npc.CurrentBehavior +
-                ", TravelState=" + npc.TravelState +
-                ", Position=" + npc.CurrentPosition +
-                ", TargetPosition=" + npc.TargetPosition +
-                ", Tick=" + currentTick);
-        }
+        SystemNpcBehaviorType nextBehavior =
+            PickFallbackBehavior(npc, resolvedScenario);
 
-        SystemNpcBehaviorType nextBehavior = PickFallbackBehavior(npc);
-
-        if (IsMilitaryDebugNpc(npc))
-        {
-            LogCustom(
-                "[NPC-MILITARY-BEHAVIOR] Assign picked. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", PrevBehavior=" + npc.PrevBehavior +
-                ", PickedBehavior=" + nextBehavior +
-                ", Tick=" + currentTick);
-        }
+        npc.CurrentBehaviorScenario = resolvedScenario;
 
         ApplyBehavior(npc, nextBehavior, currentTick);
     }
@@ -284,33 +286,46 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     //Определяем, что Npc делает дальше
-    private SystemNpcBehaviorType PickFallbackBehavior(SystemNpcRuntimeState npc)
+    private SystemNpcBehaviorType PickFallbackBehavior(
+    SystemNpcRuntimeState npc,
+    AllyBehaviourScenario resolvedScenario)
     {
         switch (npc.NpcType)
         {
             case SystemNpcType.Enemy:
-                return GetRandomBehaviorType4Enemy(npc);
+                return GetRandomBehaviorType4Enemy(npc, resolvedScenario);
 
             case SystemNpcType.Pirate:
                 return GetRandomBehaviorType4Pirate(npc);
 
             default:
-                return GetRandomBehaviorType4Ally(npc);
+                return GetRandomBehaviorType4Ally(npc, resolvedScenario);
         }
     }
 
     public SystemNpcBehaviorType GetRandomBehaviorType4Enemy(SystemNpcRuntimeState npc)
     {
+        return GetRandomBehaviorType4Enemy(
+            npc,
+            ResolveBehaviorScenario(npc));
+    }
+
+    private SystemNpcBehaviorType GetRandomBehaviorType4Enemy(
+        SystemNpcRuntimeState npc,
+        AllyBehaviourScenario resolvedScenario)
+    {
         EnemyConfig enemyConfig =
             _configService.GetEnemyConfigById(npc.ConfigId);
 
         NpcBehaviourScenarioConfig behaviorScenario =
-            GetEnemyBehaviorScenario(enemyConfig, ResolveBehaviorScenario(npc));
+            GetEnemyBehaviorScenario(enemyConfig, resolvedScenario);
 
         return PickScenarioBehavior(
             behaviorScenario,
             npc);
     }
+
+
 
     public SystemNpcBehaviorType GetRandomBehaviorType4Pirate(SystemNpcRuntimeState npc)
     {
@@ -359,19 +374,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         return weights[^1].BehaviorType;
     }
 
-    public SystemNpcBehaviorType GetRandomBehaviorType4Ally(SystemNpcRuntimeState npc)
-    {
-        AllyConfig allyConfig =
-            _configService.GetAllyConfigById(npc.ConfigId);
-
-        NpcBehaviourScenarioConfig behaviorScenario =
-            GetAllyBehaviorScenario(allyConfig, ResolveBehaviorScenario(npc));
-
-        return PickScenarioBehavior(
-            behaviorScenario,
-            npc);
-    }
-
     private NpcBehaviourScenarioConfig GetAllyBehaviorScenario(
         AllyConfig allyConfig,
         AllyBehaviourScenario scenario)
@@ -410,13 +412,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         return null;
     }
 
-    private AllyBehaviourScenario ResolveBehaviorScenario(
-     SystemNpcRuntimeState npc)
+    private AllyBehaviourScenario ResolveBehaviorScenario(SystemNpcRuntimeState npc)
     {
         if (npc == null)
-            return AllyBehaviourScenario.Normal;
-
-        if (npc.IsAlly && !CanNpcReactToThreats(npc))
             return AllyBehaviourScenario.Normal;
 
         if (_systemSecurityService != null &&
@@ -424,25 +422,50 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 npc.CurrentSystemId,
                 out StarSystemStatus systemStatus))
         {
-            if (systemStatus == StarSystemStatus.Captured)
-                return AllyBehaviourScenario.EnemySystemInvasion;
-
-            if (systemStatus == StarSystemStatus.Threatened ||
+            if (systemStatus == StarSystemStatus.Captured ||
+                systemStatus == StarSystemStatus.Threatened ||
                 systemStatus == StarSystemStatus.Invasion)
-                return AllyBehaviourScenario.EnemyInvasion;
+            {
+                if (npc.IsEnemy)
+                    return AllyBehaviourScenario.EnemySystemInvasion;
+
+                if (npc.IsAlly)
+                    return AllyBehaviourScenario.EnemyInvasion;
+            }
         }
 
         if (HasEnemiesInSystem(npc.CurrentSystemId))
-            return npc.IsEnemy
-                ? AllyBehaviourScenario.EnemySystemInvasion
-                : AllyBehaviourScenario.EnemyInvasion;
+        {
+            if (npc.IsEnemy)
+                return AllyBehaviourScenario.EnemySystemInvasion;
+
+            if (npc.IsAlly)
+                return AllyBehaviourScenario.EnemyInvasion;
+        }
 
         return AllyBehaviourScenario.Normal;
     }
 
+    private string FormatNpcRoleForDebug(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return "NULL";
+
+        if (npc.IsAlly)
+            return npc.AllyRole.ToString();
+
+        if (npc.IsEnemy)
+            return "Enemy";
+
+        if (npc.IsPirate)
+            return "Pirate";
+
+        return npc.NpcType.ToString();
+    }
+
     private SystemNpcBehaviorType PickScenarioBehavior(
-    NpcBehaviourScenarioConfig behaviorScenario,
-    SystemNpcRuntimeState npc)
+      NpcBehaviourScenarioConfig behaviorScenario,
+      SystemNpcRuntimeState npc)
     {
         if (behaviorScenario == null)
             return SystemNpcBehaviorType.None;
@@ -458,12 +481,18 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 .Where(weight => weight != null && weight.Weight > 0)
                 .ToList();
 
-        if (IsMilitaryDebugNpc(npc))
+        bool shouldLog =
+            ShouldLogAllyBehaviorPickTrace(npc, behaviorScenario) ||
+            IsMilitaryDebugNpc(npc);
+
+        if (shouldLog)
         {
             LogCustom(
-                "[NPC-MILITARY-BEHAVIOR] Pick weights before filters. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", PrevBehavior=" + npc.PrevBehavior +
+                "[NPC-BEHAVIOR-PICK] Weights before filters. " +
+                "Npc=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+                ", ConfigId=" + (npc != null ? npc.ConfigId : "NULL_CONFIG") +
+                ", RuntimeRole=" + (npc != null ? FormatNpcRoleForDebug(npc) : "NULL_ROLE") +
+                ", PrevBehavior=" + (npc != null ? npc.PrevBehavior.ToString() : "NULL_PREV") +
                 ", Scenario=" + behaviorScenario.Id +
                 ", Weights=" + FormatBehaviorWeightsForDebug(weights));
         }
@@ -471,12 +500,14 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         RemoveImpossibleNextBehaviors(weights, npc);
         RemoveRoleForbiddenBehaviors(weights, npc);
 
-        if (IsMilitaryDebugNpc(npc))
+        if (shouldLog)
         {
             LogCustom(
-                "[NPC-MILITARY-BEHAVIOR] Pick weights after filters. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", PrevBehavior=" + npc.PrevBehavior +
+                "[NPC-BEHAVIOR-PICK] Weights after filters. " +
+                "Npc=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+                ", ConfigId=" + (npc != null ? npc.ConfigId : "NULL_CONFIG") +
+                ", RuntimeRole=" + (npc != null ? FormatNpcRoleForDebug(npc) : "NULL_ROLE") +
+                ", CanReactToThreats=" + CanNpcReactToThreats(npc) +
                 ", Scenario=" + behaviorScenario.Id +
                 ", Weights=" + FormatBehaviorWeightsForDebug(weights));
         }
@@ -501,11 +532,14 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             if (roll < cumulative)
             {
-                if (IsMilitaryDebugNpc(npc))
+                if (shouldLog || item.BehaviorType == SystemNpcBehaviorType.EngageEnemies)
                 {
                     LogCustom(
-                        "[NPC-MILITARY-BEHAVIOR] Pick result. " +
-                        "Npc=" + npc.RuntimeNpcId +
+                        "[NPC-BEHAVIOR-PICK] Roll result. " +
+                        "Npc=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+                        ", ConfigId=" + (npc != null ? npc.ConfigId : "NULL_CONFIG") +
+                        ", RuntimeRole=" + (npc != null ? FormatNpcRoleForDebug(npc) : "NULL_ROLE") +
+                        ", Scenario=" + behaviorScenario.Id +
                         ", Roll=" + roll +
                         ", TotalWeight=" + totalWeight +
                         ", PickedBehavior=" + item.BehaviorType);
@@ -516,6 +550,34 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         }
 
         return weights[^1].BehaviorType;
+    }
+
+    private bool ShouldLogAllyBehaviorPickTrace(
+    SystemNpcRuntimeState npc,
+    NpcBehaviourScenarioConfig behaviorScenario)
+    {
+        if (npc == null || !npc.IsAlly)
+            return false;
+
+        if (HasEnemiesInSystem(npc.CurrentSystemId))
+            return true;
+
+        if (_systemSecurityService != null &&
+            _systemSecurityService.TryGetSystemStatus(
+                npc.CurrentSystemId,
+                out StarSystemStatus systemStatus))
+        {
+            if (systemStatus == StarSystemStatus.Threatened ||
+                systemStatus == StarSystemStatus.Invasion ||
+                systemStatus == StarSystemStatus.Captured)
+            {
+                return true;
+            }
+        }
+
+        return behaviorScenario != null &&
+               !string.IsNullOrWhiteSpace(behaviorScenario.Id) &&
+               behaviorScenario.Id.Contains("enemy_invasion");
     }
 
     private string FormatBehaviorWeightsForDebug(
@@ -531,8 +593,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private void RemoveRoleForbiddenBehaviors(
-    List<SystemNpcBehaviorWeight> weights,
-    SystemNpcRuntimeState npc)
+     List<SystemNpcBehaviorWeight> weights,
+     SystemNpcRuntimeState npc)
     {
         if (weights == null || npc == null)
             return;
@@ -542,13 +604,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             weights.RemoveAll(weight =>
                 weight != null &&
                 weight.BehaviorType == SystemNpcBehaviorType.PatrolSystem);
-        }
-
-        if (npc.IsAlly && !CanNpcReactToThreats(npc))
-        {
-            weights.RemoveAll(weight =>
-                weight != null &&
-                weight.BehaviorType == SystemNpcBehaviorType.EngageEnemies);
         }
     }
 
@@ -795,23 +850,13 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         _eventBus.Publish(new SystemNpcBehaviorChangedEvent(
             npc.RuntimeNpcId,
-            npc.CurrentBehavior
-        ));
+            npc.CurrentBehavior));
 
-        if (IsMilitaryDebugNpc(npc))
-        {
-            LogCustom(
-                "[NPC-MILITARY-BEHAVIOR] ApplyBehavior event published. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", PublishedBehavior=" + npc.CurrentBehavior +
-                ", TravelState=" + npc.TravelState +
-                ", IsOnPlanet=" + npc.IsOnPlanet +
-                ", CurrentPlanet=" + npc.CurrentPlanetId +
-                ", TargetPlanet=" + npc.TargetPlanetId +
-                ", Position=" + npc.CurrentPosition +
-                ", TargetPosition=" + npc.TargetPosition +
-                ", Tick=" + currentTick);
-        }
+        _eventBus.Publish(new SystemNpcTravelStateChangedEvent(
+            npc.RuntimeNpcId,
+            npc,
+            npc.TravelState,
+            npc.CurrentSystemId));
 
         LogCustom(
             $"NPC: {npc.RuntimeNpcId}, Type: {npc.NpcType}, CurrentBehavior: {npc.CurrentBehavior}, TargetPlanet: {npc.TargetPlanetId}");
@@ -1170,34 +1215,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (npc == null || !npc.IsAlive)
             return;
 
-        SyncNpcPositionWithCurrentPlanet(
-            npc,
-            true);
-
+        SyncNpcPositionWithCurrentPlanet(npc, true);
         ClearMovementTargets(npc);
 
         npc.IsOnPlanet = false;
-
-        if (!CanNpcReactToThreats(npc))
-        {
-            SystemNpcBehaviorType fallbackBehavior =
-                PickScenarioBehaviorExcluding(
-                    GetAllyBehaviorScenario(
-                        _configService.GetAllyConfigById(npc.ConfigId),
-                        AllyBehaviourScenario.Normal),
-                    npc,
-                    SystemNpcBehaviorType.EngageEnemies);
-
-            if (fallbackBehavior == SystemNpcBehaviorType.None)
-            {
-                ClearBehavior(npc);
-                return;
-            }
-
-            npc.CurrentBehavior = fallbackBehavior;
-            SetupFallbackBehavior(npc, fallbackBehavior);
-            return;
-        }
 
         string targetId = FindCombatTargetId(npc);
 
@@ -1207,13 +1228,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             npc.BehaviorTargetRuntimeNpcId = null;
             npc.CombatState = SystemNpcCombatState.None;
             npc.IsFighting = false;
-
-            if (CanNpcPatrolSystem(npc))
-            {
-                npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
-                SetupPatrolSystem(npc);
-                return;
-            }
 
             ClearBehavior(npc);
             return;
@@ -1225,7 +1239,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.CombatState = SystemNpcCombatState.HasTarget;
         npc.IsFighting = true;
     }
-
 
     private bool SyncNpcPositionWithCurrentPlanet(
     SystemNpcRuntimeState npc,
@@ -1436,11 +1449,21 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.TargetSystemId = null;
         npc.TargetSystemExitPoint = Vector3.zero;
         npc.TargetSystemEntryPoint = Vector3.zero;
+
         npc.TargetPlanetId = null;
         npc.CurrentTargetRuntimeNpcId = null;
         npc.BehaviorTargetRuntimeNpcId = null;
+
         npc.TargetPosition = Vector3.zero;
         npc.CurrentMovementTargetPosition = Vector3.zero;
+        npc.TickMovementTargetPosition = Vector3.zero;
+        npc.TickMovementDirection = Vector3.zero;
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
+
+        npc.TravelProgress01 = 0f;
+        npc.CombatState = SystemNpcCombatState.None;
+        npc.IsFighting = false;
     }
 
     private bool IsInvalidRoutePoint(
@@ -1686,7 +1709,74 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     private bool IsMilitaryDebugNpc(SystemNpcRuntimeState npc)
     {
         return npc != null &&
-               npc.IsAlly &&
-               npc.AllyRole == AllyRole2A.Military;
+               npc.IsAlly;
+            //     &&
+            //    (npc.AllyRole == AllyRole2A.Military ||
+            //     npc.AllyRole == AllyRole2A.Science);
+    }
+
+    public SystemNpcBehaviorType GetRandomBehaviorType4Ally(SystemNpcRuntimeState npc)
+    {
+        return GetRandomBehaviorType4Ally(
+            npc,
+            ResolveBehaviorScenario(npc));
+    }
+
+    private SystemNpcBehaviorType GetRandomBehaviorType4Ally(
+        SystemNpcRuntimeState npc,
+        AllyBehaviourScenario resolvedScenario)
+    {
+        AllyConfig allyConfig =
+            _configService.GetAllyConfigById(npc.ConfigId);
+
+        NpcBehaviourScenarioConfig behaviorScenario =
+            GetAllyBehaviorScenario(allyConfig, resolvedScenario);
+
+        bool shouldLog =
+            ShouldLogAllyBehaviorPickTrace(npc, behaviorScenario);
+
+        if (shouldLog)
+        {
+            LogCustom(
+                "[NPC-BEHAVIOR-PICK] Ally pick start. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", ConfigId=" + npc.ConfigId +
+                ", NpcType=" + npc.NpcType +
+                ", RuntimeRole=" + npc.AllyRole +
+                ", ConfigRole=" + (allyConfig != null ? allyConfig.Role.ToString() : "NULL_CONFIG") +
+                ", Level=" + npc.Level +
+                ", CurrentSystem=" + npc.CurrentSystemId +
+                ", CurrentBehavior=" + npc.CurrentBehavior +
+                ", PrevBehavior=" + npc.PrevBehavior +
+                ", TravelState=" + npc.TravelState +
+                ", IsOnPlanet=" + npc.IsOnPlanet +
+                ", CurrentPlanet=" + npc.CurrentPlanetId +
+                ", HasEnemiesInSystem=" + HasEnemiesInSystem(npc.CurrentSystemId) +
+                ", ResolvedScenario=" + resolvedScenario +
+                ", ScenarioId=" + (behaviorScenario != null ? behaviorScenario.Id : "NULL_SCENARIO") +
+                ", ScenarioWeights=" + FormatBehaviorWeightsForDebug(
+                    behaviorScenario != null
+                        ? behaviorScenario.BehaviorWeights
+                        : null));
+        }
+
+        SystemNpcBehaviorType pickedBehavior =
+            PickScenarioBehavior(
+                behaviorScenario,
+                npc);
+
+        if (shouldLog || pickedBehavior == SystemNpcBehaviorType.EngageEnemies)
+        {
+            LogCustom(
+                "[NPC-BEHAVIOR-PICK] Ally pick result. " +
+                "Npc=" + npc.RuntimeNpcId +
+                ", ConfigId=" + npc.ConfigId +
+                ", RuntimeRole=" + npc.AllyRole +
+                ", PickedBehavior=" + pickedBehavior +
+                ", ResolvedScenario=" + resolvedScenario +
+                ", ScenarioId=" + (behaviorScenario != null ? behaviorScenario.Id : "NULL_SCENARIO"));
+        }
+
+        return pickedBehavior;
     }
 }

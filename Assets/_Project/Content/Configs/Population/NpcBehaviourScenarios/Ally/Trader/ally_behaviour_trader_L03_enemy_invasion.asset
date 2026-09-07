@@ -22,15 +22,20 @@ MonoBehaviour:
     targetStationType: 0
     targetUnitSide: 0
     targetUnitType: 0
-    weight: 60
+    weight: 400
+  - behaviorType: 21
+    targetStationType: 0
+    targetUnitSide: 0
+    targetUnitType: 0
+    weight: 80
   - behaviorType: 22
     targetStationType: 0
     targetUnitSide: 0
     targetUnitType: 0
     weight: 40
-  - behaviorType: 21
+  - behaviorType: 11
     targetStationType: 0
     targetUnitSide: 0
     targetUnitType: 0
-    weight: 1
+    weight: 2
   engageEnemiesWeight: 0

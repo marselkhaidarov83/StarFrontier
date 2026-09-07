@@ -180,6 +180,10 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (npc.IsOnPlanet)
             return false;
 
+        if (npc.CurrentBehavior != SystemNpcBehaviorType.EngageEnemies &&
+            npc.TravelState != SystemNpcTravelState.EngagingEnemy)
+            return false;
+
         if (npc.Weapons == null || npc.Weapons.Count == 0)
             return false;
 
@@ -190,10 +194,22 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     }
 
     private void TryAttack(
-        SystemNpcRuntimeState shooter,
-        int quantTick,
-        bool ignoreTickGate = false)
+     SystemNpcRuntimeState shooter,
+     int quantTick,
+     bool ignoreTickGate = false)
     {
+        if (shooter == null)
+            return;
+
+        if (shooter.CurrentBehavior != SystemNpcBehaviorType.EngageEnemies &&
+            shooter.TravelState != SystemNpcTravelState.EngagingEnemy)
+        {
+            shooter.CombatState = SystemNpcCombatState.None;
+            shooter.CurrentTargetRuntimeNpcId = null;
+            shooter.IsFighting = false;
+            return;
+        }
+
         GalaxyCombatTarget target = FindTarget(shooter);
 
         if (!target.IsValid)
@@ -222,8 +238,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 target,
                 weaponRuntime,
                 quantTick,
-                ignoreTickGate
-            );
+                ignoreTickGate);
 
             if (fired)
                 firedAnyWeapon = true;

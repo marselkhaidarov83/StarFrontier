@@ -14,6 +14,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private readonly ISystemNpcBehaviorService _behaviorService;
     private readonly ISystemNpcMovementRouteService _routeService;
     private readonly IConfigService _configService;
+    private IGameTimeService _gameTimeService;
     private readonly SimpleEventBus _eventBus;
     private readonly ISystemShipRouteService2A _shipRouteService;
     private readonly SystemShipRouteResult2A _npcRouteBuildResult =
@@ -730,7 +731,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             maxBigDots,
             maxSmallDots,
             secondsPerTick,
-            passedDistance);
+            passedDistance,
+            GetCurrentTickRemainingFactor());
     }
 
     private float GetClosestDistanceOnNpcPath(
@@ -2005,8 +2007,10 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private bool IsMilitaryDebugNpc(SystemNpcRuntimeState npc)
     {
         return npc != null &&
-               npc.IsAlly &&
-               npc.AllyRole == AllyRole2A.Military;
+               npc.IsAlly;
+            //     &&
+            //    (npc.AllyRole == AllyRole2A.Military ||
+            //     npc.AllyRole == AllyRole2A.Science);
     }
 
     private void ClearNpcMovementRoute(string runtimeNpcId)
@@ -2044,5 +2048,35 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         routeState.TargetSystemId = npc.TargetSystemId;
         routeState.TargetPlanetId = npc.TargetPlanetId;
         routeState.CurrentTargetRuntimeNpcId = npc.CurrentTargetRuntimeNpcId;
+    }
+
+    private float GetCurrentTickRemainingFactor()
+    {
+        if (_gameTimeService == null &&
+            Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null)
+        {
+            Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out _gameTimeService);
+        }
+
+        if (_gameTimeService == null ||
+            _gameTimeService.State == null)
+        {
+            return 1f;
+        }
+
+        float secondsPerTick =
+            Mathf.Max(
+                0.01f,
+                GameTimeState.SecondsPerDay);
+
+        float elapsedFactor =
+            Mathf.Clamp01(
+                _gameTimeService.State.Accumulator /
+                secondsPerTick);
+
+        return Mathf.Clamp01(
+            1f - elapsedFactor);
     }
 }

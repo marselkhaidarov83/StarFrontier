@@ -17,14 +17,15 @@ public interface ISystemShipRouteService2A
         float distanceTravelled = 0f);
 
     bool FillPreviewFromPath(
-        IReadOnlyList<Vector3> path,
-        float speed,
-        TravelRoutePreview2A preview,
-        float smallDotSpacing,
-        int maxBigDots,
-        int maxSmallDots,
-        float secondsPerTick,
-        float distanceTravelled);
+      IReadOnlyList<Vector3> path,
+      float speed,
+      TravelRoutePreview2A preview,
+      float smallDotSpacing,
+      int maxBigDots,
+      int maxSmallDots,
+      float secondsPerTick,
+      float distanceTravelled,
+      float currentTickRemainingFactor = 1f);
 
     float GetPathLength(
         IReadOnlyList<Vector3> path);

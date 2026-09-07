@@ -594,15 +594,54 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
             distanceTravelled);
     }
 
+    private float GetFlyingPreviewRouteDistanceAtTick(
+    int tickIndex,
+    float passedDistance,
+    float baseDistancePerTick,
+    float totalPathLength,
+    float currentTickRemainingFactor)
+    {
+        float distance =
+            Mathf.Clamp(
+                passedDistance,
+                0f,
+                totalPathLength);
+
+        if (tickIndex <= 0)
+            return distance;
+
+        for (int currentTick = 1; currentTick <= tickIndex; currentTick++)
+        {
+            float tickDistance =
+                currentTick == 1
+                    ? baseDistancePerTick * Mathf.Clamp01(currentTickRemainingFactor)
+                    : baseDistancePerTick;
+
+            distance =
+                Mathf.Min(
+                    totalPathLength,
+                    distance + tickDistance);
+
+            if (distance >= totalPathLength)
+                return totalPathLength;
+        }
+
+        return Mathf.Clamp(
+            distance,
+            0f,
+            totalPathLength);
+    }
+
     public bool FillPreviewFromPath(
-        IReadOnlyList<Vector3> path,
-        float speed,
-        TravelRoutePreview2A preview,
-        float smallDotSpacing,
-        int maxBigDots,
-        int maxSmallDots,
-        float secondsPerTick,
-        float distanceTravelled)
+    IReadOnlyList<Vector3> path,
+    float speed,
+    TravelRoutePreview2A preview,
+    float smallDotSpacing,
+    int maxBigDots,
+    int maxSmallDots,
+    float secondsPerTick,
+    float distanceTravelled,
+    float currentTickRemainingFactor = 1f)
     {
         if (preview == null)
             return false;
@@ -618,8 +657,11 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
         float safeSpeed =
             Mathf.Max(0.01f, speed);
 
-        float distancePerTick =
-            safeSpeed * Mathf.Max(0.01f, secondsPerTick);
+        float safeSecondsPerTick =
+            Mathf.Max(0.01f, secondsPerTick);
+
+        float baseDistancePerTick =
+            safeSpeed * safeSecondsPerTick;
 
         float passedDistance =
             Mathf.Clamp(
@@ -636,27 +678,26 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
         int safeMaxSmallDots =
             Mathf.Max(0, maxSmallDots);
 
-        float firstBigDotDistance =
-            Mathf.Floor(passedDistance / distancePerTick) *
-            distancePerTick +
-            distancePerTick;
+        float safeCurrentTickRemainingFactor =
+            Mathf.Clamp01(currentTickRemainingFactor);
 
-        for (int visibleTickIndex = 1; visibleTickIndex <= safeMaxBigDots; visibleTickIndex++)
+        for (int tickIndex = 1; tickIndex <= safeMaxBigDots; tickIndex++)
         {
             float intervalStartDistance =
-                Mathf.Clamp(
-                    firstBigDotDistance -
-                    distancePerTick +
-                    (visibleTickIndex - 1) * distancePerTick,
-                    0f,
-                    totalPathLength);
+                GetFlyingPreviewRouteDistanceAtTick(
+                    tickIndex - 1,
+                    passedDistance,
+                    baseDistancePerTick,
+                    totalPathLength,
+                    safeCurrentTickRemainingFactor);
 
             float distanceAtTick =
-                Mathf.Clamp(
-                    firstBigDotDistance +
-                    (visibleTickIndex - 1) * distancePerTick,
-                    0f,
-                    totalPathLength);
+                GetFlyingPreviewRouteDistanceAtTick(
+                    tickIndex,
+                    passedDistance,
+                    baseDistancePerTick,
+                    totalPathLength,
+                    safeCurrentTickRemainingFactor);
 
             if (distanceAtTick <= passedDistance + 0.001f)
                 continue;
@@ -664,10 +705,10 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
             AddSmallPreviewDots(
                 preview,
                 path,
-                intervalStartDistance,
+                Mathf.Max(intervalStartDistance, passedDistance),
                 distanceAtTick,
                 passedDistance,
-                visibleTickIndex,
+                tickIndex,
                 safeSmallDotSpacing,
                 safeMaxSmallDots);
 
@@ -675,7 +716,7 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 GetPointOnPathAtDistance(
                     path,
                     distanceAtTick),
-                visibleTickIndex);
+                tickIndex);
 
             if (distanceAtTick >= totalPathLength)
                 break;

@@ -10,6 +10,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private readonly IGalaxyNpcMovementService _galaxyNpcMovementService;
     private readonly IGalaxyNpcCombatService _galaxyNpcCombatService;
     private readonly ISystemEnemyService _systemEnemyService;
+    private readonly IGalaxyNpcBehaviorService _galaxyNpcBehaviorService;
     private readonly ISaveService _saveService;
 
     private int _previousTick = 0;
@@ -30,6 +31,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _systemTravelService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
         _galaxyPopulationService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyPopulationService>();
+        _galaxyNpcBehaviorService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcBehaviorService>();
         _galaxyNpcMovementService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcMovementService>();
         _galaxyNpcCombatService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcCombatService>();
         _systemEnemyService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyService>();
@@ -99,9 +101,12 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _galaxyNpcCombatService.Tick(deltaTime);
         _systemEnemyService.TickSystemMapCombat(deltaTime);
         _orbitalMotionService.Tick(deltaTime);
-        _systemTravelService.Tick(deltaTime, State.CurrentQuantTick);
         _galaxyPopulationService.Tick(deltaTime);
+
+        _galaxyNpcBehaviorService.Tick(State.CurrentQuantTick);
         _galaxyNpcMovementService.Tick(deltaTime, State.CurrentQuantTick);
+
+        _systemTravelService.Tick(deltaTime, State.CurrentQuantTick);
     }
 
     private void AdvanceOneQuantTick()

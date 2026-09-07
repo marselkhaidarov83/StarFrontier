@@ -56,6 +56,7 @@ public sealed class SystemNpcRuntimeState
     public int BehaviorEndsTick;
     public bool HasActiveBehavior;
     public bool CanChangeLocationOnRestore;
+    public AllyBehaviourScenario CurrentBehaviorScenario;
 
     [Header("Behavior Context")]
     public int DaysToStayOnPlanet;
