@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class GalaxyNpcProjectileView : MonoBehaviour
+public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
 {
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float rotationOffsetDegrees = -90f;
@@ -9,6 +9,7 @@ public sealed class GalaxyNpcProjectileView : MonoBehaviour
     public bool IsActive { get; private set; }
 
     private ISystemNpcCombatService _combatService;
+    private ProjectileWeaponVisualSettings2A _settings;
     private Vector3 _lastPosition;
 
     public void Init(GalaxyNpcProjectileCreatedEvent evt)
@@ -16,11 +17,14 @@ public sealed class GalaxyNpcProjectileView : MonoBehaviour
         ProjectileId = evt.ProjectileId;
         IsActive = true;
 
-        transform.position = evt.StartPosition;
+        ResolveSettings();
+        ResolveSpriteRenderer();
+
         _lastPosition = evt.StartPosition;
+        SetPosition(evt.StartPosition);
 
         ResolveCombatService();
-        ApplyColor(evt);
+        ApplyRenderOrder();
 
         gameObject.SetActive(true);
     }
@@ -60,17 +64,25 @@ public sealed class GalaxyNpcProjectileView : MonoBehaviour
 
     public void SetPosition(Vector3 position)
     {
+        ResolveSettings();
+
+        if (_settings != null && _settings.ForceWorldZ)
+            position.z = _settings.WorldZ;
+
         Vector3 direction = position - _lastPosition;
 
         transform.position = position;
 
         if (direction.sqrMagnitude > 0.0001f)
         {
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Euler(
-                0f,
-                0f,
-                angle + rotationOffsetDegrees);
+            float angle =
+                Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            transform.rotation =
+                Quaternion.Euler(
+                    0f,
+                    0f,
+                    angle + rotationOffsetDegrees);
         }
 
         _lastPosition = position;
@@ -96,23 +108,31 @@ public sealed class GalaxyNpcProjectileView : MonoBehaviour
         bootstrapper.ServiceRegistry.TryGet(out _combatService);
     }
 
-    private void ApplyColor(GalaxyNpcProjectileCreatedEvent evt)
+    private void ResolveSettings()
+    {
+        if (_settings != null)
+            return;
+
+        _settings = GetComponent<ProjectileWeaponVisualSettings2A>();
+    }
+
+    private void ResolveSpriteRenderer()
+    {
+        if (spriteRenderer != null)
+            return;
+
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>(true);
+    }
+
+    private void ApplyRenderOrder()
     {
         if (spriteRenderer == null)
             return;
 
-        if (string.IsNullOrWhiteSpace(evt.ShooterNpcId))
-        {
-            spriteRenderer.color = new Color(0.35f, 0.95f, 1f, 1f);
+        if (_settings == null)
             return;
-        }
 
-        if (evt.TargetType == CombatTargetType.Player)
-        {
-            spriteRenderer.color = new Color(1f, 0.25f, 0.18f, 1f);
-            return;
-        }
-
-        spriteRenderer.color = new Color(0.45f, 0.7f, 1f, 1f);
+        spriteRenderer.sortingLayerName = _settings.SortingLayerName;
+        spriteRenderer.sortingOrder = _settings.SortingOrder;
     }
 }

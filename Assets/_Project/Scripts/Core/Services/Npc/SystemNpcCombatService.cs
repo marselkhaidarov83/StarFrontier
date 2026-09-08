@@ -122,14 +122,26 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (deltaTime <= 0f)
             return;
 
-        for (int i = 0; i < _activeProjectiles.Count; i++)
+        for (int i = _activeProjectiles.Count - 1; i >= 0; i--)
         {
             GalaxyNpcProjectileRuntimeState projectile = _activeProjectiles[i];
 
-            if (projectile == null || projectile.IsResolved)
+            if (projectile == null)
+            {
+                _activeProjectiles.RemoveAt(i);
                 continue;
+            }
+
+            if (projectile.IsResolved)
+            {
+                _activeProjectiles.RemoveAt(i);
+                continue;
+            }
 
             TickProjectile(projectile, deltaTime);
+
+            if (projectile.IsResolved)
+                _activeProjectiles.RemoveAt(i);
         }
 
         TickBeams(deltaTime);
@@ -333,95 +345,122 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 quantTick);
         }
 
+        if (IsTimedEnergyProjectile(weaponStats.ShotType))
+        {
+            return TryCreateTimedEnergyProjectiles(
+                shooter.CurrentSystemId,
+                CombatShooterType.Npc,
+                shooter.RuntimeNpcId,
+                target.TargetType,
+                target.TargetNpcId,
+                weaponRuntime.WeaponConfigId,
+                shooter.CurrentPosition,
+                target.Position,
+                weaponConfig,
+                weaponStats,
+                quantTick);
+        }
+
+        return TryCreateSingleProjectile(
+            shooter.CurrentSystemId,
+            CombatShooterType.Npc,
+            shooter.RuntimeNpcId,
+            target.TargetType,
+            target.TargetNpcId,
+            weaponRuntime.WeaponConfigId,
+            shooter.CurrentPosition,
+            target.Position,
+            weaponStats,
+            quantTick);
+    }
+
+    private bool TryCreateSingleProjectile(
+    string systemId,
+    CombatShooterType shooterType,
+    string shooterNpcId,
+    CombatTargetType targetType,
+    string targetNpcId,
+    string weaponConfigId,
+    Vector3 startPosition,
+    Vector3 targetPosition,
+    WeaponRuntimeStats weaponStats,
+    int quantTick)
+    {
         int projectileLifetimeTicks =
             Mathf.Max(1, weaponStats.ProjectileLifetime);
 
-        var projectile = new GalaxyNpcProjectileRuntimeState
-        {
-            ProjectileId = Guid.NewGuid().ToString("N"),
-
-            SystemId = shooter.CurrentSystemId,
-
-            ShooterType = CombatShooterType.Npc,
-            ShooterNpcId = shooter.RuntimeNpcId,
-
-            TargetType = target.TargetType,
-            TargetNpcId = target.TargetNpcId,
-
-            WeaponConfigId = weaponRuntime.WeaponConfigId,
-
-            StartPosition = shooter.CurrentPosition,
-            CurrentPosition = shooter.CurrentPosition,
-            LastKnownTargetPosition = target.Position,
-
-            Damage = weaponStats.Damage,
-
-            CreatedTick = quantTick,
-            ImpactTick = quantTick + projectileLifetimeTicks - 1,
-
-            ElapsedSeconds = 0f,
-            LifetimeSeconds = Mathf.Max(
+        float lifetimeSeconds =
+            Mathf.Max(
                 0.01f,
-                GameTimeService.SecondsPerDay * projectileLifetimeTicks),
+                GameTimeService.SecondsPerDay * projectileLifetimeTicks);
 
-            IsResolved = false
-        };
+        GalaxyNpcProjectileRuntimeState projectile =
+            CreateProjectileRuntimeState(
+                systemId,
+                shooterType,
+                shooterNpcId,
+                targetType,
+                targetNpcId,
+                weaponConfigId,
+                weaponStats.ShotType,
+                startPosition,
+                targetPosition,
+                Vector3.zero,
+                Mathf.Max(0, weaponStats.Damage),
+                0,
+                1,
+                quantTick,
+                0f,
+                lifetimeSeconds);
+
+        projectile.ImpactTick =
+            quantTick + projectileLifetimeTicks - 1;
 
         _activeProjectiles.Add(projectile);
 
-        _eventBus.Publish(new GalaxyNpcProjectileCreatedEvent(
-            projectile.ProjectileId,
-            projectile.SystemId,
-            projectile.ShooterNpcId,
-            projectile.TargetType,
-            projectile.TargetNpcId,
-            projectile.WeaponConfigId,
-            projectile.StartPosition,
-            projectile.LastKnownTargetPosition,
-            TickBasedProjectileSpeed));
-
-        LogCustom(
-            "[SystemNpcCombatService] Projectile created. " +
-            "Projectile: " +
-            projectile.ProjectileId +
-            ", Shooter: " +
-            shooter.RuntimeNpcId +
-            ", TargetType: " +
-            target.TargetType +
-            ", Target: " +
-            target.TargetNpcId +
-            ", Damage: " +
-            projectile.Damage +
-            ", Range: " +
-            weaponStats.Range.ToString("F2") +
-            ", LifetimeTicks: " +
-            projectileLifetimeTicks);
+        PublishProjectileCreated(projectile);
 
         return true;
     }
 
     private void TickProjectile(
-        GalaxyNpcProjectileRuntimeState projectile,
-        float deltaTime)
+    GalaxyNpcProjectileRuntimeState projectile,
+    float deltaTime)
     {
         projectile.ElapsedSeconds += deltaTime;
 
         Vector3 targetPosition = projectile.LastKnownTargetPosition;
 
-        if (TryGetCurrentProjectileTargetPosition(projectile, out Vector3 currentTargetPosition))
+        if (TryGetCurrentProjectileTargetPosition(
+                projectile,
+                out Vector3 currentTargetPosition))
         {
-            targetPosition = currentTargetPosition;
-            projectile.LastKnownTargetPosition = currentTargetPosition;
+            targetPosition = currentTargetPosition + projectile.PathOffset;
+            projectile.LastKnownTargetPosition = targetPosition;
         }
 
-        float lifetime = Mathf.Max(0.01f, projectile.LifetimeSeconds);
-        float progress01 = Mathf.Clamp01(projectile.ElapsedSeconds / lifetime);
+        if (projectile.ElapsedSeconds < projectile.StartDelaySeconds)
+        {
+            projectile.CurrentPosition = projectile.StartPosition;
+            return;
+        }
+
+        float flightElapsedSeconds =
+            projectile.ElapsedSeconds - projectile.StartDelaySeconds;
+
+        float lifetimeSeconds =
+            Mathf.Max(0.01f, projectile.LifetimeSeconds);
+
+        float progress01 =
+            Mathf.Clamp01(flightElapsedSeconds / lifetimeSeconds);
 
         projectile.CurrentPosition = Vector3.Lerp(
             projectile.StartPosition,
             targetPosition,
-            progress01
-        );
+            progress01);
+
+        if (progress01 >= 1f)
+            ResolveProjectile(projectile);
     }
 
     private bool TryGetCurrentProjectileTargetPosition(
@@ -669,12 +708,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     string weaponConfigId,
     int quantTick)
     {
-        LogCustom("targetNpcId = " + targetNpcId);
-
         if (string.IsNullOrWhiteSpace(targetNpcId))
             return false;
-
-        LogCustom("weaponConfigId = " + weaponConfigId);
 
         if (string.IsNullOrWhiteSpace(weaponConfigId))
             return false;
@@ -685,23 +720,20 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             return false;
         }
 
-        LogCustom("target.IsAlive = " + target.IsAlive);
-        LogCustom("target.IsOnPlanet = " + target.IsOnPlanet);
-
         if (!target.IsAlive || target.IsOnPlanet)
             return false;
 
         if (!_playerTargetService.IsPlayerAvailableInSystem(target.CurrentSystemId))
-        {
-            LogCustom("target.CurrentSystemId = " + target.CurrentSystemId);
             return false;
-        }
 
         WeaponConfig weaponConfig = _configService.GetWeaponConfigById(weaponConfigId);
 
         if (weaponConfig == null)
         {
-            Debug.LogWarning("[SystemNpcCombatService] WeaponConfig not found: " + weaponConfigId);
+            Debug.LogWarning(
+                "[SystemNpcCombatService] WeaponConfig not found: " +
+                weaponConfigId);
+
             return false;
         }
 
@@ -710,26 +742,19 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 "player",
                 target.RuntimeNpcId,
                 weaponConfigId,
-                quantTick.ToString()
-            )
-        );
+                quantTick.ToString()));
 
         Vector3 playerPosition = _playerTargetService.GetPlayerPosition();
 
-        LogCustom("playerPosition = " + playerPosition);
-        LogCustom("target.CurrentPosition = " + target.CurrentPosition);
-
-        float distance = Vector3.Distance(playerPosition, target.CurrentPosition);
-
-        LogCustom("distance = " + distance);
-        LogCustom("weaponStats.Range = " + weaponStats.Range);
+        float distance = Vector3.Distance(
+            playerPosition,
+            target.CurrentPosition);
 
         if (distance > weaponStats.Range)
         {
             LogCustom(
                 "[SystemNpcCombatService] Player target out of range. " +
-                $"Distance: {distance:F2}, Range: {weaponStats.Range:F2}"
-            );
+                $"Distance: {distance:F2}, Range: {weaponStats.Range:F2}");
 
             return false;
         }
@@ -749,41 +774,280 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 quantTick);
         }
 
-        int projectileLifetimeTicks = Mathf.Max(1, weaponStats.ProjectileLifetime);
+        if (IsTimedEnergyProjectile(weaponStats.ShotType))
+        {
+            return TryCreateTimedEnergyProjectiles(
+                target.CurrentSystemId,
+                CombatShooterType.Player,
+                string.Empty,
+                CombatTargetType.Npc,
+                target.RuntimeNpcId,
+                weaponConfigId,
+                playerPosition,
+                target.CurrentPosition,
+                weaponConfig,
+                weaponStats,
+                quantTick);
+        }
 
-        var projectile = new GalaxyNpcProjectileRuntimeState
+        return TryCreateSingleProjectile(
+            target.CurrentSystemId,
+            CombatShooterType.Player,
+            string.Empty,
+            CombatTargetType.Npc,
+            target.RuntimeNpcId,
+            weaponConfigId,
+            playerPosition,
+            target.CurrentPosition,
+            weaponStats,
+            quantTick);
+    }
+
+    private bool TryCreateTimedEnergyProjectiles(
+    string systemId,
+    CombatShooterType shooterType,
+    string shooterNpcId,
+    CombatTargetType targetType,
+    string targetNpcId,
+    string weaponConfigId,
+    Vector3 startPosition,
+    Vector3 targetPosition,
+    WeaponConfig weaponConfig,
+    WeaponRuntimeStats weaponStats,
+    int quantTick)
+    {
+        int shotCount = Mathf.Max(1, weaponStats.ShotCount);
+
+        ProjectileWeaponVisualSettings2A visualSettings =
+            ResolveProjectileVisualSettings(weaponConfig);
+
+        float sequenceTickDuration01 =
+            visualSettings != null
+                ? visualSettings.ShotSequenceTickDuration01
+                : 0.8f;
+
+        float shotGapTickDuration01 =
+            visualSettings != null
+                ? visualSettings.ShotGapTickDuration01
+                : 0.02f;
+
+        float tickSeconds =
+            Mathf.Max(0.01f, GameTimeService.SecondsPerDay);
+
+        float sequenceSeconds =
+            Mathf.Max(0.01f, tickSeconds * sequenceTickDuration01);
+
+        float slotSeconds =
+            sequenceSeconds / shotCount;
+
+        float gapSeconds =
+            Mathf.Min(
+                tickSeconds * shotGapTickDuration01,
+                Mathf.Max(0f, slotSeconds - 0.01f));
+
+        float flightSeconds =
+            Mathf.Max(0.01f, slotSeconds - gapSeconds);
+
+        Vector3 pathDirection = targetPosition - startPosition;
+        pathDirection.z = 0f;
+
+        Vector3 leftPerpendicular = Vector3.zero;
+
+        if (pathDirection.sqrMagnitude > 0.0001f)
+        {
+            pathDirection.Normalize();
+            leftPerpendicular = new Vector3(-pathDirection.y, pathDirection.x, 0f);
+        }
+
+        float rapidLaneOffset =
+            weaponStats.ShotType == WeaponShotType2A.RapidEnergyVolley &&
+            visualSettings != null
+                ? visualSettings.RapidProjectileLaneOffset
+                : 0f;
+
+        bool createdAny = false;
+
+        for (int shotIndex = 0; shotIndex < shotCount; shotIndex++)
+        {
+            float startDelaySeconds =
+                slotSeconds * shotIndex;
+
+            Vector3 pathOffset =
+                ResolveRapidProjectilePathOffset(
+                    leftPerpendicular,
+                    rapidLaneOffset,
+                    shotIndex);
+
+            GalaxyNpcProjectileRuntimeState projectile =
+                CreateProjectileRuntimeState(
+                    systemId,
+                    shooterType,
+                    shooterNpcId,
+                    targetType,
+                    targetNpcId,
+                    weaponConfigId,
+                    weaponStats.ShotType,
+                    startPosition,
+                    targetPosition,
+                    pathOffset,
+                    Mathf.Max(0, weaponStats.Damage),
+                    shotIndex,
+                    shotCount,
+                    quantTick,
+                    startDelaySeconds,
+                    flightSeconds);
+
+            _activeProjectiles.Add(projectile);
+
+            PublishProjectileCreated(projectile);
+
+            createdAny = true;
+        }
+
+        return createdAny;
+    }
+
+    private GalaxyNpcProjectileRuntimeState CreateProjectileRuntimeState(
+    string systemId,
+    CombatShooterType shooterType,
+    string shooterNpcId,
+    CombatTargetType targetType,
+    string targetNpcId,
+    string weaponConfigId,
+    WeaponShotType2A shotType,
+    Vector3 startPosition,
+    Vector3 targetPosition,
+    Vector3 pathOffset,
+    int damage,
+    int shotIndex,
+    int shotCount,
+    int quantTick,
+    float startDelaySeconds,
+    float lifetimeSeconds)
+    {
+        startPosition.z = 0f;
+        targetPosition.z = 0f;
+        pathOffset.z = 0f;
+
+        Vector3 shiftedStartPosition = startPosition + pathOffset;
+        Vector3 shiftedTargetPosition = targetPosition + pathOffset;
+
+        return new GalaxyNpcProjectileRuntimeState
         {
             ProjectileId = Guid.NewGuid().ToString("N"),
 
-            SystemId = target.CurrentSystemId,
+            SystemId = systemId,
 
-            ShooterType = CombatShooterType.Player,
-            ShooterNpcId = string.Empty,
+            ShooterType = shooterType,
+            ShooterNpcId = shooterNpcId ?? string.Empty,
 
-            TargetType = CombatTargetType.Npc,
-            TargetNpcId = target.RuntimeNpcId,
+            TargetType = targetType,
+            TargetNpcId = targetNpcId ?? string.Empty,
 
-            WeaponConfigId = weaponConfigId,
+            WeaponConfigId = weaponConfigId ?? string.Empty,
+            ShotType = shotType,
 
-            StartPosition = playerPosition,
-            CurrentPosition = playerPosition,
-            LastKnownTargetPosition = target.CurrentPosition,
+            StartPosition = shiftedStartPosition,
+            CurrentPosition = shiftedStartPosition,
+            LastKnownTargetPosition = shiftedTargetPosition,
+            PathOffset = pathOffset,
 
-            Damage = weaponStats.Damage,
+            Damage = damage,
+
+            ShotIndex = Mathf.Max(0, shotIndex),
+            ShotCount = Mathf.Max(1, shotCount),
 
             CreatedTick = quantTick,
-            ImpactTick = quantTick + projectileLifetimeTicks - 1,
+            ImpactTick = quantTick,
 
             ElapsedSeconds = 0f,
-            LifetimeSeconds = Mathf.Max(
-                0.01f,
-                GameTimeService.SecondsPerDay * projectileLifetimeTicks
-            ),
+            StartDelaySeconds = Mathf.Max(0f, startDelaySeconds),
+            LifetimeSeconds = Mathf.Max(0.01f, lifetimeSeconds),
 
             IsResolved = false
         };
+    }
+
+    private static Vector3 ResolveRapidProjectilePathOffset(
+    Vector3 leftPerpendicular,
+    float laneOffset,
+    int shotIndex)
+    {
+        if (laneOffset <= 0f)
+            return Vector3.zero;
+
+        if (leftPerpendicular.sqrMagnitude <= 0.0001f)
+            return Vector3.zero;
+
+        float side = shotIndex % 2 == 0 ? 1f : -1f;
+
+        return leftPerpendicular.normalized * laneOffset * side;
+    }
+
+    private bool TryCreateSingleLegacyProjectile(
+        string systemId,
+        CombatShooterType shooterType,
+        string shooterNpcId,
+        CombatTargetType targetType,
+        string targetNpcId,
+        string weaponConfigId,
+        Vector3 startPosition,
+        Vector3 targetPosition,
+        WeaponRuntimeStats weaponStats,
+        int quantTick)
+    {
+        int projectileLifetimeTicks =
+            Mathf.Max(1, weaponStats.ProjectileLifetime);
+
+        GalaxyNpcProjectileRuntimeState projectile =
+            new GalaxyNpcProjectileRuntimeState
+            {
+                ProjectileId = Guid.NewGuid().ToString("N"),
+
+                SystemId = systemId,
+
+                ShooterType = shooterType,
+                ShooterNpcId = shooterNpcId ?? string.Empty,
+
+                TargetType = targetType,
+                TargetNpcId = targetNpcId ?? string.Empty,
+
+                WeaponConfigId = weaponConfigId,
+                ShotType = weaponStats.ShotType,
+
+                StartPosition = startPosition,
+                CurrentPosition = startPosition,
+                LastKnownTargetPosition = targetPosition,
+
+                Damage = Mathf.Max(0, weaponStats.Damage),
+
+                ShotIndex = 0,
+                ShotCount = 1,
+
+                CreatedTick = quantTick,
+                ImpactTick = quantTick + projectileLifetimeTicks - 1,
+
+                ElapsedSeconds = 0f,
+                StartDelaySeconds = 0f,
+                LifetimeSeconds = Mathf.Max(
+                    0.01f,
+                    GameTimeService.SecondsPerDay * projectileLifetimeTicks),
+
+                IsResolved = false
+            };
 
         _activeProjectiles.Add(projectile);
+
+        PublishProjectileCreated(projectile);
+
+        return true;
+    }
+
+    private void PublishProjectileCreated(
+     GalaxyNpcProjectileRuntimeState projectile)
+    {
+        if (projectile == null)
+            return;
 
         _eventBus.Publish(new GalaxyNpcProjectileCreatedEvent(
             projectile.ProjectileId,
@@ -794,26 +1058,38 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             projectile.WeaponConfigId,
             projectile.StartPosition,
             projectile.LastKnownTargetPosition,
-            TickBasedProjectileSpeed
-        ));
+            TickBasedProjectileSpeed));
 
         _eventBus.Publish(new CombatProjectileCreatedEvent2A(
             projectile.ProjectileId,
             projectile.SystemId,
-            "player",
+            projectile.ShooterType == CombatShooterType.Player
+                ? "player"
+                : projectile.ShooterNpcId,
             projectile.TargetNpcId,
             projectile.WeaponConfigId,
             projectile.StartPosition,
             projectile.LastKnownTargetPosition));
+    }
 
-        LogCustom(
-            "[SystemNpcCombatService] Player projectile created. " +
-            $"Target: {targetNpcId}, Weapon: {weaponConfigId}, " +
-            $"Damage: {weaponStats.Damage}, Range: {weaponStats.Range:F2}, " +
-            $"LifetimeTicks: {projectileLifetimeTicks}"
-        );
+    private static bool IsTimedEnergyProjectile(
+     WeaponShotType2A shotType)
+    {
+        return shotType == WeaponShotType2A.RapidEnergyVolley ||
+               shotType == WeaponShotType2A.HeavyProjectile;
+    }
 
-        return true;
+    private static ProjectileWeaponVisualSettings2A ResolveProjectileVisualSettings(
+     WeaponConfig weaponConfig)
+    {
+        if (weaponConfig == null)
+            return null;
+
+        if (weaponConfig.ProjectilePrefabRef == null)
+            return null;
+
+        return weaponConfig.ProjectilePrefabRef
+            .GetComponent<ProjectileWeaponVisualSettings2A>();
     }
 
     public bool TryGetBeam(
@@ -952,23 +1228,20 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     {
         int safeShotCount = Mathf.Max(1, beam.ShotCount);
         float safeDuration = Mathf.Max(0.01f, beam.DurationSeconds);
+        int damagePerShot = Mathf.Max(0, beam.TotalDamage);
 
         while (!beam.IsResolved && beam.AppliedShotCount < safeShotCount)
         {
             int nextShotIndex = beam.AppliedShotCount;
+
             float requiredTime =
                 safeDuration * (nextShotIndex + 1) / safeShotCount;
 
             if (beam.ElapsedSeconds < requiredTime)
                 return;
 
-            int damage = GetBeamDamagePortion(
-                beam.TotalDamage,
-                safeShotCount,
-                nextShotIndex);
-
             Debug.Log(
-                "[BEAM_DAMAGE_PORTION] " +
+                "[BEAM_DAMAGE_SHOT] " +
                 "BeamId=" + beam.BeamId +
                 ", WeaponConfigId=" + beam.WeaponConfigId +
                 ", ShooterType=" + beam.ShooterType +
@@ -976,14 +1249,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 ", TargetType=" + beam.TargetType +
                 ", TargetNpcId=" + beam.TargetNpcId +
                 ", Shot=" + (nextShotIndex + 1) + "/" + safeShotCount +
-                ", Damage=" + damage +
-                ", TotalDamage=" + beam.TotalDamage +
-                ", BeamTime01=" + ((nextShotIndex + 1f) / safeShotCount).ToString("0.###") +
-                ", TickTime01=" + (requiredTime / Mathf.Max(0.01f, GameTimeService.SecondsPerDay)).ToString("0.###") +
-                ", ElapsedSeconds=" + beam.ElapsedSeconds.ToString("0.###") +
-                ", RequiredSeconds=" + requiredTime.ToString("0.###"));
+                ", Damage=" + damagePerShot);
 
-            ApplyBeamDamage(beam, damage);
+            ApplyBeamDamage(beam, damagePerShot);
             beam.AppliedShotCount++;
         }
     }

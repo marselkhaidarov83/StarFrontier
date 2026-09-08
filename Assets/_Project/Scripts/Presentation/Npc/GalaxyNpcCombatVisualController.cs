@@ -206,11 +206,40 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
         CompleteProjectile(evt.ProjectileId);
 
-        GalaxyNpcProjectileView view = GetProjectileFromPool();
+        GalaxyNpcProjectileView prefab =
+            ResolveProjectilePrefab(evt.WeaponConfigId);
+
+        if (prefab == null)
+            return null;
+
+        GalaxyNpcProjectileView view =
+            Instantiate(prefab, projectileRoot);
+
         view.Init(evt);
 
         _activeProjectiles[evt.ProjectileId] = view;
         return view;
+    }
+
+    private GalaxyNpcProjectileView ResolveProjectilePrefab(
+    string weaponConfigId)
+    {
+        if (_configService != null &&
+            !string.IsNullOrWhiteSpace(weaponConfigId))
+        {
+            WeaponConfig weaponConfig =
+                _configService.GetWeaponConfigById(weaponConfigId);
+
+            if (weaponConfig != null &&
+                weaponConfig.ProjectilePrefabRef != null &&
+                weaponConfig.ProjectilePrefabRef.TryGetComponent(
+                    out GalaxyNpcProjectileView configuredPrefab))
+            {
+                return configuredPrefab;
+            }
+        }
+
+        return projectilePrefab;
     }
 
     public void MoveProjectile(string projectileId, Vector3 position)

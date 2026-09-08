@@ -15,17 +15,23 @@ public sealed class GalaxyNpcProjectileRuntimeState
     public string TargetNpcId;
 
     public string WeaponConfigId;
+    public WeaponShotType2A ShotType;
 
     public Vector3 StartPosition;
     public Vector3 CurrentPosition;
     public Vector3 LastKnownTargetPosition;
+    public Vector3 PathOffset;
 
     public int Damage;
+
+    public int ShotIndex;
+    public int ShotCount;
 
     public int CreatedTick;
     public int ImpactTick;
 
     public float ElapsedSeconds;
+    public float StartDelaySeconds;
     public float LifetimeSeconds;
 
     public bool IsResolved;

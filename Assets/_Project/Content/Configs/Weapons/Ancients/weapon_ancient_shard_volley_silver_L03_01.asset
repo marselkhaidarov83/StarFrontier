@@ -29,8 +29,8 @@ MonoBehaviour:
   level: 3
   equipmentTier: 2
   cargoSize: 5
-  baseDamageMin: 54
-  baseDamageMax: 66
+  baseDamageMin: 27
+  baseDamageMax: 33
   rangeMin: 222.55
   rangeMax: 247.55
   energyCostMin: 7
@@ -43,8 +43,8 @@ MonoBehaviour:
   targetingMode: 0
   autoDetectShotType: 0
   shotType: 1
-  shotCount: 1
-  projectilePrefabRef: {fileID: 0}
+  shotCount: 2
+  projectilePrefabRef: {fileID: 2113405778882139475, guid: a6cef94b0bdef418cb260574f992c5b5, type: 3}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0

@@ -43,7 +43,7 @@ MonoBehaviour:
   autoDetectShotType: 0
   shotType: 3
   shotCount: 1
-  projectilePrefabRef: {fileID: 0}
+  projectilePrefabRef: {fileID: 2113405778882139475, guid: e97a16b4fa99a4d019f47970ebb24f52, type: 3}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0
