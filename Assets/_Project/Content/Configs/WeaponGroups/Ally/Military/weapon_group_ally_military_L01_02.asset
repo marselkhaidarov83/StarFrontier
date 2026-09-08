@@ -35,6 +35,6 @@ MonoBehaviour:
   weaponCount: 1
   powerScore: 304
   tierPattern: Gold
-  familyPattern: railgun
+  familyPattern: wave_cannon
   weaponConfigs:
-  - {fileID: 11400000, guid: a175a2b6d35924a9e9e7e0630e9ac8ff, type: 2}
+  - {fileID: 11400000, guid: 1421c8d086b5547f483e7db8c9103269, type: 2}

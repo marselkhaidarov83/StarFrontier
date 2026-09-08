@@ -35,8 +35,8 @@ MonoBehaviour:
   weaponCount: 3
   powerScore: 611
   tierPattern: Gold + Silver + Bronze
-  familyPattern: railgun + laser + missile
+  familyPattern: wave_cannon + laser + missile
   weaponConfigs:
-  - {fileID: 11400000, guid: 70e3cb5593bad4879b2fafca9a50384e, type: 2}
+  - {fileID: 11400000, guid: 93e2aea772bc84722ad5e1fca94cc26d, type: 2}
   - {fileID: 11400000, guid: 087b74c3246d2408e8b162f322fd1291, type: 2}
   - {fileID: 11400000, guid: 33402c4818a424aecb25a9804e07a0ec, type: 2}

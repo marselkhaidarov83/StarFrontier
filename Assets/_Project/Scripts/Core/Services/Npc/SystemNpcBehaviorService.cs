@@ -1055,20 +1055,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.TickMovementArrived = false;
         npc.TravelProgress01 = 0f;
 
-        Vector3 direction = exitPoint - npc.CurrentPosition;
-        direction.z = 0f;
-
-        if (direction.sqrMagnitude > 0.0001f)
-        {
-            direction.Normalize();
-            npc.FacingDirection = direction;
-            npc.TickMovementDirection = direction;
-        }
-
         if (IsMilitaryDebugNpc(npc))
         {
             LogCustom(
-                "[NPC-MILITARY-BEHAVIOR] SetupTravelToAnotherSystem target set. " +
+                "[NPC-MILITARY-BEHAVIOR] SetupTravelToAnotherSystem target set without forced facing. " +
                 "Npc=" + npc.RuntimeNpcId +
                 ", FromSystem=" + currentSystem.Id +
                 ", ToSystem=" + targetSystem.Id +
@@ -1076,7 +1066,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 ", ExitPoint=" + npc.TargetSystemExitPoint +
                 ", EntryPoint=" + npc.TargetSystemEntryPoint +
                 ", DistanceToExit=" + Vector3.Distance(npc.StartPosition, npc.TargetSystemExitPoint) +
-                ", Speed=" + npc.Speed);
+                ", Speed=" + npc.Speed +
+                ", FacingDirectionKept=" + npc.FacingDirection +
+                ", TickMovementDirectionKept=" + npc.TickMovementDirection);
         }
     }
 
@@ -1710,9 +1702,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     {
         return npc != null &&
                npc.IsAlly;
-            //     &&
-            //    (npc.AllyRole == AllyRole2A.Military ||
-            //     npc.AllyRole == AllyRole2A.Science);
+        //     &&
+        //    (npc.AllyRole == AllyRole2A.Military ||
+        //     npc.AllyRole == AllyRole2A.Science);
     }
 
     public SystemNpcBehaviorType GetRandomBehaviorType4Ally(SystemNpcRuntimeState npc)

@@ -9,7 +9,7 @@ using UnityEngine;
 public static class WeaponConfigAssetGenerator
 {
     private const string InputCsvPath =
-        "Assets/_Project/Content/Configs/Weapons/STAR_FRONTIER_WeaponConfig_300_config_fields_RU_no_enemy_types_v0.9_cargo_rules.csv";
+        "Assets/_Project/Content/Configs/Weapons/STAR_FRONTIER_WeaponConfig_300_config_fields_RU_no_enemy_types_v1.0_shot_types.csv";
 
     private const string OutputRootFolder =
         "Assets/_Project/Content/Configs/Weapons";
@@ -371,9 +371,9 @@ public static class WeaponConfigAssetGenerator
     }
 
     private static List<string> ApplyRowToWeaponConfig(
-        SerializedObject serializedObject,
-        Dictionary<string, string> row,
-        string rowId)
+     SerializedObject serializedObject,
+     Dictionary<string, string> row,
+     string rowId)
     {
         var warnings =
             new List<string>();
@@ -406,6 +406,9 @@ public static class WeaponConfigAssetGenerator
         SetRequiredBool(serializedObject, "isHitscan", Get(row, "isHitscan"), rowId, warnings);
 
         SetRequiredEnum(serializedObject, "weaponType", Get(row, "weaponType"), rowId, warnings);
+        SetRequiredBool(serializedObject, "autoDetectShotType", Get(row, "autoDetectShotType"), rowId, warnings);
+        SetRequiredEnum(serializedObject, "shotType", Get(row, "shotType"), rowId, warnings);
+        SetRequiredInt(serializedObject, "shotCount", Get(row, "shotCount"), rowId, warnings);
         SetRequiredEnum(serializedObject, "damageType", Get(row, "damageType"), rowId, warnings);
         SetRequiredEnum(serializedObject, "targetingMode", Get(row, "targetingMode"), rowId, warnings);
 
@@ -496,7 +499,8 @@ public static class WeaponConfigAssetGenerator
             "targetingMode",
             "usesAmmo",
             "maxAmmoChargesMin",
-            "maxAmmoChargesMax"
+            "maxAmmoChargesMax",
+            "weaponType"
         };
 
         for (int i = 0; i < requiredHeaders.Length; i++)
@@ -560,6 +564,9 @@ public static class WeaponConfigAssetGenerator
 
             ValidateBool(row, "isHitscan", id, result.Errors);
             ValidateBool(row, "usesAmmo", id, result.Errors);
+
+            ValidateBool(row, "autoDetectShotType", id, result.Errors);
+            ValidateInt(row, "shotCount", id, result.Errors);
 
             ValidateInt(row, "maxAmmoChargesMin", id, result.Errors);
             ValidateInt(row, "maxAmmoChargesMax", id, result.Errors);

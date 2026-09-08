@@ -26,6 +26,7 @@ public sealed class SystemShipRouteSettings2A
     public float SpeedAdjustmentStepPercent = 2.5f;
     public float MinTurnRadiusAdjustmentFactor = 0.05f;
     public float MinTurnRadiusAbsolute = 30f;
+    public float BehindSmallTurnAngleToleranceDegrees = 75f;
     public int MaxRoutePlanSteps = 8192;
     public float SunAvoidanceTurnRouteReserveMultiplier = 1.5f;
     public System.Action<string> DebugLog;
@@ -726,13 +727,13 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
     }
 
     private bool TryBuildAdjustedRoute(
-     Vector3 startPosition,
-     Vector3 destinationPosition,
-     Vector2 startFacingDirection,
-     SystemShipRouteSettings2A settings,
-     SunRouteObstacle2A obstacle,
-     bool useSunAvoidance,
-     SystemShipRouteResult2A result)
+    Vector3 startPosition,
+    Vector3 destinationPosition,
+    Vector2 startFacingDirection,
+    SystemShipRouteSettings2A settings,
+    SunRouteObstacle2A obstacle,
+    bool useSunAvoidance,
+    SystemShipRouteResult2A result)
     {
         float baseTurnRadius =
             Mathf.Max(0f, settings.TurnRadius);
@@ -761,10 +762,17 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
             return true;
         }
 
+        bool allowBehindSmallTurn =
+            IsBehindSmallTurnCandidate(
+                startPosition,
+                destinationPosition,
+                startFacingDirection,
+                settings);
+
         float minFactorByAbsolute =
             baseTurnRadius > 0f
                 ? Mathf.Clamp01(settings.MinTurnRadiusAbsolute / baseTurnRadius)
-                : 1f;
+                : 0f;
 
         float minFactor =
             Mathf.Clamp01(
@@ -780,23 +788,38 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
             Mathf.Clamp(settings.SpeedAdjustmentStepPercent, 0.1f, 50f) /
             100f;
 
-        float turnFactor = 1f;
-        float speedFactor = 1f;
+        float turnFactor =
+            allowBehindSmallTurn
+                ? minFactor
+                : 1f;
 
-        while (turnFactor >= minFactor - 0.0001f)
+        float speedFactor =
+            allowBehindSmallTurn
+                ? Mathf.Max(
+                    minFactor,
+                    1f - Mathf.CeilToInt((1f - minFactor) / turnStep) * speedStep)
+                : 1f;
+
+        while (allowBehindSmallTurn
+                   ? turnFactor <= 1f + 0.0001f
+                   : turnFactor >= minFactor - 0.0001f)
         {
             turnFactor =
-                Mathf.Max(minFactor, turnFactor);
+                Mathf.Clamp01(turnFactor);
+
+            speedFactor =
+                Mathf.Clamp01(speedFactor);
 
             float adjustedTurnRadius =
-                Mathf.Max(
-                    settings.MinTurnRadiusAbsolute,
-                    baseTurnRadius * turnFactor);
+                GetAdjustedTurnRadius(
+                    baseTurnRadius,
+                    turnFactor,
+                    settings);
 
             float adjustedSpeed =
                 Mathf.Max(
                     0.01f,
-                    settings.Speed * Mathf.Clamp01(speedFactor));
+                    settings.Speed * speedFactor);
 
             BuildWaypoints(
                 _waypointsBuffer,
@@ -837,18 +860,84 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 return true;
             }
 
-            turnFactor -= turnStep;
+            if (allowBehindSmallTurn)
+            {
+                turnFactor += turnStep;
 
-            speedFactor =
-                Mathf.Max(
-                    minFactor,
-                    speedFactor - speedStep);
+                speedFactor =
+                    Mathf.Min(
+                        1f,
+                        speedFactor + speedStep);
 
-            if (Mathf.Approximately(turnFactor, minFactor))
-                turnFactor = minFactor;
+                if (Mathf.Approximately(turnFactor, 1f))
+                    turnFactor = 1f;
+            }
+            else
+            {
+                turnFactor -= turnStep;
+
+                speedFactor =
+                    Mathf.Max(
+                        minFactor,
+                        speedFactor - speedStep);
+
+                if (Mathf.Approximately(turnFactor, minFactor))
+                    turnFactor = minFactor;
+            }
         }
 
         return false;
+    }
+
+    private static bool IsBehindSmallTurnCandidate(
+    Vector3 startPosition,
+    Vector3 destinationPosition,
+    Vector2 startFacingDirection,
+    SystemShipRouteSettings2A settings)
+    {
+        Vector2 toDestination =
+            new Vector2(
+                destinationPosition.x - startPosition.x,
+                destinationPosition.y - startPosition.y);
+
+        if (toDestination.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+            return false;
+
+        Vector2 facing =
+            TurnRadiusRouteMath2A.NormalizeDirectionOrUp(
+                startFacingDirection);
+
+        float angle =
+            Vector2.Angle(
+                facing,
+                toDestination.normalized);
+
+        float tolerance =
+            settings != null
+                ? Mathf.Clamp(settings.BehindSmallTurnAngleToleranceDegrees, 0f, 90f)
+                : 75f;
+
+        return angle >= 180f - tolerance;
+    }
+
+    private static float GetAdjustedTurnRadius(
+    float baseTurnRadius,
+    float turnFactor,
+    SystemShipRouteSettings2A settings)
+    {
+        float radius =
+            Mathf.Max(
+                RouteSegmentEpsilon,
+                baseTurnRadius * Mathf.Clamp01(turnFactor));
+
+        float minAbsolute =
+            settings != null
+                ? Mathf.Max(0f, settings.MinTurnRadiusAbsolute)
+                : 0f;
+
+        return Mathf.Max(
+            minAbsolute,
+            radius);
     }
 
     private void BuildWaypoints(
@@ -930,7 +1019,8 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
             TurnRadiusAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteTurnRadiusAdjustmentStepPercent : 5f,
             SpeedAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteSpeedAdjustmentStepPercent : 2.5f,
             MinTurnRadiusAdjustmentFactor = movementConfig != null ? movementConfig.MinRouteTurnRadiusAdjustmentFactor : 0.05f,
-            MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f
+            MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f,
+            BehindSmallTurnAngleToleranceDegrees = movementConfig != null ? movementConfig.RouteBehindSmallTurnAngleToleranceDegrees : 75f
         };
     }
 

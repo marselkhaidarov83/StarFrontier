@@ -30,6 +30,8 @@ public sealed class SystemSelectedTargetInfoHud2A :
     private ISystemNpcRuntimeService _npcRuntimeService;
     private ISystemEnemyService _enemyService;
     private IConfigService _configService;
+    private ITargetService2A _targetService;
+    private IPlayerAttackService _playerAttackService;
 
     private string _currentTargetId;
     private SystemGameplayTargetType _currentTargetType;
@@ -82,6 +84,8 @@ public sealed class SystemSelectedTargetInfoHud2A :
         context.TryGet(out _npcRuntimeService);
         context.TryGet(out _enemyService);
         context.TryGet(out _configService);
+        context.TryGet(out _targetService);
+        context.TryGet(out _playerAttackService);
 
         RebuildWeaponConfigCache();
 
@@ -128,6 +132,9 @@ public sealed class SystemSelectedTargetInfoHud2A :
         _npcRuntimeService = null;
         _enemyService = null;
         _configService = null;
+        _targetService = null;
+        _playerAttackService = null;
+
         _weaponConfigsById.Clear();
         _isBound = false;
     }
@@ -139,9 +146,12 @@ public sealed class SystemSelectedTargetInfoHud2A :
     }
 
     private void OnPanelCloseRequested(
-        SystemSelectedTargetInfoPanelCloseRequestedEvent2A evt)
+    SystemSelectedTargetInfoPanelCloseRequestedEvent2A evt)
     {
         HidePanel();
+
+        _targetService?.ClearTarget();
+        _playerAttackService?.ClearSelectedTargetIfNoAssignedWeapons();
     }
 
     private void OnObjectsPanelCloseRequested(

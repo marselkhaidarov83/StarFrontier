@@ -132,9 +132,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     }
 
     private void TickNpcMovement(
-    SystemNpcRuntimeState npc,
-    float deltaTime,
-    int currentTick)
+     SystemNpcRuntimeState npc,
+     float deltaTime,
+     int currentTick)
     {
         if (IsMilitaryDebugNpc(npc))
         {
@@ -161,14 +161,6 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         {
             npc.StartPosition = npc.CurrentPosition;
             npc.TravelProgress01 = 0f;
-
-            if (IsMilitaryDebugNpc(npc))
-            {
-                LogCustom(
-                    "[NPC-MILITARY-MOVEMENT] TargetPosition was zero, reset start/progress. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", StartPosition=" + npc.StartPosition);
-            }
         }
 
         EnsureTickMovementDirection(npc, currentTick);
@@ -294,23 +286,24 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 0f,
                 totalRouteLength);
 
+        float previousDistance =
+            routeState.DistanceTravelled;
+
         float movementDistance =
             Mathf.Max(0f, npc.Speed) *
             deltaTime;
 
         float nextDistance =
             Mathf.Clamp(
-                routeState.DistanceTravelled + movementDistance,
+                previousDistance + movementDistance,
                 0f,
                 totalRouteLength);
 
+        Vector3 oldPosition =
+            npc.CurrentPosition;
+
         Vector3 newPosition =
             GetNpcPointOnPathAtDistance(
-                routeState.Path,
-                nextDistance);
-
-        Vector2 routeDirection =
-            GetNpcDirectionOnPathAtDistance(
                 routeState.Path,
                 nextDistance);
 
@@ -322,26 +315,31 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 ", Behavior=" + npc.CurrentBehavior +
                 ", TravelState=" + npc.TravelState +
                 ", MovementDistance=" + movementDistance +
-                ", PreviousDistance=" + routeState.DistanceTravelled +
+                ", PreviousDistance=" + previousDistance +
                 ", NextDistance=" + nextDistance +
                 ", Remaining=" + (totalRouteLength - nextDistance) +
-                ", OldPosition=" + npc.CurrentPosition +
+                ", OldPosition=" + oldPosition +
                 ", NewPosition=" + newPosition +
                 ", TargetPosition=" + npc.TargetPosition +
-                ", TargetPlanet=" + npc.TargetPlanetId +
-                ", RouteDirection=" + routeDirection);
+                ", TargetPlanet=" + npc.TargetPlanetId);
         }
 
-        if (routeDirection.sqrMagnitude > DirectionThresholdSqrMagnitude)
-        {
-            npc.FacingDirection =
-                new Vector3(
-                    routeDirection.x,
-                    routeDirection.y,
-                    0f);
+        Vector3 movementDelta =
+            newPosition - oldPosition;
 
-            npc.TickMovementDirection =
-                npc.FacingDirection;
+        movementDelta.z = 0f;
+
+        bool movedAlongRoute =
+            nextDistance > previousDistance + 0.001f &&
+            movementDelta.sqrMagnitude > DirectionThresholdSqrMagnitude;
+
+        if (movedAlongRoute)
+        {
+            Vector3 movementDirection =
+                movementDelta.normalized;
+
+            npc.FacingDirection = movementDirection;
+            npc.TickMovementDirection = movementDirection;
         }
 
         npc.CurrentPosition = newPosition;
@@ -440,16 +438,20 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return;
         }
 
-        float routeReuseDistanceThreshold = GetNpcRouteReuseDistanceThreshold(npc);
+        float routeReuseDistanceThreshold =
+            GetNpcRouteReuseDistanceThreshold(npc);
 
         bool hasReusableRoute =
-            _npcMovementRoutes.TryGetValue(npc.RuntimeNpcId, out NpcMovementRouteState routeState) &&
+            _npcMovementRoutes.TryGetValue(
+                npc.RuntimeNpcId,
+                out NpcMovementRouteState routeState) &&
             routeState != null &&
             routeState.Path != null &&
             routeState.Path.Count > 1 &&
             IsSameNpcMovementRouteContext(routeState, npc) &&
-            Vector3.Distance(routeState.Destination, finalTargetPosition) <= routeReuseDistanceThreshold;
-
+            Vector3.Distance(
+                routeState.Destination,
+                finalTargetPosition) <= routeReuseDistanceThreshold;
 
         if (IsMilitaryDebugNpc(npc))
         {
@@ -494,20 +496,6 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             npc.TickMovementDirectionTick = currentTick;
             npc.TickMovementArrived = false;
 
-            Vector2 direction =
-                GetNpcDirectionOnPathAtDistance(
-                    routeState.Path,
-                    routeState.DistanceTravelled);
-
-            if (direction.sqrMagnitude > DirectionThresholdSqrMagnitude)
-            {
-                npc.TickMovementDirection =
-                    new Vector3(direction.x, direction.y, 0f);
-
-                if (npc.FacingDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
-                    npc.FacingDirection = npc.TickMovementDirection;
-            }
-
             if (IsMilitaryDebugNpc(npc))
             {
                 LogCustom(
@@ -536,7 +524,10 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         npc.TickMovementArrived = false;
 
-        if (!TryBuildNpcMovementRoutePath(npc, finalTargetPosition, _npcRoutePreviewPathBuffer))
+        if (!TryBuildNpcMovementRoutePath(
+                npc,
+                finalTargetPosition,
+                _npcRoutePreviewPathBuffer))
         {
             ClearNpcMovementRoute(npc.RuntimeNpcId);
 
@@ -576,23 +567,13 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             Mathf.Max(0.01f, GameTimeState.SecondsPerDay);
 
         Vector3 builtMovementTargetPosition =
-            GetNpcPointOnPathAtDistance(routeState.Path, builtDistancePerTick);
+            GetNpcPointOnPathAtDistance(
+                routeState.Path,
+                builtDistancePerTick);
 
         npc.CurrentMovementTargetPosition = builtMovementTargetPosition;
         npc.TickMovementTargetPosition = builtMovementTargetPosition;
         npc.TickMovementDirectionTick = currentTick;
-
-        Vector2 builtDirection =
-            GetNpcDirectionOnPathAtDistance(routeState.Path, 0f);
-
-        if (builtDirection.sqrMagnitude > DirectionThresholdSqrMagnitude)
-        {
-            npc.TickMovementDirection =
-                new Vector3(builtDirection.x, builtDirection.y, 0f);
-        }
-
-        if (npc.FacingDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
-            npc.FacingDirection = npc.TickMovementDirection;
 
         if (IsMilitaryDebugNpc(npc))
         {
@@ -1036,9 +1017,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     }
 
     private SystemShipRouteSettings2A CreateNpcRouteSettings(
-        SystemNpcRuntimeState npc,
-        float arrivalThreshold,
-        bool debugMilitary)
+    SystemNpcRuntimeState npc,
+    float arrivalThreshold,
+    bool debugMilitary)
     {
         ShipMovementConfig movementConfig =
             _configService != null
@@ -1059,12 +1040,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             SpeedAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteSpeedAdjustmentStepPercent : 2.5f,
             MinTurnRadiusAdjustmentFactor = movementConfig != null ? movementConfig.MinRouteTurnRadiusAdjustmentFactor : 0.05f,
             MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f,
+            BehindSmallTurnAngleToleranceDegrees = movementConfig != null ? movementConfig.RouteBehindSmallTurnAngleToleranceDegrees : 75f,
             MaxRoutePlanSteps = NpcRoutePlanMaxSteps,
             SunAvoidanceTurnRouteReserveMultiplier = 1.5f,
-            // DebugLog = debugMilitary ? message => LogCustom(message) : null,
-            // DebugPrefix = debugMilitary && npc != null
-            //     ? "[NPC-MILITARY-TURN-RADIUS] Npc=" + npc.RuntimeNpcId + ", "
-            //     : string.Empty
             DebugLog = null,
             DebugPrefix = string.Empty
         };
@@ -2008,9 +1986,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     {
         return npc != null &&
                npc.IsAlly;
-            //     &&
-            //    (npc.AllyRole == AllyRole2A.Military ||
-            //     npc.AllyRole == AllyRole2A.Science);
+        //     &&
+        //    (npc.AllyRole == AllyRole2A.Military ||
+        //     npc.AllyRole == AllyRole2A.Science);
     }
 
     private void ClearNpcMovementRoute(string runtimeNpcId)

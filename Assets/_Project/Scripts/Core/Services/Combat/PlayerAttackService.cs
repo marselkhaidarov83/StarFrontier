@@ -184,13 +184,27 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
 
     public void ClearWeaponSlotTarget(int weaponSlotIndex)
     {
-        if (!_weaponTargetNpcIdsBySlot.ContainsKey(weaponSlotIndex))
+        if (!_weaponTargetNpcIdsBySlot.TryGetValue(
+                weaponSlotIndex,
+                out string clearedTargetNpcId))
+        {
             return;
+        }
 
         _weaponTargetNpcIdsBySlot.Remove(weaponSlotIndex);
 
         if (_weaponTargetNpcIdsBySlot.Count == 0)
             _nextAssignmentSlotIndex = 0;
+
+        if (!string.IsNullOrWhiteSpace(CurrentTargetNpcId) &&
+            string.Equals(
+                CurrentTargetNpcId,
+                clearedTargetNpcId,
+                System.StringComparison.Ordinal) &&
+            !HasAssignedWeaponForTarget(CurrentTargetNpcId))
+        {
+            CurrentTargetNpcId = null;
+        }
 
         PublishAssignmentsChanged();
 
@@ -204,19 +218,30 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         if (string.IsNullOrWhiteSpace(CurrentTargetNpcId))
             return;
 
+        if (HasAssignedWeaponForTarget(CurrentTargetNpcId))
+            return;
+
+        CurrentTargetNpcId = null;
+        PublishAssignmentsChanged();
+    }
+
+    private bool HasAssignedWeaponForTarget(string targetNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(targetNpcId))
+            return false;
+
         foreach (var pair in _weaponTargetNpcIdsBySlot)
         {
             if (string.Equals(
                     pair.Value,
-                    CurrentTargetNpcId,
+                    targetNpcId,
                     System.StringComparison.Ordinal))
             {
-                return;
+                return true;
             }
         }
 
-        CurrentTargetNpcId = null;
-        PublishAssignmentsChanged();
+        return false;
     }
 
     public void ClearTarget()

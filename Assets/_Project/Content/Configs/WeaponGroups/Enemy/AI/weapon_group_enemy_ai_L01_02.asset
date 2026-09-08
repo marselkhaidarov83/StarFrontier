@@ -33,6 +33,6 @@ MonoBehaviour:
   weaponCount: 1
   powerScore: 204
   tierPattern: Silver
-  familyPattern: rail
+  familyPattern: core_bolt
   weaponConfigs:
-  - {fileID: 11400000, guid: cf107b21064b04492a8fb5d0a08baf84, type: 2}
+  - {fileID: 11400000, guid: 57880381f70bb4b20baedc62304ccc59, type: 2}

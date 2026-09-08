@@ -37,10 +37,10 @@ MonoBehaviour:
   weaponCount: 5
   powerScore: 711
   tierPattern: Bronze + Silver + Bronze + Silver + Bronze
-  familyPattern: pulse + pulse + laser + plasma + railgun
+  familyPattern: pulse + pulse + laser + plasma + wave_cannon
   weaponConfigs:
   - {fileID: 11400000, guid: 27d4fea4fb5ba4aec870baae27642d9b, type: 2}
   - {fileID: 11400000, guid: 7076230ee9bf7467abe3f7efff890d5b, type: 2}
   - {fileID: 11400000, guid: 12241ab41711d4004b5c1b1239c238b1, type: 2}
   - {fileID: 11400000, guid: 9a6d049fd5ce4433c83ca3c9bfbca890, type: 2}
-  - {fileID: 11400000, guid: f0664ad608d6a4d42b9706706c442cc5, type: 2}
+  - {fileID: 11400000, guid: 2b3f27cc39a4c44ad9603e1bf1f8eebd, type: 2}

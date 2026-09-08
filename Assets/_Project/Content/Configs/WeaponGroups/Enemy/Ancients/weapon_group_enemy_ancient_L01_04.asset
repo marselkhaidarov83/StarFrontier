@@ -34,6 +34,6 @@ MonoBehaviour:
   weaponCount: 1
   powerScore: 202
   tierPattern: Silver
-  familyPattern: beam
+  familyPattern: shard_volley
   weaponConfigs:
-  - {fileID: 11400000, guid: 35802fc5edb4f4c898ec6251a390edf0, type: 2}
+  - {fileID: 11400000, guid: 03539f26f78084125b07063d4a1b7b27, type: 2}

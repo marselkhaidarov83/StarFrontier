@@ -33,7 +33,7 @@ MonoBehaviour:
   weaponCount: 2
   powerScore: 407
   tierPattern: Silver + Silver
-  familyPattern: disruptor + rail
+  familyPattern: disruptor + core_bolt
   weaponConfigs:
   - {fileID: 11400000, guid: 087483cb181584221b556d5198e6c377, type: 2}
-  - {fileID: 11400000, guid: 5db82c6cc90fd4590b887fa170bda238, type: 2}
+  - {fileID: 11400000, guid: 206d8f78b8a9b4700a64f50f2e2969df, type: 2}

@@ -6,38 +6,41 @@ using UnityEngine;
 public class WeaponConfig : BaseConfig
 {
     [Header("Progression")]
-    [SerializeField] [Min(1)] private int level = 1;
+    [SerializeField][Min(1)] private int level = 1;
     [SerializeField] private WeaponEquipmentTier equipmentTier = WeaponEquipmentTier.Base;
 
     [Header("Cargo")]
-    [SerializeField] [Min(1)] private int cargoSize = 1;
+    [SerializeField][Min(1)] private int cargoSize = 1;
 
     [Header("Base Stats / Randomized Runtime Ranges")]
-    [SerializeField] [Min(1)] private int baseDamageMin = 1;
-    [SerializeField] [Min(1)] private int baseDamageMax = 1;
+    [SerializeField][Min(1)] private int baseDamageMin = 1;
+    [SerializeField][Min(1)] private int baseDamageMax = 1;
 
-    [SerializeField] [Min(0f)] private float rangeMin = 1f;
-    [SerializeField] [Min(0f)] private float rangeMax = 1f;
+    [SerializeField][Min(0f)] private float rangeMin = 1f;
+    [SerializeField][Min(0f)] private float rangeMax = 1f;
 
-    [SerializeField] [Min(0)] private int energyCostMin = 0;
-    [SerializeField] [Min(0)] private int energyCostMax = 0;
+    [SerializeField][Min(0)] private int energyCostMin = 0;
+    [SerializeField][Min(0)] private int energyCostMax = 0;
 
-    [SerializeField] [Min(1)] private int projectileLifetimeMin = 1;
-    [SerializeField] [Min(1)] private int projectileLifetimeMax = 1;
+    [SerializeField][Min(1)] private int projectileLifetimeMin = 1;
+    [SerializeField][Min(1)] private int projectileLifetimeMax = 1;
 
     [Header("Combat Behavior")]
     [SerializeField] private bool isHitscan;
     [SerializeField] private WeaponType weaponType;
     [SerializeField] private WeaponDamageType damageType;
     [SerializeField] private WeaponTargetingMode targetingMode = WeaponTargetingMode.SelectedTarget;
+    [SerializeField] private bool autoDetectShotType = true;
+    [SerializeField] private WeaponShotType2A shotType = WeaponShotType2A.Beam;
+    [SerializeField][Min(1)][InspectorName("Кол-во выстрелов")] private int shotCount = 1;
 
     [Header("Visuals")]
     [SerializeField] private GameObject projectilePrefabRef;
 
     [Header("Ammo")]
     [SerializeField] private bool usesAmmo = false;
-    [SerializeField] [Min(0)] private int maxAmmoChargesMin = 0;
-    [SerializeField] [Min(0)] private int maxAmmoChargesMax = 0;
+    [SerializeField][Min(0)] private int maxAmmoChargesMin = 0;
+    [SerializeField][Min(0)] private int maxAmmoChargesMax = 0;
 
     public int Level => level;
     public WeaponEquipmentTier EquipmentTier => equipmentTier;
@@ -66,6 +69,10 @@ public class WeaponConfig : BaseConfig
     public bool UsesAmmo => usesAmmo;
     public int MaxAmmoChargesMin => maxAmmoChargesMin;
     public int MaxAmmoChargesMax => maxAmmoChargesMax;
+
+    public bool AutoDetectShotType => autoDetectShotType;
+    public WeaponShotType2A ShotType => autoDetectShotType ? ResolveShotType() : shotType;
+    public int ShotCount => shotCount;
 
     public WeaponRuntimeStats RollRuntimeStats()
     {
@@ -103,8 +110,10 @@ public class WeaponConfig : BaseConfig
             projectileLifetime,
             isHitscan,
             weaponType,
+            ShotType,
             damageType,
             targetingMode,
+            shotCount,
             usesAmmo,
             maxAmmoCharges
         );
@@ -152,6 +161,52 @@ public class WeaponConfig : BaseConfig
         return min + (float)value01 * (max - min);
     }
 
+    private WeaponShotType2A ResolveShotType()
+    {
+        string normalizedId = string.IsNullOrWhiteSpace(Id)
+            ? string.Empty
+            : Id.ToLowerInvariant();
+
+        if (weaponType == WeaponType.Laser ||
+            weaponType == WeaponType.Beam ||
+            normalizedId.Contains("_laser_") ||
+            normalizedId.Contains("_lance_") ||
+            normalizedId.Contains("_tendril_"))
+        {
+            return WeaponShotType2A.Beam;
+        }
+
+        if (weaponType == WeaponType.Missile ||
+            normalizedId.Contains("_missile_") ||
+            normalizedId.Contains("_swarm_missile_") ||
+            normalizedId.Contains("_orb_") ||
+            normalizedId.Contains("_swarm_"))
+        {
+            return WeaponShotType2A.MissileSwarm;
+        }
+
+        if (weaponType == WeaponType.Plasma ||
+            normalizedId.Contains("_plasma_") ||
+            normalizedId.Contains("_core_bolt_") ||
+            normalizedId.Contains("_acid_"))
+        {
+            return WeaponShotType2A.HeavyProjectile;
+        }
+
+        if (weaponType == WeaponType.Disruptor ||
+            weaponType == WeaponType.Singularity ||
+            weaponType == WeaponType.Spore ||
+            normalizedId.Contains("_wave_cannon_") ||
+            normalizedId.Contains("_disruptor_") ||
+            normalizedId.Contains("_singularity_") ||
+            normalizedId.Contains("_spore_"))
+        {
+            return WeaponShotType2A.Wave;
+        }
+
+        return WeaponShotType2A.RapidEnergyVolley;
+    }
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -183,6 +238,8 @@ public class WeaponConfig : BaseConfig
             maxAmmoChargesMin = Mathf.Max(1, maxAmmoChargesMin);
             maxAmmoChargesMax = Mathf.Max(maxAmmoChargesMin, maxAmmoChargesMax);
         }
+
+        shotCount = Mathf.Max(1, shotCount);
     }
 #endif
 }

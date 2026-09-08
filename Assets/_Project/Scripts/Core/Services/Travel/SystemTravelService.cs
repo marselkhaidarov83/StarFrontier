@@ -1039,12 +1039,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             SpeedAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteSpeedAdjustmentStepPercent : 2.5f,
             MinTurnRadiusAdjustmentFactor = movementConfig != null ? movementConfig.MinRouteTurnRadiusAdjustmentFactor : 0.05f,
             MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f,
+            BehindSmallTurnAngleToleranceDegrees = movementConfig != null ? movementConfig.RouteBehindSmallTurnAngleToleranceDegrees : 75f,
             MaxRoutePlanSteps = RoutePlanMaxSteps,
             SunAvoidanceTurnRouteReserveMultiplier = SunAvoidanceTurnRouteReserveMultiplier,
             DebugLog = null,
             DebugPrefix = string.Empty
-            // DebugLog = message => LogCustom(message),
-            // DebugPrefix = "[PLAYER-ROUTE] "
         };
     }
 
@@ -3027,51 +3026,49 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         float nextRouteDistanceTravelled =
             0f;
 
-        bool usedPreservedLockedPrefix = false;
+        float nextTurnFactor =
+            1f;
 
-        RouteAdjustment routeAdjustment;
+        float nextSpeedFactor =
+            1f;
+
+        bool usedPreservedLockedPrefix = false;
 
         if (preserveLockedPrefix &&
             TryBuildRouteWithPreservedMovingDestinationPrefix(
                 liveDestinationPosition,
                 out routeClassification,
-                out routeAdjustment,
                 out nextStateStartPosition,
                 out nextRoutePreviewStartFacingDirection,
-                out nextRouteDistanceTravelled))
+                out nextRouteDistanceTravelled,
+                out nextTurnFactor,
+                out nextSpeedFactor))
         {
             usedPreservedLockedPrefix = true;
         }
         else
         {
-            routeAdjustment =
-                ResolveRouteAdjustment(
-                    routeStartPosition,
-                    liveDestinationPosition,
-                    routeStartFacingDirection);
-
-            _routeTurnAdjustmentFactor =
-                routeAdjustment.TurnFactor;
-
-            _routeSpeedAdjustmentFactor =
-                routeAdjustment.SpeedFactor;
-
-            if (routeAdjustment.HasBuiltRoute)
-            {
-                CopyRoutePath(
-                    _routeProbePathBuffer,
-                    _routeSegmentPathBuffer);
-            }
-            else
-            {
-                RebuildTravelRoutePath(
-                    _routeSegmentPathBuffer,
+            if (!TryBuildPlayerShipRoutePath2A(
                     routeStartPosition,
                     liveDestinationPosition,
                     routeStartFacingDirection,
-                    GetAdjustedShipTurnRadius(routeAdjustment.TurnFactor),
-                    GetCurrentShipTravelSpeed() * routeAdjustment.SpeedFactor,
-                    routeAdjustment.MaxAllowedRouteLength);
+                    _routeSegmentPathBuffer,
+                    out nextTurnFactor,
+                    out nextSpeedFactor))
+            {
+                _routeTurnAdjustmentFactor = previousTurnFactor;
+                _routeSpeedAdjustmentFactor = previousSpeedFactor;
+                _useRouteInitialSpeedLimit = previousUseInitialSpeedLimit;
+                _routeInitialSpeedLimitFactor = previousInitialSpeedLimitFactor;
+                _routeInitialSpeedLimitDistance = previousInitialSpeedLimitDistance;
+                _consumeSunFacingStartTurnTick = previousConsumeSunFacingStartTurnTick;
+                _useFallbackStartTurnInPlaceRoute = previousUseFallbackStartTurnInPlaceRoute;
+                _useSunFacingStartTurnInPlaceRoute = previousUseSunFacingStartTurnInPlaceRoute;
+                _fallbackStartTurnInPlaceDirection = previousFallbackStartTurnInPlaceDirection;
+                _sunFacingStartTurnInPlaceDirection = previousSunFacingStartTurnInPlaceDirection;
+                _activeRouteDestinationCase = previousActiveRouteDestinationCase;
+
+                return false;
             }
         }
 
@@ -3128,6 +3125,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _routePreviewStartFacingDirection =
             nextRoutePreviewStartFacingDirection;
 
+        _routeTurnAdjustmentFactor =
+            Mathf.Clamp01(nextTurnFactor);
+
+        _routeSpeedAdjustmentFactor =
+            Mathf.Clamp01(nextSpeedFactor);
+
         _activeRouteDestinationCase =
             routeClassification.DestinationCase;
 
@@ -3178,18 +3181,16 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     }
 
     private bool TryBuildRouteWithPreservedMovingDestinationPrefix(
-        Vector3 liveDestinationPosition,
-        out RouteDestinationClassification routeClassification,
-        out RouteAdjustment routeAdjustment,
-        out Vector3 nextStateStartPosition,
-        out Vector2 nextRoutePreviewStartFacingDirection,
-        out float nextRouteDistanceTravelled)
+    Vector3 liveDestinationPosition,
+    out RouteDestinationClassification routeClassification,
+    out Vector3 nextStateStartPosition,
+    out Vector2 nextRoutePreviewStartFacingDirection,
+    out float nextRouteDistanceTravelled,
+    out float nextTurnFactor,
+    out float nextSpeedFactor)
     {
         routeClassification =
             default;
-
-        routeAdjustment =
-            new RouteAdjustment(1f, 1f);
 
         nextStateStartPosition =
             State.StartPosition;
@@ -3199,6 +3200,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         nextRouteDistanceTravelled =
             _activeRouteDistanceTravelled;
+
+        nextTurnFactor =
+            1f;
+
+        nextSpeedFactor =
+            1f;
 
         if (!TryGetMovingDestinationLockedPrefixState(
                 out float lockedPrefixDistance,
@@ -3220,45 +3227,25 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return false;
         }
 
-        routeAdjustment =
-            ResolveRouteAdjustment(
+        if (!TryBuildPlayerShipRoutePath2A(
                 lockedPrefixEndPosition,
                 liveDestinationPosition,
-                lockedPrefixEndFacingDirection);
-
-        _routeTurnAdjustmentFactor =
-            routeAdjustment.TurnFactor;
-
-        _routeSpeedAdjustmentFactor =
-            routeAdjustment.SpeedFactor;
+                lockedPrefixEndFacingDirection,
+                _routeProbePathBuffer,
+                out nextTurnFactor,
+                out nextSpeedFactor))
+        {
+            return false;
+        }
 
         BuildRoutePrefix(
             _activeTravelRoutePath,
             lockedPrefixDistance,
             _routeSegmentPathBuffer);
 
-        if (routeAdjustment.HasBuiltRoute &&
-            _routeProbePathBuffer.Count > 1)
-        {
-            AppendRouteTail(
-                _routeProbePathBuffer,
-                _routeSegmentPathBuffer);
-        }
-        else
-        {
-            RebuildTravelRoutePath(
-                _routeProbePathBuffer,
-                lockedPrefixEndPosition,
-                liveDestinationPosition,
-                lockedPrefixEndFacingDirection,
-                GetAdjustedShipTurnRadius(routeAdjustment.TurnFactor),
-                GetCurrentShipTravelSpeed() * routeAdjustment.SpeedFactor,
-                routeAdjustment.MaxAllowedRouteLength);
-
-            AppendRouteTail(
-                _routeProbePathBuffer,
-                _routeSegmentPathBuffer);
-        }
+        AppendRouteTail(
+            _routeProbePathBuffer,
+            _routeSegmentPathBuffer);
 
         nextStateStartPosition =
             State.StartPosition;
@@ -3272,6 +3259,63 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 lockedPrefixDistance);
 
         return _routeSegmentPathBuffer.Count > 1;
+    }
+
+    private bool TryBuildPlayerShipRoutePath2A(
+    Vector3 routeStartPosition,
+    Vector3 destinationPosition,
+    Vector2 routeStartFacingDirection,
+    List<Vector3> routePath,
+    out float turnFactor,
+    out float speedFactor)
+    {
+        turnFactor = 1f;
+        speedFactor = 1f;
+
+        if (routePath == null)
+            return false;
+
+        routePath.Clear();
+
+        if (_shipRouteService == null)
+            return false;
+
+        SystemShipRouteRequest2A routeRequest =
+            new SystemShipRouteRequest2A
+            {
+                SystemId = GetCurrentPlayerSystemId(),
+                StartPosition = routeStartPosition,
+                DestinationPosition = destinationPosition,
+                StartFacingDirection = routeStartFacingDirection,
+                TargetKind = GetCurrentShipRouteTargetKind2A(),
+                Settings = CreatePlayerShipRouteSettings2A()
+            };
+
+        bool routeBuilt =
+            _shipRouteService.TryBuildRoute(
+                routeRequest,
+                _playerShipRouteBuildResult);
+
+        if (!routeBuilt ||
+            _playerShipRouteBuildResult.Path == null ||
+            _playerShipRouteBuildResult.Path.Count <= 1)
+        {
+            return false;
+        }
+
+        CopyRoutePath(
+            _playerShipRouteBuildResult.Path,
+            routePath);
+
+        turnFactor =
+            Mathf.Clamp01(
+                _playerShipRouteBuildResult.TurnRadiusFactor);
+
+        speedFactor =
+            Mathf.Clamp01(
+                _playerShipRouteBuildResult.SpeedFactor);
+
+        return routePath.Count > 1;
     }
 
     private bool TryGetMovingDestinationLockedPrefixState(
@@ -7629,6 +7673,15 @@ int maxSmallDots)
     private bool ShouldUseBehindSmallTurn(
     RouteDestinationClassification classification)
     {
+        float tolerance =
+            GetRouteBehindSmallTurnAngleToleranceDegrees();
+
+        bool isBehindEnough =
+            classification.BearingAngleDegrees >= 180f - tolerance;
+
+        if (classification.DestinationCase == RouteDestinationCase.MovingTarget)
+            return isBehindEnough;
+
         if (classification.DestinationCase == RouteDestinationCase.NearSunStartTangentNearBehind ||
             classification.DestinationCase == RouteDestinationCase.NearSunStartTangentFarBehind ||
             classification.DestinationCase == RouteDestinationCase.NearSunStartAwayNearBehind ||
@@ -7643,10 +7696,7 @@ int maxSmallDots)
             return false;
         }
 
-        float tolerance =
-            GetRouteBehindSmallTurnAngleToleranceDegrees();
-
-        return classification.BearingAngleDegrees >= 180f - tolerance;
+        return isBehindEnough;
     }
 
     private float GetBehindSmallTurnArcLength(

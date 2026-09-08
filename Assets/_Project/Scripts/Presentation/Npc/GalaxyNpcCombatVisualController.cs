@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
+public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 {
     [Header("Roots")]
     [SerializeField] private Transform projectileRoot;
@@ -11,6 +11,7 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
     [SerializeField] private GalaxyNpcProjectileView projectilePrefab;
     [SerializeField] private GalaxyNpcTimedFxView hitFxPrefab;
     [SerializeField] private GalaxyNpcTimedFxView explosionFxPrefab;
+    [SerializeField] private CombatBeamView2A beamPrefab;
 
     [Header("Settings")]
     [SerializeField, Min(0.01f)] private float hitFxLifetimeSeconds = 0.35f;
@@ -18,12 +19,17 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
 
     private readonly Dictionary<string, GalaxyNpcProjectileView> _activeProjectiles = new();
     private readonly Queue<GalaxyNpcProjectileView> _projectilePool = new();
+    private readonly Dictionary<string, CombatBeamView2A> _activeBeams = new();
+    private readonly Dictionary<string, GalaxyNpcTimedFxView> _activeBeamHitFx = new();
+    private readonly Queue<CombatBeamView2A> _beamPool = new();
     private readonly Queue<GalaxyNpcTimedFxView> _hitFxPool = new();
     private readonly Queue<GalaxyNpcTimedFxView> _explosionFxPool = new();
 
     private SimpleEventBus _eventBus;
     private ISystemNpcRuntimeService _runtimeService;
     private IConfigService _configService;
+    private ISystemNpcCombatService _combatService;
+    private IPlayerCombatTargetService _playerTargetService;
     private bool _isSubscribed;
 
     public int ActiveProjectileCount => _activeProjectiles.Count;
@@ -38,6 +44,8 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
 
         if (fxRoot == null)
             fxRoot = transform;
+
+        ApplyBeamPrefabRuntimeSettings();
     }
 
     private void OnEnable()
@@ -66,10 +74,16 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
 
         bootstrapper.ServiceRegistry.TryGet(out _runtimeService);
         bootstrapper.ServiceRegistry.TryGet(out _configService);
+        bootstrapper.ServiceRegistry.TryGet(out _combatService);
+        bootstrapper.ServiceRegistry.TryGet(out _playerTargetService);
+
+        ApplyBeamPrefabRuntimeSettings();
 
         _eventBus.Subscribe<GalaxyNpcProjectileCreatedEvent>(OnProjectileCreated);
         _eventBus.Subscribe<GalaxyNpcProjectileImpactEvent>(OnProjectileImpact);
         _eventBus.Subscribe<SystemNpcDestroyedEvent>(OnNpcDestroyed);
+        _eventBus.Subscribe<CombatBeamStartedEvent2A>(OnBeamStarted);
+        _eventBus.Subscribe<CombatBeamEndedEvent2A>(OnBeamEnded);
 
         _isSubscribed = true;
     }
@@ -82,6 +96,8 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
         _eventBus.Unsubscribe<GalaxyNpcProjectileCreatedEvent>(OnProjectileCreated);
         _eventBus.Unsubscribe<GalaxyNpcProjectileImpactEvent>(OnProjectileImpact);
         _eventBus.Unsubscribe<SystemNpcDestroyedEvent>(OnNpcDestroyed);
+        _eventBus.Unsubscribe<CombatBeamStartedEvent2A>(OnBeamStarted);
+        _eventBus.Unsubscribe<CombatBeamEndedEvent2A>(OnBeamEnded);
 
         _isSubscribed = false;
         _eventBus = null;
@@ -341,6 +357,27 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
         }
 
         _activeProjectiles.Clear();
+
+        foreach (CombatBeamView2A view in _activeBeams.Values)
+        {
+            if (view == null)
+                continue;
+
+            view.Complete();
+            _beamPool.Enqueue(view);
+        }
+
+        _activeBeams.Clear();
+
+        foreach (GalaxyNpcTimedFxView fx in _activeBeamHitFx.Values)
+        {
+            if (fx == null)
+                continue;
+
+            fx.Complete();
+        }
+
+        _activeBeamHitFx.Clear();
     }
 
     private static bool fxPrefabMatches(
@@ -351,5 +388,242 @@ public sealed class GalaxyNpcCombatVisualController : MonoBehaviour
             return false;
 
         return instance.name.StartsWith(prefab.name);
+    }
+
+    private void OnBeamStarted(CombatBeamStartedEvent2A evt)
+    {
+        SpawnBeam(evt);
+        SpawnBeamHitFx(evt);
+    }
+
+    private void OnBeamEnded(CombatBeamEndedEvent2A evt)
+    {
+        CompleteBeam(evt.BeamId);
+        CompleteBeamHitFx(evt.BeamId);
+    }
+    private CombatBeamView2A SpawnBeam(CombatBeamStartedEvent2A evt)
+    {
+        if (beamPrefab == null)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(evt.BeamId))
+            return null;
+
+        ApplyBeamPrefabRuntimeSettings();
+
+        CompleteBeam(evt.BeamId);
+
+        CombatBeamView2A view = GetBeamFromPool();
+        Color color = ResolveBeamColor(evt);
+
+        view.Init(evt, color);
+
+        _activeBeams[evt.BeamId] = view;
+        return view;
+    }
+
+    private void ApplyBeamPrefabRuntimeSettings()
+    {
+        if (beamPrefab == null)
+            return;
+
+        beamPrefab.ApplyRuntimeSettings();
+    }
+
+    private void CompleteBeam(string beamId)
+    {
+        if (string.IsNullOrWhiteSpace(beamId))
+            return;
+
+        if (!_activeBeams.TryGetValue(
+                beamId,
+                out CombatBeamView2A view))
+        {
+            return;
+        }
+
+        _activeBeams.Remove(beamId);
+
+        if (view == null)
+            return;
+
+        view.Complete();
+        _beamPool.Enqueue(view);
+    }
+
+    private CombatBeamView2A GetBeamFromPool()
+    {
+        while (_beamPool.Count > 0)
+        {
+            CombatBeamView2A pooled = _beamPool.Dequeue();
+
+            if (pooled != null)
+                return pooled;
+        }
+
+        return Instantiate(beamPrefab, projectileRoot);
+    }
+
+    private Color ResolveBeamColor(CombatBeamStartedEvent2A evt)
+    {
+        CombatFxVisualConfig config = ResolveCombatFxVisualConfig();
+
+        if (config == null)
+            return Color.white;
+
+        if (evt.ShooterType == CombatShooterType.Player)
+            return config.ResolvePlayerColor();
+
+        if (_runtimeService != null &&
+            !string.IsNullOrWhiteSpace(evt.ShooterNpcId) &&
+            _runtimeService.TryGetNpc(
+                evt.ShooterNpcId,
+                out SystemNpcRuntimeState shooter) &&
+            shooter != null)
+        {
+            return config.ResolveNpcColor(
+                shooter.NpcType,
+                shooter.ConfigId);
+        }
+
+        return config.DefaultEnemyColor;
+    }
+
+    private void Update()
+    {
+        UpdateActiveBeamHitFx();
+    }
+
+    private void SpawnBeamHitFx(CombatBeamStartedEvent2A evt)
+    {
+        if (hitFxPrefab == null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(evt.BeamId))
+            return;
+
+        ResolveCombatService();
+
+        CompleteBeamHitFx(evt.BeamId);
+
+        Color fxColor = ResolveNpcFxColor(
+            evt.TargetNpcId,
+            evt.TargetType,
+            null);
+
+        GalaxyNpcTimedFxView fx = SpawnHitFx(
+            ResolveBeamHitFxPosition(evt),
+            fxColor);
+
+        if (fx == null)
+            return;
+
+        fx.RestartLifetime(evt.DurationSeconds);
+        _activeBeamHitFx[evt.BeamId] = fx;
+    }
+
+    private void CompleteBeamHitFx(string beamId)
+    {
+        if (string.IsNullOrWhiteSpace(beamId))
+            return;
+
+        if (!_activeBeamHitFx.TryGetValue(
+                beamId,
+                out GalaxyNpcTimedFxView fx))
+        {
+            return;
+        }
+
+        _activeBeamHitFx.Remove(beamId);
+
+        if (fx != null)
+            fx.Complete();
+    }
+
+    private void UpdateActiveBeamHitFx()
+    {
+        if (_activeBeamHitFx.Count == 0)
+            return;
+
+        ResolveCombatService();
+
+        if (_combatService == null)
+            return;
+
+        List<string> completedBeamIds = null;
+
+        foreach (KeyValuePair<string, GalaxyNpcTimedFxView> pair in _activeBeamHitFx)
+        {
+            string beamId = pair.Key;
+            GalaxyNpcTimedFxView fx = pair.Value;
+
+            if (fx == null)
+            {
+                completedBeamIds ??= new List<string>();
+                completedBeamIds.Add(beamId);
+                continue;
+            }
+
+            if (!_combatService.TryGetBeam(
+                    beamId,
+                    out CombatBeamRuntimeState2A beam) ||
+                beam == null ||
+                beam.IsResolved)
+            {
+                completedBeamIds ??= new List<string>();
+                completedBeamIds.Add(beamId);
+                continue;
+            }
+
+            fx.SetPosition(ResolveBeamHitFxPosition(beam));
+        }
+
+        if (completedBeamIds == null)
+            return;
+
+        for (int i = 0; i < completedBeamIds.Count; i++)
+            CompleteBeamHitFx(completedBeamIds[i]);
+    }
+
+    private Vector3 ResolveBeamHitFxPosition(CombatBeamStartedEvent2A evt)
+    {
+        if (evt.TargetType == CombatTargetType.Player &&
+            _playerTargetService != null)
+        {
+            return _playerTargetService.GetPlayerPosition();
+        }
+
+        return evt.TargetPosition;
+    }
+
+    private Vector3 ResolveBeamHitFxPosition(CombatBeamRuntimeState2A beam)
+    {
+        if (beam.TargetType == CombatTargetType.Player &&
+            _playerTargetService != null)
+        {
+            return _playerTargetService.GetPlayerPosition();
+        }
+
+        return beam.TargetPosition;
+    }
+
+    private void ResolveCombatService()
+    {
+        if (_combatService != null &&
+            _playerTargetService != null)
+        {
+            return;
+        }
+
+        Bootstrapper bootstrapper = Bootstrapper.Instance;
+
+        if (bootstrapper == null || bootstrapper.ServiceRegistry == null)
+            return;
+
+        if (_combatService == null)
+            bootstrapper.ServiceRegistry.TryGet(out _combatService);
+
+        if (_playerTargetService == null)
+            bootstrapper.ServiceRegistry.TryGet(out _playerTargetService);
     }
 }

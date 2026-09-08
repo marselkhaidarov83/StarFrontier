@@ -36,6 +36,9 @@ MonoBehaviour:
   weaponType: 5
   damageType: 0
   targetingMode: 0
+  autoDetectShotType: 0
+  shotType: 4
+  shotCount: 1
   projectilePrefabRef: {fileID: 0}
   usesAmmo: 0
   maxAmmoChargesMin: 0

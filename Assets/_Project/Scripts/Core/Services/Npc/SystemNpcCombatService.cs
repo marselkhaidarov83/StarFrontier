@@ -14,6 +14,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
     private readonly List<GalaxyNpcProjectileRuntimeState> _activeProjectiles = new();
 
+    private readonly List<CombatBeamRuntimeState2A> _activeBeams = new();
+
     public int ActiveProjectileCount
     {
         get
@@ -46,6 +48,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         _encounterService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
 
         _eventBus.Subscribe<GameDayChangedEvent>(OnGameDayChanged);
+        _eventBus.Subscribe<SystemNpcDestroyedEvent>(OnNpcDestroyed);
+        _eventBus.Subscribe<PlayerShipDestroyedByNpcEvent>(OnPlayerShipDestroyedByNpc);
     }
 
     private void EnsureEncounterForPlayerAttack(
@@ -127,6 +131,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
             TickProjectile(projectile, deltaTime);
         }
+
+        TickBeams(deltaTime);
     }
 
     public void ForceAttackOnce(string shooterNpcId, int quantTick)
@@ -249,19 +255,30 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     }
 
     private bool TryCreateProjectile(
-    SystemNpcRuntimeState shooter,
-    GalaxyCombatTarget target,
-    SystemNpcWeaponRuntimeState weaponRuntime,
-    int quantTick,
-    bool ignoreTickGate)
+     SystemNpcRuntimeState shooter,
+     GalaxyCombatTarget target,
+     SystemNpcWeaponRuntimeState weaponRuntime,
+     int quantTick,
+     bool ignoreTickGate)
     {
+        if (shooter == null)
+            return false;
+
+        if (weaponRuntime == null)
+            return false;
+
+        if (!target.IsValid)
+            return false;
+
         WeaponConfig weaponConfig = _configService.GetWeaponConfigById(
-            weaponRuntime.WeaponConfigId
-        );
+            weaponRuntime.WeaponConfigId);
 
         if (weaponConfig == null)
         {
-            Debug.LogWarning($"[SystemNpcCombatService] WeaponConfig not found: {weaponRuntime.WeaponConfigId}");
+            Debug.LogWarning(
+                "[SystemNpcCombatService] WeaponConfig not found: " +
+                weaponRuntime.WeaponConfigId);
+
             return false;
         }
 
@@ -272,22 +289,24 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 target.TargetType.ToString(),
                 target.TargetNpcId,
                 weaponRuntime.WeaponConfigId,
-                quantTick.ToString()
-            )
-        );
+                quantTick.ToString()));
 
         float distance = Vector3.Distance(
             shooter.CurrentPosition,
-            target.Position
-        );
+            target.Position);
 
         if (distance > weaponStats.Range)
         {
             LogCustom(
-                $"[SystemNpcCombatService] Target out of range. " +
-                $"Shooter: {shooter.RuntimeNpcId}, TargetType: {target.TargetType}, " +
-                $"Distance: {distance:F2}, Range: {weaponStats.Range:F2}"
-            );
+                "[SystemNpcCombatService] Target out of range. " +
+                "Shooter: " +
+                shooter.RuntimeNpcId +
+                ", TargetType: " +
+                target.TargetType +
+                ", Distance: " +
+                distance.ToString("F2") +
+                ", Range: " +
+                weaponStats.Range.ToString("F2"));
 
             return false;
         }
@@ -297,9 +316,25 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
         weaponRuntime.MarkShotAtTick(quantTick, cooldownTicks: 1);
 
-        int projectileLifetimeTicks = Mathf.Max(1, weaponStats.ProjectileLifetime);
-
         EnsureEncounterForPlayerAttack(shooter, target);
+
+        if (weaponStats.ShotType == WeaponShotType2A.Beam)
+        {
+            return TryCreateBeam(
+                shooter.CurrentSystemId,
+                CombatShooterType.Npc,
+                shooter.RuntimeNpcId,
+                target.TargetType,
+                target.TargetNpcId,
+                weaponRuntime.WeaponConfigId,
+                shooter.CurrentPosition,
+                target.Position,
+                weaponStats,
+                quantTick);
+        }
+
+        int projectileLifetimeTicks =
+            Mathf.Max(1, weaponStats.ProjectileLifetime);
 
         var projectile = new GalaxyNpcProjectileRuntimeState
         {
@@ -327,8 +362,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             ElapsedSeconds = 0f,
             LifetimeSeconds = Mathf.Max(
                 0.01f,
-                GameTimeService.SecondsPerDay * projectileLifetimeTicks
-            ),
+                GameTimeService.SecondsPerDay * projectileLifetimeTicks),
 
             IsResolved = false
         };
@@ -344,25 +378,24 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             projectile.WeaponConfigId,
             projectile.StartPosition,
             projectile.LastKnownTargetPosition,
-            TickBasedProjectileSpeed
-        ));
-
-        _eventBus.Publish(new CombatProjectileCreatedEvent2A(
-            projectile.ProjectileId,
-            projectile.SystemId,
-            projectile.ShooterNpcId,
-            projectile.TargetNpcId,
-            projectile.WeaponConfigId,
-            projectile.StartPosition,
-            projectile.LastKnownTargetPosition));
+            TickBasedProjectileSpeed));
 
         LogCustom(
-            $"[SystemNpcCombatService] Projectile created. " +
-            $"Projectile: {projectile.ProjectileId}, Shooter: {shooter.RuntimeNpcId}, " +
-            $"TargetType: {target.TargetType}, Target: {target.TargetNpcId}, " +
-            $"Damage: {projectile.Damage}, Range: {weaponStats.Range:F2}, " +
-            $"LifetimeTicks: {projectileLifetimeTicks}"
-        );
+            "[SystemNpcCombatService] Projectile created. " +
+            "Projectile: " +
+            projectile.ProjectileId +
+            ", Shooter: " +
+            shooter.RuntimeNpcId +
+            ", TargetType: " +
+            target.TargetType +
+            ", Target: " +
+            target.TargetNpcId +
+            ", Damage: " +
+            projectile.Damage +
+            ", Range: " +
+            weaponStats.Range.ToString("F2") +
+            ", LifetimeTicks: " +
+            projectileLifetimeTicks);
 
         return true;
     }
@@ -632,9 +665,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     }
 
     public bool TryCreatePlayerProjectile(
-        string targetNpcId,
-        string weaponConfigId,
-        int quantTick)
+    string targetNpcId,
+    string weaponConfigId,
+    int quantTick)
     {
         LogCustom("targetNpcId = " + targetNpcId);
 
@@ -699,6 +732,21 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             );
 
             return false;
+        }
+
+        if (weaponStats.ShotType == WeaponShotType2A.Beam)
+        {
+            return TryCreateBeam(
+                target.CurrentSystemId,
+                CombatShooterType.Player,
+                string.Empty,
+                CombatTargetType.Npc,
+                target.RuntimeNpcId,
+                weaponConfigId,
+                playerPosition,
+                target.CurrentPosition,
+                weaponStats,
+                quantTick);
         }
 
         int projectileLifetimeTicks = Mathf.Max(1, weaponStats.ProjectileLifetime);
@@ -768,6 +816,303 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         return true;
     }
 
+    public bool TryGetBeam(
+        string beamId,
+        out CombatBeamRuntimeState2A beam)
+    {
+        beam = null;
+
+        if (string.IsNullOrWhiteSpace(beamId))
+            return false;
+
+        for (int i = 0; i < _activeBeams.Count; i++)
+        {
+            CombatBeamRuntimeState2A candidate = _activeBeams[i];
+
+            if (candidate == null)
+                continue;
+
+            if (candidate.BeamId == beamId)
+            {
+                beam = candidate;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool TryCreateBeam(
+    string systemId,
+    CombatShooterType shooterType,
+    string shooterNpcId,
+    CombatTargetType targetType,
+    string targetNpcId,
+    string weaponConfigId,
+    Vector3 startPosition,
+    Vector3 targetPosition,
+    WeaponRuntimeStats weaponStats,
+    int quantTick)
+    {
+        int shotCount = Mathf.Max(1, weaponStats.ShotCount);
+
+        float beamTickDuration01 =
+            CombatBeamRuntimeSettings2A.BeamTickDuration01;
+
+        CombatBeamRuntimeState2A beam = new CombatBeamRuntimeState2A
+        {
+            BeamId = Guid.NewGuid().ToString("N"),
+            SystemId = systemId,
+
+            ShooterType = shooterType,
+            ShooterNpcId = shooterNpcId ?? string.Empty,
+
+            TargetType = targetType,
+            TargetNpcId = targetNpcId ?? string.Empty,
+
+            WeaponConfigId = weaponConfigId,
+
+            StartPosition = startPosition,
+            TargetPosition = targetPosition,
+
+            TotalDamage = Mathf.Max(0, weaponStats.Damage),
+            ShotCount = shotCount,
+            AppliedShotCount = 0,
+
+            CreatedTick = quantTick,
+            ElapsedSeconds = 0f,
+            DurationSeconds = Mathf.Max(
+                0.01f,
+                GameTimeService.SecondsPerDay * beamTickDuration01),
+
+            IsResolved = false
+        };
+
+        _activeBeams.Add(beam);
+
+        _eventBus.Publish(new CombatBeamStartedEvent2A(
+            beam.BeamId,
+            beam.SystemId,
+            beam.ShooterType,
+            beam.ShooterNpcId,
+            beam.TargetType,
+            beam.TargetNpcId,
+            beam.WeaponConfigId,
+            beam.StartPosition,
+            beam.TargetPosition,
+            beam.DurationSeconds));
+
+        return true;
+    }
+
+    private void TickBeams(float deltaTime)
+    {
+        for (int i = _activeBeams.Count - 1; i >= 0; i--)
+        {
+            CombatBeamRuntimeState2A beam = _activeBeams[i];
+
+            if (beam == null)
+            {
+                _activeBeams.RemoveAt(i);
+                continue;
+            }
+
+            if (beam.IsResolved)
+            {
+                _activeBeams.RemoveAt(i);
+                continue;
+            }
+
+            TickBeam(beam, deltaTime);
+
+            if (beam.IsResolved)
+                _activeBeams.RemoveAt(i);
+        }
+    }
+
+    private void TickBeam(
+        CombatBeamRuntimeState2A beam,
+        float deltaTime)
+    {
+        beam.ElapsedSeconds += deltaTime;
+
+        if (!TryRefreshBeamPositions(beam))
+        {
+            CompleteBeam(beam);
+            return;
+        }
+
+        ApplyDueBeamDamage(beam);
+
+        if (beam.ElapsedSeconds >= beam.DurationSeconds)
+            CompleteBeam(beam);
+    }
+
+    private void ApplyDueBeamDamage(CombatBeamRuntimeState2A beam)
+    {
+        int safeShotCount = Mathf.Max(1, beam.ShotCount);
+        float safeDuration = Mathf.Max(0.01f, beam.DurationSeconds);
+
+        while (!beam.IsResolved && beam.AppliedShotCount < safeShotCount)
+        {
+            int nextShotIndex = beam.AppliedShotCount;
+            float requiredTime =
+                safeDuration * (nextShotIndex + 1) / safeShotCount;
+
+            if (beam.ElapsedSeconds < requiredTime)
+                return;
+
+            int damage = GetBeamDamagePortion(
+                beam.TotalDamage,
+                safeShotCount,
+                nextShotIndex);
+
+            Debug.Log(
+                "[BEAM_DAMAGE_PORTION] " +
+                "BeamId=" + beam.BeamId +
+                ", WeaponConfigId=" + beam.WeaponConfigId +
+                ", ShooterType=" + beam.ShooterType +
+                ", ShooterNpcId=" + beam.ShooterNpcId +
+                ", TargetType=" + beam.TargetType +
+                ", TargetNpcId=" + beam.TargetNpcId +
+                ", Shot=" + (nextShotIndex + 1) + "/" + safeShotCount +
+                ", Damage=" + damage +
+                ", TotalDamage=" + beam.TotalDamage +
+                ", BeamTime01=" + ((nextShotIndex + 1f) / safeShotCount).ToString("0.###") +
+                ", TickTime01=" + (requiredTime / Mathf.Max(0.01f, GameTimeService.SecondsPerDay)).ToString("0.###") +
+                ", ElapsedSeconds=" + beam.ElapsedSeconds.ToString("0.###") +
+                ", RequiredSeconds=" + requiredTime.ToString("0.###"));
+
+            ApplyBeamDamage(beam, damage);
+            beam.AppliedShotCount++;
+        }
+    }
+
+    private void ApplyBeamDamage(
+        CombatBeamRuntimeState2A beam,
+        int damage)
+    {
+        if (damage <= 0)
+            return;
+
+        if (beam.TargetType == CombatTargetType.Player)
+        {
+            _playerTargetService.ApplyDamage(damage);
+            return;
+        }
+
+        if (beam.TargetType != CombatTargetType.Npc)
+            return;
+
+        _runtimeService.ApplyDamage(
+            beam.TargetNpcId,
+            damage,
+            killedByPlayer: beam.ShooterType == CombatShooterType.Player,
+            damagedByPlayer: beam.ShooterType == CombatShooterType.Player);
+    }
+
+    private bool TryRefreshBeamPositions(CombatBeamRuntimeState2A beam)
+    {
+        if (!TryGetBeamStartPosition(beam, out Vector3 startPosition))
+            return false;
+
+        if (!TryGetBeamTargetPosition(beam, out Vector3 targetPosition))
+            return false;
+
+        beam.StartPosition = startPosition;
+        beam.TargetPosition = targetPosition;
+
+        return true;
+    }
+
+    private bool TryGetBeamStartPosition(
+        CombatBeamRuntimeState2A beam,
+        out Vector3 position)
+    {
+        position = beam.StartPosition;
+
+        if (beam.ShooterType == CombatShooterType.Player)
+        {
+            if (!_playerTargetService.IsPlayerAvailableInSystem(beam.SystemId))
+                return false;
+
+            position = _playerTargetService.GetPlayerPosition();
+            position.z = 0f;
+            return true;
+        }
+
+        if (beam.ShooterType == CombatShooterType.Npc)
+        {
+            if (!_runtimeService.TryGetNpc(
+                    beam.ShooterNpcId,
+                    out SystemNpcRuntimeState shooter))
+            {
+                return false;
+            }
+
+            if (!shooter.IsAvailableForCombat())
+                return false;
+
+            if (shooter.CurrentSystemId != beam.SystemId)
+                return false;
+
+            position = shooter.CurrentPosition;
+            position.z = 0f;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryGetBeamTargetPosition(
+        CombatBeamRuntimeState2A beam,
+        out Vector3 position)
+    {
+        position = beam.TargetPosition;
+
+        if (beam.TargetType == CombatTargetType.Player)
+        {
+            if (!_playerTargetService.IsPlayerAvailableInSystem(beam.SystemId))
+                return false;
+
+            position = _playerTargetService.GetPlayerPosition();
+            position.z = 0f;
+            return true;
+        }
+
+        if (beam.TargetType == CombatTargetType.Npc)
+        {
+            if (!_runtimeService.TryGetNpc(
+                    beam.TargetNpcId,
+                    out SystemNpcRuntimeState target))
+            {
+                return false;
+            }
+
+            if (!target.IsAvailableForCombat())
+                return false;
+
+            if (target.CurrentSystemId != beam.SystemId)
+                return false;
+
+            position = target.CurrentPosition;
+            position.z = 0f;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void CompleteBeam(CombatBeamRuntimeState2A beam)
+    {
+        if (beam == null || beam.IsResolved)
+            return;
+
+        beam.IsResolved = true;
+
+        _eventBus.Publish(new CombatBeamEndedEvent2A(beam.BeamId));
+    }
+
     private static int BuildWeaponRollSeed(params string[] parts)
     {
         unchecked
@@ -792,6 +1137,67 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             }
 
             return hash;
+        }
+    }
+
+    private static int GetBeamDamagePortion(
+      int totalDamage,
+      int shotCount,
+      int shotIndex)
+    {
+        int safeShotCount = Mathf.Max(1, shotCount);
+        int safeDamage = Mathf.Max(0, totalDamage);
+        int safeShotIndex = Mathf.Clamp(shotIndex, 0, safeShotCount - 1);
+
+        int baseDamage = safeDamage / safeShotCount;
+        int remainder = safeDamage % safeShotCount;
+
+        if (safeShotIndex == safeShotCount - 1)
+            return baseDamage + remainder;
+
+        return baseDamage;
+    }
+
+    private void OnNpcDestroyed(SystemNpcDestroyedEvent evt)
+    {
+        CompleteBeamsForNpc(evt.RuntimeNpcId);
+    }
+
+    private void OnPlayerShipDestroyedByNpc(PlayerShipDestroyedByNpcEvent evt)
+    {
+        CompleteBeamsMatching(beam =>
+            beam.ShooterType == CombatShooterType.Player ||
+            beam.TargetType == CombatTargetType.Player);
+    }
+
+    private void CompleteBeamsForNpc(string runtimeNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+            return;
+
+        CompleteBeamsMatching(beam =>
+            beam.ShooterType == CombatShooterType.Npc &&
+            string.Equals(
+                beam.ShooterNpcId,
+                runtimeNpcId,
+                StringComparison.Ordinal));
+    }
+
+    private void CompleteBeamsMatching(
+        Predicate<CombatBeamRuntimeState2A> predicate)
+    {
+        if (predicate == null)
+            return;
+
+        for (int i = 0; i < _activeBeams.Count; i++)
+        {
+            CombatBeamRuntimeState2A beam = _activeBeams[i];
+
+            if (beam == null || beam.IsResolved)
+                continue;
+
+            if (predicate(beam))
+                CompleteBeam(beam);
         }
     }
 }

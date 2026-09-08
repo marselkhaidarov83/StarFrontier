@@ -985,7 +985,7 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
     }
 
     private SystemShipRouteSettings2A CreateLegacyEnemyRouteSettings(
-    SystemEnemyRuntimeState enemy)
+SystemEnemyRuntimeState enemy)
     {
         ShipMovementConfig movementConfig =
             _configService != null
@@ -1008,6 +1008,7 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
             SpeedAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteSpeedAdjustmentStepPercent : 2.5f,
             MinTurnRadiusAdjustmentFactor = movementConfig != null ? movementConfig.MinRouteTurnRadiusAdjustmentFactor : 0.05f,
             MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f,
+            BehindSmallTurnAngleToleranceDegrees = movementConfig != null ? movementConfig.RouteBehindSmallTurnAngleToleranceDegrees : 75f,
             MaxRoutePlanSteps = RoutePlanMaxSteps,
             SunAvoidanceTurnRouteReserveMultiplier = 1.5f
         };

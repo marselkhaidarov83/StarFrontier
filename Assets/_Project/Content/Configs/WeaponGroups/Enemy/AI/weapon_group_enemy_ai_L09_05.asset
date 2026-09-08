@@ -33,10 +33,10 @@ MonoBehaviour:
   weaponCount: 5
   powerScore: 1015
   tierPattern: Silver + Silver + Silver + Silver + Silver
-  familyPattern: disruptor + rail + swarm_missile + laser + pulse
+  familyPattern: disruptor + core_bolt + swarm_missile + laser + pulse
   weaponConfigs:
   - {fileID: 11400000, guid: 5552a6321d743464ea09e0fdbed33440, type: 2}
-  - {fileID: 11400000, guid: e1b0eeccd417d45ab8357c2fadc80c3a, type: 2}
+  - {fileID: 11400000, guid: 4732131a29217471eb573a74612bda74, type: 2}
   - {fileID: 11400000, guid: 3bc639c09d64949b79d7c7fd755356bf, type: 2}
   - {fileID: 11400000, guid: 8cab15c5485cd4c60a1cd624cc455f4e, type: 2}
   - {fileID: 11400000, guid: 445345da532a94039a48f37f422256fb, type: 2}

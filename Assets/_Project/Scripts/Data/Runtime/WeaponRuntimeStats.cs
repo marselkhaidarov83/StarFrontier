@@ -16,8 +16,11 @@ public struct WeaponRuntimeStats
 
     public bool IsHitscan;
     public WeaponType WeaponType;
+    public WeaponShotType2A ShotType;
     public WeaponDamageType DamageType;
     public WeaponTargetingMode TargetingMode;
+
+    public int ShotCount;
 
     public bool UsesAmmo;
     public int MaxAmmoCharges;
@@ -33,8 +36,10 @@ public struct WeaponRuntimeStats
         int projectileLifetime,
         bool isHitscan,
         WeaponType weaponType,
+        WeaponShotType2A shotType,
         WeaponDamageType damageType,
         WeaponTargetingMode targetingMode,
+        int shotCount,
         bool usesAmmo,
         int maxAmmoCharges)
     {
@@ -51,8 +56,11 @@ public struct WeaponRuntimeStats
 
         IsHitscan = isHitscan;
         WeaponType = weaponType;
+        ShotType = shotType;
         DamageType = damageType;
         TargetingMode = targetingMode;
+
+        ShotCount = Math.Max(1, shotCount);
 
         UsesAmmo = usesAmmo;
         MaxAmmoCharges = maxAmmoCharges;

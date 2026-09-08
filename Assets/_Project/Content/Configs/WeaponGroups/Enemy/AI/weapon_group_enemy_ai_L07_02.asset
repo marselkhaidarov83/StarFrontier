@@ -33,9 +33,9 @@ MonoBehaviour:
   weaponCount: 4
   powerScore: 812
   tierPattern: Silver + Silver + Silver + Silver
-  familyPattern: rail + swarm_missile + laser + pulse
+  familyPattern: core_bolt + swarm_missile + laser + pulse
   weaponConfigs:
-  - {fileID: 11400000, guid: b59c54ed4d06f4be8acea4c1f9f8d108, type: 2}
+  - {fileID: 11400000, guid: 9e1d14eb8b3bf43ce8ed9feb95c09bff, type: 2}
   - {fileID: 11400000, guid: cd8ad30af9f014c98813013aca9a8418, type: 2}
   - {fileID: 11400000, guid: 21777be19c6154877a3c4139ea15465d, type: 2}
   - {fileID: 11400000, guid: 376ff2d38da514114b8fe3aea3e3c194, type: 2}

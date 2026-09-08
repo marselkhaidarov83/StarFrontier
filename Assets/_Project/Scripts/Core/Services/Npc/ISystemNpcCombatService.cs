@@ -15,4 +15,8 @@ public interface ISystemNpcCombatService
     bool TryGetProjectile(
         string projectileId,
         out GalaxyNpcProjectileRuntimeState projectile);
+
+    bool TryGetBeam(
+        string beamId,
+        out CombatBeamRuntimeState2A beam);
 }

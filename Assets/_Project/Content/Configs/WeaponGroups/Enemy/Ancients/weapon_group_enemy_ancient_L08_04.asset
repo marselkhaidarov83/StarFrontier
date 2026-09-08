@@ -34,9 +34,9 @@ MonoBehaviour:
   weaponCount: 4
   powerScore: 811
   tierPattern: Silver + Silver + Silver + Silver
-  familyPattern: beam + plasma + singularity + orb
+  familyPattern: shard_volley + plasma + singularity + orb
   weaponConfigs:
-  - {fileID: 11400000, guid: b00ea8e4f730641d280c76fe01bf98ed, type: 2}
+  - {fileID: 11400000, guid: c31e742eb8faf4d7c891522d0c9143e1, type: 2}
   - {fileID: 11400000, guid: b6f658eb1c179447f9760345f5019bf0, type: 2}
   - {fileID: 11400000, guid: f56d63eab11564884b4b0e21d87901d8, type: 2}
   - {fileID: 11400000, guid: 29f72633a258f4621aa937769f1e096c, type: 2}
