@@ -215,19 +215,6 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
         _projectilePool.Enqueue(view);
     }
 
-    private GalaxyNpcProjectileView GetProjectileFromPool()
-    {
-        while (_projectilePool.Count > 0)
-        {
-            GalaxyNpcProjectileView pooled = _projectilePool.Dequeue();
-
-            if (pooled != null)
-                return pooled;
-        }
-
-        return Instantiate(projectilePrefab, projectileRoot);
-    }
-
     private void OnBeamStarted(CombatBeamStartedEvent2A evt)
     {
         SpawnBeam(evt);

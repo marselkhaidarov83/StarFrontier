@@ -15,7 +15,7 @@ public sealed class S04_03_ProjectileVisualPlayModeTests
     }
 
     [UnityTest]
-    public IEnumerator ProjectileVisual_SpawnMoveImpactCleanupAndReusePool()
+    public IEnumerator ProjectileVisual_SpawnMoveImpactCleanupWithoutPoolReuse()
     {
         GalaxyNpcCombatVisualController controller = CreateController();
 
@@ -45,7 +45,6 @@ public sealed class S04_03_ProjectileVisualPlayModeTests
 
         Assert.That(firstView.gameObject.activeSelf, Is.False);
         Assert.That(controller.ActiveProjectileCount, Is.EqualTo(0));
-        Assert.That(controller.ProjectilePoolCount, Is.EqualTo(1));
 
         var createdAgain = new GalaxyNpcProjectileCreatedEvent(
             "projectile_test_02",
@@ -58,14 +57,17 @@ public sealed class S04_03_ProjectileVisualPlayModeTests
             new Vector3(3f, 0f, 0f),
             12f);
 
-        GalaxyNpcProjectileView reusedView = controller.SpawnProjectile(createdAgain);
+        GalaxyNpcProjectileView secondView = controller.SpawnProjectile(createdAgain);
 
-        Assert.That(reusedView, Is.SameAs(firstView));
-        Assert.That(reusedView.gameObject.activeSelf, Is.True);
+        Assert.That(secondView, Is.Not.Null);
+        Assert.That(secondView.gameObject.activeSelf, Is.True);
         Assert.That(controller.ActiveProjectileCount, Is.EqualTo(1));
-        Assert.That(controller.ProjectilePoolCount, Is.EqualTo(0));
+        Assert.That(secondView.ProjectileId, Is.EqualTo("projectile_test_02"));
 
         controller.CompleteProjectile("projectile_test_02");
+
+        Assert.That(secondView.gameObject.activeSelf, Is.False);
+        Assert.That(controller.ActiveProjectileCount, Is.EqualTo(0));
 
         yield return null;
     }

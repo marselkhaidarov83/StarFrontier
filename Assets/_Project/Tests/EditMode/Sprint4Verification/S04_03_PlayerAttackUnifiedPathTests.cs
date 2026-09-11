@@ -39,9 +39,35 @@ public sealed class S04_03_PlayerAttackUnifiedPathTests
         string text = ReadProjectFile(
             "Assets/_Project/Scripts/Core/Services/Npc/SystemNpcCombatService.cs");
 
+        int playerAttackIndex = text.IndexOf(
+            "public bool TryCreatePlayerProjectile",
+            System.StringComparison.Ordinal);
+
+        Assert.GreaterOrEqual(
+            playerAttackIndex,
+            0,
+            "SystemNpcCombatService must expose TryCreatePlayerProjectile for player attacks.");
+
+        string playerAttackText = text.Substring(playerAttackIndex);
+
         Assert.IsTrue(
-            text.Contains("ShooterType = CombatShooterType.Player"),
-            "Player projectile runtime state must mark ShooterType as Player.");
+            playerAttackText.Contains("CombatShooterType.Player"),
+            "Player projectile creation path must pass CombatShooterType.Player into the runtime combat factory.");
+
+        Assert.IsTrue(
+            playerAttackText.Contains("TryCreateSingleProjectile") ||
+            playerAttackText.Contains("TryCreateTimedEnergyProjectiles") ||
+            playerAttackText.Contains("TryCreateBeam") ||
+            playerAttackText.Contains("TryCreateWave"),
+            "Player attack must create runtime projectile/beam/wave through the shared combat runtime path.");
+
+        Assert.IsTrue(
+            text.Contains("ShooterType = shooterType"),
+            "Runtime projectile state must copy the shooter type passed by the player/NPC creation path.");
+
+        Assert.IsTrue(
+            text.Contains("projectile.ShooterType == CombatShooterType.Player"),
+            "Projectile publishing/damage logic must preserve player shooter identity.");
     }
 
     [Test]
