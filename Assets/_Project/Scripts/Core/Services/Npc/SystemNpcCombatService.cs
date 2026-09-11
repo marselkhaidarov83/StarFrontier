@@ -6,7 +6,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 {
     private const float TickBasedProjectileSpeed = 0f;
     private const bool WaveDamageDebugLogEnabled = false;
-    private const bool WeaponAttackTickDebugLogEnabled = true;
+    private const bool WeaponAttackTickDebugLogEnabled = false;
 
     private readonly ISystemNpcRuntimeService _runtimeService;
     private readonly IConfigService _configService;

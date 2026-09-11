@@ -13,7 +13,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
     public SystemNpcRuntimeService()
     {
-        _debugStop = true;
+        _debugStop = false;
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _damageService = ResolveDamageService();
         _encounterService = ResolveEncounterService();
@@ -35,8 +35,11 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             npc.ConfigId,
             npc.CurrentSystemId));
 
+        Debug.Log(
+            $"[NPC_COUNT] NPC spawned. TotalNpcs: {_npcs.Count}, Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}");
+
         LogCustom(
-            $"[SystemNpcRuntimeService] NPC added. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}");
+            $"NPC added. TotalNpcs: {_npcs.Count}, Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}");
     }
 
     public bool TryGetNpc(string runtimeNpcId, out SystemNpcRuntimeState npc)

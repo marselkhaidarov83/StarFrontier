@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
 {
     private const float DirectionThresholdSqrMagnitude = 0.0001f;
+    private const bool NpcMilitaryViewDebugLogEnabled = false;
 
     [Header("View")]
     [SerializeField] private SpriteRenderer spriteRenderer;
@@ -81,7 +82,7 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
             evt.BehaviorType != SystemNpcBehaviorType.StayOnPlanetForDays &&
             evt.BehaviorType != SystemNpcBehaviorType.AnnihilateOnPlanet;
 
-        if (isMilitary)
+        if (NpcMilitaryViewDebugLogEnabled && isMilitary)
         {
             LogCustom(
                 "[NPC-MILITARY-VIEW] BehaviorChanged received. " +
@@ -108,7 +109,7 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
 
         gameObject.SetActive(shouldBeActive);
 
-        if (isMilitary)
+        if (NpcMilitaryViewDebugLogEnabled && isMilitary)
         {
             LogCustom(
                 "[NPC-MILITARY-VIEW] BehaviorChanged applied. " +

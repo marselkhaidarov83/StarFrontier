@@ -215,7 +215,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     public SystemTravelService()
     {
         _debugEnabled = true;
-        // _debugStop = true;
+        _debugStop = true;
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();

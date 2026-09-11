@@ -44,6 +44,8 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private bool _globalDebugEnabled;
 
     [Header("Debug / NPC Population")]
+    [Tooltip("Спавнить NPC только в текущей системе. Существующие NPC в других системах не удаляются.")]
+    [SerializeField] private bool debugSpawnOnlyInCurrentSystem;
     [SerializeField] private bool stopAutomaticAllySpawns;
     [SerializeField] private bool stopAutomaticEnemySpawns;
     [SerializeField] private bool overrideAutomaticAllySpawnInterval;
@@ -77,6 +79,7 @@ public class Bootstrapper : CustomMonoBehaviour
     public bool GlobalDebugEnabled => _globalDebugEnabled;
     public bool StopAutomaticAllySpawns => stopAutomaticAllySpawns;
     public bool StopAutomaticEnemySpawns => stopAutomaticEnemySpawns;
+    public bool DebugSpawnOnlyInCurrentSystem => debugSpawnOnlyInCurrentSystem;
     public bool OverrideAutomaticAllySpawnInterval => overrideAutomaticAllySpawnInterval;
 
     public float DebugAutomaticAllySpawnIntervalSeconds =>

@@ -21,8 +21,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     public SystemNpcBehaviorService()
     {
-        _debugEnabled = true;
-        _debugStop = false;
+        _debugEnabled = false;
+        _debugStop = true;
 
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _npcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
@@ -31,7 +31,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _systemSecurityService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
 
-        LogCustom("[NPC-MILITARY-BEHAVIOR] Service debug enabled.");
+        LogCustom("[NPC-MILITARY-BEHAVIOR] Service debug disabled by default.");
     }
 
     public void Tick(StarSystemConfig starSystem, int currentTick)

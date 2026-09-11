@@ -889,19 +889,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d75f4106697cd44e2856cdf8c0ed902a, type: 2}
   MaxAcceptedMissionCount: 3
   SectorAllOpened: 1
-  RouteAllUnlocked: 0
-  _globalDebugEnabled: 1
-  stopAutomaticAllySpawns: 1
-  stopAutomaticEnemySpawns: 1
+  RouteAllUnlocked: 1
+  _globalDebugEnabled: 0
+  debugSpawnOnlyInCurrentSystem: 1
+  stopAutomaticAllySpawns: 0
+  stopAutomaticEnemySpawns: 0
   overrideAutomaticAllySpawnInterval: 0
   debugAutomaticAllySpawnIntervalSeconds: 5
   overrideNpcGalaxyLevel: 1
-  debugNpcGalaxyLevel: 5
+  debugNpcGalaxyLevel: 1
   debugCombatTargetRuntimeNpcId: 
   debugCombatTargetDamage: 10
   debugCombatPlayerDamage: 10
   debugNpcOfflineStepHours: 1
-  debugNpcStressSpawnAttempts: 25
+  debugNpcStressSpawnAttempts: 10
   debugNpcStressSpawnWaves: 1
   debugNpcStressSpawnAllies: 1
   debugNpcStressSpawnEnemyGroups: 1

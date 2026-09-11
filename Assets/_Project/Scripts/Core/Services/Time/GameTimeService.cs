@@ -363,15 +363,17 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
     private void LogGameTimeDebug(string message)
     {
-        bool previousDebugEnabled = _debugEnabled;
-        bool previousDebugStop = _debugStop;
+        return;
 
-        _debugEnabled = true;
-        _debugStop = false;
+        // bool previousDebugEnabled = _debugEnabled;
+        // bool previousDebugStop = _debugStop;
 
-        LogCustom(message);
+        // _debugEnabled = true;
+        // _debugStop = false;
 
-        _debugEnabled = previousDebugEnabled;
-        _debugStop = previousDebugStop;
+        // LogCustom(message);
+
+        // _debugEnabled = previousDebugEnabled;
+        // _debugStop = previousDebugStop;
     }
 }

@@ -1391,4 +1391,113 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             starSystem,
             0.01f);
     }
+
+    public bool DebugSpawnEnemyInCurrentSystem()
+    {
+        StarSystemConfig starSystem =
+            GetCurrentPlayerStarSystem();
+
+        if (starSystem == null)
+        {
+            Debug.LogWarning(
+                "[SystemPopulationService] Debug enemy spawn failed. " +
+                "Current player StarSystemConfig was not resolved.");
+
+            return false;
+        }
+
+        SystemPopulationRule populationRule =
+            GetCurrentPopulationRule(starSystem);
+
+        if (populationRule == null ||
+            populationRule.EnemyGroupSpawnRuleEntries == null ||
+            populationRule.EnemyGroupSpawnRuleEntries.Length == 0)
+        {
+            Debug.LogWarning(
+                "[SystemPopulationService] Debug enemy spawn failed. " +
+                "System has no enemy spawn rules. System: " +
+                starSystem.Id);
+
+            return false;
+        }
+
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
+        for (int ruleIndex = 0;
+             ruleIndex < populationRule.EnemyGroupSpawnRuleEntries.Length;
+             ruleIndex++)
+        {
+            SystemPopulationEnemyGroupRuleEntry ruleEntry =
+                populationRule.EnemyGroupSpawnRuleEntries[ruleIndex];
+
+            if (ruleEntry == null || !ruleEntry.IsValid())
+                continue;
+
+            EnemyGroupSpawnRuleConfig rule =
+                ruleEntry.EnemyGroupSpawnRule;
+
+            if (rule == null)
+                continue;
+
+            IReadOnlyList<EnemyGroupEntryConfig> enemies =
+                rule.PickEnemiesForGalaxyLevel(currentGalaxyLevel);
+
+            if (enemies == null || enemies.Count == 0)
+                continue;
+
+            for (int enemyIndex = 0; enemyIndex < enemies.Count; enemyIndex++)
+            {
+                EnemyGroupEntryConfig entry =
+                    enemies[enemyIndex];
+
+                if (entry == null ||
+                    !entry.IsValid() ||
+                    entry.EnemyConfig == null)
+                {
+                    continue;
+                }
+
+                string groupRuntimeId =
+                    Guid.NewGuid().ToString("N");
+
+                Vector3 position =
+                    BuildEnemySpawnPosition(starSystem);
+
+                SystemNpcRuntimeState enemy =
+                    SystemNpcRuntimeFactory.CreateEnemy(
+                        entry.EnemyConfig,
+                        starSystem.Id,
+                        starSystem.Id,
+                        position,
+                        rule.Id,
+                        groupRuntimeId);
+
+                ApplyInitialFacingToSun(enemy, starSystem);
+
+                enemy.CanChangeLocationOnRestore = false;
+
+                _npcRuntimeService.AddNpc(enemy);
+
+                Debug.Log(
+                    "[SystemPopulationService] Debug single enemy spawned. " +
+                    "System: " + starSystem.Id +
+                    ", Rule: " + rule.Id +
+                    ", Config: " + entry.EnemyConfig.Id +
+                    ", GroupRuntimeId: " + groupRuntimeId +
+                    ", GalaxyLevel: " + currentGalaxyLevel);
+
+                return true;
+            }
+        }
+
+        Debug.LogWarning(
+            "[SystemPopulationService] Debug enemy spawn failed. " +
+            "No eligible enemy config for system: " +
+            starSystem.Id +
+            ", GalaxyLevel: " +
+            currentGalaxyLevel);
+
+        return false;
+    }
 }

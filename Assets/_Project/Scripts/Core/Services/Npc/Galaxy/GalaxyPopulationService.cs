@@ -14,6 +14,20 @@ public sealed class GalaxyPopulationService : CustomService, IGalaxyPopulationSe
 
     public void Tick(float deltaTime)
     {
+        if (Bootstrapper.Instance.DebugSpawnOnlyInCurrentSystem)
+        {
+            StarSystemConfig currentSystem = _configService.GetCurrentSystemConfig();
+
+            if (currentSystem == null)
+            {
+                return;
+            }
+
+            _systemPopulationService.Tick(currentSystem, deltaTime);
+            LogCustom("current starSystem = " + currentSystem.DisplayName);
+            return;
+        }
+
         LogCustom("starSystem.Count = " + _configService.GetAllStarSystems().Count);
 
         foreach (StarSystemConfig starSystem in _configService.GetAllStarSystems())
