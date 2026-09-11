@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -463,3 +464,4 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         rectTransform.offsetMax = Vector2.zero;
     }
 }
+#endif

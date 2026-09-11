@@ -35,25 +35,27 @@ public class MetaSceneController : CustomMonoBehaviour
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
 
         metaHudController?.Initialize();
-        systemMapController2?.Initialize(); 
-        systemMapHUDController?.Initialize(); 
-        planetController?.Initialize();    
+        systemMapController2?.Initialize();
+        systemMapHUDController?.Initialize();
+        planetController?.Initialize();
         planetGovernmentMissionPresenter?.Initialize();
         marketScreenController?.Initialize();
         refuelPanelController?.Initialize();
         missionScreenController?.Initialize();
         systemShipMarkerController2?.Initialize();
         systemCameraController2A?.Initialize();
-        SystemNpcStressSpawnDebugPanel2A.EnsureCreated();
-        
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                SystemNpcStressSpawnDebugPanel2A.EnsureCreated();
+        #endif
+
         if (galaxyMapScreenRoot2 != null)
             galaxyMapScreenRoot2.SetActive(false);
         if (systemMapScreenRoot != null)
-            systemMapScreenRoot.SetActive(false);    
+            systemMapScreenRoot.SetActive(false);
         if (systemMapScreenRoot2 != null)
-            systemMapScreenRoot2.SetActive(false);    
+            systemMapScreenRoot2.SetActive(false);
         if (systemMapHUDRoot != null)
-            systemMapHUDRoot.SetActive(false);    
+            systemMapHUDRoot.SetActive(false);
         if (planetRoot != null)
             planetRoot.SetActive(false);
         if (governmentRoot != null)
