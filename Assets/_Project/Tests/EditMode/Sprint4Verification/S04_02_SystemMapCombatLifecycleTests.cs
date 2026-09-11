@@ -370,18 +370,20 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
             return Position;
         }
 
-        public void ApplyDamage(int damage)
+        public CombatDamageResult2A ApplyDamage(int damage)
         {
             if (damage <= 0 || CurrentHull <= 0)
-                return;
+                return default;
 
             DamageCallCount++;
 
             int remainingDamage = damage;
+            int shieldDamage = 0;
+            int hullDamage = 0;
 
             if (CurrentShield > 0)
             {
-                int shieldDamage =
+                shieldDamage =
                     Mathf.Min(CurrentShield, remainingDamage);
 
                 CurrentShield -= shieldDamage;
@@ -389,15 +391,32 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
             }
 
             if (remainingDamage > 0)
-                CurrentHull -= remainingDamage;
+            {
+                hullDamage =
+                    Mathf.Min(CurrentHull, remainingDamage);
+
+                CurrentHull -= hullDamage;
+            }
 
             if (CurrentHull < 0)
                 CurrentHull = 0;
 
-            if (CurrentHull <= 0)
-                _encounterService.RegisterPlayerDestroyed();
-        }
+            int appliedDamage =
+                shieldDamage + hullDamage;
 
+            CombatDamageResult2A result = new CombatDamageResult2A(
+                appliedDamage,
+                shieldDamage,
+                hullDamage,
+                CurrentShield,
+                CurrentHull,
+                CurrentHull <= 0);
+
+            if (result.IsDestroyed)
+                _encounterService.RegisterPlayerDestroyed();
+
+            return result;
+        }
         public void SetCombatState(int hull, int shield)
         {
             CurrentHull = hull;

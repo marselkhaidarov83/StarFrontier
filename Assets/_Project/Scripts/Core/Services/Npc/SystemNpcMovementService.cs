@@ -154,6 +154,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 ", TickMovementArrived=" + npc.TickMovementArrived +
                 ", Speed=" + npc.Speed +
                 ", DeltaTime=" + deltaTime +
+                ", TickScaledDeltaTime=" + GetTickScaledDeltaTime(deltaTime) +
+                ", SecondsPerTick=" + GameTimeState.SecondsPerDay +
                 ", Tick=" + currentTick);
         }
 
@@ -291,7 +293,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         float movementDistance =
             Mathf.Max(0f, npc.Speed) *
-            deltaTime;
+            GetTickScaledDeltaTime(deltaTime);
 
         float nextDistance =
             Mathf.Clamp(
@@ -474,8 +476,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             routeState.Tick = currentTick;
 
             float distancePerTick =
-                Mathf.Max(0f, npc.Speed) *
-                Mathf.Max(0.01f, GameTimeState.SecondsPerDay);
+                Mathf.Max(0f, npc.Speed);
 
             float totalRouteLength =
                 GetNpcPathLength(routeState.Path);
@@ -506,6 +507,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                     ", PathCount=" + routeState.Path.Count +
                     ", PathLength=" + totalRouteLength +
                     ", DistanceTravelled=" + routeState.DistanceTravelled +
+                    ", DistancePerTick=" + distancePerTick +
                     ", Destination=" + routeState.Destination +
                     ", CurrentPosition=" + npc.CurrentPosition +
                     ", MovementTarget=" + movementTargetPosition +
@@ -563,8 +565,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         SaveNpcMovementRouteContext(routeState, npc);
 
         float builtDistancePerTick =
-            Mathf.Max(0f, npc.Speed) *
-            Mathf.Max(0.01f, GameTimeState.SecondsPerDay);
+            Mathf.Max(0f, npc.Speed);
 
         Vector3 builtMovementTargetPosition =
             GetNpcPointOnPathAtDistance(
@@ -584,6 +585,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 ", TravelState=" + npc.TravelState +
                 ", PathCount=" + routeState.Path.Count +
                 ", PathLength=" + GetNpcPathLength(routeState.Path) +
+                ", DistancePerTick=" + builtDistancePerTick +
                 ", Destination=" + routeState.Destination +
                 ", FirstPoint=" + routeState.Path[0] +
                 ", LastPoint=" + routeState.Path[routeState.Path.Count - 1]);
@@ -2056,5 +2058,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         return Mathf.Clamp01(
             1f - elapsedFactor);
+    }
+
+    private static float GetTickScaledDeltaTime(float deltaTime)
+    {
+        return deltaTime /
+               Mathf.Max(0.01f, GameTimeState.SecondsPerDay);
     }
 }

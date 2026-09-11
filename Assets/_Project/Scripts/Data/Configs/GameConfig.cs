@@ -26,6 +26,13 @@ public class GameConfig : ScriptableObject
     [Header("Game Time")]
 
     [Tooltip(
+        "Реальная длительность одного игрового тика в секундах. " +
+        "От этого зависит скорость квантовой симуляции, полет снарядов, лучи и волны.")]
+    [Min(0.01f)]
+    public float secondsPerGameTick =
+        1.5f;
+
+    [Tooltip(
         "Количество игровых минут, " +
         "которое проходит за один игровой тик.")]
     [Min(1)]
@@ -40,4 +47,19 @@ public class GameConfig : ScriptableObject
 )]
     [Min(0.01f)]
     public float galaxyMapRoutePointSpacing = 0.25f;
+
+    public float SecondsPerGameTick =>
+        Mathf.Max(0.01f, secondsPerGameTick);
+
+    private void OnValidate()
+    {
+        secondsPerGameTick =
+            Mathf.Max(0.01f, secondsPerGameTick);
+
+        minutesPerGameTick =
+            Mathf.Max(1, minutesPerGameTick);
+
+        galaxyMapRoutePointSpacing =
+            Mathf.Max(0.01f, galaxyMapRoutePointSpacing);
+    }
 }

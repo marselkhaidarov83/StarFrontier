@@ -27,8 +27,8 @@ MonoBehaviour:
   cargoSize: 7
   baseDamageMin: 6
   baseDamageMax: 8
-  rangeMin: 135.33
-  rangeMax: 151.09
+  rangeMin: 166.67
+  rangeMax: 166.67
   energyCostMin: 1
   energyCostMax: 3
   projectileLifetimeMin: 4
@@ -40,7 +40,7 @@ MonoBehaviour:
   autoDetectShotType: 0
   shotType: 4
   shotCount: 1
-  projectilePrefabRef: {fileID: 0}
+  projectilePrefabRef: {fileID: 2113405778882139475, guid: 45bf6bc7bf5424f0885b67548ba91563, type: 3}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0

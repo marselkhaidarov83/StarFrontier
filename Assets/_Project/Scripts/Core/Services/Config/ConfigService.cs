@@ -20,6 +20,7 @@ public sealed class ConfigService : IConfigService
     public SystemHudConfig SystemHudConfig { get; }
     public SystemVisualConfig SystemVisualConfig { get; }
     public CombatFxVisualConfig CombatFxVisualConfig { get; }
+    public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig { get; }
     public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig { get; }
 
     private readonly IReadOnlyList<SectorConfig> _sectors;
@@ -64,6 +65,7 @@ public sealed class ConfigService : IConfigService
                     IEnumerable<ModuleConfig> modules,
                     IEnumerable<WeaponConfig> weapons,
                     CombatFxVisualConfig combatFxVisualConfig = null,
+                    CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
                     NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
@@ -72,6 +74,7 @@ public sealed class ConfigService : IConfigService
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
         CombatFxVisualConfig = combatFxVisualConfig;
+        CombatDamagePopupVisualConfig = combatDamagePopupVisualConfig;
         NpcBehaviourTransitionMatrixConfig = npcBehaviourTransitionMatrixConfig;
 
         BuildIndex(sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
@@ -110,6 +113,7 @@ public sealed class ConfigService : IConfigService
                     IEnumerable<ModuleConfig> modules,
                     IEnumerable<WeaponConfig> weapons,
                     CombatFxVisualConfig combatFxVisualConfig = null,
+                    CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
                     NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
@@ -125,6 +129,7 @@ public sealed class ConfigService : IConfigService
         SystemHudConfig = systemHudConfig;
         SystemVisualConfig = systemVisualConfig;
         CombatFxVisualConfig = combatFxVisualConfig;
+        CombatDamagePopupVisualConfig = combatDamagePopupVisualConfig;
         NpcBehaviourTransitionMatrixConfig = npcBehaviourTransitionMatrixConfig;
 
         List<StarSystemConfig> starSystems = new();

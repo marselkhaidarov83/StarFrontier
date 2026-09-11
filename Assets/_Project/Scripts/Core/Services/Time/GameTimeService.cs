@@ -13,7 +13,9 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private readonly IGalaxyNpcBehaviorService _galaxyNpcBehaviorService;
     private readonly ISaveService _saveService;
 
-    private int _previousTick = 0;
+    private bool _currentTickStarted;
+    private bool _pauseAfterCurrentTick;
+    private bool _singleStepInProgress;
 
     public GameTimeState State { get; }
 
@@ -37,41 +39,144 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _systemEnemyService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyService>();
         _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
 
-        State = new GameTimeState();
+        ApplyGameTimeConfig();
+
+        State = new GameTimeState
+        {
+            SecondsPerDayTimeout = GameTimeState.SecondsPerDay
+        };
     }
 
     public void SetPaused(bool paused)
     {
-        if (State.IsPaused == paused)
+        if (!paused)
+        {
+            _singleStepInProgress = false;
+
+            if (!State.IsPaused)
+            {
+                _pauseAfterCurrentTick = false;
+                return;
+            }
+
+            _pauseAfterCurrentTick = false;
+            State.IsPaused = false;
+            _eventBus.Publish(new GameTimePauseChangedEvent(State.IsPaused));
+
+            LogGameTimeDebug(
+                "[TickDebug] Pause changed | IsPaused=" +
+                State.IsPaused +
+                " | CurrentTick=" +
+                State.CurrentQuantTick +
+                " | Accumulator=" +
+                State.Accumulator.ToString("F2"));
+
+            return;
+        }
+
+        if (State.IsPaused)
             return;
 
-        State.IsPaused = paused;
+        if (_currentTickStarted || State.Accumulator > 0f)
+        {
+            _pauseAfterCurrentTick = true;
+
+            LogGameTimeDebug(
+                "[TickDebug] Pause requested at tick end | CurrentTick=" +
+                State.CurrentQuantTick +
+                " | Accumulator=" +
+                State.Accumulator.ToString("F2") +
+                " | SecondsPerTick=" +
+                GameTimeState.SecondsPerDay.ToString("F2"));
+
+            return;
+        }
+
+        _pauseAfterCurrentTick = false;
+        _singleStepInProgress = false;
+        State.IsPaused = true;
         _eventBus.Publish(new GameTimePauseChangedEvent(State.IsPaused));
 
-        LogCustom($"[GameTimeService] Pause changed. IsPaused: {State.IsPaused}");
+        LogGameTimeDebug(
+            "[TickDebug] Pause changed | IsPaused=" +
+            State.IsPaused +
+            " | CurrentTick=" +
+            State.CurrentQuantTick +
+            " | Accumulator=" +
+            State.Accumulator.ToString("F2"));
     }
 
     public void TogglePause()
     {
-        SetPaused(!State.IsPaused);
+        if (State.IsPaused)
+        {
+            SetPaused(false);
+            return;
+        }
+
+        if (_pauseAfterCurrentTick)
+        {
+            _pauseAfterCurrentTick = false;
+
+            LogGameTimeDebug(
+                "[TickDebug] Pending pause cancelled | CurrentTick=" +
+                State.CurrentQuantTick +
+                " | Accumulator=" +
+                State.Accumulator.ToString("F2"));
+
+            return;
+        }
+
+        SetPaused(true);
     }
 
     public void StepOneDay()
     {
-    }
+        if (!State.IsPaused)
+        {
+            LogGameTimeDebug(
+                "[TickDebug] StepOneDay ignored because game is already playing | CurrentTick=" +
+                State.CurrentQuantTick +
+                " | Accumulator=" +
+                State.Accumulator.ToString("F2"));
 
+            return;
+        }
+
+        if (_singleStepInProgress)
+        {
+            LogGameTimeDebug(
+                "[TickDebug] StepOneDay ignored because single step is already running | CurrentTick=" +
+                State.CurrentQuantTick +
+                " | Accumulator=" +
+                State.Accumulator.ToString("F2"));
+
+            return;
+        }
+
+        State.Accumulator = 0f;
+        _currentTickStarted = false;
+        _pauseAfterCurrentTick = false;
+        _singleStepInProgress = true;
+
+        LogGameTimeDebug(
+            "[TickDebug] Single step requested | CurrentTick=" +
+            State.CurrentQuantTick +
+            " | IsPaused=" +
+            State.IsPaused +
+            " | SecondsPerTick=" +
+            GameTimeState.SecondsPerDay.ToString("F2") +
+            " | Accumulator=" +
+            State.Accumulator.ToString("F2"));
+    }
     public void Tick(float deltaTime)
     {
         TickSaveServices(deltaTime);
 
-        if (State.IsPaused && State.Accumulator == 0)
+        if (State.IsPaused && !_singleStepInProgress)
             return;
 
-        if (_previousTick == State.CurrentQuantTick)
-        {
-            State.CurrentQuantTick++;
-            _eventBus.Publish(new GameTickStartedEvent(State.CurrentQuantTick));
-        }
+        StartCurrentTickIfNeeded();
 
         State.SimulationTimeSeconds += deltaTime;
         State.Accumulator += deltaTime;
@@ -81,14 +186,121 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         if (State.Accumulator < GameTimeState.SecondsPerDay)
             return;
 
-        while (State.Accumulator >= GameTimeState.SecondsPerDay)
+        CompleteCurrentTickIfNeeded();
+
+        State.Accumulator -= GameTimeState.SecondsPerDay;
+
+        if (_singleStepInProgress)
         {
-            State.Accumulator -= GameTimeState.SecondsPerDay;
-            AdvanceOneQuantTick();
+            _singleStepInProgress = false;
+            _pauseAfterCurrentTick = false;
+            State.Accumulator = 0f;
+
+            LogGameTimeDebug(
+                "[TickDebug] Single step completed | CurrentTick=" +
+                State.CurrentQuantTick +
+                " | IsPaused=" +
+                State.IsPaused +
+                " | Accumulator=" +
+                State.Accumulator.ToString("F2"));
+
+            return;
         }
 
-        if (State.IsPaused)
-            State.Accumulator = 0;
+        if (_pauseAfterCurrentTick)
+        {
+            _pauseAfterCurrentTick = false;
+            State.Accumulator = 0f;
+
+            LogGameTimeDebug(
+                "[TickDebug] Paused after completed tick | CurrentTick=" +
+                State.CurrentQuantTick +
+                " | Accumulator=" +
+                State.Accumulator.ToString("F2"));
+
+            SetPaused(true);
+            return;
+        }
+
+        while (State.Accumulator >= GameTimeState.SecondsPerDay)
+        {
+            StartCurrentTickIfNeeded();
+            CompleteCurrentTickIfNeeded();
+
+            State.Accumulator -= GameTimeState.SecondsPerDay;
+
+            if (_pauseAfterCurrentTick)
+            {
+                _pauseAfterCurrentTick = false;
+                State.Accumulator = 0f;
+
+                LogGameTimeDebug(
+                    "[TickDebug] Paused after completed catch-up tick | CurrentTick=" +
+                    State.CurrentQuantTick +
+                    " | Accumulator=" +
+                    State.Accumulator.ToString("F2"));
+
+                SetPaused(true);
+                return;
+            }
+        }
+    }
+
+    private void StartCurrentTickIfNeeded()
+    {
+        if (_currentTickStarted)
+            return;
+
+        State.CurrentQuantTick++;
+
+        _currentTickStarted = true;
+
+        LogGameTimeDebug(
+            "[TickDebug] GameTickStarted | Tick=" +
+            State.CurrentQuantTick +
+            " | SecondsPerTick=" +
+            GameTimeState.SecondsPerDay.ToString("F2") +
+            " | Accumulator=" +
+            State.Accumulator.ToString("F2"));
+
+        _eventBus.Publish(new GameTickStartedEvent(State.CurrentQuantTick));
+    }
+
+    private void CompleteCurrentTickIfNeeded()
+    {
+        if (!_currentTickStarted)
+            return;
+
+        _eventBus.Publish(new GameTimeQuantumAdvancedEvent(State.CurrentQuantTick));
+        _eventBus.Publish(new GameDayChangedEvent(State.CurrentQuantTick - 1, State.CurrentQuantTick));
+
+        LogGameTimeDebug(
+            "[TickDebug] GameTickCompleted | Tick=" +
+            State.CurrentQuantTick +
+            " | SecondsPerTick=" +
+            GameTimeState.SecondsPerDay.ToString("F2") +
+            " | Accumulator=" +
+            State.Accumulator.ToString("F2"));
+
+        _currentTickStarted = false;
+    }
+
+    private void ApplyGameTimeConfig()
+    {
+        float secondsPerTick = 1f;
+
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<IConfigService>(
+                out IConfigService configService) &&
+            configService.GameConfig != null)
+        {
+            secondsPerTick =
+                configService.GameConfig.SecondsPerGameTick;
+        }
+
+        GameTimeState.SecondsPerDay =
+            Mathf.Max(0.01f, secondsPerTick);
     }
 
     private void TickSaveServices(float deltaTime)
@@ -99,7 +311,6 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private void TickAllServices(float deltaTime)
     {
         _galaxyNpcCombatService.Tick(deltaTime);
-        _systemEnemyService.TickSystemMapCombat(deltaTime);
         _orbitalMotionService.Tick(deltaTime);
         _galaxyPopulationService.Tick(deltaTime);
 
@@ -107,14 +318,6 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _galaxyNpcMovementService.Tick(deltaTime, State.CurrentQuantTick);
 
         _systemTravelService.Tick(deltaTime, State.CurrentQuantTick);
-    }
-
-    private void AdvanceOneQuantTick()
-    {
-        _previousTick = State.CurrentQuantTick;
-
-        _eventBus.Publish(new GameTimeQuantumAdvancedEvent(State.CurrentQuantTick));
-        _eventBus.Publish(new GameDayChangedEvent(_previousTick, State.CurrentQuantTick));
     }
 
     public void WriteTimeToSave(GameRuntimeState state)
@@ -147,11 +350,28 @@ public sealed class GameTimeService : CustomService, IGameTimeService
             0f,
             GameTimeState.SecondsPerDay
         );
+        State.SecondsPerDayTimeout = GameTimeState.SecondsPerDay;
         State.IsPaused = true;
         state.Meta.IsGameTimePaused = true;
 
-        _previousTick = State.CurrentQuantTick;
+        _currentTickStarted = false;
+        _pauseAfterCurrentTick = false;
+        _singleStepInProgress = false;
 
         _eventBus.Publish(new GameTimePauseChangedEvent(State.IsPaused));
+    }
+
+    private void LogGameTimeDebug(string message)
+    {
+        bool previousDebugEnabled = _debugEnabled;
+        bool previousDebugStop = _debugStop;
+
+        _debugEnabled = true;
+        _debugStop = false;
+
+        LogCustom(message);
+
+        _debugEnabled = previousDebugEnabled;
+        _debugStop = previousDebugStop;
     }
 }

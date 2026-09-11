@@ -20,6 +20,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private SystemHudConfig systemHudConfig;
     [SerializeField] private SystemVisualConfig systemVisualConfig;
     [SerializeField] private CombatFxVisualConfig combatFxVisualConfig;
+    [SerializeField] private CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig;
     [SerializeField] private NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig;
 
     [Header("Data")]
@@ -145,6 +146,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 modules,
                 weapons,
                 combatFxVisualConfig,
+                combatDamagePopupVisualConfig,
                 npcBehaviourTransitionMatrixConfig));
 
         RegisterService<IShipStatsService, ShipStatsService>();

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2216995754140887778}
   - component: {fileID: 6347985207725188320}
   m_Layer: 0
-  m_Name: PF_CombatBeamView_2A
+  m_Name: PF_weapon_laser_projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

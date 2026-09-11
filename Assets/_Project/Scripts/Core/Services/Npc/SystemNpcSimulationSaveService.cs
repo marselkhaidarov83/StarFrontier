@@ -370,23 +370,26 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
     }
 
     private float ResolveRestoredWeaponShotDistance(
-        SystemNpcWeaponSaveData weaponSave)
+    SystemNpcWeaponSaveData weaponSave)
     {
         if (weaponSave == null)
             return 0f;
 
-        if (weaponSave.ShotDistance > 0f)
-            return weaponSave.ShotDistance;
-
         if (string.IsNullOrWhiteSpace(weaponSave.WeaponConfigId))
-            return 0f;
+            return Mathf.Max(0f, weaponSave.ShotDistance);
 
         WeaponConfig weaponConfig =
             _configService.GetWeaponConfigById(
                 weaponSave.WeaponConfigId);
 
         if (weaponConfig == null)
-            return 0f;
+            return Mathf.Max(0f, weaponSave.ShotDistance);
+
+        if (weaponConfig.ShotType == WeaponShotType2A.Wave)
+            return weaponConfig.RangeMax;
+
+        if (weaponSave.ShotDistance > 0f)
+            return weaponSave.ShotDistance;
 
         return weaponConfig.RangeMax;
     }

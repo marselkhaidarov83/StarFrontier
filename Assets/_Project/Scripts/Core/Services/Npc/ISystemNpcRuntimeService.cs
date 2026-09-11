@@ -30,7 +30,7 @@ public interface ISystemNpcRuntimeService
 
     void UpdateNpcPosition(string runtimeNpcId, Vector3 position);
 
-    void ApplyDamage(string runtimeNpcId, int damage, bool killedByPlayer, bool damagedByPlayer);
+    CombatDamageResult2A ApplyDamage(string runtimeNpcId, int damage, bool killedByPlayer, bool damagedByPlayer);
 
     bool DespawnNpc(string runtimeNpcId);
 

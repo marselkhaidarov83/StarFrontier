@@ -52,6 +52,7 @@ public sealed class SystemPlayerWeaponListHud2A :
     private ISystemNpcRuntimeService _npcRuntimeService;
     private IPlayerCombatTargetService _playerTargetService;
     private IPlayerAttackService _playerAttackService;
+    private IGameTimeService _gameTimeService;
     private SimpleEventBus _eventBus;
 
     private float _nextRefreshTime;
@@ -121,6 +122,7 @@ public sealed class SystemPlayerWeaponListHud2A :
         _npcRuntimeService = context.Get<ISystemNpcRuntimeService>();
         _playerTargetService = context.Get<IPlayerCombatTargetService>();
         _playerAttackService = context.Get<IPlayerAttackService>();
+        _gameTimeService = context.Get<IGameTimeService>();
         _eventBus = context.Get<SimpleEventBus>();
 
         _eventBus.Subscribe<CombatWeaponTargetAssignmentsChangedEvent2A>(
@@ -758,8 +760,8 @@ public sealed class SystemPlayerWeaponListHud2A :
     }
 
     private bool CanWeaponReachTarget(
-        string weaponConfigId,
-        SystemNpcRuntimeState target)
+    string weaponConfigId,
+    SystemNpcRuntimeState target)
     {
         if (target == null || _playerTargetService == null)
             return false;
@@ -774,7 +776,66 @@ public sealed class SystemPlayerWeaponListHud2A :
         Vector3 targetPosition = ToFlat(target.CurrentPosition);
         float distance = Vector3.Distance(playerPosition, targetPosition);
 
-        return distance <= weaponConfig.RangeMax;
+        int previewTick =
+            GetNextPlayerAttackPreviewTick();
+
+        WeaponRuntimeStats weaponStats =
+            weaponConfig.RollRuntimeStats(
+                BuildPlayerWeaponRollSeed(
+                    target.RuntimeNpcId,
+                    weaponConfigId,
+                    previewTick));
+
+        return distance <= weaponStats.Range;
+    }
+
+    private int GetNextPlayerAttackPreviewTick()
+    {
+        if (_gameTimeService == null)
+            return 1;
+
+        return Mathf.Max(
+            1,
+            _gameTimeService.CurrentQuantTick + 1);
+    }
+
+    private static int BuildPlayerWeaponRollSeed(
+    string targetNpcId,
+    string weaponConfigId,
+    int quantTick)
+    {
+        return BuildWeaponRollSeed(
+            "player",
+            targetNpcId,
+            weaponConfigId,
+            quantTick.ToString());
+    }
+
+    private static int BuildWeaponRollSeed(params string[] parts)
+    {
+        unchecked
+        {
+            int hash = 17;
+
+            if (parts == null)
+                return hash;
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+
+                if (string.IsNullOrEmpty(part))
+                {
+                    hash = hash * 31;
+                    continue;
+                }
+
+                for (int j = 0; j < part.Length; j++)
+                    hash = hash * 31 + part[j];
+            }
+
+            return hash;
+        }
     }
 
     private string ResolveWeaponName(string weaponConfigId)

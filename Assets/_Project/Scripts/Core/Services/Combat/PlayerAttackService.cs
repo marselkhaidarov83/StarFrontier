@@ -320,11 +320,23 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
                     weaponConfigId,
                     quantTick);
 
-            if (fired)
-            {
-                _lastShotTickByWeapon[weaponConfigId] =
-                    quantTick;
-            }
+            if (!fired)
+                continue;
+
+            _lastShotTickByWeapon[weaponConfigId] =
+                quantTick;
+
+            LogCustom(
+                "[AttackTickDebug] Player fired once. Tick: " +
+                quantTick +
+                ", Slot: " +
+                slotIndex +
+                ", Weapon: " +
+                weaponConfigId +
+                ", Target: " +
+                targetNpcId);
+
+            break;
         }
     }
 

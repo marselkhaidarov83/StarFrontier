@@ -3,6 +3,7 @@ public interface ISystemNpcCombatService
     int ActiveProjectileCount { get; }
 
     void Tick(StarSystemConfig starSystem, int quantTick);
+
     void TickProjectiles(float deltaTime);
 
     void ForceAttackOnce(string shooterNpcId, int quantTick);
@@ -19,4 +20,8 @@ public interface ISystemNpcCombatService
     bool TryGetBeam(
         string beamId,
         out CombatBeamRuntimeState2A beam);
+
+    bool TryGetWave(
+        string waveId,
+        out CombatWaveRuntimeState2A wave);
 }

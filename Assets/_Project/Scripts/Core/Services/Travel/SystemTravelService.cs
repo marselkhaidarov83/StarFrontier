@@ -2310,6 +2310,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         if (State.Status != SystemTravelStatus.Flying)
             return;
 
+        float normalizedTickDeltaTime =
+            GetNormalizedTickDeltaTime(deltaTime);
+
         State.DestinationPosition =
             GetCurrentTravelTickDestinationPosition();
 
@@ -2419,7 +2422,10 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return;
         }
 
-        float movementDistance = GetCurrentEffectiveTravelSpeed() * deltaTime;
+        float movementDistance =
+            GetCurrentEffectiveTravelSpeed() *
+            normalizedTickDeltaTime;
+
         Vector3 positionBeforeMove =
             State.GetCurrentPosition();
 
@@ -2500,6 +2506,19 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         PublishTravelProgress(State.TravelProgress01);
 
         TryRefreshActiveRouteForMovingDestination(quantTick);
+    }
+
+    private float GetNormalizedTickDeltaTime(float deltaTime)
+    {
+        return Mathf.Max(0f, deltaTime) /
+               GetSafeSecondsPerGameTick();
+    }
+
+    private float GetSafeSecondsPerGameTick()
+    {
+        return Mathf.Max(
+            0.01f,
+            GameTimeState.SecondsPerDay);
     }
 
     private Vector3 CalculateNextTravelPositionByTickLockedNpcPath(
@@ -3346,8 +3365,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return false;
 
         float baseDistancePerTick =
-            Mathf.Max(0.01f, GetCurrentShipTravelSpeed()) *
-            Mathf.Max(0.01f, GameTimeState.SecondsPerDay);
+            Mathf.Max(
+                0.01f,
+                GetCurrentShipTravelSpeed());
 
         lockedPrefixDistance =
             GetPreviewRouteDistanceAtTick(
@@ -3587,10 +3607,10 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     }
 
     public TravelRoutePreview2A GetCurrentRoutePreview2A(
-    float smallDotSpacing,
-    int maxBigDots,
-    int maxSmallDots,
-    float secondsPerTick)
+        float smallDotSpacing,
+        int maxBigDots,
+        int maxSmallDots,
+        float secondsPerTick)
     {
         TravelRoutePreview2A preview =
             new TravelRoutePreview2A();
@@ -3622,19 +3642,10 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 0,
                 maxSmallDots);
 
-        float safeSecondsPerTick =
-            Mathf.Max(
-                0.01f,
-                secondsPerTick);
-
-        float baseSpeed =
+        float baseDistancePerTick =
             Mathf.Max(
                 0.01f,
                 GetCurrentShipTravelSpeed());
-
-        float baseDistancePerTick =
-            baseSpeed *
-            safeSecondsPerTick;
 
         if (State.Destination != null &&
             (State.Destination.Type == TravelDestinationType.Planet ||
@@ -6002,11 +6013,6 @@ int maxSmallDots)
             return currentFactor;
         }
 
-        float secondsPerTick =
-            GameTimeState.SecondsPerDay > 0f
-                ? GameTimeState.SecondsPerDay
-                : 1f;
-
         float maxDistancePerTick =
             Mathf.Max(
                 ArrivalDistanceThreshold,
@@ -6015,7 +6021,7 @@ int maxSmallDots)
         float maxFactor =
             Mathf.Clamp01(
                 maxDistancePerTick /
-                (baseSpeed * secondsPerTick));
+                baseSpeed);
 
         if (currentFactor <= maxFactor)
         {

@@ -456,6 +456,7 @@ MonoBehaviour:
   systemHudConfig: {fileID: 11400000, guid: 28d7a2f86e70c457ab50c89e22dc7c73, type: 2}
   systemVisualConfig: {fileID: 11400000, guid: 0d8b1a6dc71c44bcdab3fda74bcd01d9, type: 2}
   combatFxVisualConfig: {fileID: 11400000, guid: 5335864e44ee244729fd857790c1023e, type: 2}
+  combatDamagePopupVisualConfig: {fileID: 11400000, guid: efa8c304b4fb84af39c05a2791fb7715, type: 2}
   npcBehaviourTransitionMatrixConfig: {fileID: 11400000, guid: f0fba1b681522430e84c74a61bcbdd99, type: 2}
   galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
   enemies:
@@ -895,7 +896,7 @@ MonoBehaviour:
   overrideAutomaticAllySpawnInterval: 0
   debugAutomaticAllySpawnIntervalSeconds: 5
   overrideNpcGalaxyLevel: 1
-  debugNpcGalaxyLevel: 1
+  debugNpcGalaxyLevel: 5
   debugCombatTargetRuntimeNpcId: 
   debugCombatTargetDamage: 10
   debugCombatPlayerDamage: 10

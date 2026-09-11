@@ -9,7 +9,7 @@ using UnityEngine;
 public static class WeaponConfigAssetGenerator
 {
     private const string InputCsvPath =
-        "Assets/_Project/Content/Configs/Weapons/STAR_FRONTIER_WeaponConfig_300_config_fields_RU_no_enemy_types_v1.1_shot_types.csv";
+        "Assets/_Project/Content/Configs/Weapons/STAR_FRONTIER_WeaponConfig_300_config_fields_RU_no_enemy_types_v1.4_wave_range.csv";
 
     private const string OutputRootFolder =
         "Assets/_Project/Content/Configs/Weapons";
@@ -35,18 +35,29 @@ public static class WeaponConfigAssetGenerator
     };
 
     private static readonly Dictionary<string, string> ProjectilePrefabAliases =
-    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-    {
-        { "prefab_weapon_common_pulse_projectile", "PF_weapon_pulse_common_projectile" },
-        { "prefab_weapon_ai_pulse_projectile", "PF_weapon_pulse_ai_projectile" },
-        { "prefab_weapon_ancients_shard_volley_projectile", "PF_weapon_pulse_ancients_projectile" },
-        { "prefab_weapon_infected_burst_projectile", "PF_weapon_pulse_infected_projectile" },
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "prefab_weapon_common_pulse_projectile", "PF_weapon_pulse_common_projectile" },
+            { "prefab_weapon_ai_pulse_projectile", "PF_weapon_pulse_ai_projectile" },
+            { "prefab_weapon_ancients_shard_volley_projectile", "PF_weapon_pulse_ancients_projectile" },
+            { "prefab_weapon_infected_burst_projectile", "PF_weapon_pulse_infected_projectile" },
 
-        { "prefab_weapon_common_plasma_projectile", "PF_weapon_heavy_common_projectile" },
-        { "prefab_weapon_ai_core_bolt_projectile", "PF_weapon_heavy_ai_projectile" },
-        { "prefab_weapon_ancient_plasma_projectile", "PF_weapon_heavy_ancients_projectile" },
-        { "prefab_weapon_infected_acid_projectile", "PF_weapon_heavy_infected_projectile" },
-    };
+            { "prefab_weapon_common_plasma_projectile", "PF_weapon_heavy_common_projectile" },
+            { "prefab_weapon_ai_core_bolt_projectile", "PF_weapon_heavy_ai_projectile" },
+            { "prefab_weapon_ancient_plasma_projectile", "PF_weapon_heavy_ancients_projectile" },
+            { "prefab_weapon_infected_acid_projectile", "PF_weapon_heavy_infected_projectile" },
+
+            { "prefab_weapon_common_missile_projectile", "PF_weapon_missile_common_projectile" },
+            { "prefab_weapon_ai_swarm_missile_projectile", "PF_weapon_missile_ai_projectile" },
+            { "prefab_weapon_ancient_orb_projectile", "PF_weapon_missile_ancients_projectile" },
+            { "prefab_weapon_ancients_orb_projectile", "PF_weapon_missile_ancients_projectile" },
+            { "prefab_weapon_infected_swarm_projectile", "PF_weapon_missile_infected_projectile" },
+
+            { "prefab_weapon_common_wave_cannon_projectile", "PF_weapon_wave_common_projectile" },
+            { "prefab_weapon_ai_disruptor_projectile", "PF_weapon_wave_ai_projectile" },
+            { "prefab_weapon_ancient_singularity_projectile", "PF_weapon_wave_ancients_projectile" },
+            { "prefab_weapon_infected_spore_projectile", "PF_weapon_wave_infected_projectile" },
+        };
 
     private const string MenuRoot =
         "STAR FRONTIER/Content/01. Weapons/";
@@ -385,9 +396,9 @@ public static class WeaponConfigAssetGenerator
     }
 
     private static List<string> ApplyRowToWeaponConfig(
-     SerializedObject serializedObject,
-     Dictionary<string, string> row,
-     string rowId)
+    SerializedObject serializedObject,
+    Dictionary<string, string> row,
+    string rowId)
     {
         var warnings =
             new List<string>();
@@ -492,30 +503,33 @@ public static class WeaponConfigAssetGenerator
 
         string[] requiredHeaders =
         {
-            "id",
-            "displayName",
-            "description",
-            "level",
-            "equipmentTier",
-            "weaponOwner",
-            "cargoSize",
-            "baseDamageMin",
-            "baseDamageMax",
-            "rangeMin",
-            "rangeMax",
-            "energyCostMin",
-            "energyCostMax",
-            "projectileLifetimeMin",
-            "projectileLifetimeMax",
-            "isHitscan",
-            "weaponType",
-            "damageType",
-            "targetingMode",
-            "usesAmmo",
-            "maxAmmoChargesMin",
-            "maxAmmoChargesMax",
-            "weaponType"
-        };
+        "id",
+        "displayName",
+        "description",
+        "level",
+        "equipmentTier",
+        "weaponOwner",
+        "cargoSize",
+        "baseDamageMin",
+        "baseDamageMax",
+        "rangeMin",
+        "rangeMax",
+        "energyCostMin",
+        "energyCostMax",
+        "projectileLifetimeMin",
+        "projectileLifetimeMax",
+        "isHitscan",
+        "weaponType",
+        "autoDetectShotType",
+        "shotType",
+        "shotCount",
+        "damageType",
+        "targetingMode",
+        "projectilePrefabRef",
+        "usesAmmo",
+        "maxAmmoChargesMin",
+        "maxAmmoChargesMax"
+    };
 
         for (int i = 0; i < requiredHeaders.Length; i++)
         {

@@ -2,6 +2,7 @@ using UnityEngine;
 
 public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTargetService
 {
+    private const bool PlayerDamageDebugLogEnabled = true;
     private readonly IGameSessionService _gameSessionService;
     private readonly SimpleEventBus _eventBus;
     private readonly IDamageService2A _damageService;
@@ -17,6 +18,24 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
         _damageService = ResolveDamageService();
         _encounterService = ResolveEncounterService();
         _configService = ResolveConfigService();
+    }
+
+
+    private void LogPlayerDamage(string message)
+    {
+        if (!PlayerDamageDebugLogEnabled)
+            return;
+
+        bool previousDebugEnabled = _debugEnabled;
+        bool previousDebugStop = _debugStop;
+
+        _debugEnabled = true;
+        _debugStop = false;
+
+        LogCustom("[PlayerDamage] " + message);
+
+        _debugEnabled = previousDebugEnabled;
+        _debugStop = previousDebugStop;
     }
 
     public bool IsPlayerAvailableInSystem(string systemId)
@@ -48,34 +67,54 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
         return position;
     }
 
-    public void ApplyDamage(int damage)
+    public CombatDamageResult2A ApplyDamage(int damage)
     {
+        LogPlayerDamage(
+            "REQUEST | " +
+            "Damage=" + damage);
+
         if (IsGodModeEnabled())
         {
+            LogPlayerDamage(
+                "BLOCKED | God mode enabled | " +
+                "RequestedDamage=" + damage);
+
             LogCustom(
                 "[PlayerCombatTargetService] Damage blocked by player god mode. " +
                 "RequestedDamage: " +
                 damage);
 
-            return;
+            return default;
         }
 
         ShipRuntimeData activeShip = GetActiveShip();
 
         if (activeShip == null)
         {
+            LogPlayerDamage(
+                "BLOCKED | Active ship is null | " +
+                "RequestedDamage=" + damage);
+
             LogCustom("[PlayerCombatTargetService] Damage ignored: active ship is null.");
-            return;
+
+            return default;
         }
 
         if (activeShip.CurrentHull <= 0)
         {
+            LogPlayerDamage(
+                "BLOCKED | Active ship already destroyed | " +
+                "ShipId=" + activeShip.ShipId +
+                " | RequestedDamage=" + damage +
+                " | CurrentShield=" + activeShip.CurrentShield +
+                " | CurrentHull=" + activeShip.CurrentHull);
+
             LogCustom(
                 "[PlayerCombatTargetService] Damage ignored: active ship is already destroyed. " +
                 "ShipId: " +
                 activeShip.ShipId);
 
-            return;
+            return default;
         }
 
         CombatDamageResult2A result = _damageService.ApplyDamage(
@@ -85,6 +124,13 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
 
         if (result.AppliedDamage <= 0)
         {
+            LogPlayerDamage(
+                "BLOCKED | Applied damage is zero | " +
+                "ShipId=" + activeShip.ShipId +
+                " | RequestedDamage=" + damage +
+                " | CurrentShield=" + activeShip.CurrentShield +
+                " | CurrentHull=" + activeShip.CurrentHull);
+
             LogCustom(
                 "[PlayerCombatTargetService] Damage ignored: applied damage is zero. " +
                 "ShipId: " +
@@ -92,11 +138,20 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
                 ", RequestedDamage: " +
                 damage);
 
-            return;
+            return default;
         }
 
         activeShip.CurrentShield = result.CurrentShield;
         activeShip.CurrentHull = result.CurrentHull;
+
+        LogPlayerDamage(
+            "APPLIED | " +
+            "ShipId=" + activeShip.ShipId +
+            " | RequestedDamage=" + damage +
+            " | AppliedDamage=" + result.AppliedDamage +
+            " | CurrentShield=" + activeShip.CurrentShield +
+            " | CurrentHull=" + activeShip.CurrentHull +
+            " | IsDestroyed=" + result.IsDestroyed);
 
         _eventBus.Publish(new PlayerDamagedByNpcEvent(
             result.AppliedDamage,
@@ -136,6 +191,8 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             activeShip.CurrentShield +
             ", CurrentHull: " +
             activeShip.CurrentHull);
+
+        return result;
     }
 
     private void RegisterPlayerDestroyed()

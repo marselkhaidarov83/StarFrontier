@@ -442,11 +442,7 @@ public sealed class SystemTravelHudController :
         if (_gameTimeService == null)
             return;
 
-        _gameTimeService.TogglePause();
-
-        StartCoroutine(
-            Delay(
-                _gameTimeService.DelayTime));
+        _gameTimeService.StepOneDay();
 
         RefreshTime();
 

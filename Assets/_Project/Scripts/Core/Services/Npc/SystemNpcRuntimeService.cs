@@ -132,17 +132,17 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             npc.CurrentPosition));
     }
 
-    public void ApplyDamage(
+    public CombatDamageResult2A ApplyDamage(
         string runtimeNpcId,
         int damage,
         bool killedByPlayer,
         bool damagedByPlayer)
     {
         if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc))
-            return;
+            return default;
 
         if (!npc.IsAlive)
-            return;
+            return default;
 
         CombatDamageResult2A result = _damageService.ApplyDamage(
             npc.CurrentShield,
@@ -150,7 +150,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             damage);
 
         if (result.AppliedDamage <= 0)
-            return;
+            return default;
 
         npc.ApplyDamageResult(
             result.CurrentShield,
@@ -172,6 +172,8 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         if (!npc.IsAlive)
             DestroyNpc(npc, killedByPlayer);
+
+        return result;
     }
 
     public void ClearAll()

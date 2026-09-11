@@ -6,10 +6,18 @@ public sealed class OrbitalMotionService : CustomService, IOrbitalMotionService
 
     public void Tick(float deltaTime)
     {
-        _simulationTimeSeconds += deltaTime;
+        _simulationTimeSeconds += GetTickScaledDeltaTime(deltaTime);
     }
 
-    private Vector3 GetPlanetPosition(PlanetOrbitConfig orbitConfig, float simulationTimeSeconds)
+    private static float GetTickScaledDeltaTime(float deltaTime)
+    {
+        return deltaTime /
+               Mathf.Max(0.01f, GameTimeState.SecondsPerDay);
+    }
+
+    private Vector3 GetPlanetPosition(
+        PlanetOrbitConfig orbitConfig,
+        float simulationTimeSeconds)
     {
         if (orbitConfig == null)
         {
@@ -17,37 +25,48 @@ public sealed class OrbitalMotionService : CustomService, IOrbitalMotionService
             return Vector3.zero;
         }
 
-        float angleDegrees = GetPlanetAngleDegrees(orbitConfig, simulationTimeSeconds);
-        float angleRadians = angleDegrees * Mathf.Deg2Rad;
+        float angleDegrees =
+            GetPlanetAngleDegrees(
+                orbitConfig,
+                simulationTimeSeconds);
 
-        float x = orbitConfig.OrbitCenterOffset.x + Mathf.Cos(angleRadians) * orbitConfig.OrbitRadius;
-        float y = orbitConfig.OrbitCenterOffset.y + Mathf.Sin(angleRadians) * orbitConfig.OrbitRadius;
+        float angleRadians =
+            angleDegrees * Mathf.Deg2Rad;
 
-        // if (x == 0f || y == 0f)
-        // {
-        //     LogCustom("angleDegrees = " + angleDegrees +
-        //             ", angleRadians = " + angleRadians +
-        //             ", orbitConfig.Id = " + orbitConfig.Id);
-        // }
+        float x =
+            orbitConfig.OrbitCenterOffset.x +
+            Mathf.Cos(angleRadians) * orbitConfig.OrbitRadius;
+
+        float y =
+            orbitConfig.OrbitCenterOffset.y +
+            Mathf.Sin(angleRadians) * orbitConfig.OrbitRadius;
 
         return new Vector3(x, y, -2);
     }
 
-    public Vector3 GetPlanetCurrentPosition(PlanetOrbitConfig orbitConfig)
+    public Vector3 GetPlanetCurrentPosition(
+        PlanetOrbitConfig orbitConfig)
     {
-        return GetPlanetPosition(orbitConfig, _simulationTimeSeconds);
+        return GetPlanetPosition(
+            orbitConfig,
+            _simulationTimeSeconds);
     }
 
-    public float GetPlanetAngleDegrees(PlanetOrbitConfig orbitConfig, float simulationTimeSeconds)
+    public float GetPlanetAngleDegrees(
+        PlanetOrbitConfig orbitConfig,
+        float simulationTimeSeconds)
     {
         if (orbitConfig == null)
             return 0f;
 
-        int direction = orbitConfig.Direction >= 0 ? 1 : -1;
+        int direction =
+            orbitConfig.Direction >= 0 ? 1 : -1;
 
         float angle =
             orbitConfig.StartAngleDeg +
-            orbitConfig.OrbitSpeedDegPerSec * simulationTimeSeconds * direction;
+            orbitConfig.OrbitSpeedDegPerSec *
+            simulationTimeSeconds *
+            direction;
 
         return NormalizeAngle(angle);
     }

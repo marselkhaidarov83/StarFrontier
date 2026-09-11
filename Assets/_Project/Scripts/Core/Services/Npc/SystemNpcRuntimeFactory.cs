@@ -322,8 +322,8 @@ public static class SystemNpcRuntimeFactory
     }
 
     private static bool AddWeapon(
-        SystemNpcRuntimeState npc,
-        WeaponConfig weaponConfig)
+     SystemNpcRuntimeState npc,
+     WeaponConfig weaponConfig)
     {
         if (npc == null)
             return false;

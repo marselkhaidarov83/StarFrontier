@@ -11156,12 +11156,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30749232cd8c947f692436df237ba239, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Presentation::GalaxyNpcCombatVisualController
+  _debugEnabled: 0
+  _debugStop: 0
   projectileRoot: {fileID: 1086103753}
   fxRoot: {fileID: 1587708906}
   projectilePrefab: {fileID: 5466342931177470382, guid: e1fa526fea1e04665a5176917fc31c51, type: 3}
   hitFxPrefab: {fileID: 1468902137238522349, guid: 096586222132e4c3a9aa529e331983e4, type: 3}
   explosionFxPrefab: {fileID: 1468902137238522349, guid: 6337c5381e4334c72a178c18f926167e, type: 3}
   beamPrefab: {fileID: 6347985207725188320, guid: c7a190cb797ac44e8a96bc8fca142365, type: 3}
+  wavePrefab: {fileID: 3743439557513463515, guid: 28979e031533441a0bce52584bde5e6f, type: 3}
   hitFxLifetimeSeconds: 0.35
   explosionFxLifetimeSeconds: 0.65
 --- !u!1001 &1117123349

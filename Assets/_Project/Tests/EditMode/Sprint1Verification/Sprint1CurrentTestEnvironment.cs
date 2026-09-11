@@ -50,6 +50,7 @@ namespace StarFrontier.Tests.Sprint1
         public SystemHudConfig SystemHudConfig => null;
         public SystemVisualConfig SystemVisualConfig => null;
         public CombatFxVisualConfig CombatFxVisualConfig => null;
+        public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig => null;
         public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig => null;
         public TestConfigService(SaveConfig saveConfig) { SaveConfig = saveConfig; }
         public IReadOnlyList<SectorConfig> GetAllSectors() => new List<SectorConfig>();

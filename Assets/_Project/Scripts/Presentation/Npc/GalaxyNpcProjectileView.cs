@@ -3,7 +3,7 @@ using UnityEngine;
 public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
 {
     [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private float rotationOffsetDegrees = -90f;
+    [SerializeField] private float rotationOffsetDegrees = 0f;
 
     public string ProjectileId { get; private set; }
     public bool IsActive { get; private set; }
@@ -25,6 +25,9 @@ public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
 
         ResolveCombatService();
         ApplyRenderOrder();
+
+        if (spriteRenderer != null)
+            spriteRenderer.enabled = false;
 
         gameObject.SetActive(true);
     }
@@ -59,6 +62,12 @@ public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
             return;
         }
 
+        bool released =
+            projectile.ElapsedSeconds >= projectile.StartDelaySeconds;
+
+        if (spriteRenderer != null)
+            spriteRenderer.enabled = released;
+
         SetPosition(projectile.CurrentPosition);
     }
 
@@ -92,6 +101,10 @@ public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
     {
         ProjectileId = null;
         IsActive = false;
+
+        if (spriteRenderer != null)
+            spriteRenderer.enabled = false;
+
         gameObject.SetActive(false);
     }
 
@@ -126,10 +139,7 @@ public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
 
     private void ApplyRenderOrder()
     {
-        if (spriteRenderer == null)
-            return;
-
-        if (_settings == null)
+        if (spriteRenderer == null || _settings == null)
             return;
 
         spriteRenderer.sortingLayerName = _settings.SortingLayerName;
