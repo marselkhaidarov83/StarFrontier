@@ -121,6 +121,25 @@ public sealed class ShipMovementConfig : ScriptableObject
     [SerializeField]
     private Vector2 systemBoundsHalfSize = new Vector2(12f, 20f);
 
+    [SerializeField]
+    [Range(0f, 0.25f)]
+    private float boundaryNavigationInsetPercent = 0.03f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float boundaryProtectionRadiusWorld = 1500f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float boundaryProtectionPullStepWorld = 80f;
+
+    [SerializeField]
+    private bool useBoundaryNavigationInsetWorldUnits;
+
+    [SerializeField]
+    [Min(0f)]
+    private float boundaryNavigationInsetWorldUnits = 0f;
+
     public float MaxSpeed => maxSpeed;
     public float Acceleration => acceleration;
     public float Deceleration => deceleration;
@@ -159,6 +178,20 @@ public sealed class ShipMovementConfig : ScriptableObject
 
     public bool ClampToSystemBounds => clampToSystemBounds;
     public Vector2 SystemBoundsHalfSize => systemBoundsHalfSize;
+    public float BoundaryNavigationInsetPercent =>
+    Mathf.Clamp(boundaryNavigationInsetPercent, 0f, 0.25f);
+
+    public bool UseBoundaryNavigationInsetWorldUnits =>
+        useBoundaryNavigationInsetWorldUnits;
+
+    public float BoundaryProtectionRadiusWorld =>
+Mathf.Max(0f, boundaryProtectionRadiusWorld);
+
+    public float BoundaryProtectionPullStepWorld =>
+        Mathf.Max(0f, boundaryProtectionPullStepWorld);
+
+    public float BoundaryNavigationInsetWorldUnits =>
+        Mathf.Max(0f, boundaryNavigationInsetWorldUnits);
     public int RouteSubstepsPerTick =>
     Mathf.Clamp(routeSubstepsPerTick, 1, 30);
 

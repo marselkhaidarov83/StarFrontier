@@ -328,16 +328,48 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         if (npc == null)
             return targetPosition;
 
+        Vector3 currentPosition =
+            npc.CurrentPosition;
+
+        currentPosition.z = -2f;
+        targetPosition.z = -2f;
+
         float combatRange =
-            GetAllWeaponsCanShootRange(npc);
+            Mathf.Max(
+                ArrivalSafeDistance(),
+                GetAllWeaponsCanShootRange(npc));
 
-        Vector3 approachPosition =
-            GetApproachPosition(
-                npc.CurrentPosition,
-                targetPosition,
-                combatRange);
+        float arrivalTolerance =
+            GetCombatApproachArrivalTolerance(npc);
 
-        return approachPosition;
+        float distanceToTarget =
+            Vector3.Distance(
+                currentPosition,
+                targetPosition);
+
+        if (distanceToTarget <= combatRange + arrivalTolerance)
+        {
+            return currentPosition;
+        }
+
+        return GetApproachPosition(
+            currentPosition,
+            targetPosition,
+            combatRange);
+    }
+
+    private float GetCombatApproachArrivalTolerance(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return ArrivalSafeDistance();
+
+        float turnRadiusPart =
+            Mathf.Max(0f, npc.TurnRadius) * 0.05f;
+
+        return Mathf.Clamp(
+            turnRadiusPart,
+            ArrivalSafeDistance(),
+            25f);
     }
 
     private float GetAllWeaponsCanShootRange(SystemNpcRuntimeState npc)

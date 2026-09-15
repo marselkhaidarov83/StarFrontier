@@ -10,6 +10,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private DebugConfig debugConfig;
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
+    [SerializeField] private DebugLogConfig debugLogConfig;
 
     [Header("Sprint 3 System Gameplay")]
     [SerializeField] private PlayerControlConfig playerControlConfig;
@@ -90,8 +91,38 @@ public class Bootstrapper : CustomMonoBehaviour
     public int DebugNpcGalaxyLevel =>
         Mathf.Clamp(debugNpcGalaxyLevel, 1, 10);
 
+    public DebugLogConfig DebugLogConfig => debugLogConfig;
+
+    public bool IsDebugLogEnabled(DebugLogChannel channel)
+    {
+        return debugLogConfig != null &&
+               debugLogConfig.IsEnabled(channel);
+    }
+
+    public void LogDebug(DebugLogChannel channel, string message)
+    {
+        if (!IsDebugLogEnabled(channel) ||
+            string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        Debug.Log("[DebugLog][" + channel + "] " + message);
+    }
+
+    public Action<string> CreateDebugLogAction(DebugLogChannel channel)
+    {
+        if (!IsDebugLogEnabled(channel))
+            return null;
+
+        return message => LogDebug(channel, message);
+    }
+
     private void Awake()
     {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 30;
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -205,6 +236,7 @@ public class Bootstrapper : CustomMonoBehaviour
             RegisterService<ISaveService, SaveService2A>();
 
         RegisterService<IPlayerCombatTargetService, PlayerCombatTargetService>();
+        RegisterService<ISystemEnemyMovementService, SystemEnemyMovementService>();
         RegisterService<ISystemNpcMovementRouteService, SystemNpcMovementRouteService>();
         RegisterService<ISystemNpcMovementService, SystemNpcMovementService>();
         RegisterService<IGalaxyNpcMovementService, GalaxyNpcMovementService>();

@@ -27,7 +27,7 @@ public enum WeaponGroupEnemyFaction
 
 [CreateAssetMenu(
     fileName = "weapon_group_",
-    menuName = "STAR FRONTIER/Configs/Weapon Group Config")]
+    menuName = "StarFrontier/Configs/Combat/Weapon Group Config")]
 public sealed class WeaponGroupConfig : BaseConfig
 {
     [Header("Identity")]

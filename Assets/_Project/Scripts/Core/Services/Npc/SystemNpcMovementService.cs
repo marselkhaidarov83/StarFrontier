@@ -25,8 +25,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
     private const int NpcRoutePlanMaxSteps = 8192;
     private readonly Dictionary<string, NpcMovementRouteState> _npcMovementRoutes = new();
+    private readonly Dictionary<string, SystemBoundaryNavigation2A.BoundaryNavigationState> _npcBoundaryNavigationStates = new();
     private readonly List<Vector3> _npcRouteWaypointsBuffer = new();
     private readonly List<Vector3> _npcRoutePreviewPathBuffer = new();
+    private readonly List<Vector3> _npcRouteTailPathBuffer = new();
+    private readonly List<Vector3> _npcRouteSegmentPathBuffer = new();
 
     public SystemNpcMovementService()
     {
@@ -132,9 +135,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     }
 
     private void TickNpcMovement(
-     SystemNpcRuntimeState npc,
-     float deltaTime,
-     int currentTick)
+        SystemNpcRuntimeState npc,
+        float deltaTime,
+        int currentTick)
     {
         if (IsMilitaryDebugNpc(npc))
         {
@@ -168,20 +171,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         EnsureTickMovementDirection(npc, currentTick);
 
         if (npc.TickMovementArrived)
-        {
-            if (IsMilitaryDebugNpc(npc))
-            {
-                LogCustom(
-                    "[NPC-MILITARY-MOVEMENT] Tick skipped: TickMovementArrived. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", Behavior=" + npc.CurrentBehavior +
-                    ", TravelState=" + npc.TravelState +
-                    ", Position=" + npc.CurrentPosition +
-                    ", TargetPosition=" + npc.TargetPosition);
-            }
-
             return;
-        }
 
         if (!_npcMovementRoutes.TryGetValue(
                 npc.RuntimeNpcId,
@@ -191,23 +181,14 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             routeState.Path.Count <= 1 ||
             !IsSameNpcMovementRouteContext(routeState, npc))
         {
-            if (IsMilitaryDebugNpc(npc))
-            {
-                LogCustom(
-                    "[NPC-MILITARY-MOVEMENT] Tick skipped: no valid route for current behavior. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", Behavior=" + npc.CurrentBehavior +
-                    ", TravelState=" + npc.TravelState +
-                    ", HasRoute=" + (routeState != null) +
-                    ", HasPath=" + (routeState != null && routeState.Path != null) +
-                    ", PathCount=" + (routeState != null && routeState.Path != null ? routeState.Path.Count : 0) +
-                    ", RouteBehavior=" + (routeState != null ? routeState.BehaviorType : SystemNpcBehaviorType.None) +
-                    ", RouteTravelState=" + (routeState != null ? routeState.TravelState : SystemNpcTravelState.Idle) +
-                    ", Position=" + npc.CurrentPosition +
-                    ", TargetPosition=" + npc.TargetPosition +
-                    ", TargetPlanet=" + npc.TargetPlanetId);
-            }
+            return;
+        }
 
+        if (ConsumeNpcStartTurnInPlaceIfNeeded(
+                npc,
+                routeState,
+                currentTick))
+        {
             return;
         }
 
@@ -219,65 +200,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         float totalRouteLength =
             GetNpcPathLength(routeState.Path);
 
-        float distanceToTarget =
-            Vector3.Distance(
-                npc.CurrentPosition,
-                npc.TargetPosition);
-
-        if (IsMilitaryDebugNpc(npc))
-        {
-            LogCustom(
-                "[NPC-MILITARY-MOVEMENT] Route state. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", Behavior=" + npc.CurrentBehavior +
-                ", TravelState=" + npc.TravelState +
-                ", RouteDestination=" + routeState.Destination +
-                ", PathCount=" + routeState.Path.Count +
-                ", TotalLength=" + totalRouteLength +
-                ", DistanceTravelled=" + routeState.DistanceTravelled +
-                ", CurrentPosition=" + npc.CurrentPosition +
-                ", TargetPosition=" + npc.TargetPosition +
-                ", DistanceToTarget=" + distanceToTarget +
-                ", ArrivalThresholdUsed=" + arrivalThreshold);
-        }
-
         if (totalRouteLength <= arrivalThreshold)
         {
-            if (distanceToTarget > arrivalThreshold)
-            {
-                if (IsMilitaryDebugNpc(npc))
-                {
-                    LogCustom(
-                        "[NPC-MILITARY-MOVEMENT] Short route ignored: target is still far. " +
-                        "Npc=" + npc.RuntimeNpcId +
-                        ", Behavior=" + npc.CurrentBehavior +
-                        ", TravelState=" + npc.TravelState +
-                        ", TotalLength=" + totalRouteLength +
-                        ", DistanceToTarget=" + distanceToTarget +
-                        ", ArrivalThresholdUsed=" + arrivalThreshold +
-                        ", CurrentPosition=" + npc.CurrentPosition +
-                        ", TargetPosition=" + npc.TargetPosition +
-                        ", TargetPlanet=" + npc.TargetPlanetId);
-                }
-
-                ClearNpcMovementRoute(npc.RuntimeNpcId);
-                return;
-            }
-
-            if (IsMilitaryDebugNpc(npc))
-            {
-                LogCustom(
-                    "[NPC-MILITARY-MOVEMENT] Completing immediately: route shorter than threshold. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", Behavior=" + npc.CurrentBehavior +
-                    ", TravelState=" + npc.TravelState +
-                    ", TotalLength=" + totalRouteLength +
-                    ", Threshold=" + arrivalThreshold +
-                    ", CurrentPosition=" + npc.CurrentPosition +
-                    ", TargetPosition=" + npc.TargetPosition +
-                    ", TargetPlanet=" + npc.TargetPlanetId);
-            }
-
             CompleteMovement(npc, currentTick);
             return;
         }
@@ -304,44 +228,59 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         Vector3 oldPosition =
             npc.CurrentPosition;
 
+        Vector3 oldFacingDirection =
+            npc.FacingDirection;
+
         Vector3 newPosition =
             GetNpcPointOnPathAtDistance(
                 routeState.Path,
                 nextDistance);
 
-        if (IsMilitaryDebugNpc(npc))
-        {
-            LogCustom(
-                "[NPC-MILITARY-MOVEMENT] Move step. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", Behavior=" + npc.CurrentBehavior +
-                ", TravelState=" + npc.TravelState +
-                ", MovementDistance=" + movementDistance +
-                ", PreviousDistance=" + previousDistance +
-                ", NextDistance=" + nextDistance +
-                ", Remaining=" + (totalRouteLength - nextDistance) +
-                ", OldPosition=" + oldPosition +
-                ", NewPosition=" + newPosition +
-                ", TargetPosition=" + npc.TargetPosition +
-                ", TargetPlanet=" + npc.TargetPlanetId);
-        }
-
-        Vector3 movementDelta =
-            newPosition - oldPosition;
-
-        movementDelta.z = 0f;
+        Vector2 routeDirection =
+            _shipRouteService != null
+                ? _shipRouteService.GetDirectionOnPathAtDistance(
+                    routeState.Path,
+                    nextDistance)
+                : GetNpcDirectionOnPathAtDistance(
+                    routeState.Path,
+                    nextDistance);
 
         bool movedAlongRoute =
             nextDistance > previousDistance + 0.001f &&
-            movementDelta.sqrMagnitude > DirectionThresholdSqrMagnitude;
+            routeDirection.sqrMagnitude > DirectionThresholdSqrMagnitude;
 
         if (movedAlongRoute)
         {
             Vector3 movementDirection =
-                movementDelta.normalized;
+                new Vector3(
+                    routeDirection.x,
+                    routeDirection.y,
+                    0f).normalized;
 
             npc.FacingDirection = movementDirection;
             npc.TickMovementDirection = movementDirection;
+
+            float turnAngle =
+                GetSignedAngle(oldFacingDirection, movementDirection);
+
+            if (IsNpcMovementDebugEnabled() &&
+                Mathf.Abs(turnAngle) >= GetMovementTurnSpikeAngleDegrees())
+            {
+                LogNpcMovementDebug(
+                    "[NPC-TURN-SPIKE]" +
+                    " | Npc=" + npc.RuntimeNpcId +
+                    " | Type=" + npc.NpcType +
+                    " | TurnAngle=" + turnAngle.ToString("0.###") +
+                    " | OldPosition=" + FormatVector3(oldPosition) +
+                    " | NewPosition=" + FormatVector3(newPosition) +
+                    " | OldFacing=" + FormatVector3(oldFacingDirection) +
+                    " | NewFacing=" + FormatVector3(movementDirection) +
+                    " | RouteDirection=" + FormatVector2(routeDirection) +
+                    " | PreviousDistance=" + previousDistance.ToString("0.###") +
+                    " | NextDistance=" + nextDistance.ToString("0.###") +
+                    " | TotalRouteLength=" + totalRouteLength.ToString("0.###") +
+                    " | TargetPosition=" + FormatVector3(npc.TargetPosition));
+            }
         }
 
         npc.CurrentPosition = newPosition;
@@ -366,38 +305,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
             if (distanceToRealTarget > arrivalThreshold)
             {
-                if (IsMilitaryDebugNpc(npc))
-                {
-                    LogCustom(
-                        "[NPC-MILITARY-MOVEMENT] Complete blocked after move: real target is still far. " +
-                        "Npc=" + npc.RuntimeNpcId +
-                        ", Behavior=" + npc.CurrentBehavior +
-                        ", TravelState=" + npc.TravelState +
-                        ", RouteRemaining=" + (totalRouteLength - nextDistance) +
-                        ", DistanceToRealTarget=" + distanceToRealTarget +
-                        ", ArrivalThresholdUsed=" + arrivalThreshold +
-                        ", CurrentPosition=" + npc.CurrentPosition +
-                        ", TargetPosition=" + npc.TargetPosition +
-                        ", TargetPlanet=" + npc.TargetPlanetId);
-                }
-
                 ClearNpcMovementRoute(npc.RuntimeNpcId);
                 return;
-            }
-
-            if (IsMilitaryDebugNpc(npc))
-            {
-                LogCustom(
-                    "[NPC-MILITARY-MOVEMENT] Completing: remaining under threshold. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", Behavior=" + npc.CurrentBehavior +
-                    ", TravelState=" + npc.TravelState +
-                    ", Remaining=" + (totalRouteLength - nextDistance) +
-                    ", Threshold=" + arrivalThreshold +
-                    ", CurrentPosition=" + npc.CurrentPosition +
-                    ", TargetPosition=" + npc.TargetPosition +
-                    ", TargetPlanet=" + npc.TargetPlanetId +
-                    ", TravelProgress01=" + npc.TravelProgress01);
             }
 
             CompleteMovement(npc, currentTick);
@@ -406,8 +315,26 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
     private void EnsureTickMovementDirection(SystemNpcRuntimeState npc, int currentTick)
     {
-        Vector3 finalTargetPosition =
+        Vector3 rawFinalTargetPosition =
             _routeService.GetNextTargetPosition(npc);
+
+        rawFinalTargetPosition.z = -2f;
+
+        SystemBoundaryNavigation2A.BoundaryNavigationState boundaryState =
+            GetOrCreateNpcBoundaryNavigationState(npc.RuntimeNpcId);
+
+        Vector3 finalTargetPosition =
+            SystemBoundaryNavigation2A.GetRouteDestinationInsideSystemBounds(
+                npc.CurrentSystemId,
+                npc.CurrentPosition,
+                rawFinalTargetPosition,
+                GetNpcSafeFacingDirection(npc),
+                _configService != null ? _configService.ShipMovementConfig : null,
+                boundaryState,
+                currentTick,
+                GetNpcBoundaryRouteStepDistance(npc),
+                npc.TravelState == SystemNpcTravelState.EngagingEnemy,
+                out bool isBoundaryAdjusted);
 
         finalTargetPosition.z = -2f;
         npc.TargetPosition = finalTargetPosition;
@@ -421,6 +348,24 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             GetNpcRouteArrivalDistanceThreshold(
                 npc,
                 finalTargetPosition);
+
+        if (npc.TravelState == SystemNpcTravelState.EngagingEnemy &&
+            distanceToFinalTarget <= arrivalThreshold)
+        {
+            ClearNpcMovementRoute(npc.RuntimeNpcId);
+
+            Vector3 holdPosition =
+                npc.CurrentPosition;
+
+            holdPosition.z = -2f;
+            npc.CurrentPosition = holdPosition;
+            npc.CurrentMovementTargetPosition = holdPosition;
+            npc.TickMovementTargetPosition = holdPosition;
+            npc.TickMovementDirectionTick = currentTick;
+            npc.TickMovementArrived = true;
+
+            return;
+        }
 
         if (npc.TravelState == SystemNpcTravelState.Patrolling &&
             distanceToFinalTarget <= arrivalThreshold + 0.5f)
@@ -440,80 +385,63 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return;
         }
 
-        float routeReuseDistanceThreshold =
-            GetNpcRouteReuseDistanceThreshold(npc);
-
-        bool hasReusableRoute =
+        bool hasActiveRoute =
             _npcMovementRoutes.TryGetValue(
                 npc.RuntimeNpcId,
                 out NpcMovementRouteState routeState) &&
             routeState != null &&
             routeState.Path != null &&
             routeState.Path.Count > 1 &&
-            IsSameNpcMovementRouteContext(routeState, npc) &&
+            IsSameNpcMovementRouteContext(routeState, npc);
+
+        NpcMovementRouteState existingRouteState =
+            hasActiveRoute
+                ? routeState
+                : null;
+
+        if (hasActiveRoute &&
+            routeState.IsBoundaryEscapeRoute &&
+            IsNpcBoundaryRouteStillUseful(
+                npc,
+                routeState,
+                finalTargetPosition) &&
+            TryUpdateNpcMovementTargetFromRoute(
+                npc,
+                routeState,
+                currentTick))
+        {
+            return;
+        }
+
+        if (hasActiveRoute &&
+            IsNpcRouteRefreshBlockedByInitialTicks(
+                npc,
+                routeState,
+                currentTick) &&
+            TryUpdateNpcMovementTargetFromRoute(
+                npc,
+                routeState,
+                currentTick))
+        {
+            return;
+        }
+
+        float routeReuseDistanceThreshold =
+            GetNpcRouteReuseDistanceThreshold(npc);
+
+        bool hasReusableRoute =
+            hasActiveRoute &&
             Vector3.Distance(
                 routeState.Destination,
                 finalTargetPosition) <= routeReuseDistanceThreshold;
 
-        if (IsMilitaryDebugNpc(npc))
-        {
-            LogCustom(
-                "[NPC-MILITARY-ROUTE] Ensure route. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", Behavior=" + npc.CurrentBehavior +
-                ", TravelState=" + npc.TravelState +
-                ", CurrentPosition=" + npc.CurrentPosition +
-                ", FinalTarget=" + finalTargetPosition +
-                ", TargetSystem=" + npc.TargetSystemId +
-                ", TargetPlanet=" + npc.TargetPlanetId +
-                ", HasReusableRoute=" + hasReusableRoute +
-                ", Tick=" + currentTick);
-        }
-
         if (hasReusableRoute &&
-            ShouldKeepNpcRouteUntilArrival(npc))
+            ShouldKeepNpcRouteUntilArrival(npc) &&
+            TryUpdateNpcMovementTargetFromRoute(
+                npc,
+                routeState,
+                currentTick))
         {
-            routeState.Tick = currentTick;
-
-            float distancePerTick =
-                Mathf.Max(0f, npc.Speed);
-
-            float totalRouteLength =
-                GetNpcPathLength(routeState.Path);
-
-            float nextPreviewDistance =
-                Mathf.Clamp(
-                    routeState.DistanceTravelled + distancePerTick,
-                    0f,
-                    totalRouteLength);
-
-            Vector3 movementTargetPosition =
-                GetNpcPointOnPathAtDistance(
-                    routeState.Path,
-                    nextPreviewDistance);
-
-            npc.CurrentMovementTargetPosition = movementTargetPosition;
-            npc.TickMovementTargetPosition = movementTargetPosition;
-            npc.TickMovementDirectionTick = currentTick;
-            npc.TickMovementArrived = false;
-
-            if (IsMilitaryDebugNpc(npc))
-            {
-                LogCustom(
-                    "[NPC-MILITARY-ROUTE] Reusing active patrol route. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", Behavior=" + npc.CurrentBehavior +
-                    ", TravelState=" + npc.TravelState +
-                    ", PathCount=" + routeState.Path.Count +
-                    ", PathLength=" + totalRouteLength +
-                    ", DistanceTravelled=" + routeState.DistanceTravelled +
-                    ", DistancePerTick=" + distancePerTick +
-                    ", Destination=" + routeState.Destination +
-                    ", CurrentPosition=" + npc.CurrentPosition +
-                    ", MovementTarget=" + movementTargetPosition +
-                    ", Tick=" + currentTick);
-            }
-
             return;
         }
 
@@ -529,27 +457,24 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         if (!TryBuildNpcMovementRoutePath(
                 npc,
                 finalTargetPosition,
-                _npcRoutePreviewPathBuffer))
+                _npcRoutePreviewPathBuffer,
+                currentTick,
+                out float builtRouteDistanceTravelled))
         {
+            if (TryContinueCurrentNpcRouteAfterFailedRefresh(
+                    npc,
+                    existingRouteState,
+                    finalTargetPosition,
+                    currentTick))
+            {
+                return;
+            }
+
             ClearNpcMovementRoute(npc.RuntimeNpcId);
 
             npc.CurrentMovementTargetPosition = finalTargetPosition;
             npc.TickMovementTargetPosition = finalTargetPosition;
             npc.TickMovementDirectionTick = currentTick;
-
-            if (IsMilitaryDebugNpc(npc))
-            {
-                LogCustom(
-                    "[NPC-MILITARY-ROUTE] Build failed. Active route cleared. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", Behavior=" + npc.CurrentBehavior +
-                    ", TravelState=" + npc.TravelState +
-                    ", CurrentPosition=" + npc.CurrentPosition +
-                    ", FinalTarget=" + finalTargetPosition +
-                    ", Distance=" + Vector3.Distance(npc.CurrentPosition, finalTargetPosition) +
-                    ", TargetSystem=" + npc.TargetSystemId +
-                    ", TargetPlanet=" + npc.TargetPlanetId);
-            }
 
             return;
         }
@@ -559,37 +484,186 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         routeState.Path.Clear();
         routeState.Path.AddRange(_npcRoutePreviewPathBuffer);
         routeState.Destination = finalTargetPosition;
-        routeState.DistanceTravelled = 0f;
         routeState.Tick = currentTick;
+        routeState.BuildTick = currentTick;
+        routeState.IsBoundaryEscapeRoute =
+            isBoundaryAdjusted ||
+            SystemBoundaryNavigation2A.IsPositionNearSystemBounds(
+                npc.CurrentSystemId,
+                finalTargetPosition,
+                _configService != null ? _configService.ShipMovementConfig : null);
+
+        float totalRouteLength =
+            GetNpcPathLength(routeState.Path);
+
+        routeState.DistanceTravelled =
+            Mathf.Clamp(
+                builtRouteDistanceTravelled,
+                0f,
+                totalRouteLength);
 
         SaveNpcMovementRouteContext(routeState, npc);
+        RebuildNpcMovementRoutePlan(routeState, npc);
+
+        if (routeState.StartTurnInPlacePending)
+        {
+            npc.CurrentMovementTargetPosition = npc.CurrentPosition;
+            npc.TickMovementTargetPosition = npc.CurrentPosition;
+            npc.TickMovementDirectionTick = currentTick;
+            return;
+        }
 
         float builtDistancePerTick =
             Mathf.Max(0f, npc.Speed);
 
+        float builtPreviewDistance =
+            Mathf.Clamp(
+                routeState.DistanceTravelled + builtDistancePerTick,
+                0f,
+                totalRouteLength);
+
         Vector3 builtMovementTargetPosition =
             GetNpcPointOnPathAtDistance(
                 routeState.Path,
-                builtDistancePerTick);
+                builtPreviewDistance);
 
         npc.CurrentMovementTargetPosition = builtMovementTargetPosition;
         npc.TickMovementTargetPosition = builtMovementTargetPosition;
         npc.TickMovementDirectionTick = currentTick;
+    }
 
-        if (IsMilitaryDebugNpc(npc))
+    private bool IsNpcBoundaryRouteStillUseful(
+        SystemNpcRuntimeState npc,
+        NpcMovementRouteState routeState,
+        Vector3 finalTargetPosition)
+    {
+        if (npc == null ||
+            routeState == null ||
+            routeState.Path == null ||
+            routeState.Path.Count <= 1)
         {
-            LogCustom(
-                "[NPC-MILITARY-ROUTE] Build success. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", Behavior=" + npc.CurrentBehavior +
-                ", TravelState=" + npc.TravelState +
-                ", PathCount=" + routeState.Path.Count +
-                ", PathLength=" + GetNpcPathLength(routeState.Path) +
-                ", DistancePerTick=" + builtDistancePerTick +
-                ", Destination=" + routeState.Destination +
-                ", FirstPoint=" + routeState.Path[0] +
-                ", LastPoint=" + routeState.Path[routeState.Path.Count - 1]);
+            return false;
         }
+
+        if (!SystemBoundaryNavigation2A.IsPositionNearSystemBounds(
+                npc.CurrentSystemId,
+                finalTargetPosition,
+                _configService != null ? _configService.ShipMovementConfig : null))
+        {
+            return false;
+        }
+
+        float totalRouteLength =
+            GetNpcPathLength(routeState.Path);
+
+        float arrivalThreshold =
+            GetNpcRouteArrivalDistanceThreshold(
+                npc,
+                finalTargetPosition);
+
+        if (totalRouteLength <= arrivalThreshold)
+            return false;
+
+        return routeState.DistanceTravelled <
+               totalRouteLength - arrivalThreshold;
+    }
+
+    private bool TryUpdateNpcMovementTargetFromRoute(
+        SystemNpcRuntimeState npc,
+        NpcMovementRouteState routeState,
+        int currentTick)
+    {
+        if (npc == null ||
+            routeState == null ||
+            routeState.Path == null ||
+            routeState.Path.Count <= 1)
+        {
+            return false;
+        }
+
+        routeState.Tick = currentTick;
+
+        if (routeState.StartTurnInPlacePending)
+        {
+            npc.CurrentMovementTargetPosition = npc.CurrentPosition;
+            npc.TickMovementTargetPosition = npc.CurrentPosition;
+            npc.TickMovementDirectionTick = currentTick;
+            npc.TickMovementArrived = false;
+            return true;
+        }
+
+        float totalRouteLength =
+            GetNpcPathLength(routeState.Path);
+
+        float arrivalThreshold =
+            GetNpcRouteArrivalDistanceThreshold(
+                npc,
+                routeState.Destination);
+
+        if (routeState.DistanceTravelled >= totalRouteLength - arrivalThreshold)
+            return false;
+
+        float distancePerTick =
+            Mathf.Max(0f, npc.Speed);
+
+        float nextPreviewDistance =
+            Mathf.Clamp(
+                routeState.DistanceTravelled + distancePerTick,
+                0f,
+                totalRouteLength);
+
+        Vector3 movementTargetPosition =
+            GetNpcPointOnPathAtDistance(
+                routeState.Path,
+                nextPreviewDistance);
+
+        npc.CurrentMovementTargetPosition = movementTargetPosition;
+        npc.TickMovementTargetPosition = movementTargetPosition;
+        npc.TickMovementDirectionTick = currentTick;
+        npc.TickMovementArrived = false;
+
+        return true;
+    }
+
+    private bool IsNpcRouteRefreshBlockedByInitialTicks(
+        SystemNpcRuntimeState npc,
+        NpcMovementRouteState routeState,
+        int currentTick)
+    {
+        if (!ShouldUseNpcRouteLockedPrefix(npc) ||
+            routeState == null)
+        {
+            return false;
+        }
+
+        int blockedTicks =
+            GetNpcRouteRefreshBlockedInitialTicks();
+
+        if (blockedTicks <= 0)
+            return false;
+
+        if (routeState.BuildTick < 0)
+            return false;
+
+        int passedTicks =
+            currentTick - routeState.BuildTick;
+
+        if (passedTicks < 0)
+            return false;
+
+        return passedTicks < blockedTicks;
+    }
+
+    private int GetNpcRouteRefreshBlockedInitialTicks()
+    {
+        ShipMovementConfig movementConfig =
+            _configService != null
+                ? _configService.ShipMovementConfig
+                : null;
+
+        return movementConfig != null
+            ? movementConfig.MovingDestinationRouteRefreshBlockedInitialTicks
+            : 1;
     }
 
     private bool ShouldKeepNpcRouteUntilArrival(SystemNpcRuntimeState npc)
@@ -627,12 +701,12 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     }
 
     public bool TryBuildRoutePreview2A(
-     string runtimeNpcId,
-     TravelRoutePreview2A preview,
-     float smallDotSpacing,
-     int maxBigDots,
-     int maxSmallDots,
-     float secondsPerTick)
+        string runtimeNpcId,
+        TravelRoutePreview2A preview,
+        float smallDotSpacing,
+        int maxBigDots,
+        int maxSmallDots,
+        float secondsPerTick)
     {
         if (preview == null)
         {
@@ -693,7 +767,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             if (!TryBuildNpcMovementRoutePath(
                     npc,
                     destinationPosition,
-                    _npcRoutePreviewPathBuffer))
+                    _npcRoutePreviewPathBuffer,
+                    -1,
+                    out float previewRouteDistanceTravelled))
             {
                 return false;
             }
@@ -887,8 +963,12 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private bool TryBuildNpcMovementRoutePath(
         SystemNpcRuntimeState npc,
         Vector3 destinationPosition,
-        List<Vector3> routePath)
+        List<Vector3> routePath,
+        int currentTick,
+        out float routeDistanceTravelled)
     {
+        routeDistanceTravelled = 0f;
+
         if (npc == null ||
             routePath == null)
         {
@@ -902,82 +982,98 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 npc,
                 destinationPosition);
 
-        float initialDistance =
-            Vector3.Distance(
+        if (Vector3.Distance(
                 npc.CurrentPosition,
-                destinationPosition);
-
-        bool debugMilitary =
-            IsMilitaryDebugNpc(npc);
-
-        if (debugMilitary)
+                destinationPosition) <= arrivalThreshold)
         {
-            LogCustom(
-                "[NPC-MILITARY-ROUTE-BUILD] Start. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", Behavior=" + npc.CurrentBehavior +
-                ", TravelState=" + npc.TravelState +
-                ", CurrentSystem=" + npc.CurrentSystemId +
-                ", CurrentPlanet=" + npc.CurrentPlanetId +
-                ", TargetPlanet=" + npc.TargetPlanetId +
-                ", CurrentPosition=" + npc.CurrentPosition +
-                ", DestinationPosition=" + destinationPosition +
-                ", InitialDistance=" + initialDistance +
-                ", ArrivalThresholdUsed=" + arrivalThreshold +
-                ", FacingDirection=" + npc.FacingDirection +
-                ", TickMovementDirection=" + npc.TickMovementDirection +
-                ", Speed=" + npc.Speed +
-                ", TurnRadius=" + npc.TurnRadius);
-        }
-
-        if (initialDistance <= arrivalThreshold)
-        {
-            if (debugMilitary)
-            {
-                LogCustom(
-                    "[NPC-MILITARY-ROUTE-BUILD] Rejected: already near destination. " +
-                    "Npc=" + npc.RuntimeNpcId +
-                    ", Distance=" + initialDistance +
-                    ", ArrivalThresholdUsed=" + arrivalThreshold);
-            }
-
             return false;
         }
 
         if (_shipRouteService == null)
-        {
-            if (debugMilitary)
-            {
-                LogCustom(
-                    "[NPC-MILITARY-ROUTE-BUILD] Rejected: ship route service is null. " +
-                    "Npc=" + npc.RuntimeNpcId);
-            }
+            return false;
 
+        if (TryBuildNpcRouteWithPreservedPrefix(
+                npc,
+                destinationPosition,
+                arrivalThreshold,
+                routePath,
+                currentTick,
+                out routeDistanceTravelled))
+        {
+            return true;
+        }
+
+        Vector2 startFacingDirection =
+            GetNpcSafeFacingDirection(npc);
+
+        routeDistanceTravelled = 0f;
+
+        return TryBuildNpcRoutePathFrom(
+            npc,
+            npc.CurrentPosition,
+            destinationPosition,
+            startFacingDirection,
+            arrivalThreshold,
+            routePath,
+            currentTick);
+    }
+
+    private bool TryBuildNpcRoutePathFrom(
+        SystemNpcRuntimeState npc,
+        Vector3 startPosition,
+        Vector3 destinationPosition,
+        Vector2 startFacingDirection,
+        float arrivalThreshold,
+        List<Vector3> routePath,
+        int currentTick)
+    {
+        if (npc == null ||
+            routePath == null)
+        {
             return false;
         }
 
-        if (debugMilitary)
-        {
-            BuildNpcTravelWaypoints(
-                npc,
+        routePath.Clear();
+
+        float boundaryStepDistance =
+            GetNpcBoundaryRouteStepDistance(npc);
+
+        Vector3 adjustedDestinationPosition =
+            SystemBoundaryNavigation2A.GetRouteDestinationInsideSystemBounds(
+                npc.CurrentSystemId,
+                startPosition,
                 destinationPosition,
-                _npcRouteWaypointsBuffer);
+                startFacingDirection,
+                _configService != null ? _configService.ShipMovementConfig : null,
+                GetOrCreateNpcBoundaryNavigationState(npc.RuntimeNpcId),
+                currentTick,
+                boundaryStepDistance,
+                npc.TravelState == SystemNpcTravelState.EngagingEnemy,
+                out _);
+
+        adjustedDestinationPosition.z = -2f;
+
+        if (Vector3.Distance(
+                startPosition,
+                adjustedDestinationPosition) <= arrivalThreshold)
+        {
+            return false;
         }
 
         SystemShipRouteRequest2A request =
             new SystemShipRouteRequest2A
             {
                 SystemId = npc.CurrentSystemId,
-                StartPosition = npc.CurrentPosition,
-                DestinationPosition = destinationPosition,
-                StartFacingDirection = GetNpcSafeFacingDirection(npc),
+                StartPosition = startPosition,
+                DestinationPosition = adjustedDestinationPosition,
+                StartFacingDirection = startFacingDirection,
                 TargetKind = npc.IsEnemy
                     ? SystemShipRouteTargetKind2A.Enemy
                     : SystemShipRouteTargetKind2A.Npc,
                 Settings = CreateNpcRouteSettings(
                     npc,
                     arrivalThreshold,
-                    debugMilitary)
+                    false)
             };
 
         bool routeBuilt =
@@ -985,53 +1081,587 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 request,
                 _npcRouteBuildResult);
 
-        if (routeBuilt)
+        if (!routeBuilt ||
+            _npcRouteBuildResult.Path == null ||
+            _npcRouteBuildResult.Path.Count <= 1)
         {
-            routePath.AddRange(_npcRouteBuildResult.Path);
+            return false;
         }
 
-        if (debugMilitary)
+        if (ShouldRejectNpcRawFallbackRoute(
+                npc,
+                startFacingDirection,
+                _npcRouteBuildResult))
         {
-            LogCustom(
-                "[NPC-MILITARY-ROUTE-BUILD] Turn-radius result. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", RouteBuilt=" + routeBuilt +
-                ", WaypointCount=" + _npcRouteWaypointsBuffer.Count +
-                ", WaypointPathLength=" + TurnRadiusRouteMath2A.GetPathLength(_npcRouteWaypointsBuffer) +
-                ", Waypoints=" + FormatNpcRoutePathForDebug(_npcRouteWaypointsBuffer) +
-                ", FacingDirectionUsed=" + request.StartFacingDirection +
-                ", SpeedUsed=" + _npcRouteBuildResult.EffectiveSpeed +
-                ", TurnRadiusUsed=" + _npcRouteBuildResult.EffectiveTurnRadius +
-                ", RouteStepDistance=" + GetNpcRoutePlanStepDistance(Mathf.Max(0.01f, npc.Speed)) +
-                ", ArrivalThresholdUsed=" + arrivalThreshold +
-                ", IntermediateWaypointArrivalDistanceThreshold=handled by SystemShipRouteService2A" +
-                ", StraightExitAngleDegrees=" + GetNpcRouteStraightExitAngleDegrees() +
-                ", MaxSteps=" + NpcRoutePlanMaxSteps +
-                ", ResultPathCount=" + routePath.Count +
-                ", ResultPathLength=" + _npcRouteBuildResult.PathLength +
-                ", MaxAllowedRouteLength=handled by SystemShipRouteService2A" +
-                ", ResultPath=" + FormatNpcRoutePathForDebug(routePath) +
-                ", LastPointToDestinationDistance=" + GetNpcRouteLastPointDistanceToDestination(routePath, destinationPosition));
+            return false;
         }
 
-        return routeBuilt &&
-               routePath.Count > 1;
+        if (ShouldRejectNpcStartTurnSpikeRoute(
+                npc,
+                startFacingDirection,
+                _npcRouteBuildResult))
+        {
+            return false;
+        }
+
+        routePath.AddRange(_npcRouteBuildResult.Path);
+        return true;
     }
 
-    private SystemShipRouteSettings2A CreateNpcRouteSettings(
-    SystemNpcRuntimeState npc,
-    float arrivalThreshold,
-    bool debugMilitary)
+    private float GetNpcBoundaryRouteStepDistance(
+        SystemNpcRuntimeState npc)
+    {
+        float speed =
+            npc != null
+                ? Mathf.Max(0f, npc.Speed)
+                : 0f;
+
+        return Mathf.Clamp(
+            speed * 2.5f,
+            ArrivalDistanceThreshold * 4f,
+            260f);
+    }
+
+    private bool ShouldRejectNpcStartTurnSpikeRoute(
+        SystemNpcRuntimeState npc,
+        Vector2 startFacingDirection,
+        SystemShipRouteResult2A routeResult)
+    {
+        if (npc == null ||
+            routeResult == null ||
+            routeResult.Path == null ||
+            routeResult.Path.Count <= 1 ||
+            startFacingDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        {
+            return false;
+        }
+
+        Vector2 routeStartDirection =
+            _shipRouteService != null
+                ? _shipRouteService.GetDirectionOnPathAtDistance(
+                    routeResult.Path,
+                    0f)
+                : GetNpcDirectionOnPathAtDistance(
+                    routeResult.Path,
+                    0f);
+
+        if (routeStartDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+            return false;
+
+        float startTurnAngle =
+            Mathf.Abs(
+                Vector2.SignedAngle(
+                    startFacingDirection.normalized,
+                    routeStartDirection.normalized));
+
+        float maxAllowedStartTurnAngle =
+            Mathf.Clamp(
+                GetMovementTurnSpikeAngleDegrees(),
+                1f,
+                179f);
+
+        bool shouldReject =
+            startTurnAngle > maxAllowedStartTurnAngle;
+
+        if (shouldReject &&
+            ShouldLogNpcRouteDecision())
+        {
+            LogNpcMovementDebug(
+                "[NPC-ROUTE-START-SPIKE-REJECTED]" +
+                " | Npc=" + npc.RuntimeNpcId +
+                " | Type=" + npc.NpcType +
+                " | StartTurnAngle=" + startTurnAngle.ToString("0.###") +
+                " | MaxAllowed=" + maxAllowedStartTurnAngle.ToString("0.###") +
+                " | StartFacing=" + FormatVector2(startFacingDirection) +
+                " | RouteDirection=" + FormatVector2(routeStartDirection) +
+                " | PathLength=" + routeResult.PathLength.ToString("0.###") +
+                " | UsedRawSafeFallback=" + routeResult.UsedRawSafeFallback +
+                " | UsedSunAvoidance=" + routeResult.UsedSunAvoidance +
+                " | Destination=" + FormatVector3(routeResult.Path[routeResult.Path.Count - 1]));
+        }
+
+        return shouldReject;
+    }
+
+    private bool TryBuildNpcRouteWithPreservedPrefix(
+        SystemNpcRuntimeState npc,
+        Vector3 destinationPosition,
+        float arrivalThreshold,
+        List<Vector3> routePath,
+        int currentTick,
+        out float routeDistanceTravelled)
+    {
+        routeDistanceTravelled = 0f;
+
+        if (!ShouldUseNpcRouteLockedPrefix(npc) ||
+            routePath == null)
+        {
+            return false;
+        }
+
+        if (!_npcMovementRoutes.TryGetValue(
+                npc.RuntimeNpcId,
+                out NpcMovementRouteState routeState) ||
+            routeState == null ||
+            routeState.Path == null ||
+            routeState.Path.Count <= 1 ||
+            !IsSameNpcMovementRouteContext(routeState, npc))
+        {
+            return false;
+        }
+
+        if (!TryGetNpcLockedPrefixState(
+                npc,
+                routeState,
+                out float currentDistance,
+                out float lockedPrefixDistance,
+                out Vector3 lockedPrefixEndPosition,
+                out Vector2 lockedPrefixEndFacingDirection))
+        {
+            return false;
+        }
+
+        if (!TryBuildNpcRoutePathFrom(
+                npc,
+                lockedPrefixEndPosition,
+                destinationPosition,
+                lockedPrefixEndFacingDirection,
+                arrivalThreshold,
+                _npcRouteTailPathBuffer,
+                currentTick))
+        {
+            return false;
+        }
+
+        BuildNpcRoutePrefix(
+            routeState.Path,
+            lockedPrefixDistance,
+            _npcRouteSegmentPathBuffer);
+
+        if (_npcRouteSegmentPathBuffer.Count <= 1)
+            return false;
+
+        routePath.Clear();
+        routePath.AddRange(_npcRouteSegmentPathBuffer);
+
+        AppendNpcRouteTail(
+            _npcRouteTailPathBuffer,
+            routePath);
+
+        if (routePath.Count <= 1)
+            return false;
+
+        routeDistanceTravelled =
+            Mathf.Min(
+                currentDistance,
+                lockedPrefixDistance);
+
+        if (ShouldLogNpcRouteDecision())
+        {
+            LogNpcMovementDebug(
+                "[NPC-ROUTE-PREFIX-PRESERVED]" +
+                " | Npc=" + npc.RuntimeNpcId +
+                " | Type=" + npc.NpcType +
+                " | CurrentDistance=" + currentDistance.ToString("0.###") +
+                " | LockedPrefixDistance=" + lockedPrefixDistance.ToString("0.###") +
+                " | PreservedDistance=" + routeDistanceTravelled.ToString("0.###") +
+                " | PrefixEnd=" + FormatVector3(lockedPrefixEndPosition) +
+                " | PrefixFacing=" + FormatVector2(lockedPrefixEndFacingDirection) +
+                " | Destination=" + FormatVector3(destinationPosition) +
+                " | PathCount=" + routePath.Count);
+        }
+
+        return true;
+    }
+
+    private bool TryGetNpcLockedPrefixState(
+        SystemNpcRuntimeState npc,
+        NpcMovementRouteState routeState,
+        out float currentDistance,
+        out float lockedPrefixDistance,
+        out Vector3 lockedPrefixEndPosition,
+        out Vector2 lockedPrefixEndFacingDirection)
+    {
+        currentDistance = 0f;
+        lockedPrefixDistance = 0f;
+        lockedPrefixEndPosition = Vector3.zero;
+        lockedPrefixEndFacingDirection = Vector2.up;
+
+        if (npc == null ||
+            routeState == null ||
+            routeState.Path == null ||
+            routeState.Path.Count <= 1)
+        {
+            return false;
+        }
+
+        int lockedPrefixSlots =
+            GetNpcRouteLockedPrefixSlots();
+
+        if (lockedPrefixSlots <= 0)
+            return false;
+
+        float totalPathLength =
+            GetNpcPathLength(routeState.Path);
+
+        if (totalPathLength <= ArrivalDistanceThreshold)
+            return false;
+
+        currentDistance =
+            Mathf.Clamp(
+                routeState.DistanceTravelled,
+                0f,
+                totalPathLength);
+
+        if (currentDistance >= totalPathLength - ArrivalDistanceThreshold)
+            return false;
+
+        float routeStepDistance =
+            GetNpcRoutePlanStepDistance(
+                Mathf.Max(0f, npc.Speed));
+
+        float lockedPrefixLength =
+            Mathf.Max(
+                ArrivalDistanceThreshold,
+                routeStepDistance * lockedPrefixSlots);
+
+        lockedPrefixDistance =
+            Mathf.Clamp(
+                currentDistance + lockedPrefixLength,
+                0f,
+                totalPathLength);
+
+        if (lockedPrefixDistance <= currentDistance + ArrivalDistanceThreshold)
+            return false;
+
+        lockedPrefixEndPosition =
+            GetNpcPointOnPathAtDistance(
+                routeState.Path,
+                lockedPrefixDistance);
+
+        lockedPrefixEndFacingDirection =
+            _shipRouteService != null
+                ? _shipRouteService.GetDirectionOnPathAtDistance(
+                    routeState.Path,
+                    lockedPrefixDistance)
+                : GetNpcDirectionOnPathAtDistance(
+                    routeState.Path,
+                    lockedPrefixDistance);
+
+        if (lockedPrefixEndFacingDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+            lockedPrefixEndFacingDirection = GetNpcSafeFacingDirection(npc);
+
+        if (lockedPrefixEndFacingDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+            return false;
+
+        lockedPrefixEndFacingDirection.Normalize();
+        return true;
+    }
+
+    private bool TryContinueCurrentNpcRouteAfterFailedRefresh(
+        SystemNpcRuntimeState npc,
+        NpcMovementRouteState routeState,
+        Vector3 finalTargetPosition,
+        int currentTick)
+    {
+        if (!ShouldUseNpcRouteLockedPrefix(npc) ||
+            routeState == null ||
+            routeState.Path == null ||
+            routeState.Path.Count <= 1 ||
+            !IsSameNpcMovementRouteContext(routeState, npc))
+        {
+            return false;
+        }
+
+        float totalRouteLength =
+            GetNpcPathLength(routeState.Path);
+
+        float arrivalThreshold =
+            GetNpcRouteArrivalDistanceThreshold(
+                npc,
+                finalTargetPosition);
+
+        if (routeState.DistanceTravelled >= totalRouteLength - arrivalThreshold)
+            return false;
+
+        routeState.Tick = currentTick;
+
+        float distancePerTick =
+            Mathf.Max(0f, npc.Speed);
+
+        float nextPreviewDistance =
+            Mathf.Clamp(
+                routeState.DistanceTravelled + distancePerTick,
+                0f,
+                totalRouteLength);
+
+        Vector3 movementTargetPosition =
+            GetNpcPointOnPathAtDistance(
+                routeState.Path,
+                nextPreviewDistance);
+
+        npc.CurrentMovementTargetPosition = movementTargetPosition;
+        npc.TickMovementTargetPosition = movementTargetPosition;
+        npc.TickMovementDirectionTick = currentTick;
+        npc.TickMovementArrived = false;
+
+        if (ShouldLogNpcRouteDecision())
+        {
+            LogNpcMovementDebug(
+                "[NPC-ROUTE-REFRESH-FAILED-KEEP-OLD]" +
+                " | Npc=" + npc.RuntimeNpcId +
+                " | Type=" + npc.NpcType +
+                " | DistanceTravelled=" + routeState.DistanceTravelled.ToString("0.###") +
+                " | TotalRouteLength=" + totalRouteLength.ToString("0.###") +
+                " | OldDestination=" + FormatVector3(routeState.Destination) +
+                " | NewDestination=" + FormatVector3(finalTargetPosition));
+        }
+
+        return true;
+    }
+
+    private bool ShouldUseNpcRouteLockedPrefix(SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return false;
+
+        if (!ShouldKeepNpcRouteUntilArrival(npc))
+            return false;
+
+        if (npc.TravelState == SystemNpcTravelState.EngagingEnemy)
+            return true;
+
+        if (npc.TravelState == SystemNpcTravelState.TravelingInsideSystem &&
+            npc.CurrentBehavior == SystemNpcBehaviorType.PlanetToPlanetTravel)
+        {
+            return true;
+        }
+
+        if (npc.TravelState == SystemNpcTravelState.Patrolling)
+            return true;
+
+        return false;
+    }
+
+    private int GetNpcRouteLockedPrefixSlots()
     {
         ShipMovementConfig movementConfig =
             _configService != null
                 ? _configService.ShipMovementConfig
                 : null;
 
+        return movementConfig != null
+            ? movementConfig.MovingDestinationRouteRefreshBlockedInitialSlots
+            : 2;
+    }
+
+    private void BuildNpcRoutePrefix(
+        IReadOnlyList<Vector3> sourcePath,
+        float prefixDistance,
+        List<Vector3> destinationPath)
+    {
+        if (destinationPath == null)
+            return;
+
+        destinationPath.Clear();
+
+        if (sourcePath == null ||
+            sourcePath.Count == 0)
+        {
+            return;
+        }
+
+        destinationPath.Add(sourcePath[0]);
+
+        if (sourcePath.Count == 1)
+            return;
+
+        float remainingDistance =
+            Mathf.Max(0f, prefixDistance);
+
+        for (int i = 1; i < sourcePath.Count; i++)
+        {
+            Vector3 from = sourcePath[i - 1];
+            Vector3 to = sourcePath[i];
+
+            float segmentDistance =
+                Vector3.Distance(from, to);
+
+            if (segmentDistance <= 0.001f)
+                continue;
+
+            if (remainingDistance >= segmentDistance)
+            {
+                AddNpcRoutePointIfDifferent(
+                    destinationPath,
+                    to);
+
+                remainingDistance -= segmentDistance;
+                continue;
+            }
+
+            float t =
+                Mathf.Clamp01(
+                    remainingDistance / segmentDistance);
+
+            Vector3 prefixEnd =
+                Vector3.Lerp(
+                    from,
+                    to,
+                    t);
+
+            AddNpcRoutePointIfDifferent(
+                destinationPath,
+                prefixEnd);
+
+            return;
+        }
+    }
+
+    private void AppendNpcRouteTail(
+        IReadOnlyList<Vector3> tailPath,
+        List<Vector3> destinationPath)
+    {
+        if (tailPath == null ||
+            destinationPath == null ||
+            tailPath.Count == 0)
+        {
+            return;
+        }
+
+        int startIndex =
+            destinationPath.Count > 0
+                ? 1
+                : 0;
+
+        for (int i = startIndex; i < tailPath.Count; i++)
+        {
+            AddNpcRoutePointIfDifferent(
+                destinationPath,
+                tailPath[i]);
+        }
+    }
+
+    private void AddNpcRoutePointIfDifferent(
+        List<Vector3> path,
+        Vector3 point)
+    {
+        if (path == null)
+            return;
+
+        if (path.Count > 0 &&
+            Vector3.Distance(
+                path[path.Count - 1],
+                point) <= 0.001f)
+        {
+            return;
+        }
+
+        path.Add(point);
+    }
+
+    private bool ShouldRejectNpcRawFallbackRoute(
+        SystemNpcRuntimeState npc,
+        Vector2 startFacingDirection,
+        SystemShipRouteResult2A routeResult)
+    {
+        if (npc == null ||
+            routeResult == null ||
+            !routeResult.UsedRawSafeFallback ||
+            routeResult.Path == null ||
+            routeResult.Path.Count <= 1)
+        {
+            return false;
+        }
+
+        Vector2 routeStartDirection =
+            _shipRouteService != null
+                ? _shipRouteService.GetDirectionOnPathAtDistance(
+                    routeResult.Path,
+                    0f)
+                : GetNpcDirectionOnPathAtDistance(
+                    routeResult.Path,
+                    0f);
+
+        if (routeStartDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude ||
+            startFacingDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        {
+            return false;
+        }
+
+        float startTurnAngle =
+            Mathf.Abs(
+                Vector2.SignedAngle(
+                    startFacingDirection.normalized,
+                    routeStartDirection.normalized));
+
+        float maxAllowedStartTurnAngle =
+            GetNpcRawFallbackMaxStartTurnAngleDegrees(npc);
+
+        bool shouldReject =
+            startTurnAngle > maxAllowedStartTurnAngle;
+
+        if (shouldReject &&
+            ShouldLogNpcRouteDecision())
+        {
+            LogNpcMovementDebug(
+                "[NPC-RAW-FALLBACK-REJECTED]" +
+                " | Npc=" + npc.RuntimeNpcId +
+                " | Type=" + npc.NpcType +
+                " | StartTurnAngle=" + startTurnAngle.ToString("0.###") +
+                " | MaxAllowed=" + maxAllowedStartTurnAngle.ToString("0.###") +
+                " | StartFacing=" + FormatVector2(startFacingDirection) +
+                " | RouteDirection=" + FormatVector2(routeStartDirection) +
+                " | PathLength=" + routeResult.PathLength.ToString("0.###") +
+                " | Destination=" + FormatVector3(routeResult.Path[routeResult.Path.Count - 1]));
+        }
+
+        return shouldReject;
+    }
+
+    private float GetNpcRawFallbackMaxStartTurnAngleDegrees(SystemNpcRuntimeState npc)
+    {
+        return Mathf.Clamp(
+            GetMovementTurnSpikeAngleDegrees(),
+            1f,
+            179f);
+    }
+
+    private SystemShipRouteSettings2A CreateNpcRouteSettings(
+        SystemNpcRuntimeState npc,
+        float arrivalThreshold,
+        bool debugMilitary)
+    {
+        ShipMovementConfig movementConfig =
+            _configService != null
+                ? _configService.ShipMovementConfig
+                : null;
+
+        System.Action<string> routeDebugLog =
+            ShouldLogShipRouteInternals()
+                ? Bootstrapper.Instance.CreateDebugLogAction(DebugLogChannel.ShipRoute)
+                : null;
+
+        float minTurnRadiusAbsolute =
+            movementConfig != null
+                ? movementConfig.MinRouteTurnRadiusAbsolute
+                : 30f;
+
+        float turnRadius =
+            Mathf.Max(0f, npc != null ? npc.TurnRadius : 0f);
+
+        if (minTurnRadiusAbsolute > 0f)
+        {
+            turnRadius =
+                Mathf.Max(
+                    turnRadius,
+                    minTurnRadiusAbsolute);
+        }
+
         return new SystemShipRouteSettings2A
         {
             Speed = Mathf.Max(0.01f, npc != null ? npc.Speed : 0f),
-            TurnRadius = Mathf.Max(0f, npc != null ? npc.TurnRadius : 0f),
+            TurnRadius = turnRadius,
             ArrivalDistanceThreshold = arrivalThreshold,
             SunAvoidanceSafetyMargin = SunAvoidanceSafetyMargin,
             SunAvoidanceArcSegments = SunAvoidanceArcSegments,
@@ -1041,21 +1671,112 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             TurnRadiusAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteTurnRadiusAdjustmentStepPercent : 5f,
             SpeedAdjustmentStepPercent = movementConfig != null ? movementConfig.RouteSpeedAdjustmentStepPercent : 2.5f,
             MinTurnRadiusAdjustmentFactor = movementConfig != null ? movementConfig.MinRouteTurnRadiusAdjustmentFactor : 0.05f,
-            MinTurnRadiusAbsolute = movementConfig != null ? movementConfig.MinRouteTurnRadiusAbsolute : 30f,
+            MinTurnRadiusAbsolute = minTurnRadiusAbsolute,
             BehindSmallTurnAngleToleranceDegrees = movementConfig != null ? movementConfig.RouteBehindSmallTurnAngleToleranceDegrees : 75f,
             MaxRoutePlanSteps = NpcRoutePlanMaxSteps,
             SunAvoidanceTurnRouteReserveMultiplier = 1.5f,
-            DebugLog = null,
-            DebugPrefix = string.Empty
+            DebugLog = routeDebugLog,
+            DebugPrefix = "[NpcMovement] "
         };
     }
 
+    private bool ShouldLogShipRouteInternals()
+    {
+        DebugLogConfig debugLogConfig =
+            Bootstrapper.Instance != null
+                ? Bootstrapper.Instance.DebugLogConfig
+                : null;
+
+        return debugLogConfig != null &&
+               debugLogConfig.IncludeShipRouteInternalLogs &&
+               debugLogConfig.IsEnabled(DebugLogChannel.ShipRoute);
+    }
+
+    private bool ShouldLogNpcRouteDecision()
+    {
+        DebugLogConfig debugLogConfig =
+            Bootstrapper.Instance != null
+                ? Bootstrapper.Instance.DebugLogConfig
+                : null;
+
+        return debugLogConfig != null &&
+               debugLogConfig.NpcRouteDecisionLogs &&
+               debugLogConfig.IsEnabled(DebugLogChannel.NpcMovement);
+    }
+
+    private bool IsNpcMovementDebugEnabled()
+    {
+        return Bootstrapper.Instance != null &&
+               Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.NpcMovement);
+    }
+
+    private float GetMovementTurnSpikeAngleDegrees()
+    {
+        DebugLogConfig debugLogConfig =
+            Bootstrapper.Instance != null
+                ? Bootstrapper.Instance.DebugLogConfig
+                : null;
+
+        return debugLogConfig != null
+            ? debugLogConfig.MovementTurnSpikeAngleDegrees
+            : 120f;
+    }
+
+    private void LogNpcMovementDebug(string message)
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.NpcMovement,
+            "[SystemNpcMovementService] " + message);
+    }
+
+    private float GetSignedAngle(Vector3 from, Vector3 to)
+    {
+        Vector2 from2 =
+            new Vector2(from.x, from.y);
+
+        Vector2 to2 =
+            new Vector2(to.x, to.y);
+
+        if (from2.sqrMagnitude <= DirectionThresholdSqrMagnitude ||
+            to2.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        {
+            return 0f;
+        }
+
+        return Vector2.SignedAngle(from2.normalized, to2.normalized);
+    }
+
+    private string FormatVector3(Vector3 value)
+    {
+        return "(" +
+               value.x.ToString("0.###") + ", " +
+               value.y.ToString("0.###") + ", " +
+               value.z.ToString("0.###") + ")";
+    }
+
+    private string FormatVector2(Vector2 value)
+    {
+        return "(" +
+               value.x.ToString("0.###") + ", " +
+               value.y.ToString("0.###") + ")";
+    }
+
     private float GetNpcRouteArrivalDistanceThreshold(
-    SystemNpcRuntimeState npc,
-    Vector3 destinationPosition)
+        SystemNpcRuntimeState npc,
+        Vector3 destinationPosition)
     {
         if (npc == null)
             return ArrivalDistanceThreshold;
+
+        if (npc.TravelState == SystemNpcTravelState.EngagingEnemy)
+        {
+            return Mathf.Max(
+                ArrivalDistanceThreshold,
+                GetNpcCombatRouteArrivalDistanceThreshold(npc));
+        }
 
         if (npc.CurrentBehavior != SystemNpcBehaviorType.PlanetToPlanetTravel &&
             npc.TravelState != SystemNpcTravelState.TravelingInsideSystem)
@@ -1077,6 +1798,21 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         return Mathf.Max(
             ArrivalDistanceThreshold,
             planetRadius);
+    }
+
+    private float GetNpcCombatRouteArrivalDistanceThreshold(
+        SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return ArrivalDistanceThreshold;
+
+        float turnRadiusPart =
+            Mathf.Max(0f, npc.TurnRadius) * 0.05f;
+
+        return Mathf.Clamp(
+            turnRadiusPart,
+            ArrivalDistanceThreshold,
+            25f);
     }
 
     private float GetPlanetWorldSize(PlanetConfig planet)
@@ -1328,9 +2064,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         return routeState;
     }
 
-    private Vector2 GetNpcSafeFacingDirection(
-    SystemNpcRuntimeState npc)
+    private Vector2 GetNpcSafeFacingDirection(SystemNpcRuntimeState npc)
     {
+        if (npc == null)
+            return Vector2.up;
+
         Vector3 facing = npc.FacingDirection;
         facing.z = 0f;
 
@@ -1342,6 +2080,12 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         if (tickDirection.sqrMagnitude > DirectionThresholdSqrMagnitude)
             return new Vector2(tickDirection.x, tickDirection.y).normalized;
+
+        Vector3 targetDirection = npc.TargetPosition - npc.CurrentPosition;
+        targetDirection.z = 0f;
+
+        if (targetDirection.sqrMagnitude > DirectionThresholdSqrMagnitude)
+            return new Vector2(targetDirection.x, targetDirection.y).normalized;
 
         return Vector2.up;
     }
@@ -1974,14 +2718,21 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private sealed class NpcMovementRouteState
     {
         public readonly List<Vector3> Path = new();
+        public readonly TravelRoutePlan RoutePlan = new();
+
         public Vector3 Destination;
         public float DistanceTravelled;
         public int Tick = -1;
+        public int BuildTick = -1;
         public SystemNpcBehaviorType BehaviorType;
         public SystemNpcTravelState TravelState;
         public string TargetSystemId;
         public string TargetPlanetId;
         public string CurrentTargetRuntimeNpcId;
+        public bool IsBoundaryEscapeRoute;
+
+        public bool StartTurnInPlacePending;
+        public Vector2 StartTurnInPlaceDirection = Vector2.up;
     }
 
     private bool IsMilitaryDebugNpc(SystemNpcRuntimeState npc)
@@ -1999,7 +2750,28 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return;
 
         _npcMovementRoutes.Remove(runtimeNpcId);
+        _npcBoundaryNavigationStates.Remove(runtimeNpcId);
         ClearSunAvoidanceRoute(runtimeNpcId);
+    }
+
+    private SystemBoundaryNavigation2A.BoundaryNavigationState GetOrCreateNpcBoundaryNavigationState(
+    string runtimeNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+            return null;
+
+        if (!_npcBoundaryNavigationStates.TryGetValue(
+                runtimeNpcId,
+                out SystemBoundaryNavigation2A.BoundaryNavigationState state) ||
+            state == null)
+        {
+            state =
+                new SystemBoundaryNavigation2A.BoundaryNavigationState();
+
+            _npcBoundaryNavigationStates[runtimeNpcId] = state;
+        }
+
+        return state;
     }
 
     private bool IsSameNpcMovementRouteContext(
@@ -2064,5 +2836,162 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     {
         return deltaTime /
                Mathf.Max(0.01f, GameTimeState.SecondsPerDay);
+    }
+
+    private void RebuildNpcMovementRoutePlan(
+    NpcMovementRouteState routeState,
+    SystemNpcRuntimeState npc)
+    {
+        if (routeState == null)
+            return;
+
+        routeState.RoutePlan.Clear();
+        routeState.StartTurnInPlacePending = false;
+        routeState.StartTurnInPlaceDirection = Vector2.up;
+
+        if (npc == null ||
+            routeState.Path == null ||
+            routeState.Path.Count <= 1)
+        {
+            return;
+        }
+
+        Vector2 startFacingDirection =
+            GetNpcSafeFacingDirection(npc);
+
+        Vector2 firstRouteDirection =
+            _shipRouteService != null
+                ? _shipRouteService.GetDirectionOnPathAtDistance(
+                    routeState.Path,
+                    0f)
+                : GetNpcDirectionOnPathAtDistance(
+                    routeState.Path,
+                    0f);
+
+        if (firstRouteDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        {
+            routeState.RoutePlan.SetMovePath(routeState.Path);
+            return;
+        }
+
+        firstRouteDirection.Normalize();
+
+        float startTurnAngle =
+            Vector2.SignedAngle(
+                startFacingDirection,
+                firstRouteDirection);
+
+        if (ShouldUseNpcStartTurnInPlace(
+                Mathf.Abs(startTurnAngle),
+                npc,
+                routeState))
+        {
+            routeState.RoutePlan.AddTurnInPlace(
+                npc.CurrentPosition,
+                startFacingDirection,
+                firstRouteDirection);
+
+            routeState.StartTurnInPlacePending = true;
+            routeState.StartTurnInPlaceDirection = firstRouteDirection;
+
+            if (IsNpcMovementDebugEnabled())
+            {
+                LogNpcMovementDebug(
+                    "[NPC-TURN-IN-PLACE-PLAN]" +
+                    " | Npc=" + npc.RuntimeNpcId +
+                    " | Type=" + npc.NpcType +
+                    " | TurnAngle=" + startTurnAngle.ToString("0.###") +
+                    " | Position=" + FormatVector3(npc.CurrentPosition) +
+                    " | From=" + FormatVector2(startFacingDirection) +
+                    " | To=" + FormatVector2(firstRouteDirection) +
+                    " | Destination=" + FormatVector3(routeState.Destination) +
+                    " | PathCount=" + routeState.Path.Count);
+            }
+        }
+
+        routeState.RoutePlan.SetMovePath(routeState.Path);
+    }
+
+    private bool ShouldUseNpcStartTurnInPlace(
+     float turnAngleDegrees,
+     SystemNpcRuntimeState npc,
+     NpcMovementRouteState routeState)
+    {
+        return false;
+    }
+
+    private bool ConsumeNpcStartTurnInPlaceIfNeeded(
+        SystemNpcRuntimeState npc,
+        NpcMovementRouteState routeState,
+        int currentTick)
+    {
+        if (npc == null ||
+            routeState == null ||
+            !routeState.StartTurnInPlacePending)
+        {
+            return false;
+        }
+
+        Vector2 turnDirection =
+            routeState.StartTurnInPlaceDirection;
+
+        if (routeState.RoutePlan.HasTurnInPlaceAtStart &&
+            routeState.RoutePlan.Steps.Count > 0 &&
+            routeState.RoutePlan.Steps[0].ToDirection.sqrMagnitude >
+            DirectionThresholdSqrMagnitude)
+        {
+            turnDirection =
+                routeState.RoutePlan.Steps[0].ToDirection;
+        }
+
+        if (turnDirection.sqrMagnitude <= DirectionThresholdSqrMagnitude)
+        {
+            routeState.StartTurnInPlacePending = false;
+            return false;
+        }
+
+        turnDirection.Normalize();
+
+        Vector3 oldFacingDirection =
+            npc.FacingDirection;
+
+        Vector3 newFacingDirection =
+            new Vector3(
+                turnDirection.x,
+                turnDirection.y,
+                0f);
+
+        npc.FacingDirection = newFacingDirection;
+        npc.TickMovementDirection = newFacingDirection;
+
+        npc.CurrentMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementDirectionTick = currentTick;
+        npc.TickMovementArrived = false;
+
+        routeState.StartTurnInPlacePending = false;
+        routeState.Tick = currentTick;
+
+        if (IsNpcMovementDebugEnabled())
+        {
+            LogNpcMovementDebug(
+                "[NPC-TURN-IN-PLACE]" +
+                " | Npc=" + npc.RuntimeNpcId +
+                " | Type=" + npc.NpcType +
+                " | TurnAngle=" + GetSignedAngle(
+                    oldFacingDirection,
+                    newFacingDirection).ToString("0.###") +
+                " | Position=" + FormatVector3(npc.CurrentPosition) +
+                " | OldFacing=" + FormatVector3(oldFacingDirection) +
+                " | NewFacing=" + FormatVector3(newFacingDirection) +
+                " | Destination=" + FormatVector3(routeState.Destination));
+        }
+
+        _eventBus.Publish(new SystemNpcPositionChangedEvent(
+            npc.RuntimeNpcId,
+            npc.CurrentSystemId,
+            npc.CurrentPosition));
+
+        return true;
     }
 }

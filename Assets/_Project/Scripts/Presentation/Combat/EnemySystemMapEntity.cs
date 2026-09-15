@@ -38,10 +38,24 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
 
     private void Update()
     {
-        if (!_isBound)
+        if (!_isBound ||
+            _enemyService == null ||
+            string.IsNullOrWhiteSpace(runtimeEnemyId))
+        {
+            return;
+        }
+
+        if (!_enemyService.TryGetEnemy(
+                runtimeEnemyId,
+                out SystemEnemyRuntimeState enemy))
+        {
+            return;
+        }
+
+        if (enemy == null || !enemy.IsAlive)
             return;
 
-        _enemyService.UpdateEnemyPosition(runtimeEnemyId, transform.position);
+        ApplyRuntimeTransform(enemy);
     }
 
     private void OnEnable()
@@ -111,8 +125,35 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
             spriteRenderer.enabled = true;
         }
 
-        if (_movementController != null)
-            _movementController.ApplyRuntimeConfig(runtimeEnemy);
+        ApplyRuntimeTransform(runtimeEnemy);
+    }
+
+    private void ApplyRuntimeTransform(SystemEnemyRuntimeState enemy)
+    {
+        if (enemy == null)
+            return;
+
+        Vector3 position = enemy.Position;
+        position.z = transform.position.z;
+        transform.position = position;
+
+        if (spriteRenderer == null)
+            return;
+
+        Vector3 direction = enemy.FacingDirection;
+        direction.z = 0f;
+
+        if (direction.sqrMagnitude <= 0.0001f)
+            return;
+
+        float angle =
+            Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        spriteRenderer.transform.localRotation =
+            Quaternion.Euler(
+                0f,
+                0f,
+                angle - 90f);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -139,7 +180,7 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
             travelService.SetNpcDestination(runtimeEnemyId);
         }
     }
-    
+
     public void ApplyDamage(int damage, bool fromPlayer)
     {
         if (!_isBound)

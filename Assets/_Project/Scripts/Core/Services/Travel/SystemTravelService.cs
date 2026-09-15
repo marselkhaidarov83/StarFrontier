@@ -9,6 +9,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private const float NpcFollowDefaultMaxDistance = 300f;
 
     private int _npcFollowModeIndex;
+    private readonly SystemBoundaryNavigation2A.BoundaryNavigationState _playerBoundaryNavigationState =
+    new SystemBoundaryNavigation2A.BoundaryNavigationState();
 
     public int NpcFollowModeIndex => Mathf.Clamp(
         _npcFollowModeIndex,
@@ -2653,7 +2655,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     }
 
     private void TryRefreshActiveRouteForMovingDestination(
-    int quantTick)
+        int quantTick)
     {
         if (!ShouldRefreshActiveRouteForMovingDestination())
             return;
@@ -2677,6 +2679,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return;
         }
 
+        bool isBoundaryLocked =
+            IsCurrentMovingDestinationRouteBoundaryLocked();
+
         bool preserveLockedPrefix =
             ShouldPreserveMovingDestinationLockedPrefix(
                 quantTick);
@@ -2689,13 +2694,20 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 ? 0.01f
                 : Mathf.Max(0.5f, ArrivalDistanceThreshold);
 
+        if (isBoundaryLocked)
+        {
+            refreshThreshold =
+                Mathf.Max(
+                    refreshThreshold,
+                    GetBoundaryMovingDestinationRouteRefreshThreshold());
+        }
+
         float destinationShift =
             Vector3.Distance(
                 liveDestinationPosition,
                 currentRouteEndPosition);
 
         if (!alwaysRefresh &&
-            !preserveLockedPrefix &&
             destinationShift < refreshThreshold)
         {
             return;
@@ -2708,16 +2720,13 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     }
 
     private bool IsMovingDestinationInitialRouteRefreshBlocked(
-    int quantTick)
+        int quantTick)
     {
         if (State == null ||
             State.Destination == null)
         {
             return false;
         }
-
-        if (State.Destination.Type == TravelDestinationType.Npc)
-            return false;
 
         int blockedTicks =
             GetMovingDestinationRouteRefreshBlockedInitialTicks();
@@ -3177,9 +3186,14 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     private bool ShouldAlwaysRefreshMovingDestinationRoute()
     {
-        return State != null &&
-               State.Destination != null &&
-               State.Destination.Type == TravelDestinationType.Npc;
+        if (State == null ||
+            State.Destination == null ||
+            State.Destination.Type != TravelDestinationType.Npc)
+        {
+            return false;
+        }
+
+        return !IsCurrentMovingDestinationRouteBoundaryLocked();
     }
 
     private bool ShouldPreserveMovingDestinationLockedPrefix(
@@ -3192,11 +3206,47 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return false;
         }
 
-        if (State.Destination.Type != TravelDestinationType.Planet)
-            return false;
+        if (State.Destination.Type == TravelDestinationType.Planet)
+        {
+            return IsMovingDestinationInitialRouteRefreshBlocked(
+                quantTick);
+        }
 
-        return IsMovingDestinationInitialRouteRefreshBlocked(
-            quantTick);
+        if (State.Destination.Type == TravelDestinationType.Npc)
+        {
+            return IsMovingDestinationInitialRouteRefreshBlocked(
+                quantTick);
+        }
+
+        return false;
+    }
+
+    private float GetBoundaryMovingDestinationRouteRefreshThreshold()
+    {
+        float followDistance =
+            Mathf.Max(
+                ArrivalDistanceThreshold,
+                GetNpcFollowModeDistance());
+
+        return Mathf.Clamp(
+            followDistance * 0.5f,
+            60f,
+            220f);
+    }
+
+    private bool IsCurrentMovingDestinationRouteBoundaryLocked()
+    {
+        if (State == null ||
+            State.Destination == null ||
+            State.Status != SystemTravelStatus.Flying)
+        {
+            return false;
+        }
+
+        return SystemBoundaryNavigation2A.IsPositionNearSystemBounds(
+            GetCurrentPlayerSystemId(),
+            State.DestinationPosition,
+            _configService != null ? _configService.ShipMovementConfig : null);
     }
 
     private bool TryBuildRouteWithPreservedMovingDestinationPrefix(
@@ -3281,12 +3331,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     }
 
     private bool TryBuildPlayerShipRoutePath2A(
-    Vector3 routeStartPosition,
-    Vector3 destinationPosition,
-    Vector2 routeStartFacingDirection,
-    List<Vector3> routePath,
-    out float turnFactor,
-    out float speedFactor)
+        Vector3 routeStartPosition,
+        Vector3 destinationPosition,
+        Vector2 routeStartFacingDirection,
+        List<Vector3> routePath,
+        out float turnFactor,
+        out float speedFactor)
     {
         turnFactor = 1f;
         speedFactor = 1f;
@@ -3299,12 +3349,49 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         if (_shipRouteService == null)
             return false;
 
+        float boundaryStepDistance =
+            GetBoundaryRouteStepDistance();
+
+        Vector3 adjustedDestinationPosition =
+            SystemBoundaryNavigation2A.GetRouteDestinationInsideSystemBounds(
+                GetCurrentPlayerSystemId(),
+                routeStartPosition,
+                destinationPosition,
+                routeStartFacingDirection,
+                _configService != null ? _configService.ShipMovementConfig : null,
+                _playerBoundaryNavigationState,
+                GetCurrentTravelQuantTick(),
+                boundaryStepDistance,
+                State != null &&
+                State.Destination != null &&
+                State.Destination.Type == TravelDestinationType.Npc,
+                out bool isBoundaryAdjusted);
+
+        if (Vector3.Distance(
+                routeStartPosition,
+                adjustedDestinationPosition) <= ArrivalDistanceThreshold)
+        {
+            LogPlayerBoundaryRouteDebug(
+                "BUILD-SKIPPED-ARRIVAL",
+                routeStartPosition,
+                destinationPosition,
+                adjustedDestinationPosition,
+                routeStartFacingDirection,
+                isBoundaryAdjusted,
+                boundaryStepDistance,
+                0f,
+                turnFactor,
+                speedFactor);
+
+            return false;
+        }
+
         SystemShipRouteRequest2A routeRequest =
             new SystemShipRouteRequest2A
             {
                 SystemId = GetCurrentPlayerSystemId(),
                 StartPosition = routeStartPosition,
-                DestinationPosition = destinationPosition,
+                DestinationPosition = adjustedDestinationPosition,
                 StartFacingDirection = routeStartFacingDirection,
                 TargetKind = GetCurrentShipRouteTargetKind2A(),
                 Settings = CreatePlayerShipRouteSettings2A()
@@ -3319,6 +3406,18 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             _playerShipRouteBuildResult.Path == null ||
             _playerShipRouteBuildResult.Path.Count <= 1)
         {
+            LogPlayerBoundaryRouteDebug(
+                "BUILD-FAILED",
+                routeStartPosition,
+                destinationPosition,
+                adjustedDestinationPosition,
+                routeStartFacingDirection,
+                isBoundaryAdjusted,
+                boundaryStepDistance,
+                0f,
+                turnFactor,
+                speedFactor);
+
             return false;
         }
 
@@ -3334,7 +3433,80 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             Mathf.Clamp01(
                 _playerShipRouteBuildResult.SpeedFactor);
 
+        if (isBoundaryAdjusted &&
+            State != null &&
+            State.Status == SystemTravelStatus.Flying)
+        {
+            speedFactor =
+                Mathf.Min(
+                    speedFactor,
+                    Mathf.Clamp01(GetCurrentEffectiveTravelSpeedFactor()));
+        }
+
+        LogPlayerBoundaryRouteDebug(
+            "BUILD-OK",
+            routeStartPosition,
+            destinationPosition,
+            adjustedDestinationPosition,
+            routeStartFacingDirection,
+            isBoundaryAdjusted,
+            boundaryStepDistance,
+            _playerShipRouteBuildResult.PathLength,
+            turnFactor,
+            speedFactor);
+
         return routePath.Count > 1;
+    }
+
+    private void LogPlayerBoundaryRouteDebug(
+        string label,
+        Vector3 routeStartPosition,
+        Vector3 rawDestinationPosition,
+        Vector3 adjustedDestinationPosition,
+        Vector2 routeStartFacingDirection,
+        bool isBoundaryAdjusted,
+        float boundaryStepDistance,
+        float pathLength,
+        float turnFactor,
+        float speedFactor)
+    {
+        if (Bootstrapper.Instance == null ||
+    !Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.PlayerMovement))
+        {
+            return;
+        }
+
+        Debug.Log(
+            "[DebugLog][PlayerMovement] [PLAYER-BOUNDARY-ROUTE]" +
+            " | Label=" + label +
+            " | DestinationType=" + (State != null && State.Destination != null ? State.Destination.Type.ToString() : "None") +
+            " | Start=" + FormatVector3(routeStartPosition) +
+            " | RawDestination=" + FormatVector3(rawDestinationPosition) +
+            " | AdjustedDestination=" + FormatVector3(adjustedDestinationPosition) +
+            " | StartFacing=" + FormatVector2(routeStartFacingDirection) +
+            " | BoundaryAdjusted=" + isBoundaryAdjusted +
+            " | BoundaryStepDistance=" + boundaryStepDistance.ToString("0.###") +
+            " | PathLength=" + pathLength.ToString("0.###") +
+            " | TurnFactor=" + turnFactor.ToString("0.###") +
+            " | SpeedFactor=" + speedFactor.ToString("0.###") +
+            " | CurrentEffectiveSpeed=" + GetCurrentEffectiveTravelSpeed().ToString("0.###") +
+            " | BaseSpeed=" + GetCurrentShipTravelSpeed().ToString("0.###") +
+            " | ActiveRouteDistance=" + _activeRouteDistanceTravelled.ToString("0.###") +
+            " | StateDestination=" + (State != null ? FormatVector3(State.DestinationPosition) : "None"));
+    }
+
+    private float GetBoundaryRouteStepDistance()
+    {
+        float speed =
+            GetCurrentEffectiveTravelSpeed();
+
+        if (speed <= 0f)
+            speed = GetCurrentShipTravelSpeed();
+
+        return Mathf.Clamp(
+            speed * 2.5f,
+            ArrivalDistanceThreshold * 4f,
+            260f);
     }
 
     private bool TryGetMovingDestinationLockedPrefixState(

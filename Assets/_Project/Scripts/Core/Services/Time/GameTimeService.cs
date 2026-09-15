@@ -10,6 +10,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private readonly IGalaxyNpcMovementService _galaxyNpcMovementService;
     private readonly IGalaxyNpcCombatService _galaxyNpcCombatService;
     private readonly ISystemEnemyService _systemEnemyService;
+    private readonly ISystemEnemyMovementService _systemEnemyMovementService;
     private readonly IGalaxyNpcBehaviorService _galaxyNpcBehaviorService;
     private readonly ISaveService _saveService;
 
@@ -37,6 +38,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _galaxyNpcMovementService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcMovementService>();
         _galaxyNpcCombatService = Bootstrapper.Instance.ServiceRegistry.Get<IGalaxyNpcCombatService>();
         _systemEnemyService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyService>();
+        _systemEnemyMovementService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyMovementService>();
         _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
 
         ApplyGameTimeConfig();
@@ -316,6 +318,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
         _galaxyNpcBehaviorService.Tick(State.CurrentQuantTick);
         _galaxyNpcMovementService.Tick(deltaTime, State.CurrentQuantTick);
+        _systemEnemyMovementService.Tick(deltaTime, State.CurrentQuantTick);
 
         _systemTravelService.Tick(deltaTime, State.CurrentQuantTick);
     }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "DamagePopupVisualConfig2A",
-    menuName = "Star Frontier/Combat/Damage Popup Visual Config 2A")]
+    menuName = "StarFrontier/Configs/Combat/Damage Popup Visual Config 2A")]
 public sealed class CombatDamagePopupVisualConfig2A : BaseConfig
 {
     [SerializeField] private bool enabled = true;

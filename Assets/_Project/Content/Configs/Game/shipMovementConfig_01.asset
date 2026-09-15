@@ -24,8 +24,9 @@ MonoBehaviour:
   routeSubstepsPerTick: 10
   routeStraightExitAngleDegrees: 10
   minRouteTurnRadiusAbsolute: 45
-  movingDestinationRouteRefreshBlockedInitialTicks: 2
+  movingDestinationRouteRefreshBlockedInitialSlots: 2
   movingDestinationRouteRefreshesPerTick: 5
+  movingDestinationRouteRefreshBlockedInitialTicks: 2
   routeNearDistanceTurnRadiusMultiplier: 0.75
   routeForwardSectorAngleDegrees: 60
   routeBehindSectorAngleDegrees: 105
@@ -38,4 +39,9 @@ MonoBehaviour:
   visualBankAmount: 0.25
   visualTiltReturnSpeed: 8
   clampToSystemBounds: 1
-  systemBoundsHalfSize: {x: 12, y: 20}
+  systemBoundsHalfSize: {x: 1200, y: 1900}
+  boundaryNavigationInsetPercent: 0.05
+  boundaryProtectionRadiusWorld: 1100
+  boundaryProtectionPullStepWorld: 80
+  useBoundaryNavigationInsetWorldUnits: 0
+  boundaryNavigationInsetWorldUnits: 0

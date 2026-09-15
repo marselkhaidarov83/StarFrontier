@@ -11,6 +11,9 @@ public sealed class SystemEnemyRuntimeState
 
     public string SystemId;
     public Vector3 Position;
+    public Vector3 DestinationPosition;
+    public Vector3 FacingDirection = Vector3.up;
+    public float TravelProgress01;
 
     public int CurrentHull;
     public int CurrentShield;
