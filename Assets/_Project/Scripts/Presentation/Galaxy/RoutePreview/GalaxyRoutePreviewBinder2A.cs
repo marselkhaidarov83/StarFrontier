@@ -18,7 +18,6 @@ public sealed class GalaxyRoutePreviewBinder2A :
     MonoBehaviour
 {
     [Header("Root")]
-
     [Tooltip(
         "Корневой объект панели preview. " +
         "Может совпадать с GameObject этого компонента.")]
@@ -26,84 +25,50 @@ public sealed class GalaxyRoutePreviewBinder2A :
     private GameObject panelRoot;
 
     [Header("Texts")]
-
-    [SerializeField]
-    private TMP_Text routeText;
-
-    [SerializeField]
-    private TMP_Text fuelCostText;
-
-    [SerializeField]
-    private TMP_Text availabilityText;
+    [SerializeField] private TMP_Text routeText;
+    [SerializeField] private TMP_Text fuelCostText;
+    [SerializeField] private TMP_Text availabilityText;
 
     [Header("Actions")]
-
-    [Tooltip(
-        "Кнопка фактического межсистемного перелёта.")]
+    [Tooltip("Кнопка фактического межсистемного перелёта.")]
     [SerializeField]
     private Button travelButton;
 
     [Header("Display")]
-
-    [SerializeField]
-    private string fuelCostPrefix =
-        "Топливо: ";
-
-    [SerializeField]
-    private string noRouteText =
-        "Маршрут не выбран";
-
-    [SerializeField]
-    private bool hidePanelWithoutRoute =
-        true;
+    [SerializeField] private string fuelCostPrefix = "Топливо: ";
+    [SerializeField] private string noRouteText = "Маршрут не выбран";
+    [SerializeField] private bool hidePanelWithoutRoute = true;
 
     [Header("Diagnostics")]
+    [SerializeField] private bool logInitializationErrors = true;
 
-    [SerializeField]
-    private bool logInitializationErrors =
-        true;
+    private ITravelService _travelService;
+    private IGameStateMachine _gameStateMachine;
 
-    private ITravelService
-        _travelService;
+    private string _fromSystemId;
+    private string _toSystemId;
+    private bool _initialized;
 
-    private string
-        _fromSystemId;
-
-    private string
-        _toSystemId;
-
-    private bool
-        _initialized;
-
-    public string FromSystemId =>
-        _fromSystemId;
-
-    public string ToSystemId =>
-        _toSystemId;
+    public string FromSystemId => _fromSystemId;
+    public string ToSystemId => _toSystemId;
 
     public bool HasSelectedRoute =>
-        !string.IsNullOrWhiteSpace(
-            _fromSystemId) &&
-        !string.IsNullOrWhiteSpace(
-            _toSystemId);
+        !string.IsNullOrWhiteSpace(_fromSystemId) &&
+        !string.IsNullOrWhiteSpace(_toSystemId);
 
     public bool IsTravelAvailable
     {
         get
         {
-            if (!_initialized &&
-                !TryInitialize())
-            {
+            if (!_initialized && !TryInitialize())
                 return false;
-            }
 
             if (!HasSelectedRoute)
                 return false;
 
-            return _travelService
-                       .GetTravelFailReason(
-                           _fromSystemId,
-                           _toSystemId) ==
+            return _travelService.GetTravelFailReason(
+                       _fromSystemId,
+                       _toSystemId) ==
                    TravelFailReason.None;
         }
     }
@@ -114,53 +79,30 @@ public sealed class GalaxyRoutePreviewBinder2A :
         ClearRoute();
     }
 
-    /// <summary>
-    /// Вызывается существующим контроллером
-    /// карты после выбора системы назначения.
-    /// </summary>
     public void SetRoute(
         string fromSystemId,
         string toSystemId)
     {
-        _fromSystemId =
-            NormalizeId(
-                fromSystemId);
-
-        _toSystemId =
-            NormalizeId(
-                toSystemId);
+        _fromSystemId = NormalizeId(fromSystemId);
+        _toSystemId = NormalizeId(toSystemId);
 
         Refresh();
     }
 
-    /// <summary>
-    /// Можно использовать, если исходная и конечная
-    /// системы назначаются по отдельности.
-    /// </summary>
     public void SetFromSystemId(
         string fromSystemId)
     {
-        _fromSystemId =
-            NormalizeId(
-                fromSystemId);
-
+        _fromSystemId = NormalizeId(fromSystemId);
         Refresh();
     }
 
     public void SetToSystemId(
         string toSystemId)
     {
-        _toSystemId =
-            NormalizeId(
-                toSystemId);
-
+        _toSystemId = NormalizeId(toSystemId);
         Refresh();
     }
 
-    /// <summary>
-    /// Повторно читает authoritative-данные
-    /// из ITravelService.
-    /// </summary>
     public void Refresh()
     {
         if (!TryInitialize())
@@ -178,16 +120,14 @@ public sealed class GalaxyRoutePreviewBinder2A :
         SetPanelVisible(true);
 
         TravelFailReason failReason =
-            _travelService
-                .GetTravelFailReason(
-                    _fromSystemId,
-                    _toSystemId);
+            _travelService.GetTravelFailReason(
+                _fromSystemId,
+                _toSystemId);
 
         int fuelCost =
-            _travelService
-                .GetTravelCost(
-                    _fromSystemId,
-                    _toSystemId);
+            _travelService.GetTravelCost(
+                _fromSystemId,
+                _toSystemId);
 
         if (routeText != null)
         {
@@ -205,16 +145,14 @@ public sealed class GalaxyRoutePreviewBinder2A :
         }
 
         bool canTravel =
-            failReason ==
-            TravelFailReason.None;
+            failReason == TravelFailReason.None;
 
         if (availabilityText != null)
         {
             availabilityText.text =
                 canTravel
                     ? "Маршрут доступен"
-                    : GetPlayerFacingReason(
-                        failReason);
+                    : GetPlayerFacingReason(failReason);
         }
 
         if (travelButton != null)
@@ -224,13 +162,6 @@ public sealed class GalaxyRoutePreviewBinder2A :
         }
     }
 
-    /// <summary>
-    /// Подключается к Button.onClick.
-    ///
-    /// Не подключайте параллельно другой вызов
-    /// ITravelService.TryTravel, иначе Fuel
-    /// может быть списан дважды.
-    /// </summary>
     public void TryTravelSelectedRoute()
     {
         if (!TryInitialize())
@@ -245,202 +176,161 @@ public sealed class GalaxyRoutePreviewBinder2A :
             return;
         }
 
-        /*
-         * Повторная проверка непосредственно
-         * перед фактическим вызовом.
-         */
+        if (!CanEnterSystemAfterTravel())
+        {
+            ShowSystemEnterUnavailable();
+            return;
+        }
+
         TravelFailReason failReason =
-            _travelService
-                .GetTravelFailReason(
-                    _fromSystemId,
-                    _toSystemId);
+            _travelService.GetTravelFailReason(
+                _fromSystemId,
+                _toSystemId);
 
-        if (failReason !=
-            TravelFailReason.None)
+        if (failReason != TravelFailReason.None)
         {
             Refresh();
             return;
         }
 
-        TravelResult result =
-            _travelService
-                .TryTravel(
-                    _toSystemId);
+        IGameSessionService gameSessionService = null;
 
-        if (result == null)
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null)
         {
-            if (availabilityText != null)
-            {
-                availabilityText.text =
-                    "Перелёт не выполнен";
-            }
-
-            if (travelButton != null)
-            {
-                travelButton.interactable =
-                    false;
-            }
-
-            return;
+            Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out gameSessionService);
         }
 
-        if (!result.Success)
-        {
-            if (availabilityText != null)
-            {
-                availabilityText.text =
-                    GetPlayerFacingReason(
-                        result.FailReason);
-            }
+        LoadingSceneContext.SetSystemTravel(
+            gameSessionService != null
+                ? gameSessionService.State
+                : null);
 
-            Refresh();
-            return;
-        }
+        string targetSystemId =
+            _toSystemId;
 
-        /*
-         * TravelService2A уже:
-         * - списал Fuel;
-         * - изменил систему;
-         * - опубликовал события;
-         * - запросил сохранение.
-         */
         ClearRoute();
+
+        _gameStateMachine.Enter(
+            new SystemState(targetSystemId));
     }
 
     public void ClearRoute()
     {
-        _fromSystemId =
-            string.Empty;
-
-        _toSystemId =
-            string.Empty;
+        _fromSystemId = string.Empty;
+        _toSystemId = string.Empty;
 
         if (routeText != null)
-        {
-            routeText.text =
-                noRouteText;
-        }
+            routeText.text = noRouteText;
 
         if (fuelCostText != null)
-        {
-            fuelCostText.text =
-                fuelCostPrefix +
-                "—";
-        }
+            fuelCostText.text = fuelCostPrefix + "—";
 
         if (availabilityText != null)
-        {
-            availabilityText.text =
-                string.Empty;
-        }
+            availabilityText.text = string.Empty;
 
         if (travelButton != null)
-        {
-            travelButton.interactable =
-                false;
-        }
+            travelButton.interactable = false;
 
         if (hidePanelWithoutRoute)
-        {
             SetPanelVisible(false);
-        }
     }
 
     private bool TryInitialize()
     {
         if (_initialized &&
-            _travelService != null)
+            _travelService != null &&
+            _gameStateMachine != null)
         {
             return true;
         }
 
-        _initialized =
-            false;
-
-        _travelService =
-            null;
+        _initialized = false;
+        _travelService = null;
+        _gameStateMachine = null;
 
         if (Bootstrapper.Instance == null)
         {
-            LogInitializationError(
-                "Bootstrapper.Instance is null.");
-
+            LogInitializationError("Bootstrapper.Instance is null.");
             return false;
         }
 
-        if (Bootstrapper.Instance
-                .ServiceRegistry == null)
+        if (Bootstrapper.Instance.ServiceRegistry == null)
         {
-            LogInitializationError(
-                "ServiceRegistry is null.");
-
+            LogInitializationError("ServiceRegistry is null.");
             return false;
         }
 
-        bool found =
-            Bootstrapper.Instance
-                .ServiceRegistry
-                .TryGet<ITravelService>(
-                    out ITravelService
-                        travelService);
+        IServiceRegistry registry =
+            Bootstrapper.Instance.ServiceRegistry;
 
-        if (!found ||
-            travelService == null)
+        bool travelFound =
+            registry.TryGet<ITravelService>(
+                out ITravelService travelService);
+
+        if (!travelFound || travelService == null)
         {
-            LogInitializationError(
-                "ITravelService is not registered.");
-
+            LogInitializationError("ITravelService is not registered.");
             return false;
         }
 
-        _travelService =
-            travelService;
+        bool stateMachineFound =
+            registry.TryGet<IGameStateMachine>(
+                out IGameStateMachine gameStateMachine);
 
-        _initialized =
-            true;
+        if (!stateMachineFound || gameStateMachine == null)
+        {
+            LogInitializationError("IGameStateMachine is not registered.");
+            return false;
+        }
+
+        _travelService = travelService;
+        _gameStateMachine = gameStateMachine;
+        _initialized = true;
 
         return true;
+    }
+
+    private bool CanEnterSystemAfterTravel()
+    {
+        if (_gameStateMachine != null)
+            return true;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return false;
+        }
+
+        return Bootstrapper.Instance.ServiceRegistry.TryGet<IGameStateMachine>(
+                   out _gameStateMachine) &&
+               _gameStateMachine != null;
     }
 
     private void ShowNoRoute()
     {
         if (routeText != null)
-        {
-            routeText.text =
-                noRouteText;
-        }
+            routeText.text = noRouteText;
 
         if (fuelCostText != null)
-        {
-            fuelCostText.text =
-                fuelCostPrefix +
-                "—";
-        }
+            fuelCostText.text = fuelCostPrefix + "—";
 
         if (availabilityText != null)
-        {
-            availabilityText.text =
-                string.Empty;
-        }
+            availabilityText.text = string.Empty;
 
         if (travelButton != null)
-        {
-            travelButton.interactable =
-                false;
-        }
+            travelButton.interactable = false;
 
         if (hidePanelWithoutRoute)
-        {
             SetPanelVisible(false);
-        }
     }
 
     private void ShowServiceUnavailable()
     {
         SetPanelVisible(true);
 
-        if (routeText != null &&
-            HasSelectedRoute)
+        if (routeText != null && HasSelectedRoute)
         {
             routeText.text =
                 _fromSystemId +
@@ -449,94 +339,71 @@ public sealed class GalaxyRoutePreviewBinder2A :
         }
 
         if (fuelCostText != null)
-        {
-            fuelCostText.text =
-                fuelCostPrefix +
-                "—";
-        }
+            fuelCostText.text = fuelCostPrefix + "—";
 
         if (availabilityText != null)
-        {
-            availabilityText.text =
-                "Сервис перелёта недоступен";
-        }
+            availabilityText.text = "Сервис перелёта недоступен";
 
         if (travelButton != null)
-        {
-            travelButton.interactable =
-                false;
-        }
+            travelButton.interactable = false;
     }
 
-    private void SetPanelVisible(
-        bool visible)
+    private void ShowSystemEnterUnavailable()
+    {
+        SetPanelVisible(true);
+
+        if (availabilityText != null)
+            availabilityText.text = "Переход в систему недоступен";
+
+        if (travelButton != null)
+            travelButton.interactable = false;
+    }
+
+    private void SetPanelVisible(bool visible)
     {
         if (panelRoot != null &&
             panelRoot.activeSelf != visible)
         {
-            panelRoot.SetActive(
-                visible);
+            panelRoot.SetActive(visible);
         }
     }
 
-    private static string NormalizeId(
-        string systemId)
+    private static string NormalizeId(string systemId)
     {
-        return string.IsNullOrWhiteSpace(
-                systemId)
+        return string.IsNullOrWhiteSpace(systemId)
             ? string.Empty
             : systemId.Trim();
     }
 
-    private static string
-        GetPlayerFacingReason(
-            TravelFailReason reason)
+    private static string GetPlayerFacingReason(
+        TravelFailReason reason)
     {
         switch (reason)
         {
             case TravelFailReason.None:
                 return "Маршрут доступен";
 
-            case TravelFailReason
-                .CurrentSystemMissing:
-                return
-                    "Текущая система не определена";
+            case TravelFailReason.CurrentSystemMissing:
+                return "Текущая система не определена";
 
-            case TravelFailReason
-                .TargetSystemMissing:
-                return
-                    "Система назначения недоступна";
+            case TravelFailReason.TargetSystemMissing:
+                return "Система назначения недоступна";
 
-            case TravelFailReason
-                .TargetSystemIsCurrent:
-                return
-                    "Корабль уже находится " +
-                    "в этой системе";
+            case TravelFailReason.TargetSystemIsCurrent:
+                return "Корабль уже находится в этой системе";
 
-            case TravelFailReason
-                .SystemsAreNotNeighbors:
-                return
-                    "Между системами нет " +
-                    "доступного маршрута";
+            case TravelFailReason.SystemsAreNotNeighbors:
+                return "Между системами нет доступного маршрута";
 
-            case TravelFailReason
-                .NotEnoughFuel:
-                return
-                    "Недостаточно топлива";
+            case TravelFailReason.NotEnoughFuel:
+                return "Недостаточно топлива";
 
             default:
-                /*
-                 * Защита на случай добавления
-                 * нового значения enum.
-                 */
-                return
-                    "Перелёт недоступен: " +
-                    reason;
+                return "Перелёт недоступен: " + reason;
         }
     }
 
-    private void LogInitializationError(
-        string message)
+    private void LogInitializationError(string message)
     {
         if (!logInitializationErrors)
             return;

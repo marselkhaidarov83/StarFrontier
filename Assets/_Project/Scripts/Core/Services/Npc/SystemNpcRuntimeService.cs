@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeService
 {
     private readonly List<SystemNpcRuntimeState> _npcs = new();
+    private readonly Dictionary<string, SystemNpcRuntimeState> _npcByRuntimeId = new();
     private readonly SimpleEventBus _eventBus;
     private readonly IDamageService2A _damageService;
     private readonly ISystemEncounterService _encounterService;
@@ -24,10 +25,14 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         if (npc == null)
             return;
 
-        if (_npcs.Any(x => x.RuntimeNpcId == npc.RuntimeNpcId))
+        if (string.IsNullOrWhiteSpace(npc.RuntimeNpcId))
+            return;
+
+        if (_npcByRuntimeId.ContainsKey(npc.RuntimeNpcId))
             return;
 
         _npcs.Add(npc);
+        _npcByRuntimeId[npc.RuntimeNpcId] = npc;
 
         _eventBus.Publish(new SystemNpcCreatedEvent(
             npc.RuntimeNpcId,
@@ -44,8 +49,13 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
     public bool TryGetNpc(string runtimeNpcId, out SystemNpcRuntimeState npc)
     {
-        npc = _npcs.FirstOrDefault(x => x.RuntimeNpcId == runtimeNpcId);
-        return npc != null;
+        npc = null;
+
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+            return false;
+
+        return _npcByRuntimeId.TryGetValue(runtimeNpcId, out npc) &&
+               npc != null;
     }
 
     public IReadOnlyList<SystemNpcRuntimeState> GetAliveNpcsInSystem(string systemId)
@@ -182,6 +192,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     public void ClearAll()
     {
         _npcs.Clear();
+        _npcByRuntimeId.Clear();
     }
 
     public void RestoreNpc(SystemNpcRuntimeState npc)
@@ -189,8 +200,23 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         if (npc == null)
             return;
 
-        _npcs.RemoveAll(x => x.RuntimeNpcId == npc.RuntimeNpcId);
+        if (string.IsNullOrWhiteSpace(npc.RuntimeNpcId))
+            return;
+
+        if (_npcByRuntimeId.TryGetValue(
+                npc.RuntimeNpcId,
+                out SystemNpcRuntimeState existingNpc))
+        {
+            _npcs.Remove(existingNpc);
+            _npcByRuntimeId.Remove(npc.RuntimeNpcId);
+        }
+        else
+        {
+            _npcs.RemoveAll(x => x.RuntimeNpcId == npc.RuntimeNpcId);
+        }
+
         _npcs.Add(npc);
+        _npcByRuntimeId[npc.RuntimeNpcId] = npc;
 
         _eventBus.Publish(new SystemNpcCreatedEvent(
             npc.RuntimeNpcId,
@@ -324,6 +350,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         }
 
         _npcs.Remove(npc);
+        _npcByRuntimeId.Remove(runtimeNpcId);
 
         PublishNpcDestroyedEvent(
             npc,
@@ -465,5 +492,142 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         return true;
     }
 
+    public bool AnnihilateNpc(string runtimeNpcId)
+    {
+        LogNpcAnnihilation(
+            "[NPC_ANNIHILATION_RUNTIME_REQUEST]" +
+            " RuntimeNpcId=" + runtimeNpcId);
 
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_RUNTIME_RESULT]" +
+                " Result=False" +
+                " | Reason=EmptyRuntimeNpcId");
+
+            return false;
+        }
+
+        if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_RUNTIME_RESULT]" +
+                " Result=False" +
+                " | Reason=NpcNotFound" +
+                " | RuntimeNpcId=" + runtimeNpcId);
+
+            return false;
+        }
+
+        LogNpcAnnihilation(
+            "[NPC_ANNIHILATION_RUNTIME_BEFORE]" +
+            " RuntimeNpcId=" + npc.RuntimeNpcId +
+            " | Type=" + npc.NpcType +
+            " | ConfigId=" + npc.ConfigId +
+            " | SystemId=" + npc.CurrentSystemId +
+            " | PlanetId=" + npc.CurrentPlanetId +
+            " | IsAlive=" + npc.IsAlive +
+            " | LifeState=" + npc.LifeState +
+            " | IsOnPlanet=" + npc.IsOnPlanet +
+            " | CurrentBehavior=" + npc.CurrentBehavior +
+            " | HasActiveBehavior=" + npc.HasActiveBehavior);
+
+        if (!npc.IsAlive || npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_RUNTIME_RESULT]" +
+                " Result=False" +
+                " | Reason=NpcNotAlive" +
+                " | RuntimeNpcId=" + npc.RuntimeNpcId +
+                " | IsAlive=" + npc.IsAlive +
+                " | LifeState=" + npc.LifeState);
+
+            return false;
+        }
+
+        npc.Annihilate();
+
+        npc.CurrentHull = 0;
+        npc.CurrentShield = 0;
+        npc.CurrentEnergy = 0;
+
+        npc.PrevBehavior = SystemNpcBehaviorType.AnnihilateOnPlanet;
+        npc.CurrentBehavior = SystemNpcBehaviorType.None;
+        npc.BehaviorStartedTick = 0;
+        npc.BehaviorEndsTick = 0;
+        npc.DaysToStayOnPlanet = 0;
+        npc.DaysStayedOnPlanet = 0;
+
+        npc.TargetSystemId = null;
+        npc.TargetSystemExitPoint = Vector3.zero;
+        npc.TargetSystemEntryPoint = Vector3.zero;
+        npc.TargetPlanetId = null;
+        npc.TargetPosition = Vector3.zero;
+        npc.CurrentMovementTargetPosition = Vector3.zero;
+        npc.TickMovementTargetPosition = Vector3.zero;
+        npc.TravelProgress01 = 1f;
+        npc.TravelStartTick = 0;
+        npc.TravelEndTick = 0;
+
+        npc.BehaviorTargetRuntimeNpcId = null;
+        npc.CurrentTargetRuntimeNpcId = null;
+        npc.IsFighting = false;
+        npc.CombatState = SystemNpcCombatState.None;
+        npc.WasKilledByPlayer = false;
+        npc.WasDamagedByPlayer = false;
+
+        npc.DestroyedAtTick = GetCurrentQuantTick();
+        npc.NextRespawnTick = ScheduleRespawn(npc);
+
+        PublishNpcDestroyedEvent(
+            npc,
+            false);
+
+        LogNpcAnnihilation(
+            "[NPC_ANNIHILATION_RUNTIME_RESULT]" +
+            " Result=True" +
+            " | RuntimeNpcId=" + npc.RuntimeNpcId +
+            " | Type=" + npc.NpcType +
+            " | ConfigId=" + npc.ConfigId +
+            " | SystemId=" + npc.CurrentSystemId +
+            " | PlanetId=" + npc.CurrentPlanetId +
+            " | IsAlive=" + npc.IsAlive +
+            " | LifeState=" + npc.LifeState +
+            " | DestroyedAtTick=" + npc.DestroyedAtTick +
+            " | NextRespawnTick=" + npc.NextRespawnTick +
+            " | AliveNpcs=" + CountAliveNpcs() +
+            " | TotalNpcs=" + _npcs.Count);
+
+        return true;
+    }
+
+    private int CountAliveNpcs()
+    {
+        int count = 0;
+
+        for (int i = 0; i < _npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc = _npcs[i];
+
+            if (npc != null && npc.IsAlive)
+                count++;
+        }
+
+        return count;
+    }
+
+    private void LogNpcAnnihilation(string message)
+    {
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(
+                DebugLogPerformanceArea.NpcAnnihilation))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.NpcAnnihilation,
+            message);
+    }
 }

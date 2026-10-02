@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-public sealed class CombatDefeatDebugListener : MonoBehaviour
+public sealed class CombatDefeatDebugListener : CustomMonoBehaviour
 {
     private SimpleEventBus _eventBus;
     private bool _isSubscribed;
@@ -26,22 +26,30 @@ public sealed class CombatDefeatDebugListener : MonoBehaviour
 
         if (bootstrapper == null || bootstrapper.ServiceRegistry == null)
         {
-            Debug.LogWarning("[CombatDefeatDebugListener] Bootstrapper or ServiceRegistry is unavailable.");
+            LogCombatDebug(
+                "[CombatDefeatDebugListener] Bootstrapper or ServiceRegistry is unavailable.");
+
             return;
         }
 
         if (!bootstrapper.ServiceRegistry.TryGet(out _eventBus) || _eventBus == null)
         {
-            Debug.LogWarning("[CombatDefeatDebugListener] SimpleEventBus is not registered.");
+            LogCombatDebug(
+                "[CombatDefeatDebugListener] SimpleEventBus is not registered.");
+
             return;
         }
 
-        _eventBus.Subscribe<SystemEncounterDefeatedEvent>(OnSystemEncounterDefeated);
-        _eventBus.Subscribe<CombatDefeatEvent2A>(OnCombatDefeat);
+        _eventBus.Subscribe<SystemEncounterDefeatedEvent>(
+            OnSystemEncounterDefeated);
+
+        _eventBus.Subscribe<CombatDefeatEvent2A>(
+            OnCombatDefeat);
 
         _isSubscribed = true;
 
-        Debug.Log("[CombatDefeatDebugListener] Subscribed to defeat events.");
+        LogCombatDebug(
+            "[CombatDefeatDebugListener] Subscribed to defeat events.");
     }
 
     private void Unsubscribe()
@@ -56,22 +64,34 @@ public sealed class CombatDefeatDebugListener : MonoBehaviour
         _eventBus = null;
     }
 
-    private void OnSystemEncounterDefeated(SystemEncounterDefeatedEvent evt)
+    private void OnSystemEncounterDefeated(
+    SystemEncounterDefeatedEvent evt)
     {
-        Debug.Log(
+        LogCombatDebug(
             "[CombatDefeatDebugListener] SystemEncounterDefeatedEvent " +
             $"EncounterId={evt.EncounterId}, " +
             $"SystemId={evt.SystemId}, " +
             $"Reason={evt.Reason}");
     }
 
-    private void OnCombatDefeat(CombatDefeatEvent2A evt)
+    private void OnCombatDefeat(
+    CombatDefeatEvent2A evt)
     {
-        Debug.Log(
+        LogCombatDebug(
             "[CombatDefeatDebugListener] CombatDefeatEvent2A " +
             $"EncounterId={evt.EncounterId}, " +
             $"SystemId={evt.SystemId}, " +
             $"Reason={evt.Reason}");
+    }
+
+    private void LogCombatDebug(string message)
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            message);
     }
 }
 

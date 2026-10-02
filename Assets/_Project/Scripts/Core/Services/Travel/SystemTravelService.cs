@@ -7,6 +7,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private const float NpcFollowWeaponRangeFactor = 0.9f;
     private const float NpcFollowDefaultMinDistance = 100f;
     private const float NpcFollowDefaultMaxDistance = 300f;
+    private const double PlayerRoutePerfLogThresholdMs = 0.0;
+
+    private int _lastPlayerRouteHash;
+    private float _lastPlayerRoutePathLength;
+    private int _lastPlayerRoutePathCount;
 
     private int _npcFollowModeIndex;
     private readonly SystemBoundaryNavigation2A.BoundaryNavigationState _playerBoundaryNavigationState =
@@ -639,6 +644,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return;
         }
 
+        Vector3 previousPosition =
+            State != null
+                ? State.GetCurrentPosition()
+                : Vector3.zero;
+
         State.Destination = SystemTravelDestination.MapPoint(mapPosition);
         State.DestinationPosition = mapPosition;
         State.Status = SystemTravelStatus.DestinationSelected;
@@ -650,6 +660,15 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             string.Empty,
             string.Empty
         ));
+
+        LogPlayerMovementPerformance(
+            "SystemTravelService.SetMapPointDestination" +
+            " | RouteTargetKind=FIXED_MAP_POINT" +
+            " | RouteTargetMoveKind=FIXED" +
+            " | Start=" + FormatVector3(previousPosition) +
+            " | Destination=" + FormatVector3(mapPosition) +
+            " | DirectDistance=" + Vector3.Distance(previousPosition, mapPosition).ToString("0.###") +
+            " | Ms=0.00");
 
         LogCustom($"Map point destination selected: {mapPosition}");
         LogCustom("State = " + State);
@@ -836,6 +855,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void StartTravel()
     {
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
         if (!State.HasDestination)
         {
             Debug.LogWarning("[SystemTravelService] Cannot start travel: no destination selected.");
@@ -847,6 +869,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             Debug.LogWarning("[SystemTravelService] Cannot start travel: already flying.");
             return;
         }
+
+        TravelDestinationType destinationType =
+            State.Destination != null
+                ? State.Destination.Type
+                : TravelDestinationType.MapPoint;
 
         State.StartPosition = State.GetCurrentPosition();
         State.DestinationPosition = GetCurrentDestinationPosition();
@@ -912,6 +939,20 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         {
             Debug.LogWarning("[SystemTravelService] Cannot start travel: destination is inside the sun blocking radius.");
 
+            LogPlayerRouteBuildPerformance(
+                "FORBIDDEN_DESTINATION",
+                destinationType,
+                State.StartPosition,
+                State.DestinationPosition,
+                _routePreviewStartFacingDirection,
+                false,
+                0f,
+                0f,
+                0f,
+                0,
+                startedAt,
+                routeClassification);
+
             if (IsMapPointDestination())
             {
                 RejectMapPointTravelDestination(
@@ -924,6 +965,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             ResetFailedTravelToDestinationSelected();
             return;
         }
+
+        double shipRouteBuildStartedAt =
+            Time.realtimeSinceStartupAsDouble;
 
         SystemShipRouteRequest2A routeRequest =
             new SystemShipRouteRequest2A
@@ -942,6 +986,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 routeRequest,
                 _playerShipRouteBuildResult);
 
+        double shipRouteBuildMs =
+            (Time.realtimeSinceStartupAsDouble - shipRouteBuildStartedAt) * 1000.0;
+
         if (routeBuilt)
         {
             CopyRoutePath(
@@ -955,11 +1002,17 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 Mathf.Clamp01(_playerShipRouteBuildResult.SpeedFactor);
         }
 
+        double rebuildPlanStartedAt =
+            Time.realtimeSinceStartupAsDouble;
+
         RebuildActiveTravelRoutePlan(
             routeClassification,
             State.StartPosition,
             State.DestinationPosition,
             _routePreviewStartFacingDirection);
+
+        double rebuildPlanMs =
+            (Time.realtimeSinceStartupAsDouble - rebuildPlanStartedAt) * 1000.0;
 
         if (!IsMovingTravelDestination())
         {
@@ -981,6 +1034,20 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 State.DestinationPosition,
                 _routePreviewStartFacingDirection);
 
+            LogPlayerRouteBuildPerformance(
+                "FAILED",
+                destinationType,
+                State.StartPosition,
+                State.DestinationPosition,
+                _routePreviewStartFacingDirection,
+                routeBuilt,
+                shipRouteBuildMs,
+                rebuildPlanMs,
+                0f,
+                _activeTravelRoutePath.Count,
+                startedAt,
+                routeClassification);
+
             if (IsMapPointDestination())
             {
                 RejectMapPointTravelDestination(
@@ -1000,6 +1067,20 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         State.TravelDistance =
             GetPathLength(_activeTravelRoutePath);
 
+        LogPlayerRouteBuildPerformance(
+            "OK",
+            destinationType,
+            State.StartPosition,
+            State.DestinationPosition,
+            _routePreviewStartFacingDirection,
+            routeBuilt,
+            shipRouteBuildMs,
+            rebuildPlanMs,
+            State.TravelDistance,
+            _activeTravelRoutePath.Count,
+            startedAt,
+            routeClassification);
+
         if (shouldTraceRouteBuild)
         {
             LogRouteDebugSnapshot(
@@ -1018,6 +1099,173 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         LogCustom("Travel started.");
         LogCustom("State = " + State);
+    }
+
+    private void LogPlayerRouteBuildPerformance(
+        string status,
+        TravelDestinationType destinationType,
+        Vector3 startPosition,
+        Vector3 destinationPosition,
+        Vector2 startFacingDirection,
+        bool shipRouteBuilt,
+        double shipRouteBuildMs,
+        double rebuildPlanMs,
+        float pathLength,
+        int pathCount,
+        double startedAt,
+        RouteDestinationClassification routeClassification)
+    {
+        double elapsedMs =
+            (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+        if (elapsedMs < PlayerRoutePerfLogThresholdMs)
+            return;
+
+        int routeHash =
+            CalculateRouteHashForLog(_activeTravelRoutePath);
+
+        bool routeChanged =
+            routeHash != _lastPlayerRouteHash ||
+            pathCount != _lastPlayerRoutePathCount ||
+            Mathf.Abs(pathLength - _lastPlayerRoutePathLength) > 0.01f;
+
+        string routeChangeStrength =
+            _lastPlayerRouteHash == 0
+                ? "FIRST_BUILD"
+                : routeChanged
+                    ? "CHANGED"
+                    : "UNCHANGED";
+
+        int previousRouteHash =
+            _lastPlayerRouteHash;
+
+        float previousPathLength =
+            _lastPlayerRoutePathLength;
+
+        int previousPathCount =
+            _lastPlayerRoutePathCount;
+
+        float routeLengthDelta =
+            Mathf.Abs(pathLength - previousPathLength);
+
+        float routeLengthDeltaPercent =
+            previousPathLength > 0.01f
+                ? routeLengthDelta / previousPathLength * 100f
+                : 0f;
+
+        _lastPlayerRouteHash = routeHash;
+        _lastPlayerRoutePathLength = pathLength;
+        _lastPlayerRoutePathCount = pathCount;
+
+        LogPlayerMovementPerformance(
+            "SystemTravelService.StartTravel " + status +
+            " | RouteTargetKind=" + GetPlayerRouteTargetKindForLog(destinationType) +
+            " | RouteTargetMoveKind=" + GetPlayerRouteTargetMoveKindForLog(destinationType) +
+            " | RouteDestinationCase=" + routeClassification.DestinationCase +
+            " | CurrentSystemId=" + GetCurrentPlayerSystemId() +
+            " | RouteHash=" + routeHash +
+            " | PreviousRouteHash=" + previousRouteHash +
+            " | RouteChanged=" + routeChanged +
+            " | RouteChangeStrength=" + routeChangeStrength +
+            " | PreviousPathLength=" + previousPathLength.ToString("0.###") +
+            " | RouteLengthDelta=" + routeLengthDelta.ToString("0.###") +
+            " | RouteLengthDeltaPercent=" + routeLengthDeltaPercent.ToString("0.###") +
+            " | PreviousPathCount=" + previousPathCount +
+            " | RoutePointCountDelta=" + (pathCount - previousPathCount) +
+            " | ShipRouteBuilt=" + shipRouteBuilt +
+            " | ShipRouteBuildMs=" + shipRouteBuildMs.ToString("0.00") +
+            " | RebuildPlanMs=" + rebuildPlanMs.ToString("0.00") +
+            " | PathCount=" + pathCount +
+            " | PathLength=" + pathLength.ToString("0.###") +
+            " | Start=" + FormatVector3(startPosition) +
+            " | Destination=" + FormatVector3(destinationPosition) +
+            " | StartFacing=" + FormatVector2(startFacingDirection) +
+            " | DirectDistance=" + Vector3.Distance(startPosition, destinationPosition).ToString("0.###") +
+            " | Speed=" + GetCurrentShipTravelSpeed().ToString("0.###") +
+            " | TurnRadius=" + GetCurrentShipTurnRadius().ToString("0.###") +
+            " | TurnRadiusFactor=" + _routeTurnAdjustmentFactor.ToString("0.###") +
+            " | SpeedFactor=" + _routeSpeedAdjustmentFactor.ToString("0.###") +
+            " | Ms=" + elapsedMs.ToString("0.00"));
+    }
+
+
+    private void LogPlayerMovementPerformance(string message)
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.PlayerMovement,
+            "[SystemTravelService] " + message);
+    }
+
+    private string GetPlayerRouteTargetKindForLog(
+        TravelDestinationType destinationType)
+    {
+        switch (destinationType)
+        {
+            case TravelDestinationType.MapPoint:
+                return "FIXED_MAP_POINT";
+
+            case TravelDestinationType.SystemExit:
+                return "FIXED_SYSTEM_EXIT_POINT";
+
+            case TravelDestinationType.Planet:
+                return "MOVING_PLANET";
+
+            case TravelDestinationType.Npc:
+                return "MOVING_NPC";
+
+            case TravelDestinationType.Station:
+                return "FIXED_STATION";
+
+            default:
+                return "UNKNOWN_OR_FALLBACK";
+        }
+    }
+
+    private string GetPlayerRouteTargetMoveKindForLog(
+        TravelDestinationType destinationType)
+    {
+        switch (destinationType)
+        {
+            case TravelDestinationType.Planet:
+            case TravelDestinationType.Npc:
+                return "MOVING";
+
+            case TravelDestinationType.MapPoint:
+            case TravelDestinationType.SystemExit:
+            case TravelDestinationType.Station:
+                return "FIXED";
+
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    private int CalculateRouteHashForLog(IReadOnlyList<Vector3> path)
+    {
+        if (path == null ||
+            path.Count == 0)
+        {
+            return 0;
+        }
+
+        unchecked
+        {
+            int hash = 17;
+
+            for (int i = 0; i < path.Count; i++)
+            {
+                Vector3 point = path[i];
+
+                hash = hash * 31 + Mathf.RoundToInt(point.x * 10f);
+                hash = hash * 31 + Mathf.RoundToInt(point.y * 10f);
+                hash = hash * 31 + Mathf.RoundToInt(point.z * 10f);
+            }
+
+            return hash;
+        }
     }
 
     private SystemShipRouteSettings2A CreatePlayerShipRouteSettings2A()
@@ -2426,7 +2674,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         float movementDistance =
             GetCurrentEffectiveTravelSpeed() *
-            normalizedTickDeltaTime;
+            normalizedTickDeltaTime *
+            GetSpeedMultiplier();
 
         Vector3 positionBeforeMove =
             State.GetCurrentPosition();
@@ -2508,6 +2757,19 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         PublishTravelProgress(State.TravelProgress01);
 
         TryRefreshActiveRouteForMovingDestination(quantTick);
+    }
+
+    private float GetSpeedMultiplier()
+    {
+        ShipMovementConfig config =
+            _configService != null
+                ? _configService.ShipMovementConfig
+                : null;
+
+        if (config == null)
+            return 1f;
+
+        return config.SpeedMultiplier;
     }
 
     private float GetNormalizedTickDeltaTime(float deltaTime)
@@ -3817,7 +4079,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         float baseDistancePerTick =
             Mathf.Max(
                 0.01f,
-                GetCurrentShipTravelSpeed());
+                GetCurrentShipTravelSpeed() * GetSpeedMultiplier());
 
         if (State.Destination != null &&
             (State.Destination.Type == TravelDestinationType.Planet ||

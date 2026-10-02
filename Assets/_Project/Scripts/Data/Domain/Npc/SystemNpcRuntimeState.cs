@@ -48,6 +48,9 @@ public sealed class SystemNpcRuntimeState
     public float TravelProgress01;
     public int TravelStartTick;
     public int TravelEndTick;
+    public bool IsWaitingForInitialRouteBuild;
+    public bool ReleaseFromPlanetAfterInitialRouteBuild;
+    public string InitialRouteBuildPlanetId;
 
     [Header("Behavior")]
     public SystemNpcBehaviorType PrevBehavior;

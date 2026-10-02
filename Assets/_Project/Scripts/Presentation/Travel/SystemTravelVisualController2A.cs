@@ -65,13 +65,70 @@ public sealed class SystemTravelVisualController2A : CustomMonoBehaviour
 
     private void Update()
     {
-        if (_travelService == null)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        UpdateTravelLine();
-        UpdateEngineGlow();
+        double travelLineMs = 0.0;
+        double engineGlowMs = 0.0;
+        double readPositionMs = 0.0;
 
-        _lastShipPosition = _travelService.State.GetCurrentPosition();
+        bool hasTravelService = false;
+
+        try
+        {
+            hasTravelService =
+                _travelService != null;
+
+            if (!hasTravelService)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            UpdateTravelLine();
+
+            travelLineMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            UpdateEngineGlow();
+
+            engineGlowMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            _lastShipPosition =
+                _travelService.State.GetCurrentPosition();
+
+            readPositionMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | HasTravelService=" + hasTravelService +
+                " | TravelLineMs=" + travelLineMs.ToString("F3") +
+                " | EngineGlowMs=" + engineGlowMs.ToString("F3") +
+                " | ReadPositionMs=" + readPositionMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemTravelVisualController2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemTravelVisualController2A.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void UpdateTravelLine()

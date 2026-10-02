@@ -2,7 +2,6 @@ using UnityEngine;
 
 public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTargetService
 {
-    private const bool PlayerDamageDebugLogEnabled = true;
     private readonly IGameSessionService _gameSessionService;
     private readonly SimpleEventBus _eventBus;
     private readonly IDamageService2A _damageService;
@@ -23,7 +22,7 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
 
     private void LogPlayerDamage(string message)
     {
-        if (!PlayerDamageDebugLogEnabled)
+        if (!IsPlayerDamageLogEnabled())
             return;
 
         bool previousDebugEnabled = _debugEnabled;
@@ -37,6 +36,18 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
         _debugEnabled = previousDebugEnabled;
         _debugStop = previousDebugStop;
     }
+
+    private bool IsPlayerDamageLogEnabled()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.DebugLogConfig == null)
+        {
+            return false;
+        }
+
+        return Bootstrapper.Instance.DebugLogConfig.IsEnabled(DebugLogChannel.Damage);
+    }
+
 
     public bool IsPlayerAvailableInSystem(string systemId)
     {

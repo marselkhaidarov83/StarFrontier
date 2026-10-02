@@ -22,6 +22,14 @@ public sealed class ShipMovementConfig : ScriptableObject
     [Min(0f)]
     private float brakingDeceleration = 30f;
 
+    [Header("Runtime Tuning")]
+    [SerializeField]
+    [Range(0.01f, 10f)]
+    private float speedMultiplier = 1f;
+
+    [SerializeField, Min(0.01f)]
+    private float offscreenNpcTravelSlowdown = 1.3f;
+
     [Header("Rotation")]
     [SerializeField]
     [Min(0f)]
@@ -48,6 +56,8 @@ public sealed class ShipMovementConfig : ScriptableObject
     [Range(1, 30)]
     private int routeSubstepsPerTick = 10;
 
+    public float SpeedMultiplier => Mathf.Max(0.01f, speedMultiplier);
+
     [SerializeField]
     [Range(0f, 15f)]
     private float routeStraightExitAngleDegrees = 3f;
@@ -66,6 +76,12 @@ public sealed class ShipMovementConfig : ScriptableObject
     [SerializeField]
     [Range(0, 10)]
     private int movingDestinationRouteRefreshBlockedInitialTicks = 1;
+
+    [SerializeField] private bool offscreenMovingPlanetRouteRefreshEnabled = true;
+    [SerializeField][Min(0)] private int offscreenMovingPlanetRouteRefreshCooldownTicks = 10;
+    [SerializeField][Min(0f)] private float offscreenMovingPlanetTerminalRefreshDistance = 80f;
+    [SerializeField][Min(0)] private int offscreenMovingPlanetTerminalRefreshTimeTicks = 1;
+    [SerializeField][Min(0f)] private float offscreenMovingPlanetMaxDestinationDriftBeforeRefresh = 300f;
 
     [Header("Travel Route Classification")]
     [SerializeField]
@@ -192,6 +208,10 @@ Mathf.Max(0f, boundaryProtectionRadiusWorld);
 
     public float BoundaryNavigationInsetWorldUnits =>
         Mathf.Max(0f, boundaryNavigationInsetWorldUnits);
+
+    public float OffscreenNpcTravelSlowdown =>
+        Mathf.Max(0.01f, offscreenNpcTravelSlowdown);
+
     public int RouteSubstepsPerTick =>
     Mathf.Clamp(routeSubstepsPerTick, 1, 30);
 
@@ -200,6 +220,20 @@ Mathf.Max(0f, boundaryProtectionRadiusWorld);
 
     public float RouteBehindSmallTurnAngleToleranceDegrees =>
     Mathf.Clamp(routeBehindSmallTurnAngleToleranceDegrees, 0f, 90f);
+
+    public bool OffscreenMovingPlanetRouteRefreshEnabled => offscreenMovingPlanetRouteRefreshEnabled;
+
+    public int OffscreenMovingPlanetRouteRefreshCooldownTicks =>
+        Mathf.Clamp(offscreenMovingPlanetRouteRefreshCooldownTicks, 0, 600);
+
+    public float OffscreenMovingPlanetTerminalRefreshDistance =>
+        Mathf.Max(0f, offscreenMovingPlanetTerminalRefreshDistance);
+
+    public int OffscreenMovingPlanetTerminalRefreshTimeTicks =>
+        Mathf.Clamp(offscreenMovingPlanetTerminalRefreshTimeTicks, 0, 60);
+
+    public float OffscreenMovingPlanetMaxDestinationDriftBeforeRefresh =>
+        Mathf.Max(0f, offscreenMovingPlanetMaxDestinationDriftBeforeRefresh);
 
     public float MinRouteTurnRadiusAbsolute =>
     Mathf.Max(0f, minRouteTurnRadiusAbsolute);

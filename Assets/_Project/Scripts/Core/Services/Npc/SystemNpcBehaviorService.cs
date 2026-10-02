@@ -1,9 +1,135 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehaviorService
 {
+    private sealed class NpcBehaviorSelectAnalytics
+    {
+        private sealed class Entry
+        {
+            public SystemNpcBehaviorType Behavior;
+            public int Count;
+            public double ResolveScenarioMs;
+            public double AssignNewMs;
+            public double ReassignMs;
+            public double ActiveBehaviorMs;
+            public double DeferredMs;
+        }
+
+        private readonly Dictionary<SystemNpcBehaviorType, Entry> _entries =
+            new Dictionary<SystemNpcBehaviorType, Entry>();
+
+        public void AddResolve(
+            SystemNpcBehaviorType behavior,
+            double elapsedMs)
+        {
+            Entry entry =
+                GetOrCreateEntry(behavior);
+
+            entry.ResolveScenarioMs += Mathf.Max(0f, (float)elapsedMs);
+            entry.Count++;
+        }
+
+        public void AddAssignNew(
+            SystemNpcBehaviorType behavior,
+            double elapsedMs)
+        {
+            GetOrCreateEntry(behavior).AssignNewMs += Mathf.Max(0f, (float)elapsedMs);
+        }
+
+        public void AddReassign(
+            SystemNpcBehaviorType behavior,
+            double elapsedMs)
+        {
+            GetOrCreateEntry(behavior).ReassignMs += Mathf.Max(0f, (float)elapsedMs);
+        }
+
+        public void AddActiveBehavior(
+            SystemNpcBehaviorType behavior,
+            double elapsedMs)
+        {
+            GetOrCreateEntry(behavior).ActiveBehaviorMs += Mathf.Max(0f, (float)elapsedMs);
+        }
+
+        public void AddDeferred(
+            SystemNpcBehaviorType behavior,
+            double elapsedMs)
+        {
+            GetOrCreateEntry(behavior).DeferredMs += Mathf.Max(0f, (float)elapsedMs);
+        }
+
+        public string BuildLogFields()
+        {
+            StringBuilder builder =
+                new StringBuilder();
+
+            foreach (KeyValuePair<SystemNpcBehaviorType, Entry> pair in _entries)
+            {
+                Entry entry =
+                    pair.Value;
+
+                if (entry == null)
+                    continue;
+
+                double totalMs =
+                    entry.ResolveScenarioMs +
+                    entry.AssignNewMs +
+                    entry.ReassignMs +
+                    entry.ActiveBehaviorMs +
+                    entry.DeferredMs;
+
+                builder.Append(" | Behavior=");
+                builder.Append(entry.Behavior);
+                builder.Append(",Count=");
+                builder.Append(entry.Count);
+                builder.Append(",1_DetermineBehaviorAndTargetMs=");
+                builder.Append(totalMs.ToString("F2"));
+                builder.Append(",ResolveScenarioMs=");
+                builder.Append(entry.ResolveScenarioMs.ToString("F2"));
+                builder.Append(",AssignNewMs=");
+                builder.Append(entry.AssignNewMs.ToString("F2"));
+                builder.Append(",ReassignMs=");
+                builder.Append(entry.ReassignMs.ToString("F2"));
+                builder.Append(",ActiveBehaviorMs=");
+                builder.Append(entry.ActiveBehaviorMs.ToString("F2"));
+                builder.Append(",DeferredMs=");
+                builder.Append(entry.DeferredMs.ToString("F2"));
+            }
+
+            return builder.ToString();
+        }
+
+        private Entry GetOrCreateEntry(SystemNpcBehaviorType behavior)
+        {
+            if (!_entries.TryGetValue(behavior, out Entry entry) ||
+                entry == null)
+            {
+                entry =
+                    new Entry
+                    {
+                        Behavior = behavior
+                    };
+
+                _entries[behavior] = entry;
+            }
+
+            return entry;
+        }
+    }
+
+    private struct SystemNpcScenarioContext
+    {
+        public string SystemId;
+        public StarSystemStatus SystemStatus;
+        public bool HasSystemStatus;
+        public bool HasThreatStatus;
+        public bool HasEnemies;
+    }
+
+    private const double BehaviorPerfLogThresholdMs = 1.0;
+    private const double AssignBehaviorDetailPerfLogThresholdMs = 2.0;
     private const int MinStayDays = 1;
     private const int MaxStayDays = 5;
     private const int PatrolBoundaryPlanetOrdinal = 8;
@@ -18,6 +144,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     private readonly IRouteService _routeService;
     private readonly IOrbitalMotionService _orbitalMotionService;
     private readonly ISystemSecurityService _systemSecurityService;
+
+    private readonly System.Random _offscreenNpcProcessingRandom = new();
+    private readonly HashSet<string> _systemsWithProcessedBehaviorWarmup = new();
 
     public SystemNpcBehaviorService()
     {
@@ -36,35 +165,354 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     public void Tick(StarSystemConfig starSystem, int currentTick)
     {
+        Tick(starSystem, currentTick, true, false);
+    }
+
+    public void Tick(
+        StarSystemConfig starSystem,
+        int currentTick,
+        bool isDetailedSystem)
+    {
+        Tick(starSystem, currentTick, isDetailedSystem, false);
+    }
+
+    public void Tick(
+        StarSystemConfig starSystem,
+        int currentTick,
+        bool isDetailedSystem,
+        bool forceInitialWarmup)
+    {
         if (starSystem == null || string.IsNullOrWhiteSpace(starSystem.Id))
             return;
 
-        var npcs = _npcRuntimeService.GetAliveNpcsInSystem(starSystem.Id);
+        bool isInitialWarmup =
+            forceInitialWarmup ||
+            !_systemsWithProcessedBehaviorWarmup.Contains(starSystem.Id);
 
-        for (int i = 0; i < npcs.Count; i++)
+        string behaviorTickPhase =
+            isInitialWarmup
+                ? "InitialWarmup"
+                : "Runtime";
+
+        bool useRuntimeLimits =
+            !isDetailedSystem && !isInitialWarmup;
+
+        long totalStartedAt = BeginPerfMeasure();
+
+        long getNpcsStartedAt = BeginPerfMeasure();
+        var npcs = _npcRuntimeService.GetAliveNpcsInSystem(starSystem.Id);
+        double getNpcsMs = EndPerfMeasureMs(getNpcsStartedAt);
+
+        SystemNpcScenarioContext scenarioContext =
+            BuildScenarioContext(
+                starSystem.Id,
+                npcs);
+
+        NpcBehaviorSelectAnalytics behaviorSelectAnalytics =
+            new NpcBehaviorSelectAnalytics();
+
+        long loopStartedAt = BeginPerfMeasure();
+
+        int npcCount = npcs != null ? npcs.Count : 0;
+        int processedCount = 0;
+        int skippedCount = 0;
+        int assignNewCount = 0;
+        int deferredAssignNewCount = 0;
+        int reassignCount = 0;
+        int deferredReassignCount = 0;
+        int activeTickCount = 0;
+        int deferredActiveBehaviorCount = 0;
+
+        int maxAssignNewPerTick =
+            useRuntimeLimits
+                ? GetMaxOffscreenAssignNewPerSystemTick()
+                : int.MaxValue;
+
+        int maxReassignPerTick =
+            useRuntimeLimits
+                ? GetMaxOffscreenReassignPerSystemTick()
+                : int.MaxValue;
+
+        int maxActiveBehaviorPerTick =
+            useRuntimeLimits
+                ? GetMaxOffscreenActiveBehaviorPerSystemTick()
+                : int.MaxValue;
+
+        int npcStartIndex =
+            isDetailedSystem || npcCount <= 1
+                ? 0
+                : _offscreenNpcProcessingRandom.Next(npcCount);
+
+        double resolveScenarioMs = 0.0;
+        double assignNewMs = 0.0;
+        double reassignMs = 0.0;
+        double activeBehaviorMs = 0.0;
+
+        double maxNpcMs = 0.0;
+        string maxNpcId = "";
+        string maxNpcStage = "";
+        SystemNpcBehaviorType maxNpcBehavior = SystemNpcBehaviorType.None;
+        AllyBehaviourScenario maxNpcScenario = default;
+
+        for (int i = 0; i < npcCount; i++)
         {
-            SystemNpcRuntimeState npc = npcs[i];
+            int npcIndex = npcStartIndex + i;
+
+            if (npcIndex >= npcCount)
+                npcIndex -= npcCount;
+
+            SystemNpcRuntimeState npc = npcs[npcIndex];
 
             if (npc == null || !npc.IsAlive)
+            {
+                skippedCount++;
                 continue;
+            }
+
+            long npcStartedAt = BeginPerfMeasure();
+
+            SystemNpcBehaviorType behaviorBefore = npc.CurrentBehavior;
+            AllyBehaviourScenario scenarioBefore = npc.CurrentBehaviorScenario;
+
+            if (!npc.HasActiveBehavior &&
+                assignNewCount >= maxAssignNewPerTick)
+            {
+                deferredAssignNewCount++;
+                processedCount++;
+
+                double deferredMs =
+                    EndPerfMeasureMs(npcStartedAt);
+
+                behaviorSelectAnalytics.AddDeferred(
+                    behaviorBefore,
+                    deferredMs);
+
+                TrackMaxNpcBehaviorPerf(
+                    npc,
+                    "DeferredAssignNew",
+                    deferredMs,
+                    behaviorBefore,
+                    scenarioBefore,
+                    ref maxNpcMs,
+                    ref maxNpcId,
+                    ref maxNpcStage,
+                    ref maxNpcBehavior,
+                    ref maxNpcScenario);
+
+                continue;
+            }
+
+            long resolveScenarioStartedAt = BeginPerfMeasure();
 
             AllyBehaviourScenario resolvedScenario =
-                ResolveBehaviorScenario(npc);
+                ResolveBehaviorScenario(
+                    npc,
+                    scenarioContext);
+
+            double currentResolveScenarioMs =
+                EndPerfMeasureMs(resolveScenarioStartedAt);
+
+            resolveScenarioMs += currentResolveScenarioMs;
+            processedCount++;
+
+            behaviorSelectAnalytics.AddResolve(
+                behaviorBefore,
+                currentResolveScenarioMs);
 
             if (!npc.HasActiveBehavior)
             {
+                long assignStartedAt = BeginPerfMeasure();
+
                 AssignBehavior(npc, currentTick, resolvedScenario);
+
+                double currentAssignMs = EndPerfMeasureMs(assignStartedAt);
+                assignNewMs += currentAssignMs;
+                assignNewCount++;
+
+                behaviorSelectAnalytics.AddAssignNew(
+                    npc.CurrentBehavior,
+                    currentAssignMs);
+
+                TrackMaxNpcBehaviorPerf(
+                    npc,
+                    "AssignNew",
+                    EndPerfMeasureMs(npcStartedAt),
+                    behaviorBefore,
+                    scenarioBefore,
+                    ref maxNpcMs,
+                    ref maxNpcId,
+                    ref maxNpcStage,
+                    ref maxNpcBehavior,
+                    ref maxNpcScenario);
+
                 continue;
             }
 
             if (ShouldReassignForScenarioChange(npc, resolvedScenario))
             {
+                if (reassignCount >= maxReassignPerTick)
+                {
+                    deferredReassignCount++;
+
+                    double deferredMs =
+                        EndPerfMeasureMs(npcStartedAt);
+
+                    behaviorSelectAnalytics.AddDeferred(
+                        behaviorBefore,
+                        deferredMs);
+
+                    TrackMaxNpcBehaviorPerf(
+                        npc,
+                        "DeferredReassign",
+                        deferredMs,
+                        behaviorBefore,
+                        scenarioBefore,
+                        ref maxNpcMs,
+                        ref maxNpcId,
+                        ref maxNpcStage,
+                        ref maxNpcBehavior,
+                        ref maxNpcScenario);
+
+                    continue;
+                }
+
+                long reassignStartedAt = BeginPerfMeasure();
+
                 AssignBehavior(npc, currentTick, resolvedScenario);
+
+                double currentReassignMs = EndPerfMeasureMs(reassignStartedAt);
+                reassignMs += currentReassignMs;
+                reassignCount++;
+
+                behaviorSelectAnalytics.AddReassign(
+                    npc.CurrentBehavior,
+                    currentReassignMs);
+
+                TrackMaxNpcBehaviorPerf(
+                    npc,
+                    "Reassign",
+                    EndPerfMeasureMs(npcStartedAt),
+                    behaviorBefore,
+                    scenarioBefore,
+                    ref maxNpcMs,
+                    ref maxNpcId,
+                    ref maxNpcStage,
+                    ref maxNpcBehavior,
+                    ref maxNpcScenario);
+
                 continue;
             }
 
+            if (activeTickCount >= maxActiveBehaviorPerTick)
+            {
+                deferredActiveBehaviorCount++;
+
+                double deferredMs =
+                    EndPerfMeasureMs(npcStartedAt);
+
+                behaviorSelectAnalytics.AddDeferred(
+                    behaviorBefore,
+                    deferredMs);
+
+                TrackMaxNpcBehaviorPerf(
+                    npc,
+                    "DeferredActiveBehavior",
+                    deferredMs,
+                    behaviorBefore,
+                    scenarioBefore,
+                    ref maxNpcMs,
+                    ref maxNpcId,
+                    ref maxNpcStage,
+                    ref maxNpcBehavior,
+                    ref maxNpcScenario);
+
+                continue;
+            }
+
+            long activeBehaviorStartedAt = BeginPerfMeasure();
+
             TickActiveBehavior(npc, currentTick);
+
+            double currentActiveBehaviorMs =
+                EndPerfMeasureMs(activeBehaviorStartedAt);
+
+            activeBehaviorMs += currentActiveBehaviorMs;
+            activeTickCount++;
+
+            behaviorSelectAnalytics.AddActiveBehavior(
+                behaviorBefore,
+                currentActiveBehaviorMs);
+
+            TrackMaxNpcBehaviorPerf(
+                npc,
+                "TickActiveBehavior",
+                EndPerfMeasureMs(npcStartedAt),
+                behaviorBefore,
+                scenarioBefore,
+                ref maxNpcMs,
+                ref maxNpcId,
+                ref maxNpcStage,
+                ref maxNpcBehavior,
+                ref maxNpcScenario);
         }
+
+        double loopMs = EndPerfMeasureMs(loopStartedAt);
+        double totalMs = EndPerfMeasureMs(totalStartedAt);
+
+        _systemsWithProcessedBehaviorWarmup.Add(starSystem.Id);
+
+        LogNpcBehaviorPerformance(
+            totalMs,
+            "[SystemNpcBehaviorService] Tick | " +
+            "Tick=" + currentTick +
+            " | BehaviorTickPhase=" + behaviorTickPhase +
+            " | ForceInitialWarmup=" + forceInitialWarmup +
+            " | RuntimeLimitsEnabled=" + useRuntimeLimits +
+            " | SystemId=" + starSystem.Id +
+            " | SystemName=" + starSystem.DisplayName +
+            " | ScenarioStatus=" + scenarioContext.SystemStatus +
+            " | ScenarioHasEnemies=" + scenarioContext.HasEnemies +
+            " | ScenarioHasThreatStatus=" + scenarioContext.HasThreatStatus +
+            " | DetailedSystem=" + isDetailedSystem +
+            " | Npcs=" + npcCount +
+            " | NpcStartIndex=" + npcStartIndex +
+            " | Processed=" + processedCount +
+            " | Skipped=" + skippedCount +
+            " | AssignNew=" + assignNewCount +
+            " | DeferredAssignNew=" + deferredAssignNewCount +
+            " | AssignNewLimit=" +
+            (useRuntimeLimits ? maxAssignNewPerTick.ToString() : "Unlimited") +
+            " | Reassign=" + reassignCount +
+            " | DeferredReassign=" + deferredReassignCount +
+            " | ReassignLimit=" +
+            (useRuntimeLimits ? maxReassignPerTick.ToString() : "Unlimited") +
+            " | ActiveBehavior=" + activeTickCount +
+            " | DeferredActiveBehavior=" + deferredActiveBehaviorCount +
+            " | ActiveBehaviorLimit=" +
+            (useRuntimeLimits ? maxActiveBehaviorPerTick.ToString() : "Unlimited") +
+            " | GetNpcsMs=" + getNpcsMs.ToString("F2") +
+            " | ResolveScenarioMs=" + resolveScenarioMs.ToString("F2") +
+            " | AssignNewMs=" + assignNewMs.ToString("F2") +
+            " | ReassignMs=" + reassignMs.ToString("F2") +
+            " | ActiveBehaviorMs=" + activeBehaviorMs.ToString("F2") +
+            " | LoopMs=" + loopMs.ToString("F2") +
+            " | TotalMs=" + totalMs.ToString("F2") +
+            " | MaxNpcMs=" + maxNpcMs.ToString("F2") +
+            " | MaxNpc=" + maxNpcId +
+            " | MaxNpcStage=" + maxNpcStage +
+            " | MaxNpcBehaviorBefore=" + maxNpcBehavior +
+            " | MaxNpcScenarioBefore=" + maxNpcScenario);
+
+        LogNpcBehaviorSelectAnalytics(
+            currentTick,
+            isDetailedSystem,
+            behaviorTickPhase,
+            starSystem,
+            npcCount,
+            processedCount,
+            skippedCount,
+            totalMs,
+            behaviorSelectAnalytics);
     }
 
     private bool ShouldReassignForScenarioChange(
@@ -131,12 +579,59 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (npc == null || !npc.IsAlive)
             return;
 
+        long totalStartedAt = BeginPerfMeasure();
+
+        SystemNpcBehaviorType behaviorBefore = npc.CurrentBehavior;
+        SystemNpcBehaviorType prevBehaviorBefore = npc.PrevBehavior;
+        SystemNpcTravelState travelStateBefore = npc.TravelState;
+        bool wasOnPlanet = npc.IsOnPlanet;
+        string currentPlanetBefore = npc.CurrentPlanetId;
+        string currentSystemBefore = npc.CurrentSystemId;
+
+        long pickStartedAt = BeginPerfMeasure();
+
         SystemNpcBehaviorType nextBehavior =
             PickFallbackBehavior(npc, resolvedScenario);
 
+        double pickMs = EndPerfMeasureMs(pickStartedAt);
+
         npc.CurrentBehaviorScenario = resolvedScenario;
 
+        long applyStartedAt = BeginPerfMeasure();
+
         ApplyBehavior(npc, nextBehavior, currentTick);
+
+        double applyMs = EndPerfMeasureMs(applyStartedAt);
+        double totalMs = EndPerfMeasureMs(totalStartedAt);
+
+        if (totalMs >= AssignBehaviorDetailPerfLogThresholdMs)
+        {
+            LogNpcBehaviorPerformance(
+                totalMs,
+                "[SystemNpcBehaviorService] AssignBehavior | " +
+                "Tick=" + currentTick +
+                " | Npc=" + npc.RuntimeNpcId +
+                " | NpcType=" + npc.NpcType +
+                " | ConfigId=" + npc.ConfigId +
+                " | SystemIdBefore=" + currentSystemBefore +
+                " | SystemIdAfter=" + npc.CurrentSystemId +
+                " | Scenario=" + resolvedScenario +
+                " | BehaviorBefore=" + behaviorBefore +
+                " | PrevBehaviorBefore=" + prevBehaviorBefore +
+                " | RequestedBehavior=" + nextBehavior +
+                " | FinalBehavior=" + npc.CurrentBehavior +
+                " | TravelStateBefore=" + travelStateBefore +
+                " | TravelStateAfter=" + npc.TravelState +
+                " | WasOnPlanet=" + wasOnPlanet +
+                " | IsOnPlanet=" + npc.IsOnPlanet +
+                " | PlanetBefore=" + currentPlanetBefore +
+                " | PlanetAfter=" + npc.CurrentPlanetId +
+                " | TargetPlanet=" + npc.TargetPlanetId +
+                " | TargetSystem=" + npc.TargetSystemId +
+                " | PickMs=" + pickMs.ToString("0.00") +
+                " | ApplyMs=" + applyMs.ToString("0.00") +
+                " | TotalMs=" + totalMs.ToString("0.00"));
+        }
     }
 
     private void NormalizeInvalidBehaviorTransitionContext(SystemNpcRuntimeState npc)
@@ -245,12 +740,62 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void TickAnnihilateOnPlanet(SystemNpcRuntimeState npc)
     {
-        if (!npc.IsOnPlanet)
+        if (npc == null)
+        {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_TICK]" +
+                " Result=False" +
+                " | Reason=NullNpc");
+
             return;
+        }
 
-        npc.Annihilate();
+        LogNpcAnnihilation(
+            "[NPC_ANNIHILATION_TICK]" +
+            " RuntimeNpcId=" + npc.RuntimeNpcId +
+            " | SystemId=" + npc.CurrentSystemId +
+            " | PlanetId=" + npc.CurrentPlanetId +
+            " | IsAlive=" + npc.IsAlive +
+            " | LifeState=" + npc.LifeState +
+            " | IsOnPlanet=" + npc.IsOnPlanet +
+            " | CurrentBehavior=" + npc.CurrentBehavior +
+            " | HasActiveBehavior=" + npc.HasActiveBehavior);
 
-        LogCustom($"NPC annihilated on planet: {npc.RuntimeNpcId}");
+        if (!npc.IsAlive)
+        {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_TICK_RESULT]" +
+                " Result=False" +
+                " | Reason=NpcNotAlive" +
+                " | RuntimeNpcId=" + npc.RuntimeNpcId);
+
+            return;
+        }
+
+        if (!npc.IsOnPlanet)
+        {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_TICK_RESULT]" +
+                " Result=False" +
+                " | Reason=NpcNotOnPlanet" +
+                " | RuntimeNpcId=" + npc.RuntimeNpcId +
+                " | SystemId=" + npc.CurrentSystemId +
+                " | TravelState=" + npc.TravelState);
+
+            return;
+        }
+
+        bool annihilated =
+            _npcRuntimeService.AnnihilateNpc(npc.RuntimeNpcId);
+
+        LogNpcAnnihilation(
+            "[NPC_ANNIHILATION_TICK_RESULT]" +
+            " Result=" + annihilated +
+            " | RuntimeNpcId=" + npc.RuntimeNpcId +
+            " | SystemId=" + npc.CurrentSystemId +
+            " | PlanetId=" + npc.CurrentPlanetId +
+            " | IsAliveAfter=" + npc.IsAlive +
+            " | LifeStateAfter=" + npc.LifeState);
     }
 
     private void TickEngageEnemies(SystemNpcRuntimeState npc, int currentTick)
@@ -412,38 +957,87 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         return null;
     }
 
-    private AllyBehaviourScenario ResolveBehaviorScenario(SystemNpcRuntimeState npc)
+    private SystemNpcScenarioContext BuildScenarioContext(
+        string systemId,
+        IReadOnlyList<SystemNpcRuntimeState> systemNpcs)
+    {
+        SystemNpcScenarioContext context =
+            new SystemNpcScenarioContext
+            {
+                SystemId = systemId,
+                SystemStatus = StarSystemStatus.Stable,
+                HasSystemStatus = false,
+                HasThreatStatus = false,
+                HasEnemies = false
+            };
+
+        if (string.IsNullOrWhiteSpace(systemId))
+            return context;
+
+        if (_systemSecurityService != null &&
+            _systemSecurityService.TryGetSystemStatus(
+                systemId,
+                out StarSystemStatus systemStatus))
+        {
+            context.HasSystemStatus = true;
+            context.SystemStatus = systemStatus;
+            context.HasThreatStatus =
+                IsThreatSystemStatus(systemStatus);
+        }
+
+        context.HasEnemies =
+            HasEnemiesInSystem(
+                systemId,
+                systemNpcs);
+
+        return context;
+    }
+
+    private AllyBehaviourScenario ResolveBehaviorScenario(
+        SystemNpcRuntimeState npc)
     {
         if (npc == null)
             return AllyBehaviourScenario.Normal;
 
-        if (_systemSecurityService != null &&
-            _systemSecurityService.TryGetSystemStatus(
+        SystemNpcScenarioContext context =
+            BuildScenarioContext(
                 npc.CurrentSystemId,
-                out StarSystemStatus systemStatus))
-        {
-            if (systemStatus == StarSystemStatus.Captured ||
-                systemStatus == StarSystemStatus.Threatened ||
-                systemStatus == StarSystemStatus.Invasion)
-            {
-                if (npc.IsEnemy)
-                    return AllyBehaviourScenario.EnemySystemInvasion;
+                null);
 
-                if (npc.IsAlly)
-                    return AllyBehaviourScenario.EnemyInvasion;
-            }
-        }
+        return ResolveBehaviorScenario(
+            npc,
+            context);
+    }
 
-        if (HasEnemiesInSystem(npc.CurrentSystemId))
-        {
-            if (npc.IsEnemy)
-                return AllyBehaviourScenario.EnemySystemInvasion;
+    private AllyBehaviourScenario ResolveBehaviorScenario(
+        SystemNpcRuntimeState npc,
+        SystemNpcScenarioContext context)
+    {
+        if (npc == null)
+            return AllyBehaviourScenario.Normal;
 
-            if (npc.IsAlly)
-                return AllyBehaviourScenario.EnemyInvasion;
-        }
+        bool hasScenarioThreat =
+            context.HasThreatStatus ||
+            context.HasEnemies;
+
+        if (!hasScenarioThreat)
+            return AllyBehaviourScenario.Normal;
+
+        if (npc.IsEnemy)
+            return AllyBehaviourScenario.EnemySystemInvasion;
+
+        if (npc.IsAlly)
+            return AllyBehaviourScenario.EnemyInvasion;
 
         return AllyBehaviourScenario.Normal;
+    }
+
+    private static bool IsThreatSystemStatus(
+        StarSystemStatus systemStatus)
+    {
+        return systemStatus == StarSystemStatus.Captured ||
+               systemStatus == StarSystemStatus.Threatened ||
+               systemStatus == StarSystemStatus.Invasion;
     }
 
     private string FormatNpcRoleForDebug(SystemNpcRuntimeState npc)
@@ -464,22 +1058,59 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private SystemNpcBehaviorType PickScenarioBehavior(
-      NpcBehaviourScenarioConfig behaviorScenario,
-      SystemNpcRuntimeState npc)
+        NpcBehaviourScenarioConfig behaviorScenario,
+        SystemNpcRuntimeState npc)
     {
         if (behaviorScenario == null)
+        {
+            LogNpcAnnihilationPick(
+                "[NPC_ANNIHILATION_PICK]" +
+                " Result=False" +
+                " | Reason=NullScenario" +
+                " | RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC"));
+
             return SystemNpcBehaviorType.None;
+        }
 
         IReadOnlyList<SystemNpcBehaviorWeight> behaviorWeights =
             behaviorScenario.BehaviorWeights;
 
         if (behaviorWeights == null || behaviorWeights.Count == 0)
+        {
+            LogNpcAnnihilationPick(
+                "[NPC_ANNIHILATION_PICK]" +
+                " Result=False" +
+                " | Reason=EmptyScenarioWeights" +
+                " | RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+                " | Scenario=" + behaviorScenario.Id);
+
             return SystemNpcBehaviorType.None;
+        }
 
         List<SystemNpcBehaviorWeight> weights =
             behaviorWeights
                 .Where(weight => weight != null && weight.Weight > 0)
                 .ToList();
+
+        bool hadAnnihilationBeforeFilters =
+            HasBehaviorWeight(
+                weights,
+                SystemNpcBehaviorType.AnnihilateOnPlanet);
+
+        LogNpcAnnihilationPick(
+            "[NPC_ANNIHILATION_PICK_BEFORE_FILTERS]" +
+            " RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+            " | ConfigId=" + (npc != null ? npc.ConfigId : "NULL_CONFIG") +
+            " | NpcType=" + (npc != null ? npc.NpcType.ToString() : "NULL_TYPE") +
+            " | RuntimeRole=" + (npc != null ? FormatNpcRoleForDebug(npc) : "NULL_ROLE") +
+            " | SystemId=" + (npc != null ? npc.CurrentSystemId : "NULL_SYSTEM") +
+            " | PlanetId=" + (npc != null ? npc.CurrentPlanetId : "NULL_PLANET") +
+            " | IsOnPlanet=" + (npc != null && npc.IsOnPlanet) +
+            " | PrevBehavior=" + (npc != null ? npc.PrevBehavior.ToString() : "NULL_PREV") +
+            " | CurrentBehavior=" + (npc != null ? npc.CurrentBehavior.ToString() : "NULL_CURRENT") +
+            " | Scenario=" + behaviorScenario.Id +
+            " | HasAnnihilationBeforeFilters=" + hadAnnihilationBeforeFilters +
+            " | Weights=" + FormatBehaviorWeightsForDebug(weights));
 
         bool shouldLog =
             ShouldLogAllyBehaviorPickTrace(npc, behaviorScenario) ||
@@ -500,6 +1131,25 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         RemoveImpossibleNextBehaviors(weights, npc);
         RemoveRoleForbiddenBehaviors(weights, npc);
 
+        bool hasAnnihilationAfterFilters =
+            HasBehaviorWeight(
+                weights,
+                SystemNpcBehaviorType.AnnihilateOnPlanet);
+
+        LogNpcAnnihilationPick(
+            "[NPC_ANNIHILATION_PICK_AFTER_FILTERS]" +
+            " RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+            " | ConfigId=" + (npc != null ? npc.ConfigId : "NULL_CONFIG") +
+            " | NpcType=" + (npc != null ? npc.NpcType.ToString() : "NULL_TYPE") +
+            " | RuntimeRole=" + (npc != null ? FormatNpcRoleForDebug(npc) : "NULL_ROLE") +
+            " | SystemId=" + (npc != null ? npc.CurrentSystemId : "NULL_SYSTEM") +
+            " | PlanetId=" + (npc != null ? npc.CurrentPlanetId : "NULL_PLANET") +
+            " | IsOnPlanet=" + (npc != null && npc.IsOnPlanet) +
+            " | Scenario=" + behaviorScenario.Id +
+            " | HasAnnihilationBeforeFilters=" + hadAnnihilationBeforeFilters +
+            " | HasAnnihilationAfterFilters=" + hasAnnihilationAfterFilters +
+            " | Weights=" + FormatBehaviorWeightsForDebug(weights));
+
         if (shouldLog)
         {
             LogCustom(
@@ -513,7 +1163,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         }
 
         if (weights.Count == 0)
+        {
+            LogNpcAnnihilationPick(
+                "[NPC_ANNIHILATION_PICK_RESULT]" +
+                " Result=False" +
+                " | Reason=NoWeightsAfterFilters" +
+                " | RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+                " | HadAnnihilationBeforeFilters=" + hadAnnihilationBeforeFilters);
+
             return SystemNpcBehaviorType.None;
+        }
 
         int totalWeight = 0;
 
@@ -521,7 +1180,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             totalWeight += Mathf.Max(0, item.Weight);
 
         if (totalWeight <= 0)
+        {
+            LogNpcAnnihilationPick(
+                "[NPC_ANNIHILATION_PICK_RESULT]" +
+                " Result=False" +
+                " | Reason=TotalWeightZero" +
+                " | RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+                " | HadAnnihilationBeforeFilters=" + hadAnnihilationBeforeFilters);
+
             return SystemNpcBehaviorType.None;
+        }
 
         int roll = UnityEngine.Random.Range(0, totalWeight);
         int cumulative = 0;
@@ -532,6 +1200,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             if (roll < cumulative)
             {
+                LogNpcAnnihilationPick(
+                    "[NPC_ANNIHILATION_PICK_RESULT]" +
+                    " Result=True" +
+                    " | RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+                    " | Scenario=" + behaviorScenario.Id +
+                    " | Roll=" + roll +
+                    " | TotalWeight=" + totalWeight +
+                    " | PickedBehavior=" + item.BehaviorType +
+                    " | HasAnnihilationAfterFilters=" + hasAnnihilationAfterFilters);
+
                 if (shouldLog || item.BehaviorType == SystemNpcBehaviorType.EngageEnemies)
                 {
                     LogCustom(
@@ -549,7 +1227,62 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             }
         }
 
-        return weights[^1].BehaviorType;
+        SystemNpcBehaviorType fallbackBehavior =
+            weights[^1].BehaviorType;
+
+        LogNpcAnnihilationPick(
+            "[NPC_ANNIHILATION_PICK_RESULT]" +
+            " Result=True" +
+            " | Reason=FallbackLastWeight" +
+            " | RuntimeNpcId=" + (npc != null ? npc.RuntimeNpcId : "NULL_NPC") +
+            " | Scenario=" + behaviorScenario.Id +
+            " | Roll=" + roll +
+            " | TotalWeight=" + totalWeight +
+            " | PickedBehavior=" + fallbackBehavior +
+            " | HasAnnihilationAfterFilters=" + hasAnnihilationAfterFilters);
+
+        return fallbackBehavior;
+    }
+
+    private bool HasBehaviorWeight(
+        IReadOnlyList<SystemNpcBehaviorWeight> weights,
+        SystemNpcBehaviorType behaviorType)
+    {
+        if (weights == null)
+            return false;
+
+        for (int i = 0; i < weights.Count; i++)
+        {
+            SystemNpcBehaviorWeight weight = weights[i];
+
+            if (weight != null &&
+                weight.BehaviorType == behaviorType &&
+                weight.Weight > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void LogNpcAnnihilationPick(string message)
+    {
+        LogNpcAnnihilation(message);
+    }
+
+    private void LogNpcAnnihilation(string message)
+    {
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(
+                DebugLogPerformanceArea.NpcAnnihilation))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.NpcAnnihilation,
+            message);
     }
 
     private bool ShouldLogAllyBehaviorPickTrace(
@@ -763,15 +1496,32 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private void ApplyBehavior(
-    SystemNpcRuntimeState npc,
-    SystemNpcBehaviorType nextBehavior,
-    int currentTick)
+        SystemNpcRuntimeState npc,
+        SystemNpcBehaviorType nextBehavior,
+        int currentTick)
     {
         if (npc == null)
             return;
 
+        long totalStartedAt = BeginPerfMeasure();
+
         SystemNpcBehaviorType previousBehaviorBeforeApply =
             npc.PrevBehavior;
+
+        SystemNpcBehaviorType currentBehaviorBefore =
+            npc.CurrentBehavior;
+
+        SystemNpcTravelState travelStateBefore =
+            npc.TravelState;
+
+        bool isOnPlanetBefore =
+            npc.IsOnPlanet;
+
+        string currentPlanetBefore =
+            npc.CurrentPlanetId;
+
+        string targetPlanetBefore =
+            npc.TargetPlanetId;
 
         if (IsMilitaryDebugNpc(npc))
         {
@@ -790,11 +1540,17 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 ", Tick=" + currentTick);
         }
 
+        long stateSetupStartedAt = BeginPerfMeasure();
+
         npc.CurrentBehavior = nextBehavior;
         npc.HasActiveBehavior = true;
         npc.BehaviorStartedTick = currentTick;
         npc.BehaviorEndsTick = 0;
         npc.BehaviorTargetRuntimeNpcId = null;
+
+        double stateSetupMs = EndPerfMeasureMs(stateSetupStartedAt);
+
+        long setupStartedAt = BeginPerfMeasure();
 
         switch (nextBehavior)
         {
@@ -827,6 +1583,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 break;
         }
 
+        double setupMs = EndPerfMeasureMs(setupStartedAt);
+
         if (IsMilitaryDebugNpc(npc))
         {
             LogCustom(
@@ -848,9 +1606,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 ", Tick=" + currentTick);
         }
 
+        long behaviorChangedEventStartedAt = BeginPerfMeasure();
+
         _eventBus.Publish(new SystemNpcBehaviorChangedEvent(
             npc.RuntimeNpcId,
             npc.CurrentBehavior));
+
+        double behaviorChangedEventMs =
+            EndPerfMeasureMs(behaviorChangedEventStartedAt);
+
+        long travelStateEventStartedAt = BeginPerfMeasure();
 
         _eventBus.Publish(new SystemNpcTravelStateChangedEvent(
             npc.RuntimeNpcId,
@@ -858,8 +1623,44 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             npc.TravelState,
             npc.CurrentSystemId));
 
+        double travelStateEventMs =
+            EndPerfMeasureMs(travelStateEventStartedAt);
+
         LogCustom(
             $"NPC: {npc.RuntimeNpcId}, Type: {npc.NpcType}, CurrentBehavior: {npc.CurrentBehavior}, TargetPlanet: {npc.TargetPlanetId}");
+
+        double totalMs = EndPerfMeasureMs(totalStartedAt);
+
+        if (totalMs >= AssignBehaviorDetailPerfLogThresholdMs)
+        {
+            LogNpcBehaviorPerformance(
+                totalMs,
+                "[SystemNpcBehaviorService] ApplyBehavior | " +
+                "Tick=" + currentTick +
+                " | Npc=" + npc.RuntimeNpcId +
+                " | NpcType=" + npc.NpcType +
+                " | ConfigId=" + npc.ConfigId +
+                " | RequestedBehavior=" + nextBehavior +
+                " | FinalBehavior=" + npc.CurrentBehavior +
+                " | BehaviorChangedBySetup=" + (npc.CurrentBehavior != nextBehavior) +
+                " | BehaviorBefore=" + currentBehaviorBefore +
+                " | PrevBehaviorBeforeApply=" + previousBehaviorBeforeApply +
+                " | TravelStateBefore=" + travelStateBefore +
+                " | TravelStateAfter=" + npc.TravelState +
+                " | IsOnPlanetBefore=" + isOnPlanetBefore +
+                " | IsOnPlanetAfter=" + npc.IsOnPlanet +
+                " | CurrentPlanetBefore=" + currentPlanetBefore +
+                " | CurrentPlanetAfter=" + npc.CurrentPlanetId +
+                " | TargetPlanetBefore=" + targetPlanetBefore +
+                " | TargetPlanetAfter=" + npc.TargetPlanetId +
+                " | TargetSystem=" + npc.TargetSystemId +
+                " | HasActiveBehavior=" + npc.HasActiveBehavior +
+                " | StateSetupMs=" + stateSetupMs.ToString("0.00") +
+                " | SetupMs=" + setupMs.ToString("0.00") +
+                " | BehaviorChangedEventMs=" + behaviorChangedEventMs.ToString("0.00") +
+                " | TravelStateEventMs=" + travelStateEventMs.ToString("0.00") +
+                " | TotalMs=" + totalMs.ToString("0.00"));
+        }
     }
 
     private void SetupPlanetToPlanetTravel(SystemNpcRuntimeState npc)
@@ -878,11 +1679,11 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         SyncNpcPositionWithCurrentPlanet(npc, true);
 
         string previousPlanetId = npc.CurrentPlanetId;
+        bool startedOnPlanet = npc.IsOnPlanet;
 
         ClearMovementTargets(npc);
 
         npc.TravelState = SystemNpcTravelState.TravelingInsideSystem;
-        npc.IsOnPlanet = false;
 
         StarSystemConfig starSystem =
             _configService.GetStarSystemConfigById(npc.CurrentSystemId);
@@ -932,7 +1733,19 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.TargetPosition = planetPosition;
         npc.CurrentMovementTargetPosition = planetPosition;
         npc.TickMovementTargetPosition = planetPosition;
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
         npc.TravelProgress01 = 0f;
+
+        npc.IsWaitingForInitialRouteBuild = startedOnPlanet;
+        npc.ReleaseFromPlanetAfterInitialRouteBuild = startedOnPlanet;
+        npc.InitialRouteBuildPlanetId = startedOnPlanet ? previousPlanetId : null;
+
+        if (!startedOnPlanet)
+        {
+            npc.IsOnPlanet = false;
+            npc.CurrentPlanetId = null;
+        }
 
         if (IsMilitaryDebugNpc(npc))
         {
@@ -944,7 +1757,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 ", StartPosition=" + npc.StartPosition +
                 ", PlanetPosition=" + planetPosition +
                 ", Distance=" + Vector3.Distance(npc.StartPosition, planetPosition) +
-                ", Speed=" + npc.Speed);
+                ", Speed=" + npc.Speed +
+                ", WaitingForInitialRouteBuild=" + npc.IsWaitingForInitialRouteBuild);
         }
     }
 
@@ -986,24 +1800,12 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupTravelToAnotherSystem(SystemNpcRuntimeState npc)
     {
-        if (npc == null)
-            return;
-
-        if (IsMilitaryDebugNpc(npc))
-        {
-            LogCustom(
-                "[NPC-MILITARY-BEHAVIOR] SetupTravelToAnotherSystem start. " +
-                "Npc=" + npc.RuntimeNpcId +
-                ", CurrentSystem=" + npc.CurrentSystemId +
-                ", CurrentPlanet=" + npc.CurrentPlanetId +
-                ", IsOnPlanet=" + npc.IsOnPlanet +
-                ", Position=" + npc.CurrentPosition +
-                ", TravelState=" + npc.TravelState);
-        }
-
         SyncNpcPositionWithCurrentPlanet(
             npc,
             true);
+
+        bool startedOnPlanet = npc.IsOnPlanet;
+        string previousPlanetId = npc.CurrentPlanetId;
 
         StarSystemConfig currentSystem =
             _configService.GetStarSystemConfigById(npc.CurrentSystemId);
@@ -1040,8 +1842,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         ClearMovementTargets(npc);
 
         npc.TravelState = SystemNpcTravelState.TravelingToAnotherSystem;
-        npc.IsOnPlanet = false;
-        npc.CurrentPlanetId = null;
 
         npc.TargetSystemId = targetSystem.Id;
         npc.TargetSystemExitPoint = exitPoint;
@@ -1054,6 +1854,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.TickMovementDirectionTick = -1;
         npc.TickMovementArrived = false;
         npc.TravelProgress01 = 0f;
+
+        npc.IsWaitingForInitialRouteBuild = startedOnPlanet;
+        npc.ReleaseFromPlanetAfterInitialRouteBuild = startedOnPlanet;
+        npc.InitialRouteBuildPlanetId = startedOnPlanet ? previousPlanetId : null;
+
+        if (!startedOnPlanet)
+        {
+            npc.IsOnPlanet = false;
+            npc.CurrentPlanetId = null;
+        }
 
         if (IsMilitaryDebugNpc(npc))
         {
@@ -1068,7 +1878,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 ", DistanceToExit=" + Vector3.Distance(npc.StartPosition, npc.TargetSystemExitPoint) +
                 ", Speed=" + npc.Speed +
                 ", FacingDirectionKept=" + npc.FacingDirection +
-                ", TickMovementDirectionKept=" + npc.TickMovementDirection);
+                ", TickMovementDirectionKept=" + npc.TickMovementDirection +
+                ", WaitingForInitialRouteBuild=" + npc.IsWaitingForInitialRouteBuild);
         }
     }
 
@@ -1190,16 +2001,54 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private void SetupAnnihilateOnPlanet(SystemNpcRuntimeState npc)
     {
+        if (npc == null)
+        {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_SETUP]" +
+                " Result=False" +
+                " | Reason=NullNpc");
+
+            return;
+        }
+
+        LogNpcAnnihilation(
+            "[NPC_ANNIHILATION_SETUP]" +
+            " RuntimeNpcId=" + npc.RuntimeNpcId +
+            " | SystemId=" + npc.CurrentSystemId +
+            " | PlanetId=" + npc.CurrentPlanetId +
+            " | IsAlive=" + npc.IsAlive +
+            " | LifeState=" + npc.LifeState +
+            " | IsOnPlanet=" + npc.IsOnPlanet +
+            " | PrevBehavior=" + npc.PrevBehavior +
+            " | CurrentBehavior=" + npc.CurrentBehavior +
+            " | TravelState=" + npc.TravelState);
+
         ClearMovementTargets(npc);
 
         if (!npc.IsOnPlanet)
         {
+            LogNpcAnnihilation(
+                "[NPC_ANNIHILATION_SETUP_RESULT]" +
+                " Result=False" +
+                " | Reason=NpcNotOnPlanetFallbackToStay" +
+                " | RuntimeNpcId=" + npc.RuntimeNpcId +
+                " | SystemId=" + npc.CurrentSystemId +
+                " | TravelState=" + npc.TravelState);
+
             npc.CurrentBehavior = SystemNpcBehaviorType.StayOnPlanetForDays;
             SetupStayOnPlanet(npc, npc.BehaviorStartedTick);
             return;
         }
 
         npc.TravelState = SystemNpcTravelState.OnPlanet;
+
+        LogNpcAnnihilation(
+            "[NPC_ANNIHILATION_SETUP_RESULT]" +
+            " Result=True" +
+            " | RuntimeNpcId=" + npc.RuntimeNpcId +
+            " | SystemId=" + npc.CurrentSystemId +
+            " | PlanetId=" + npc.CurrentPlanetId +
+            " | TravelState=" + npc.TravelState);
     }
 
     private void SetupEngageEnemies(SystemNpcRuntimeState npc)
@@ -1383,6 +2232,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             npc,
             true);
 
+        bool startedOnPlanet = npc.IsOnPlanet;
+        string previousPlanetId = npc.CurrentPlanetId;
+
         ClearMovementTargets(npc);
 
         Vector3 patrolTargetPosition =
@@ -1409,7 +2261,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         }
 
         npc.TravelState = SystemNpcTravelState.Patrolling;
-        npc.IsOnPlanet = false;
 
         npc.StartPosition = npc.CurrentPosition;
         npc.TargetPosition = patrolTargetPosition;
@@ -1421,6 +2272,16 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         npc.TravelProgress01 = 0f;
 
+        npc.IsWaitingForInitialRouteBuild = startedOnPlanet;
+        npc.ReleaseFromPlanetAfterInitialRouteBuild = startedOnPlanet;
+        npc.InitialRouteBuildPlanetId = startedOnPlanet ? previousPlanetId : null;
+
+        if (!startedOnPlanet)
+        {
+            npc.IsOnPlanet = false;
+            npc.CurrentPlanetId = null;
+        }
+
         if (IsMilitaryDebugNpc(npc))
         {
             LogCustom(
@@ -1429,7 +2290,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 ", CurrentPosition=" + npc.CurrentPosition +
                 ", PatrolTarget=" + patrolTargetPosition +
                 ", FacingDirectionKept=" + npc.FacingDirection +
-                ", TickMovementDirectionKept=" + npc.TickMovementDirection);
+                ", TickMovementDirectionKept=" + npc.TickMovementDirection +
+                ", WaitingForInitialRouteBuild=" + npc.IsWaitingForInitialRouteBuild);
         }
     }
 
@@ -1559,10 +2421,52 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
     private bool HasEnemiesInSystem(string systemId)
     {
-        return _npcRuntimeService.Npcs.Any(x =>
-            x.IsAlive &&
-            x.IsEnemy &&
-            x.CurrentSystemId == systemId);
+        return HasEnemiesInSystem(
+            systemId,
+            null);
+    }
+
+    private bool HasEnemiesInSystem(
+        string systemId,
+        IReadOnlyList<SystemNpcRuntimeState> systemNpcs)
+    {
+        if (string.IsNullOrWhiteSpace(systemId))
+            return false;
+
+        if (systemNpcs != null)
+        {
+            for (int i = 0; i < systemNpcs.Count; i++)
+            {
+                SystemNpcRuntimeState npc = systemNpcs[i];
+
+                if (npc == null)
+                    continue;
+
+                if (npc.IsAlive &&
+                    npc.IsEnemy &&
+                    npc.CurrentSystemId == systemId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        foreach (SystemNpcRuntimeState npc in _npcRuntimeService.Npcs)
+        {
+            if (npc == null)
+                continue;
+
+            if (npc.IsAlive &&
+                npc.IsEnemy &&
+                npc.CurrentSystemId == systemId)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private float GetSunWorldSize(SunConfig sun)
@@ -1770,5 +2674,127 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         }
 
         return pickedBehavior;
+    }
+
+    private static long BeginPerfMeasure()
+    {
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    private static double EndPerfMeasureMs(long startedAt)
+    {
+        long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
+        return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+    }
+
+    private static void TrackMaxNpcBehaviorPerf(
+        SystemNpcRuntimeState npc,
+        string stage,
+        double elapsedMs,
+        SystemNpcBehaviorType behaviorBefore,
+        AllyBehaviourScenario scenarioBefore,
+        ref double maxNpcMs,
+        ref string maxNpcId,
+        ref string maxNpcStage,
+        ref SystemNpcBehaviorType maxNpcBehavior,
+        ref AllyBehaviourScenario maxNpcScenario)
+    {
+        if (elapsedMs <= maxNpcMs)
+            return;
+
+        maxNpcMs = elapsedMs;
+        maxNpcId = npc != null ? npc.RuntimeNpcId : "";
+        maxNpcStage = stage;
+        maxNpcBehavior = behaviorBefore;
+        maxNpcScenario = scenarioBefore;
+    }
+
+    private void LogNpcBehaviorPerformance(double elapsedMs, string message)
+    {
+        if (elapsedMs < BehaviorPerfLogThresholdMs)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.NpcBehavior))
+            return;
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.NpcBehavior,
+            message);
+    }
+
+    private int GetMaxOffscreenAssignNewPerSystemTick()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.OffscreenNpcSimulationScheduleConfig == null)
+        {
+            return 15;
+        }
+
+        return Bootstrapper
+            .Instance
+            .OffscreenNpcSimulationScheduleConfig
+            .MaxOffscreenAssignNewPerSystemTick;
+    }
+
+    private int GetMaxOffscreenReassignPerSystemTick()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.OffscreenNpcSimulationScheduleConfig == null)
+        {
+            return 15;
+        }
+
+        return Bootstrapper
+            .Instance
+            .OffscreenNpcSimulationScheduleConfig
+            .MaxOffscreenReassignPerSystemTick;
+    }
+
+    private int GetMaxOffscreenActiveBehaviorPerSystemTick()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.OffscreenNpcSimulationScheduleConfig == null)
+        {
+            return 30;
+        }
+
+        return Bootstrapper
+            .Instance
+            .OffscreenNpcSimulationScheduleConfig
+            .MaxOffscreenActiveBehaviorPerSystemTick;
+    }
+
+    private void LogNpcBehaviorSelectAnalytics(
+    int currentTick,
+    bool isDetailedSystem,
+    string behaviorTickPhase,
+    StarSystemConfig starSystem,
+    int npcCount,
+    int processedCount,
+    int skippedCount,
+    double totalMs,
+    NpcBehaviorSelectAnalytics analytics)
+    {
+        if (Bootstrapper.Instance == null ||
+            analytics == null ||
+            starSystem == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.NpcBehavior))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.NpcBehavior,
+            "[NPC_BEHAVIOR_SELECT_ANALYTICS]" +
+            " | Tick=" + currentTick +
+            " | SystemId=" + starSystem.Id +
+            " | DetailedSystem=" + isDetailedSystem +
+            " | BehaviorTickPhase=" + behaviorTickPhase +
+            " | TotalMs=" + totalMs.ToString("F2") +
+            " | Npcs=" + npcCount +
+            " | Processed=" + processedCount +
+            " | Skipped=" + skippedCount +
+            analytics.BuildLogFields());
     }
 }

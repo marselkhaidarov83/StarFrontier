@@ -68,7 +68,33 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private void Update()
     {
-        UpdateActiveBeamHitFx();
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        try
+        {
+            UpdateActiveBeamHitFx();
+        }
+        finally
+        {
+            LogSlowVisualUpdateIfNeeded(
+                "GalaxyNpcCombatVisualController.Update",
+                startedAt,
+                "Projectiles=" + _activeProjectiles.Count +
+                " | Beams=" + _activeBeams.Count +
+                " | Waves=" + _activeWaves.Count);
+        }
+    }
+
+    private void LogSlowVisualUpdateIfNeeded(
+    string marker,
+    double startedAt,
+    string details)
+    {
+        VisualUpdatePerfLog.LogIfSlow(
+            marker,
+            startedAt,
+            details);
     }
 
     private void TrySubscribe()

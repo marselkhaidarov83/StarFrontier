@@ -6,9 +6,11 @@ using UnityEngine.UI;
 public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 {
     private const int SpawnCount = 10;
+    private const int SpawnCountOtherSystem = 100;
     private const int EnemySpawnCount = 10;
     private const float RazmerShrifta = 23f;
     private const float CurrentSystemCountRefreshSeconds = 5f;
+    private const float heightB = 24f;
 
     private static readonly AllyRole2A[] SpawnRoles =
     {
@@ -23,6 +25,7 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
     private TMP_Text currentSystemCountText;
     private Button spawnNpcsButton;
     private Button spawnEnemyWaveButton;
+    private Button spawnOtherSystemsNpcsButton;
     private float nextCurrentSystemCountRefreshTime;
 
     public static void EnsureCreated()
@@ -60,10 +63,40 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 
     private void Update()
     {
-        if (Time.unscaledTime < nextCurrentSystemCountRefreshTime)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        RefreshCurrentSystemCountText();
+        double refreshMs = 0.0;
+
+        bool refreshed = false;
+
+        try
+        {
+            if (Time.unscaledTime < nextCurrentSystemCountRefreshTime)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshNpcCountTexts();
+
+            refreshMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            refreshed = true;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            VisualUpdateAggregateLog.Record(
+                "SystemNpcStressSpawnDebugPanel2A.Update",
+                elapsedMs,
+                "Name=" + name +
+                " | Refreshed=" + refreshed +
+                " | RefreshMs=" + refreshMs.ToString("F3"));
+        }
     }
 
     private void OnDestroy()
@@ -73,6 +106,34 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 
         if (spawnEnemyWaveButton != null)
             spawnEnemyWaveButton.onClick.RemoveListener(SpawnEnemyWave);
+
+        if (spawnOtherSystemsNpcsButton != null)
+            spawnOtherSystemsNpcsButton.onClick.RemoveListener(SpawnNpcsInOtherSystems);
+    }
+
+    private void RefreshNpcCountTexts()
+    {
+        nextCurrentSystemCountRefreshTime =
+            Time.unscaledTime + CurrentSystemCountRefreshSeconds;
+
+        RefreshTotalNpcCountText();
+        RefreshCurrentSystemCountText();
+    }
+
+    private void RefreshTotalNpcCountText()
+    {
+        if (countText == null)
+            return;
+
+        if (!TryGetRuntimeService(
+                out ISystemNpcRuntimeService runtimeService))
+        {
+            countText.text = "NPC alive: -";
+            return;
+        }
+
+        countText.text =
+            "NPC alive: " + GetNpcCount(runtimeService);
     }
 
     private void BuildUi()
@@ -84,7 +145,7 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         rectTransform.anchorMax = new Vector2(0f, 1f);
         rectTransform.pivot = new Vector2(0f, 1f);
         rectTransform.anchoredPosition = new Vector2(16f, -156f);
-        rectTransform.sizeDelta = new Vector2(260f, 146f);
+        rectTransform.sizeDelta = new Vector2(320f, 158f);
 
         Image background =
             gameObject.AddComponent<Image>();
@@ -95,17 +156,18 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
             gameObject.AddComponent<VerticalLayoutGroup>();
 
         layout.padding = new RectOffset(8, 8, 8, 8);
-        layout.spacing = 6f;
+        layout.spacing = 5f;
         layout.childControlWidth = true;
         layout.childControlHeight = false;
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
 
         CreateSpawnButton();
+        CreateOtherSystemsSpawnButton();
         CreateEnemyWaveButton();
         CreateCountText();
         CreateCurrentSystemCountText();
-        RefreshCurrentSystemCountText();
+        RefreshNpcCountTexts();
     }
 
     private void CreateSpawnButton()
@@ -123,7 +185,7 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         LayoutElement layoutElement =
             buttonObject.GetComponent<LayoutElement>();
 
-        layoutElement.preferredHeight = 34f;
+        layoutElement.preferredHeight = heightB;
 
         Image image =
             buttonObject.GetComponent<Image>();
@@ -161,7 +223,7 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         LayoutElement layoutElement =
             buttonObject.GetComponent<LayoutElement>();
 
-        layoutElement.preferredHeight = 34f;
+        layoutElement.preferredHeight = heightB;
 
         Image image =
             buttonObject.GetComponent<Image>();
@@ -182,6 +244,100 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
                 TextAlignmentOptions.Center);
 
         Stretch(label.GetComponent<RectTransform>());
+    }
+
+    private void CreateOtherSystemsSpawnButton()
+    {
+        GameObject buttonObject =
+            new GameObject(
+                "Spawn" + SpawnCountOtherSystem + "NpcsInOtherSystemsButton",
+                typeof(RectTransform),
+                typeof(Image),
+                typeof(Button),
+                typeof(LayoutElement));
+
+        buttonObject.transform.SetParent(transform, false);
+
+        LayoutElement layoutElement =
+            buttonObject.GetComponent<LayoutElement>();
+
+        layoutElement.preferredHeight = heightB;
+
+        Image image =
+            buttonObject.GetComponent<Image>();
+
+        image.color = new Color(0.12f, 0.18f, 0.30f, 0.96f);
+
+        spawnOtherSystemsNpcsButton =
+            buttonObject.GetComponent<Button>();
+
+        spawnOtherSystemsNpcsButton.onClick.AddListener(SpawnNpcsInOtherSystems);
+
+        TextMeshProUGUI label =
+            CreateTextObject(
+                "Label",
+                buttonObject.transform,
+                "Spawn " + SpawnCountOtherSystem + " NPC in other systems",
+                RazmerShrifta,
+                TextAlignmentOptions.Center);
+
+        Stretch(label.GetComponent<RectTransform>());
+    }
+
+    private void SpawnNpcsInOtherSystems()
+    {
+        if (!TryGetServices(
+                out ISystemNpcPopulationService populationService,
+                out ISystemNpcRuntimeService runtimeService))
+        {
+            return;
+        }
+
+        int beforeCount =
+            GetNpcCount(runtimeService);
+
+        int spawnedCommands = 0;
+        int failedCommands = 0;
+
+        for (int i = 0; i < SpawnCountOtherSystem; i++)
+        {
+            if (TrySpawnAnyAllyInOtherSystem(populationService, i))
+                spawnedCommands++;
+            else
+                failedCommands++;
+        }
+
+        int afterCount =
+            GetNpcCount(runtimeService);
+
+        if (countText != null)
+            countText.text = "NPC alive: " + afterCount;
+
+        RefreshNpcCountTexts();
+
+        Debug.Log(
+            "[SystemNpcStressSpawnDebugPanel2A] Spawn " + SpawnCountOtherSystem + " NPC in other systems requested. " +
+            "NpcAliveBefore: " + beforeCount +
+            ", NpcAliveAfter: " + afterCount +
+            ", Delta: " + (afterCount - beforeCount) +
+            ", SuccessfulCommands: " + spawnedCommands +
+            ", FailedCommands: " + failedCommands);
+    }
+
+    private static bool TrySpawnAnyAllyInOtherSystem(
+    ISystemNpcPopulationService populationService,
+    int spawnIndex)
+    {
+        for (int i = 0; i < SpawnRoles.Length; i++)
+        {
+            AllyRole2A role =
+                SpawnRoles[(spawnIndex + i) % SpawnRoles.Length];
+
+            if (populationService.DebugSpawnAllyInOtherSystem(role))
+                return true;
+        }
+
+        return false;
     }
 
     private void CreateCountText()
@@ -247,14 +403,14 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
             GetNpcCount(runtimeService);
 
         if (countText != null)
-            countText.text = "NPC total: " + afterCount;
+            countText.text = "NPC alive: " + afterCount;
 
-        RefreshCurrentSystemCountText();
+        RefreshNpcCountTexts();
 
         Debug.Log(
             "[SystemNpcStressSpawnDebugPanel2A] Spawn " + SpawnCount + " NPC requested. " +
-            "NpcCountBefore: " + beforeCount +
-            ", NpcCountAfter: " + afterCount +
+            "NpcAliveBefore: " + beforeCount +
+            ", NpcAliveAfter: " + afterCount +
             ", Delta: " + (afterCount - beforeCount) +
             ", SuccessfulCommands: " + spawnedCommands +
             ", FailedCommands: " + failedCommands);
@@ -287,30 +443,29 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
             GetNpcCount(runtimeService);
 
         if (countText != null)
-            countText.text = "NPC total: " + afterCount;
+            countText.text = "NPC alive: " + afterCount;
 
-        RefreshCurrentSystemCountText();
+        RefreshNpcCountTexts();
 
         Debug.Log(
             "[SystemNpcStressSpawnDebugPanel2A] Spawn Enemy Wave requested. " +
             "RequestedEnemies: " + EnemySpawnCount +
             ", SpawnedEnemies: " + spawnedEnemies +
             ", FailedEnemies: " + failedEnemies +
-            ", NpcCountBefore: " + beforeCount +
-            ", NpcCountAfter: " + afterCount +
+            ", NpcAliveBefore: " + beforeCount +
+            ", NpcAliveAfter: " + afterCount +
             ", Delta: " + (afterCount - beforeCount));
     }
 
     private void RefreshCurrentSystemCountText()
     {
-        nextCurrentSystemCountRefreshTime =
-            Time.unscaledTime + CurrentSystemCountRefreshSeconds;
-
         if (currentSystemCountText == null)
             return;
 
-        if (!TryGetCurrentSystemNpcCount(
-                out int count,
+        if (!TryGetCurrentSystemNpcCounts(
+                out int totalCount,
+                out int expectedVisibleCount,
+                out int actualViewCount,
                 out string currentSystemId))
         {
             currentSystemCountText.text = "NPC in system: -";
@@ -318,7 +473,31 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         }
 
         currentSystemCountText.text =
-            "NPC in system: " + count;
+            "NPC in system: " +
+            totalCount +
+            " / " +
+            expectedVisibleCount +
+            " / " +
+            actualViewCount;
+    }
+
+    private static bool TryGetRuntimeService(
+    out ISystemNpcRuntimeService runtimeService)
+    {
+        runtimeService = null;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return false;
+        }
+
+        IServiceRegistry registry =
+            Bootstrapper.Instance.ServiceRegistry;
+
+        return registry.TryGet<ISystemNpcRuntimeService>(
+                   out runtimeService) &&
+               runtimeService != null;
     }
 
     private static bool TrySpawnAnyAlly(
@@ -373,11 +552,15 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         return true;
     }
 
-    private static bool TryGetCurrentSystemNpcCount(
-        out int count,
+    private static bool TryGetCurrentSystemNpcCounts(
+        out int totalCount,
+        out int expectedVisibleCount,
+        out int actualViewCount,
         out string currentSystemId)
     {
-        count = 0;
+        totalCount = 0;
+        expectedVisibleCount = 0;
+        actualViewCount = 0;
         currentSystemId = string.Empty;
 
         if (Bootstrapper.Instance == null ||
@@ -411,14 +594,43 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
             return false;
         }
 
-        count =
-            runtimeService.GetAliveNpcsInSystem(currentSystemId).Count;
+        var npcs =
+            runtimeService.GetAliveNpcsInSystem(currentSystemId);
+
+        totalCount =
+            npcs.Count;
+
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                npcs[i];
+
+            if (npc == null ||
+                !npc.IsAlive)
+            {
+                continue;
+            }
+
+            if (npc.IsOnPlanet ||
+                npc.TravelState == SystemNpcTravelState.OnPlanet)
+            {
+                continue;
+            }
+
+            expectedVisibleCount++;
+        }
+
+        SystemNpcViewBinder viewBinder =
+            FindFirstObjectByType<SystemNpcViewBinder>();
+
+        if (viewBinder != null)
+            actualViewCount = viewBinder.VisibleViewCount;
 
         return true;
     }
 
     private static int GetNpcCount(
-        ISystemNpcRuntimeService runtimeService)
+    ISystemNpcRuntimeService runtimeService)
     {
         if (runtimeService == null ||
             runtimeService.Npcs == null)
@@ -426,7 +638,22 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
             return 0;
         }
 
-        return runtimeService.Npcs.Count;
+        int aliveCount = 0;
+
+        for (int i = 0; i < runtimeService.Npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                runtimeService.Npcs[i];
+
+            if (npc != null &&
+                npc.IsAlive &&
+                npc.LifeState == SystemNpcLifeState.Alive)
+            {
+                aliveCount++;
+            }
+        }
+
+        return aliveCount;
     }
 
     private static TextMeshProUGUI CreateTextObject(

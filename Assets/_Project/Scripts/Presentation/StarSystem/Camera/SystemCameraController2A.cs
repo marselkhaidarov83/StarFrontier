@@ -279,36 +279,45 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_isInitialized)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        if (!_isSystemCameraActive)
-            return;
-
-        if (targetCamera == null)
-            return;
-
-        switch (mode)
+        try
         {
-            case SystemCameraMode2A.FollowShip:
-                UpdateFollowShip();
-                break;
+            if (!_isInitialized)
+                return;
 
-            case SystemCameraMode2A.ReturningToShip:
-                UpdateReturnToShip();
-                break;
+            if (!_isSystemCameraActive)
+                return;
 
-            case SystemCameraMode2A.CenteringOnTarget:
-                UpdateCenterOnTarget();
-                break;
+            if (targetCamera == null)
+                return;
 
-            case SystemCameraMode2A.FreeLook:
-                /*
-                 * При изменении зума в FreeLook камера
-                 * также должна оставаться внутри карты.
-                 */
-                ReclampCurrentPosition();
-                break;
+            switch (mode)
+            {
+                case SystemCameraMode2A.FollowShip:
+                    UpdateFollowShip();
+                    break;
+
+                case SystemCameraMode2A.ReturningToShip:
+                    UpdateReturnToShip();
+                    break;
+
+                case SystemCameraMode2A.CenteringOnTarget:
+                    UpdateCenterOnTarget();
+                    break;
+
+                case SystemCameraMode2A.FreeLook:
+                    ReclampCurrentPosition();
+                    break;
+            }
+        }
+        finally
+        {
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemCameraController2A.LateUpdate",
+                startedAt,
+                "Mode=" + mode);
         }
     }
 

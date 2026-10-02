@@ -1081,7 +1081,11 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         }
 
         if (starSystem != null)
-            return starSystem.MapPosition;
+        {
+            return ClampNpcSpawnPositionToBoundaryProtectionRadius(
+                starSystem,
+                starSystem.MapPosition);
+        }
 
         return Vector3.zero;
     }
@@ -1089,13 +1093,19 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     private Vector3 PickEnemyGroupSpawnBasePosition(
         StarSystemConfig starSystem)
     {
+        Vector3 position =
+            new Vector3(6f, 0f, 0f);
+
         if (starSystem != null &&
             starSystem.NpcSpawnPoints != null)
         {
-            return starSystem.NpcSpawnPoints.PickEnemySpawnBasePosition();
+            position =
+                starSystem.NpcSpawnPoints.PickEnemySpawnBasePosition();
         }
 
-        return new Vector3(6f, 0f, 0f);
+        return ClampNpcSpawnPositionToBoundaryProtectionRadius(
+            starSystem,
+            position);
     }
 
     private Vector3 BuildEnemySpawnPosition(
@@ -1121,14 +1131,19 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             scatterRadius = starSystem.NpcSpawnPoints.EnemyRandomRadius;
         }
 
-        return BuildTangentialEnemySpawnPosition(
-            groupSpawnBasePosition,
-            scatterRadius);
+        Vector3 position =
+            BuildTangentialEnemySpawnPosition(
+                groupSpawnBasePosition,
+                scatterRadius);
+
+        return ClampNpcSpawnPositionToBoundaryProtectionRadius(
+            starSystem,
+            position);
     }
 
     private Vector3 BuildTangentialEnemySpawnPosition(
-        Vector3 groupSpawnBasePosition,
-        float scatterRadius)
+    Vector3 groupSpawnBasePosition,
+    float scatterRadius)
     {
         Vector2 radial =
             new Vector2(
@@ -1170,6 +1185,73 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             scatteredPosition.x,
             scatteredPosition.y,
             0f);
+    }
+
+    private Vector3 ClampNpcSpawnPositionToBoundaryProtectionRadius(
+        StarSystemConfig starSystem,
+        Vector3 position)
+    {
+        float protectionRadius =
+            GetNpcSpawnBoundaryProtectionRadius();
+
+        if (protectionRadius <= 0f)
+            return position;
+
+        Vector2 center =
+            ResolveBoundaryProtectionCenter(starSystem);
+
+        Vector2 point =
+            new Vector2(
+                position.x,
+                position.y);
+
+        Vector2 fromCenter =
+            point - center;
+
+        float distance =
+            fromCenter.magnitude;
+
+        if (distance <= protectionRadius)
+            return position;
+
+        if (distance <= 0.0001f)
+            return position;
+
+        Vector2 clampedPoint =
+            center +
+            fromCenter / distance * protectionRadius;
+
+        return new Vector3(
+            clampedPoint.x,
+            clampedPoint.y,
+            position.z);
+    }
+
+    private float GetNpcSpawnBoundaryProtectionRadius()
+    {
+        if (_configService == null ||
+            _configService.ShipMovementConfig == null)
+        {
+            return 0f;
+        }
+
+        return _configService
+            .ShipMovementConfig
+            .BoundaryProtectionRadiusWorld;
+    }
+
+    private static Vector2 ResolveBoundaryProtectionCenter(
+        StarSystemConfig starSystem)
+    {
+        if (starSystem != null &&
+            starSystem.Sun != null)
+        {
+            return new Vector2(
+                starSystem.Sun.LocalOffset.x,
+                starSystem.Sun.LocalOffset.y);
+        }
+
+        return Vector2.zero;
     }
 
     private StarSystemConfig GetCurrentPlayerStarSystem()
@@ -1499,5 +1581,150 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             currentGalaxyLevel);
 
         return false;
+    }
+
+    public bool DebugSpawnAllyInOtherSystem(
+    AllyRole2A role)
+    {
+        if (!TryPickOtherSystemAllySpawn(
+                role,
+                out StarSystemConfig starSystem,
+                out AllySpawnRuleConfig rule,
+                out AllyConfig allyConfig))
+        {
+            Debug.LogWarning(
+                "[SystemPopulationService] Debug other-system ally spawn failed. " +
+                "No eligible other system ally. Role: " +
+                role +
+                ", GalaxyLevel: " +
+                GetCurrentGalaxyLevel());
+
+            return false;
+        }
+
+        CreateAlly(
+            starSystem,
+            rule,
+            allyConfig);
+
+        Debug.Log(
+            "[SystemPopulationService] Debug other-system ally spawned. " +
+            "System: " +
+            starSystem.Id +
+            ", Rule: " +
+            rule.Id +
+            ", Role: " +
+            role +
+            ", GalaxyLevel: " +
+            GetCurrentGalaxyLevel());
+
+        return true;
+    }
+
+    private bool TryPickOtherSystemAllySpawn(
+    AllyRole2A role,
+    out StarSystemConfig selectedSystem,
+    out AllySpawnRuleConfig selectedRule,
+    out AllyConfig selectedAllyConfig)
+    {
+        selectedSystem = null;
+        selectedRule = null;
+        selectedAllyConfig = null;
+
+        IReadOnlyList<StarSystemConfig> systems =
+            _configService.GetAllStarSystems();
+
+        if (systems == null || systems.Count == 0)
+            return false;
+
+        string currentSystemId =
+            _gameSessionService != null &&
+            _gameSessionService.State != null &&
+            _gameSessionService.State.Player != null
+                ? _gameSessionService.State.Player.CurrentSystemId
+                : string.Empty;
+
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
+        List<(StarSystemConfig System, AllySpawnRuleConfig Rule, AllyConfig Ally)> candidates =
+            new();
+
+        for (int systemIndex = 0; systemIndex < systems.Count; systemIndex++)
+        {
+            StarSystemConfig system =
+                systems[systemIndex];
+
+            if (system == null)
+                continue;
+
+            if (!string.IsNullOrWhiteSpace(currentSystemId) &&
+                system.Id == currentSystemId)
+                continue;
+
+            SystemPopulationRule populationRule =
+                GetCurrentPopulationRule(system);
+
+            if (populationRule == null ||
+                populationRule.AllySpawnRules == null ||
+                populationRule.AllySpawnRules.Length == 0)
+            {
+                continue;
+            }
+
+            for (int ruleIndex = 0;
+                 ruleIndex < populationRule.AllySpawnRules.Length;
+                 ruleIndex++)
+            {
+                AllySpawnRuleConfig rule =
+                    populationRule.AllySpawnRules[ruleIndex];
+
+                if (rule == null)
+                    continue;
+
+                IReadOnlyList<AllyGroupEntryConfig> allies =
+                    rule.GetAlliesForGalaxyLevel(currentGalaxyLevel);
+
+                if (allies == null)
+                    continue;
+
+                for (int allyIndex = 0; allyIndex < allies.Count; allyIndex++)
+                {
+                    AllyGroupEntryConfig entry =
+                        allies[allyIndex];
+
+                    if (entry == null || !entry.IsValid())
+                        continue;
+
+                    AllyConfig allyConfig =
+                        entry.AllyConfig;
+
+                    if (allyConfig == null)
+                        continue;
+
+                    if (allyConfig.Role != role)
+                        continue;
+
+                    if (allyConfig.Level != currentGalaxyLevel)
+                        continue;
+
+                    candidates.Add((system, rule, allyConfig));
+                }
+            }
+        }
+
+        if (candidates.Count == 0)
+            return false;
+
+        var selected =
+            candidates[UnityEngine.Random.Range(0, candidates.Count)];
+
+        selectedSystem = selected.System;
+        selectedRule = selected.Rule;
+        selectedAllyConfig = selected.Ally;
+
+        return selectedSystem != null &&
+               selectedRule != null &&
+               selectedAllyConfig != null;
     }
 }

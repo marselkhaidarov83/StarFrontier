@@ -40,23 +40,74 @@ public sealed class PlayerSystemMapShipView :
 
     private void Update()
     {
-        if (_isDestroyed)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        ShipRuntimeData activeShip = GetActiveShip();
+        double getShipMs = 0.0;
+        double applyPositionMs = 0.0;
 
-        if (activeShip == null)
-            return;
+        bool activeShipFound = false;
+        bool hidden = false;
 
-        if (activeShip.CurrentHull <= 0)
+        try
         {
-            HideShip();
-            return;
-        }
+            if (_isDestroyed)
+                return;
 
-        Vector3 position = _gameSessionService.State.Player.SystemMapShipPosition;
-        position.z = transform.position.z;
-        transform.position = position;
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ShipRuntimeData activeShip = GetActiveShip();
+
+            getShipMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            activeShipFound =
+                activeShip != null;
+
+            if (activeShip == null)
+                return;
+
+            if (activeShip.CurrentHull <= 0)
+            {
+                hidden = true;
+                HideShip();
+                return;
+            }
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            Vector3 position = _gameSessionService.State.Player.SystemMapShipPosition;
+            position.z = transform.position.z;
+            transform.position = position;
+
+            applyPositionMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + gameObject.name +
+                " | IsDestroyed=" + _isDestroyed +
+                " | ActiveShipFound=" + activeShipFound +
+                " | Hidden=" + hidden +
+                " | GetShipMs=" + getShipMs.ToString("F3") +
+                " | ApplyPositionMs=" + applyPositionMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "PlayerSystemMapShipView.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "PlayerSystemMapShipView.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnPlayerShipDestroyed(PlayerShipDestroyedByNpcEvent evt)

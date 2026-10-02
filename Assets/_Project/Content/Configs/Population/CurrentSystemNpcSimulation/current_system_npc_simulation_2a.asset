@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b66414a8c8d84f5f915ec7b3fbbe1ae, type: 3}
+  m_Name: current_system_npc_simulation_2a
+  m_EditorClassIdentifier: Core::CurrentSystemNpcSimulationConfig
+  maxInitialRouteBuildsPerTick: 3
+  routeBuildTimeBudgetMsPerTick: 8
+  routeRefreshTimeBudgetMsPerTick: 4
+  ensureDirectionRouteBuildBudgetSafetyMs: 0.05
+  priorityFinalApproachRouteBuildsPerTick: 6
+  finalPlanetApproachRefreshTicks: 3
+  maxCurrentSystemShipsInSpaceBeforePlanetLaunchRouteBuild: 80
+  routeTargetRerollAttempts: 6
+  routeTargetRerollMinDistance: 1
+  maxSystemExitCompletionsPerTick: 2

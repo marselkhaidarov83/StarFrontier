@@ -11,6 +11,14 @@ public sealed class CombatDamagePopupView2A : CustomMonoBehaviour
     private float _elapsedSeconds;
     private float _lifetimeSeconds;
 
+    private static int _aggregateFrame = -1;
+    private static int _aggregateCount;
+    private static int _aggregateDestroyedCount;
+    private static double _aggregateTotalMs;
+    private static double _aggregateApplyVisualMs;
+    private static double _aggregateMaxSingleMs;
+    private static string _aggregateMaxObjectName = string.Empty;
+
     public void Init(
         CombatDamagePopupVisualConfig2A config,
         int damage,
@@ -42,7 +50,7 @@ public sealed class CombatDamagePopupView2A : CustomMonoBehaviour
 
         _text.text = Mathf.Max(0, damage).ToString();
         _text.alignment = TextAlignmentOptions.Center;
-        _text.enableWordWrapping = false;
+        _text.textWrappingMode = TextWrappingModes.NoWrap;
         _text.fontStyle = FontStyles.Bold;
 
         ApplyRenderOrder();
@@ -53,18 +61,127 @@ public sealed class CombatDamagePopupView2A : CustomMonoBehaviour
 
     private void Update()
     {
-        if (_text == null)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double applyVisualMs = 0.0;
+
+        bool textAvailable = false;
+        bool destroyed = false;
+        float progress01 = 0f;
+
+        try
+        {
+            textAvailable =
+                _text != null;
+
+            if (!textAvailable)
+                return;
+
+            _elapsedSeconds += Time.deltaTime;
+
+            progress01 =
+                Mathf.Clamp01(_elapsedSeconds / Mathf.Max(0.01f, _lifetimeSeconds));
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplyVisual(progress01);
+
+            applyVisualMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (progress01 >= 1f)
+            {
+                destroyed = true;
+                Destroy(gameObject);
+            }
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            RecordUpdateAggregate(
+                elapsedMs,
+                applyVisualMs,
+                destroyed,
+                gameObject.name);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "CombatDamagePopupView2A.Update",
+                startedAt,
+                "Name=" + gameObject.name +
+                " | TextAvailable=" + textAvailable +
+                " | ElapsedSeconds=" + _elapsedSeconds.ToString("F3") +
+                " | LifetimeSeconds=" + _lifetimeSeconds.ToString("F3") +
+                " | Progress01=" + progress01.ToString("F3") +
+                " | Destroyed=" + destroyed +
+                " | ApplyVisualMs=" + applyVisualMs.ToString("F3"));
+        }
+    }
+
+
+    private static void RecordUpdateAggregate(
+        double elapsedMs,
+        double applyVisualMs,
+        bool destroyed,
+        string objectName)
+    {
+        int frame =
+            Time.frameCount;
+
+        if (_aggregateFrame != frame)
+        {
+            FlushUpdateAggregate();
+            ResetUpdateAggregate(frame);
+        }
+
+        _aggregateCount++;
+        _aggregateTotalMs += elapsedMs;
+        _aggregateApplyVisualMs += applyVisualMs;
+
+        if (destroyed)
+            _aggregateDestroyedCount++;
+
+        if (elapsedMs > _aggregateMaxSingleMs)
+        {
+            _aggregateMaxSingleMs = elapsedMs;
+            _aggregateMaxObjectName = objectName ?? string.Empty;
+        }
+    }
+
+    private static void ResetUpdateAggregate(int frame)
+    {
+        _aggregateFrame = frame;
+        _aggregateCount = 0;
+        _aggregateDestroyedCount = 0;
+        _aggregateTotalMs = 0.0;
+        _aggregateApplyVisualMs = 0.0;
+        _aggregateMaxSingleMs = 0.0;
+        _aggregateMaxObjectName = string.Empty;
+    }
+
+    private static void FlushUpdateAggregate()
+    {
+        if (_aggregateFrame < 0 ||
+            _aggregateCount <= 0)
+        {
+            return;
+        }
+
+        if (!VisualUpdatePerfLog.ShouldLog(_aggregateTotalMs))
             return;
 
-        _elapsedSeconds += Time.deltaTime;
-
-        float progress01 =
-            Mathf.Clamp01(_elapsedSeconds / Mathf.Max(0.01f, _lifetimeSeconds));
-
-        ApplyVisual(progress01);
-
-        if (progress01 >= 1f)
-            Destroy(gameObject);
+        VisualUpdatePerfLog.LogMeasured(
+            "CombatDamagePopupView2A.Update.Aggregate",
+            _aggregateTotalMs,
+            "AggregateFrame=" + _aggregateFrame +
+            " | ViewCount=" + _aggregateCount +
+            " | DestroyedCount=" + _aggregateDestroyedCount +
+            " | MaxSingleMs=" + _aggregateMaxSingleMs.ToString("F3") +
+            " | MaxObject=" + _aggregateMaxObjectName +
+            " | ApplyVisualMs=" + _aggregateApplyVisualMs.ToString("F3"));
     }
 
     private void ResolveText()

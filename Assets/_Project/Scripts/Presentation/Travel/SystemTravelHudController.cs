@@ -186,25 +186,81 @@ public sealed class SystemTravelHudController :
 
     private void Update()
     {
-        if (!_isInitialized)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        RefreshTime();
-        RefreshTravelState();
+        double refreshTimeMs = 0.0;
+        double refreshTravelStateMs = 0.0;
+        double refreshSpeedMs = 0.0;
 
-        if (Time.unscaledTime <
-            _nextSpeedRefreshTime)
+        bool refreshedSpeed = false;
+
+        try
         {
-            return;
+            if (!_isInitialized)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshTime();
+
+            refreshTimeMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshTravelState();
+
+            refreshTravelStateMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (Time.unscaledTime <
+                _nextSpeedRefreshTime)
+            {
+                return;
+            }
+
+            _nextSpeedRefreshTime =
+                Time.unscaledTime +
+                Mathf.Max(
+                    0.02f,
+                    speedRefreshIntervalSeconds);
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshStatusTextWithSpeed();
+
+            refreshSpeedMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            refreshedSpeed = true;
         }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
 
-        _nextSpeedRefreshTime =
-            Time.unscaledTime +
-            Mathf.Max(
-                0.02f,
-                speedRefreshIntervalSeconds);
+            string details =
+                "Name=" + name +
+                " | Initialized=" + _isInitialized +
+                " | RefreshedSpeed=" + refreshedSpeed +
+                " | RefreshTimeMs=" + refreshTimeMs.ToString("F3") +
+                " | RefreshTravelStateMs=" + refreshTravelStateMs.ToString("F3") +
+                " | RefreshSpeedMs=" + refreshSpeedMs.ToString("F3");
 
-        RefreshStatusTextWithSpeed();
+            VisualUpdateAggregateLog.Record(
+                "SystemTravelHudController.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemTravelHudController.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnDisable()

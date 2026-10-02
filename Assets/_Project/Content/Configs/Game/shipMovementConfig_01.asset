@@ -16,6 +16,7 @@ MonoBehaviour:
   acceleration: 18
   deceleration: 22
   brakingDeceleration: 30
+  speedMultiplier: 1
   turnSpeedDegrees: 240
   rotationSmoothing: 0.18
   routeTurnRadiusAdjustmentStepPercent: 5
@@ -27,6 +28,11 @@ MonoBehaviour:
   movingDestinationRouteRefreshBlockedInitialSlots: 2
   movingDestinationRouteRefreshesPerTick: 5
   movingDestinationRouteRefreshBlockedInitialTicks: 2
+  offscreenMovingPlanetRouteRefreshEnabled: 1
+  offscreenMovingPlanetRouteRefreshCooldownTicks: 10
+  offscreenMovingPlanetTerminalRefreshDistance: 80
+  offscreenMovingPlanetTerminalRefreshTimeTicks: 1
+  offscreenMovingPlanetMaxDestinationDriftBeforeRefresh: 300
   routeNearDistanceTurnRadiusMultiplier: 0.75
   routeForwardSectorAngleDegrees: 60
   routeBehindSectorAngleDegrees: 105

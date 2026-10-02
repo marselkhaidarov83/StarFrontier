@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class CombatBeamView2A :  CustomMonoBehaviour
+public sealed class CombatBeamView2A : CustomMonoBehaviour
 {
     private const string DefaultSortingLayerName = "SystemShipFX";
 
@@ -11,12 +11,21 @@ public sealed class CombatBeamView2A :  CustomMonoBehaviour
 
     [Header("Line")]
     [SerializeField] private LineRenderer lineRenderer;
-    [SerializeField] [Min(0.01f)] private float lineWidth = 0.08f;
-    [SerializeField] [Min(0f)] private float endpointPadding = 0.45f;
+    [SerializeField][Min(0.01f)] private float lineWidth = 0.08f;
+    [SerializeField][Min(0f)] private float endpointPadding = 0.45f;
     [SerializeField] private string sortingLayerName = DefaultSortingLayerName;
     [SerializeField] private int sortingOrder = 730;
 
     private ISystemNpcCombatService _combatService;
+    private static int _aggregateFrame = -1;
+    private static int _aggregateCount;
+    private static int _aggregateCompletedCount;
+    private static double _aggregateTotalMs;
+    private static double _aggregateResolveServiceMs;
+    private static double _aggregateTryGetBeamMs;
+    private static double _aggregateSetEndpointsMs;
+    private static double _aggregateMaxSingleMs;
+    private static string _aggregateMaxBeamId = string.Empty;
 
     public string BeamId { get; private set; }
 
@@ -69,29 +78,156 @@ public sealed class CombatBeamView2A :  CustomMonoBehaviour
 
     private void Update()
     {
-        if (string.IsNullOrWhiteSpace(BeamId))
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        ResolveCombatService();
+        double resolveServiceMs = 0.0;
+        double tryGetBeamMs = 0.0;
+        double setEndpointsMs = 0.0;
 
-        if (_combatService == null)
-            return;
+        bool completed = false;
 
-        if (!_combatService.TryGetBeam(
-                BeamId,
-                out CombatBeamRuntimeState2A beam))
+        try
         {
-            Complete();
+            if (string.IsNullOrWhiteSpace(BeamId))
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ResolveCombatService();
+
+            resolveServiceMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (_combatService == null)
+                return;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            bool beamFound =
+                _combatService.TryGetBeam(
+                    BeamId,
+                    out CombatBeamRuntimeState2A beam);
+
+            tryGetBeamMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!beamFound)
+            {
+                completed = true;
+                Complete();
+                return;
+            }
+
+            if (beam == null || beam.IsResolved)
+            {
+                completed = true;
+                Complete();
+                return;
+            }
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            SetEndpoints(beam.StartPosition, beam.TargetPosition);
+
+            setEndpointsMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            RecordUpdateAggregate(
+                elapsedMs,
+                resolveServiceMs,
+                tryGetBeamMs,
+                setEndpointsMs,
+                completed,
+                BeamId);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "CombatBeamView2A.Update",
+                startedAt,
+                "BeamId=" + (BeamId ?? string.Empty) +
+                " | Completed=" + completed +
+                " | ResolveServiceMs=" + resolveServiceMs.ToString("F3") +
+                " | TryGetBeamMs=" + tryGetBeamMs.ToString("F3") +
+                " | SetEndpointsMs=" + setEndpointsMs.ToString("F3"));
+        }
+    }
+
+    private static void RecordUpdateAggregate(
+        double elapsedMs,
+        double resolveServiceMs,
+        double tryGetBeamMs,
+        double setEndpointsMs,
+        bool completed,
+        string beamId)
+    {
+        int frame =
+            Time.frameCount;
+
+        if (_aggregateFrame != frame)
+        {
+            FlushUpdateAggregate();
+            ResetUpdateAggregate(frame);
+        }
+
+        _aggregateCount++;
+        _aggregateTotalMs += elapsedMs;
+        _aggregateResolveServiceMs += resolveServiceMs;
+        _aggregateTryGetBeamMs += tryGetBeamMs;
+        _aggregateSetEndpointsMs += setEndpointsMs;
+
+        if (completed)
+            _aggregateCompletedCount++;
+
+        if (elapsedMs > _aggregateMaxSingleMs)
+        {
+            _aggregateMaxSingleMs = elapsedMs;
+            _aggregateMaxBeamId = beamId ?? string.Empty;
+        }
+    }
+
+    private static void ResetUpdateAggregate(int frame)
+    {
+        _aggregateFrame = frame;
+        _aggregateCount = 0;
+        _aggregateCompletedCount = 0;
+        _aggregateTotalMs = 0.0;
+        _aggregateResolveServiceMs = 0.0;
+        _aggregateTryGetBeamMs = 0.0;
+        _aggregateSetEndpointsMs = 0.0;
+        _aggregateMaxSingleMs = 0.0;
+        _aggregateMaxBeamId = string.Empty;
+    }
+
+    private static void FlushUpdateAggregate()
+    {
+        if (_aggregateFrame < 0 ||
+            _aggregateCount <= 0)
+        {
             return;
         }
 
-        if (beam == null || beam.IsResolved)
-        {
-            Complete();
+        if (!VisualUpdatePerfLog.ShouldLog(_aggregateTotalMs))
             return;
-        }
 
-        SetEndpoints(beam.StartPosition, beam.TargetPosition);
+        VisualUpdatePerfLog.LogMeasured(
+            "CombatBeamView2A.Update.Aggregate",
+            _aggregateTotalMs,
+            "AggregateFrame=" + _aggregateFrame +
+            " | ViewCount=" + _aggregateCount +
+            " | CompletedCount=" + _aggregateCompletedCount +
+            " | MaxSingleMs=" + _aggregateMaxSingleMs.ToString("F3") +
+            " | MaxBeamId=" + _aggregateMaxBeamId +
+            " | ResolveServiceMs=" + _aggregateResolveServiceMs.ToString("F3") +
+            " | TryGetBeamMs=" + _aggregateTryGetBeamMs.ToString("F3") +
+            " | SetEndpointsMs=" + _aggregateSetEndpointsMs.ToString("F3"));
     }
 
     public void SetEndpoints(

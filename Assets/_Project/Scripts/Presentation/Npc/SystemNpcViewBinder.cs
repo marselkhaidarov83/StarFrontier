@@ -17,6 +17,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
     private SimpleEventBus _eventBus;
 
     private readonly Dictionary<string, SystemNpcView> _viewsByNpcId = new();
+    public int VisibleViewCount => _viewsByNpcId.Count;
 
     private void Awake()
     {

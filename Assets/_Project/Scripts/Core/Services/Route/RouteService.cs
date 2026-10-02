@@ -5,6 +5,7 @@ public class RouteService : CustomService, IRouteService
     private GalaxyRuntimeState _galaxyRuntimeState;
     private readonly SimpleEventBus _eventBus;
     private readonly IConfigService _configService;
+    private const double PerfLogThresholdMs = 2.0;
 
     public RouteService()
     {
@@ -113,26 +114,58 @@ public class RouteService : CustomService, IRouteService
 
     private RouteConfig FindRouteConfig(string fromSystemId, string toSystemId)
     {
+        long startedAt = BeginPerfMeasure();
+
+        int sectorCount = 0;
+        int systemCount = 0;
+        int routeCount = 0;
+
         foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
         {
+            sectorCount++;
+
             if (sectorConfig == null || sectorConfig.Systems == null)
                 continue;
 
             foreach (StarSystemConfig systemConfig in sectorConfig.Systems)
             {
+                systemCount++;
+
                 if (systemConfig == null || systemConfig.Routes == null)
                     continue;
 
                 foreach (RouteConfig routeConfig in systemConfig.Routes)
                 {
+                    routeCount++;
+
                     if (routeConfig == null)
                         continue;
 
                     if (routeConfig.ConnectsSystems(fromSystemId, toSystemId))
+                    {
+                        LogRoutePerf(
+                            EndPerfMeasureMs(startedAt),
+                            "FindRouteConfig OK" +
+                            " | From=" + fromSystemId +
+                            " | To=" + toSystemId +
+                            " | Sectors=" + sectorCount +
+                            " | Systems=" + systemCount +
+                            " | Routes=" + routeCount);
+
                         return routeConfig;
+                    }
                 }
             }
         }
+
+        LogRoutePerf(
+            EndPerfMeasureMs(startedAt),
+            "FindRouteConfig FAILED" +
+            " | From=" + fromSystemId +
+            " | To=" + toSystemId +
+            " | Sectors=" + sectorCount +
+            " | Systems=" + systemCount +
+            " | Routes=" + routeCount);
 
         return null;
     }
@@ -165,21 +198,36 @@ public class RouteService : CustomService, IRouteService
 
     public string FindRouteId(string fromSystemId, string toSystemId)
     {
-        if (_configService.GalaxyConfig == null || _configService.GetAllSectors() == null)
+        long startedAt = BeginPerfMeasure();
+
+        if (_configService.GalaxyConfig == null ||
+            _configService.GetAllSectors() == null)
+        {
             return string.Empty;
+        }
+
+        int sectorCount = 0;
+        int systemCount = 0;
+        int routeCount = 0;
 
         foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
         {
+            sectorCount++;
+
             if (sectorConfig == null || sectorConfig.Systems == null)
                 continue;
 
             foreach (StarSystemConfig systemConfig in sectorConfig.Systems)
             {
+                systemCount++;
+
                 if (systemConfig == null || systemConfig.Routes == null)
                     continue;
 
                 foreach (RouteConfig routeConfig in systemConfig.Routes)
                 {
+                    routeCount++;
+
                     if (routeConfig == null)
                         continue;
 
@@ -192,10 +240,31 @@ public class RouteService : CustomService, IRouteService
                         routeConfig.ToSystem.Id == fromSystemId;
 
                     if (directRoute || reverseRoute)
+                    {
+                        LogRoutePerf(
+                            EndPerfMeasureMs(startedAt),
+                            "FindRouteId OK" +
+                            " | From=" + fromSystemId +
+                            " | To=" + toSystemId +
+                            " | RouteId=" + routeConfig.Id +
+                            " | Sectors=" + sectorCount +
+                            " | Systems=" + systemCount +
+                            " | Routes=" + routeCount);
+
                         return routeConfig.Id;
+                    }
                 }
             }
         }
+
+        LogRoutePerf(
+            EndPerfMeasureMs(startedAt),
+            "FindRouteId FAILED" +
+            " | From=" + fromSystemId +
+            " | To=" + toSystemId +
+            " | Sectors=" + sectorCount +
+            " | Systems=" + systemCount +
+            " | Routes=" + routeCount);
 
         return string.Empty;
     }
@@ -230,5 +299,35 @@ public class RouteService : CustomService, IRouteService
         return _galaxyRuntimeState.Routes.FirstOrDefault(
             route => route.RouteId == routeId
         );
+    }
+
+    private static long BeginPerfMeasure()
+    {
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    private static double EndPerfMeasureMs(long startedAt)
+    {
+        long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
+        return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+    }
+
+    private void LogRoutePerf(double elapsedMs, string message)
+    {
+        if (elapsedMs < PerfLogThresholdMs)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.GalaxyRoute))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.GalaxyRoute,
+            "[RouteService] " +
+            message +
+            " | Ms=" +
+            elapsedMs.ToString("F2"));
     }
 }

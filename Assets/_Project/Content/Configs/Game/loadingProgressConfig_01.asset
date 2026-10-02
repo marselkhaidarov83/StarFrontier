@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e1a9273dc8244745924e215f182b418, type: 3}
+  m_Name: loadingProgressConfig_01
+  m_EditorClassIdentifier: Data::LoadingProgressConfig
+  gameStartShowSeconds: 1
+  systemTravelShowSeconds: 0.3
+  maxProgressBeforeWorkComplete: 0.98
+  progressSmoothSpeed: 1.5
+  offlineRelocationMaxNpcsPerSlice: 1000
+  offlineRelocationMaxSliceMs: 12
+  offlineRelocationNpcPercent: 50
+  startProgress: 0.05
+  canContinueProgress: 0.1
+  saveLoadedProgress: 0.22
+  sessionLoadedProgress: 0.25
+  offlineRelocationFromProgress: 0.25
+  offlineRelocationToProgress: 0.78
+  populationProgress: 0.8
+  enterSystemProgress: 0.82
+  warmupFromProgress: 0.82
+  warmupToProgress: 0.98
+  beforeLoadSystemProgress: 0.99

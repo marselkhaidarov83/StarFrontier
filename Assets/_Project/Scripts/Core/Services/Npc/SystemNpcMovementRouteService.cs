@@ -1,9 +1,16 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
 public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMovementRouteService
 {
+    private sealed class PlanetPositionCacheEntry
+    {
+        public int Tick;
+        public Vector3 Position;
+    }
+
     private const float InvalidRoutePointSqrMagnitude = 0.001f;
 
     private readonly IConfigService _configService;
@@ -14,6 +21,9 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
     private const float KeepDistanceRadius = 100f;
     private const float PlanetKeepDistanceRadius = 200f;
+
+    private readonly Dictionary<string, PlanetPositionCacheEntry> _planetPositionCache =
+    new Dictionary<string, PlanetPositionCacheEntry>();
 
     public SystemNpcMovementRouteService()
     {
@@ -31,66 +41,350 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
     public Vector3 GetNextTargetPosition(SystemNpcRuntimeState npc)
     {
-        if (npc == null)
-            return Vector3.zero;
-
-        if (npc.IsAlly)
-            return GetAllyTargetPosition(npc);
-
-        if (npc.IsEnemy)
-            return GetEnemyTargetPosition(npc);
-
-        if (npc.IsPirate)
-            return GetPirateTargetPosition(npc);
-
-        return GetRandomFallbackPosition(npc);
+        return GetNextTargetPosition(npc, null);
     }
 
-    private Vector3 GetAllyTargetPosition(SystemNpcRuntimeState npc)
+    public Vector3 GetNextTargetPosition(
+        SystemNpcRuntimeState npc,
+        SystemNpcMovementTargetResolveStats stats)
     {
-        if (TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition))
-            return GetCombatApproachPosition(npc, npcTargetPosition);
+        long startedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        long branchStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        Vector3 result;
+
+        if (npc == null)
+        {
+            result = Vector3.zero;
+
+            if (stats != null)
+            {
+                stats.GetNextTargetFallbackCount++;
+                stats.GetNextTargetFallbackMs += EndPerfMeasureMs(branchStartedAt);
+            }
+        }
+        else if (TryGetPlanetToPlanetTravelTargetPosition(
+                     npc,
+                     stats,
+                     out Vector3 planetToPlanetTargetPosition))
+        {
+            result = planetToPlanetTargetPosition;
+
+            if (stats != null)
+            {
+                stats.GetNextTargetAllyCount++;
+                stats.GetNextTargetAllyMs += EndPerfMeasureMs(branchStartedAt);
+            }
+        }
+        else if (npc.IsAlly)
+        {
+            result = GetAllyTargetPosition(npc, stats);
+
+            if (stats != null)
+            {
+                stats.GetNextTargetAllyCount++;
+                stats.GetNextTargetAllyMs += EndPerfMeasureMs(branchStartedAt);
+            }
+        }
+        else if (npc.IsEnemy)
+        {
+            result = GetEnemyTargetPosition(npc, stats);
+
+            if (stats != null)
+            {
+                stats.GetNextTargetEnemyCount++;
+                stats.GetNextTargetEnemyMs += EndPerfMeasureMs(branchStartedAt);
+            }
+        }
+        else if (npc.IsPirate)
+        {
+            result = GetPirateTargetPosition(npc, stats);
+
+            if (stats != null)
+            {
+                stats.GetNextTargetPirateCount++;
+                stats.GetNextTargetPirateMs += EndPerfMeasureMs(branchStartedAt);
+            }
+        }
+        else
+        {
+            result = GetRandomFallbackPosition(npc, stats);
+
+            if (stats != null)
+            {
+                stats.GetNextTargetFallbackCount++;
+                stats.GetNextTargetFallbackMs += EndPerfMeasureMs(branchStartedAt);
+            }
+        }
+
+        if (stats != null)
+        {
+            stats.GetNextTargetCount++;
+            stats.GetNextTargetMs += EndPerfMeasureMs(startedAt);
+        }
+
+        return result;
+    }
+
+    private bool TryGetPlanetToPlanetTravelTargetPosition(
+        SystemNpcRuntimeState npc,
+        SystemNpcMovementTargetResolveStats stats,
+        out Vector3 targetPosition)
+    {
+        targetPosition =
+            Vector3.zero;
+
+        if (npc == null)
+            return false;
+
+        if (npc.CurrentBehavior != SystemNpcBehaviorType.PlanetToPlanetTravel)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(npc.TargetPlanetId))
+            return false;
+
+        long planetLookupStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        Vector3 planetPosition =
+            GetPlanetPosition(
+                npc.TargetPlanetId,
+                stats);
+
+        long validationStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        bool isInvalidRoutePoint =
+            IsInvalidRoutePoint(planetPosition);
+
+        if (stats != null)
+        {
+            stats.PlanetInvalidPointCheckCount++;
+            stats.PlanetInvalidPointCheckMs += EndPerfMeasureMs(validationStartedAt);
+
+            stats.PlanetLookupCount++;
+            stats.PlanetLookupMs += EndPerfMeasureMs(planetLookupStartedAt);
+        }
+
+        if (isInvalidRoutePoint)
+        {
+            npc.TargetPlanetId = null;
+            return false;
+        }
+
+        targetPosition =
+            planetPosition;
+
+        return true;
+    }
+
+    private Vector3 GetAllyTargetPosition(
+        SystemNpcRuntimeState npc,
+        SystemNpcMovementTargetResolveStats stats)
+    {
+        long stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        bool hasNpcTarget =
+            TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition);
+
+        if (stats != null)
+        {
+            stats.CombatNpcCheckCount++;
+            stats.CombatNpcCheckMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        if (hasNpcTarget)
+            return GetCombatApproachPosition(npc, npcTargetPosition, stats);
+
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
 
         if (npc.TargetSystemId != null)
         {
+            long detailStartedAt =
+                stats != null
+                    ? BeginPerfMeasure()
+                    : 0L;
+
             LogCustom("Ally target system link = " +
                       npc.TargetSystemId + ", " +
                       npc.TargetSystemExitPoint);
 
-            if (!IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetSystemExitPoint))
-                return npc.TargetSystemExitPoint;
+            if (stats != null)
+            {
+                stats.SystemExitLogCount++;
+                stats.SystemExitLogMs += EndPerfMeasureMs(detailStartedAt);
+            }
+
+            detailStartedAt =
+                stats != null
+                    ? BeginPerfMeasure()
+                    : 0L;
+
+            bool isInvalidSystemPoint =
+                IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetSystemExitPoint);
+
+            if (stats != null)
+            {
+                stats.SystemExitInvalidPointCheckCount++;
+                stats.SystemExitInvalidPointCheckMs += EndPerfMeasureMs(detailStartedAt);
+            }
+
+            if (stats != null)
+            {
+                stats.SystemExitCheckCount++;
+                stats.SystemExitCheckMs += EndPerfMeasureMs(stepStartedAt);
+            }
+
+            if (!isInvalidSystemPoint)
+            {
+                detailStartedAt =
+                    stats != null
+                        ? BeginPerfMeasure()
+                        : 0L;
+
+                Vector3 targetSystemExitPoint =
+                    npc.TargetSystemExitPoint;
+
+                if (stats != null)
+                {
+                    stats.SystemExitReturnCount++;
+                    stats.SystemExitReturnMs += EndPerfMeasureMs(detailStartedAt);
+                }
+
+                return targetSystemExitPoint;
+            }
+
+            detailStartedAt =
+                stats != null
+                    ? BeginPerfMeasure()
+                    : 0L;
 
             npc.TargetSystemId = null;
             npc.TargetSystemExitPoint = Vector3.zero;
             npc.TargetSystemEntryPoint = Vector3.zero;
+
+            if (stats != null)
+            {
+                stats.SystemExitResetCount++;
+                stats.SystemExitResetMs += EndPerfMeasureMs(detailStartedAt);
+            }
         }
+        else if (stats != null)
+        {
+            stats.SystemExitCheckCount++;
+            stats.SystemExitCheckMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
 
         if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId))
         {
-            Vector3 planetPosition = GetPlanetPosition(npc.TargetPlanetId);
+            Vector3 planetPosition =
+                GetPlanetPosition(npc.TargetPlanetId, stats);
+
             LogCustom("Ally target planet = " + npc.TargetPlanetId + ", " + planetPosition);
 
-            if (!IsInvalidRoutePoint(planetPosition))
+            long validationStartedAt =
+                stats != null
+                    ? BeginPerfMeasure()
+                    : 0L;
+
+            bool isInvalidRoutePoint =
+                IsInvalidRoutePoint(planetPosition);
+
+            if (stats != null)
+            {
+                stats.PlanetInvalidPointCheckCount++;
+                stats.PlanetInvalidPointCheckMs += EndPerfMeasureMs(validationStartedAt);
+
+                stats.PlanetLookupCount++;
+                stats.PlanetLookupMs += EndPerfMeasureMs(stepStartedAt);
+            }
+
+            if (!isInvalidRoutePoint)
                 return planetPosition;
 
             npc.TargetPlanetId = null;
         }
+        else if (stats != null)
+        {
+            stats.PlanetLookupCount++;
+            stats.PlanetLookupMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
 
         if (npc.TargetPosition != Vector3.zero &&
             !IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetPosition))
         {
+            if (stats != null)
+            {
+                stats.TargetPositionCheckCount++;
+                stats.TargetPositionCheckMs += EndPerfMeasureMs(stepStartedAt);
+            }
+
             return npc.TargetPosition;
+        }
+
+        if (stats != null)
+        {
+            stats.TargetPositionCheckCount++;
+            stats.TargetPositionCheckMs += EndPerfMeasureMs(stepStartedAt);
         }
 
         npc.TargetPosition = Vector3.zero;
 
-        return GetRandomFallbackPosition(npc);
+        return GetRandomFallbackPosition(npc, stats);
     }
 
-    private Vector3 GetPirateTargetPosition(SystemNpcRuntimeState npc)
+    private Vector3 GetPirateTargetPosition(
+        SystemNpcRuntimeState npc,
+        SystemNpcMovementTargetResolveStats stats)
     {
-        if (TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition))
-            return GetCombatApproachPosition(npc, npcTargetPosition);
+        long stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        bool hasNpcTarget =
+            TryGetNpcTargetPosition(npc, out Vector3 npcTargetPosition);
+
+        if (stats != null)
+        {
+            stats.CombatNpcCheckCount++;
+            stats.CombatNpcCheckMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        if (hasNpcTarget)
+            return GetCombatApproachPosition(npc, npcTargetPosition, stats);
+
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
 
         if (npc.TargetSystemId != null)
         {
@@ -98,57 +392,171 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
                       npc.TargetSystemId + ", " +
                       npc.TargetSystemExitPoint);
 
-            if (!IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetSystemExitPoint))
+            bool isInvalidSystemPoint =
+                IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetSystemExitPoint);
+
+            if (stats != null)
+            {
+                stats.SystemExitCheckCount++;
+                stats.SystemExitCheckMs += EndPerfMeasureMs(stepStartedAt);
+            }
+
+            if (!isInvalidSystemPoint)
                 return npc.TargetSystemExitPoint;
 
             npc.TargetSystemId = null;
             npc.TargetSystemExitPoint = Vector3.zero;
             npc.TargetSystemEntryPoint = Vector3.zero;
         }
+        else if (stats != null)
+        {
+            stats.SystemExitCheckCount++;
+            stats.SystemExitCheckMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
 
         if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId))
         {
-            Vector3 planetPosition = GetPlanetPosition(npc.TargetPlanetId);
+            Vector3 planetPosition =
+                GetPlanetPosition(npc.TargetPlanetId, stats);
+
             LogCustom("Pirate target planet = " + npc.TargetPlanetId + ", " + planetPosition);
 
-            if (!IsInvalidRoutePoint(planetPosition))
+            long validationStartedAt =
+                stats != null
+                    ? BeginPerfMeasure()
+                    : 0L;
+
+            bool isInvalidRoutePoint =
+                IsInvalidRoutePoint(planetPosition);
+
+            if (stats != null)
+            {
+                stats.PlanetInvalidPointCheckCount++;
+                stats.PlanetInvalidPointCheckMs += EndPerfMeasureMs(validationStartedAt);
+
+                stats.PlanetLookupCount++;
+                stats.PlanetLookupMs += EndPerfMeasureMs(stepStartedAt);
+            }
+
+            if (!isInvalidRoutePoint)
                 return planetPosition;
 
             npc.TargetPlanetId = null;
         }
+        else if (stats != null)
+        {
+            stats.PlanetLookupCount++;
+            stats.PlanetLookupMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
 
         if (npc.TargetPosition != Vector3.zero &&
             !IsInvalidSystemPoint(npc.CurrentSystemId, npc.TargetPosition))
         {
+            if (stats != null)
+            {
+                stats.TargetPositionCheckCount++;
+                stats.TargetPositionCheckMs += EndPerfMeasureMs(stepStartedAt);
+            }
+
             return npc.TargetPosition;
+        }
+
+        if (stats != null)
+        {
+            stats.TargetPositionCheckCount++;
+            stats.TargetPositionCheckMs += EndPerfMeasureMs(stepStartedAt);
         }
 
         npc.TargetPosition = Vector3.zero;
 
-        return GetRandomFallbackPosition(npc);
+        return GetRandomFallbackPosition(npc, stats);
     }
 
     private Vector3 GetEnemyTargetPosition(SystemNpcRuntimeState npc)
     {
-        if (TryFindNearestAllyPosition(npc, out Vector3 allyPosition))
+        return GetEnemyTargetPosition(npc, null);
+    }
+
+    private Vector3 GetEnemyTargetPosition(
+        SystemNpcRuntimeState npc,
+        SystemNpcMovementTargetResolveStats stats)
+    {
+        long stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        bool hasNearestAlly =
+            TryFindNearestAllyPosition(npc, out Vector3 allyPosition);
+
+        if (stats != null)
+        {
+            stats.EnemyNearestAllyCheckCount++;
+            stats.EnemyNearestAllyCheckMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        if (hasNearestAlly)
         {
             LogCustom("Enemy target = nearest ally");
-            return GetCombatApproachPosition(npc, allyPosition);
+            return GetCombatApproachPosition(npc, allyPosition, stats);
         }
 
-        if (TryGetPlayerPositionInSameSystem(npc, out Vector3 playerPosition))
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        bool hasPlayer =
+            TryGetPlayerPositionInSameSystem(npc, out Vector3 playerPosition);
+
+        if (stats != null)
+        {
+            stats.PlayerCheckCount++;
+            stats.PlayerCheckMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        if (hasPlayer)
         {
             LogCustom("Enemy target = player");
-            return GetCombatApproachPosition(npc, playerPosition);
+            return GetCombatApproachPosition(npc, playerPosition, stats);
         }
 
-        if (TryFindNearestInhabitedPlanetPosition(npc, out Vector3 planetPosition))
+        stepStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        bool hasInhabitedPlanet =
+            TryFindNearestInhabitedPlanetPosition(npc, out Vector3 planetPosition);
+
+        if (stats != null)
+        {
+            stats.NearestInhabitedPlanetCheckCount++;
+            stats.NearestInhabitedPlanetCheckMs += EndPerfMeasureMs(stepStartedAt);
+        }
+
+        if (hasInhabitedPlanet)
         {
             LogCustom("Enemy target = nearest inhabited planet");
-            return GetApproachPosition(npc.CurrentPosition, planetPosition, PlanetKeepDistanceRadius);
+
+            return GetApproachPosition(
+                npc.CurrentPosition,
+                planetPosition,
+                PlanetKeepDistanceRadius,
+                stats);
         }
 
-        return GetRandomFallbackPosition(npc);
+        return GetRandomFallbackPosition(npc, stats);
     }
 
     private bool TryGetNpcTargetPosition(SystemNpcRuntimeState npc, out Vector3 position)
@@ -288,19 +696,112 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
     private Vector3 GetPlanetPosition(string planetId)
     {
-        PlanetConfig planet = _configService.GetPlanetConfigById(planetId);
+        return GetPlanetPosition(planetId, null);
+    }
+
+    private Vector3 GetPlanetPosition(
+        string planetId,
+        SystemNpcMovementTargetResolveStats stats)
+    {
+        if (string.IsNullOrWhiteSpace(planetId))
+            return Vector3.zero;
+
+        int currentFrame =
+            Time.frameCount;
+
+        long cacheStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        bool hasCachedPosition =
+            _planetPositionCache.TryGetValue(
+                planetId,
+                out PlanetPositionCacheEntry cacheEntry) &&
+            cacheEntry != null &&
+            cacheEntry.Tick == currentFrame;
+
+        if (stats != null)
+        {
+            stats.PlanetCacheCheckCount++;
+            stats.PlanetCacheCheckMs += EndPerfMeasureMs(cacheStartedAt);
+        }
+
+        if (hasCachedPosition)
+        {
+            if (stats != null)
+                stats.PlanetCacheHitCount++;
+
+            return cacheEntry.Position;
+        }
+
+        if (stats != null)
+            stats.PlanetCacheMissCount++;
+
+        long configStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        PlanetConfig planet =
+            _configService.GetPlanetConfigById(planetId);
+
+        if (stats != null)
+        {
+            stats.PlanetConfigLookupCount++;
+            stats.PlanetConfigLookupMs += EndPerfMeasureMs(configStartedAt);
+        }
 
         if (planet == null)
             return Vector3.zero;
 
-        return _orbitalMotionService.GetPlanetCurrentPosition(planet.PlanetOrbit);
+        long orbitalStartedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        Vector3 position =
+            _orbitalMotionService.GetPlanetCurrentPosition(planet.PlanetOrbit);
+
+        if (stats != null)
+        {
+            stats.PlanetOrbitalPositionCount++;
+            stats.PlanetOrbitalPositionMs += EndPerfMeasureMs(orbitalStartedAt);
+        }
+
+        _planetPositionCache[planetId] =
+            new PlanetPositionCacheEntry
+            {
+                Tick = currentFrame,
+                Position = position
+            };
+
+        return position;
     }
 
     private Vector3 GetApproachPosition(
-    Vector3 currentPosition,
-    Vector3 targetPosition,
-    float radius)
+        Vector3 currentPosition,
+        Vector3 targetPosition,
+        float radius)
     {
+        return GetApproachPosition(
+            currentPosition,
+            targetPosition,
+            radius,
+            null);
+    }
+
+    private Vector3 GetApproachPosition(
+        Vector3 currentPosition,
+        Vector3 targetPosition,
+        float radius,
+        SystemNpcMovementTargetResolveStats stats)
+    {
+        long startedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
         Vector3 fromTargetToCurrent =
             currentPosition - targetPosition;
 
@@ -318,6 +819,12 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
         approachPosition.z = -2f;
 
+        if (stats != null)
+        {
+            stats.ApproachPositionCount++;
+            stats.ApproachPositionMs += EndPerfMeasureMs(startedAt);
+        }
+
         return approachPosition;
     }
 
@@ -325,8 +832,29 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         SystemNpcRuntimeState npc,
         Vector3 targetPosition)
     {
+        return GetCombatApproachPosition(npc, targetPosition, null);
+    }
+
+    private Vector3 GetCombatApproachPosition(
+        SystemNpcRuntimeState npc,
+        Vector3 targetPosition,
+        SystemNpcMovementTargetResolveStats stats)
+    {
+        long startedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
         if (npc == null)
+        {
+            if (stats != null)
+            {
+                stats.CombatApproachCount++;
+                stats.CombatApproachMs += EndPerfMeasureMs(startedAt);
+            }
+
             return targetPosition;
+        }
 
         Vector3 currentPosition =
             npc.CurrentPosition;
@@ -349,13 +877,29 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
         if (distanceToTarget <= combatRange + arrivalTolerance)
         {
+            if (stats != null)
+            {
+                stats.CombatApproachCount++;
+                stats.CombatApproachMs += EndPerfMeasureMs(startedAt);
+            }
+
             return currentPosition;
         }
 
-        return GetApproachPosition(
-            currentPosition,
-            targetPosition,
-            combatRange);
+        Vector3 result =
+            GetApproachPosition(
+                currentPosition,
+                targetPosition,
+                combatRange,
+                stats);
+
+        if (stats != null)
+        {
+            stats.CombatApproachCount++;
+            stats.CombatApproachMs += EndPerfMeasureMs(startedAt);
+        }
+
+        return result;
     }
 
     private float GetCombatApproachArrivalTolerance(SystemNpcRuntimeState npc)
@@ -414,8 +958,31 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
     private Vector3 GetRandomFallbackPosition(SystemNpcRuntimeState npc)
     {
-        Vector2 random = Random.insideUnitCircle * 5f;
-        return npc.CurrentPosition + new Vector3(random.x, random.y, -2f);
+        return GetRandomFallbackPosition(npc, null);
+    }
+
+    private Vector3 GetRandomFallbackPosition(
+        SystemNpcRuntimeState npc,
+        SystemNpcMovementTargetResolveStats stats)
+    {
+        long startedAt =
+            stats != null
+                ? BeginPerfMeasure()
+                : 0L;
+
+        Vector2 random =
+            Random.insideUnitCircle * 5f;
+
+        Vector3 result =
+            npc.CurrentPosition + new Vector3(random.x, random.y, -2f);
+
+        if (stats != null)
+        {
+            stats.FallbackCount++;
+            stats.FallbackMs += EndPerfMeasureMs(startedAt);
+        }
+
+        return result;
     }
 
     private bool IsInvalidRoutePoint(Vector3 point)
@@ -477,4 +1044,22 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         return !float.IsNaN(value) &&
                !float.IsInfinity(value);
     }
+
+    private static long BeginPerfMeasure()
+    {
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    private static double EndPerfMeasureMs(long startedAt)
+    {
+        if (startedAt <= 0L)
+            return 0d;
+
+        long elapsedTicks =
+            System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
+
+        return elapsedTicks * 1000d / System.Diagnostics.Stopwatch.Frequency;
+    }
+
+
 }

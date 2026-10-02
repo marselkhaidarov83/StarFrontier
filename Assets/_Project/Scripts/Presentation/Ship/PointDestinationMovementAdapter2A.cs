@@ -48,73 +48,132 @@ public sealed class PointDestinationMovementAdapter2A :
 
     private void Update()
     {
-        if (!_hasDestination)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        if (!TryResolveServices())
-            return;
+        double resolveServicesMs = 0.0;
+        double movementStateMs = 0.0;
+        double setInputMs = 0.0;
 
-        if (_movementService.State == null)
-            return;
+        bool completed = false;
+        bool cancelledInvalid = false;
+        float distance = 0f;
 
-        Vector2 currentPosition =
-            _movementService.State.Position;
-
-        if (!IsFinite(currentPosition))
+        try
         {
-            Debug.LogError(
-                "[PointDestinationMovementAdapter2A] " +
-                "Movement State contains invalid position.",
-                this);
+            if (!_hasDestination)
+                return;
 
-            CancelDestination(
-                immediateStop: true);
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
 
-            return;
+            bool servicesResolved =
+                TryResolveServices();
+
+            resolveServicesMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!servicesResolved)
+                return;
+
+            if (_movementService.State == null)
+                return;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            Vector2 currentPosition =
+                _movementService.State.Position;
+
+            movementStateMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!IsFinite(currentPosition))
+            {
+                cancelledInvalid = true;
+
+                Debug.LogError(
+                    "[PointDestinationMovementAdapter2A] " +
+                    "Movement State contains invalid position.",
+                    this);
+
+                CancelDestination(
+                    immediateStop: true);
+
+                return;
+            }
+
+            Vector2 delta =
+                _destination -
+                currentPosition;
+
+            distance =
+                delta.magnitude;
+
+            if (distance <= arrivalRadius)
+            {
+                completed = true;
+                CompleteDestination();
+                return;
+            }
+
+            Vector2 direction =
+                delta / distance;
+
+            float effectiveSlowDownRadius =
+                Mathf.Max(
+                    slowDownRadius,
+                    arrivalRadius + 0.01f);
+
+            float inputStrength =
+                Mathf.Clamp01(
+                    distance /
+                    effectiveSlowDownRadius);
+
+            inputStrength =
+                Mathf.Max(
+                    inputStrength,
+                    0.1f);
+
+            Vector2 movementIntent =
+                direction *
+                inputStrength;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            _controlService.SetRawMoveInput(
+                movementIntent);
+
+            setInputMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
         }
-
-        Vector2 delta =
-            _destination -
-            currentPosition;
-
-        float distance =
-            delta.magnitude;
-
-        if (distance <= arrivalRadius)
+        finally
         {
-            CompleteDestination();
-            return;
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | HasDestination=" + _hasDestination +
+                " | Destination=" + _destination +
+                " | Distance=" + distance.ToString("F2") +
+                " | Completed=" + completed +
+                " | CancelledInvalid=" + cancelledInvalid +
+                " | ResolveServicesMs=" + resolveServicesMs.ToString("F3") +
+                " | MovementStateMs=" + movementStateMs.ToString("F3") +
+                " | SetInputMs=" + setInputMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "PointDestinationMovementAdapter2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "PointDestinationMovementAdapter2A.Update",
+                startedAt,
+                details);
         }
-
-        Vector2 direction =
-            delta / distance;
-
-        float effectiveSlowDownRadius =
-            Mathf.Max(
-                slowDownRadius,
-                arrivalRadius + 0.01f);
-
-        float inputStrength =
-            Mathf.Clamp01(
-                distance /
-                effectiveSlowDownRadius);
-
-        /*
-         * До попадания внутрь arrivalRadius
-         * input не должен стать настолько мал,
-         * чтобы корабль остановился раньше цели.
-         */
-        inputStrength =
-            Mathf.Max(
-                inputStrength,
-                0.1f);
-
-        Vector2 movementIntent =
-            direction *
-            inputStrength;
-
-        _controlService.SetRawMoveInput(
-            movementIntent);
     }
 
     private void OnDisable()

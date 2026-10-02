@@ -60,28 +60,90 @@ public sealed class SystemRouteSectorDebugVisualizer2A : MonoBehaviour
 
     private void Update()
     {
-        if (!visible)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double resolveMs = 0.0;
+        double rebuildMs = 0.0;
+        double hideMs = 0.0;
+
+        bool rebuilt = false;
+        bool hidden = false;
+
+        try
         {
-            HideAll();
-            return;
+            if (!visible)
+            {
+                double phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                HideAll();
+
+                hideMs =
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                hidden = true;
+                return;
+            }
+
+            if (_travelService == null)
+            {
+                double phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                TryResolveServices();
+
+                resolveMs =
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+            }
+
+            if (_travelService == null)
+                return;
+
+            if (!rebuildEveryFrame &&
+                Time.unscaledTime < _nextRefreshTime)
+            {
+                return;
+            }
+
+            _nextRefreshTime =
+                Time.unscaledTime + Mathf.Max(0.02f, refreshInterval);
+
+            double rebuildStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            Rebuild();
+
+            rebuildMs =
+                (Time.realtimeSinceStartupAsDouble - rebuildStartedAt) * 1000.0;
+
+            rebuilt = true;
         }
-
-        if (_travelService == null)
-            TryResolveServices();
-
-        if (_travelService == null)
-            return;
-
-        if (!rebuildEveryFrame &&
-            Time.unscaledTime < _nextRefreshTime)
+        finally
         {
-            return;
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | Visible=" + visible +
+                " | RebuildEveryFrame=" + rebuildEveryFrame +
+                " | Rebuilt=" + rebuilt +
+                " | Hidden=" + hidden +
+                " | ResolveMs=" + resolveMs.ToString("F3") +
+                " | RebuildMs=" + rebuildMs.ToString("F3") +
+                " | HideMs=" + hideMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemRouteSectorDebugVisualizer2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemRouteSectorDebugVisualizer2A.Update",
+                startedAt,
+                details);
         }
-
-        _nextRefreshTime =
-            Time.unscaledTime + Mathf.Max(0.02f, refreshInterval);
-
-        Rebuild();
     }
 
     private void TryResolveServices()

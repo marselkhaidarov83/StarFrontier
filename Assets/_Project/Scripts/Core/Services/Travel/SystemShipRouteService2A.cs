@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public enum SystemShipRouteTargetKind2A
@@ -14,6 +15,10 @@ public enum SystemShipRouteTargetKind2A
 
 public sealed class SystemShipRouteSettings2A
 {
+    public double RouteBuildBudgetStartedAt;
+    public float RouteBuildTimeBudgetMs;
+    public System.Func<double> GetRouteBuildBudgetUsedMs;
+    public System.Action<double> AddRouteBuildBudgetUsedMs;
     public float Speed;
     public float TurnRadius;
     public float ArrivalDistanceThreshold = 3f;
@@ -58,6 +63,25 @@ public sealed class SystemShipRouteResult2A
     public bool DestinationWasPushedOutsideSun;
     public bool StartWasPushedOutsideSun;
 
+    public int CandidateAttemptCount;
+    public int RawFallbackAttemptCount;
+    public string SelectedRouteSource = string.Empty;
+    public string LastRejectReason = string.Empty;
+
+    public int LastPlannerMaxSteps;
+    public float LastPlannerRouteStepDistance;
+    public float LastPlannerIntermediateArrivalThreshold;
+    public float LastPlannerRouteLength;
+    public float LastPlannerMaxAllowedRouteLength;
+    public float LastWaypointPathLength;
+    public int LastWaypointCount;
+
+    public bool DirectRouteCrossesSun;
+    public bool HasSunObstacle;
+    public Vector3 SunCenter;
+    public float SunRadius;
+    public float SunBlockingRadius;
+
     public void Clear()
     {
         Path.Clear();
@@ -72,6 +96,25 @@ public sealed class SystemShipRouteResult2A
         UsedRawSafeFallback = false;
         DestinationWasPushedOutsideSun = false;
         StartWasPushedOutsideSun = false;
+
+        CandidateAttemptCount = 0;
+        RawFallbackAttemptCount = 0;
+        SelectedRouteSource = string.Empty;
+        LastRejectReason = string.Empty;
+
+        LastPlannerMaxSteps = 0;
+        LastPlannerRouteStepDistance = 0f;
+        LastPlannerIntermediateArrivalThreshold = 0f;
+        LastPlannerRouteLength = 0f;
+        LastPlannerMaxAllowedRouteLength = 0f;
+        LastWaypointPathLength = 0f;
+        LastWaypointCount = 0;
+
+        DirectRouteCrossesSun = false;
+        HasSunObstacle = false;
+        SunCenter = Vector3.zero;
+        SunRadius = 0f;
+        SunBlockingRadius = 0f;
     }
 }
 
@@ -79,6 +122,7 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
 {
     private const float DirectionThresholdSqrMagnitude = 0.0001f;
     private const float RouteSegmentEpsilon = 0.001f;
+    private const double ExpensiveRouteBuildLogThresholdMs = 50.0;
 
     private readonly IConfigService _configService;
 
@@ -95,9 +139,11 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
     }
 
     public bool TryBuildRoute(
-    SystemShipRouteRequest2A request,
-    SystemShipRouteResult2A result)
+        SystemShipRouteRequest2A request,
+        SystemShipRouteResult2A result)
     {
+        long startedAt = Stopwatch.GetTimestamp();
+
         if (result == null)
             return false;
 
@@ -108,6 +154,9 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
 
         SystemShipRouteSettings2A settings =
             request.Settings ?? CreateDefaultSettings();
+
+        if (IsRouteBuildTimeBudgetExceeded(settings, startedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "TryBuildRoute.Start");
 
         if (settings.Speed <= 0f)
             return false;
@@ -127,6 +176,11 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 request.SystemId,
                 startPosition.z,
                 settings);
+
+        result.HasSunObstacle = obstacle.HasObstacle;
+        result.SunCenter = obstacle.Center;
+        result.SunRadius = obstacle.Radius;
+        result.SunBlockingRadius = obstacle.BlockingRadius;
 
         Vector3 originalStartPosition = startPosition;
         Vector3 originalDestinationPosition = destinationPosition;
@@ -149,10 +203,26 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
         result.DestinationWasPushedOutsideSun =
             Vector3.Distance(originalDestinationPosition, destinationPosition) > RouteSegmentEpsilon;
 
+        if (IsRouteBuildTimeBudgetExceeded(settings, startedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "TryBuildRoute.AfterPrepare");
+
         if (Vector3.Distance(
                 startPosition,
                 destinationPosition) <= settings.ArrivalDistanceThreshold)
         {
+            result.LastRejectReason = "AlreadyAtDestination";
+
+            LogExpensiveRouteBuildIfNeeded(
+                startedAt,
+                request,
+                settings,
+                startPosition,
+                destinationPosition,
+                startFacingDirection,
+                obstacle,
+                false,
+                result);
+
             return false;
         }
 
@@ -165,6 +235,8 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 obstacle.Center,
                 obstacle.BlockingRadius);
 
+        result.DirectRouteCrossesSun = directRouteCrossesSun;
+
         result.DestinationCase =
             ResolveDestinationCaseName(
                 startPosition,
@@ -173,17 +245,58 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 obstacle,
                 directRouteCrossesSun);
 
-        bool built =
-            TryBuildAdjustedRoute(
-                startPosition,
-                destinationPosition,
-                startFacingDirection,
+        bool earlyRawFallbackTried = false;
+        bool built = false;
+
+        if (ShouldTryEarlyRawSunFallback(
                 settings,
                 obstacle,
-                directRouteCrossesSun,
-                result);
+                directRouteCrossesSun))
+        {
+            earlyRawFallbackTried = true;
+
+            built =
+                TryBuildRawSafeFallbackRoute(
+                    startPosition,
+                    destinationPosition,
+                    startFacingDirection,
+                    settings,
+                    obstacle,
+                    directRouteCrossesSun,
+                    result,
+                    startedAt);
+
+            if (built)
+            {
+                result.SelectedRouteSource =
+                    string.IsNullOrWhiteSpace(result.SelectedRouteSource)
+                        ? "EarlyRawSunFallback"
+                        : "Early" + result.SelectedRouteSource;
+            }
+        }
+
+        if (IsRouteBuildTimeBudgetExceeded(settings, startedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "TryBuildRoute.AfterEarlyRawFallback");
+
+        if (!built)
+        {
+            built =
+                TryBuildAdjustedRoute(
+                    startPosition,
+                    destinationPosition,
+                    startFacingDirection,
+                    settings,
+                    obstacle,
+                    directRouteCrossesSun,
+                    result,
+                    startedAt);
+        }
+
+        if (IsRouteBuildTimeBudgetExceeded(settings, startedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "TryBuildRoute.AfterAdjustedRoute");
 
         if (!built &&
+            !earlyRawFallbackTried &&
             TryBuildRawSafeFallbackRoute(
                 startPosition,
                 destinationPosition,
@@ -191,16 +304,36 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 settings,
                 obstacle,
                 directRouteCrossesSun,
-                result))
+                result,
+                startedAt))
         {
             built = true;
         }
 
         if (!built)
         {
-            result.Clear();
+            result.LastRejectReason =
+                string.IsNullOrWhiteSpace(result.LastRejectReason)
+                    ? "RouteBuildFailed"
+                    : result.LastRejectReason;
+
+            LogExpensiveRouteBuildIfNeeded(
+                startedAt,
+                request,
+                settings,
+                startPosition,
+                destinationPosition,
+                startFacingDirection,
+                obstacle,
+                false,
+                result);
+
+            ClearFailedRoutePathForDiagnostics(result);
             return false;
         }
+
+        if (IsRouteBuildTimeBudgetExceeded(settings, startedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "TryBuildRoute.BeforeFinalValidation");
 
         ClampPathOutsideSunBlockingRadius(
             result.Path,
@@ -212,7 +345,20 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 obstacle,
                 obstacle.BlockingRadius))
         {
-            result.Clear();
+            result.LastRejectReason = "FinalPathTouchesSunBlock";
+
+            LogExpensiveRouteBuildIfNeeded(
+                startedAt,
+                request,
+                settings,
+                startPosition,
+                destinationPosition,
+                startFacingDirection,
+                obstacle,
+                false,
+                result);
+
+            ClearFailedRoutePathForDiagnostics(result);
             return false;
         }
 
@@ -225,34 +371,93 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
         if (result.EffectiveTurnRadius <= 0f)
             result.EffectiveTurnRadius = Mathf.Max(0f, settings.TurnRadius);
 
-        return result.Path.Count > 1;
+        bool success =
+            result.Path.Count > 1;
+
+        if (!success)
+            result.LastRejectReason = "PathTooShort";
+
+        LogExpensiveRouteBuildIfNeeded(
+            startedAt,
+            request,
+            settings,
+            startPosition,
+            destinationPosition,
+            startFacingDirection,
+            obstacle,
+            success,
+            result);
+
+        ConsumeRouteBuildBudget(settings, startedAt);
+
+        return success;
+    }
+
+    private static void ClearFailedRoutePathForDiagnostics(
+        SystemShipRouteResult2A result)
+    {
+        if (result == null)
+            return;
+
+        result.Path.Clear();
+        result.Built = false;
+        result.PathLength = 0f;
+    }
+
+    private static bool ShouldTryEarlyRawSunFallback(
+        SystemShipRouteSettings2A settings,
+        SunRouteObstacle2A obstacle,
+        bool directRouteCrossesSun)
+    {
+        if (settings == null)
+            return false;
+
+        if (!settings.AllowSunAvoidance)
+            return false;
+
+        if (!obstacle.HasObstacle)
+            return false;
+
+        return directRouteCrossesSun;
     }
 
     private bool TryBuildRawSafeFallbackRoute(
-    Vector3 startPosition,
-    Vector3 destinationPosition,
-    Vector2 startFacingDirection,
-    SystemShipRouteSettings2A settings,
-    SunRouteObstacle2A obstacle,
-    bool useSunAvoidance,
-    SystemShipRouteResult2A result)
+        Vector3 startPosition,
+        Vector3 destinationPosition,
+        Vector2 startFacingDirection,
+        SystemShipRouteSettings2A settings,
+        SunRouteObstacle2A obstacle,
+        bool useSunAvoidance,
+        SystemShipRouteResult2A result,
+        long budgetStartedAt)
     {
         if (result == null)
             return false;
+
+        if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "RawFallback.Start");
 
         if (!useSunAvoidance ||
             !settings.AllowSunAvoidance ||
             !obstacle.HasObstacle)
         {
+            result.RawFallbackAttemptCount++;
+
             _waypointsBuffer.Clear();
             _waypointsBuffer.Add(startPosition);
             _waypointsBuffer.Add(destinationPosition);
+
+            result.LastWaypointCount = _waypointsBuffer.Count;
+            result.LastWaypointPathLength = GetPathLength(_waypointsBuffer);
+            result.SelectedRouteSource = "RawFallbackDirect";
 
             if (!RouteAvoidsSun(
                     _waypointsBuffer,
                     obstacle,
                     obstacle.BlockingRadius))
             {
+                result.LastRejectReason = "RawFallbackDirectTouchesSunBlock";
+
                 LogRouteDebug(
                     settings,
                     "RawFallback.DirectRejected",
@@ -270,7 +475,8 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 result,
                 _waypointsBuffer,
                 settings,
-                false);
+                false,
+                "RawFallbackDirect");
 
             LogRouteDebug(
                 settings,
@@ -294,6 +500,11 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
 
         for (int attempt = 0; attempt <= attemptCount; attempt++)
         {
+            if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+                return RejectRouteBuildByTimeBudget(settings, result, "RawFallback.PaddingAttempt");
+
+            result.RawFallbackAttemptCount++;
+
             float padding =
                 attempt == attemptCount
                     ? paddingMax
@@ -317,10 +528,17 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 startFacingDirection,
                 Mathf.Max(0f, settings.TurnRadius));
 
+            if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+                return RejectRouteBuildByTimeBudget(settings, result, "RawFallback.AfterBuildPath");
+
             ClampPathOutsideSunBlockingRadius(
                 _waypointsBuffer,
                 obstacle,
                 startFacingDirection);
+
+            result.LastWaypointCount = _waypointsBuffer.Count;
+            result.LastWaypointPathLength = GetPathLength(_waypointsBuffer);
+            result.SelectedRouteSource = "RawFallbackPadding" + padding.ToString("0.###");
 
             bool routeIsValid =
                 _waypointsBuffer.Count > 1 &&
@@ -342,13 +560,19 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 routeIsValid);
 
             if (!routeIsValid)
+            {
+                result.LastRejectReason =
+                    "RawFallbackPadding" + padding.ToString("0.###") + "Rejected";
+
                 continue;
+            }
 
             FillRawSafeFallbackResult(
                 result,
                 _waypointsBuffer,
                 settings,
-                true);
+                true,
+                "RawFallbackPadding" + padding.ToString("0.###"));
 
             return true;
         }
@@ -378,7 +602,8 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
         SystemShipRouteResult2A result,
         IReadOnlyList<Vector3> path,
         SystemShipRouteSettings2A settings,
-        bool usedSunAvoidance)
+        bool usedSunAvoidance,
+        string source)
     {
         result.Path.Clear();
 
@@ -394,6 +619,10 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
         result.SpeedFactor = 1f;
         result.UsedSunAvoidance = usedSunAvoidance;
         result.UsedRawSafeFallback = true;
+        result.SelectedRouteSource = source;
+        result.LastRejectReason = string.Empty;
+        result.LastWaypointCount = path != null ? path.Count : 0;
+        result.LastWaypointPathLength = GetPathLength(path);
     }
 
     private void LogRouteDebug(
@@ -727,28 +956,39 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
     }
 
     private bool TryBuildAdjustedRoute(
-    Vector3 startPosition,
-    Vector3 destinationPosition,
-    Vector2 startFacingDirection,
-    SystemShipRouteSettings2A settings,
-    SunRouteObstacle2A obstacle,
-    bool useSunAvoidance,
-    SystemShipRouteResult2A result)
+        Vector3 startPosition,
+        Vector3 destinationPosition,
+        Vector2 startFacingDirection,
+        SystemShipRouteSettings2A settings,
+        SunRouteObstacle2A obstacle,
+        bool useSunAvoidance,
+        SystemShipRouteResult2A result,
+        long budgetStartedAt)
     {
+        if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "Adjusted.Start");
+
         float baseTurnRadius =
             Mathf.Max(0f, settings.TurnRadius);
 
         if (baseTurnRadius <= RouteSegmentEpsilon)
         {
+            result.CandidateAttemptCount++;
+
             _routeProbeBuffer.Clear();
             _routeProbeBuffer.Add(startPosition);
             _routeProbeBuffer.Add(destinationPosition);
+
+            result.LastWaypointCount = _routeProbeBuffer.Count;
+            result.LastWaypointPathLength = GetPathLength(_routeProbeBuffer);
+            result.SelectedRouteSource = "DirectZeroTurnRadius";
 
             if (!RouteAvoidsSun(
                     _routeProbeBuffer,
                     obstacle,
                     obstacle.BlockingRadius))
             {
+                result.LastRejectReason = "DirectZeroTurnRadiusTouchesSunBlock";
                 return false;
             }
 
@@ -759,6 +999,7 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
             result.TurnRadiusFactor = 1f;
             result.SpeedFactor = 1f;
             result.UsedSunAvoidance = false;
+            result.LastRejectReason = string.Empty;
             return true;
         }
 
@@ -804,6 +1045,11 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                    ? turnFactor <= 1f + 0.0001f
                    : turnFactor >= minFactor - 0.0001f)
         {
+            if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+                return RejectRouteBuildByTimeBudget(settings, result, "Adjusted.AttemptLoop");
+
+            result.CandidateAttemptCount++;
+
             turnFactor =
                 Mathf.Clamp01(turnFactor);
 
@@ -831,6 +1077,16 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 obstacle,
                 useSunAvoidance);
 
+            if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+                return RejectRouteBuildByTimeBudget(settings, result, "Adjusted.AfterBuildWaypoints");
+
+            result.LastWaypointCount = _waypointsBuffer.Count;
+            result.LastWaypointPathLength = GetPathLength(_waypointsBuffer);
+            result.SelectedRouteSource =
+                useSunAvoidance
+                    ? "AdjustedSunAvoidance"
+                    : "AdjustedDirect";
+
             bool routeBuilt =
                 TryBuildPathFromWaypoints(
                     _waypointsBuffer,
@@ -838,7 +1094,12 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                     adjustedSpeed,
                     adjustedTurnRadius,
                     settings,
-                    _routeProbeBuffer);
+                    _routeProbeBuffer,
+                    result,
+                    budgetStartedAt);
+
+            if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+                return RejectRouteBuildByTimeBudget(settings, result, "Adjusted.AfterPlanner");
 
             bool routeAvoidsSun =
                 routeBuilt &&
@@ -857,7 +1118,20 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
                 result.SpeedFactor = speedFactor;
                 result.UsedSunAvoidance = useSunAvoidance;
                 result.UsedRawSafeFallback = false;
+                result.LastRejectReason = string.Empty;
                 return true;
+            }
+
+            if (!routeBuilt)
+            {
+                result.LastRejectReason =
+                    string.IsNullOrWhiteSpace(result.LastRejectReason)
+                        ? "AdjustedPreviewBuildFailed"
+                        : result.LastRejectReason;
+            }
+            else if (!routeAvoidsSun)
+            {
+                result.LastRejectReason = "AdjustedRouteTouchesSunBlock";
             }
 
             if (allowBehindSmallTurn)
@@ -979,30 +1253,180 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
         float speed,
         float turnRadius,
         SystemShipRouteSettings2A settings,
-        List<Vector3> routePath)
+        List<Vector3> routePath,
+        SystemShipRouteResult2A result,
+        long budgetStartedAt)
     {
+        if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "Planner.Start");
+
         float routeStepDistance =
             Mathf.Max(
                 settings.ArrivalDistanceThreshold,
                 speed / Mathf.Max(1, settings.RouteSubstepsPerTick));
 
-        return TurnRadiusRouteMath2A.TryBuildLimitedWaypointPreviewPath(
-            routePath,
-            waypoints,
-            startFacingDirection,
-            routeStepDistance,
-            turnRadius,
-            settings.ArrivalDistanceThreshold,
-            settings.MaxRoutePlanSteps,
-            settings.SunAvoidanceTurnRouteReserveMultiplier,
-            out int maxSteps,
-            out float intermediateWaypointArrivalDistanceThreshold,
-            out float routeLength,
-            out float maxAllowedRouteLength,
-            settings.RouteStraightExitAngleDegrees,
-            settings.DebugLog,
-            settings.DebugPrefix);
+        bool built =
+            TurnRadiusRouteMath2A.TryBuildLimitedWaypointPreviewPath(
+                routePath,
+                waypoints,
+                startFacingDirection,
+                routeStepDistance,
+                turnRadius,
+                settings.ArrivalDistanceThreshold,
+                settings.MaxRoutePlanSteps,
+                settings.SunAvoidanceTurnRouteReserveMultiplier,
+                out int maxSteps,
+                out float intermediateWaypointArrivalDistanceThreshold,
+                out float routeLength,
+                out float maxAllowedRouteLength,
+                settings.RouteStraightExitAngleDegrees,
+                settings.DebugLog,
+                settings.DebugPrefix,
+                () => IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt));
+
+        if (result != null)
+        {
+            result.LastPlannerRouteStepDistance = routeStepDistance;
+            result.LastPlannerMaxSteps = maxSteps;
+            result.LastPlannerIntermediateArrivalThreshold = intermediateWaypointArrivalDistanceThreshold;
+            result.LastPlannerRouteLength = routeLength;
+            result.LastPlannerMaxAllowedRouteLength = maxAllowedRouteLength;
+            result.LastWaypointCount = waypoints != null ? waypoints.Count : 0;
+            result.LastWaypointPathLength = GetPathLength(waypoints);
+
+            if (!built)
+            {
+                result.LastRejectReason =
+                    routePath == null || routePath.Count <= 1
+                        ? "TryBuildLimitedWaypointPreviewPathFailed"
+                        : "TryBuildLimitedWaypointPreviewPathRejected";
+            }
+        }
+
+        if (IsRouteBuildTimeBudgetExceeded(settings, budgetStartedAt))
+            return RejectRouteBuildByTimeBudget(settings, result, "Planner.AbortedByTimeBudget");
+
+        return built;
     }
+
+    private static double GetElapsedMilliseconds(long startedAt)
+    {
+        long elapsedTicks =
+            Stopwatch.GetTimestamp() - startedAt;
+
+        return elapsedTicks * 1000.0 / Stopwatch.Frequency;
+    }
+
+    private void LogExpensiveRouteBuildIfNeeded(
+        long startedAt,
+        SystemShipRouteRequest2A request,
+        SystemShipRouteSettings2A settings,
+        Vector3 startPosition,
+        Vector3 destinationPosition,
+        Vector2 startFacingDirection,
+        SunRouteObstacle2A obstacle,
+        bool success,
+        SystemShipRouteResult2A result)
+    {
+        double elapsedMs =
+            GetElapsedMilliseconds(startedAt);
+
+        float thresholdMs =
+            GetExpensiveRouteBuildLogThresholdMs();
+
+        if (elapsedMs < thresholdMs)
+            return;
+
+        if (Bootstrapper.Instance == null)
+            return;
+
+        float directDistance =
+            Vector3.Distance(
+                startPosition,
+                destinationPosition);
+
+        float startToSunDistance =
+            obstacle.HasObstacle
+                ? Vector2.Distance(
+                    new Vector2(startPosition.x, startPosition.y),
+                    new Vector2(obstacle.Center.x, obstacle.Center.y))
+                : 0f;
+
+        float destinationToSunDistance =
+            obstacle.HasObstacle
+                ? Vector2.Distance(
+                    new Vector2(destinationPosition.x, destinationPosition.y),
+                    new Vector2(obstacle.Center.x, obstacle.Center.y))
+                : 0f;
+
+        float finalPathLength =
+            result != null && result.Path != null
+                ? GetPathLength(result.Path)
+                : 0f;
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.NpcMovement,
+            "[SystemShipRouteService2A] SHIP_ROUTE_BUILD_EXPENSIVE" +
+            " | Success=" + success +
+            " | Ms=" + elapsedMs.ToString("F2") +
+            " | ThresholdMs=" + thresholdMs.ToString("0.###") +
+            " | SystemId=" + (request != null ? request.SystemId : string.Empty) +
+            " | TargetKind=" + (request != null ? request.TargetKind.ToString() : string.Empty) +
+            " | Start=" + startPosition +
+            " | Destination=" + destinationPosition +
+            " | DirectDistance=" + directDistance.ToString("0.###") +
+            " | StartFacing=" + startFacingDirection +
+            " | HasSunObstacle=" + obstacle.HasObstacle +
+            " | SunCenter=" + obstacle.Center +
+            " | SunRadius=" + obstacle.Radius.ToString("0.###") +
+            " | SunBlockingRadius=" + obstacle.BlockingRadius.ToString("0.###") +
+            " | StartToSunDistance=" + startToSunDistance.ToString("0.###") +
+            " | DestinationToSunDistance=" + destinationToSunDistance.ToString("0.###") +
+            " | DestinationCase=" + (result != null ? result.DestinationCase : string.Empty) +
+            " | SelectedRouteSource=" + (result != null ? result.SelectedRouteSource : string.Empty) +
+            " | LastRejectReason=" + (result != null ? result.LastRejectReason : string.Empty) +
+            " | CandidateAttemptCount=" + (result != null ? result.CandidateAttemptCount : 0) +
+            " | RawFallbackAttemptCount=" + (result != null ? result.RawFallbackAttemptCount : 0) +
+            " | UsedRawSafeFallback=" + (result != null && result.UsedRawSafeFallback) +
+            " | UsedSunAvoidance=" + (result != null && result.UsedSunAvoidance) +
+            " | DirectRouteCrossesSun=" + (result != null && result.DirectRouteCrossesSun) +
+            " | PathCount=" + (result != null && result.Path != null ? result.Path.Count : 0) +
+            " | PathLength=" + finalPathLength.ToString("0.###") +
+            " | WaypointCount=" + (result != null ? result.LastWaypointCount : 0) +
+            " | WaypointPathLength=" + (result != null ? result.LastWaypointPathLength.ToString("0.###") : "0") +
+            " | PlannerMaxSteps=" + (result != null ? result.LastPlannerMaxSteps : 0) +
+            " | PlannerRouteStepDistance=" + (result != null ? result.LastPlannerRouteStepDistance.ToString("0.###") : "0") +
+            " | PlannerIntermediateArrivalThreshold=" + (result != null ? result.LastPlannerIntermediateArrivalThreshold.ToString("0.###") : "0") +
+            " | PlannerRouteLength=" + (result != null ? result.LastPlannerRouteLength.ToString("0.###") : "0") +
+            " | PlannerMaxAllowedRouteLength=" + (result != null ? result.LastPlannerMaxAllowedRouteLength.ToString("0.###") : "0") +
+            " | BaseSpeed=" + (settings != null ? settings.Speed.ToString("0.###") : "0") +
+            " | EffectiveSpeed=" + (result != null ? result.EffectiveSpeed.ToString("0.###") : "0") +
+            " | SpeedFactor=" + (result != null ? result.SpeedFactor.ToString("0.###") : "0") +
+            " | BaseTurnRadius=" + (settings != null ? settings.TurnRadius.ToString("0.###") : "0") +
+            " | EffectiveTurnRadius=" + (result != null ? result.EffectiveTurnRadius.ToString("0.###") : "0") +
+            " | TurnRadiusFactor=" + (result != null ? result.TurnRadiusFactor.ToString("0.###") : "0") +
+            " | ArrivalThreshold=" + (settings != null ? settings.ArrivalDistanceThreshold.ToString("0.###") : "0") +
+            " | RouteSubstepsPerTick=" + (settings != null ? settings.RouteSubstepsPerTick : 0) +
+            " | MaxRoutePlanSteps=" + (settings != null ? settings.MaxRoutePlanSteps : 0) +
+            " | StraightExitAngle=" + (settings != null ? settings.RouteStraightExitAngleDegrees.ToString("0.###") : "0") +
+            " | TurnRadiusAdjustmentStepPercent=" + (settings != null ? settings.TurnRadiusAdjustmentStepPercent.ToString("0.###") : "0") +
+            " | SpeedAdjustmentStepPercent=" + (settings != null ? settings.SpeedAdjustmentStepPercent.ToString("0.###") : "0"));
+    }
+
+    private float GetExpensiveRouteBuildLogThresholdMs()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.DebugLogConfig == null)
+        {
+            return (float)ExpensiveRouteBuildLogThresholdMs;
+        }
+
+        return Bootstrapper
+            .Instance
+            .DebugLogConfig
+            .ShipRouteBuildDiagnosticsThresholdMs;
+    }
+
     private SystemShipRouteSettings2A CreateDefaultSettings()
     {
         ShipMovementConfig movementConfig =
@@ -1309,5 +1733,51 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
             Radius = radius;
             BlockingRadius = blockingRadius;
         }
+    }
+
+    private static bool IsRouteBuildTimeBudgetExceeded(
+    SystemShipRouteSettings2A settings,
+    long localStartedAt)
+    {
+        if (settings == null)
+            return false;
+
+        if (settings.RouteBuildTimeBudgetMs <= 0f)
+            return false;
+
+        double externalUsedMs =
+            settings.GetRouteBuildBudgetUsedMs != null
+                ? settings.GetRouteBuildBudgetUsedMs()
+                : 0d;
+
+        double localElapsedMs =
+            GetElapsedMilliseconds(localStartedAt);
+
+        return externalUsedMs + localElapsedMs >= settings.RouteBuildTimeBudgetMs;
+    }
+
+    private static bool RejectRouteBuildByTimeBudget(
+        SystemShipRouteSettings2A settings,
+        SystemShipRouteResult2A result,
+        string stage)
+    {
+        if (result != null)
+            result.LastRejectReason = "TimeBudgetExceeded:" + stage;
+
+        return false;
+    }
+
+    private static void ConsumeRouteBuildBudget(
+        SystemShipRouteSettings2A settings,
+        long localStartedAt)
+    {
+        if (settings == null ||
+            settings.AddRouteBuildBudgetUsedMs == null)
+        {
+            return;
+        }
+
+        settings.AddRouteBuildBudgetUsedMs(
+            GetElapsedMilliseconds(localStartedAt));
     }
 }

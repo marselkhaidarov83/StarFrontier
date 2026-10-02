@@ -31,9 +31,25 @@ public sealed class CombatEnemyStatusMarkerView2A : MonoBehaviour
     private SimpleEventBus _eventBus;
     private ISystemNpcRuntimeService _runtimeService;
     private SystemNpcView _npcView;
+    private SpriteRenderer _shipRenderer;
 
     private string _runtimeNpcId = string.Empty;
     private float _baseWidth = 1f;
+    private bool _suppressUpdatesForNonHostile;
+
+    private static int _aggregateFrame = -1;
+    private static int _aggregateCount;
+    private static int _aggregateSuppressedAtStartCount;
+    private static int _aggregateSuppressedAfterCount;
+    private static int _aggregateVisibleCount;
+    private static int _aggregateHostileCount;
+    private static int _aggregateNpcFoundCount;
+    private static double _aggregateTotalMs;
+    private static double _aggregateRefreshRuntimeNpcIdMs;
+    private static double _aggregateRefreshFromStateMs;
+    private static double _aggregateMaxSingleMs;
+    private static string _aggregateMaxObjectName = string.Empty;
+    private static string _aggregateMaxRuntimeNpcId = string.Empty;
 
     private void Awake()
     {
@@ -45,6 +61,8 @@ public sealed class CombatEnemyStatusMarkerView2A : MonoBehaviour
 
     private void OnEnable()
     {
+        _suppressUpdatesForNonHostile = false;
+
         ResolveObjects();
         ApplyStaticVisualSettings();
         ResolveServices();
@@ -72,8 +90,76 @@ public sealed class CombatEnemyStatusMarkerView2A : MonoBehaviour
 
     private void Update()
     {
-        RefreshRuntimeNpcId();
-        RefreshFromState();
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double refreshRuntimeNpcIdMs = 0d;
+        double refreshFromStateMs = 0d;
+
+        bool suppressedAtStart =
+            _suppressUpdatesForNonHostile;
+
+        bool visibleAfter = false;
+        bool hostileAfter = false;
+        bool npcFoundAfter = false;
+
+        try
+        {
+            if (_suppressUpdatesForNonHostile)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshRuntimeNpcId();
+
+            refreshRuntimeNpcIdMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshFromState(
+                out visibleAfter,
+                out hostileAfter,
+                out npcFoundAfter);
+
+            refreshFromStateMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            RecordUpdateAggregate(
+                elapsedMs,
+                refreshRuntimeNpcIdMs,
+                refreshFromStateMs,
+                suppressedAtStart,
+                _suppressUpdatesForNonHostile,
+                visibleAfter,
+                hostileAfter,
+                npcFoundAfter,
+                gameObject.name,
+                _runtimeNpcId);
+
+            if (VisualUpdatePerfLog.ShouldLog(elapsedMs))
+            {
+                VisualUpdatePerfLog.LogMeasured(
+                    "CombatEnemyStatusMarkerView2A.Update",
+                    elapsedMs,
+                    "Name=" + gameObject.name +
+                    " | RuntimeNpcId=" + (_runtimeNpcId ?? string.Empty) +
+                    " | SuppressedAtStart=" + suppressedAtStart +
+                    " | SuppressedAfter=" + _suppressUpdatesForNonHostile +
+                    " | VisibleAfter=" + visibleAfter +
+                    " | HostileAfter=" + hostileAfter +
+                    " | NpcFoundAfter=" + npcFoundAfter +
+                    " | RefreshRuntimeNpcIdMs=" + refreshRuntimeNpcIdMs.ToString("F3") +
+                    " | RefreshFromStateMs=" + refreshFromStateMs.ToString("F3"));
+            }
+        }
     }
 
     private void OnNpcDamaged(SystemNpcDamagedEvent evt)
@@ -98,26 +184,291 @@ public sealed class CombatEnemyStatusMarkerView2A : MonoBehaviour
 
     private void RefreshFromState()
     {
-        if (string.IsNullOrWhiteSpace(_runtimeNpcId) ||
-            _runtimeService == null ||
-            !_runtimeService.TryGetNpc(_runtimeNpcId, out SystemNpcRuntimeState npc))
+        RefreshFromState(
+            out _,
+            out _,
+            out _);
+    }
+
+    private void RefreshFromState(
+        out bool visibleAfter,
+        out bool hostileAfter,
+        out bool npcFoundAfter)
+    {
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double precheckMs = 0d;
+        double tryGetNpcMs = 0d;
+        double hostileCheckMs = 0d;
+        double refreshLayoutMs = 0d;
+        double applyShieldMs = 0d;
+        double applyHullMs = 0d;
+        double setVisibleMs = 0d;
+
+        bool hasRuntimeNpcId = false;
+        bool hasRuntimeService = false;
+        bool npcFound = false;
+        bool npcAlive = false;
+        bool npcHostile = false;
+        bool suppressedForNonHostile = false;
+
+        visibleAfter = false;
+        hostileAfter = false;
+        npcFoundAfter = false;
+
+        SystemNpcRuntimeState npc = null;
+
+        try
         {
-            SetVisible(false);
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            hasRuntimeNpcId =
+                !string.IsNullOrWhiteSpace(_runtimeNpcId);
+
+            hasRuntimeService =
+                _runtimeService != null;
+
+            precheckMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!hasRuntimeNpcId || !hasRuntimeService)
+            {
+                phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                SetVisible(false);
+                visibleAfter = false;
+
+                setVisibleMs +=
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                return;
+            }
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            npcFound =
+                _runtimeService.TryGetNpc(
+                    _runtimeNpcId,
+                    out npc);
+
+            npcFoundAfter =
+                npcFound;
+
+            tryGetNpcMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!npcFound || npc == null)
+            {
+                phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                SetVisible(false);
+                visibleAfter = false;
+
+                setVisibleMs +=
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                return;
+            }
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            npcAlive =
+                npc.IsAlive;
+
+            npcHostile =
+                npc.IsHostileToPlayer;
+
+            hostileAfter =
+                npcHostile;
+
+            hostileCheckMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!npcAlive || !npcHostile)
+            {
+                suppressedForNonHostile =
+                    npcAlive && !npcHostile;
+
+                if (suppressedForNonHostile)
+                    _suppressUpdatesForNonHostile = true;
+
+                phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                SetVisible(false);
+                visibleAfter = false;
+
+                setVisibleMs +=
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                return;
+            }
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshLayout();
+
+            refreshLayoutMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplyFill(
+                shieldFillRenderer,
+                GetNormalized(npc.CurrentShield, npc.MaxShield));
+
+            applyShieldMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplyFill(
+                hullFillRenderer,
+                GetNormalized(npc.CurrentHull, npc.MaxHull));
+
+            applyHullMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            SetVisible(true);
+            visibleAfter = true;
+
+            setVisibleMs +=
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            if (VisualUpdatePerfLog.ShouldLog(elapsedMs))
+            {
+                VisualUpdatePerfLog.LogMeasured(
+                    "CombatEnemyStatusMarkerView2A.RefreshFromState",
+                    elapsedMs,
+                    "Name=" + gameObject.name +
+                    " | RuntimeNpcId=" + (_runtimeNpcId ?? string.Empty) +
+                    " | HasRuntimeNpcId=" + hasRuntimeNpcId +
+                    " | HasRuntimeService=" + hasRuntimeService +
+                    " | NpcFound=" + npcFound +
+                    " | NpcAlive=" + npcAlive +
+                    " | NpcHostile=" + npcHostile +
+                    " | SuppressedForNonHostile=" + suppressedForNonHostile +
+                    " | VisibleAfter=" + visibleAfter +
+                    " | PrecheckMs=" + precheckMs.ToString("F3") +
+                    " | TryGetNpcMs=" + tryGetNpcMs.ToString("F3") +
+                    " | HostileCheckMs=" + hostileCheckMs.ToString("F3") +
+                    " | RefreshLayoutMs=" + refreshLayoutMs.ToString("F3") +
+                    " | ApplyShieldMs=" + applyShieldMs.ToString("F3") +
+                    " | ApplyHullMs=" + applyHullMs.ToString("F3") +
+                    " | SetVisibleMs=" + setVisibleMs.ToString("F3"));
+            }
+        }
+    }
+
+    private static void RecordUpdateAggregate(
+        double elapsedMs,
+        double refreshRuntimeNpcIdMs,
+        double refreshFromStateMs,
+        bool suppressedAtStart,
+        bool suppressedAfter,
+        bool visibleAfter,
+        bool hostileAfter,
+        bool npcFoundAfter,
+        string objectName,
+        string runtimeNpcId)
+    {
+        int frame =
+            Time.frameCount;
+
+        if (_aggregateFrame != frame)
+        {
+            FlushUpdateAggregate();
+            ResetUpdateAggregate(frame);
+        }
+
+        _aggregateCount++;
+        _aggregateTotalMs += elapsedMs;
+        _aggregateRefreshRuntimeNpcIdMs += refreshRuntimeNpcIdMs;
+        _aggregateRefreshFromStateMs += refreshFromStateMs;
+
+        if (suppressedAtStart)
+            _aggregateSuppressedAtStartCount++;
+
+        if (suppressedAfter)
+            _aggregateSuppressedAfterCount++;
+
+        if (visibleAfter)
+            _aggregateVisibleCount++;
+
+        if (hostileAfter)
+            _aggregateHostileCount++;
+
+        if (npcFoundAfter)
+            _aggregateNpcFoundCount++;
+
+        if (elapsedMs > _aggregateMaxSingleMs)
+        {
+            _aggregateMaxSingleMs = elapsedMs;
+            _aggregateMaxObjectName = objectName ?? string.Empty;
+            _aggregateMaxRuntimeNpcId = runtimeNpcId ?? string.Empty;
+        }
+    }
+
+    private static void ResetUpdateAggregate(int frame)
+    {
+        _aggregateFrame = frame;
+        _aggregateCount = 0;
+        _aggregateSuppressedAtStartCount = 0;
+        _aggregateSuppressedAfterCount = 0;
+        _aggregateVisibleCount = 0;
+        _aggregateHostileCount = 0;
+        _aggregateNpcFoundCount = 0;
+        _aggregateTotalMs = 0.0;
+        _aggregateRefreshRuntimeNpcIdMs = 0.0;
+        _aggregateRefreshFromStateMs = 0.0;
+        _aggregateMaxSingleMs = 0.0;
+        _aggregateMaxObjectName = string.Empty;
+        _aggregateMaxRuntimeNpcId = string.Empty;
+    }
+
+    private static void FlushUpdateAggregate()
+    {
+        if (_aggregateFrame < 0 ||
+            _aggregateCount <= 0)
+        {
             return;
         }
 
-        if (!npc.IsAlive || !npc.IsHostileToPlayer)
-        {
-            SetVisible(false);
+        if (!VisualUpdatePerfLog.ShouldLog(_aggregateTotalMs))
             return;
-        }
 
-        RefreshLayout();
-
-        ApplyFill(shieldFillRenderer, GetNormalized(npc.CurrentShield, npc.MaxShield));
-        ApplyFill(hullFillRenderer, GetNormalized(npc.CurrentHull, npc.MaxHull));
-
-        SetVisible(true);
+        VisualUpdatePerfLog.LogMeasured(
+            "CombatEnemyStatusMarkerView2A.Update.Aggregate",
+            _aggregateTotalMs,
+            "AggregateFrame=" + _aggregateFrame +
+            " | ViewCount=" + _aggregateCount +
+            " | SuppressedAtStartCount=" + _aggregateSuppressedAtStartCount +
+            " | SuppressedAfterCount=" + _aggregateSuppressedAfterCount +
+            " | VisibleCount=" + _aggregateVisibleCount +
+            " | HostileCount=" + _aggregateHostileCount +
+            " | NpcFoundCount=" + _aggregateNpcFoundCount +
+            " | MaxSingleMs=" + _aggregateMaxSingleMs.ToString("F3") +
+            " | MaxObject=" + _aggregateMaxObjectName +
+            " | MaxRuntimeNpcId=" + _aggregateMaxRuntimeNpcId +
+            " | RefreshRuntimeNpcIdMs=" + _aggregateRefreshRuntimeNpcIdMs.ToString("F3") +
+            " | RefreshFromStateMs=" + _aggregateRefreshFromStateMs.ToString("F3"));
     }
 
     private void RefreshRuntimeNpcId()
@@ -210,6 +561,9 @@ public sealed class CombatEnemyStatusMarkerView2A : MonoBehaviour
 
     private SpriteRenderer ResolveShipRenderer()
     {
+        if (_shipRenderer != null)
+            return _shipRenderer;
+
         SpriteRenderer[] renderers =
             GetComponentsInChildren<SpriteRenderer>(true);
 
@@ -231,7 +585,8 @@ public sealed class CombatEnemyStatusMarkerView2A : MonoBehaviour
                 continue;
             }
 
-            return renderer;
+            _shipRenderer = renderer;
+            return _shipRenderer;
         }
 
         return null;

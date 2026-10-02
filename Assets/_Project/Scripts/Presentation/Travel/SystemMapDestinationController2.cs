@@ -58,7 +58,43 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
     private void Update()
     {
-        UpdateMovingPlanetDestinationMarker();
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double updateMarkerMs = 0.0;
+
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            UpdateMovingPlanetDestinationMarker();
+
+            updateMarkerMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | HasSelectedPlanet=" + (_selectedPlanetData != null) +
+                " | HasSelectedPlanetView=" + (_selectedPlanetView != null) +
+                " | HasMarkerController=" + (markerController != null) +
+                " | UpdateMarkerMs=" + updateMarkerMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemMapDestinationController2.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemMapDestinationController2.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnDestroy()

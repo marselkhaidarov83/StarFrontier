@@ -162,7 +162,8 @@ public static class TurnRadiusRouteMath2A
     float intermediateWaypointArrivalDistanceThreshold = -1f,
     float straightExitAngleDegrees = 0f,
     System.Action<string> debugLog = null,
-    string debugPrefix = "")
+    string debugPrefix = "",
+    System.Func<bool> shouldAbort = null)
     {
         if (result == null)
         {
@@ -213,14 +214,9 @@ public static class TurnRadiusRouteMath2A
                 turnRadius,
                 intermediateWaypointArrivalDistanceThreshold);
 
-        float lastPathProgress =
-            0f;
-
-        float bestDistanceToFinal =
-            float.MaxValue;
-
-        float bestPathProgress =
-            0f;
+        float lastPathProgress = 0f;
+        float bestDistanceToFinal = float.MaxValue;
+        float bestPathProgress = 0f;
 
         int safeMaxSteps =
             Mathf.Max(1, maxSteps);
@@ -249,6 +245,28 @@ public static class TurnRadiusRouteMath2A
 
         for (int i = 0; i < safeMaxSteps; i++)
         {
+            if (shouldAbort != null &&
+                shouldAbort())
+            {
+                debugLog?.Invoke(
+                    debugPrefix +
+                    " Aborted: route build time budget exceeded. " +
+                    "Step=" + i +
+                    ", ResultCount=" + result.Count +
+                    ", LastPosition=" + result[result.Count - 1] +
+                    ", FinalDestination=" + finalDestination +
+                    ", LastDistanceToFinal=" + Vector3.Distance(result[result.Count - 1], finalDestination) +
+                    ", BestDistanceToFinal=" + bestDistanceToFinal +
+                    ", LastPathProgress=" + lastPathProgress +
+                    ", BestPathProgress=" + bestPathProgress +
+                    ", PathLength=" + pathLength +
+                    ", LookAheadDistance=" + lookAheadDistance +
+                    ", MovementDistancePerStep=" + movementDistancePerStep +
+                    ", TurnRadius=" + turnRadius);
+
+                return false;
+            }
+
             float pathProgressBefore =
                 GetClosestDistanceOnPath(
                     waypoints,
@@ -259,8 +277,7 @@ public static class TurnRadiusRouteMath2A
                     lastPathProgress,
                     pathProgressBefore);
 
-            lastPathProgress =
-                pathProgress;
+            lastPathProgress = pathProgress;
 
             float targetDistance =
                 Mathf.Min(
@@ -811,7 +828,8 @@ public static class TurnRadiusRouteMath2A
     out float maxAllowedRouteLength,
     float straightExitAngleDegrees = 0f,
     System.Action<string> debugLog = null,
-    string debugPrefix = "")
+    string debugPrefix = "",
+    System.Func<bool> shouldAbort = null)
     {
         maxSteps = GetRoutePlanMaxSteps(
             waypoints,
@@ -838,7 +856,8 @@ public static class TurnRadiusRouteMath2A
                 intermediateWaypointArrivalDistanceThreshold,
                 straightExitAngleDegrees,
                 debugLog,
-                debugPrefix);
+                debugPrefix,
+                shouldAbort);
 
         routeLength = GetPathLength(result);
 

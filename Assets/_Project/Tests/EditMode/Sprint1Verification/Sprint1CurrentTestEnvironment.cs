@@ -85,7 +85,36 @@ namespace StarFrontier.Tests.Sprint1
 
     internal sealed class NullNpcSaveService : ISystemNpcSimulationSaveService
     {
-        public SystemNpcSimulationSaveData Capture() => new SystemNpcSimulationSaveData();
-        public void Restore(SystemNpcSimulationSaveData data) { }
+        public SystemNpcSimulationSaveData Capture()
+        {
+            return new SystemNpcSimulationSaveData();
+        }
+
+        public SystemNpcSimulationCaptureSession BeginIncrementalCapture()
+        {
+            return new SystemNpcSimulationCaptureSession
+            {
+                RuntimeScanComplete = true,
+                EntriesBuildComplete = true
+            };
+        }
+
+        public bool ContinueIncrementalCapture(
+            SystemNpcSimulationCaptureSession session,
+            float budgetMs,
+            int maxNpcItemsPerStep)
+        {
+            if (session == null)
+                return true;
+
+            session.RuntimeScanComplete = true;
+            session.EntriesBuildComplete = true;
+
+            return true;
+        }
+
+        public void Restore(SystemNpcSimulationSaveData data)
+        {
+        }
     }
 }

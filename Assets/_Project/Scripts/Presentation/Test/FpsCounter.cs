@@ -10,23 +10,42 @@ public class FpsCounter : MonoBehaviour
 
     private void Update()
     {
-        deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        float fps = 1f / deltaTime;
+        float fps = 0f;
 
-        fpsText.text = $"{fps:0}";
-
-        if (fps < 30f)
+        try
         {
-            fpsText.color = Color.red;
+            deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+
+            fps = 1f / deltaTime;
+
+            fpsText.text = $"{fps:0}";
+
+            if (fps < 30f)
+            {
+                fpsText.color = Color.red;
+            }
+            else if (fps < 60f)
+            {
+                fpsText.color = new Color(1f, 0.5f, 0f);
+            }
+            else
+            {
+                fpsText.color = Color.green;
+            }
         }
-        else if (fps < 60f)
+        finally
         {
-            fpsText.color = new Color(1f, 0.5f, 0f); // оранжевый
-        }
-        else
-        {
-            fpsText.color = Color.green;
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            VisualUpdateAggregateLog.Record(
+                "FpsCounter.Update",
+                elapsedMs,
+                "Name=" + name +
+                " | Fps=" + fps.ToString("F1"));
         }
     }
 }

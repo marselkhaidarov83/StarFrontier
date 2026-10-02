@@ -30,11 +30,17 @@ public interface ISystemNpcRuntimeService
 
     void UpdateNpcPosition(string runtimeNpcId, Vector3 position);
 
-    CombatDamageResult2A ApplyDamage(string runtimeNpcId, int damage, bool killedByPlayer, bool damagedByPlayer);
+    CombatDamageResult2A ApplyDamage(
+        string runtimeNpcId,
+        int damage,
+        bool killedByPlayer,
+        bool damagedByPlayer);
 
     bool DespawnNpc(string runtimeNpcId);
 
     bool KillNpc(string runtimeNpcId, bool killedByPlayer);
+
+    bool AnnihilateNpc(string runtimeNpcId);
 
     bool ResetNpc(string runtimeNpcId);
 
@@ -42,5 +48,5 @@ public interface ISystemNpcRuntimeService
 
     void RestoreNpc(SystemNpcRuntimeState npc);
     void RestoreNpcs(IEnumerable<SystemNpcRuntimeState> npcs);
-
+    
 }

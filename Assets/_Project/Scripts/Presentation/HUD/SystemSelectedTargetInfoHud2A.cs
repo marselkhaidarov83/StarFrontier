@@ -59,20 +59,69 @@ public sealed class SystemSelectedTargetInfoHud2A :
 
     private void Update()
     {
-        if (panelRoot == null ||
-            !panelRoot.activeSelf ||
-            string.IsNullOrWhiteSpace(_currentTargetId))
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double refreshMs = 0.0;
+
+        bool panelActive = false;
+        bool hasTarget = false;
+        bool refreshed = false;
+
+        try
         {
-            return;
+            panelActive =
+                panelRoot != null &&
+                panelRoot.activeSelf;
+
+            hasTarget =
+                !string.IsNullOrWhiteSpace(_currentTargetId);
+
+            if (!panelActive || !hasTarget)
+                return;
+
+            _refreshTimer -= Time.unscaledDeltaTime;
+
+            if (_refreshTimer > 0f)
+                return;
+
+            _refreshTimer = Mathf.Max(0.05f, refreshIntervalSeconds);
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshCurrentTarget();
+
+            refreshMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            refreshed = true;
         }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
 
-        _refreshTimer -= Time.unscaledDeltaTime;
+            string details =
+                "Name=" + name +
+                " | IsBound=" + _isBound +
+                " | PanelActive=" + panelActive +
+                " | HasTarget=" + hasTarget +
+                " | Refreshed=" + refreshed +
+                " | TargetId=" + _currentTargetId +
+                " | TargetType=" + _currentTargetType +
+                " | RefreshMs=" + refreshMs.ToString("F3");
 
-        if (_refreshTimer > 0f)
-            return;
+            VisualUpdateAggregateLog.Record(
+                "SystemSelectedTargetInfoHud2A.Update",
+                elapsedMs,
+                details);
 
-        _refreshTimer = Mathf.Max(0.05f, refreshIntervalSeconds);
-        RefreshCurrentTarget();
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemSelectedTargetInfoHud2A.Update",
+                startedAt,
+                details);
+        }
     }
 
     public void Bind(SystemHudBindingContext2A context)

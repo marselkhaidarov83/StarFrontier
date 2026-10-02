@@ -24,10 +24,40 @@ public sealed class DebugHudController : MonoBehaviour
 
     private void Update()
     {
-        if (Time.unscaledTime < _nextRefreshTime)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        Refresh();
+        double refreshMs = 0.0;
+
+        bool refreshed = false;
+
+        try
+        {
+            if (Time.unscaledTime < _nextRefreshTime)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            Refresh();
+
+            refreshMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            refreshed = true;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            VisualUpdateAggregateLog.Record(
+                "DebugHudController.Update",
+                elapsedMs,
+                "Name=" + name +
+                " | Refreshed=" + refreshed +
+                " | RefreshMs=" + refreshMs.ToString("F3"));
+        }
     }
 
     [ContextMenu("Refresh Debug HUD")]

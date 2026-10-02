@@ -5,8 +5,11 @@ using UnityEngine;
 public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatService
 {
     private const float TickBasedProjectileSpeed = 0f;
-    private const bool WaveDamageDebugLogEnabled = false;
-    private const bool WeaponAttackTickDebugLogEnabled = false;
+    private const double NpcPerfLogThresholdMs = 4.0;
+    private const int NpcPerfLogMinNpcCount = 30;
+    private const int NpcPerfLogTickCooldown = 10;
+
+    private int _lastNpcPerfLogTick = -100000;
 
     private readonly ISystemNpcRuntimeService _runtimeService;
     private readonly IConfigService _configService;
@@ -109,17 +112,53 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (starSystem == null)
             return;
 
-        string systemId = starSystem.Id;
-        var npcs = _runtimeService.GetAliveNpcsInSystem(systemId);
+        long totalStartedAt = BeginPerfMeasure();
 
-        for (int i = 0; i < npcs.Count; i++)
+        string systemId = starSystem.Id;
+
+        long getNpcsStartedAt = BeginPerfMeasure();
+        var npcs = _runtimeService.GetAliveNpcsInSystem(systemId);
+        double getNpcsMs = EndPerfMeasureMs(getNpcsStartedAt);
+
+        int npcCount = npcs != null ? npcs.Count : 0;
+        int checkedCount = 0;
+        int canFightCount = 0;
+        int attackAttemptCount = 0;
+
+        long loopStartedAt = BeginPerfMeasure();
+
+        for (int i = 0; i < npcCount; i++)
         {
             SystemNpcRuntimeState shooter = npcs[i];
+            checkedCount++;
 
             if (!CanFight(shooter))
                 continue;
 
+            canFightCount++;
+            attackAttemptCount++;
+
             TryAttack(shooter, quantTick);
+        }
+
+        double loopMs = EndPerfMeasureMs(loopStartedAt);
+        double totalMs = EndPerfMeasureMs(totalStartedAt);
+
+        if (ShouldWriteNpcPerfLog(quantTick, totalMs, npcCount))
+        {
+            LogCustom(
+                "[NPC_PERF] SystemNpcCombatService.Tick " +
+                "SystemId=" + systemId +
+                ", Tick=" + quantTick +
+                ", TotalMs=" + totalMs.ToString("F2") +
+                ", GetNpcsMs=" + getNpcsMs.ToString("F2") +
+                ", LoopMs=" + loopMs.ToString("F2") +
+                ", Npcs=" + npcCount +
+                ", Checked=" + checkedCount +
+                ", CanFight=" + canFightCount +
+                ", AttackAttempts=" + attackAttemptCount +
+                ", ActiveProjectiles=" + _activeProjectiles.Count +
+                ", ActiveBeams=" + _activeBeams.Count);
         }
     }
 
@@ -128,6 +167,14 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (deltaTime <= 0f)
             return;
 
+        long totalStartedAt = BeginPerfMeasure();
+
+        int projectilesBefore = _activeProjectiles.Count;
+        int projectileTickCount = 0;
+        int projectileRemovedCount = 0;
+
+        long projectileLoopStartedAt = BeginPerfMeasure();
+
         for (int i = _activeProjectiles.Count - 1; i >= 0; i--)
         {
             GalaxyNpcProjectileRuntimeState projectile = _activeProjectiles[i];
@@ -135,23 +182,49 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             if (projectile == null)
             {
                 _activeProjectiles.RemoveAt(i);
+                projectileRemovedCount++;
                 continue;
             }
 
             if (projectile.IsResolved)
             {
                 _activeProjectiles.RemoveAt(i);
+                projectileRemovedCount++;
                 continue;
             }
+
+            projectileTickCount++;
 
             TickProjectile(projectile, deltaTime);
 
             if (projectile.IsResolved)
+            {
                 _activeProjectiles.RemoveAt(i);
+                projectileRemovedCount++;
+            }
         }
 
+        double projectileLoopMs = EndPerfMeasureMs(projectileLoopStartedAt);
+
+        long beamLoopStartedAt = BeginPerfMeasure();
         TickBeams(deltaTime);
-        TickWaves(deltaTime);
+        double beamLoopMs = EndPerfMeasureMs(beamLoopStartedAt);
+
+        double totalMs = EndPerfMeasureMs(totalStartedAt);
+
+        if (totalMs >= NpcPerfLogThresholdMs)
+        {
+            LogCustom(
+                "[NPC_PERF] SystemNpcCombatService.TickProjectiles " +
+                "TotalMs=" + totalMs.ToString("F2") +
+                ", ProjectileLoopMs=" + projectileLoopMs.ToString("F2") +
+                ", BeamLoopMs=" + beamLoopMs.ToString("F2") +
+                ", ProjectilesBefore=" + projectilesBefore +
+                ", ProjectileTicks=" + projectileTickCount +
+                ", ProjectileRemoved=" + projectileRemovedCount +
+                ", ProjectilesAfter=" + _activeProjectiles.Count +
+                ", BeamsAfter=" + _activeBeams.Count);
+        }
     }
 
     public void ForceAttackOnce(string shooterNpcId, int quantTick)
@@ -223,6 +296,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         int quantTick,
         bool ignoreTickGate = false)
     {
+        long startedAt = BeginPerfMeasure();
+
         if (shooter == null)
             return;
 
@@ -235,10 +310,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             return;
         }
 
-        if (shooter.Weapons == null || shooter.Weapons.Count == 0)
-            return;
-
+        long findTargetStartedAt = BeginPerfMeasure();
         GalaxyCombatTarget target = FindTarget(shooter);
+        double findTargetMs = EndPerfMeasureMs(findTargetStartedAt);
 
         if (!target.IsValid)
         {
@@ -253,8 +327,12 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         shooter.IsFighting = true;
 
         bool firedAnyWeapon = false;
+        int weaponCount = shooter.Weapons != null ? shooter.Weapons.Count : 0;
+        int firedCount = 0;
 
-        for (int i = 0; i < shooter.Weapons.Count; i++)
+        long weaponsStartedAt = BeginPerfMeasure();
+
+        for (int i = 0; i < weaponCount; i++)
         {
             SystemNpcWeaponRuntimeState weaponRuntime = shooter.Weapons[i];
 
@@ -268,15 +346,34 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 quantTick,
                 ignoreTickGate);
 
-            if (!fired)
-                continue;
-
-            firedAnyWeapon = true;
-            break;
+            if (fired)
+            {
+                firedAnyWeapon = true;
+                firedCount++;
+            }
         }
+
+        double weaponsMs = EndPerfMeasureMs(weaponsStartedAt);
 
         if (firedAnyWeapon)
             shooter.CombatState = SystemNpcCombatState.Attacking;
+
+        double totalMs = EndPerfMeasureMs(startedAt);
+
+        if (totalMs >= NpcPerfLogThresholdMs)
+        {
+            LogCustom(
+                "[NPC_PERF] SystemNpcCombatService.TryAttack " +
+                "TotalMs=" + totalMs.ToString("F2") +
+                ", FindTargetMs=" + findTargetMs.ToString("F2") +
+                ", WeaponsMs=" + weaponsMs.ToString("F2") +
+                ", Shooter=" + shooter.RuntimeNpcId +
+                ", SystemId=" + shooter.CurrentSystemId +
+                ", TargetType=" + target.TargetType +
+                ", TargetNpcId=" + target.TargetNpcId +
+                ", Weapons=" + weaponCount +
+                ", Fired=" + firedCount);
+        }
     }
 
     private bool TryCreateProjectile(
@@ -881,17 +978,23 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         SystemNpcRuntimeState shooter,
         SystemNpcType targetType)
     {
+        long startedAt = BeginPerfMeasure();
+
         var candidates = _runtimeService.GetAliveNpcsInSystemByType(
             shooter.CurrentSystemId,
-            targetType
-        );
+            targetType);
+
+        int candidateCount = candidates != null ? candidates.Count : 0;
+        int checkedCount = 0;
+        int availableCount = 0;
 
         SystemNpcRuntimeState best = null;
         float bestDistance = float.MaxValue;
 
-        for (int i = 0; i < candidates.Count; i++)
+        for (int i = 0; i < candidateCount; i++)
         {
             SystemNpcRuntimeState candidate = candidates[i];
+            checkedCount++;
 
             if (candidate == null)
                 continue;
@@ -899,10 +1002,11 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             if (!candidate.IsAvailableForCombat())
                 continue;
 
+            availableCount++;
+
             float distance = Vector3.Distance(
                 shooter.CurrentPosition,
-                candidate.CurrentPosition
-            );
+                candidate.CurrentPosition);
 
             if (distance < bestDistance)
             {
@@ -911,13 +1015,28 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             }
         }
 
+        double elapsedMs = EndPerfMeasureMs(startedAt);
+
+        if (elapsedMs >= NpcPerfLogThresholdMs)
+        {
+            LogCustom(
+                "[NPC_PERF] SystemNpcCombatService.FindNearestNpcTarget " +
+                "Ms=" + elapsedMs.ToString("F2") +
+                ", Shooter=" + shooter.RuntimeNpcId +
+                ", SystemId=" + shooter.CurrentSystemId +
+                ", TargetType=" + targetType +
+                ", Candidates=" + candidateCount +
+                ", Checked=" + checkedCount +
+                ", Available=" + availableCount +
+                ", BestDistance=" + bestDistance.ToString("F2"));
+        }
+
         if (best == null)
             return GalaxyCombatTarget.None();
 
         return GalaxyCombatTarget.Npc(
             best.RuntimeNpcId,
-            best.CurrentPosition
-        );
+            best.CurrentPosition);
     }
 
     public bool TryCreatePlayerProjectile(
@@ -1071,7 +1190,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         bool fired,
         string reason)
     {
-        if (!WeaponAttackTickDebugLogEnabled)
+        if (!IsWeaponAttackTickDebugLogEnabled())
             return;
 
         bool previousDebugEnabled = _debugEnabled;
@@ -1090,8 +1209,16 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             " | WeaponConfigId=" + (weaponConfigId ?? string.Empty) +
             " | WeaponType=" + weaponStats.WeaponType +
             " | ShotType=" + weaponStats.ShotType +
+            " | DamageType=" + weaponStats.DamageType +
+            " | TargetingMode=" + weaponStats.TargetingMode +
             " | DistanceAtTickStart=" + distanceAtTickStart.ToString("F2") +
             " | Range=" + weaponStats.Range.ToString("F2") +
+            " | Damage=" + weaponStats.Damage +
+            " | EnergyCost=" + weaponStats.EnergyCost +
+            " | ProjectileLifetime=" + weaponStats.ProjectileLifetime +
+            " | ShotCount=" + weaponStats.ShotCount +
+            " | UsesAmmo=" + weaponStats.UsesAmmo +
+            " | MaxAmmoCharges=" + weaponStats.MaxAmmoCharges +
             " | Fired=" + fired +
             " | Reason=" + (reason ?? string.Empty));
 
@@ -1128,7 +1255,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
     private void LogWaveDamage(string message)
     {
-        if (!WaveDamageDebugLogEnabled)
+        if (!IsWaveDamageDebugLogEnabled())
             return;
 
         bool previousDebugEnabled = _debugEnabled;
@@ -1141,6 +1268,28 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
         _debugEnabled = previousDebugEnabled;
         _debugStop = previousDebugStop;
+    }
+
+    private bool IsWeaponAttackTickDebugLogEnabled()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.DebugLogConfig == null)
+        {
+            return false;
+        }
+
+        return Bootstrapper.Instance.DebugLogConfig.IsEnabled(DebugLogChannel.Combat);
+    }
+
+    private bool IsWaveDamageDebugLogEnabled()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.DebugLogConfig == null)
+        {
+            return false;
+        }
+
+        return Bootstrapper.Instance.DebugLogConfig.IsEnabled(DebugLogChannel.Damage);
     }
 
     private bool TryCreateWave(
@@ -1545,7 +1694,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             string.Empty,
             playerPosition);
     }
-    
+
     private bool CanWaveDamageNpc(
         CombatWaveRuntimeState2A wave,
         SystemNpcRuntimeState npc)
@@ -2940,5 +3089,35 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         return Quaternion.AngleAxis(
             30f,
             Vector3.forward) * tailDirection;
+    }
+
+    private static long BeginPerfMeasure()
+    {
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    private static double EndPerfMeasureMs(long startedAt)
+    {
+        long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
+
+        return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+    }
+
+    private bool ShouldWriteNpcPerfLog(
+        int quantTick,
+        double elapsedMs,
+        int npcCount)
+    {
+        if (elapsedMs < NpcPerfLogThresholdMs &&
+            npcCount < NpcPerfLogMinNpcCount)
+        {
+            return false;
+        }
+
+        if (quantTick - _lastNpcPerfLogTick < NpcPerfLogTickCooldown)
+            return false;
+
+        _lastNpcPerfLogTick = quantTick;
+        return true;
     }
 }

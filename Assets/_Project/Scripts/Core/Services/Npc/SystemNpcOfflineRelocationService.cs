@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public sealed class SystemNpcOfflineRelocationService :
     CustomService,
@@ -48,20 +49,37 @@ public sealed class SystemNpcOfflineRelocationService :
         if (npcs == null || npcs.Count == 0)
             return false;
 
+        List<StarSystemConfig> destinationCandidates =
+            BuildOfflineDestinationCandidates(
+                state,
+                npcs);
+
+        if (destinationCandidates.Count == 0)
+            return false;
+
+        Dictionary<string, bool> travelScenarioByConfigId =
+            new Dictionary<string, bool>();
+
         int movedCount = 0;
 
         for (int i = 0; i < npcs.Count; i++)
         {
             SystemNpcRuntimeState npc = npcs[i];
 
-            if (!CanNpcTryOfflineRelocation(npc))
-                continue;
-
-            if (!TryPickDestinationSystem(
+            if (!CanNpcTryOfflineRelocation(
                     npc,
-                    state,
-                    out StarSystemConfig destinationSystem))
+                    travelScenarioByConfigId))
+            {
                 continue;
+            }
+
+            if (!TryPickDestinationSystemFromCandidates(
+                    npc,
+                    destinationCandidates,
+                    out StarSystemConfig destinationSystem))
+            {
+                continue;
+            }
 
             ApplyOfflineRelocation(
                 npc,
@@ -82,7 +100,8 @@ public sealed class SystemNpcOfflineRelocationService :
         LogCustom(
             "[SystemNpcOfflineRelocationService] Offline relocation finished. " +
             "Hours=" + offlineHours.ToString("0.00") +
-            ", moved=" + movedCount);
+            ", moved=" + movedCount +
+            ", candidates=" + destinationCandidates.Count);
 
         return movedCount > 0;
     }
@@ -417,7 +436,8 @@ public sealed class SystemNpcOfflineRelocationService :
         }
 
         PlaceNpcOnRandomMapPoint(
-            npc);
+            npc,
+            destinationSystem);
 
         PublishNpcLocationChanged(npc);
     }
@@ -477,10 +497,12 @@ public sealed class SystemNpcOfflineRelocationService :
         return planet.PlanetOrbit.OrbitCenterOffset + offset;
     }
 
-    private void PlaceNpcOnRandomMapPoint(SystemNpcRuntimeState npc)
+    private void PlaceNpcOnRandomMapPoint(
+        SystemNpcRuntimeState npc,
+        StarSystemConfig system)
     {
         Vector3 position =
-            PickRandomMapPosition();
+            PickRandomMapPosition(system);
 
         npc.CurrentPlanetId =
             null;
@@ -496,35 +518,104 @@ public sealed class SystemNpcOfflineRelocationService :
             position);
     }
 
-    private Vector3 PickRandomMapPosition()
+    private Vector3 PickRandomMapPosition(
+        StarSystemConfig system)
     {
-        Vector2 halfSize =
-            Vector2.zero;
+        Vector2 center =
+            ResolveBoundaryProtectionCenter(system);
 
-        if (_configService.ShipMovementConfig != null)
-            halfSize = _configService.ShipMovementConfig.SystemBoundsHalfSize;
+        float minRadius =
+            MinMapSpawnRadiusFromSun;
 
-        if (halfSize.x <= 0f)
-            halfSize.x = 600f;
+        float maxRadius =
+            GetMapSpawnMaxRadiusFromSun();
 
-        if (halfSize.y <= 0f)
-            halfSize.y = 600f;
+        if (maxRadius < minRadius)
+            maxRadius = minRadius;
+
+        float minRadiusSqr =
+            minRadius * minRadius;
+
+        float maxRadiusSqr =
+            maxRadius * maxRadius;
 
         for (int i = 0; i < 20; i++)
         {
-            Vector2 candidate =
-                new Vector2(
-                    UnityEngine.Random.Range(-halfSize.x, halfSize.x),
-                    UnityEngine.Random.Range(-halfSize.y, halfSize.y));
+            float angle =
+                UnityEngine.Random.Range(
+                    0f,
+                    Mathf.PI * 2f);
 
-            if (candidate.magnitude >= MinMapSpawnRadiusFromSun)
-                return new Vector3(candidate.x, candidate.y, 0f);
+            float radius =
+                Mathf.Sqrt(
+                    UnityEngine.Random.Range(
+                        minRadiusSqr,
+                        maxRadiusSqr));
+
+            Vector2 direction =
+                new Vector2(
+                    Mathf.Cos(angle),
+                    Mathf.Sin(angle));
+
+            Vector2 candidate =
+                center + direction * radius;
+
+            return new Vector3(
+                candidate.x,
+                candidate.y,
+                0f);
         }
 
         return new Vector3(
-            0f,
-            -MinMapSpawnRadiusFromSun,
+            center.x,
+            center.y - minRadius,
             0f);
+    }
+
+    private float GetMapSpawnMaxRadiusFromSun()
+    {
+        if (_configService != null &&
+            _configService.ShipMovementConfig != null &&
+            _configService.ShipMovementConfig.BoundaryProtectionRadiusWorld > 0f)
+        {
+            return _configService
+                .ShipMovementConfig
+                .BoundaryProtectionRadiusWorld;
+        }
+
+        Vector2 halfSize =
+            Vector2.zero;
+
+        if (_configService != null &&
+            _configService.ShipMovementConfig != null)
+        {
+            halfSize =
+                _configService.ShipMovementConfig.SystemBoundsHalfSize;
+        }
+
+        float fallbackRadius =
+            Mathf.Min(
+                Mathf.Abs(halfSize.x),
+                Mathf.Abs(halfSize.y));
+
+        if (fallbackRadius > MinMapSpawnRadiusFromSun)
+            return fallbackRadius;
+
+        return MinMapSpawnRadiusFromSun;
+    }
+
+    private static Vector2 ResolveBoundaryProtectionCenter(
+        StarSystemConfig system)
+    {
+        if (system != null &&
+            system.Sun != null)
+        {
+            return new Vector2(
+                system.Sun.LocalOffset.x,
+                system.Sun.LocalOffset.y);
+        }
+
+        return Vector2.zero;
     }
 
     private void SetNpcPositionFields(
@@ -841,5 +932,535 @@ public sealed class SystemNpcOfflineRelocationService :
         }
 
         return 1;
+    }
+
+    public IEnumerator TryProcessOfflineRoutine(
+    GameRuntimeState state,
+    float progressFrom01,
+    float progressTo01,
+    Action<bool> completed)
+    {
+        if (state == null || state.Meta == null)
+        {
+            LogOfflineRelocationRoutine(
+                "Exit.StateOrMetaNull",
+                0d,
+                0,
+                0,
+                0,
+                0,
+                0,
+                LoadingSceneContext.OfflineRelocationNpcPercent,
+                0);
+
+            completed?.Invoke(false);
+            yield break;
+        }
+
+        double offlineHours =
+            CalculateOfflineHours(state.Meta);
+
+        if (offlineHours <= 0d)
+        {
+            LogOfflineRelocationRoutine(
+                "Exit.NoOfflineHours",
+                offlineHours,
+                0,
+                0,
+                0,
+                0,
+                0,
+                LoadingSceneContext.OfflineRelocationNpcPercent,
+                0);
+
+            completed?.Invoke(false);
+            yield break;
+        }
+
+        IReadOnlyList<SystemNpcRuntimeState> npcs =
+            _npcRuntimeService.Npcs;
+
+        int npcCount =
+            npcs != null
+                ? npcs.Count
+                : 0;
+
+        if (npcs == null || npcs.Count == 0)
+        {
+            LogOfflineRelocationRoutine(
+                "Exit.NoNpcs",
+                offlineHours,
+                npcCount,
+                0,
+                0,
+                0,
+                0,
+                LoadingSceneContext.OfflineRelocationNpcPercent,
+                0);
+
+            completed?.Invoke(false);
+            yield break;
+        }
+
+        float npcPercent =
+            LoadingSceneContext.OfflineRelocationNpcPercent;
+
+        if (npcPercent <= 0f)
+        {
+            state.Meta.LastSaveUtc =
+                DateTime.UtcNow.Ticks;
+
+            LoadingSceneContext.SetProgress(
+                string.Empty,
+                progressTo01);
+
+            LogOfflineRelocationRoutine(
+                "Exit.PercentZero",
+                offlineHours,
+                npcCount,
+                0,
+                0,
+                0,
+                0,
+                npcPercent,
+                0);
+
+            completed?.Invoke(false);
+            yield break;
+        }
+
+        LoadingSceneContext.SetProgress(
+            string.Empty,
+            progressFrom01);
+
+        yield return null;
+
+        List<StarSystemConfig> destinationCandidates =
+            BuildOfflineDestinationCandidates(
+                state,
+                npcs);
+
+        int candidateCount =
+            destinationCandidates != null
+                ? destinationCandidates.Count
+                : 0;
+
+        if (destinationCandidates == null ||
+            destinationCandidates.Count == 0)
+        {
+            LogOfflineRelocationRoutine(
+                "Exit.NoDestinationCandidates",
+                offlineHours,
+                npcCount,
+                candidateCount,
+                0,
+                0,
+                0,
+                npcPercent,
+                0);
+
+            completed?.Invoke(false);
+            yield break;
+        }
+
+        Dictionary<string, bool> travelScenarioByConfigId =
+            new Dictionary<string, bool>();
+
+        int eligibleCount =
+            CountOfflineRelocationEligibleNpcs(
+                npcs,
+                travelScenarioByConfigId);
+
+        int targetEligibleCount =
+            Mathf.CeilToInt(
+                eligibleCount * npcPercent / 100f);
+
+        if (targetEligibleCount <= 0)
+        {
+            state.Meta.LastSaveUtc =
+                DateTime.UtcNow.Ticks;
+
+            LoadingSceneContext.SetProgress(
+                string.Empty,
+                progressTo01);
+
+            LogOfflineRelocationRoutine(
+                "Exit.NoTargetEligible",
+                offlineHours,
+                npcCount,
+                candidateCount,
+                eligibleCount,
+                targetEligibleCount,
+                0,
+                npcPercent,
+                0);
+
+            completed?.Invoke(false);
+            yield break;
+        }
+
+        int movedCount = 0;
+        int processedEligibleCount = 0;
+        int failedPickDestinationCount = 0;
+        int scannedSinceYield = 0;
+
+        long sliceStartedAt =
+            System.Diagnostics.Stopwatch.GetTimestamp();
+
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc = npcs[i];
+
+            if (!CanNpcTryOfflineRelocation(
+                    npc,
+                    travelScenarioByConfigId))
+            {
+                continue;
+            }
+
+            processedEligibleCount++;
+
+            if (TryPickDestinationSystemFromCandidates(
+                    npc,
+                    destinationCandidates,
+                    out StarSystemConfig destinationSystem))
+            {
+                ApplyOfflineRelocation(
+                    npc,
+                    destinationSystem);
+
+                movedCount++;
+            }
+            else
+            {
+                failedPickDestinationCount++;
+            }
+
+            scannedSinceYield++;
+
+            if (processedEligibleCount >= targetEligibleCount)
+                break;
+
+            if (ShouldYieldOfflineRelocationSlice(
+                    scannedSinceYield,
+                    sliceStartedAt))
+            {
+                float progress01 =
+                    Mathf.Lerp(
+                        progressFrom01,
+                        progressTo01,
+                        (float)processedEligibleCount / targetEligibleCount);
+
+                LoadingSceneContext.SetProgress(
+                    string.Empty,
+                    progress01);
+
+                scannedSinceYield = 0;
+                sliceStartedAt =
+                    System.Diagnostics.Stopwatch.GetTimestamp();
+
+                yield return null;
+            }
+        }
+
+        state.Meta.LastSaveUtc =
+            DateTime.UtcNow.Ticks;
+
+        if (movedCount > 0)
+        {
+            _eventBus.Publish(
+                new SaveNeedEvent("npc_offline_relocation"));
+        }
+
+        LoadingSceneContext.SetProgress(
+            string.Empty,
+            progressTo01);
+
+        LogOfflineRelocationRoutine(
+            movedCount > 0
+                ? "Complete.Moved"
+                : "Complete.NoMoved",
+            offlineHours,
+            npcCount,
+            candidateCount,
+            eligibleCount,
+            targetEligibleCount,
+            processedEligibleCount,
+            npcPercent,
+            movedCount,
+            failedPickDestinationCount);
+
+        completed?.Invoke(movedCount > 0);
+    }
+
+    private static void LogOfflineRelocationRoutine(
+        string reason,
+        double offlineHours,
+        int npcCount,
+        int candidateCount,
+        int eligibleCount,
+        int targetEligibleCount,
+        int processedEligibleCount,
+        float npcPercent,
+        int movedCount,
+        int failedPickDestinationCount = 0)
+    {
+        if (!IsLoadingSceneDiagnosticsLogEnabled())
+            return;
+
+        float movedOfEligiblePercent =
+            eligibleCount > 0
+                ? movedCount * 100f / eligibleCount
+                : 0f;
+
+        float movedOfTargetPercent =
+            targetEligibleCount > 0
+                ? movedCount * 100f / targetEligibleCount
+                : 0f;
+
+        Debug.Log(
+            "[LOADING_DIAG][OfflineRelocation] " +
+            reason +
+            " | Frame=" + Time.frameCount +
+            " | Time=" + Time.unscaledTime.ToString("F3") +
+            " | Hours=" + offlineHours.ToString("0.00") +
+            " | Npcs=" + npcCount +
+            " | Candidates=" + candidateCount +
+            " | Eligible=" + eligibleCount +
+            " | PercentSetting=" + npcPercent.ToString("0.0") +
+            " | TargetEligible=" + targetEligibleCount +
+            " | ProcessedEligible=" + processedEligibleCount +
+            " | Moved=" + movedCount +
+            " | FailedPickDestination=" + failedPickDestinationCount +
+            " | MovedOfEligiblePercent=" + movedOfEligiblePercent.ToString("0.0") +
+            " | MovedOfTargetPercent=" + movedOfTargetPercent.ToString("0.0"));
+    }
+
+    private static bool IsLoadingSceneDiagnosticsLogEnabled()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.DebugLogConfig == null)
+        {
+            return false;
+        }
+
+        return Bootstrapper.Instance
+            .DebugLogConfig
+            .LoadingSceneDiagnosticsLogs;
+    }
+
+    private int CountOfflineRelocationEligibleNpcs(
+        IReadOnlyList<SystemNpcRuntimeState> npcs,
+        Dictionary<string, bool> travelScenarioByConfigId)
+    {
+        if (npcs == null || npcs.Count == 0)
+            return 0;
+
+        int count = 0;
+
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            if (CanNpcTryOfflineRelocation(
+                    npcs[i],
+                    travelScenarioByConfigId))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private bool CanNpcTryOfflineRelocation(
+        SystemNpcRuntimeState npc,
+        Dictionary<string, bool> travelScenarioByConfigId)
+    {
+        if (npc == null)
+            return false;
+
+        if (!npc.IsAlive)
+            return false;
+
+        if (!npc.IsAlly)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(npc.CurrentSystemId))
+            return false;
+
+        string configId =
+            npc.ConfigId ?? string.Empty;
+
+        if (!travelScenarioByConfigId.TryGetValue(
+                configId,
+                out bool hasTravelScenario))
+        {
+            hasTravelScenario =
+                AllyHasTravelToAnotherSystemScenario(configId);
+
+            travelScenarioByConfigId[configId] =
+                hasTravelScenario;
+        }
+
+        return hasTravelScenario;
+    }
+
+    private List<StarSystemConfig> BuildOfflineDestinationCandidates(
+        GameRuntimeState state,
+        IReadOnlyList<SystemNpcRuntimeState> npcs)
+    {
+        List<StarSystemConfig> candidates =
+            new List<StarSystemConfig>();
+
+        IReadOnlyList<StarSystemConfig> allSystems =
+            _configService.GetAllStarSystems();
+
+        if (allSystems == null || allSystems.Count == 0)
+            return candidates;
+
+        HashSet<string> hostileSystemIds =
+            BuildAliveHostileSystemIds(npcs);
+
+        for (int i = 0; i < allSystems.Count; i++)
+        {
+            StarSystemConfig system =
+                allSystems[i];
+
+            if (system == null ||
+                string.IsNullOrWhiteSpace(system.Id))
+            {
+                continue;
+            }
+
+            if (!IsSystemOpen(system, state))
+                continue;
+
+            if (hostileSystemIds.Contains(system.Id))
+                continue;
+
+            candidates.Add(system);
+        }
+
+        return candidates;
+    }
+
+    private HashSet<string> BuildAliveHostileSystemIds(
+        IReadOnlyList<SystemNpcRuntimeState> npcs)
+    {
+        HashSet<string> hostileSystemIds =
+            new HashSet<string>();
+
+        if (npcs == null)
+            return hostileSystemIds;
+
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                npcs[i];
+
+            if (npc == null)
+                continue;
+
+            if (!npc.IsAlive)
+                continue;
+
+            if (!npc.IsHostileToPlayer)
+                continue;
+
+            if (string.IsNullOrWhiteSpace(npc.CurrentSystemId))
+                continue;
+
+            hostileSystemIds.Add(
+                npc.CurrentSystemId);
+        }
+
+        return hostileSystemIds;
+    }
+
+    private bool TryPickDestinationSystemFromCandidates(
+        SystemNpcRuntimeState npc,
+        IReadOnlyList<StarSystemConfig> candidates,
+        out StarSystemConfig destinationSystem)
+    {
+        destinationSystem = null;
+
+        if (npc == null ||
+            candidates == null ||
+            candidates.Count == 0)
+        {
+            return false;
+        }
+
+        if (candidates.Count == 1)
+        {
+            StarSystemConfig onlyCandidate =
+                candidates[0];
+
+            if (onlyCandidate == null ||
+                onlyCandidate.Id == npc.CurrentSystemId)
+            {
+                return false;
+            }
+
+            destinationSystem = onlyCandidate;
+            return true;
+        }
+
+        const int RandomAttempts = 8;
+
+        for (int i = 0; i < RandomAttempts; i++)
+        {
+            StarSystemConfig candidate =
+                candidates[
+                    UnityEngine.Random.Range(
+                        0,
+                        candidates.Count)];
+
+            if (candidate == null)
+                continue;
+
+            if (candidate.Id == npc.CurrentSystemId)
+                continue;
+
+            destinationSystem = candidate;
+            return true;
+        }
+
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            StarSystemConfig candidate =
+                candidates[i];
+
+            if (candidate == null)
+                continue;
+
+            if (candidate.Id == npc.CurrentSystemId)
+                continue;
+
+            destinationSystem = candidate;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool ShouldYieldOfflineRelocationSlice(
+        int scannedSinceYield,
+        long sliceStartedAt)
+    {
+        int maxNpcsPerSlice =
+            LoadingSceneContext.OfflineRelocationMaxNpcsPerSlice;
+
+        float maxSliceMs =
+            LoadingSceneContext.OfflineRelocationMaxSliceMs;
+
+        if (scannedSinceYield >= maxNpcsPerSlice)
+            return true;
+
+        double elapsedMs =
+            (System.Diagnostics.Stopwatch.GetTimestamp() - sliceStartedAt) *
+            1000.0 /
+            System.Diagnostics.Stopwatch.Frequency;
+
+        return elapsedMs >= maxSliceMs;
     }
 }

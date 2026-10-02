@@ -14,8 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::SaveConfig
   SaveFileName: save_star_frontier.json
   BackupFileName: save_star_frontier_backup.json
+  UseMultiFileSave: 1
+  MultiFileSaveDirectoryName: save_star_frontier_parts
+  ActiveDirectoryName: active
+  BackupDirectoryName: backup
+  StagingDirectoryName: staging
+  ManifestFileName: manifest.json
+  SaveStepBudgetMs: 2
+  MaxNpcCaptureItemsPerStep: 256
+  MaxNpcSnapshotEntriesPerPart: 64
   SaveVersion: 1
-  AutosaveIntervalSeconds: 60
+  AutosaveIntervalSeconds: 15
   CreateBackupBeforeSave: 1
   AutoSaveOnPause: 1
   AutoSaveOnQuit: 1

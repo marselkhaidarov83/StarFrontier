@@ -102,15 +102,13 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
 
     private void Start()
     {
-        _debugEnabled = true;
-        _debugStop = false;
-
         ResolveServices();
 
-        LogCustom(
+        LogNpcRouteDebug(
             "[NpcRouteDebug] Start | " +
             "LineView = " + (npcRouteLineView != null) +
-            " | SameGameObject = " + (npcRouteLineView != null && npcRouteLineView.gameObject == gameObject) +
+            " | SameGameObject = " +
+            (npcRouteLineView != null && npcRouteLineView.gameObject == gameObject) +
             " | EventBus = " + (_eventBus != null) +
             " | NpcMovementService = " + (_npcMovementService != null) +
             " | NpcRuntimeService = " + (_npcRuntimeService != null) +
@@ -121,7 +119,7 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
         if (npcRouteLineView != null &&
             npcRouteLineView.gameObject == gameObject)
         {
-            LogCustom(
+            LogNpcRouteDebug(
                 "[NpcRouteDebug] ERROR | NpcRouteLineView is on same GameObject as controller. " +
                 "TravelLineView2A.Hide() disables this object.");
         }
@@ -155,11 +153,12 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
             _eventBus.Subscribe<SystemEnemyDestroyedEvent>(
                 OnEnemyDestroyed);
 
-            LogCustom("[NpcRouteDebug] Subscribed to events.");
+            LogNpcRouteDebug("[NpcRouteDebug] Subscribed to events.");
         }
         else
         {
-            LogCustom("[NpcRouteDebug] EventBus is null. Route visualizer will not receive panel events.");
+            LogNpcRouteDebug(
+                "[NpcRouteDebug] EventBus is null. Route visualizer will not receive panel events.");
         }
     }
 
@@ -200,31 +199,55 @@ public sealed class SystemNpcRouteVisualController2A : CustomMonoBehaviour
 
     private void LateUpdate()
     {
-        if (_hideRouteRequestedFrame >= 0)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        try
         {
-            if (!string.IsNullOrWhiteSpace(_selectedNpcId))
+            if (_hideRouteRequestedFrame >= 0)
             {
-                _hideRouteRequestedFrame = -1;
+                if (!string.IsNullOrWhiteSpace(_selectedNpcId))
+                {
+                    _hideRouteRequestedFrame = -1;
+                }
+                else
+                {
+                    HideRoute();
+                    _hideRouteRequestedFrame = -1;
+                    return;
+                }
             }
-            else
-            {
-                HideRoute();
-                _hideRouteRequestedFrame = -1;
+
+            if (string.IsNullOrWhiteSpace(_selectedNpcId))
                 return;
-            }
+
+            if (Time.unscaledTime < _nextRouteRefreshTime)
+                return;
+
+            _nextRouteRefreshTime =
+                Time.unscaledTime +
+                Mathf.Max(0.02f, routeRefreshIntervalSeconds);
+
+            RefreshRoute();
         }
+        finally
+        {
+            LogSlowVisualUpdateIfNeeded(
+                "SystemNpcRouteVisualController2A.LateUpdate",
+                startedAt,
+                "SelectedNpc=" + (_selectedNpcId ?? string.Empty));
+        }
+    }
 
-        if (string.IsNullOrWhiteSpace(_selectedNpcId))
-            return;
-
-        if (Time.unscaledTime < _nextRouteRefreshTime)
-            return;
-
-        _nextRouteRefreshTime =
-            Time.unscaledTime +
-            Mathf.Max(0.02f, routeRefreshIntervalSeconds);
-
-        RefreshRoute();
+    private void LogSlowVisualUpdateIfNeeded(
+    string marker,
+    double startedAt,
+    string details)
+    {
+        VisualUpdatePerfLog.LogIfSlow(
+            marker,
+            startedAt,
+            details);
     }
 
     private void OnTargetInfoPanelRequested(
@@ -1371,5 +1394,15 @@ SystemEnemyRuntimeState enemy)
         return sun != null
             ? sun.VisualSize
             : 0f;
+    }
+
+    private void LogNpcRouteDebug(string message)
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.NpcMovement,
+            message);
     }
 }

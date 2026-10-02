@@ -110,22 +110,44 @@ public sealed class SaveValidationStage
     }
 
     private static void NormalizeNpcCollections(
-        GameRuntimeState state,
-        SaveValidationResult result)
+    GameRuntimeState state,
+    SaveValidationResult result)
     {
         if (state.SystemNpcSimulation == null)
             return;
 
+        state.SystemNpcSimulation.PopulationEntries ??= new();
         state.SystemNpcSimulation.Npcs ??= new();
         state.SystemNpcSimulation.PopulationTimers ??= new();
+
+        int removedPopulationEntries =
+            state.SystemNpcSimulation.PopulationEntries.RemoveAll(item => item == null);
+
+        int removedInvalidPopulationEntries =
+            state.SystemNpcSimulation.PopulationEntries.RemoveAll(item =>
+                item.Count <= 0 ||
+                string.IsNullOrWhiteSpace(item.SystemId) ||
+                string.IsNullOrWhiteSpace(item.ConfigId));
 
         int removedNpcs =
             state.SystemNpcSimulation.Npcs.RemoveAll(item => item == null);
 
+        if (removedPopulationEntries > 0)
+        {
+            result.Normalizations.Add(
+                "Removed null compact NPC population entries: " + removedPopulationEntries + ".");
+        }
+
+        if (removedInvalidPopulationEntries > 0)
+        {
+            result.Normalizations.Add(
+                "Removed invalid compact NPC population entries: " + removedInvalidPopulationEntries + ".");
+        }
+
         if (removedNpcs > 0)
         {
             result.Normalizations.Add(
-                "Removed null NPC entries: " + removedNpcs + ".");
+                "Removed null legacy NPC entries: " + removedNpcs + ".");
         }
     }
 }

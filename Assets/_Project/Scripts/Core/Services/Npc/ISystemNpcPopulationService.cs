@@ -22,4 +22,5 @@ public interface ISystemNpcPopulationService
 
     bool DebugSpawnAllyInCurrentSystem(AllyRole2A role);
     bool DebugSpawnEnemyInCurrentSystem();
+    bool DebugSpawnAllyInOtherSystem(AllyRole2A role);
 }

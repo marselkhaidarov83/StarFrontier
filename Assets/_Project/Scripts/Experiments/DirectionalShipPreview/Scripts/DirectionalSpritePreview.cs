@@ -30,16 +30,45 @@ public sealed class DirectionalSpritePreview : MonoBehaviour
 
     private void Update()
     {
-        if (!autoRotate)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double applySpriteMs = 0.0;
+
+        bool applied = false;
+
+        try
         {
-            return;
+            if (!autoRotate)
+                return;
+
+            angleDegrees = Mathf.Repeat(
+                angleDegrees + degreesPerSecond * Time.deltaTime,
+                360f);
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplySprite();
+
+            applySpriteMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            applied = true;
         }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
 
-        angleDegrees = Mathf.Repeat(
-            angleDegrees + degreesPerSecond * Time.deltaTime,
-            360f);
-
-        ApplySprite();
+            VisualUpdateAggregateLog.Record(
+                "DirectionalSpritePreview.Update",
+                elapsedMs,
+                "Name=" + name +
+                " | AutoRotate=" + autoRotate +
+                " | Applied=" + applied +
+                " | ApplySpriteMs=" + applySpriteMs.ToString("F3"));
+        }
     }
 
     private void OnValidate()

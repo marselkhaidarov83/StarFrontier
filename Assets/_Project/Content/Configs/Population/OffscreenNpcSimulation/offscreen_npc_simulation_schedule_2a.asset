@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60426562a42bb48a2bfe667f1414631c, type: 3}
+  m_Name: offscreen_npc_simulation_schedule_2a
+  m_EditorClassIdentifier: Core::OffscreenNpcSimulationScheduleConfig
+  unreachableSystemPriority: 99
+  maxOffscreenAssignNewPerSystemTick: 15
+  maxOffscreenReassignPerSystemTick: 15
+  maxOffscreenActiveBehaviorPerSystemTick: 20
+  maxOffscreenMovementNpcsPerSystemTick: 15
+  maxOffscreenCompletedTravelsPerSystemTick: 10
+  maxOffscreenCompletedTravelMsPerSystemTick: 11
+  offscreenCompletedTravelBudgetReserveMs: 1
+  ticks:
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 2
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 3
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 2
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 4
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 2
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 3
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 5
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 2
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 99
+    systemLimitMode: 0
+    maxSystems: 1
+  - priority: 1
+    systemLimitMode: 0
+    maxSystems: 1

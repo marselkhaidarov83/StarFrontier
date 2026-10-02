@@ -10,6 +10,7 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
     private const int SunAvoidanceArcSegments = 18;
     private const int RoutePlanMaxSteps = 8192;
     private const float TurnSpikeAngleThresholdDegrees = 120f;
+    private const double PerfLogThresholdMs = 2.0;
 
     private readonly Dictionary<string, EnemyRouteState> _routes = new();
     private readonly SystemShipRouteResult2A _routeBuildResult = new();
@@ -34,6 +35,8 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
 
     public void Tick(float deltaTime, int currentTick)
     {
+        long totalStartedAt = BeginPerfMeasure();
+
         if (!_encounterService.HasActiveEncounter)
             return;
 
@@ -48,23 +51,64 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
         if (!_playerTargetService.IsPlayerAvailableInSystem(encounter.SystemId))
             return;
 
+        long playerPositionStartedAt = BeginPerfMeasure();
         Vector3 playerPosition = _playerTargetService.GetPlayerPosition();
+        double playerPositionMs = EndPerfMeasureMs(playerPositionStartedAt);
+
+        long getEnemiesStartedAt = BeginPerfMeasure();
 
         IReadOnlyList<SystemEnemyRuntimeState> enemies =
             _enemyService.GetAliveEnemiesInSystem(encounter.SystemId);
 
-        for (int i = 0; i < enemies.Count; i++)
+        double getEnemiesMs = EndPerfMeasureMs(getEnemiesStartedAt);
+
+        int enemyCount = enemies != null ? enemies.Count : 0;
+        int movedCount = 0;
+        int skippedCount = 0;
+
+        long loopStartedAt = BeginPerfMeasure();
+
+        for (int i = 0; i < enemyCount; i++)
         {
             SystemEnemyRuntimeState enemy = enemies[i];
 
             if (enemy == null || !enemy.IsAlive)
+            {
+                skippedCount++;
                 continue;
+            }
 
             Vector3 destination = playerPosition;
             destination.z = enemy.Position.z;
 
+            long enemyStartedAt = BeginPerfMeasure();
             TickEnemy(enemy, destination, deltaTime);
+            double enemyMs = EndPerfMeasureMs(enemyStartedAt);
+
+            LogEnemyPerf(
+                enemyMs,
+                "TickEnemy" +
+                " | Enemy=" + enemy.RuntimeEnemyId +
+                " | System=" + enemy.SystemId +
+                " | Speed=" + enemy.Speed.ToString("0.###"));
+
+            movedCount++;
         }
+
+        double loopMs = EndPerfMeasureMs(loopStartedAt);
+        double totalMs = EndPerfMeasureMs(totalStartedAt);
+
+        LogEnemyPerf(
+            totalMs,
+            "Tick" +
+            " | System=" + encounter.SystemId +
+            " | Tick=" + currentTick +
+            " | Enemies=" + enemyCount +
+            " | Moved=" + movedCount +
+            " | Skipped=" + skippedCount +
+            " | PlayerPositionMs=" + playerPositionMs.ToString("F2") +
+            " | GetEnemiesMs=" + getEnemiesMs.ToString("F2") +
+            " | LoopMs=" + loopMs.ToString("F2"));
     }
 
     public bool TryBuildRoutePreview2A(
@@ -120,7 +164,7 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
 
         return _routeService.FillPreviewFromPath(
             path,
-            Mathf.Max(0.01f, enemy.Speed),
+            Mathf.Max(0.01f, enemy.Speed * GetSpeedMultiplier()),
             preview,
             smallDotSpacing,
             maxBigDots,
@@ -219,7 +263,8 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
 
         float movementDistance =
             Mathf.Max(0f, enemy.Speed) *
-            GetNormalizedTickDeltaTime(deltaTime);
+            GetNormalizedTickDeltaTime(deltaTime) *
+            GetSpeedMultiplier();
 
         float nextDistance =
             Mathf.Clamp(
@@ -261,7 +306,7 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
 
         routeState.DistanceTravelled = nextDistance;
 
-        if (debugMovement)
+        if (IsEnemyTurnSpikeDebugEnabled())
         {
             float turnAngle =
                 GetSignedAngle(previousFacingDirection, nextFacingDirection);
@@ -284,13 +329,31 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
             }
         }
 
-        _eventBus.Publish(new SystemEnemyPositionChangedEvent(
-            enemy.RuntimeEnemyId,
-            enemy.Position,
-            enemy.FacingDirection));
-
-        if (totalLength - nextDistance <= ArrivalDistanceThreshold)
+        if (Vector3.Distance(enemy.Position, destination) <= ArrivalDistanceThreshold ||
+            totalLength - nextDistance <= ArrivalDistanceThreshold)
+        {
             ClearRoute(enemy.RuntimeEnemyId);
+        }
+
+        _eventBus.Publish(
+            new SystemEnemyPositionChangedEvent(
+                enemy.RuntimeEnemyId,
+                enemy.Position,
+                enemy.FacingDirection));
+    }
+
+
+    private float GetSpeedMultiplier()
+    {
+        ShipMovementConfig config =
+            _configService != null
+                ? _configService.ShipMovementConfig
+                : null;
+
+        if (config == null)
+            return 1f;
+
+        return config.SpeedMultiplier;
     }
 
     private static Vector2 GetDirectionToDestination(
@@ -368,6 +431,8 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
         Vector3 destination,
         List<Vector3> routePath)
     {
+        long startedAt = BeginPerfMeasure();
+
         if (enemy == null ||
             routePath == null ||
             _routeService == null)
@@ -388,19 +453,40 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
                 Settings = CreateRouteSettings(enemy)
             };
 
+        long buildStartedAt = BeginPerfMeasure();
+
         bool routeBuilt =
             _routeService.TryBuildRoute(
                 request,
                 _routeBuildResult);
 
+        double buildMs = EndPerfMeasureMs(buildStartedAt);
+
         if (!routeBuilt ||
             _routeBuildResult.Path == null ||
             _routeBuildResult.Path.Count <= 1)
         {
+            LogEnemyPerf(
+                EndPerfMeasureMs(startedAt),
+                "TryBuildRoute FAILED" +
+                " | Enemy=" + enemy.RuntimeEnemyId +
+                " | System=" + enemy.SystemId +
+                " | BuildMs=" + buildMs.ToString("F2"));
+
             return false;
         }
 
         routePath.AddRange(_routeBuildResult.Path);
+
+        LogEnemyPerf(
+            EndPerfMeasureMs(startedAt),
+            "TryBuildRoute OK" +
+            " | Enemy=" + enemy.RuntimeEnemyId +
+            " | System=" + enemy.SystemId +
+            " | PathCount=" + routePath.Count +
+            " | PathLength=" + _routeBuildResult.PathLength.ToString("0.###") +
+            " | BuildMs=" + buildMs.ToString("F2"));
+
         return true;
     }
 
@@ -622,5 +708,47 @@ public sealed class SystemEnemyMovementService : CustomService, ISystemEnemyMove
         public readonly List<Vector3> Path = new();
         public Vector3 Destination;
         public float DistanceTravelled;
+    }
+
+    private static long BeginPerfMeasure()
+    {
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    private static double EndPerfMeasureMs(long startedAt)
+    {
+        long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
+        return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+    }
+
+    private void LogEnemyPerf(double elapsedMs, string message)
+    {
+        if (elapsedMs < PerfLogThresholdMs)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.EnemyMovement))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.EnemyMovement,
+            "[SystemEnemyMovementService] " +
+            message +
+            " | Ms=" +
+            elapsedMs.ToString("F2"));
+    }
+
+    private bool IsEnemyTurnSpikeDebugEnabled()
+    {
+        DebugLogConfig debugLogConfig =
+            Bootstrapper.Instance != null
+                ? Bootstrapper.Instance.DebugLogConfig
+                : null;
+
+        return debugLogConfig != null &&
+               debugLogConfig.EnemyTurnSpikeLogs &&
+               debugLogConfig.IsEnabled(DebugLogChannel.EnemyMovement);
     }
 }

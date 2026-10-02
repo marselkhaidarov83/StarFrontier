@@ -3,10 +3,49 @@ using UnityEngine;
 public sealed class OrbitalMotionService : CustomService, IOrbitalMotionService
 {
     private float _simulationTimeSeconds;
+    private readonly ShipMovementConfig _shipMovementConfig;
+    private const double PerfLogThresholdMs = 1.0;
+
+    public OrbitalMotionService()
+    {
+        IConfigService configService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+
+        _shipMovementConfig =
+            configService != null
+                ? configService.ShipMovementConfig
+                : null;
+    }
+
 
     public void Tick(float deltaTime)
     {
-        _simulationTimeSeconds += GetTickScaledDeltaTime(deltaTime);
+        long startedAt = BeginPerfMeasure();
+
+        float scaledDeltaTime =
+            GetTickScaledDeltaTime(deltaTime);
+
+        float speedMultiplier =
+            GetSpeedMultiplier();
+
+        _simulationTimeSeconds +=
+            scaledDeltaTime * speedMultiplier;
+
+        LogPlanetPerf(
+            EndPerfMeasureMs(startedAt),
+            "Tick" +
+            " | DeltaTime=" + deltaTime.ToString("0.####") +
+            " | ScaledDeltaTime=" + scaledDeltaTime.ToString("0.####") +
+            " | SpeedMultiplier=" + speedMultiplier.ToString("0.###") +
+            " | SimulationTime=" + _simulationTimeSeconds.ToString("0.###"));
+    }
+
+    private float GetSpeedMultiplier()
+    {
+        if (_shipMovementConfig == null)
+            return 1f;
+
+        return _shipMovementConfig.SpeedMultiplier;
     }
 
     private static float GetTickScaledDeltaTime(float deltaTime)
@@ -45,11 +84,22 @@ public sealed class OrbitalMotionService : CustomService, IOrbitalMotionService
     }
 
     public Vector3 GetPlanetCurrentPosition(
-        PlanetOrbitConfig orbitConfig)
+    PlanetOrbitConfig orbitConfig)
     {
-        return GetPlanetPosition(
-            orbitConfig,
-            _simulationTimeSeconds);
+        long startedAt = BeginPerfMeasure();
+
+        Vector3 position =
+            GetPlanetPosition(
+                orbitConfig,
+                _simulationTimeSeconds);
+
+        LogPlanetPerf(
+            EndPerfMeasureMs(startedAt),
+            "GetPlanetCurrentPosition" +
+            " | PlanetOrbitNull=" + (orbitConfig == null) +
+            " | Position=" + position);
+
+        return position;
     }
 
     public float GetPlanetAngleDegrees(
@@ -79,5 +129,35 @@ public sealed class OrbitalMotionService : CustomService, IOrbitalMotionService
             angle += 360f;
 
         return angle;
+    }
+
+    private static long BeginPerfMeasure()
+    {
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    private static double EndPerfMeasureMs(long startedAt)
+    {
+        long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
+        return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+    }
+
+    private void LogPlanetPerf(double elapsedMs, string message)
+    {
+        if (elapsedMs < PerfLogThresholdMs)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.PlanetMovement))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.PlanetMovement,
+            "[OrbitalMotionService] " +
+            message +
+            " | Ms=" +
+            elapsedMs.ToString("F2"));
     }
 }

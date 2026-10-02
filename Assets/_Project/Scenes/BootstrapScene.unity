@@ -444,6 +444,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::Bootstrapper
   _debugEnabled: 1
   _debugStop: 0
+  targetFrameRate: 60
   gameConfig: {fileID: 11400000, guid: f76b09e1774ab45c7a1c5e6e6af8934e, type: 2}
   debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
@@ -459,6 +460,8 @@ MonoBehaviour:
   combatFxVisualConfig: {fileID: 11400000, guid: 5335864e44ee244729fd857790c1023e, type: 2}
   combatDamagePopupVisualConfig: {fileID: 11400000, guid: efa8c304b4fb84af39c05a2791fb7715, type: 2}
   npcBehaviourTransitionMatrixConfig: {fileID: 11400000, guid: f0fba1b681522430e84c74a61bcbdd99, type: 2}
+  offscreenNpcSimulationScheduleConfig: {fileID: 11400000, guid: 5f7f970f8ec1540b68afd1a05ee7b20b, type: 2}
+  currentSystemNpcSimulationConfig: {fileID: 11400000, guid: 7482e3a5eabda470c95d1b8b54d678fb, type: 2}
   galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
   enemies:
   - {fileID: 11400000, guid: 78172c88849d445a38e39ed596230ceb, type: 2}
@@ -568,16 +571,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8076622fea8674dd39b50ffd8805a8e6, type: 2}
   - {fileID: 11400000, guid: ac0963563de2d4e5ebef42c264cfdfb0, type: 2}
   - {fileID: 11400000, guid: 8bbee09ad94fc463ca04e9af38d72e78, type: 2}
-  pirates:
-  - {fileID: 11400000, guid: f21272adbb4464b118431f4637ba652d, type: 2}
-  pirateGroupSpawnRules:
-  - {fileID: 11400000, guid: 3e6655de2271b4c85badade0ca60e298, type: 2}
-  modules:
-  - {fileID: 11400000, guid: 56f2403182ba04ff9acdbea5b9b656d1, type: 2}
-  - {fileID: 11400000, guid: bf0411083d87f4772b07e5d874f04fa3, type: 2}
-  - {fileID: 11400000, guid: 1afb97223a06d4fb9b1912f7f567c1e3, type: 2}
-  - {fileID: 11400000, guid: 25899fa0b12e949fa8939f4521f48058, type: 2}
-  - {fileID: 11400000, guid: d28854f61639443fea152e7f6e154c4e, type: 2}
+  pirates: []
+  pirateGroupSpawnRules: []
+  modules: []
   weapons:
   - {fileID: 11400000, guid: 57880381f70bb4b20baedc62304ccc59, type: 2}
   - {fileID: 11400000, guid: f46478182f0dd436e95d7f48607df7d1, type: 2}
@@ -890,7 +886,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d75f4106697cd44e2856cdf8c0ed902a, type: 2}
   MaxAcceptedMissionCount: 3
   SectorAllOpened: 1
-  RouteAllUnlocked: 1
+  RouteAllUnlocked: 0
   _globalDebugEnabled: 0
   debugSpawnOnlyInCurrentSystem: 1
   stopAutomaticAllySpawns: 1

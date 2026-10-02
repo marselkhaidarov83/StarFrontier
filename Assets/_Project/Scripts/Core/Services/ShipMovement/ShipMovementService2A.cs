@@ -12,6 +12,7 @@ public sealed class ShipMovementService2A : IShipMovementService
 {
     private const float InputThresholdSqrMagnitude = 0.0001f;
     private const float VelocityThresholdSqrMagnitude = 0.000001f;
+    private const double PerfLogThresholdMs = 1.0;
 
     private readonly ShipMovementConfig _shipMovementConfig;
     private readonly ISystemGameplayStateService _stateService;
@@ -145,16 +146,27 @@ public sealed class ShipMovementService2A : IShipMovementService
 
     public void Tick(float deltaTime)
     {
+        long totalStartedAt = BeginPerfMeasure();
+
         ValidateDeltaTime(deltaTime);
 
         if (!IsEnabled)
             return;
+
+        float movementDeltaTime =
+            deltaTime * GetSpeedMultiplier();
+
+        long stateStartedAt = BeginPerfMeasure();
 
         PlayerControlRuntimeState controlState =
             _stateService.Control;
 
         ShipMovementRuntimeState movementState =
             _stateService.Movement;
+
+        double stateMs = EndPerfMeasureMs(stateStartedAt);
+
+        long inputStartedAt = BeginPerfMeasure();
 
         Vector2 moveInput =
             controlState.SmoothedMoveInput;
@@ -168,11 +180,12 @@ public sealed class ShipMovementService2A : IShipMovementService
         bool hasMoveInput =
             moveInput.sqrMagnitude >= InputThresholdSqrMagnitude;
 
-        float maxSpeed =
-            GetMaxSpeed();
+        double inputMs = EndPerfMeasureMs(inputStartedAt);
 
-        float acceleration =
-            GetAcceleration();
+        long statsStartedAt = BeginPerfMeasure();
+
+        float maxSpeed = GetMaxSpeed();
+        float acceleration = GetAcceleration();
 
         float deceleration =
             hasMoveInput
@@ -183,6 +196,10 @@ public sealed class ShipMovementService2A : IShipMovementService
             hasMoveInput
                 ? moveInput.magnitude * maxSpeed
                 : 0f;
+
+        double statsMs = EndPerfMeasureMs(statsStartedAt);
+
+        long movementStartedAt = BeginPerfMeasure();
 
         float newSpeed =
             Mathf.MoveTowards(
@@ -201,7 +218,7 @@ public sealed class ShipMovementService2A : IShipMovementService
             TurnRadiusRouteMath2A.RotateTowardsByTravelDistance(
                 movementState.FacingDirection,
                 targetFacingDirection,
-                newSpeed * deltaTime,
+                newSpeed * movementDeltaTime,
                 GetTurnRadius());
 
         Vector2 newVelocity =
@@ -212,20 +229,25 @@ public sealed class ShipMovementService2A : IShipMovementService
                 ? targetFacingDirection * desiredSpeed
                 : Vector2.zero;
 
-        if (newVelocity.sqrMagnitude <
-            VelocityThresholdSqrMagnitude)
-        {
+        if (newVelocity.sqrMagnitude < VelocityThresholdSqrMagnitude)
             newVelocity = Vector2.zero;
-        }
 
         Vector2 newPosition =
-            movementState.Position
-            + newVelocity * deltaTime;
+            movementState.Position +
+            newVelocity * movementDeltaTime;
+
+        double movementMs = EndPerfMeasureMs(movementStartedAt);
+
+        long boundsStartedAt = BeginPerfMeasure();
 
         bool wasClamped =
             ClampPositionAndVelocity(
                 ref newPosition,
                 ref newVelocity);
+
+        double boundsMs = EndPerfMeasureMs(boundsStartedAt);
+
+        long writeStartedAt = BeginPerfMeasure();
 
         movementState.SetPosition(newPosition);
 
@@ -233,12 +255,11 @@ public sealed class ShipMovementService2A : IShipMovementService
             newVelocity,
             desiredVelocity);
 
-        movementState.SetFacingDirection(
-            newFacingDirection);
+        movementState.SetFacingDirection(newFacingDirection);
 
         movementState.SetBraking(
-            !hasMoveInput
-            && movementState.CurrentSpeed > 0.001f);
+            !hasMoveInput &&
+            movementState.CurrentSpeed > 0.001f);
 
         movementState.SetClampedToBounds(wasClamped);
 
@@ -247,6 +268,31 @@ public sealed class ShipMovementService2A : IShipMovementService
             moveInput,
             newVelocity,
             maxSpeed);
+
+        double writeMs = EndPerfMeasureMs(writeStartedAt);
+        double totalMs = EndPerfMeasureMs(totalStartedAt);
+
+        LogPlayerMovementPerf(
+            totalMs,
+            "Tick" +
+            " | DeltaTime=" + deltaTime.ToString("0.####") +
+            " | HasInput=" + hasMoveInput +
+            " | Speed=" + newSpeed.ToString("0.###") +
+            " | WasClamped=" + wasClamped +
+            " | StateMs=" + stateMs.ToString("F2") +
+            " | InputMs=" + inputMs.ToString("F2") +
+            " | StatsMs=" + statsMs.ToString("F2") +
+            " | MovementMs=" + movementMs.ToString("F2") +
+            " | BoundsMs=" + boundsMs.ToString("F2") +
+            " | WriteMs=" + writeMs.ToString("F2"));
+    }
+
+    private float GetSpeedMultiplier()
+    {
+        if (_shipMovementConfig == null)
+            return 1f;
+
+        return _shipMovementConfig.SpeedMultiplier;
     }
 
     public void StopImmediately()
@@ -541,5 +587,35 @@ public sealed class ShipMovementService2A : IShipMovementService
     {
         return !float.IsNaN(value)
             && !float.IsInfinity(value);
+    }
+
+    private static long BeginPerfMeasure()
+    {
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    private static double EndPerfMeasureMs(long startedAt)
+    {
+        long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
+        return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+    }
+
+    private void LogPlayerMovementPerf(double elapsedMs, string message)
+    {
+        if (elapsedMs < PerfLogThresholdMs)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.PlayerMovement))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.PlayerMovement,
+            "[ShipMovementService2A] " +
+            message +
+            " | Ms=" +
+            elapsedMs.ToString("F2"));
     }
 }

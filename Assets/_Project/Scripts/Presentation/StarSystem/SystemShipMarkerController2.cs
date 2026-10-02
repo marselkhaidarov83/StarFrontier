@@ -227,14 +227,87 @@ public sealed class SystemShipMarkerController2 :
 
     private void Update()
     {
-        if (_systemTravelService == null)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double refreshVisualsMs = 0.0;
+        double refreshPositionMs = 0.0;
+
+        bool hasTravelService = false;
+
+        try
+        {
+            hasTravelService =
+                _systemTravelService != null;
+
+            if (!hasTravelService)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshShipVisuals(
+                force: false);
+
+            refreshVisualsMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshPosition(
+                updateDirection: true);
+
+            refreshPositionMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "SystemId=" + (_lastSystemId ?? string.Empty) +
+                " | HasTravelService=" + hasTravelService +
+                " | RefreshVisualsMs=" + refreshVisualsMs.ToString("F3") +
+                " | RefreshPositionMs=" + refreshPositionMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemShipMarkerController2.Update",
+                elapsedMs,
+                details);
+
+            LogSlowVisualUpdateIfNeeded(
+                "SystemShipMarkerController2.Update",
+                startedAt,
+                details);
+        }
+    }
+
+    private void LogSlowVisualUpdateIfNeeded(
+    string marker,
+    double startedAt,
+    string details)
+    {
+        double elapsedMs =
+            (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+        if (elapsedMs < 1.0)
             return;
 
-        RefreshShipVisuals(
-            force: false);
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.GameTimeLoadAnalytics))
+        {
+            return;
+        }
 
-        RefreshPosition(
-            updateDirection: true);
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.GameTimeLoadAnalytics,
+            "[VISUAL_UPDATE_SPIKE]" +
+            " Marker=" + marker +
+            " | UnityFrame=" + Time.frameCount +
+            " | Ms=" + elapsedMs.ToString("F2") +
+            " | " + details);
     }
 
     private void RefreshPosition(

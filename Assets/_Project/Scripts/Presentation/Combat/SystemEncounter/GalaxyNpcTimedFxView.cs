@@ -61,7 +61,42 @@ public sealed class GalaxyNpcTimedFxView : CustomMonoBehaviour
 
     private void Update()
     {
-        Tick(Time.deltaTime);
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double tickMs = 0.0;
+
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            Tick(Time.deltaTime);
+
+            tickMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + gameObject.name +
+                " | IsActive=" + IsActive +
+                " | RemainingSeconds=" + _remainingSeconds.ToString("F3") +
+                " | TickMs=" + tickMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "GalaxyNpcTimedFxView.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "GalaxyNpcTimedFxView.Update",
+                startedAt,
+                details);
+        }
     }
 
     public void Tick(float deltaTime)

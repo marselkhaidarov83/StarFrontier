@@ -92,17 +92,61 @@ public sealed class SystemPlayerThreatListHud2A :
 
     private void Update()
     {
-        if (!_isBound)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        if (Time.unscaledTime < _nextRefreshTime)
-            return;
+        double refreshMs = 0.0;
 
-        _nextRefreshTime =
-            Time.unscaledTime +
-            Mathf.Max(0.05f, refreshIntervalSeconds);
+        bool refreshed = false;
 
-        RefreshThreats();
+        try
+        {
+            if (!_isBound)
+                return;
+
+            if (Time.unscaledTime < _nextRefreshTime)
+                return;
+
+            _nextRefreshTime =
+                Time.unscaledTime +
+                Mathf.Max(0.05f, refreshIntervalSeconds);
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshThreats();
+
+            refreshMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            refreshed = true;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | IsBound=" + _isBound +
+                " | Refreshed=" + refreshed +
+                " | ThreatCount=" + currentThreatCount +
+                " | CheckedNpc=" + _debugCheckedNpcCount +
+                " | RejectedNpc=" + _debugRejectedNpcCount +
+                " | HostileNpc=" + _debugHostileNpcCount +
+                " | InRangeHostileNpc=" + _debugInRangeHostileNpcCount +
+                " | RefreshMs=" + refreshMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemPlayerThreatListHud2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemPlayerThreatListHud2A.Update",
+                startedAt,
+                details);
+        }
     }
 
     public void Bind(SystemHudBindingContext2A context)

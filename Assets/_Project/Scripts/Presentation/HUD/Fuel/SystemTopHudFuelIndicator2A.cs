@@ -82,10 +82,52 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
 
     private void Update()
     {
-        if (!refreshEveryFrame)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        Refresh();
+        double refreshMs = 0.0;
+
+        bool refreshed = false;
+
+        try
+        {
+            if (!refreshEveryFrame)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            Refresh();
+
+            refreshMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            refreshed = true;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | RefreshEveryFrame=" + refreshEveryFrame +
+                " | Refreshed=" + refreshed +
+                " | Initialized=" + _initialized +
+                " | LastFuel=" + _lastFuel +
+                " | LastCapacity=" + _lastCapacity +
+                " | RefreshMs=" + refreshMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemTopHudFuelIndicator2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemTopHudFuelIndicator2A.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnDisable()

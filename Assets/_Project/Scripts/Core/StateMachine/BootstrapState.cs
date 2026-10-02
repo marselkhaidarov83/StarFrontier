@@ -1,3 +1,6 @@
+using System.Collections;
+using UnityEngine;
+
 public class BootstrapState : IGameState
 {
     private const string LOADING_SCENE = "LoadingScene";
@@ -8,6 +11,7 @@ public class BootstrapState : IGameState
     private readonly INewGameService _newGameService;
     private bool _waitingForLoading;
     private bool _debugEnabled;
+    private Coroutine _loadingRoutine;
 
     public BootstrapState(
         IGameStateMachine stateMachine,
@@ -53,6 +57,8 @@ public class BootstrapState : IGameState
             return;
         }
 
+        LoadingSceneContext.SetGameStart();
+
         SubscribeToSceneEvents();
         _waitingForLoading = true;
 
@@ -69,6 +75,15 @@ public class BootstrapState : IGameState
     {
         if (_waitingForLoading)
             _sceneService?.CancelActiveLoad();
+
+        if (_loadingRoutine != null &&
+            Bootstrapper.Instance != null)
+        {
+            Bootstrapper.Instance.StopCoroutine(
+                _loadingRoutine);
+
+            _loadingRoutine = null;
+        }
 
         _waitingForLoading = false;
         UnsubscribeFromSceneEvents();
@@ -104,7 +119,45 @@ public class BootstrapState : IGameState
 
         _waitingForLoading = false;
         UnsubscribeFromSceneEvents();
+
+        if (Bootstrapper.Instance == null)
+        {
+            AppLog.Error(
+                "BootstrapState cannot continue loading: " +
+                "Bootstrapper.Instance is null.");
+
+            _newGameService.StartNewGame();
+            return;
+        }
+
+        _loadingRoutine =
+            Bootstrapper.Instance.StartCoroutine(
+                StartGameAfterLoadingSceneAppears());
+    }
+
+    private IEnumerator StartGameAfterLoadingSceneAppears()
+    {
+        yield return null;
+
+        while (!LoadingSceneContext.IsSceneRegistered)
+            yield return null;
+
+        LoadingSceneContext.Log(
+            "BootstrapState.LoadingSceneRegistered");
+
+        yield return null;
+        yield return new WaitForEndOfFrame();
+        yield return null;
+
+        LoadingSceneContext.Log(
+            "BootstrapState.StartNewGame.Before");
+
+        _loadingRoutine = null;
+
         _newGameService.StartNewGame();
+
+        LoadingSceneContext.Log(
+            "BootstrapState.StartNewGame.After");
     }
 
     private void HandleLoadingFailure(

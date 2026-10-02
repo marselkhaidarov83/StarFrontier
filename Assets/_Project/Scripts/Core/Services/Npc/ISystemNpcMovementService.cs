@@ -2,6 +2,8 @@ public interface ISystemNpcMovementService
 {
     void Tick(StarSystemConfig starSystem, float deltaTime, int currentTick);
 
+    void RunInitialWarmupRoutes(StarSystemConfig starSystem, int currentTick);
+
     bool TryBuildRoutePreview2A(
         string runtimeNpcId,
         TravelRoutePreview2A preview,

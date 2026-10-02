@@ -38,24 +38,75 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
 
     private void Update()
     {
-        if (!_isBound ||
-            _enemyService == null ||
-            string.IsNullOrWhiteSpace(runtimeEnemyId))
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double tryGetEnemyMs = 0.0;
+        double applyTransformMs = 0.0;
+
+        bool enemyFound = false;
+        bool enemyAlive = false;
+
+        try
         {
-            return;
-        }
+            if (!_isBound ||
+                _enemyService == null ||
+                string.IsNullOrWhiteSpace(runtimeEnemyId))
+            {
+                return;
+            }
 
-        if (!_enemyService.TryGetEnemy(
-                runtimeEnemyId,
-                out SystemEnemyRuntimeState enemy))
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            enemyFound =
+                _enemyService.TryGetEnemy(
+                    runtimeEnemyId,
+                    out SystemEnemyRuntimeState enemy);
+
+            tryGetEnemyMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!enemyFound)
+                return;
+
+            if (enemy == null || !enemy.IsAlive)
+                return;
+
+            enemyAlive = true;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplyRuntimeTransform(enemy);
+
+            applyTransformMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
         {
-            return;
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | RuntimeEnemyId=" + runtimeEnemyId +
+                " | IsBound=" + _isBound +
+                " | EnemyFound=" + enemyFound +
+                " | EnemyAlive=" + enemyAlive +
+                " | TryGetEnemyMs=" + tryGetEnemyMs.ToString("F3") +
+                " | ApplyTransformMs=" + applyTransformMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "EnemySystemMapEntity.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "EnemySystemMapEntity.Update",
+                startedAt,
+                details);
         }
-
-        if (enemy == null || !enemy.IsAlive)
-            return;
-
-        ApplyRuntimeTransform(enemy);
     }
 
     private void OnEnable()

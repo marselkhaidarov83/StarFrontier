@@ -3,7 +3,6 @@ using UnityEngine;
 public sealed class CombatWaveView2A : CustomMonoBehaviour
 {
     private const string DefaultSortingLayerName = "SystemShipFX";
-    private const bool WaveVisualGeometryDebugLogEnabled = false;
     private const float WaveVisualGeometryLogStep = 0.1f;
 
     private ISystemNpcCombatService _combatService;
@@ -13,6 +12,16 @@ public sealed class CombatWaveView2A : CustomMonoBehaviour
     private Color _runtimeTint = Color.white;
     private bool _hasCachedOriginalColors;
     private int _lastVisualGeometryLogBucket = -1;
+
+    private static int _aggregateFrame = -1;
+    private static int _aggregateCount;
+    private static int _aggregateCompletedCount;
+    private static double _aggregateTotalMs;
+    private static double _aggregateResolveServiceMs;
+    private static double _aggregateTryGetWaveMs;
+    private static double _aggregateApplyVisualMs;
+    private static double _aggregateMaxSingleMs;
+    private static string _aggregateMaxWaveId = string.Empty;
 
     public string WaveId { get; private set; }
 
@@ -51,25 +60,151 @@ public sealed class CombatWaveView2A : CustomMonoBehaviour
 
     private void Update()
     {
-        if (string.IsNullOrWhiteSpace(WaveId))
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        ResolveCombatService();
+        double resolveServiceMs = 0.0;
+        double tryGetWaveMs = 0.0;
+        double applyVisualMs = 0.0;
 
-        if (_combatService == null)
-            return;
+        bool completed = false;
 
-        if (!_combatService.TryGetWave(
-                WaveId,
-                out CombatWaveRuntimeState2A wave) ||
-            wave == null ||
-            wave.IsResolved)
+        try
         {
-            Complete();
+            if (string.IsNullOrWhiteSpace(WaveId))
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ResolveCombatService();
+
+            resolveServiceMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (_combatService == null)
+                return;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            bool waveFound =
+                _combatService.TryGetWave(
+                    WaveId,
+                    out CombatWaveRuntimeState2A wave);
+
+            tryGetWaveMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!waveFound ||
+                wave == null ||
+                wave.IsResolved)
+            {
+                completed = true;
+                Complete();
+                return;
+            }
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplyVisual(wave.Progress01, wave.CurrentRadius);
+
+            applyVisualMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            RecordUpdateAggregate(
+                elapsedMs,
+                resolveServiceMs,
+                tryGetWaveMs,
+                applyVisualMs,
+                completed,
+                WaveId);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "CombatWaveView2A.Update",
+                startedAt,
+                "WaveId=" + (WaveId ?? string.Empty) +
+                " | Completed=" + completed +
+                " | ResolveServiceMs=" + resolveServiceMs.ToString("F3") +
+                " | TryGetWaveMs=" + tryGetWaveMs.ToString("F3") +
+                " | ApplyVisualMs=" + applyVisualMs.ToString("F3"));
+        }
+    }
+
+    private static void RecordUpdateAggregate(
+        double elapsedMs,
+        double resolveServiceMs,
+        double tryGetWaveMs,
+        double applyVisualMs,
+        bool completed,
+        string waveId)
+    {
+        int frame =
+            Time.frameCount;
+
+        if (_aggregateFrame != frame)
+        {
+            FlushUpdateAggregate();
+            ResetUpdateAggregate(frame);
+        }
+
+        _aggregateCount++;
+        _aggregateTotalMs += elapsedMs;
+        _aggregateResolveServiceMs += resolveServiceMs;
+        _aggregateTryGetWaveMs += tryGetWaveMs;
+        _aggregateApplyVisualMs += applyVisualMs;
+
+        if (completed)
+            _aggregateCompletedCount++;
+
+        if (elapsedMs > _aggregateMaxSingleMs)
+        {
+            _aggregateMaxSingleMs = elapsedMs;
+            _aggregateMaxWaveId = waveId ?? string.Empty;
+        }
+    }
+
+    private static void ResetUpdateAggregate(int frame)
+    {
+        _aggregateFrame = frame;
+        _aggregateCount = 0;
+        _aggregateCompletedCount = 0;
+        _aggregateTotalMs = 0.0;
+        _aggregateResolveServiceMs = 0.0;
+        _aggregateTryGetWaveMs = 0.0;
+        _aggregateApplyVisualMs = 0.0;
+        _aggregateMaxSingleMs = 0.0;
+        _aggregateMaxWaveId = string.Empty;
+    }
+
+    private static void FlushUpdateAggregate()
+    {
+        if (_aggregateFrame < 0 ||
+            _aggregateCount <= 0)
+        {
             return;
         }
 
-        ApplyVisual(wave.Progress01, wave.CurrentRadius);
+        if (!VisualUpdatePerfLog.ShouldLog(_aggregateTotalMs))
+            return;
+
+        VisualUpdatePerfLog.LogMeasured(
+            "CombatWaveView2A.Update.Aggregate",
+            _aggregateTotalMs,
+            "AggregateFrame=" + _aggregateFrame +
+            " | ViewCount=" + _aggregateCount +
+            " | CompletedCount=" + _aggregateCompletedCount +
+            " | MaxSingleMs=" + _aggregateMaxSingleMs.ToString("F3") +
+            " | MaxWaveId=" + _aggregateMaxWaveId +
+            " | ResolveServiceMs=" + _aggregateResolveServiceMs.ToString("F3") +
+            " | TryGetWaveMs=" + _aggregateTryGetWaveMs.ToString("F3") +
+            " | ApplyVisualMs=" + _aggregateApplyVisualMs.ToString("F3"));
     }
 
     public void Complete()
@@ -266,7 +401,7 @@ public sealed class CombatWaveView2A : CustomMonoBehaviour
 
     private bool ShouldLogWaveVisualGeometry(float progress01)
     {
-        if (!WaveVisualGeometryDebugLogEnabled)
+        if (!IsWaveVisualGeometryDebugLogEnabled())
             return false;
 
         int bucket =
@@ -290,7 +425,7 @@ public sealed class CombatWaveView2A : CustomMonoBehaviour
         int rendererIndex,
         SpriteRenderer renderer)
     {
-        if (!WaveVisualGeometryDebugLogEnabled)
+        if (!IsWaveVisualGeometryDebugLogEnabled())
             return;
 
         bool previousDebugEnabled = _debugEnabled;
@@ -333,6 +468,17 @@ public sealed class CombatWaveView2A : CustomMonoBehaviour
 
         _debugEnabled = previousDebugEnabled;
         _debugStop = previousDebugStop;
+    }
+
+    private bool IsWaveVisualGeometryDebugLogEnabled()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.DebugLogConfig == null)
+        {
+            return false;
+        }
+
+        return Bootstrapper.Instance.DebugLogConfig.WaveVisualGeometryLogs;
     }
 
     private static void ApplyRendererRadius(

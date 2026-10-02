@@ -24,6 +24,7 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
     private ISystemTravelService _systemTravelService;
     private ITravelService _travelService;
     private IGameSessionService _gameSessionService;
+    private IGameStateMachine _gameStateMachine;
 
     private Coroutine _currentRoutine;
 
@@ -62,6 +63,9 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
         _gameSessionService =
             registry.Get<IGameSessionService>();
 
+        _gameStateMachine =
+            registry.Get<IGameStateMachine>();
+
         if (_eventBus == null)
         {
             Debug.LogError(
@@ -98,6 +102,15 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
             return;
         }
 
+        if (_gameStateMachine == null)
+        {
+            Debug.LogError(
+                "[SystemTransitionController2] " +
+                "IGameStateMachine not found.");
+
+            return;
+        }
+
         _eventBus.Subscribe<SystemTravelCompletedEvent>(
             OnTravelCompleted);
 
@@ -126,13 +139,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
     private void OnTravelCompleted(
         SystemTravelCompletedEvent evt)
     {
-        /*
-         * SystemTravelCompletedEvent является
-         * типом-значением.
-         *
-         * Поэтому проверка evt == null
-         * здесь не выполняется.
-         */
+        if (evt.DestinationType != TravelDestinationType.SystemExit)
+            return;
 
         if (_gameSessionService == null ||
             _gameSessionService.State == null ||
@@ -145,12 +153,17 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
             return;
         }
 
+        string targetSystemId =
+            string.IsNullOrWhiteSpace(evt.TargetSystemId)
+                ? string.Empty
+                : evt.TargetSystemId.Trim();
+
         if (IsDebug())
         {
             Debug.Log(
                 "[SystemTransitionController2] " +
-                "Clicked system: " +
-                evt.TargetSystemId);
+                "System exit reached. Target system: " +
+                targetSystemId);
         }
 
         string currentSystemId =
@@ -161,21 +174,12 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (string.Equals(
                 currentSystemId,
-                evt.TargetSystemId,
+                targetSystemId,
                 StringComparison.Ordinal))
         {
-            if (IsDebug())
-            {
-                Debug.Log(
-                    "[SystemTransitionController2] " +
-                    "'" +
-                    evt.TargetSystemId +
-                    "' is the current system.");
-            }
-
             _eventBus.Publish(
                 new StarSystemEnteredEvent(
-                    evt.TargetSystemId));
+                    targetSystemId));
 
             return;
         }
@@ -184,26 +188,36 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
         {
             Debug.LogError(
                 "[SystemTransitionController2] " +
-                "Cannot perform travel: " +
-                "ITravelService is null.");
+                "Cannot perform travel: ITravelService is null.");
 
             return;
         }
 
-        TravelResult result =
-            _travelService.TryTravel(
-                evt.TargetSystemId);
+        TravelFailReason failReason =
+            _travelService.GetTravelFailReason(
+                currentSystemId,
+                targetSystemId);
 
-        if (IsDebug())
+        if (failReason != TravelFailReason.None)
         {
-            Debug.Log(
-                "[SystemTransitionController2] " +
-                "Travel result = " +
-                result);
+            ShowTravelFailReason(failReason);
+            return;
         }
 
-        ShowTravelFailReason(
-            result.FailReason);
+        if (_gameStateMachine == null)
+        {
+            Debug.LogError(
+                "[SystemTransitionController2] " +
+                "Cannot enter target system: IGameStateMachine is null.");
+
+            return;
+        }
+
+        LoadingSceneContext.SetSystemTravel(
+            _gameSessionService.State);
+
+        _gameStateMachine.Enter(
+            new SystemState(targetSystemId));
     }
 
     /// <summary>
