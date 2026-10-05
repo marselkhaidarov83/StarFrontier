@@ -1,7 +1,7 @@
 public interface IHangarService
 {
     ShipRuntimeData GetActiveShipState();
-    ShipConfig GetActiveShipData();
+    AllyConfig GetActiveShipData();
     ShipStats GetActiveShipStats();
 
     HangarOperationResult SwitchShip(string shipId);

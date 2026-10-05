@@ -17,6 +17,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
     private SimpleEventBus _eventBus;
 
     private readonly Dictionary<string, SystemNpcView> _viewsByNpcId = new();
+    public int VisibleViewCount => _viewsByNpcId.Count;
 
     private void Awake()
     {
@@ -53,19 +54,33 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
 
     private void OnSystemNpcTravelStateChangedEvent(SystemNpcTravelStateChangedEvent evt)
     {
-        if (evt.TravelState.Equals(SystemNpcTravelState.TravelingToAnotherSystem))
+        if (evt.TravelState == SystemNpcTravelState.OnPlanet)
+        {
+            RemoveView(evt.RuntimeNpcId);
+            return;
+        }
+
+        if (evt.Npc != null &&
+            (evt.Npc.IsOnPlanet ||
+             evt.Npc.TravelState == SystemNpcTravelState.OnPlanet))
+        {
+            RemoveView(evt.RuntimeNpcId);
+            return;
+        }
+
+        if (evt.TravelState == SystemNpcTravelState.TravelingToAnotherSystem)
         {
             if (evt.DestinationSystemId != GetCurrentSystemId())
             {
                 RemoveView(evt.RuntimeNpcId);
-                return;        
-            }
-            else
-            {
-                CreateViewIfNeeded(evt.Npc);
                 return;
-            }            
+            }
+
+            CreateViewIfNeeded(evt.Npc);
+            return;
         }
+
+        CreateViewIfNeeded(evt.Npc);
     }
 
     private void Start()
@@ -148,6 +163,13 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
         if (npc == null || !npc.IsAlive)
             return;
 
+        if (npc.IsOnPlanet ||
+            npc.TravelState == SystemNpcTravelState.OnPlanet)
+        {
+            RemoveView(npc.RuntimeNpcId);
+            return;
+        }
+
         string currentSystemId = GetCurrentSystemId();
 
         if (npc.CurrentSystemId != currentSystemId)
@@ -163,6 +185,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
         }
 
         Sprite sprite = ResolveSprite(npc);
+        float worldSize = ResolveWorldSize(npc);
 
         SystemNpcView view = Instantiate(
             npcViewPrefab,
@@ -170,7 +193,11 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
             Quaternion.identity,
             npc.NpcType == SystemNpcType.Enemy ? enemyRoot : allyRoot
         );
-        view.Bind(npc, sprite);
+
+        view.Bind(
+            npc,
+            sprite,
+            worldSize);
 
         _viewsByNpcId.Add(npc.RuntimeNpcId, view);
     }
@@ -213,6 +240,48 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
         }
 
         return null;
+    }
+
+    private float ResolveWorldSize(SystemNpcRuntimeState npc)
+    {
+        if (npc == null ||
+            _configService == null ||
+            _configService.SystemVisualConfig == null)
+        {
+            return 0f;
+        }
+
+        if (npc.NpcType == SystemNpcType.Enemy)
+        {
+            EnemyConfig enemyConfig =
+                _configService.GetEnemyConfigById(npc.ConfigId);
+
+            return _configService
+                .SystemVisualConfig
+                .GetEnemyWorldSize(enemyConfig);
+        }
+
+        if (npc.NpcType == SystemNpcType.Ally)
+        {
+            AllyConfig allyConfig =
+                _configService.GetAllyConfigById(npc.ConfigId);
+
+            return _configService
+                .SystemVisualConfig
+                .GetAllyWorldSize(allyConfig);
+        }
+
+        if (npc.NpcType == SystemNpcType.Pirate)
+        {
+            PirateConfig pirateConfig =
+                _configService.GetPirateConfigById(npc.ConfigId);
+
+            return _configService
+                .SystemVisualConfig
+                .GetPirateWorldSize(pirateConfig);
+        }
+
+        return 0f;
     }
 
     private string GetCurrentSystemId()

@@ -7,5 +7,6 @@ public enum ShipStatType
     Speed,
     Acceleration,
     TurnRate,
+    TurnRadius,
     CargoCapacity
 }

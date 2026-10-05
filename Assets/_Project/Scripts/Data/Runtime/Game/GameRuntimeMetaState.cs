@@ -53,4 +53,7 @@ public class GameRuntimeMetaState
     /// Был ли GameTimeService на паузе в момент сохранения.
     /// </summary>
     public bool IsGameTimePaused = true;
+
+    public LoadingProgressRuntimeProfile LoadingProgressProfile =
+    new LoadingProgressRuntimeProfile();
 }

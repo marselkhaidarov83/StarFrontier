@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "StarSystemConfig", menuName = "StarFrontier/Configs/Star System")]
+[CreateAssetMenu(fileName = "StarSystemConfig", menuName = "StarFrontier/Configs/System/Star System")]
 public class StarSystemConfig : BaseConfig
 {
     [Header("System Data")]
@@ -21,7 +21,8 @@ public class StarSystemConfig : BaseConfig
     [SerializeField] private Vector2 mapPosition;
 
     [Header("Npc")]
-    [SerializeField] private SystemPopulationConfig systemPopulation;
+    [SerializeField] private SystemPopulationRule systemPopulationRule;
+    [SerializeField] private SystemNpcSpawnPointConfig npcSpawnPoints;
 
     [Header("AtStart")]
     [SerializeField] private bool isStartSystem;
@@ -40,7 +41,8 @@ public class StarSystemConfig : BaseConfig
 
     public MissionTag[] MissionTags => missionTags;
     public Vector3 MapPosition => mapPosition;
-    public SystemPopulationConfig SystemPopulation => systemPopulation;
+    public SystemPopulationRule SystemPopulationRule => systemPopulationRule;
+    public SystemNpcSpawnPointConfig NpcSpawnPoints => npcSpawnPoints;
     public bool IsStartSystem => isStartSystem;
     public bool IsHiddenAtStart => isHiddenAtStart;
     public int RecommendedPower => recommendedPower;

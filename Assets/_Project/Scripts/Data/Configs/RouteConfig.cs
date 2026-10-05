@@ -2,7 +2,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "RouteConfig",
-    menuName = "StarFrontier/Configs/Route"
+    menuName = "StarFrontier/Configs/Galaxy/Route"
 )]
 public class RouteConfig : BaseConfig
 {

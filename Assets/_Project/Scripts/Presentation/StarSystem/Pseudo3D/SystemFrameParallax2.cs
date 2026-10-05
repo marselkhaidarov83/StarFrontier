@@ -58,8 +58,47 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
 
     private void LateUpdate()
     {
-        Initialize();
-        ApplyParallax();
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        try
+        {
+            Initialize();
+            ApplyParallax();
+        }
+        finally
+        {
+            LogSlowVisualUpdateIfNeeded(
+                "SystemFrameParallax2.LateUpdate",
+                startedAt,
+                "Layers=" + (layers != null ? layers.Length : 0));
+        }
+    }
+
+    private void LogSlowVisualUpdateIfNeeded(
+        string marker,
+        double startedAt,
+        string details)
+    {
+        double elapsedMs =
+            (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+        if (elapsedMs < 1.0)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.GameTimeLoadAnalytics))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.GameTimeLoadAnalytics,
+            "[VISUAL_UPDATE_SPIKE]" +
+            " Marker=" + marker +
+            " | UnityFrame=" + Time.frameCount +
+            " | Ms=" + elapsedMs.ToString("F2") +
+            " | " + details);
     }
 
     private void Initialize()

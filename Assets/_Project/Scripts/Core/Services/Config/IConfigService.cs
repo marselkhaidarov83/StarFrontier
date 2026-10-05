@@ -15,7 +15,9 @@ public interface IConfigService
     InteractionConfig InteractionConfig { get; }
     SystemHudConfig SystemHudConfig { get; }
     SystemVisualConfig SystemVisualConfig { get; }
-
+    CombatFxVisualConfig CombatFxVisualConfig { get; }
+    CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig { get; }
+    NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig { get; }
 
     IReadOnlyList<SectorConfig> GetAllSectors();
 
@@ -33,9 +35,7 @@ public interface IConfigService
     IReadOnlyList<ItemConfig> GetAllItems();
     ItemConfig GetItemConfigById(string id);
 
-    IReadOnlyList<ShipConfig> GetAllShips();
-    ShipConfig GetShipConfigById(string shipId);
-
+    IReadOnlyList<AllyConfig> GetAllAllies();
     EnemyConfig GetEnemyConfigById(string id);
     AllyConfig GetAllyConfigById(string id);
     PirateConfig GetPirateConfigById(string id);

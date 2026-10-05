@@ -9,7 +9,7 @@ public class RewardItemChance
     public int MaxAmount;
 }
 
-[CreateAssetMenu(fileName = "RewardConfig", menuName = "StarFrontier/Configs/Reward")]
+[CreateAssetMenu(fileName = "RewardConfig", menuName = "StarFrontier/Configs/Combat/Reward")]
 public class RewardConfig : BaseConfig
 {
     [Header("Credits")]

@@ -10,12 +10,15 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     [SerializeField] private SpriteRenderer legacyLineSpriteRenderer;
 
     [Header("Dots")]
+    [SerializeField] private TravelLineView2A dotSizeSource;
+
     [Tooltip(
-    "Постоянное расстояние между маленькими точками " +
-    "маршрута в мировых координатах карты системы.")]
+        "Постоянное расстояние между маленькими точками " +
+        "маршрута в мировых координатах карты системы.")]
     [SerializeField]
     [Min(0.01f)]
     private float smallDotSpacing = 20f;
+
     [SerializeField] private float bigDotDiameter = 28f;
     [SerializeField] private float smallDotDiameter = 10f;
     [SerializeField] private Color bigDotColor = new Color(0.55f, 0.9f, 1f, 0.95f);
@@ -44,10 +47,11 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     public int LastEstimatedTickCount { get; private set; }
     public int MaxBigDots => maxBigDots;
     public int MaxSmallDots => maxSmallDots;
+
     public float SmallDotSpacing =>
-    Mathf.Max(
-        0.01f,
-        smallDotSpacing);
+        Mathf.Max(
+            0.01f,
+            GetEffectiveSmallDotSpacing());
 
     private void Awake()
     {
@@ -155,7 +159,7 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
             DrawDot(
                 GetOrCreateDot(_bigDotPool, "BigTickDot"),
                 tickPosition,
-                bigDotDiameter,
+                GetEffectiveBigDotDiameter(),
                 bigDotColor,
                 bigDotSortingOrder
             );
@@ -172,10 +176,10 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     }
 
     private void DrawSmallDotsBetween(
-     Vector3 from,
-     Vector3 to,
-     ref int smallDotIndex
- )
+    Vector3 from,
+    Vector3 to,
+    ref int smallDotIndex
+)
     {
         if (smallDotIndex >= maxSmallDots)
             return;
@@ -191,12 +195,11 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
         float safeSpacing =
             Mathf.Max(
                 0.01f,
-                smallDotSpacing);
+                GetEffectiveSmallDotSpacing());
 
         for (
             float distanceFromStart = safeSpacing;
-            distanceFromStart <
-                segmentDistance - 0.001f;
+            distanceFromStart < segmentDistance - 0.001f;
             distanceFromStart += safeSpacing)
         {
             if (smallDotIndex >= maxSmallDots)
@@ -217,7 +220,7 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
                     _smallDotPool,
                     "SmallRouteDot"),
                 position,
-                smallDotDiameter,
+                GetEffectiveSmallDotDiameter(),
                 smallDotColor,
                 smallDotSortingOrder
             );
@@ -228,9 +231,6 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
 
     private Vector3 EvaluateRoutePoint(Vector3 from, Vector3 to, float route01)
     {
-        // Сейчас маршрут прямой.
-        // В будущем именно здесь можно заменить прямую на кривую,
-        // например Bezier-кривую или путь из нескольких сегментов.
         return Vector3.Lerp(from, to, route01);
     }
 
@@ -379,12 +379,12 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     }
 
     public void ShowAnchored(
-    Vector3 routeStart,
-    Vector3 currentPosition,
-    Vector3 destinationPosition,
-    float shipSpeedUnitsPerSecond,
-    float secondsPerTick
-)
+        Vector3 routeStart,
+        Vector3 currentPosition,
+        Vector3 destinationPosition,
+        float shipSpeedUnitsPerSecond,
+        float secondsPerTick
+    )
     {
         gameObject.SetActive(true);
 
@@ -398,12 +398,12 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
     }
 
     private void UpdateAnchoredRoute(
-    Vector3 routeStart,
-    Vector3 currentPosition,
-    Vector3 destinationPosition,
-    float shipSpeedUnitsPerSecond,
-    float secondsPerTick
-)
+        Vector3 routeStart,
+        Vector3 currentPosition,
+        Vector3 destinationPosition,
+        float shipSpeedUnitsPerSecond,
+        float secondsPerTick
+    )
     {
         if (_dotSprite == null)
             _dotSprite = CreateDotSprite();
@@ -428,11 +428,6 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
             0f,
             totalDistance
         );
-        if (totalDistance <= minDistanceToShow)
-        {
-            Hide();
-            return;
-        }
 
         float safeSpeed = Mathf.Max(0.01f, shipSpeedUnitsPerSecond);
         float safeSecondsPerTick = Mathf.Max(0.01f, secondsPerTick);
@@ -456,7 +451,6 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
                 totalDistance
             );
 
-            // Если корабль уже прошёл точку этого тика — не рисуем её.
             if (distanceAtTick <= passedDistance)
                 continue;
 
@@ -476,7 +470,7 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
             DrawDot(
                 GetOrCreateDot(_bigDotPool, "BigTickDot"),
                 tickPosition,
-                bigDotDiameter,
+                GetEffectiveBigDotDiameter(),
                 bigDotColor,
                 bigDotSortingOrder
             );
@@ -513,7 +507,7 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
                 DrawDot(
                     GetOrCreateDot(_bigDotPool, "BigTickDot"),
                     dot.Position,
-                    bigDotDiameter,
+                    GetEffectiveBigDotDiameter(),
                     bigDotColor,
                     bigDotSortingOrder
                 );
@@ -525,7 +519,7 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
                 DrawDot(
                     GetOrCreateDot(_smallDotPool, "SmallRouteDot"),
                     dot.Position,
-                    smallDotDiameter,
+                    GetEffectiveSmallDotDiameter(),
                     smallDotColor,
                     smallDotSortingOrder
                 );
@@ -538,5 +532,51 @@ public sealed class TravelLineView2A : CustomMonoBehaviour
 
         DisableUnusedDots(_bigDotPool, bigDotIndex);
         DisableUnusedDots(_smallDotPool, smallDotIndex);
+    }
+
+    public void SetDotColors(
+        Color bigColor,
+        Color smallColor)
+    {
+        bigDotColor = bigColor;
+        smallDotColor = smallColor;
+
+        ApplyAlphaToPool(_bigDotPool, bigDotColor);
+        ApplyAlphaToPool(_smallDotPool, smallDotColor);
+    }
+
+    public void CopyDotSizeSettingsFrom(
+    TravelLineView2A source)
+    {
+        if (source == null || source == this)
+            return;
+
+        smallDotSpacing = source.smallDotSpacing;
+        bigDotDiameter = source.bigDotDiameter;
+        smallDotDiameter = source.smallDotDiameter;
+    }
+
+    private float GetEffectiveSmallDotSpacing()
+    {
+        if (dotSizeSource != null && dotSizeSource != this)
+            return dotSizeSource.smallDotSpacing;
+
+        return smallDotSpacing;
+    }
+
+    private float GetEffectiveBigDotDiameter()
+    {
+        if (dotSizeSource != null && dotSizeSource != this)
+            return dotSizeSource.bigDotDiameter;
+
+        return bigDotDiameter;
+    }
+
+    private float GetEffectiveSmallDotDiameter()
+    {
+        if (dotSizeSource != null && dotSizeSource != this)
+            return dotSizeSource.smallDotDiameter;
+
+        return smallDotDiameter;
     }
 }

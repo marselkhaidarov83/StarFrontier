@@ -11,7 +11,7 @@ public static class ValidationMenu
         var issues = new List<ValidationIssue>();
 
         var allConfigs = new List<BaseConfig>();
-        allConfigs.AddRange(ValidationRunner.LoadAllConfigs<ShipConfig>());
+        allConfigs.AddRange(ValidationRunner.LoadAllConfigs<AllyConfig>());
         allConfigs.AddRange(ValidationRunner.LoadAllConfigs<WeaponConfig>());
         allConfigs.AddRange(ValidationRunner.LoadAllConfigs<ModuleConfig>());
         allConfigs.AddRange(ValidationRunner.LoadAllConfigs<ItemConfig>());
@@ -27,17 +27,21 @@ public static class ValidationMenu
 
         foreach (var config in allConfigs)
             issues.AddRange(baseValidator.Validate(config));
+
         issues.AddRange(idValidator.Validate(allConfigs));
 
-        var shipValidator = new ShipConfigValidator();
-        foreach (var config in ValidationRunner.LoadAllConfigs<ShipConfig>())
-        issues.AddRange(shipValidator.Validate(config));
+        var allyValidator = new AllyConfigValidator();
+
+        foreach (var config in ValidationRunner.LoadAllConfigs<AllyConfig>())
+            issues.AddRange(allyValidator.Validate(config));
 
         var starSystemValidator = new StarSystemConfigValidator();
+
         foreach (var config in starSystemConfigs)
             issues.AddRange(starSystemValidator.Validate(config));
 
         var starSystemConnectivityValidator = new StarSystemConnectivityValidator();
+
         issues.AddRange(starSystemConnectivityValidator.Validate(
             starSystemConfigs,
             "system_helios_01",
@@ -48,9 +52,9 @@ public static class ValidationMenu
         foreach (var issue in issues)
         {
             if (issue.Severity == ValidationSeverity.Error)
-            Debug.LogError(issue.ToString(), issue.SourceObject);
+                Debug.LogError(issue.ToString(), issue.SourceObject);
             else
-            Debug.LogWarning(issue.ToString(), issue.SourceObject);
+                Debug.LogWarning(issue.ToString(), issue.SourceObject);
         }
     }
 }

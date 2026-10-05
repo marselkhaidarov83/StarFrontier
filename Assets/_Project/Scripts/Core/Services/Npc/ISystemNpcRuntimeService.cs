@@ -25,13 +25,28 @@ public interface ISystemNpcRuntimeService
         string systemId,
         string groupRuleId);
 
+    IReadOnlyList<SystemNpcRuntimeState> GetAliveEnemyGroupsInSystem(
+        string systemId);
+
     void UpdateNpcPosition(string runtimeNpcId, Vector3 position);
 
-    void ApplyDamage(string runtimeNpcId, int damage, bool killedByPlayer, bool damagedByPlayer);
+    CombatDamageResult2A ApplyDamage(
+        string runtimeNpcId,
+        int damage,
+        bool killedByPlayer,
+        bool damagedByPlayer);
+
+    bool DespawnNpc(string runtimeNpcId);
+
+    bool KillNpc(string runtimeNpcId, bool killedByPlayer);
+
+    bool AnnihilateNpc(string runtimeNpcId);
+
+    bool ResetNpc(string runtimeNpcId);
 
     void ClearAll();
 
     void RestoreNpc(SystemNpcRuntimeState npc);
     void RestoreNpcs(IEnumerable<SystemNpcRuntimeState> npcs);
-
+    
 }

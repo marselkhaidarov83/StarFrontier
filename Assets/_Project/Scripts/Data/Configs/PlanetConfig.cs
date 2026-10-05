@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PlanetConfig", menuName = "StarFrontier/Configs/Planet")]
+[CreateAssetMenu(fileName = "PlanetConfig", menuName = "StarFrontier/Configs/System/Planet")]
 public class PlanetConfig : BaseConfig
 {
     [Header("Base Info")]
@@ -23,6 +23,7 @@ public class PlanetConfig : BaseConfig
     [Header("Visuals")]
     [SerializeField] private Sprite planetSprite;
     [SerializeField] private Sprite backgroundSprite;
+    [SerializeField][Min(0f)] private float visualSize = 96f;
 
     public PlanetType PlanetType => planetType;
     public bool IsInhabited => isInhabited;
@@ -33,4 +34,5 @@ public class PlanetConfig : BaseConfig
     public ScriptableObject EncounterProfile => encounterProfile;
     public Sprite PlanetSprite => planetSprite;
     public Sprite BackgroundSprite => backgroundSprite;
+    public float VisualSize => visualSize;
 }

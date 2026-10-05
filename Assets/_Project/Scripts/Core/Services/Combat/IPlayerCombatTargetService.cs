@@ -4,5 +4,5 @@ public interface IPlayerCombatTargetService
 {
     bool IsPlayerAvailableInSystem(string systemId);
     Vector3 GetPlayerPosition();
-    void ApplyDamage(int damage);
+    CombatDamageResult2A ApplyDamage(int damage);
 }

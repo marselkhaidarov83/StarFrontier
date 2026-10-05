@@ -18,7 +18,7 @@ using UnityEngine.InputSystem;
 /// Не вызывает Tick() сервисов.
 /// </summary>
 [DisallowMultipleComponent]
-public sealed class PlayerInputBridge2A : MonoBehaviour
+public sealed class PlayerInputBridge2A : CustomMonoBehaviour
 {
     [Header("Input Actions")]
 
@@ -107,32 +107,113 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
     private void Update()
     {
-        if (!_initialized)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double initializeMs = 0.0;
+        double inputBlockedMs = 0.0;
+        double stopMovementMs = 0.0;
+        double readKeyboardMs = 0.0;
+        double pushInputMs = 0.0;
+
+        bool initializedAtStart = false;
+        bool isBlocked = false;
+        bool blockChanged = false;
+
+        try
         {
-            TryInitialize();
-            return;
+            initializedAtStart =
+                _initialized;
+
+            if (!_initialized)
+            {
+                double phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                TryInitialize();
+
+                initializeMs =
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                return;
+            }
+
+            double blockStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            isBlocked =
+                IsInputBlocked();
+
+            inputBlockedMs =
+                (Time.realtimeSinceStartupAsDouble - blockStartedAt) * 1000.0;
+
+            if (isBlocked == _wasBlocked)
+                return;
+
+            blockChanged = true;
+            _wasBlocked = isBlocked;
+
+            if (isBlocked)
+            {
+                double phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                StopMovementInternal(
+                    immediateStop: false,
+                    cancelInteraction: true);
+
+                stopMovementMs =
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                return;
+            }
+
+            double readStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            _keyboardMoveInput =
+                ReadCurrentKeyboardMoveInput();
+
+            readKeyboardMs =
+                (Time.realtimeSinceStartupAsDouble - readStartedAt) * 1000.0;
+
+            double pushStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            PushMoveInput();
+
+            pushInputMs =
+                (Time.realtimeSinceStartupAsDouble - pushStartedAt) * 1000.0;
         }
-
-        bool isBlocked = IsInputBlocked();
-
-        if (isBlocked == _wasBlocked)
-            return;
-
-        _wasBlocked = isBlocked;
-
-        if (isBlocked)
+        finally
         {
-            StopMovementInternal(
-                immediateStop: false,
-                cancelInteraction: true);
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
 
-            return;
+            string details =
+                "Name=" + name +
+                " | InitializedAtStart=" + initializedAtStart +
+                " | InitializedAfter=" + _initialized +
+                " | ManualInputEnabled=" + _manualInputEnabled +
+                " | IsBlocked=" + isBlocked +
+                " | WasBlocked=" + _wasBlocked +
+                " | BlockChanged=" + blockChanged +
+                " | InitializeMs=" + initializeMs.ToString("F3") +
+                " | InputBlockedMs=" + inputBlockedMs.ToString("F3") +
+                " | StopMovementMs=" + stopMovementMs.ToString("F3") +
+                " | ReadKeyboardMs=" + readKeyboardMs.ToString("F3") +
+                " | PushInputMs=" + pushInputMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "PlayerInputBridge2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "PlayerInputBridge2A.Update",
+                startedAt,
+                details);
         }
-
-        _keyboardMoveInput =
-            ReadCurrentKeyboardMoveInput();
-
-        PushMoveInput();
     }
 
     private void OnDisable()
@@ -393,11 +474,10 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
         if (logInitialization)
         {
-            Debug.Log(
+            LogCustom(
                 "[PlayerInputBridge2A] Initialized: " +
                 "keyboard, touch UI, Interact, " +
-                "RecenterCamera and StopMovement.",
-                this);
+                "RecenterCamera and StopMovement.");
 
             if (destinationAdapter == null)
             {
@@ -632,11 +712,10 @@ public sealed class PlayerInputBridge2A : MonoBehaviour
 
         if (logStopCommands)
         {
-            Debug.Log(
+            LogCustom(
                 "[PlayerInputBridge2A] " +
                 $"Stop movement. Immediate: " +
-                $"{immediateStop}.",
-                this);
+                $"{immediateStop}.");
         }
     }
 

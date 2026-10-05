@@ -63,6 +63,12 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
             Current.EnemiesAlive,
             Current.AlliesAlive));
 
+        _eventBus.Publish(new CombatRuntimeStartedEvent2A(
+            Current.EncounterId,
+            Current.SystemId,
+            Current.EnemiesAlive,
+            Current.AlliesAlive));
+
         PublishStateChanged();
     }
 
@@ -78,6 +84,12 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
 
         if (killedByPlayer)
             Current.PlayerKills++;
+
+        _eventBus.Publish(new CombatTargetDestroyedEvent2A(
+            Current.EncounterId,
+            Current.SystemId,
+            "enemy",
+            killedByPlayer ? "player" : "ally"));
 
         Debug.Log(
             $"[SystemEncounterService] Enemy destroyed. KilledByPlayer: {killedByPlayer}, EnemiesAlive: {Current.EnemiesAlive}, PlayerKills: {Current.PlayerKills}"
@@ -96,6 +108,12 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
         if (Current.AlliesAlive < 0)
             Current.AlliesAlive = 0;
 
+        _eventBus.Publish(new CombatTargetDestroyedEvent2A(
+            Current.EncounterId,
+            Current.SystemId,
+            "ally",
+            "enemy"));
+
         Debug.Log(
             $"[SystemEncounterService] Ally destroyed. AlliesAlive: {Current.AlliesAlive}"
         );
@@ -105,8 +123,20 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
 
     public void RegisterPlayerDestroyed()
     {
-        if (!HasActiveEncounter)
+        if (Current == null)
+        {
+            Debug.LogWarning("[SystemEncounterService] Player destroyed ignored: Current encounter is null.");
             return;
+        }
+
+        if (Current.State != SystemEncounterState.Active)
+        {
+            Debug.LogWarning(
+                "[SystemEncounterService] Player destroyed ignored: encounter is not Active. " +
+                $"Current state: {Current.State}, Encounter: {Current.EncounterId}, System: {Current.SystemId}");
+
+            return;
+        }
 
         Current.PlayerDestroyed = true;
 
@@ -242,6 +272,16 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
             Current.SystemId,
             Current.PlayerKills));
 
+        _eventBus.Publish(new CombatVictoryEvent2A(
+            Current.EncounterId,
+            Current.SystemId,
+            Current.PlayerKills));
+
+        _eventBus.Publish(new CombatRewardPendingEvent2A(
+            Current.EncounterId,
+            Current.SystemId,
+            Current.PlayerKills));
+
         PublishStateChanged();
     }
 
@@ -279,6 +319,11 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
         Debug.Log($"[SystemEncounterService] Encounter defeated. Reason: {reason}");
 
         _eventBus.Publish(new SystemEncounterDefeatedEvent(
+            Current.EncounterId,
+            Current.SystemId,
+            reason));
+
+        _eventBus.Publish(new CombatDefeatEvent2A(
             Current.EncounterId,
             Current.SystemId,
             reason));

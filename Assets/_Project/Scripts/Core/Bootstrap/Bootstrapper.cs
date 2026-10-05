@@ -1,13 +1,20 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text;
 using UnityEngine;
+using Unity.Profiling;
 
 public class Bootstrapper : CustomMonoBehaviour
 {
     [Header("Game")]
+    [Range(30, 120)]
+    [SerializeField] private int targetFrameRate = 60;
     [SerializeField] private GameConfig gameConfig;
     [SerializeField] private DebugConfig debugConfig;
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
+    [SerializeField] private DebugLogConfig debugLogConfig;
 
     [Header("Sprint 3 System Gameplay")]
     [SerializeField] private PlayerControlConfig playerControlConfig;
@@ -17,14 +24,19 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private InteractionConfig interactionConfig;
     [SerializeField] private SystemHudConfig systemHudConfig;
     [SerializeField] private SystemVisualConfig systemVisualConfig;
+    [SerializeField] private CombatFxVisualConfig combatFxVisualConfig;
+    [SerializeField] private CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig;
+    [SerializeField] private NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig;
+    [SerializeField] private OffscreenNpcSimulationScheduleConfig offscreenNpcSimulationScheduleConfig;
+    [SerializeField] private CurrentSystemNpcSimulationConfig currentSystemNpcSimulationConfig;
 
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
-    [SerializeField] private List<SectorConfig> sectors;
-    [SerializeField] private List<ShipConfig> ships;
     [SerializeField] private List<EnemyConfig> enemies;
     [SerializeField] private List<AllyConfig> allies;
     [SerializeField] private List<AllySpawnRuleConfig> allySpawnRuleConfigs;
+    [SerializeField] private List<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules;
+    [SerializeField] private List<SystemPopulationRule> systemPopulationRules;
     [SerializeField] private List<PirateConfig> pirates;
     [SerializeField] private List<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules;
     [SerializeField] private List<ModuleConfig> modules;
@@ -33,8 +45,37 @@ public class Bootstrapper : CustomMonoBehaviour
 
     [SerializeField] public int MaxAcceptedMissionCount = 3;
 
+    [Header("Debug")]
+    [SerializeField] public bool SectorAllOpened = false;
+    [SerializeField] public bool RouteAllUnlocked = false;
+    [SerializeField] private bool _globalDebugEnabled;
+
+    [Header("Debug / NPC Population")]
+    [Tooltip("Спавнить NPC только в текущей системе. Существующие NPC в других системах не удаляются.")]
+    [SerializeField] private bool debugSpawnOnlyInCurrentSystem;
+    [SerializeField] private bool stopAutomaticAllySpawns;
+    [SerializeField] private bool stopAutomaticEnemySpawns;
+    [SerializeField] private bool overrideAutomaticAllySpawnInterval;
+    [SerializeField, Min(0.1f)] private float debugAutomaticAllySpawnIntervalSeconds = 5f;
+    [SerializeField] private bool overrideNpcGalaxyLevel;
+    [SerializeField, Range(1, 10)] private int debugNpcGalaxyLevel = 1;
+
+    [Header("Debug / Combat Damage")]
+    [SerializeField] private string debugCombatTargetRuntimeNpcId;
+    [SerializeField, Min(1)] private int debugCombatTargetDamage = 10;
+    [SerializeField, Min(1)] private int debugCombatPlayerDamage = 10;
+    [SerializeField, Min(0.1f)] private float debugNpcOfflineStepHours = 1f;
+
+    [Header("Debug / NPC Stress")]
+    [SerializeField, Min(1)] private int debugNpcStressSpawnAttempts = 25;
+    [SerializeField, Min(1)] private int debugNpcStressSpawnWaves = 1;
+    [SerializeField] private bool debugNpcStressSpawnAllies = true;
+    [SerializeField] private bool debugNpcStressSpawnEnemyGroups = true;
+
     public static Bootstrapper Instance;
     public IServiceRegistry ServiceRegistry;
+    private bool _debugLogRuntimeSettingsApplied;
+
     private IGameStateMachine _gameStateMachine;
     private ISaveService _saveService;
     private IGameTimeService _gameTimeService;
@@ -43,11 +84,91 @@ public class Bootstrapper : CustomMonoBehaviour
     private IInteractionService2A _interactionService;
     private ITickService _tickService;
 
-    [SerializeField] private bool _globalDebugEnabled;
+    private ProfilerRecorder _mainThreadTimeRecorder;
+    private ProfilerRecorder _renderThreadTimeRecorder;
+    private ProfilerRecorder _gcAllocatedInFrameRecorder;
+    private ProfilerRecorder _gcUsedMemoryRecorder;
+    private ProfilerRecorder _totalUsedMemoryRecorder;
+    private ProfilerRecorder _systemUsedMemoryRecorder;
+    private ProfilerRecorder _playerLoopRecorder;
+    private ProfilerRecorder _behaviourUpdateRecorder;
+    private ProfilerRecorder _scriptRunBehaviourUpdateRecorder;
+    private ProfilerRecorder _lateBehaviourUpdateRecorder;
+    private ProfilerRecorder _scriptRunBehaviourLateUpdateRecorder;
+    private ProfilerRecorder _cameraRenderRecorder;
+    private ProfilerRecorder _canvasBuildBatchRecorder;
+    private ProfilerRecorder _canvasSendWillRenderCanvasesRecorder;
+    private ProfilerRecorder _gcCollectRecorder;
+
+    private ProfilerRecorder _fixedBehaviourUpdateRecorder;
+    private ProfilerRecorder _scriptRunDelayedStartupFrameRecorder;
+    private ProfilerRecorder _scriptRunDelayedDynamicFrameRateRecorder;
+    private ProfilerRecorder _scriptRunDelayedTasksRecorder;
+    private ProfilerRecorder _unitySynchronizationContextExecuteTasksRecorder;
+    private ProfilerRecorder _updateRectTransformRecorder;
+    private ProfilerRecorder _updateCanvasRectTransformRecorder;
+    private ProfilerRecorder _updateAllRenderersRecorder;
+    private ProfilerRecorder _updateAllSkinnedMeshesRecorder;
+    private ProfilerRecorder _finishFrameRenderingRecorder;
+    private ProfilerRecorder _presentAfterDrawRecorder;
+
+    private bool _externalFrameProfilersStarted;
+    private double _lastBootstrapperUpdateMs;
+
     public bool GlobalDebugEnabled => _globalDebugEnabled;
+    public bool StopAutomaticAllySpawns => stopAutomaticAllySpawns;
+    public bool StopAutomaticEnemySpawns => stopAutomaticEnemySpawns;
+    public bool DebugSpawnOnlyInCurrentSystem => debugSpawnOnlyInCurrentSystem;
+    public bool OverrideAutomaticAllySpawnInterval => overrideAutomaticAllySpawnInterval;
+    public OffscreenNpcSimulationScheduleConfig OffscreenNpcSimulationScheduleConfig =>
+    offscreenNpcSimulationScheduleConfig;
+    public CurrentSystemNpcSimulationConfig CurrentSystemNpcSimulationConfig =>
+    currentSystemNpcSimulationConfig;
+
+    public float DebugAutomaticAllySpawnIntervalSeconds =>
+        Mathf.Max(0.1f, debugAutomaticAllySpawnIntervalSeconds);
+
+    public bool OverrideNpcGalaxyLevel => overrideNpcGalaxyLevel;
+
+    public int DebugNpcGalaxyLevel =>
+        Mathf.Clamp(debugNpcGalaxyLevel, 1, 10);
+
+    public DebugLogConfig DebugLogConfig => debugLogConfig;
+
+    public bool IsDebugLogEnabled(DebugLogChannel channel)
+    {
+        EnsureDebugLogRuntimeSettingsApplied();
+
+        return debugLogConfig != null &&
+               debugLogConfig.IsEnabled(channel);
+    }
+
+    public void LogDebug(DebugLogChannel channel, string message)
+    {
+        EnsureDebugLogRuntimeSettingsApplied();
+
+        if (!IsDebugLogEnabled(channel) ||
+            string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        Debug.Log("[DebugLog][" + channel + "] " + message);
+    }
+
+    public Action<string> CreateDebugLogAction(DebugLogChannel channel)
+    {
+        if (!IsDebugLogEnabled(channel))
+            return null;
+
+        return message => LogDebug(channel, message);
+    }
 
     private void Awake()
     {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = targetFrameRate;
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -57,7 +178,9 @@ public class Bootstrapper : CustomMonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        LogCustom("Bootstrapper awaked");
+        LogDebug(
+            DebugLogChannel.Bootstrap,
+            "Bootstrapper awaked");
 
         InitializeServiceRegistry();
         InitializeStateMachine();
@@ -68,12 +191,16 @@ public class Bootstrapper : CustomMonoBehaviour
     private void InitializeServiceRegistry()
     {
         ServiceRegistry = new ServiceRegistry();
-        LogCustom("ServiceRegistry created");
+
+        LogDebug(
+            DebugLogChannel.Bootstrap,
+            "ServiceRegistry created");
     }
 
     private void InitializeStateMachine()
     {
-        _gameStateMachine = RegisterService<IGameStateMachine, GameStateMachine>();
+        _gameStateMachine =
+            RegisterService<IGameStateMachine, GameStateMachine>();
     }
 
     private void InitializeServices()
@@ -96,21 +223,28 @@ public class Bootstrapper : CustomMonoBehaviour
                 systemHudConfig,
                 systemVisualConfig,
                 items,
-                ships,
                 enemies,
                 allies,
                 allySpawnRuleConfigs,
                 pirates,
                 pirateGroupSpawnRules,
                 modules,
-                weapons));
+                weapons,
+                combatFxVisualConfig,
+                combatDamagePopupVisualConfig,
+                npcBehaviourTransitionMatrixConfig));
 
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
         RegisterService<ITargetService2A, TargetService2A>();
         RegisterService<ISystemBoundsService, SystemBoundsService2A>();
-        _playerControlService = RegisterService<IPlayerControlService, PlayerControlService2A>();
-        _shipMovementService = RegisterService<IShipMovementService, ShipMovementService2A>();
+
+        _playerControlService =
+            RegisterService<IPlayerControlService, PlayerControlService2A>();
+
+        _shipMovementService =
+            RegisterService<IShipMovementService, ShipMovementService2A>();
+
         RegisterService<IPlayerShipSaveSyncService, PlayerShipSaveSyncService2A>();
         RegisterService<ISystemContextService, SystemContextService>();
         RegisterService<ISceneService, SceneService>();
@@ -125,27 +259,42 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IGalaxyDiscoveryService, GalaxyDiscoveryService>();
         RegisterService<IRouteService, RouteService>();
         RegisterService<IOrbitalMotionService, OrbitalMotionService>();
+        RegisterService<ISystemShipRouteService2A, SystemShipRouteService2A>();
         RegisterService<IHangarService, HangarService>();
         RegisterService<ISystemTravelService, SystemTravelService>();
         RegisterService<ITravelService, TravelService2A>();
-        _interactionService = RegisterService<IInteractionService2A, InteractionService2A>();
+
+        _interactionService =
+            RegisterService<IInteractionService2A, InteractionService2A>();
+
         RegisterService<IRepairService, RepairService>();
         RegisterService<IRewardService, RewardService>();
         RegisterService<IPlanetMissionOfferStateService, PlanetMissionOfferStateService>();
         RegisterService<IPlanetMissionOfferGenerator, PlanetMissionOfferGenerator>();
         RegisterService<IGovernmentRewardPayoutService, DebugGovernmentRewardPayoutService>();
         RegisterService<IGovernmentRewardService, GovernmentRewardService>();
+        RegisterService<IDamageService2A, DamageService2A>();
         RegisterService<ISystemNpcRuntimeService, SystemNpcRuntimeService>();
+        RegisterService<ISystemSecurityService, SystemSecurityService>();
         RegisterService<ISystemNpcPopulationService, SystemNpcPopulationService>();
         RegisterService<IGalaxyPopulationService, GalaxyPopulationService>();
+        RegisterService<IGalaxyNpcSimulationScheduleService, GalaxyNpcSimulationScheduleService>();
         RegisterService<ISystemNpcBehaviorService, SystemNpcBehaviorService>();
         RegisterService<IGalaxyNpcBehaviorService, GalaxyNpcBehaviorService>();
         RegisterService<ISystemNpcSimulationSaveService, SystemNpcSimulationSaveService>();
-        _saveService = RegisterService<ISaveService, SaveService2A>();
+        RegisterService<ISystemNpcOfflineRelocationService, SystemNpcOfflineRelocationService>();
+
+        _saveService =
+            RegisterService<ISaveService, SaveService2A>();
+
         RegisterService<IPlayerCombatTargetService, PlayerCombatTargetService>();
+        RegisterService<ISystemEnemyMovementService, SystemEnemyMovementService>();
         RegisterService<ISystemNpcMovementRouteService, SystemNpcMovementRouteService>();
+        RegisterService<ISystemShipRoutePlanner2A, SystemShipRoutePlanner2A>();
+        RegisterService<ISystemNpcOffscreenSimulationService, SystemNpcOffscreenSimulationService>();
         RegisterService<ISystemNpcMovementService, SystemNpcMovementService>();
         RegisterService<IGalaxyNpcMovementService, GalaxyNpcMovementService>();
+        RegisterService<IGalaxyNpcWarmupService, GalaxyNpcWarmupService>();
         RegisterService<ISystemNpcCombatService, SystemNpcCombatService>();
         RegisterService<IGalaxyNpcCombatService, GalaxyNpcCombatService>();
         RegisterService<IPlayerAttackService, PlayerAttackService>();
@@ -155,22 +304,21 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IMissionTracker, MissionTracker>();
         RegisterService<IPlanetGovernmentMissionService, PlanetGovernmentMissionService>();
 
-        _tickService = RegisterService<ITickService, TickService>();
-        _gameTimeService = RegisterService<IGameTimeService, GameTimeService>();
+        _tickService =
+            RegisterService<ITickService, TickService>();
+
+        _gameTimeService =
+            RegisterService<IGameTimeService, GameTimeService>();
+
         _tickService.Register(_gameTimeService, TickOrder.GameTime);
         _tickService.Register(_playerControlService, TickOrder.PlayerControl);
         _tickService.Register(_shipMovementService, TickOrder.ShipMovement);
         _tickService.Register(_interactionService, TickOrder.Interaction);
+
         RegisterService<IGameTimePauseScopeService, GameTimePauseScopeService>();
     }
 
-    /// <summary>
-    /// Создаёт сервис через пустой конструктор
-    /// и передаёт его в регистрацию готового экземпляра.
-    /// </summary>
-    private TInterface RegisterService<
-        TInterface,
-        TImplementation>()
+    private TInterface RegisterService<TInterface, TImplementation>()
         where TImplementation : TInterface, new()
     {
         TImplementation service =
@@ -179,20 +327,1347 @@ public class Bootstrapper : CustomMonoBehaviour
         return RegisterService<TInterface>(service);
     }
 
-    /// <summary>
-    /// Регистрирует уже созданный экземпляр сервиса.
-    ///
-    /// Используется, когда объект создан заранее
-    /// или требует параметров конструктора.
-    /// </summary>
     private TInterface RegisterService<TInterface>(
         TInterface service)
     {
         ServiceRegistry.Register<TInterface>(service);
 
-        LogCustom($"{service.GetType().Name} registered " + $"as {typeof(TInterface).Name}");
+        LogDebug(
+            DebugLogChannel.Bootstrap,
+            $"{service.GetType().Name} registered as {typeof(TInterface).Name}");
 
         return service;
+    }
+
+    [ContextMenu("STAR FRONTIER/Kill All NPCs")]
+    private void DebugKillAllNpcs()
+    {
+        if (ServiceRegistry == null)
+        {
+            LogCustom("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            LogCustom("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return;
+        }
+
+        int npcCount =
+            npcRuntimeService.Npcs != null
+                ? npcRuntimeService.Npcs.Count
+                : 0;
+
+        npcRuntimeService.ClearAll();
+
+        if (ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out ISystemNpcPopulationService populationService))
+        {
+            populationService.ClearRuntimeState();
+        }
+
+        LogCustom(
+            "[Bootstrapper] Debug Kill All NPCs completed. Removed NPCs: " +
+            npcCount);
+    }
+
+    [ContextMenu("STAR FRONTIER/Kill All NPCs In This System")]
+    private void DebugKillAllNpcsInThisSystem()
+    {
+        if (ServiceRegistry == null)
+        {
+            LogCustom("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService) ||
+            npcRuntimeService == null)
+        {
+            LogCustom("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<IGameSessionService>(
+                out IGameSessionService gameSessionService) ||
+            gameSessionService == null ||
+            gameSessionService.State == null ||
+            gameSessionService.State.Player == null)
+        {
+            LogCustom("[Bootstrapper] IGameSessionService state is unavailable.");
+            return;
+        }
+
+        string currentSystemId =
+            gameSessionService.State.Player.CurrentSystemId;
+
+        if (string.IsNullOrWhiteSpace(currentSystemId))
+        {
+            LogCustom("[Bootstrapper] Current system id is empty.");
+            return;
+        }
+
+        if (npcRuntimeService.Npcs == null ||
+            npcRuntimeService.Npcs.Count == 0)
+        {
+            LogCustom(
+                "[Bootstrapper] Debug Kill All NPCs In This System skipped. NPC list is empty. System: " +
+                currentSystemId);
+
+            return;
+        }
+
+        List<string> npcIdsToRemove =
+            new List<string>();
+
+        for (int i = 0; i < npcRuntimeService.Npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                npcRuntimeService.Npcs[i];
+
+            if (npc == null)
+                continue;
+
+            if (npc.CurrentSystemId != currentSystemId)
+                continue;
+
+            if (string.IsNullOrWhiteSpace(npc.RuntimeNpcId))
+                continue;
+
+            npcIdsToRemove.Add(npc.RuntimeNpcId);
+        }
+
+        for (int i = 0; i < npcIdsToRemove.Count; i++)
+            npcRuntimeService.DespawnNpc(npcIdsToRemove[i]);
+
+        LogCustom(
+            "[Bootstrapper] Debug Kill All NPCs In This System completed. " +
+            "System: " +
+            currentSystemId +
+            ", Removed NPCs: " +
+            npcIdsToRemove.Count);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Enemy Attack Group In Current System")]
+    private void DebugSpawnEnemyAttackGroupInCurrentSystem()
+    {
+        if (ServiceRegistry == null)
+        {
+            LogCustom("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out ISystemNpcPopulationService populationService))
+        {
+            LogCustom("[Bootstrapper] ISystemNpcPopulationService is not registered.");
+            return;
+        }
+
+        bool spawned =
+            populationService.DebugSpawnEnemyAttackGroupInCurrentSystem();
+
+        LogCustom(
+            "[Bootstrapper] Debug Spawn Enemy Attack Group In Current System result: " +
+            spawned);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Ranger In Current System")]
+    private void DebugSpawnAllyRangerInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Ranger);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Military In Current System")]
+    private void DebugSpawnAllyMilitaryInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Military);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Trader In Current System")]
+    private void DebugSpawnAllyTraderInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Trader);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Science In Current System")]
+    private void DebugSpawnAllyScienceInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Science);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn Ally Medic In Current System")]
+    private void DebugSpawnAllyMedicInCurrentSystem()
+    {
+        DebugSpawnAllyInCurrentSystem(AllyRole2A.Medic);
+    }
+
+    private void DebugSpawnAllyInCurrentSystem(
+        AllyRole2A role)
+    {
+        if (ServiceRegistry == null)
+        {
+            LogCustom("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out ISystemNpcPopulationService populationService))
+        {
+            LogCustom("[Bootstrapper] ISystemNpcPopulationService is not registered.");
+            return;
+        }
+
+        bool spawned =
+            populationService.DebugSpawnAllyInCurrentSystem(role);
+
+        LogCustom(
+            "[Bootstrapper] Debug Spawn Ally In Current System result: " +
+            spawned +
+            ", Role: " +
+            role);
+    }
+
+    [ContextMenu("STAR FRONTIER/Stress Spawn NPC")]
+    private void DebugStressSpawnNpcs()
+    {
+        if (!TryGetDebugNpcStressServices(
+                out ISystemNpcPopulationService populationService,
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        if (!debugNpcStressSpawnAllies &&
+            !debugNpcStressSpawnEnemyGroups)
+        {
+            DebugCombatWarning("[Bootstrapper] NPC stress spawn skipped. No spawn type is enabled.");
+            return;
+        }
+
+        int beforeCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        int spawnedCommands = 0;
+        int failedCommands = 0;
+
+        int waveCount =
+            Mathf.Max(1, debugNpcStressSpawnWaves);
+
+        int attemptsPerWave =
+            Mathf.Max(1, debugNpcStressSpawnAttempts);
+
+        for (int wave = 0; wave < waveCount; wave++)
+        {
+            RunDebugNpcStressSpawnWave(
+                populationService,
+                attemptsPerWave,
+                ref spawnedCommands,
+                ref failedCommands);
+        }
+
+        int afterCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC Stress Spawn completed. " +
+            "Waves: " + waveCount +
+            ", AttemptsPerWave: " + attemptsPerWave +
+            ", SuccessfulCommands: " + spawnedCommands +
+            ", FailedCommands: " + failedCommands +
+            ", NpcCountBefore: " + beforeCount +
+            ", NpcCountAfter: " + afterCount +
+            ", Delta: " + (afterCount - beforeCount));
+    }
+
+    [ContextMenu("STAR FRONTIER/Stress Spawn NPC Wave")]
+    private void DebugStressSpawnNpcWave()
+    {
+        if (!TryGetDebugNpcStressServices(
+                out ISystemNpcPopulationService populationService,
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        int beforeCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        int spawnedCommands = 0;
+        int failedCommands = 0;
+
+        RunDebugNpcStressSpawnWave(
+            populationService,
+            Mathf.Max(1, debugNpcStressSpawnAttempts),
+            ref spawnedCommands,
+            ref failedCommands);
+
+        int afterCount =
+            GetDebugNpcRuntimeCount(npcRuntimeService);
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC Stress Spawn Wave completed. " +
+            "Attempts: " + Mathf.Max(1, debugNpcStressSpawnAttempts) +
+            ", SuccessfulCommands: " + spawnedCommands +
+            ", FailedCommands: " + failedCommands +
+            ", NpcCountBefore: " + beforeCount +
+            ", NpcCountAfter: " + afterCount +
+            ", Delta: " + (afterCount - beforeCount));
+    }
+
+    [ContextMenu("STAR FRONTIER/Print NPC Runtime Count")]
+    private void DebugPrintNpcRuntimeCount()
+    {
+        if (!TryGetDebugNpcRuntimeServiceWithoutTarget(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC Runtime Count: " +
+            GetDebugNpcRuntimeCount(npcRuntimeService));
+    }
+
+    [ContextMenu("STAR FRONTIER/Validate NPC Runtime State")]
+    private void DebugValidateNpcRuntimeState()
+    {
+        if (!TryGetDebugNpcRuntimeServiceWithoutTarget(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        if (ServiceRegistry == null ||
+            !ServiceRegistry.TryGet<IConfigService>(
+                out IConfigService configService) ||
+            configService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] NPC validation failed. IConfigService is not registered.");
+            return;
+        }
+
+        int checkedCount = 0;
+        int issueCount = 0;
+
+        IReadOnlyList<SystemNpcRuntimeState> npcs =
+            npcRuntimeService.Npcs;
+
+        if (npcs == null || npcs.Count == 0)
+        {
+            DebugCombatLog("[Bootstrapper] NPC validation completed. NPCs: none.");
+            return;
+        }
+
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                npcs[i];
+
+            checkedCount++;
+
+            ValidateDebugNpcRuntimeState(
+                npc,
+                i,
+                configService,
+                ref issueCount);
+        }
+
+        DebugCombatLog(
+            "[Bootstrapper] NPC validation completed. " +
+            "Checked: " + checkedCount +
+            ", Issues: " + issueCount);
+    }
+
+    [ContextMenu("STAR FRONTIER/Damage First Enemy In Current System")]
+    private void DebugDamageFirstEnemyInCurrentSystem()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        string runtimeNpcId =
+            FindFirstAliveEnemyRuntimeIdInCurrentSystem(
+                npcRuntimeService,
+                configService);
+
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "No alive enemy was found in current system.");
+
+            return;
+        }
+
+        DamageDebugTarget(
+            npcRuntimeService,
+            runtimeNpcId,
+            debugCombatTargetDamage);
+    }
+
+    [ContextMenu("STAR FRONTIER/Damage Target NPC By Runtime ID")]
+    private void DebugDamageTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "debugCombatTargetRuntimeNpcId is empty.");
+
+            return;
+        }
+
+        DamageDebugTarget(
+            npcRuntimeService,
+            debugCombatTargetRuntimeNpcId,
+            debugCombatTargetDamage);
+    }
+
+    [ContextMenu("STAR FRONTIER/Damage Player")]
+    private void DebugDamagePlayer()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        int safeDamage =
+            Mathf.Max(1, debugCombatPlayerDamage);
+
+        ShipRuntimeData activeShipBefore =
+            GetDebugActiveShip();
+
+        if (activeShipBefore == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug Damage Player failed. " +
+                "Active ship is null.");
+
+            return;
+        }
+
+        int shieldBefore =
+            activeShipBefore.CurrentShield;
+
+        int hullBefore =
+            activeShipBefore.CurrentHull;
+
+        playerCombatTargetService.ApplyDamage(safeDamage);
+
+        ShipRuntimeData activeShipAfter =
+            GetDebugActiveShip();
+
+        if (activeShipAfter == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug Damage Player finished, " +
+                "but active ship is null after damage.");
+
+            return;
+        }
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Damage Player requested. " +
+            "Damage: " +
+            safeDamage +
+            ", Shield: " +
+            shieldBefore +
+            " -> " +
+            activeShipAfter.CurrentShield +
+            ", Hull: " +
+            hullBefore +
+            " -> " +
+            activeShipAfter.CurrentHull);
+    }
+
+    [ContextMenu("STAR FRONTIER/Kill First Enemy In Current System")]
+    private void DebugKillFirstEnemyInCurrentSystem()
+    {
+        if (!TryGetDebugCombatServices(
+                out ISystemNpcRuntimeService npcRuntimeService,
+                out IPlayerCombatTargetService playerCombatTargetService,
+                out IConfigService configService))
+        {
+            return;
+        }
+
+        string runtimeNpcId =
+            FindFirstAliveEnemyRuntimeIdInCurrentSystem(
+                npcRuntimeService,
+                configService);
+
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "No alive enemy was found in current system.");
+
+            return;
+        }
+
+        KillDebugEnemy(
+            npcRuntimeService,
+            runtimeNpcId);
+    }
+
+    private bool TryGetDebugNpcRuntimeService(
+        out ISystemNpcRuntimeService npcRuntimeService)
+    {
+        npcRuntimeService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService))
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            DebugCombatWarning("[Bootstrapper] debugCombatTargetRuntimeNpcId is empty.");
+            return false;
+        }
+
+        return true;
+    }
+
+    [ContextMenu("STAR FRONTIER/Kill Target NPC By Runtime ID")]
+    private void DebugKillTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        bool killed =
+            npcRuntimeService.KillNpc(
+                debugCombatTargetRuntimeNpcId,
+                true);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Kill Target NPC result: " +
+            killed +
+            ", RuntimeNpcId: " +
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Despawn Target NPC By Runtime ID")]
+    private void DebugDespawnTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        bool despawned =
+            npcRuntimeService.DespawnNpc(
+                debugCombatTargetRuntimeNpcId);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Despawn Target NPC result: " +
+            despawned +
+            ", RuntimeNpcId: " +
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Reset Target NPC By Runtime ID")]
+    private void DebugResetTargetNpcByRuntimeId()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        bool reset =
+            npcRuntimeService.ResetNpc(
+                debugCombatTargetRuntimeNpcId);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Reset Target NPC result: " +
+            reset +
+            ", RuntimeNpcId: " +
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Force Target NPC Route To Linked System")]
+    private void DebugForceTargetNpcRouteToLinkedSystem()
+    {
+        if (!TryGetDebugNpcOfflineServices(
+                out ISystemNpcOfflineRelocationService offlineRelocationService,
+                out IGameSessionService gameSessionService))
+        {
+            return;
+        }
+
+        bool forced =
+            offlineRelocationService.DebugForceTargetNpcRoute(
+                debugCombatTargetRuntimeNpcId,
+                gameSessionService.State);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Force Target NPC Route result: " +
+            forced +
+            ", RuntimeNpcId: " +
+            debugCombatTargetRuntimeNpcId);
+    }
+
+    [ContextMenu("STAR FRONTIER/Run NPC Offline Step")]
+    private void DebugRunNpcOfflineStep()
+    {
+        if (!TryGetDebugNpcOfflineServices(
+                out ISystemNpcOfflineRelocationService offlineRelocationService,
+                out IGameSessionService gameSessionService))
+        {
+            return;
+        }
+
+        bool moved =
+            offlineRelocationService.DebugProcessOfflineStep(
+                gameSessionService.State,
+                debugNpcOfflineStepHours);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug NPC Offline Step result: " +
+            moved +
+            ", Hours: " +
+            debugNpcOfflineStepHours.ToString("0.00"));
+    }
+
+    [ContextMenu("STAR FRONTIER/Reset Current Encounter")]
+    private void DebugResetCurrentEncounter()
+    {
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemEncounterService>(
+                out ISystemEncounterService encounterService) ||
+            encounterService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemEncounterService is not registered.");
+            return;
+        }
+
+        encounterService.ClearEncounter();
+
+        DebugCombatLog("[Bootstrapper] Debug Reset Current Encounter completed.");
+    }
+
+    [ContextMenu("STAR FRONTIER/Enable Player God Mode")]
+    private void DebugEnablePlayerGodMode()
+    {
+        SetDebugPlayerGodMode(true);
+    }
+
+    [ContextMenu("STAR FRONTIER/Disable Player God Mode")]
+    private void DebugDisablePlayerGodMode()
+    {
+        SetDebugPlayerGodMode(false);
+    }
+
+    private void SetDebugPlayerGodMode(
+        bool enabled)
+    {
+        if (debugConfig == null)
+        {
+            DebugCombatWarning("[Bootstrapper] DebugConfig is not assigned.");
+            return;
+        }
+
+        debugConfig.enableGodMode = enabled;
+
+        DebugCombatLog(
+            "[Bootstrapper] Player God Mode: " +
+            enabled);
+    }
+
+    [ContextMenu("STAR FRONTIER/Print All NPC Debug State")]
+    private void DebugPrintAllNpcDebugState()
+    {
+        if (!TryGetDebugNpcRuntimeServiceWithoutTarget(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        StringBuilder text =
+            new StringBuilder(2048);
+
+        text.AppendLine("[Bootstrapper] NPC Debug State");
+
+        if (npcRuntimeService.Npcs == null ||
+            npcRuntimeService.Npcs.Count == 0)
+        {
+            text.AppendLine("NPCs: none");
+            DebugCombatLog(text.ToString());
+            return;
+        }
+
+        for (int i = 0; i < npcRuntimeService.Npcs.Count; i++)
+        {
+            AppendNpcDebugState(
+                text,
+                npcRuntimeService.Npcs[i],
+                i);
+        }
+
+        DebugCombatLog(text.ToString());
+    }
+
+    [ContextMenu("STAR FRONTIER/Print Target NPC Debug State")]
+    private void DebugPrintTargetNpcDebugState()
+    {
+        if (!TryGetDebugNpcRuntimeService(
+                out ISystemNpcRuntimeService npcRuntimeService))
+        {
+            return;
+        }
+
+        if (!npcRuntimeService.TryGetNpc(
+                debugCombatTargetRuntimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Target NPC debug failed. NPC was not found. RuntimeNpcId: " +
+                debugCombatTargetRuntimeNpcId);
+
+            return;
+        }
+
+        StringBuilder text =
+            new StringBuilder(1024);
+
+        text.AppendLine("[Bootstrapper] Target NPC Debug State");
+
+        AppendNpcDebugState(
+            text,
+            npc,
+            0);
+
+        DebugCombatLog(text.ToString());
+    }
+
+    private bool TryGetDebugNpcRuntimeServiceWithoutTarget(
+        out ISystemNpcRuntimeService npcRuntimeService)
+    {
+        npcRuntimeService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService))
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
+        }
+
+        return true;
+    }
+
+    [ContextMenu("STAR FRONTIER/Print Combat Debug State")]
+    private void DebugPrintCombatState()
+    {
+        StringBuilder text =
+            new StringBuilder(512);
+
+        text.AppendLine("[Bootstrapper] Combat Debug State");
+
+        AppendDebugEncounterState(text);
+        AppendDebugPlayerState(text);
+        AppendDebugTargetState(text);
+        AppendDebugNpcCombatState(text);
+
+        DebugCombatLog(text.ToString());
+    }
+
+    private void DebugCombatLog(
+        string message)
+    {
+        Debug.unityLogger.Log(
+            LogType.Log,
+            (object)message,
+            this);
+    }
+
+    private void DebugCombatWarning(
+        string message)
+    {
+        Debug.unityLogger.Log(
+            LogType.Warning,
+            (object)message,
+            this);
+    }
+
+    private void AppendDebugEncounterState(
+        StringBuilder text)
+    {
+        if (ServiceRegistry == null)
+        {
+            text.AppendLine("Encounter: ServiceRegistry unavailable");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemEncounterService>(
+                out ISystemEncounterService encounterService) ||
+            encounterService == null)
+        {
+            text.AppendLine("Encounter: service unavailable");
+            return;
+        }
+
+        ActiveSystemEncounter encounter =
+            encounterService.Current;
+
+        if (encounter == null)
+        {
+            text.AppendLine("Encounter: none");
+            return;
+        }
+
+        text.Append("Encounter: ")
+            .Append(encounter.EncounterId)
+            .Append(", System: ")
+            .Append(encounter.SystemId)
+            .Append(", State: ")
+            .Append(encounter.State)
+            .Append(", EnemiesAlive: ")
+            .Append(encounter.EnemiesAlive)
+            .Append(", AlliesAlive: ")
+            .Append(encounter.AlliesAlive)
+            .Append(", PlayerKills: ")
+            .Append(encounter.PlayerKills)
+            .Append(", DefeatReason: ")
+            .AppendLine(encounter.DefeatReason.ToString());
+    }
+
+    private void AppendDebugPlayerState(
+        StringBuilder text)
+    {
+        ShipRuntimeData activeShip =
+            GetDebugActiveShip();
+
+        if (activeShip == null)
+        {
+            text.AppendLine("Player: active ship unavailable");
+            return;
+        }
+
+        ShipStats stats =
+            GetDebugActiveShipStats();
+
+        int maxHull =
+            stats != null
+                ? stats.MaxHull
+                : activeShip.HullCapacity;
+
+        int maxShield =
+            stats != null
+                ? stats.MaxShield
+                : activeShip.CurrentShield;
+
+        text.Append("Player: ShipId: ")
+            .Append(activeShip.ShipId)
+            .Append(", Hull: ")
+            .Append(activeShip.CurrentHull)
+            .Append(" / ")
+            .Append(maxHull)
+            .Append(", Shield: ")
+            .Append(activeShip.CurrentShield)
+            .Append(" / ")
+            .Append(maxShield)
+            .Append(", Energy: ")
+            .Append(activeShip.CurrentEnergy)
+            .AppendLine();
+    }
+
+    private void AppendDebugTargetState(
+        StringBuilder text)
+    {
+        if (ServiceRegistry == null)
+        {
+            text.AppendLine("Target: ServiceRegistry unavailable");
+            return;
+        }
+
+        if (ServiceRegistry.TryGet<IPlayerAttackService>(
+                out IPlayerAttackService playerAttackService) &&
+            playerAttackService != null &&
+            !string.IsNullOrWhiteSpace(playerAttackService.CurrentTargetNpcId))
+        {
+            AppendDebugNpcTarget(
+                text,
+                "PlayerAttack target",
+                playerAttackService.CurrentTargetNpcId);
+
+            return;
+        }
+
+        if (ServiceRegistry.TryGet<ITargetService2A>(
+                out ITargetService2A targetService) &&
+            targetService != null &&
+            targetService.State != null &&
+            targetService.State.HasTarget)
+        {
+            text.Append("Targeting target: ")
+                .Append(targetService.State.CurrentTargetId)
+                .Append(", Type: ")
+                .Append(targetService.State.CurrentTargetType)
+                .Append(", Distance: ")
+                .Append(targetService.State.CurrentTargetDistance.ToString("0.0"))
+                .Append(", InRange: ")
+                .Append(targetService.State.IsTargetInRange)
+                .AppendLine();
+
+            AppendDebugNpcTarget(
+                text,
+                "Targeting NPC state",
+                targetService.State.CurrentTargetId);
+
+            return;
+        }
+
+        text.AppendLine("Target: none");
+    }
+
+    private void AppendDebugNpcTarget(
+        StringBuilder text,
+        string label,
+        string runtimeNpcId)
+    {
+        if (ServiceRegistry == null)
+            return;
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService) ||
+            npcRuntimeService == null)
+        {
+            text.Append(label)
+                .AppendLine(": NPC runtime service unavailable");
+
+            return;
+        }
+
+        if (!npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            text.Append(label)
+                .Append(": not found. RuntimeNpcId: ")
+                .AppendLine(runtimeNpcId);
+
+            return;
+        }
+
+        text.Append(label)
+            .Append(": ")
+            .Append(npc.DisplayName)
+            .Append(", RuntimeNpcId: ")
+            .Append(npc.RuntimeNpcId)
+            .Append(", Type: ")
+            .Append(npc.NpcType)
+            .Append(", Hull: ")
+            .Append(npc.CurrentHull)
+            .Append(" / ")
+            .Append(npc.MaxHull)
+            .Append(", Shield: ")
+            .Append(npc.CurrentShield)
+            .Append(" / ")
+            .Append(npc.MaxShield)
+            .Append(", CombatState: ")
+            .Append(npc.CombatState)
+            .Append(", Alive: ")
+            .Append(npc.IsAlive)
+            .AppendLine();
+    }
+
+    private void AppendNpcDebugState(
+    StringBuilder text,
+    SystemNpcRuntimeState npc,
+    int index)
+    {
+        if (npc == null)
+        {
+            text.Append("#")
+                .Append(index)
+                .AppendLine(": null NPC");
+            return;
+        }
+
+        text.Append("#")
+            .Append(index)
+            .Append(": ")
+            .Append(npc.DisplayName)
+            .Append(", RuntimeNpcId: ")
+            .Append(npc.RuntimeNpcId)
+            .Append(", Type: ")
+            .Append(npc.NpcType)
+            .Append(", Role: ")
+            .Append(npc.AllyRole)
+            .Append(", Faction: ")
+            .Append(BuildDebugNpcFaction(npc))
+            .AppendLine();
+
+        text.Append("  Route: OriginSystem: ")
+            .Append(npc.OriginSystemId)
+            .Append(", CurrentSystem: ")
+            .Append(npc.CurrentSystemId)
+            .Append(", TargetSystem: ")
+            .Append(npc.TargetSystemId)
+            .Append(", CurrentPlanet: ")
+            .Append(npc.CurrentPlanetId)
+            .Append(", TargetPlanet: ")
+            .Append(npc.TargetPlanetId)
+            .Append(", TravelState: ")
+            .Append(npc.TravelState)
+            .AppendLine();
+
+        text.Append("  Target: CurrentTargetRuntimeNpcId: ")
+            .Append(npc.CurrentTargetRuntimeNpcId)
+            .Append(", BehaviorTargetRuntimeNpcId: ")
+            .Append(npc.BehaviorTargetRuntimeNpcId)
+            .AppendLine();
+
+        text.Append("  State: LifeState: ")
+            .Append(npc.LifeState)
+            .Append(", IsAlive: ")
+            .Append(npc.IsAlive)
+            .Append(", Behavior: ")
+            .Append(npc.CurrentBehavior)
+            .Append(", PrevBehavior: ")
+            .Append(npc.PrevBehavior)
+            .Append(", CombatState: ")
+            .Append(npc.CombatState)
+            .Append(", IsFighting: ")
+            .Append(npc.IsFighting)
+            .AppendLine();
+
+        text.Append("  Timers: BehaviorStartedTick: ")
+            .Append(npc.BehaviorStartedTick)
+            .Append(", BehaviorEndsTick: ")
+            .Append(npc.BehaviorEndsTick)
+            .Append(", TravelStartTick: ")
+            .Append(npc.TravelStartTick)
+            .Append(", TravelEndTick: ")
+            .Append(npc.TravelEndTick)
+            .Append(", DestroyedAtTick: ")
+            .Append(npc.DestroyedAtTick)
+            .Append(", NextRespawnTick: ")
+            .Append(npc.NextRespawnTick)
+            .AppendLine();
+    }
+
+    private string BuildDebugNpcFaction(
+        SystemNpcRuntimeState npc)
+    {
+        if (npc == null)
+            return "Unknown";
+
+        if (npc.IsEnemy)
+            return "Enemy";
+
+        if (npc.IsPirate)
+            return "Pirate";
+
+        if (npc.IsAlly)
+            return "Civilization";
+
+        return "Unknown";
+    }
+
+    private void AppendDebugNpcCombatState(
+    StringBuilder text)
+    {
+        if (ServiceRegistry == null)
+        {
+            text.AppendLine("NPC Debug: ServiceRegistry unavailable");
+            return;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out ISystemNpcRuntimeService npcRuntimeService) ||
+            npcRuntimeService == null)
+        {
+            text.AppendLine("NPC Debug: runtime service unavailable");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            text.AppendLine("NPC Debug: target RuntimeNpcId is empty");
+            return;
+        }
+
+        if (!npcRuntimeService.TryGetNpc(
+                debugCombatTargetRuntimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            text.Append("NPC Debug: target not found. RuntimeNpcId: ")
+                .AppendLine(debugCombatTargetRuntimeNpcId);
+
+            return;
+        }
+
+        AppendNpcDebugState(
+            text,
+            npc,
+            0);
+    }
+
+    private bool TryGetDebugCombatServices(
+        out ISystemNpcRuntimeService npcRuntimeService,
+        out IPlayerCombatTargetService playerCombatTargetService,
+        out IConfigService configService)
+    {
+        npcRuntimeService = null;
+        playerCombatTargetService = null;
+        configService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService))
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<IPlayerCombatTargetService>(
+                out playerCombatTargetService))
+        {
+            DebugCombatWarning("[Bootstrapper] IPlayerCombatTargetService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<IConfigService>(
+                out configService))
+        {
+            DebugCombatWarning("[Bootstrapper] IConfigService is not registered.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private string FindFirstAliveEnemyRuntimeIdInCurrentSystem(
+        ISystemNpcRuntimeService npcRuntimeService,
+        IConfigService configService)
+    {
+        StarSystemConfig currentSystem =
+            configService.GetCurrentSystemConfig();
+
+        if (currentSystem == null ||
+            string.IsNullOrWhiteSpace(currentSystem.Id))
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "Current system was not resolved.");
+
+            return null;
+        }
+
+        IReadOnlyList<SystemNpcRuntimeState> enemies =
+            npcRuntimeService.GetAliveNpcsInSystemByType(
+                currentSystem.Id,
+                SystemNpcType.Enemy);
+
+        if (enemies == null || enemies.Count == 0)
+            return null;
+
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            SystemNpcRuntimeState enemy =
+                enemies[i];
+
+            if (enemy == null)
+                continue;
+
+            if (!enemy.IsAlive ||
+                enemy.LifeState != SystemNpcLifeState.Alive)
+            {
+                continue;
+            }
+
+            return enemy.RuntimeNpcId;
+        }
+
+        return null;
+    }
+
+    private void DamageDebugTarget(
+        ISystemNpcRuntimeService npcRuntimeService,
+        string runtimeNpcId,
+        int damage)
+    {
+        if (!npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "NPC was not found. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        if (!npc.IsAlive ||
+            npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug damage target failed. " +
+                "NPC is not alive. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        int safeDamage =
+            Mathf.Max(1, damage);
+
+        npcRuntimeService.ApplyDamage(
+            runtimeNpcId,
+            safeDamage,
+            true,
+            true);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Damage Target completed. " +
+            "RuntimeNpcId: " +
+            runtimeNpcId +
+            ", Damage: " +
+            safeDamage);
+    }
+
+    private void KillDebugEnemy(
+        ISystemNpcRuntimeService npcRuntimeService,
+        string runtimeNpcId)
+    {
+        if (!npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) ||
+            npc == null)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "NPC was not found. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        if (!npc.IsEnemy)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "NPC is not an enemy. RuntimeNpcId: " +
+                runtimeNpcId +
+                ", Type: " +
+                npc.NpcType);
+
+            return;
+        }
+
+        if (!npc.IsAlive ||
+            npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            DebugCombatWarning(
+                "[Bootstrapper] Debug kill enemy failed. " +
+                "Enemy is not alive. RuntimeNpcId: " +
+                runtimeNpcId);
+
+            return;
+        }
+
+        int lethalDamage =
+            Mathf.Max(
+                npc.CurrentHull + npc.CurrentShield,
+                999999);
+
+        npcRuntimeService.ApplyDamage(
+            runtimeNpcId,
+            lethalDamage,
+            true,
+            true);
+
+        DebugCombatLog(
+            "[Bootstrapper] Debug Kill Enemy completed. " +
+            "RuntimeNpcId: " +
+            runtimeNpcId +
+            ", Damage: " +
+            lethalDamage);
+    }
+
+    private ShipRuntimeData GetDebugActiveShip()
+    {
+        if (ServiceRegistry == null)
+            return null;
+
+        if (!ServiceRegistry.TryGet<IGameSessionService>(
+                out IGameSessionService gameSessionService) ||
+            gameSessionService == null ||
+            gameSessionService.State == null ||
+            gameSessionService.State.Player == null)
+        {
+            return null;
+        }
+
+        return gameSessionService.State.Player.GetActiveShip();
+    }
+
+    private ShipStats GetDebugActiveShipStats()
+    {
+        if (ServiceRegistry == null)
+            return null;
+
+        if (!ServiceRegistry.TryGet<IHangarService>(
+                out IHangarService hangarService) ||
+            hangarService == null)
+        {
+            return null;
+        }
+
+        return hangarService.GetActiveShipStats();
     }
 
     private void StartGameFlow()
@@ -202,13 +1677,418 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void Update()
     {
-        // float deltaTime = Time.deltaTime;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        // _gameTimeService?.Tick(deltaTime);
-        _tickService?.Tick(Time.deltaTime);
+        double profilerStartMs = 0.0;
+        double tickMs = 0.0;
+
+        bool hasTickService = false;
+
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            EnsureExternalFrameProfilersStarted();
+
+            profilerStartMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            hasTickService =
+                _tickService != null;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            _tickService?.Tick(Time.deltaTime);
+
+            tickMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            _lastBootstrapperUpdateMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            if (_lastBootstrapperUpdateMs >= 1.0 &&
+                IsPerformanceLogEnabled(DebugLogPerformanceArea.GameTimeLoadAnalytics))
+            {
+                LogPerformance(
+                    DebugLogPerformanceArea.GameTimeLoadAnalytics,
+                    "[VISUAL_UPDATE_SPIKE]" +
+                    " Marker=Bootstrapper.Update" +
+                    " | UnityFrame=" + Time.frameCount +
+                    " | Ms=" + _lastBootstrapperUpdateMs.ToString("F2") +
+                    " | ThresholdMs=1.00" +
+                    " | HasTickService=" + hasTickService +
+                    " | ProfilerStartMs=" + profilerStartMs.ToString("F3") +
+                    " | TickMs=" + tickMs.ToString("F3"));
+            }
+        }
     }
 
-    private void OnApplicationPause(bool pause)
+    private void LateUpdate()
+    {
+        LogExternalFrameDiagnosticsIfNeeded();
+    }
+
+    private void OnDestroy()
+    {
+        StopExternalFrameProfilers();
+    }
+
+    private void EnsureExternalFrameProfilersStarted()
+    {
+        if (_externalFrameProfilersStarted)
+            return;
+
+        _externalFrameProfilersStarted = true;
+
+        _mainThreadTimeRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Internal,
+                "Main Thread");
+
+        _renderThreadTimeRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Internal,
+                "Render Thread");
+
+        _playerLoopRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Internal,
+                "PlayerLoop");
+
+        _behaviourUpdateRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "BehaviourUpdate");
+
+        _scriptRunBehaviourUpdateRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "Update.ScriptRunBehaviourUpdate");
+
+        _lateBehaviourUpdateRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "LateBehaviourUpdate");
+
+        _scriptRunBehaviourLateUpdateRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "PreLateUpdate.ScriptRunBehaviourLateUpdate");
+
+        _fixedBehaviourUpdateRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "FixedUpdate.ScriptRunBehaviourFixedUpdate");
+
+        _scriptRunDelayedStartupFrameRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "EarlyUpdate.ScriptRunDelayedStartupFrame");
+
+        _scriptRunDelayedDynamicFrameRateRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "Update.ScriptRunDelayedDynamicFrameRate");
+
+        _scriptRunDelayedTasksRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "Update.ScriptRunDelayedTasks");
+
+        _unitySynchronizationContextExecuteTasksRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Scripts,
+                "UnitySynchronizationContext.ExecuteTasks");
+
+        _updateRectTransformRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "UpdateRectTransform");
+
+        _updateCanvasRectTransformRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "UpdateCanvasRectTransform");
+
+        _cameraRenderRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "Camera.Render");
+
+        _canvasBuildBatchRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "Canvas.BuildBatch");
+
+        _canvasSendWillRenderCanvasesRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "Canvas.SendWillRenderCanvases");
+
+        _updateAllRenderersRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "UpdateAllRenderers");
+
+        _updateAllSkinnedMeshesRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "UpdateAllSkinnedMeshes");
+
+        _finishFrameRenderingRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "FinishFrameRendering");
+
+        _presentAfterDrawRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Render,
+                "PresentAfterDraw");
+
+        _gcCollectRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Memory,
+                "GC.Collect");
+
+        _gcAllocatedInFrameRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Memory,
+                "GC Allocated In Frame");
+
+        _gcUsedMemoryRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Memory,
+                "GC Used Memory");
+
+        _totalUsedMemoryRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Memory,
+                "Total Used Memory");
+
+        _systemUsedMemoryRecorder =
+            StartProfilerRecorder(
+                ProfilerCategory.Memory,
+                "System Used Memory");
+    }
+
+    private ProfilerRecorder StartProfilerRecorder(
+        ProfilerCategory category,
+        string markerName)
+    {
+        try
+        {
+            return ProfilerRecorder.StartNew(
+                category,
+                markerName,
+                1);
+        }
+        catch (Exception e)
+        {
+            LogPerformance(
+                DebugLogPerformanceArea.GameTimeLoadAnalytics,
+                "[FRAME_EXTERNAL_RECORDER_FAILED]" +
+                " Marker=" + markerName +
+                " | Error=" + e.Message);
+
+            return default;
+        }
+    }
+
+    private void StopExternalFrameProfilers()
+    {
+        StopProfilerRecorder(ref _mainThreadTimeRecorder);
+        StopProfilerRecorder(ref _renderThreadTimeRecorder);
+        StopProfilerRecorder(ref _playerLoopRecorder);
+        StopProfilerRecorder(ref _behaviourUpdateRecorder);
+        StopProfilerRecorder(ref _scriptRunBehaviourUpdateRecorder);
+        StopProfilerRecorder(ref _lateBehaviourUpdateRecorder);
+        StopProfilerRecorder(ref _scriptRunBehaviourLateUpdateRecorder);
+        StopProfilerRecorder(ref _fixedBehaviourUpdateRecorder);
+        StopProfilerRecorder(ref _scriptRunDelayedStartupFrameRecorder);
+        StopProfilerRecorder(ref _scriptRunDelayedDynamicFrameRateRecorder);
+        StopProfilerRecorder(ref _scriptRunDelayedTasksRecorder);
+        StopProfilerRecorder(ref _unitySynchronizationContextExecuteTasksRecorder);
+        StopProfilerRecorder(ref _updateRectTransformRecorder);
+        StopProfilerRecorder(ref _updateCanvasRectTransformRecorder);
+        StopProfilerRecorder(ref _cameraRenderRecorder);
+        StopProfilerRecorder(ref _canvasBuildBatchRecorder);
+        StopProfilerRecorder(ref _canvasSendWillRenderCanvasesRecorder);
+        StopProfilerRecorder(ref _updateAllRenderersRecorder);
+        StopProfilerRecorder(ref _updateAllSkinnedMeshesRecorder);
+        StopProfilerRecorder(ref _finishFrameRenderingRecorder);
+        StopProfilerRecorder(ref _presentAfterDrawRecorder);
+        StopProfilerRecorder(ref _gcCollectRecorder);
+        StopProfilerRecorder(ref _gcAllocatedInFrameRecorder);
+        StopProfilerRecorder(ref _gcUsedMemoryRecorder);
+        StopProfilerRecorder(ref _totalUsedMemoryRecorder);
+        StopProfilerRecorder(ref _systemUsedMemoryRecorder);
+
+        _externalFrameProfilersStarted = false;
+    }
+
+    private void StopProfilerRecorder(
+        ref ProfilerRecorder recorder)
+    {
+        if (!recorder.Valid)
+            return;
+
+        recorder.Dispose();
+        recorder = default;
+    }
+
+    private void LogExternalFrameDiagnosticsIfNeeded()
+    {
+        if (!IsPerformanceLogEnabled(DebugLogPerformanceArea.GameTimeLoadAnalytics))
+            return;
+
+        if (debugLogConfig == null)
+            return;
+
+        double frameMs =
+            Time.unscaledDeltaTime > 0f
+                ? Time.unscaledDeltaTime * 1000.0
+                : 0.0;
+
+        if (frameMs < debugLogConfig.GameTimeFrameSpikeWarningMs)
+            return;
+
+        int currentTick =
+            _gameTimeService != null
+                ? _gameTimeService.CurrentQuantTick
+                : -1;
+
+        int gc0 =
+            GC.CollectionCount(0);
+
+        int gc1 =
+            GC.CollectionCount(1);
+
+        int gc2 =
+            GC.CollectionCount(2);
+
+        long managedMemory =
+            GC.GetTotalMemory(false);
+
+        double mainThreadMs =
+            ProfilerRecorderNanosecondsToMs(_mainThreadTimeRecorder);
+
+        double playerLoopMs =
+            ProfilerRecorderNanosecondsToMs(_playerLoopRecorder);
+
+        double behaviourUpdateMs =
+            ProfilerRecorderNanosecondsToMs(_behaviourUpdateRecorder);
+
+        double scriptRunBehaviourUpdateMs =
+            ProfilerRecorderNanosecondsToMs(_scriptRunBehaviourUpdateRecorder);
+
+        double lateBehaviourUpdateMs =
+            ProfilerRecorderNanosecondsToMs(_lateBehaviourUpdateRecorder);
+
+        double scriptRunBehaviourLateUpdateMs =
+            ProfilerRecorderNanosecondsToMs(_scriptRunBehaviourLateUpdateRecorder);
+
+        double gcCollectMs =
+            ProfilerRecorderNanosecondsToMs(_gcCollectRecorder);
+
+        double cameraRenderMs =
+            ProfilerRecorderNanosecondsToMs(_cameraRenderRecorder);
+
+        double canvasBuildBatchMs =
+            ProfilerRecorderNanosecondsToMs(_canvasBuildBatchRecorder);
+
+        double canvasSendWillRenderCanvasesMs =
+            ProfilerRecorderNanosecondsToMs(_canvasSendWillRenderCanvasesRecorder);
+
+        double knownPlayerLoopMs =
+            behaviourUpdateMs +
+            lateBehaviourUpdateMs +
+            cameraRenderMs +
+            canvasBuildBatchMs +
+            canvasSendWillRenderCanvasesMs +
+            gcCollectMs;
+
+        double mainThreadOutsidePlayerLoopMs =
+            Mathf.Max(
+                0f,
+                (float)(mainThreadMs - playerLoopMs));
+
+        double playerLoopOutsideKnownMs =
+            Mathf.Max(
+                0f,
+                (float)(playerLoopMs - knownPlayerLoopMs));
+
+        LogPerformance(
+            DebugLogPerformanceArea.GameTimeLoadAnalytics,
+            "[FRAME_EXTERNAL]" +
+            " UnityFrame=" + Time.frameCount +
+            " | Tick=" + currentTick +
+            " | IsPaused=" + (_gameTimeService != null && _gameTimeService.IsPaused) +
+            " | FrameMs=" + frameMs.ToString("F2") +
+            " | BootstrapperUpdateMs=" + _lastBootstrapperUpdateMs.ToString("F2") +
+            " | MainThreadMs=" + mainThreadMs.ToString("F2") +
+            " | RenderThreadMs=" + ProfilerRecorderNanosecondsToMs(_renderThreadTimeRecorder).ToString("F2") +
+            " | PlayerLoopMs=" + playerLoopMs.ToString("F2") +
+            " | MainThreadOutsidePlayerLoopMs=" + mainThreadOutsidePlayerLoopMs.ToString("F2") +
+            " | PlayerLoopOutsideKnownMs=" + playerLoopOutsideKnownMs.ToString("F2") +
+            " | BehaviourUpdateMs=" + behaviourUpdateMs.ToString("F2") +
+            " | ScriptRunBehaviourUpdateMs=" + scriptRunBehaviourUpdateMs.ToString("F2") +
+            " | LateBehaviourUpdateMs=" + lateBehaviourUpdateMs.ToString("F2") +
+            " | ScriptRunBehaviourLateUpdateMs=" + scriptRunBehaviourLateUpdateMs.ToString("F2") +
+            " | FixedBehaviourUpdateMs=" + ProfilerRecorderNanosecondsToMs(_fixedBehaviourUpdateRecorder).ToString("F2") +
+            " | ScriptRunDelayedStartupFrameMs=" + ProfilerRecorderNanosecondsToMs(_scriptRunDelayedStartupFrameRecorder).ToString("F2") +
+            " | ScriptRunDelayedDynamicFrameRateMs=" + ProfilerRecorderNanosecondsToMs(_scriptRunDelayedDynamicFrameRateRecorder).ToString("F2") +
+            " | ScriptRunDelayedTasksMs=" + ProfilerRecorderNanosecondsToMs(_scriptRunDelayedTasksRecorder).ToString("F2") +
+            " | UnitySynchronizationContextExecuteTasksMs=" + ProfilerRecorderNanosecondsToMs(_unitySynchronizationContextExecuteTasksRecorder).ToString("F2") +
+            " | UpdateRectTransformMs=" + ProfilerRecorderNanosecondsToMs(_updateRectTransformRecorder).ToString("F2") +
+            " | UpdateCanvasRectTransformMs=" + ProfilerRecorderNanosecondsToMs(_updateCanvasRectTransformRecorder).ToString("F2") +
+            " | CameraRenderMs=" + cameraRenderMs.ToString("F2") +
+            " | CanvasBuildBatchMs=" + canvasBuildBatchMs.ToString("F2") +
+            " | CanvasSendWillRenderCanvasesMs=" + canvasSendWillRenderCanvasesMs.ToString("F2") +
+            " | UpdateAllRenderersMs=" + ProfilerRecorderNanosecondsToMs(_updateAllRenderersRecorder).ToString("F2") +
+            " | UpdateAllSkinnedMeshesMs=" + ProfilerRecorderNanosecondsToMs(_updateAllSkinnedMeshesRecorder).ToString("F2") +
+            " | FinishFrameRenderingMs=" + ProfilerRecorderNanosecondsToMs(_finishFrameRenderingRecorder).ToString("F2") +
+            " | PresentAfterDrawMs=" + ProfilerRecorderNanosecondsToMs(_presentAfterDrawRecorder).ToString("F2") +
+            " | GcCollectMs=" + gcCollectMs.ToString("F2") +
+            " | GcAllocatedInFrameMb=" + ProfilerRecorderBytesToMb(_gcAllocatedInFrameRecorder).ToString("F2") +
+            " | GcUsedMemoryMb=" + ProfilerRecorderBytesToMb(_gcUsedMemoryRecorder).ToString("F2") +
+            " | TotalUsedMemoryMb=" + ProfilerRecorderBytesToMb(_totalUsedMemoryRecorder).ToString("F2") +
+            " | SystemUsedMemoryMb=" + ProfilerRecorderBytesToMb(_systemUsedMemoryRecorder).ToString("F2") +
+            " | ManagedMemoryMb=" + BytesToMegabytes(managedMemory).ToString("F2") +
+            " | Gc0=" + gc0 +
+            " | Gc1=" + gc1 +
+            " | Gc2=" + gc2);
+    }
+
+    private static double ProfilerRecorderNanosecondsToMs(
+        ProfilerRecorder recorder)
+    {
+        if (!recorder.Valid)
+            return 0.0;
+
+        return recorder.LastValue / 1000000.0;
+    }
+
+    private static double ProfilerRecorderBytesToMb(
+        ProfilerRecorder recorder)
+    {
+        if (!recorder.Valid)
+            return 0.0;
+
+        return BytesToMegabytes(recorder.LastValue);
+    }
+
+    private static double BytesToMegabytes(long bytes)
+    {
+        return bytes / (1024.0 * 1024.0);
+    }
+
+    private void OnApplicationPause(
+    bool pause)
     {
         if (!pause)
             return;
@@ -223,8 +2103,440 @@ public class Bootstrapper : CustomMonoBehaviour
             SaveCurrentGame("app_quit");
     }
 
-    public void SaveCurrentGame(string reason = "manual")
+    public void SaveCurrentGame(
+        string reason = "manual")
     {
-        _saveService.Save();
+        string normalizedReason =
+            string.IsNullOrWhiteSpace(reason)
+                ? "manual"
+                : reason;
+
+        int unityFrame =
+            Time.frameCount;
+
+        int tick =
+            _gameTimeService != null
+                ? _gameTimeService.CurrentQuantTick
+                : -1;
+
+        LogSaveLifecycle(
+            "[Bootstrapper] SAVE_CURRENT_GAME_START" +
+            " | Reason=" + normalizedReason +
+            " | UnityFrame=" + unityFrame +
+            " | Tick=" + tick);
+
+        if (_saveService == null)
+        {
+            AppLog.Warning(
+                "[Bootstrapper] SaveCurrentGame skipped: ISaveService is missing.");
+
+            LogSaveLifecycle(
+                "[Bootstrapper] SAVE_CURRENT_GAME_SKIPPED" +
+                " | Reason=" + normalizedReason +
+                " | UnityFrame=" + unityFrame +
+                " | Tick=" + tick +
+                " | Cause=SaveServiceMissing");
+
+            return;
+        }
+
+        _saveService.Save(normalizedReason);
+
+        LogSaveLifecycle(
+            "[Bootstrapper] SAVE_CURRENT_GAME_COMPLETE" +
+            " | Reason=" + normalizedReason +
+            " | UnityFrame=" + Time.frameCount +
+            " | Tick=" +
+            (_gameTimeService != null ? _gameTimeService.CurrentQuantTick : -1) +
+            " | HasSave=" + _saveService.HasSave());
+    }
+
+    private void LogSaveLifecycle(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        if (IsPerformanceLogEnabled(DebugLogPerformanceArea.Save))
+        {
+            LogPerformance(
+                DebugLogPerformanceArea.Save,
+                message);
+        }
+    }
+
+    private bool TryGetDebugNpcOfflineServices(
+    out ISystemNpcOfflineRelocationService offlineRelocationService,
+    out IGameSessionService gameSessionService)
+    {
+        offlineRelocationService = null;
+        gameSessionService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcOfflineRelocationService>(
+                out offlineRelocationService) ||
+            offlineRelocationService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcOfflineRelocationService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<IGameSessionService>(
+                out gameSessionService) ||
+            gameSessionService == null ||
+            gameSessionService.State == null)
+        {
+            DebugCombatWarning("[Bootstrapper] IGameSessionService state is unavailable.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(debugCombatTargetRuntimeNpcId))
+        {
+            DebugCombatWarning("[Bootstrapper] debugCombatTargetRuntimeNpcId is empty.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void RunDebugNpcStressSpawnWave(
+    ISystemNpcPopulationService populationService,
+    int attempts,
+    ref int spawnedCommands,
+    ref int failedCommands)
+    {
+        AllyRole2A[] allyRoles =
+        {
+        AllyRole2A.Ranger,
+        AllyRole2A.Military,
+        AllyRole2A.Trader,
+        AllyRole2A.Science,
+        AllyRole2A.Medic
+    };
+
+        for (int i = 0; i < attempts; i++)
+        {
+            bool spawned;
+
+            if (debugNpcStressSpawnAllies &&
+                debugNpcStressSpawnEnemyGroups)
+            {
+                if (i % 2 == 0)
+                {
+                    AllyRole2A role =
+                        allyRoles[i % allyRoles.Length];
+
+                    spawned =
+                        populationService.DebugSpawnAllyInCurrentSystem(role);
+                }
+                else
+                {
+                    spawned =
+                        populationService.DebugSpawnEnemyAttackGroupInCurrentSystem();
+                }
+            }
+            else if (debugNpcStressSpawnAllies)
+            {
+                AllyRole2A role =
+                    allyRoles[i % allyRoles.Length];
+
+                spawned =
+                    populationService.DebugSpawnAllyInCurrentSystem(role);
+            }
+            else
+            {
+                spawned =
+                    populationService.DebugSpawnEnemyAttackGroupInCurrentSystem();
+            }
+
+            if (spawned)
+                spawnedCommands++;
+            else
+                failedCommands++;
+        }
+    }
+
+    private bool TryGetDebugNpcStressServices(
+        out ISystemNpcPopulationService populationService,
+        out ISystemNpcRuntimeService npcRuntimeService)
+    {
+        populationService = null;
+        npcRuntimeService = null;
+
+        if (ServiceRegistry == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ServiceRegistry is not initialized.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcPopulationService>(
+                out populationService) ||
+            populationService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcPopulationService is not registered.");
+            return false;
+        }
+
+        if (!ServiceRegistry.TryGet<ISystemNpcRuntimeService>(
+                out npcRuntimeService) ||
+            npcRuntimeService == null)
+        {
+            DebugCombatWarning("[Bootstrapper] ISystemNpcRuntimeService is not registered.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private int GetDebugNpcRuntimeCount(
+        ISystemNpcRuntimeService npcRuntimeService)
+    {
+        if (npcRuntimeService == null ||
+            npcRuntimeService.Npcs == null)
+        {
+            return 0;
+        }
+
+        return npcRuntimeService.Npcs.Count;
+    }
+
+    private void ValidateDebugNpcRuntimeState(
+    SystemNpcRuntimeState npc,
+    int index,
+    IConfigService configService,
+    ref int issueCount)
+    {
+        if (npc == null)
+        {
+            issueCount++;
+            DebugCombatWarning("[Bootstrapper] NPC validation issue. Index: " + index + ", NPC is null.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(npc.RuntimeNpcId))
+        {
+            issueCount++;
+            DebugCombatWarning("[Bootstrapper] NPC validation issue. RuntimeNpcId is empty. Index: " + index);
+        }
+
+        if (string.IsNullOrWhiteSpace(npc.ConfigId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. ConfigId is empty. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+        else if (!IsDebugNpcConfigValid(npc, configService))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. Config not found. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", Type: " +
+                npc.NpcType +
+                ", ConfigId: " +
+                npc.ConfigId);
+        }
+
+        if (string.IsNullOrWhiteSpace(npc.CurrentSystemId) ||
+            configService.GetStarSystemConfigById(npc.CurrentSystemId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. CurrentSystemId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", CurrentSystemId: " +
+                npc.CurrentSystemId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(npc.TargetSystemId) &&
+            configService.GetStarSystemConfigById(npc.TargetSystemId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. TargetSystemId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", TargetSystemId: " +
+                npc.TargetSystemId);
+        }
+
+        if (npc.IsOnPlanet &&
+            string.IsNullOrWhiteSpace(npc.CurrentPlanetId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. NPC is on planet but CurrentPlanetId is empty. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(npc.CurrentPlanetId) &&
+            configService.GetPlanetConfigById(npc.CurrentPlanetId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. CurrentPlanetId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", CurrentPlanetId: " +
+                npc.CurrentPlanetId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(npc.TargetPlanetId) &&
+            configService.GetPlanetConfigById(npc.TargetPlanetId) == null)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. TargetPlanetId invalid. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", TargetPlanetId: " +
+                npc.TargetPlanetId);
+        }
+
+        if (npc.IsAlive &&
+            npc.LifeState != SystemNpcLifeState.Alive)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. IsAlive=true but LifeState is not Alive. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", LifeState: " +
+                npc.LifeState);
+        }
+
+        if (!npc.IsAlive &&
+            npc.LifeState == SystemNpcLifeState.Alive)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. IsAlive=false but LifeState is Alive. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (npc.CurrentHull < 0 ||
+            npc.CurrentShield < 0 ||
+            npc.CurrentEnergy < 0)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. Negative stats. RuntimeNpcId: " +
+                npc.RuntimeNpcId +
+                ", Hull: " +
+                npc.CurrentHull +
+                ", Shield: " +
+                npc.CurrentShield +
+                ", Energy: " +
+                npc.CurrentEnergy);
+        }
+
+        if (npc.CurrentHull > npc.MaxHull ||
+            npc.CurrentShield > npc.MaxShield ||
+            npc.CurrentEnergy > npc.MaxEnergy)
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. Current stats exceed max stats. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (npc.TravelState == SystemNpcTravelState.TravelingToAnotherSystem &&
+            string.IsNullOrWhiteSpace(npc.TargetSystemId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. TravelingToAnotherSystem without TargetSystemId. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+
+        if (npc.IsFighting &&
+            string.IsNullOrWhiteSpace(npc.CurrentTargetRuntimeNpcId))
+        {
+            issueCount++;
+            DebugCombatWarning(
+                "[Bootstrapper] NPC validation issue. IsFighting=true but CurrentTargetRuntimeNpcId is empty. RuntimeNpcId: " +
+                npc.RuntimeNpcId);
+        }
+    }
+
+    private bool IsDebugNpcConfigValid(
+        SystemNpcRuntimeState npc,
+        IConfigService configService)
+    {
+        if (npc == null ||
+            configService == null ||
+            string.IsNullOrWhiteSpace(npc.ConfigId))
+        {
+            return false;
+        }
+
+        if (npc.IsEnemy)
+            return configService.GetEnemyConfigById(npc.ConfigId) != null;
+
+        if (npc.IsAlly)
+            return configService.GetAllyConfigById(npc.ConfigId) != null;
+
+        if (npc.IsPirate)
+            return configService.GetPirateConfigById(npc.ConfigId) != null;
+
+        return false;
+    }
+
+    private void EnsureDebugLogRuntimeSettingsApplied()
+    {
+        if (_debugLogRuntimeSettingsApplied)
+            return;
+
+        _debugLogRuntimeSettingsApplied = true;
+
+        if (debugLogConfig == null)
+            return;
+
+        if (debugLogConfig.DisableInfoLogStackTrace)
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+    }
+
+    public bool IsPerformanceLogEnabled(DebugLogPerformanceArea area)
+    {
+        EnsureDebugLogRuntimeSettingsApplied();
+
+        return debugLogConfig != null &&
+               debugLogConfig.IsPerformanceEnabled(area);
+    }
+
+    public void LogPerformance(
+    DebugLogPerformanceArea area,
+    string message,
+    [CallerMemberName] string callerMemberName = "",
+    [CallerFilePath] string callerFilePath = "",
+    [CallerLineNumber] int callerLineNumber = 0)
+    {
+        EnsureDebugLogRuntimeSettingsApplied();
+
+        if (!IsPerformanceLogEnabled(area) ||
+            string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        string callerFileName = callerFilePath;
+
+        if (!string.IsNullOrWhiteSpace(callerFileName))
+        {
+            int slashIndex = callerFileName.LastIndexOf('/');
+            int backslashIndex = callerFileName.LastIndexOf('\\');
+            int separatorIndex = Math.Max(slashIndex, backslashIndex);
+
+            if (separatorIndex >= 0 && separatorIndex + 1 < callerFileName.Length)
+                callerFileName = callerFileName.Substring(separatorIndex + 1);
+        }
+
+        Debug.Log(
+            "[PerfLog][" + area + "] " +
+            message +
+            " | Source=" + callerFileName +
+            ":" + callerLineNumber +
+            ":" + callerMemberName);
     }
 }

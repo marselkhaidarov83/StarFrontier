@@ -55,13 +55,80 @@ public class MapCameraController2A : MonoBehaviour
 
     private void Update()
     {
-        HandleMouseDrag();
-        HandleMouseZoom();
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        HandleTouchDrag();
-        HandleTouchZoom();
+        double mouseDragMs = 0.0;
+        double mouseZoomMs = 0.0;
+        double touchDragMs = 0.0;
+        double touchZoomMs = 0.0;
+        double clampMs = 0.0;
 
-        ClampCameraPosition();
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            HandleMouseDrag();
+
+            mouseDragMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            HandleMouseZoom();
+
+            mouseZoomMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            HandleTouchDrag();
+
+            touchDragMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            HandleTouchZoom();
+
+            touchZoomMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ClampCameraPosition();
+
+            clampMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | MouseDragMs=" + mouseDragMs.ToString("F3") +
+                " | MouseZoomMs=" + mouseZoomMs.ToString("F3") +
+                " | TouchDragMs=" + touchDragMs.ToString("F3") +
+                " | TouchZoomMs=" + touchZoomMs.ToString("F3") +
+                " | ClampMs=" + clampMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "MapCameraController2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "MapCameraController2A.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void HandleMouseDrag()

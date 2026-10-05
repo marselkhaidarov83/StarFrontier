@@ -43,13 +43,16 @@ public class MetaHudController :
     private TMP_Text cargoText;
 
     [SerializeField]
+    private TMP_Text healthText;
+
+    [SerializeField]
+    private TMP_Text shieldText;
+
+    [SerializeField]
     private TMP_Text systemText;
 
     [SerializeField]
     private TMP_Text planetText;
-
-    [SerializeField]
-    private TMP_Text baseText;
 
     [Header("Images")]
 
@@ -81,6 +84,7 @@ public class MetaHudController :
 
     private ISaveService
         _saveService;
+    private IHangarService hangarService;
 
     private Coroutine
         currentRoutine;
@@ -111,6 +115,11 @@ public class MetaHudController :
             Bootstrapper.Instance
                 .ServiceRegistry
                 .Get<ISaveService>();
+
+        hangarService =
+            Bootstrapper.Instance
+            .ServiceRegistry
+            .Get<IHangarService>();
 
         BindButtons();
 
@@ -193,6 +202,14 @@ public class MetaHudController :
         simpleEventBus.Subscribe<
             GameSavedEvent>(
                 OnGameSaved);
+
+        simpleEventBus.Subscribe<
+            PlayerCombatStatsChangedEvent>(
+            OnPlayerCombatStatsChanged);
+
+        simpleEventBus.Subscribe<
+            ShipStatsChangedEvent>(
+                OnShipStatsChanged);
     }
 
     private void UnsubscribeFromEvents()
@@ -223,10 +240,30 @@ public class MetaHudController :
         simpleEventBus.Unsubscribe<
             GameSavedEvent>(
                 OnGameSaved);
+
+        simpleEventBus.Unsubscribe<
+            PlayerCombatStatsChangedEvent>(
+            OnPlayerCombatStatsChanged);
+
+        simpleEventBus.Unsubscribe<
+            ShipStatsChangedEvent>(
+                OnShipStatsChanged);
     }
 
     private void OnActiveShipChanged(
         ActiveShipChangedEvent evt)
+    {
+        Refresh();
+    }
+
+    private void OnPlayerCombatStatsChanged(
+    PlayerCombatStatsChangedEvent evt)
+    {
+        Refresh();
+    }
+
+    private void OnShipStatsChanged(
+        ShipStatsChangedEvent evt)
     {
         Refresh();
     }
@@ -272,11 +309,72 @@ public class MetaHudController :
         RefreshFuel(
             player);
 
+        RefreshShipDurability(
+            player);
+
         RefreshCargo(
             player);
 
         RefreshLocation(
             player);
+    }
+
+    private void RefreshShipDurability(
+    PlayerState player)
+    {
+        ShipRuntimeData activeShip =
+            GetActiveShip(
+                player);
+
+        if (activeShip == null)
+        {
+            SetTextSafe(
+                healthText,
+                "-");
+
+            SetTextSafe(
+                shieldText,
+                "-");
+
+            return;
+        }
+
+        ShipStats stats =
+            hangarService != null
+                ? hangarService.GetActiveShipStats()
+                : null;
+
+        int maxHull =
+            stats != null
+                ? stats.MaxHull
+                : activeShip.HullCapacity;
+
+        int maxShield =
+            stats != null
+                ? stats.MaxShield
+                : activeShip.CurrentShield;
+
+        SetTextSafe(
+            healthText,
+            FormatAmount(
+                Mathf.Clamp(
+                    activeShip.CurrentHull,
+                    0,
+                    maxHull)) +
+            " / " +
+            FormatAmount(
+                maxHull));
+
+        SetTextSafe(
+            shieldText,
+            FormatAmount(
+                Mathf.Clamp(
+                    activeShip.CurrentShield,
+                    0,
+                    maxShield)) +
+            " / " +
+            FormatAmount(
+                maxShield));
     }
 
     private PlayerState GetPlayerState()
@@ -294,32 +392,34 @@ public class MetaHudController :
     }
 
     private void RefreshCurrencies(
-        PlayerState player)
+     PlayerState player)
     {
         if (player == null)
         {
             SetTextSafe(
                 creditsText,
-                "Кредиты: -");
+                "-");
 
             SetTextSafe(
                 diamondText,
-                "Алмазы: -");
+                "-");
 
             return;
         }
 
         SetTextSafe(
             creditsText,
-            "Кредиты: " + FormatAmount(player.Credits));
+            FormatAmount(
+                player.Credits));
 
         SetTextSafe(
             diamondText,
-            "Алмазы: " + FormatAmount(player.Diamonds));
+            FormatAmount(
+                player.Diamonds));
     }
 
     private void RefreshFuel(
-        PlayerState player)
+     PlayerState player)
     {
         ShipRuntimeData activeShip =
             GetActiveShip(
@@ -329,14 +429,13 @@ public class MetaHudController :
         {
             SetTextSafe(
                 fuelText,
-                "Топливо: -");
+                "-");
 
             return;
         }
 
         SetTextSafe(
             fuelText,
-            "Топливо: " +
             FormatAmount(
                 activeShip.CurrentFuel) +
             " / " +
@@ -345,7 +444,7 @@ public class MetaHudController :
     }
 
     private void RefreshCargo(
-        PlayerState player)
+    PlayerState player)
     {
         ShipRuntimeData activeShip =
             GetActiveShip(
@@ -355,7 +454,7 @@ public class MetaHudController :
         {
             SetTextSafe(
                 cargoText,
-                "Груз: -");
+                "-");
 
             return;
         }
@@ -373,7 +472,6 @@ public class MetaHudController :
 
         SetTextSafe(
             cargoText,
-            "Груз: " +
             FormatAmount(
                 usedCargo) +
             " / " +

@@ -22,6 +22,14 @@ public sealed class ShipMovementConfig : ScriptableObject
     [Min(0f)]
     private float brakingDeceleration = 30f;
 
+    [Header("Runtime Tuning")]
+    [SerializeField]
+    [Range(0.01f, 10f)]
+    private float speedMultiplier = 1f;
+
+    [SerializeField, Min(0.01f)]
+    private float offscreenNpcTravelSlowdown = 1.3f;
+
     [Header("Rotation")]
     [SerializeField]
     [Min(0f)]
@@ -30,6 +38,84 @@ public sealed class ShipMovementConfig : ScriptableObject
     [SerializeField]
     [Range(0f, 1f)]
     private float rotationSmoothing = 0.18f;
+
+    [Header("Travel Maneuver Assist")]
+    [SerializeField]
+    [Range(0.1f, 50f)]
+    private float routeTurnRadiusAdjustmentStepPercent = 5f;
+
+    [SerializeField]
+    [Range(0.1f, 50f)]
+    private float routeSpeedAdjustmentStepPercent = 2.5f;
+
+    [SerializeField]
+    [Range(0.01f, 1f)]
+    private float minRouteTurnRadiusAdjustmentFactor = 0.05f;
+
+    [SerializeField]
+    [Range(1, 30)]
+    private int routeSubstepsPerTick = 10;
+
+    public float SpeedMultiplier => Mathf.Max(0.01f, speedMultiplier);
+
+    [SerializeField]
+    [Range(0f, 15f)]
+    private float routeStraightExitAngleDegrees = 3f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float minRouteTurnRadiusAbsolute = 30f;
+
+    [SerializeField]
+    [Range(0, 30)]
+    private int movingDestinationRouteRefreshBlockedInitialSlots = 2;
+
+    [SerializeField]
+    [Range(1, 60)]
+    private int movingDestinationRouteRefreshesPerTick = 10;
+    [SerializeField]
+    [Range(0, 10)]
+    private int movingDestinationRouteRefreshBlockedInitialTicks = 1;
+
+    [SerializeField] private bool offscreenMovingPlanetRouteRefreshEnabled = true;
+    [SerializeField][Min(0)] private int offscreenMovingPlanetRouteRefreshCooldownTicks = 10;
+    [SerializeField][Min(0f)] private float offscreenMovingPlanetTerminalRefreshDistance = 80f;
+    [SerializeField][Min(0)] private int offscreenMovingPlanetTerminalRefreshTimeTicks = 1;
+    [SerializeField][Min(0f)] private float offscreenMovingPlanetMaxDestinationDriftBeforeRefresh = 300f;
+
+    [Header("Travel Route Classification")]
+    [SerializeField]
+    [Range(0.1f, 5f)]
+    private float routeNearDistanceTurnRadiusMultiplier = 0.75f;
+
+    [SerializeField]
+    [Range(1f, 179f)]
+    private float routeForwardSectorAngleDegrees = 60f;
+
+    [SerializeField]
+    [Range(1f, 179f)]
+    private float routeBehindSectorAngleDegrees = 135f;
+
+    [SerializeField]
+    [Range(0f, 90f)]
+    private float routeBehindSmallTurnAngleToleranceDegrees = 15f;
+
+    [Header("Travel Sun Safety")]
+    [SerializeField]
+    [Range(1f, 3f)]
+    private float sunDestinationForbiddenRadiusMultiplier = 1.2f;
+
+    [SerializeField]
+    [Range(0f, 25f)]
+    private float sunTangentTolerancePercent = 5f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float sunAvoidanceRoutePaddingStep = 5f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float sunAvoidanceRoutePaddingMax = 40f;
 
     [Header("Pseudo 3D")]
     [SerializeField]
@@ -51,6 +137,25 @@ public sealed class ShipMovementConfig : ScriptableObject
     [SerializeField]
     private Vector2 systemBoundsHalfSize = new Vector2(12f, 20f);
 
+    [SerializeField]
+    [Range(0f, 0.25f)]
+    private float boundaryNavigationInsetPercent = 0.03f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float boundaryProtectionRadiusWorld = 1500f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float boundaryProtectionPullStepWorld = 80f;
+
+    [SerializeField]
+    private bool useBoundaryNavigationInsetWorldUnits;
+
+    [SerializeField]
+    [Min(0f)]
+    private float boundaryNavigationInsetWorldUnits = 0f;
+
     public float MaxSpeed => maxSpeed;
     public float Acceleration => acceleration;
     public float Deceleration => deceleration;
@@ -59,10 +164,92 @@ public sealed class ShipMovementConfig : ScriptableObject
     public float TurnSpeedDegrees => turnSpeedDegrees;
     public float RotationSmoothing => rotationSmoothing;
 
+    public float RouteTurnRadiusAdjustmentStepPercent =>
+        Mathf.Clamp(routeTurnRadiusAdjustmentStepPercent, 0.1f, 50f);
+
+    public float RouteSpeedAdjustmentStepPercent =>
+        Mathf.Clamp(routeSpeedAdjustmentStepPercent, 0.1f, 50f);
+
+    public float MinRouteTurnRadiusAdjustmentFactor =>
+        Mathf.Clamp(minRouteTurnRadiusAdjustmentFactor, 0.01f, 1f);
+
+    public float RouteNearDistanceTurnRadiusMultiplier =>
+        Mathf.Clamp(routeNearDistanceTurnRadiusMultiplier, 0.1f, 5f);
+
+    public float RouteForwardSectorAngleDegrees =>
+        Mathf.Clamp(routeForwardSectorAngleDegrees, 1f, 179f);
+
+    public float RouteBehindSectorAngleDegrees =>
+        Mathf.Clamp(routeBehindSectorAngleDegrees, 1f, 179f);
+
+    public float SunDestinationForbiddenRadiusMultiplier =>
+        Mathf.Clamp(sunDestinationForbiddenRadiusMultiplier, 1f, 3f);
+
+    public float SunTangentTolerancePercent =>
+        Mathf.Clamp(sunTangentTolerancePercent, 0f, 25f);
+
     public float VisualTiltAmount => visualTiltAmount;
     public float VisualBankAmount => visualBankAmount;
     public float VisualTiltReturnSpeed => visualTiltReturnSpeed;
 
     public bool ClampToSystemBounds => clampToSystemBounds;
     public Vector2 SystemBoundsHalfSize => systemBoundsHalfSize;
+    public float BoundaryNavigationInsetPercent =>
+    Mathf.Clamp(boundaryNavigationInsetPercent, 0f, 0.25f);
+
+    public bool UseBoundaryNavigationInsetWorldUnits =>
+        useBoundaryNavigationInsetWorldUnits;
+
+    public float BoundaryProtectionRadiusWorld =>
+Mathf.Max(0f, boundaryProtectionRadiusWorld);
+
+    public float BoundaryProtectionPullStepWorld =>
+        Mathf.Max(0f, boundaryProtectionPullStepWorld);
+
+    public float BoundaryNavigationInsetWorldUnits =>
+        Mathf.Max(0f, boundaryNavigationInsetWorldUnits);
+
+    public float OffscreenNpcTravelSlowdown =>
+        Mathf.Max(0.01f, offscreenNpcTravelSlowdown);
+
+    public int RouteSubstepsPerTick =>
+    Mathf.Clamp(routeSubstepsPerTick, 1, 30);
+
+    public float RouteStraightExitAngleDegrees =>
+    Mathf.Clamp(routeStraightExitAngleDegrees, 0f, 15f);
+
+    public float RouteBehindSmallTurnAngleToleranceDegrees =>
+    Mathf.Clamp(routeBehindSmallTurnAngleToleranceDegrees, 0f, 90f);
+
+    public bool OffscreenMovingPlanetRouteRefreshEnabled => offscreenMovingPlanetRouteRefreshEnabled;
+
+    public int OffscreenMovingPlanetRouteRefreshCooldownTicks =>
+        Mathf.Clamp(offscreenMovingPlanetRouteRefreshCooldownTicks, 0, 600);
+
+    public float OffscreenMovingPlanetTerminalRefreshDistance =>
+        Mathf.Max(0f, offscreenMovingPlanetTerminalRefreshDistance);
+
+    public int OffscreenMovingPlanetTerminalRefreshTimeTicks =>
+        Mathf.Clamp(offscreenMovingPlanetTerminalRefreshTimeTicks, 0, 60);
+
+    public float OffscreenMovingPlanetMaxDestinationDriftBeforeRefresh =>
+        Mathf.Max(0f, offscreenMovingPlanetMaxDestinationDriftBeforeRefresh);
+
+    public float MinRouteTurnRadiusAbsolute =>
+    Mathf.Max(0f, minRouteTurnRadiusAbsolute);
+
+    public float SunAvoidanceRoutePaddingStep =>
+    Mathf.Max(0f, sunAvoidanceRoutePaddingStep);
+
+    public float SunAvoidanceRoutePaddingMax =>
+        Mathf.Max(0f, sunAvoidanceRoutePaddingMax);
+
+    public int MovingDestinationRouteRefreshBlockedInitialSlots =>
+        Mathf.Clamp(movingDestinationRouteRefreshBlockedInitialSlots, 0, 30);
+
+    public int MovingDestinationRouteRefreshesPerTick =>
+        Mathf.Clamp(movingDestinationRouteRefreshesPerTick, 1, 10);
+
+    public int MovingDestinationRouteRefreshBlockedInitialTicks =>
+        Mathf.Clamp(movingDestinationRouteRefreshBlockedInitialTicks, 0, 10);
 }

@@ -1,5 +1,14 @@
 public interface ISystemNpcMovementService
-    {
-        void Tick(StarSystemConfig starSystem, float deltaTime, int currentTick);
-        // void TickAllOpenSystems(string[] openSystemIds, float deltaTime, int currentTick);
-    }
+{
+    void Tick(StarSystemConfig starSystem, float deltaTime, int currentTick);
+
+    void RunInitialWarmupRoutes(StarSystemConfig starSystem, int currentTick);
+
+    bool TryBuildRoutePreview2A(
+        string runtimeNpcId,
+        TravelRoutePreview2A preview,
+        float smallDotSpacing,
+        int maxBigDots,
+        int maxSmallDots,
+        float secondsPerTick);
+}

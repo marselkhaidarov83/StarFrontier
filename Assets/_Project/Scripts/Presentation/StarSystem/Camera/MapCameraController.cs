@@ -134,48 +134,88 @@ public class MapCameraController : MonoBehaviour
 
     private void Update()
     {
-        if (cam == null)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        int touchCount =
-            UnityEngine.InputSystem.EnhancedTouch.Touch
-                .activeTouches.Count;
+        double dragMs = 0.0;
+        double zoomMs = 0.0;
+        double clampMs = 0.0;
 
-        /*
-         * На системной карте ручное перемещение обрабатывает
-         * SystemCameraDragInput2A через SystemCameraController2A.
-         *
-         * MapCameraController напрямую двигает камеру только там,
-         * где системный контроллер не активен.
-         */
-        if (handleDrag &&
-            !IsSystemCameraControllingPosition())
+        int touchCount = 0;
+
+        try
         {
-            if (touchCount == 0)
-                HandleMouseDrag();
-            else if (touchCount == 1)
-                HandleTouchDrag();
+            if (cam == null)
+                return;
+
+            touchCount =
+                UnityEngine.InputSystem.EnhancedTouch.Touch
+                    .activeTouches.Count;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            if (handleDrag &&
+                !IsSystemCameraControllingPosition())
+            {
+                if (touchCount == 0)
+                    HandleMouseDrag();
+                else if (touchCount == 1)
+                    HandleTouchDrag();
+            }
+
+            dragMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            if (handleZoom)
+            {
+                if (touchCount == 0)
+                    HandleMouseZoom();
+                else if (touchCount == 2)
+                    HandleTouchZoom();
+
+                ApplyZoom();
+            }
+
+            zoomMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            if (clampPosition &&
+                !IsSystemCameraControllingPosition())
+            {
+                ClampCameraPosition();
+            }
+
+            clampMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
         }
-
-        if (handleZoom)
+        finally
         {
-            if (touchCount == 0)
-                HandleMouseZoom();
-            else if (touchCount == 2)
-                HandleTouchZoom();
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
 
-            ApplyZoom();
-        }
+            string details =
+                "Name=" + gameObject.name +
+                " | TouchCount=" + touchCount +
+                " | DragMs=" + dragMs.ToString("F3") +
+                " | ZoomMs=" + zoomMs.ToString("F3") +
+                " | ClampMs=" + clampMs.ToString("F3");
 
-        /*
-         * Для обычных карт MapCameraController ограничивает позицию сам.
-         * Для системной карты это сделает SystemCameraController2A
-         * в LateUpdate после применения нового зума.
-         */
-        if (clampPosition &&
-            !IsSystemCameraControllingPosition())
-        {
-            ClampCameraPosition();
+            VisualUpdateAggregateLog.Record(
+                "MapCameraController.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "MapCameraController.Update",
+                startedAt,
+                details);
         }
     }
 

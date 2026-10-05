@@ -58,7 +58,43 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
     private void Update()
     {
-        UpdateMovingPlanetDestinationMarker();
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double updateMarkerMs = 0.0;
+
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            UpdateMovingPlanetDestinationMarker();
+
+            updateMarkerMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | HasSelectedPlanet=" + (_selectedPlanetData != null) +
+                " | HasSelectedPlanetView=" + (_selectedPlanetView != null) +
+                " | HasMarkerController=" + (markerController != null) +
+                " | UpdateMarkerMs=" + updateMarkerMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemMapDestinationController2.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemMapDestinationController2.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnDestroy()
@@ -75,6 +111,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         {
             _simpleEventBus.Subscribe<RouteExitMapChangedEvent>(OnRouteExitMapChanged);
             _simpleEventBus.Subscribe<PlanetSelectedEvent>(OnPlanetSelected);
+            _simpleEventBus.Subscribe<StationSelectedEvent>(OnStationSelected);
             _simpleEventBus.Subscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
             _simpleEventBus.Subscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
         }
@@ -89,6 +126,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         {
             _simpleEventBus.Unsubscribe<RouteExitMapChangedEvent>(OnRouteExitMapChanged);
             _simpleEventBus.Unsubscribe<PlanetSelectedEvent>(OnPlanetSelected);
+            _simpleEventBus.Unsubscribe<StationSelectedEvent>(OnStationSelected);
             _simpleEventBus.Unsubscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
             _simpleEventBus.Unsubscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
         }
@@ -150,6 +188,40 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         LogCustom("Planet selected: " + planetData.Id);
     }
 
+    private void OnStationSelected(StationSelectedEvent evt)
+    {
+        LogCustom("Station clicked");
+
+        if (_systemTravelService == null)
+            return;
+
+        if (evt == null || evt.Station == null)
+            return;
+
+        _selectedPlanetView = null;
+        _selectedPlanetData = null;
+
+        StationConfig stationData = evt.Station;
+
+        _systemTravelService.SetStationDestination(
+            stationData);
+
+        Vector3 position =
+            new Vector3(
+                stationData.LocalOffset.x,
+                stationData.LocalOffset.y,
+                0f);
+
+        if (markerController != null)
+        {
+            markerController.ShowStationDestination(
+                position,
+                stationData);
+        }
+
+        LogCustom("Station selected: " + stationData.Id);
+    }
+
     private PlanetSelectableView2 FindPlanetView(string planetId)
     {
         if (string.IsNullOrWhiteSpace(planetId))
@@ -185,6 +257,16 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             _targetService.ClearTarget();
 
         _systemTravelService.SetMapPointDestination(mapPosition);
+
+        if (_systemTravelService.State == null ||
+            _systemTravelService.State.Destination == null ||
+            _systemTravelService.State.Destination.Type != TravelDestinationType.MapPoint)
+        {
+            if (markerController != null)
+                markerController.HideAll();
+
+            return;
+        }
 
         if (markerController != null)
             markerController.ShowMapPointDestination(mapPosition);

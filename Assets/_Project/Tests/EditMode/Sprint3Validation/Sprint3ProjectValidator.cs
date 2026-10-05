@@ -21,19 +21,19 @@ public static class Sprint3ProjectValidator
     {
         new(
             "PlayerControlConfig",
-            "Assets/_Project/Content/Configs/Sprint3/playerControlConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/playerControlConfig_01.asset"),
         new(
             "ShipMovementConfig",
-            "Assets/_Project/Content/Configs/Ships/shipMovementConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/shipMovementConfig_01.asset"),
         new(
             "SystemCameraConfig",
-            "Assets/_Project/Content/Configs/Sprint3/systemCameraConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/systemCameraConfig_01.asset"),
         new(
             "TargetingConfig",
-            "Assets/_Project/Content/Configs/Sprint3/targetingConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/targetingConfig_01.asset"),
         new(
             "InteractionConfig",
-            "Assets/_Project/Content/Configs/Sprint3/interactionConfig_01.asset")
+            "Assets/_Project/Content/Configs/Game/interactionConfig_01.asset")
     };
 
     private static readonly string[] NonNegativeNameTokens =
@@ -394,8 +394,8 @@ public static class Sprint3ProjectValidator
 
             ValidatePositive(report, serialized, path, true, "baseHull");
             ValidatePositive(report, serialized, path, true, "baseSpeed");
-            ValidatePositive(report, serialized, path, true, "baseAcceleration");
-            ValidatePositive(report, serialized, path, true, "baseTurnRate");
+            ValidatePositive(report, serialized, path, true, "baseAccelerationMin");
+            ValidatePositive(report, serialized, path, true, "baseTurnRateMin");
 
             SerializedProperty sprite = serialized.FindProperty("combatSprite");
             if (sprite != null &&

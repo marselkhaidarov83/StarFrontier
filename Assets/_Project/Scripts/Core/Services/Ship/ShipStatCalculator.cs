@@ -9,7 +9,7 @@ public class ShipStatCalculator
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
     }
 
-    public ShipStats Calculate(ShipConfig shipData, List<string> equippedModuleIds)
+    public ShipStats Calculate(AllyConfig shipData, List<string> equippedModuleIds)
     {
         if (shipData == null)
             return null;
@@ -32,6 +32,7 @@ public class ShipStatCalculator
                 continue;
 
             ModuleConfig moduleData = _configService.GetModuleConfigById(moduleId);
+
             if (moduleData == null)
                 continue;
 

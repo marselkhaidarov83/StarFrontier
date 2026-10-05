@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b1999aae3fc4897b5681297d005728, type: 3}
+  m_Name: s06_system_bastion_front_02
+  m_EditorClassIdentifier: Data::StarSystemConfig
+  id: s06_system_bastion_front_02
+  displayName: "\u0411\u0430\u0441\u0442\u0438\u043E\u043D\u043D\u044B\u0439 \u0424\u0440\u043E\u043D\u0442"
+  description: "\u0411\u0430\u0441\u0442\u0438\u043E\u043D\u043D\u044B\u0439 \u0424\u0440\u043E\u043D\u0442"
+  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
+  economyType: 2
+  dangerLevel: 3
+  sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
+  planetRefs:
+  - {fileID: 11400000, guid: 6da4b707199044c4f87a49314ce495f3, type: 2}
+  - {fileID: 11400000, guid: 4174fbf3d19514436a3450c3791ded2b, type: 2}
+  - {fileID: 11400000, guid: 4665ffe0a9db64bff85591c23e10dba9, type: 2}
+  - {fileID: 11400000, guid: 88a3bb92312494d5f9ad5efb5fd5dd4d, type: 2}
+  - {fileID: 11400000, guid: e07b021b91d3a4ef5b34715208397a49, type: 2}
+  - {fileID: 11400000, guid: 55d93b1cd94164faeb324cde66967853, type: 2}
+  - {fileID: 11400000, guid: c0f9b4470dbe04cdabc1b89c4854a375, type: 2}
+  linkedSystems: []
+  station: {fileID: 11400000, guid: 22d66291737d746ffac7f83928880482, type: 2}
+  missionTags: 020000000600000004000000
+  mapPosition: {x: -4.3, y: 0.4}
+  systemPopulationRule: {fileID: 11400000, guid: ac0963563de2d4e5ebef42c264cfdfb0, type: 2}
+  npcSpawnPoints: {fileID: 11400000, guid: f53c66ee7ccb545e1869a226ac3acb2d, type: 2}
+  isStartSystem: 0
+  isHiddenAtStart: 1
+  recommendedPower: 6
+  routes:
+  - {fileID: 11400000, guid: b4f680c611eef434cb9b43e09b404226, type: 2}
+  - {fileID: 11400000, guid: d81a3e70446a34bdea69076fb7aea67a, type: 2}
+  - {fileID: 11400000, guid: 961f484d69d3c48e4bf6539483f3ab92, type: 2}
+  - {fileID: 11400000, guid: f62a23896eb9f471ab5ca6b9537aa354, type: 2}

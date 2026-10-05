@@ -18,6 +18,8 @@ public sealed class SystemMapClickArea2 : CustomMonoBehaviour,
     private bool _isPointerDown;
     private bool _wasDragged;
     private int _activePointerId;
+    private IPlayerAttackService _playerAttackService;
+    private SimpleEventBus _eventBus;
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -75,6 +77,10 @@ public sealed class SystemMapClickArea2 : CustomMonoBehaviour,
             return;
         }
 
+        ResolvePlayerAttackService();
+        _playerAttackService?.ClearSelectedTargetIfNoAssignedWeapons();
+        PublishSystemObjectsPanelCloseRequest();
+
         Vector3 worldPosition = eventData.pointerCurrentRaycast.worldPosition;
 
         if (IsDebug())
@@ -89,6 +95,37 @@ public sealed class SystemMapClickArea2 : CustomMonoBehaviour,
         ));
 
         ResetPointerState();
+    }
+
+    private void PublishSystemObjectsPanelCloseRequest()
+    {
+        if (_eventBus == null &&
+            Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null)
+        {
+            _eventBus =
+                Bootstrapper.Instance
+                    .ServiceRegistry
+                    .Get<SimpleEventBus>();
+        }
+
+        _eventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
+    }
+
+    private void ResolvePlayerAttackService()
+    {
+        if (_playerAttackService != null)
+            return;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.ServiceRegistry.TryGet(
+            out _playerAttackService);
     }
 
     private bool ShouldIgnoreAsDrag(PointerEventData eventData)

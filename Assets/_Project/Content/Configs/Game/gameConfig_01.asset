@@ -17,5 +17,6 @@ MonoBehaviour:
   fallbackSceneName: 2A_StarSystemScene
   enableDebugOverlay: 1
   enableAutosave: 1
+  secondsPerGameTick: 1
   minutesPerGameTick: 15
   galaxyMapRoutePointSpacing: 0.1

@@ -18,7 +18,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(100)]
 public sealed class SystemHudCompositionRoot2A :
-    MonoBehaviour
+    CustomMonoBehaviour
 {
     [Header("Binder discovery")]
 
@@ -164,10 +164,9 @@ public sealed class SystemHudCompositionRoot2A :
         if (logLifecycle &&
             Application.isPlaying)
         {
-            Debug.Log(
+            LogCustom(
                 "[2A-S03-03-T02] " +
-                "System HUD unbound.",
-                this);
+                "System HUD unbound.");
         }
     }
 
@@ -263,13 +262,12 @@ public sealed class SystemHudCompositionRoot2A :
 
             if (logLifecycle)
             {
-                Debug.Log(
+                LogCustom(
                     "[2A-S03-03-T02] " +
                     "System HUD bound. " +
                     $"Binders: {boundBinderCount}; " +
                     $"Registry services: " +
-                    $"{registryServiceCount}.",
-                    this);
+                    $"{registryServiceCount}.");
             }
         }
         catch (Exception exception)

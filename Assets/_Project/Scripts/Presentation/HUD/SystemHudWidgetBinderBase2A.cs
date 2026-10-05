@@ -11,7 +11,7 @@ using UnityEngine;
 /// - отсутствие создания gameplay-сервисов.
 /// </summary>
 public abstract class SystemHudWidgetBinderBase2A :
-    MonoBehaviour,
+    CustomMonoBehaviour,
     ISystemHudWidgetBinder2A
 {
     [SerializeField]

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 /// <summary>
 /// Единый покадровый планировщик обычных C#-объектов.
@@ -71,6 +72,20 @@ public sealed class TickService : ITickService
     {
         ValidateDeltaTime(deltaTime);
 
+        double tickStartedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double copyBufferMs = 0.0;
+        double entriesTotalMs = 0.0;
+        double maxEntryMs = 0.0;
+
+        int executedCount = 0;
+        int skippedMissingCount = 0;
+        int skippedReplacedCount = 0;
+
+        string maxEntryType = string.Empty;
+        string maxEntryOrder = string.Empty;
+
         if (IsTicking)
         {
             throw new InvalidOperationException(
@@ -82,11 +97,17 @@ public sealed class TickService : ITickService
 
         IsTicking = true;
 
-        _executionBuffer.Clear();
-        _executionBuffer.AddRange(_entries);
-
         try
         {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            _executionBuffer.Clear();
+            _executionBuffer.AddRange(_entries);
+
+            copyBufferMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
             for (int index = 0;
                  index < _executionBuffer.Count;
                  index++)
@@ -98,6 +119,7 @@ public sealed class TickService : ITickService
                         bufferedEntry.Tickable,
                         out TickEntry activeEntry))
                 {
+                    skippedMissingCount++;
                     continue;
                 }
 
@@ -105,17 +127,125 @@ public sealed class TickService : ITickService
                         bufferedEntry,
                         activeEntry))
                 {
+                    skippedReplacedCount++;
                     continue;
                 }
 
+                double entryStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
                 bufferedEntry.Tickable.Tick(deltaTime);
+
+                double entryMs =
+                    (Time.realtimeSinceStartupAsDouble - entryStartedAt) * 1000.0;
+
+                entriesTotalMs += entryMs;
+                executedCount++;
+
+                if (entryMs > maxEntryMs)
+                {
+                    maxEntryMs = entryMs;
+                    maxEntryType = bufferedEntry.Tickable.GetType().Name;
+                    maxEntryOrder = bufferedEntry.Order.ToString();
+                }
+
+                LogTickEntryIfSlow(
+                    bufferedEntry,
+                    entryMs,
+                    deltaTime,
+                    index);
             }
         }
         finally
         {
             _executionBuffer.Clear();
             IsTicking = false;
+
+            double totalMs =
+                (Time.realtimeSinceStartupAsDouble - tickStartedAt) * 1000.0;
+
+            LogTickSummaryIfSlow(
+                totalMs,
+                copyBufferMs,
+                entriesTotalMs,
+                maxEntryMs,
+                maxEntryType,
+                maxEntryOrder,
+                executedCount,
+                skippedMissingCount,
+                skippedReplacedCount,
+                deltaTime);
         }
+    }
+    private static void LogTickEntryIfSlow(
+    TickEntry entry,
+    double entryMs,
+    float deltaTime,
+    int index)
+    {
+        if (entryMs < 1.0)
+            return;
+
+        Bootstrapper bootstrapper =
+            Bootstrapper.Instance;
+
+        if (bootstrapper == null ||
+            !bootstrapper.IsPerformanceLogEnabled(
+                DebugLogPerformanceArea.GameTimeLoadAnalytics))
+        {
+            return;
+        }
+
+        bootstrapper.LogPerformance(
+            DebugLogPerformanceArea.GameTimeLoadAnalytics,
+            "[TICK_SERVICE_ENTRY]" +
+            " UnityFrame=" + Time.frameCount +
+            " | Ms=" + entryMs.ToString("F2") +
+            " | Tickable=" + entry.Tickable.GetType().Name +
+            " | Order=" + entry.Order +
+            " | Index=" + index +
+            " | DeltaTime=" + deltaTime.ToString("F4"));
+    }
+
+    private static void LogTickSummaryIfSlow(
+        double totalMs,
+        double copyBufferMs,
+        double entriesTotalMs,
+        double maxEntryMs,
+        string maxEntryType,
+        string maxEntryOrder,
+        int executedCount,
+        int skippedMissingCount,
+        int skippedReplacedCount,
+        float deltaTime)
+    {
+        if (totalMs < 1.0)
+            return;
+
+        Bootstrapper bootstrapper =
+            Bootstrapper.Instance;
+
+        if (bootstrapper == null ||
+            !bootstrapper.IsPerformanceLogEnabled(
+                DebugLogPerformanceArea.GameTimeLoadAnalytics))
+        {
+            return;
+        }
+
+        bootstrapper.LogPerformance(
+            DebugLogPerformanceArea.GameTimeLoadAnalytics,
+            "[TICK_SERVICE_SUMMARY]" +
+            " UnityFrame=" + Time.frameCount +
+            " | Ms=" + totalMs.ToString("F2") +
+            " | CopyBufferMs=" + copyBufferMs.ToString("F3") +
+            " | EntriesTotalMs=" + entriesTotalMs.ToString("F3") +
+            " | MaxEntryMs=" + maxEntryMs.ToString("F3") +
+            " | MaxEntryType=" + (maxEntryType ?? string.Empty) +
+            " | MaxEntryOrder=" + (maxEntryOrder ?? string.Empty) +
+            " | ExecutedCount=" + executedCount +
+            " | SkippedMissingCount=" + skippedMissingCount +
+            " | SkippedReplacedCount=" + skippedReplacedCount +
+            " | DeltaTime=" + deltaTime.ToString("F4"));
     }
 
     public void Clear()

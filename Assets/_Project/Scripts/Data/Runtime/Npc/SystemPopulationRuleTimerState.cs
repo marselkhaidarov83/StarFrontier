@@ -7,11 +7,13 @@ using System;
         public string RuleId;
 
         public float TimerSeconds;
+        public int NextSpawnTick;
 
         public SystemPopulationRuleTimerState(string systemId, string ruleId)
         {
             SystemId = systemId;
             RuleId = ruleId;
             TimerSeconds = 0f;
+            NextSpawnTick = 0;
         }
     }

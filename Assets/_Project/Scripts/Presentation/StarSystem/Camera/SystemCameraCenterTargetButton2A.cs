@@ -43,12 +43,43 @@ public sealed class SystemCameraCenterTargetButton2A :
 
     private void Update()
     {
-        /*
-         * Кнопка доступна только тогда,
-         * когда у корабля действительно есть
-         * текущая цель движения.
-         */
-        RefreshInteractable();
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double refreshMs = 0.0;
+
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshInteractable();
+
+            refreshMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | IsBound=" + _isBound +
+                " | HasButton=" + (button != null) +
+                " | HasCameraController=" + (cameraController != null) +
+                " | RefreshMs=" + refreshMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemCameraCenterTargetButton2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemCameraCenterTargetButton2A.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnDisable()

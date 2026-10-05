@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1f5b29ec6984b88b3e77930fb53b24, type: 3}
+  m_Name: weapon_group_enemy_ai_L02_01
+  m_EditorClassIdentifier: Data::WeaponGroupConfig
+  id: weapon_group_enemy_ai_L02_01
+  displayName: "\u0412\u0440\u0430\u0433\u0438 \u2014 \u0418\u0418 \u2014 \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+    2, \u0432\u0430\u0440\u0438\u0430\u043D\u0442 1"
+  description: "\u0412\u0440\u0430\u0436\u0435\u0441\u043A\u0438\u0435 \u0433\u0440\u0443\u043F\u043F\u044B
+    \u0418\u0418: \u0445\u043E\u043B\u043E\u0434\u043D\u0430\u044F \u0442\u043E\u0447\u043D\u043E\u0441\u0442\u044C,
+    \u0434\u0430\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0438 \u043C\u0430\u0448\u0438\u043D\u043D\u044B\u0439
+    \u043E\u0433\u043E\u043D\u044C. Strict-level: 2; weapon count: 1; enemy baseline
+    tier: Silver."
+  icon: {fileID: 0}
+  level: 2
+  groupKind: 10
+  allyType: 0
+  enemyFaction: 10
+  strengthRank: 0
+  strengthOrder: Enemy faction; not part of ally order
+  weaponOwner: AI
+  weaponOwnerKey: ai
+  variant: 1
+  weaponCount: 1
+  powerScore: 202
+  tierPattern: Silver
+  familyPattern: laser
+  weaponConfigs:
+  - {fileID: 11400000, guid: 5eabcc5e2c7f04615b85e0a16e55bce6, type: 2}

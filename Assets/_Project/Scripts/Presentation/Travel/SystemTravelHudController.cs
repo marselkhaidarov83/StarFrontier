@@ -142,6 +142,12 @@ public sealed class SystemTravelHudController :
     private bool _buttonsSubscribed;
     private bool _eventsSubscribed;
 
+    public bool UsesMovementRuntimeState =>
+        usesMovementRuntimeState;
+
+    public bool UsesLegacyTravelSpeed =>
+        usesLegacyTravelSpeed;
+
     private void Start()
     {
         ResolveServices();
@@ -180,25 +186,81 @@ public sealed class SystemTravelHudController :
 
     private void Update()
     {
-        if (!_isInitialized)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        RefreshTime();
-        RefreshTravelState();
+        double refreshTimeMs = 0.0;
+        double refreshTravelStateMs = 0.0;
+        double refreshSpeedMs = 0.0;
 
-        if (Time.unscaledTime <
-            _nextSpeedRefreshTime)
+        bool refreshedSpeed = false;
+
+        try
         {
-            return;
+            if (!_isInitialized)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshTime();
+
+            refreshTimeMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshTravelState();
+
+            refreshTravelStateMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (Time.unscaledTime <
+                _nextSpeedRefreshTime)
+            {
+                return;
+            }
+
+            _nextSpeedRefreshTime =
+                Time.unscaledTime +
+                Mathf.Max(
+                    0.02f,
+                    speedRefreshIntervalSeconds);
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshStatusTextWithSpeed();
+
+            refreshSpeedMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            refreshedSpeed = true;
         }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
 
-        _nextSpeedRefreshTime =
-            Time.unscaledTime +
-            Mathf.Max(
-                0.02f,
-                speedRefreshIntervalSeconds);
+            string details =
+                "Name=" + name +
+                " | Initialized=" + _isInitialized +
+                " | RefreshedSpeed=" + refreshedSpeed +
+                " | RefreshTimeMs=" + refreshTimeMs.ToString("F3") +
+                " | RefreshTravelStateMs=" + refreshTravelStateMs.ToString("F3") +
+                " | RefreshSpeedMs=" + refreshSpeedMs.ToString("F3");
 
-        RefreshStatusTextWithSpeed();
+            VisualUpdateAggregateLog.Record(
+                "SystemTravelHudController.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemTravelHudController.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnDisable()
@@ -436,11 +498,7 @@ public sealed class SystemTravelHudController :
         if (_gameTimeService == null)
             return;
 
-        _gameTimeService.TogglePause();
-
-        StartCoroutine(
-            Delay(
-                _gameTimeService.DelayTime));
+        _gameTimeService.StepOneDay();
 
         RefreshTime();
 
@@ -681,8 +739,20 @@ public sealed class SystemTravelHudController :
                     GetPlanetDisplayName(
                         evt.PlanetId);
 
+            case TravelDestinationType.Station:
+                return
+                    "станция " +
+                    GetStationDisplayName(
+                        evt.StationId);
+
             case TravelDestinationType.MapPoint:
                 return "космос";
+
+            case TravelDestinationType.Npc:
+                return
+                    "NPC " +
+                    GetNpcDisplayName(
+                        evt.RuntimeNpcId);
 
             case TravelDestinationType.SystemExit:
                 return
@@ -718,8 +788,22 @@ public sealed class SystemTravelHudController :
                         state.Destination
                             .PlanetId);
 
+            case TravelDestinationType.Station:
+                return
+                    "станция " +
+                    GetStationDisplayName(
+                        state.Destination
+                            .StationId);
+
             case TravelDestinationType.MapPoint:
                 return "космос";
+
+            case TravelDestinationType.Npc:
+                return
+                    "NPC " +
+                    GetNpcDisplayName(
+                        state.Destination
+                            .RuntimeNpcId);
 
             case TravelDestinationType.SystemExit:
                 return
@@ -783,6 +867,53 @@ public sealed class SystemTravelHudController :
         return systemConfig.Id;
     }
 
+    private string GetNpcDisplayName(
+        string runtimeNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeNpcId))
+            return "цель";
+
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out ISystemNpcRuntimeService npcRuntimeService) &&
+            npcRuntimeService.TryGetNpc(
+                runtimeNpcId,
+                out SystemNpcRuntimeState npc) &&
+            npc != null &&
+            !string.IsNullOrWhiteSpace(npc.DisplayName))
+        {
+            return npc.DisplayName.Trim();
+        }
+
+        return runtimeNpcId;
+    }
+
+    private string GetStationDisplayName(
+        string stationId)
+    {
+        if (string.IsNullOrWhiteSpace(
+                stationId))
+        {
+            return "неизвестная";
+        }
+
+        StationConfig stationConfig =
+            FindStationConfig(
+                stationId);
+
+        if (stationConfig == null)
+            return stationId;
+
+        if (!string.IsNullOrWhiteSpace(
+                stationConfig.DisplayName))
+        {
+            return stationConfig.DisplayName;
+        }
+
+        return stationConfig.Id;
+    }
+
     private PlanetConfig FindPlanetConfig(
         string planetId)
     {
@@ -822,6 +953,40 @@ public sealed class SystemTravelHudController :
                 {
                     return planetConfig;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    private StationConfig FindStationConfig(
+        string stationId)
+    {
+        if (_configService == null)
+            return null;
+
+        IReadOnlyList<StarSystemConfig>
+            systems =
+                _configService
+                    .GetAllStarSystems();
+
+        if (systems == null)
+            return null;
+
+        foreach (
+            StarSystemConfig systemConfig
+            in systems)
+        {
+            if (systemConfig == null ||
+                systemConfig.Station == null)
+            {
+                continue;
+            }
+
+            if (systemConfig.Station.Id ==
+                stationId)
+            {
+                return systemConfig.Station;
             }
         }
 
@@ -954,7 +1119,7 @@ public sealed class SystemTravelHudController :
             statusLabel +
             "  •  Скорость: " +
             currentSpeed.ToString(
-                "0.0");
+                "0");
 
         if (!force &&
             nextText ==
@@ -984,6 +1149,18 @@ public sealed class SystemTravelHudController :
             return 0f;
         }
 
+        float travelSpeed =
+            GetLegacyTravelSpeed();
+
+        if (travelSpeed >
+            SpeedEpsilon)
+        {
+            usesLegacyTravelSpeed =
+                true;
+
+            return travelSpeed;
+        }
+
         if (_shipMovementService != null &&
             _shipMovementService.IsEnabled &&
             _shipMovementService.State != null)
@@ -1000,17 +1177,7 @@ public sealed class SystemTravelHudController :
             return movementSpeed;
         }
 
-        float legacySpeed =
-            GetLegacyTravelSpeed();
-
-        if (legacySpeed >
-            SpeedEpsilon)
-        {
-            usesLegacyTravelSpeed =
-                true;
-        }
-
-        return legacySpeed;
+        return 0f;
     }
 
     private float GetLegacyTravelSpeed()
@@ -1027,18 +1194,8 @@ public sealed class SystemTravelHudController :
             return 0f;
         }
 
-        if (_hangarService == null)
-            return 0f;
-
-        var activeShipStats =
-            _hangarService
-                .GetActiveShipStats();
-
-        if (activeShipStats == null)
-            return 0f;
-
         return SanitizeSpeed(
-            activeShipStats.Speed);
+            _travelService.CurrentEffectiveTravelSpeed);
     }
 
     private static float SanitizeSpeed(

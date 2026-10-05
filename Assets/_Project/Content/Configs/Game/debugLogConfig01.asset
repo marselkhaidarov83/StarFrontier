@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 305e505661dee42c58da12e2624f7c3f, type: 3}
+  m_Name: debugLogConfig01
+  m_EditorClassIdentifier: Data::DebugLogConfig
+  logsEnabled: 1
+  shipRouteLogs: 0
+  includeShipRouteInternalLogs: 0
+  npcRouteDecisionLogs: 0
+  playerMovementLogs: 0
+  npcMovementLogs: 0
+  enemyMovementLogs: 0
+  movementTurnSpikeAngleDegrees: 60
+  combatLogs: 0
+  damageLogs: 0
+  populationLogs: 0
+  planetMovementLogs: 0
+  saveLogs: 0
+  timeLogs: 0
+  uiLogs: 0
+  loadingSceneDiagnosticsLogs: 0
+  waveVisualGeometryLogs: 0
+  bootstrapLogs: 0
+  performanceLogs: 1
+  disableInfoLogStackTrace: 1
+  gameTimeLoadAnalyticsLogs: 1
+  gameTimeFullFpsAnalyticsLogs: 1
+  gameTimeFullFpsSampleIntervalFrames: 120
+  gameTimeFrameSpikeWarningMs: 20
+  gameTimeFrameSpikeCriticalMs: 30
+  gameTimeFrameSpikeRelativeMultiplier: 2
+  gameTimeSimpleFrameLogs: 0
+  gameTimeSimpleFrameLogIntervalFrames: 1
+  npcMovementPerformanceLogs: 0
+  npcMovementRouteDecisionPerformanceLogs: 0
+  shipRouteBuildDiagnosticsThresholdMs: 3
+  npcMovementLoadAnalyticsLogs: 0
+  npcMovementLoadAnalyticsFpsWarningThreshold: 35
+  npcMovementLoadAnalyticsFpsCriticalThreshold: 30
+  npcMovementLoadAnalyticsTickWarningMs: 6
+  npcMovementLoadAnalyticsRegularLogIntervalTicks: 0
+  npcMovementLoadAnalyticsDetailLevel: 0
+  npcBehaviorActionAnalyticsLogs: 0
+  npcBehaviorActionAnalyticsTickWarningMs: 6
+  npcBehaviorActionAnalyticsOnFpsWarning: 0
+  npcBehaviorActionAnalyticsRegularLogIntervalTicks: 0
+  visualUpdateSpikeThresholdMs: 5
+  visualUpdateVerboseLogs: 0
+  npcBehaviorPerformanceLogs: 0
+  npcAnnihilationPerformanceLogs: 0
+  enemyMovementPerformanceLogs: 0
+  playerMovementPerformanceLogs: 0
+  shipRoutePerformanceLogs: 0
+  npcCombatPerformanceLogs: 0
+  planetMovementPerformanceLogs: 0
+  galaxyRoutePerformanceLogs: 0
+  savePerformanceLogs: 1
+  npcTurnSpikeLogs: 0
+  enemyTurnSpikeLogs: 0
+  npcMilitaryMovementVerboseLogs: 0
+  npcPlanetApproachQueueCoordinateLogs: 0

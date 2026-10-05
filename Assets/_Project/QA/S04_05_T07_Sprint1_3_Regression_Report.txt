@@ -1,0 +1,52 @@
+2A-S04-05-T07 - Sprint 1-3 Regression After Combat Enablement
+
+Branch:
+stage-2a-sprint-4-2026.08.03
+
+Date:
+2026-08-27
+
+Unity compile:
+NOT_CHECKED
+
+EditMode Sprint 1:
+NOT_CHECKED
+
+EditMode Sprint 2:
+NOT_CHECKED
+
+EditMode Sprint 3:
+NOT_CHECKED
+
+EditMode Sprint 4 smoke:
+NOT_CHECKED
+
+Manual smoke:
+NOT_CHECKED
+
+Manual checklist:
+[ ] Main menu opens
+[ ] New game starts
+[ ] Galaxy map opens
+[ ] Current system is visible
+[ ] Player ship is visible in system
+[ ] System HUD is visible
+[ ] Fuel HUD is visible
+[ ] Target selection works
+[ ] Travel to system object works
+[ ] Planet entry works
+[ ] Repair/hangar screen opens
+[ ] Save/load does not break current ship state
+[ ] Debug combat enemy spawn works
+[ ] Combat debug state prints to Console
+[ ] Combat scene bindings validator passes
+[ ] No unexpected red errors in Console
+
+Failed tests:
+None
+
+Bugs found:
+None
+
+Result:
+NOT_PASSED

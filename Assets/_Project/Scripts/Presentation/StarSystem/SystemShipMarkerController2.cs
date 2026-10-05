@@ -16,7 +16,12 @@ public sealed class SystemShipMarkerController2 :
     private ISystemTravelService _systemTravelService;
     private IHangarService _hangarService;
     private IShipMovementService _shipMovementService;
+    private IConfigService _configService;
     private string _lastSystemId;
+    private Pseudo3DDepthByY2 _pseudo3DDepth;
+    private AllyConfig _lastActiveShipData;
+    private Sprite _lastShipSprite;
+    private float _lastShipWorldSize = -1f;
 
     private Vector3 _lastShipPosition;
     private bool _hasLastShipPosition;
@@ -42,6 +47,11 @@ public sealed class SystemShipMarkerController2 :
             Bootstrapper.Instance
             .ServiceRegistry
             .Get<IShipMovementService>();
+
+        Bootstrapper.Instance
+            .ServiceRegistry
+            .TryGet<IConfigService>(
+                out _configService);
 
         if (_systemTravelService == null)
         {
@@ -129,6 +139,13 @@ public sealed class SystemShipMarkerController2 :
 
     private void SetShipImage()
     {
+        RefreshShipVisuals(
+            force: true);
+    }
+
+    private void RefreshShipVisuals(
+        bool force)
+    {
         if (shipMarkerImage == null)
             return;
 
@@ -141,17 +158,156 @@ public sealed class SystemShipMarkerController2 :
         if (activeShipData == null)
             return;
 
-        shipMarkerImage.sprite =
+        Sprite activeShipSprite =
             activeShipData.CombatSprite;
+
+        if (force ||
+            _lastActiveShipData != activeShipData ||
+            _lastShipSprite != activeShipSprite)
+        {
+            shipMarkerImage.sprite =
+                activeShipSprite;
+
+            _lastActiveShipData =
+                activeShipData;
+
+            _lastShipSprite =
+                activeShipSprite;
+        }
+
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            float worldSize =
+                _configService
+                    .SystemVisualConfig
+                    .GetAllyWorldSize(activeShipData);
+
+            if (!force &&
+                Mathf.Approximately(
+                    _lastShipWorldSize,
+                    worldSize))
+            {
+                return;
+            }
+
+            ApplyShipWorldSize(
+                worldSize);
+
+            _lastShipWorldSize =
+                worldSize;
+        }
+    }
+
+    private void ApplyShipWorldSize(
+        float worldSize)
+    {
+        if (_pseudo3DDepth == null &&
+            shipMarkerImage != null)
+        {
+            _pseudo3DDepth =
+                shipMarkerImage
+                    .GetComponentInParent<Pseudo3DDepthByY2>(
+                        true);
+        }
+
+        if (_pseudo3DDepth != null)
+        {
+            _pseudo3DDepth.SetBaseWorldSize(
+                shipMarkerImage,
+                worldSize);
+
+            return;
+        }
+
+        SpriteRendererSizeUtility.SetWorldSize(
+            shipMarkerImage,
+            worldSize);
     }
 
     private void Update()
     {
-        if (_systemTravelService == null)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double refreshVisualsMs = 0.0;
+        double refreshPositionMs = 0.0;
+
+        bool hasTravelService = false;
+
+        try
+        {
+            hasTravelService =
+                _systemTravelService != null;
+
+            if (!hasTravelService)
+                return;
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshShipVisuals(
+                force: false);
+
+            refreshVisualsMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            RefreshPosition(
+                updateDirection: true);
+
+            refreshPositionMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "SystemId=" + (_lastSystemId ?? string.Empty) +
+                " | HasTravelService=" + hasTravelService +
+                " | RefreshVisualsMs=" + refreshVisualsMs.ToString("F3") +
+                " | RefreshPositionMs=" + refreshPositionMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemShipMarkerController2.Update",
+                elapsedMs,
+                details);
+
+            LogSlowVisualUpdateIfNeeded(
+                "SystemShipMarkerController2.Update",
+                startedAt,
+                details);
+        }
+    }
+
+    private void LogSlowVisualUpdateIfNeeded(
+    string marker,
+    double startedAt,
+    string details)
+    {
+        double elapsedMs =
+            (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+        if (elapsedMs < 1.0)
             return;
 
-        RefreshPosition(
-            updateDirection: true);
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.GameTimeLoadAnalytics))
+        {
+            return;
+        }
+
+        Bootstrapper.Instance.LogPerformance(
+            DebugLogPerformanceArea.GameTimeLoadAnalytics,
+            "[VISUAL_UPDATE_SPIKE]" +
+            " Marker=" + marker +
+            " | UnityFrame=" + Time.frameCount +
+            " | Ms=" + elapsedMs.ToString("F2") +
+            " | " + details);
     }
 
     private void RefreshPosition(
@@ -258,12 +414,15 @@ _systemTravelService
 
         if (updateDirection)
         {
-            Vector3 movementDelta =
-                shipPosition -
-                _lastShipPosition;
+            if (!TryApplyRuntimeFacingDirection())
+            {
+                Vector3 movementDelta =
+                    shipPosition -
+                    _lastShipPosition;
 
-            SetDirection(
-                movementDelta);
+                SetDirection(
+                    movementDelta);
+            }
         }
 
         /*
@@ -276,11 +435,16 @@ _systemTravelService
 
     private void ApplyMovementFacingDirection()
     {
+        TryApplyRuntimeFacingDirection();
+    }
+
+    private bool TryApplyRuntimeFacingDirection()
+    {
         if (_shipMovementService == null)
-            return;
+            return false;
 
         if (_shipMovementService.State == null)
-            return;
+            return false;
 
         Vector2 facingDirection =
             _shipMovementService
@@ -290,7 +454,7 @@ _systemTravelService
         if (facingDirection.sqrMagnitude <=
             0.0001f)
         {
-            return;
+            return false;
         }
 
         SetDirection(
@@ -298,6 +462,8 @@ _systemTravelService
                 facingDirection.x,
                 facingDirection.y,
                 0f));
+
+        return true;
     }
 
     public void SetDirection(

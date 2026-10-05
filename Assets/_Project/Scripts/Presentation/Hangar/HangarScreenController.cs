@@ -145,8 +145,9 @@ public class HangarScreenController : MonoBehaviour
 
         var shipData = _hangarService.GetActiveShipData();
         var stats = _hangarService.GetActiveShipStats();
+        var activeShip = _hangarService.GetActiveShipState();
 
-        if (shipData == null || stats == null)
+        if (shipData == null || stats == null || activeShip == null)
         {
             ShowMessage("No active ship");
             return;
@@ -165,11 +166,31 @@ public class HangarScreenController : MonoBehaviour
             shipImage.enabled = false;
         }
 
-        hullText.text = $"Hull: {stats.MaxHull}";
-        shieldText.text = $"Shield: {stats.MaxShield}";
-        energyText.text = $"Energy: {stats.MaxEnergy}";
+        hullText.text =
+            $"Hull: {Mathf.Clamp(activeShip.CurrentHull, 0, stats.MaxHull)} / {stats.MaxHull}";
+
+        shieldText.text =
+            $"Shield: {Mathf.Clamp(activeShip.CurrentShield, 0, stats.MaxShield)} / {stats.MaxShield}";
+
+        energyText.text =
+            $"Energy: {Mathf.Clamp(activeShip.CurrentEnergy, 0, stats.MaxEnergy)} / {stats.MaxEnergy}";
+
         speedText.text = $"Speed: {stats.Speed:0.0}";
-        cargoText.text = $"Cargo: {stats.CargoCapacity}";
+
+        cargoText.text =
+            $"Cargo: {GetUsedCargo(activeShip)} / {stats.CargoCapacity}";
+    }
+
+    private int GetUsedCargo(
+        ShipRuntimeData activeShip)
+    {
+        if (activeShip == null ||
+            activeShip.Cargo == null)
+        {
+            return 0;
+        }
+
+        return activeShip.Cargo.GetUsedCapacity();
     }
 
     private void ShowMessage(string message)

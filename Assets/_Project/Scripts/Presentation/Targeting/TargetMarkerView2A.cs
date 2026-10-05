@@ -49,6 +49,7 @@ public sealed class TargetMarkerView2A :
         _subscribed;
 
     private bool _markerVisible;
+    private Transform _markerRootTransform;
     private Vector3
     _baseMarkerLocalScale =
         Vector3.one;
@@ -74,6 +75,29 @@ public sealed class TargetMarkerView2A :
 
         ResolveDependencies();
         ApplyCurrentTargetState();
+        RefreshVisual();
+    }
+
+    public void ConfigureMarker(
+        GameObject root,
+        SpriteRenderer renderer)
+    {
+        markerRoot =
+            root;
+
+        _markerRootTransform =
+            markerRoot != null
+                ? markerRoot.transform
+                : null;
+
+        markerRenderer =
+            renderer;
+
+        _baseMarkerScaleCaptured =
+            false;
+
+        CaptureBaseMarkerScale();
+        SetMarkerVisible(false);
         RefreshVisual();
     }
 
@@ -105,6 +129,11 @@ public sealed class TargetMarkerView2A :
 
     private void Awake()
     {
+        _markerRootTransform =
+            markerRoot != null
+                ? markerRoot.transform
+                : null;
+
         CaptureBaseMarkerScale();
         SetMarkerVisible(false);
     }
@@ -123,26 +152,136 @@ public sealed class TargetMarkerView2A :
 
     private void Update()
     {
-        if (!_markerVisible)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        if (!ResolveDependencies())
-            return;
+        double visibleCheckMs = 0.0;
+        double resolveDependenciesMs = 0.0;
+        double readPositionMs = 0.0;
+        double refreshCurrentTargetMs = 0.0;
+        double animateMarkerMs = 0.0;
 
-        Vector3 position =
-            transform.position;
+        bool markerVisibleAtStart = false;
+        bool markerVisibleAtEnd = false;
+        bool dependenciesResolved = false;
+        bool refreshedTarget = false;
+        bool animatedMarker = false;
 
-        _targetService
-            .TryRefreshCurrentTarget(
-                _targetId,
-                new Vector2(
-                    position.x,
-                    position.y),
-                isInteractable,
-                isAvailable,
-                out _);
+        Vector3 position = Vector3.zero;
 
-        AnimateMarker();
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            markerVisibleAtStart =
+                _markerVisible;
+
+            visibleCheckMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!markerVisibleAtStart)
+                return;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            dependenciesResolved =
+                ResolveDependencies();
+
+            resolveDependenciesMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!dependenciesResolved)
+                return;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            position =
+                transform.position;
+
+            readPositionMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            _targetService
+                .TryRefreshCurrentTarget(
+                    _targetId,
+                    new Vector2(
+                        position.x,
+                        position.y),
+                    isInteractable,
+                    isAvailable,
+                    out _);
+
+            refreshedTarget =
+                true;
+
+            refreshCurrentTargetMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            AnimateMarker();
+
+            animatedMarker =
+                true;
+
+            animateMarkerMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            markerVisibleAtEnd =
+                _markerVisible;
+
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            VisualUpdateAggregateLog.Record(
+                "TargetMarkerView2A.Update",
+                elapsedMs,
+                "Name=" + name +
+                " | TargetId=" + _targetId +
+                " | MarkerVisibleAtStart=" + markerVisibleAtStart +
+                " | MarkerVisibleAtEnd=" + markerVisibleAtEnd +
+                " | DependenciesResolved=" + dependenciesResolved +
+                " | RefreshedTarget=" + refreshedTarget +
+                " | AnimatedMarker=" + animatedMarker +
+                " | Interactable=" + isInteractable +
+                " | Available=" + isAvailable +
+                " | VisibleCheckMs=" + visibleCheckMs.ToString("F3") +
+                " | ResolveDependenciesMs=" + resolveDependenciesMs.ToString("F3") +
+                " | ReadPositionMs=" + readPositionMs.ToString("F3") +
+                " | RefreshCurrentTargetMs=" + refreshCurrentTargetMs.ToString("F3") +
+                " | AnimateMarkerMs=" + animateMarkerMs.ToString("F3"));
+
+            if (VisualUpdatePerfLog.ShouldLog(elapsedMs))
+            {
+                VisualUpdatePerfLog.LogMeasured(
+                    "TargetMarkerView2A.Update",
+                    elapsedMs,
+                    "Name=" + name +
+                    " | TargetId=" + _targetId +
+                    " | MarkerVisibleAtStart=" + markerVisibleAtStart +
+                    " | MarkerVisibleAtEnd=" + markerVisibleAtEnd +
+                    " | DependenciesResolved=" + dependenciesResolved +
+                    " | RefreshedTarget=" + refreshedTarget +
+                    " | AnimatedMarker=" + animatedMarker +
+                    " | Interactable=" + isInteractable +
+                    " | Available=" + isAvailable +
+                    " | Position=" + position +
+                    " | VisibleCheckMs=" + visibleCheckMs.ToString("F3") +
+                    " | ResolveDependenciesMs=" + resolveDependenciesMs.ToString("F3") +
+                    " | ReadPositionMs=" + readPositionMs.ToString("F3") +
+                    " | RefreshCurrentTargetMs=" + refreshCurrentTargetMs.ToString("F3") +
+                    " | AnimateMarkerMs=" + animateMarkerMs.ToString("F3"));
+            }
+        }
     }
 
     private bool ResolveDependencies()
@@ -265,8 +404,15 @@ public sealed class TargetMarkerView2A :
     }
 
     private void SetMarkerVisible(
-        bool visible)
+    bool visible)
     {
+        if (_markerVisible == visible &&
+            markerRoot != null &&
+            markerRoot.activeSelf == visible)
+        {
+            return;
+        }
+
         _markerVisible =
             visible;
 
@@ -280,7 +426,15 @@ public sealed class TargetMarkerView2A :
 
     private void AnimateMarker()
     {
-        if (markerRoot == null)
+        if (_markerRootTransform == null)
+        {
+            _markerRootTransform =
+                markerRoot != null
+                    ? markerRoot.transform
+                    : null;
+        }
+
+        if (_markerRootTransform == null)
             return;
 
         CaptureBaseMarkerScale();
@@ -295,17 +449,15 @@ public sealed class TargetMarkerView2A :
                 2f) *
             0.06f;
 
-        markerRoot
-            .transform
-            .localScale =
-                new Vector3(
-                    _baseMarkerLocalScale.x *
-                    pulse,
+        _markerRootTransform.localScale =
+            new Vector3(
+                _baseMarkerLocalScale.x *
+                pulse,
 
-                    _baseMarkerLocalScale.y *
-                    pulse,
+                _baseMarkerLocalScale.y *
+                pulse,
 
-                    _baseMarkerLocalScale.z);
+                _baseMarkerLocalScale.z);
     }
 
     private void CaptureBaseMarkerScale()
@@ -313,13 +465,19 @@ public sealed class TargetMarkerView2A :
         if (_baseMarkerScaleCaptured)
             return;
 
-        if (markerRoot == null)
+        if (_markerRootTransform == null)
+        {
+            _markerRootTransform =
+                markerRoot != null
+                    ? markerRoot.transform
+                    : null;
+        }
+
+        if (_markerRootTransform == null)
             return;
 
         _baseMarkerLocalScale =
-            markerRoot
-                .transform
-                .localScale;
+            _markerRootTransform.localScale;
 
         _baseMarkerScaleCaptured =
             true;

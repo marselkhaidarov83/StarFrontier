@@ -1,5 +1,13 @@
 public interface ISystemNpcSimulationSaveService
-    {
-        SystemNpcSimulationSaveData Capture();
-        void Restore(SystemNpcSimulationSaveData saveData);
-    }
+{
+    SystemNpcSimulationSaveData Capture();
+
+    SystemNpcSimulationCaptureSession BeginIncrementalCapture();
+
+    bool ContinueIncrementalCapture(
+        SystemNpcSimulationCaptureSession session,
+        float budgetMs,
+        int maxNpcItemsPerStep);
+
+    void Restore(SystemNpcSimulationSaveData saveData);
+}

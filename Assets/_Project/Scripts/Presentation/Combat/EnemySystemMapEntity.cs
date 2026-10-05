@@ -8,11 +8,13 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
 
     [Header("View")]
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private string sortingLayerName = "SystemShipFX";
+    [SerializeField] private int sortingOrder = 210;
 
     private SimpleEventBus _simpleEventBus;
     private ISystemEnemyService _enemyService;
+    private IConfigService _configService;
     private EnemySystemMovementController _movementController;
-    private WeaponFireController _playerWeaponFireController;
 
     private bool _isBound;
 
@@ -23,20 +25,88 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
     {
         _simpleEventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _enemyService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyService>();
+        Bootstrapper.Instance
+            .ServiceRegistry
+            .TryGet<IConfigService>(
+                out _configService);
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         _movementController = GetComponent<EnemySystemMovementController>();
-        _playerWeaponFireController = FindObjectOfType<WeaponFireController>();
     }
 
     private void Update()
     {
-        if (!_isBound)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        _enemyService.UpdateEnemyPosition(runtimeEnemyId, transform.position);
+        double tryGetEnemyMs = 0.0;
+        double applyTransformMs = 0.0;
+
+        bool enemyFound = false;
+        bool enemyAlive = false;
+
+        try
+        {
+            if (!_isBound ||
+                _enemyService == null ||
+                string.IsNullOrWhiteSpace(runtimeEnemyId))
+            {
+                return;
+            }
+
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            enemyFound =
+                _enemyService.TryGetEnemy(
+                    runtimeEnemyId,
+                    out SystemEnemyRuntimeState enemy);
+
+            tryGetEnemyMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!enemyFound)
+                return;
+
+            if (enemy == null || !enemy.IsAlive)
+                return;
+
+            enemyAlive = true;
+
+            phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplyRuntimeTransform(enemy);
+
+            applyTransformMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | RuntimeEnemyId=" + runtimeEnemyId +
+                " | IsBound=" + _isBound +
+                " | EnemyFound=" + enemyFound +
+                " | EnemyAlive=" + enemyAlive +
+                " | TryGetEnemyMs=" + tryGetEnemyMs.ToString("F3") +
+                " | ApplyTransformMs=" + applyTransformMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "EnemySystemMapEntity.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "EnemySystemMapEntity.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnEnable()
@@ -77,16 +147,70 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
         runtimeEnemyId = runtimeEnemy.RuntimeEnemyId;
         _isBound = true;
 
-        if (spriteRenderer != null && runtimeEnemy.EnemyConfig != null)
-            spriteRenderer.sprite = runtimeEnemy.EnemyConfig.CombatSprite;
+        if (spriteRenderer != null)
+        {
+            if (runtimeEnemy.EnemyConfig != null)
+            {
+                spriteRenderer.sprite = runtimeEnemy.EnemyConfig.CombatSprite;
 
-        if (_movementController != null)
-            _movementController.ApplyRuntimeConfig(runtimeEnemy);
+                if (_configService != null &&
+                    _configService.SystemVisualConfig != null)
+                {
+                    float worldSize =
+                        _configService
+                            .SystemVisualConfig
+                            .GetEnemyWorldSize(
+                                runtimeEnemy.EnemyConfig);
+
+                    if (worldSize > 0f)
+                    {
+                        SpriteRendererSizeUtility.SetWorldSize(
+                            spriteRenderer,
+                            worldSize);
+                    }
+                }
+            }
+
+            spriteRenderer.sortingLayerName = sortingLayerName;
+            spriteRenderer.sortingOrder = sortingOrder;
+            spriteRenderer.enabled = true;
+        }
+
+        ApplyRuntimeTransform(runtimeEnemy);
+    }
+
+    private void ApplyRuntimeTransform(SystemEnemyRuntimeState enemy)
+    {
+        if (enemy == null)
+            return;
+
+        Vector3 position = enemy.Position;
+        position.z = transform.position.z;
+        transform.position = position;
+
+        if (spriteRenderer == null)
+            return;
+
+        Vector3 direction = enemy.FacingDirection;
+        direction.z = 0f;
+
+        if (direction.sqrMagnitude <= 0.0001f)
+            return;
+
+        float angle =
+            Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        spriteRenderer.transform.localRotation =
+            Quaternion.Euler(
+                0f,
+                0f,
+                angle - 90f);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"[EnemySystemMapEntity] Pointer click received on {name}");
+        _simpleEventBus?.Publish(
+            new SystemObjectsPanelCloseRequestedEvent2A());
 
         if (!_isBound)
         {
@@ -94,17 +218,20 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
             return;
         }
 
-        if (_playerWeaponFireController == null)
-            _playerWeaponFireController = FindObjectOfType<WeaponFireController>();
+        _simpleEventBus?.Publish(
+            new SystemSelectedTargetInfoPanelRequestedEvent2A(
+                runtimeEnemyId,
+                SystemGameplayTargetType.Enemy));
 
-        if (_playerWeaponFireController == null)
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemTravelService>(
+                out ISystemTravelService travelService))
         {
-            Debug.LogWarning("[EnemySystemMapEntity] WeaponFireController not found.");
-            return;
+            travelService.SetNpcDestination(runtimeEnemyId);
         }
-
-        _playerWeaponFireController.SelectTarget(this);
     }
+
     public void ApplyDamage(int damage, bool fromPlayer)
     {
         if (!_isBound)

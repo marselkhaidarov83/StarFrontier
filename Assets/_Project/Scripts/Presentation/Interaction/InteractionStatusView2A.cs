@@ -94,74 +94,130 @@ public sealed class InteractionStatusView2A :
 
     private void Update()
     {
-        if (_interactionService == null)
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double resolveMs = 0.0;
+        double stateMs = 0.0;
+        double uiMs = 0.0;
+
+        bool hasService = false;
+        bool feedbackActive = false;
+        bool hasTarget = false;
+
+        try
         {
-            ResolveDependencies();
-            return;
+            if (_interactionService == null)
+            {
+                double phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                ResolveDependencies();
+
+                resolveMs =
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                return;
+            }
+
+            hasService = true;
+
+            double stateStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            InteractionRuntimeState state =
+                _interactionService.State;
+
+            stateMs =
+                (Time.realtimeSinceStartupAsDouble - stateStartedAt) * 1000.0;
+
+            double uiStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            if (holdProgressImage != null)
+            {
+                holdProgressImage.fillAmount =
+                    state.HoldProgressNormalized;
+
+                holdProgressImage.enabled =
+                    state.IsInteractionInProgress;
+            }
+
+            feedbackActive =
+                Time.unscaledTime <
+                _feedbackUntilTime;
+
+            hasTarget =
+                !string.IsNullOrWhiteSpace(
+                    state.CurrentInteractionTargetId);
+
+            SetVisible(
+                feedbackActive ||
+                hasTarget);
+
+            if (interactionButton != null)
+            {
+                interactionButton.interactable =
+                    state.CanInteract &&
+                    state.CooldownRemainingSeconds <= 0f;
+            }
+
+            if (actionText != null)
+            {
+                actionText.text =
+                    _currentActionName;
+            }
+
+            if (reasonText != null)
+            {
+                reasonText.text =
+                    feedbackActive
+                        ? _feedbackText
+                        : state.CanInteract
+                            ? string.Empty
+                            : GetReasonText(_currentReason);
+            }
+
+            if (actionIcon != null)
+            {
+                Color color =
+                    actionIcon.color;
+
+                color.a =
+                    state.CanInteract
+                        ? 1f
+                        : 0.35f;
+
+                actionIcon.color =
+                    color;
+            }
+
+            uiMs =
+                (Time.realtimeSinceStartupAsDouble - uiStartedAt) * 1000.0;
         }
-
-        InteractionRuntimeState state =
-            _interactionService.State;
-
-        if (holdProgressImage != null)
+        finally
         {
-            holdProgressImage.fillAmount =
-                state.HoldProgressNormalized;
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
 
-            holdProgressImage.enabled =
-                state.IsInteractionInProgress;
-        }
+            string details =
+                "Name=" + name +
+                " | HasService=" + hasService +
+                " | FeedbackActive=" + feedbackActive +
+                " | HasTarget=" + hasTarget +
+                " | ResolveMs=" + resolveMs.ToString("F3") +
+                " | StateMs=" + stateMs.ToString("F3") +
+                " | UiMs=" + uiMs.ToString("F3");
 
-        bool feedbackActive =
-            Time.unscaledTime <
-            _feedbackUntilTime;
+            VisualUpdateAggregateLog.Record(
+                "InteractionStatusView2A.Update",
+                elapsedMs,
+                details);
 
-        bool hasTarget =
-            !string.IsNullOrWhiteSpace(
-                state
-                    .CurrentInteractionTargetId);
-
-        SetVisible(
-            feedbackActive ||
-            hasTarget);
-
-        if (interactionButton != null)
-        {
-            interactionButton.interactable =
-                state.CanInteract &&
-                state.CooldownRemainingSeconds <=
-                    0f;
-        }
-
-        if (actionText != null)
-        {
-            actionText.text =
-                _currentActionName;
-        }
-
-        if (reasonText != null)
-        {
-            reasonText.text =
-                feedbackActive
-                    ? _feedbackText
-                    : state.CanInteract
-                        ? string.Empty
-                        : GetReasonText(
-                            _currentReason);
-        }
-
-        if (actionIcon != null)
-        {
-            Color color =
-                actionIcon.color;
-
-            color.a =
-                state.CanInteract
-                    ? 1f
-                    : 0.35f;
-
-            actionIcon.color =
-                color;
+            VisualUpdatePerfLog.LogIfSlow(
+                "InteractionStatusView2A.Update",
+                startedAt,
+                details);
         }
     }
 

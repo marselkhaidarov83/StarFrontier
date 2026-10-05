@@ -119,7 +119,7 @@ namespace StarFrontier.Tests.Sprint1
         {
             return new ConfigService(null, null, null, null, null,
                 Array.Empty<SectorConfig>(), Array.Empty<StarSystemConfig>(),
-                Array.Empty<PlanetConfig>(), items, Array.Empty<ShipConfig>(),
+                Array.Empty<PlanetConfig>(), items, 
                 Array.Empty<EnemyConfig>(), Array.Empty<AllyConfig>(),
                 Array.Empty<AllySpawnRuleConfig>(), Array.Empty<PirateConfig>(),
                 Array.Empty<PirateGroupSpawnRuleConfig>(), Array.Empty<ModuleConfig>(),

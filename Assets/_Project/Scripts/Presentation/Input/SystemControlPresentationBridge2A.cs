@@ -16,17 +16,73 @@ public sealed class SystemControlPresentationBridge2A :
 
     private void LateUpdate()
     {
-        if (!TryResolveStateService())
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        if (cameraController == null)
-            return;
+        double resolveServiceMs = 0.0;
+        double returnToShipMs = 0.0;
 
-        if (_stateService
-            .Control
-            .RecenterCameraPressedThisFrame)
+        bool hasStateService = false;
+        bool hasCameraController = false;
+        bool recentered = false;
+
+        try
         {
-            cameraController.ReturnToShip();
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            hasStateService =
+                TryResolveStateService();
+
+            resolveServiceMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+            if (!hasStateService)
+                return;
+
+            hasCameraController =
+                cameraController != null;
+
+            if (!hasCameraController)
+                return;
+
+            if (_stateService
+                .Control
+                .RecenterCameraPressedThisFrame)
+            {
+                phaseStartedAt =
+                    Time.realtimeSinceStartupAsDouble;
+
+                cameraController.ReturnToShip();
+
+                returnToShipMs =
+                    (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+
+                recentered = true;
+            }
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | HasStateService=" + hasStateService +
+                " | HasCameraController=" + hasCameraController +
+                " | Recentered=" + recentered +
+                " | ResolveServiceMs=" + resolveServiceMs.ToString("F3") +
+                " | ReturnToShipMs=" + returnToShipMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemControlPresentationBridge2A.LateUpdate",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemControlPresentationBridge2A.LateUpdate",
+                startedAt,
+                details);
         }
     }
 

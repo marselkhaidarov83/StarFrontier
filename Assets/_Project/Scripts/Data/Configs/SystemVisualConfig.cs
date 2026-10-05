@@ -5,6 +5,11 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Sprint 3/System Visual")]
 public sealed class SystemVisualConfig : ScriptableObject
 {
+    [Header("System Object Size Grid")]
+    [SerializeField]
+    [Min(0.01f)]
+    private float sizeUnitPixels = 1f;
+
     [Header("Player Ship Visuals")]
     [SerializeField]
     private Sprite playerShipPlaceholderSprite;
@@ -14,10 +19,6 @@ public sealed class SystemVisualConfig : ScriptableObject
 
     [SerializeField]
     private Sprite engineGlowSprite;
-
-    [SerializeField]
-    [Min(0f)]
-    private float playerShipWorldScale = 1f;
 
     [Header("World Object Visuals")]
     [SerializeField]
@@ -70,7 +71,7 @@ public sealed class SystemVisualConfig : ScriptableObject
     public Sprite PlayerShipPlaceholderSprite => playerShipPlaceholderSprite;
     public Sprite ShipShadowSprite => shipShadowSprite;
     public Sprite EngineGlowSprite => engineGlowSprite;
-    public float PlayerShipWorldScale => playerShipWorldScale;
+    public float SizeUnitPixels => Mathf.Max(0.01f, sizeUnitPixels);
 
     public Sprite SunPlaceholderSprite => sunPlaceholderSprite;
     public Sprite PlanetPlaceholderSprite => planetPlaceholderSprite;
@@ -88,4 +89,72 @@ public sealed class SystemVisualConfig : ScriptableObject
     public float EngineGlowMinScale => engineGlowMinScale;
     public float EngineGlowMaxScale => engineGlowMaxScale;
     public float IdleEngineGlowAlpha => idleEngineGlowAlpha;
+
+    public float UnitsToWorldSize(float sizeUnits)
+    {
+        return Mathf.Max(0f, sizeUnits) * SizeUnitPixels;
+    }
+
+    public float GetSunWorldSize(SunConfig sun)
+    {
+        float units = sun != null
+            ? sun.VisualSize
+            : 0f;
+
+        return UnitsToWorldSize(units);
+    }
+
+    public float GetPlanetWorldSize(PlanetConfig planet)
+    {
+        float units = planet != null
+            ? planet.VisualSize
+            : 0f;
+
+        return UnitsToWorldSize(units);
+    }
+
+    public float GetStationWorldSize(StationConfig station)
+    {
+        float units = station != null
+            ? station.VisualSize
+            : 0f;
+
+        return UnitsToWorldSize(units);
+    }
+
+    public float GetAllyWorldSize(AllyConfig ally)
+    {
+        float units = ally != null
+            ? ally.VisualSize
+            : 0f;
+
+        return UnitsToWorldSize(units);
+    }
+
+    public float GetEnemyWorldSize(EnemyConfig enemy)
+    {
+        float units = enemy != null
+            ? enemy.VisualSize
+            : 0f;
+
+        return UnitsToWorldSize(units);
+    }
+
+    public float GetPirateWorldSize(PirateConfig pirate)
+    {
+        float units = pirate != null
+            ? pirate.VisualSize
+            : 0f;
+
+        return UnitsToWorldSize(units);
+    }
+
+    public float GetSystemExitWorldSize(RouteEndpointConfig endpoint)
+    {
+        float units = endpoint != null
+            ? endpoint.VisualSize
+            : 0f;
+
+        return UnitsToWorldSize(units);
+    }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "SystemHudConfig",
-    menuName = "StarFrontier/Configs/Sprint 3/System HUD")]
+    menuName = "StarFrontier/Configs/Game/System HUD")]
 public sealed class SystemHudConfig : ScriptableObject
 {
     [Header("Visibility")]

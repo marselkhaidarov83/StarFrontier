@@ -11,7 +11,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public sealed class
     TravelPointInteractionTarget2A :
-        MonoBehaviour
+        CustomMonoBehaviour
 {
     [Header("Target")]
 
@@ -208,12 +208,11 @@ public sealed class
                 true);
         }
 
-        Debug.Log(
+        LogCustom(
             "[TravelPointInteractionTarget2A] " +
             "Destination bound. " +
             "Target system ID = " +
-            _destinationSystemId,
-            this);
+            _destinationSystemId);
     }
 
     private void ResolveComponents()

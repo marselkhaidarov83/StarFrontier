@@ -8,10 +8,15 @@ public sealed class SystemNpcRuntimeState
     [Header("Identity")]
     public string RuntimeNpcId;
     public SystemNpcType NpcType;
+    public string DisplayName;
 
     public string ConfigId;
     public string SpawnRuleId;
     public string GroupRuntimeId;
+
+    [Header("Identity Details")]
+    public AllyRole2A AllyRole;
+    public int Level = 1;
 
     [Header("System Location")]
     public string OriginSystemId;
@@ -29,12 +34,23 @@ public sealed class SystemNpcRuntimeState
     public Vector3 CurrentPosition;
     public Vector3 StartPosition;
     public Vector3 TargetPosition;
+    public Vector3 CurrentMovementTargetPosition;
+
+    public Vector3 TickMovementTargetPosition;
+    public Vector3 TickMovementDirection = Vector3.up;
+    public Vector3 FacingDirection = Vector3.up;
+    public float TurnRadius = 60f;
+    public int TickMovementDirectionTick = -1;
+    public bool TickMovementArrived;
 
     [Header("Travel")]
     public SystemNpcTravelState TravelState;
     public float TravelProgress01;
     public int TravelStartTick;
     public int TravelEndTick;
+    public bool IsWaitingForInitialRouteBuild;
+    public bool ReleaseFromPlanetAfterInitialRouteBuild;
+    public string InitialRouteBuildPlanetId;
 
     [Header("Behavior")]
     public SystemNpcBehaviorType PrevBehavior;
@@ -43,6 +59,7 @@ public sealed class SystemNpcRuntimeState
     public int BehaviorEndsTick;
     public bool HasActiveBehavior;
     public bool CanChangeLocationOnRestore;
+    public AllyBehaviourScenario CurrentBehaviorScenario;
 
     [Header("Behavior Context")]
     public int DaysToStayOnPlanet;
@@ -66,11 +83,13 @@ public sealed class SystemNpcRuntimeState
     public int MaxEnergy;
     public int CurrentEnergy;
 
-    public float Speed;
+    public int Speed;
 
     [Header("Life")]
     public SystemNpcLifeState LifeState;
     public bool IsAlive;
+    public int DestroyedAtTick;
+    public int NextRespawnTick;
 
     [Header("Rewards / Contribution")]
     public bool WasKilledByPlayer;
@@ -96,25 +115,15 @@ public sealed class SystemNpcRuntimeState
         return IsAlive && !IsOnPlanet && LifeState == SystemNpcLifeState.Alive;
     }
 
-    public void ApplyDamage(int damage)
+    public void ApplyDamageResult(
+        int currentShield,
+        int currentHull)
     {
         if (!IsAlive)
             return;
 
-        if (damage <= 0)
-            return;
-
-        int remainingDamage = damage;
-
-        if (CurrentShield > 0)
-        {
-            int shieldDamage = Mathf.Min(CurrentShield, remainingDamage);
-            CurrentShield -= shieldDamage;
-            remainingDamage -= shieldDamage;
-        }
-
-        if (remainingDamage > 0)
-            CurrentHull -= remainingDamage;
+        CurrentShield = Mathf.Max(0, currentShield);
+        CurrentHull = Mathf.Max(0, currentHull);
 
         if (CurrentHull <= 0)
         {
@@ -137,7 +146,8 @@ public sealed class SystemNpcRuntimeState
 
     public float getShotDistance()
     {
-        float distance = 0;
+        float distance = 0f;
+
         foreach (SystemNpcWeaponRuntimeState item in Weapons)
             distance = Math.Max(distance, item.ShotDistance);
 

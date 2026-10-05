@@ -68,6 +68,11 @@ public class SystemTravelDestination
     public string PlanetId;
     public PlanetConfig PlanetData;
 
+    public string StationId;
+    public StationConfig StationData;
+
+    public string RuntimeNpcId;
+
     public string TargetSystemId;
     public StarSystemConfig TargetSystemConfig;
 
@@ -103,12 +108,37 @@ public class SystemTravelDestination
         };
     }
 
+    public static SystemTravelDestination Station(StationConfig stationData)
+    {
+        return new SystemTravelDestination
+        {
+            Type = TravelDestinationType.Station,
+            StationData = stationData,
+            StationId = stationData != null ? stationData.Id : string.Empty,
+            FixedMapPosition = stationData != null
+                ? stationData.LocalOffset
+                : Vector2.zero
+        };
+    }
+
     public static SystemTravelDestination MapPoint(Vector2 position)
     {
         return new SystemTravelDestination
         {
             Type = TravelDestinationType.MapPoint,
             FixedMapPosition = position
+        };
+    }
+
+    public static SystemTravelDestination Npc(
+        string runtimeNpcId,
+        Vector3 currentPosition)
+    {
+        return new SystemTravelDestination
+        {
+            Type = TravelDestinationType.Npc,
+            RuntimeNpcId = runtimeNpcId ?? string.Empty,
+            FixedMapPosition = currentPosition
         };
     }
 

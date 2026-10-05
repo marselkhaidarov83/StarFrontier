@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-[CreateAssetMenu(fileName = "PirateGroupSpawnRuleConfig", menuName = "StarFrontier/Configs/Pirate group spawn rule")]
+[CreateAssetMenu(fileName = "PirateGroupSpawnRuleConfig", menuName = "StarFrontier/Configs/Npc/Pirate group spawn rule")]
 public sealed class PirateGroupSpawnRuleConfig : BaseConfig
 {
     [Header("Group Composition")]

@@ -1,12 +1,13 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "RouteEndpointConfig", menuName = "StarFrontier/Configs/Route end point")]
+[CreateAssetMenu(fileName = "RouteEndpointConfig", menuName = "StarFrontier/Configs/Galaxy/Route end point")]
 public class RouteEndpointConfig : BaseConfig
 {
     [Header("Hyper Travel Points")]
     [SerializeField] private Vector3 exitPoint;
     [SerializeField] private Vector3 entryPoint;
+    [SerializeField] [Min(0f)] private float visualSize = 50f;
 
     /// <summary>
     /// Точка выхода из этой системы в гиперпространство.
@@ -19,4 +20,5 @@ public class RouteEndpointConfig : BaseConfig
     /// Используется, когда игрок прилетает в эту систему.
     /// </summary>
     public Vector3 EntryPoint => entryPoint;
+    public float VisualSize => visualSize;
 }

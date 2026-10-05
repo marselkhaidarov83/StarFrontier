@@ -18,6 +18,7 @@ public sealed class ShipFinalStats
         float maxSpeed,
         float acceleration,
         float turnRate,
+        float turnRadius,
         int cargoCapacity,
         int weaponSlotCount,
         int moduleSlotCount,
@@ -31,6 +32,7 @@ public sealed class ShipFinalStats
         MaxSpeed = Mathf.Max(0f, maxSpeed);
         Acceleration = Mathf.Max(0f, acceleration);
         TurnRate = Mathf.Max(0f, turnRate);
+        TurnRadius = Mathf.Max(0f, turnRadius);
 
         CargoCapacity = Mathf.Max(0, cargoCapacity);
         WeaponSlotCount = Mathf.Max(0, weaponSlotCount);
@@ -50,6 +52,8 @@ public sealed class ShipFinalStats
     public float Acceleration { get; }
 
     public float TurnRate { get; }
+
+    public float TurnRadius { get; }
 
     public int CargoCapacity { get; }
 

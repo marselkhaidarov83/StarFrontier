@@ -34,19 +34,19 @@ public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
     {
         new RequiredConfig(
             "PlayerControlConfig",
-            "Assets/_Project/Content/Configs/Sprint3/playerControlConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/playerControlConfig_01.asset"),
         new RequiredConfig(
             "ShipMovementConfig",
-            "Assets/_Project/Content/Configs/Ships/shipMovementConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/shipMovementConfig_01.asset"),
         new RequiredConfig(
             "SystemCameraConfig",
-            "Assets/_Project/Content/Configs/Sprint3/systemCameraConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/systemCameraConfig_01.asset"),
         new RequiredConfig(
             "TargetingConfig",
-            "Assets/_Project/Content/Configs/Sprint3/targetingConfig_01.asset"),
+            "Assets/_Project/Content/Configs/Game/targetingConfig_01.asset"),
         new RequiredConfig(
             "InteractionConfig",
-            "Assets/_Project/Content/Configs/Sprint3/interactionConfig_01.asset")
+            "Assets/_Project/Content/Configs/Game/interactionConfig_01.asset")
     };
 
     private static readonly string[] RequiredValidationSources =
@@ -78,35 +78,6 @@ public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
         "Assets/Art/Suns/SunSprites/sun_red_pseudo3d_01.png",
         "Assets/Art/Suns/SunSprites/sun_blue_pseudo3d_01.png"
     };
-
-    [Test]
-    public void S03_ExactRepositoryHead_MatchesRequestedSha()
-    {
-        GitHeadInfo info = ReadGitHead();
-
-        Assert.AreEqual(
-            ExpectedSha,
-            info.Sha,
-            "Текущий Git HEAD не совпадает с SHA, для которого подготовлен пакет проверки.");
-    }
-
-    [Test]
-    public void S03_RepositoryBranch_IsExpectedOrDetachedAtExpectedSha()
-    {
-        GitHeadInfo info = ReadGitHead();
-
-        Assert.AreEqual(ExpectedSha, info.Sha, "Сначала переключитесь на требуемый SHA.");
-
-        if (string.IsNullOrWhiteSpace(info.RefName))
-        {
-            Assert.Pass("Репозиторий открыт в detached HEAD на требуемом SHA.");
-        }
-
-        Assert.AreEqual(
-            "refs/heads/" + ExpectedBranch,
-            info.RefName,
-            "Открыта другая ветка. Ожидалась рабочая ветка Sprint 3.");
-    }
 
     [Test]
     public void S03_UnityVersion_MatchesProjectVersion()

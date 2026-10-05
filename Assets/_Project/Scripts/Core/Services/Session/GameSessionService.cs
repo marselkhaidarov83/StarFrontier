@@ -15,12 +15,14 @@ public class GameSessionService : IGameSessionService
     public void StartNewSession(GameRuntimeState state)
     {
         State = state;
+        ForcePauseOnSessionOpen();
         InitializeSystemTravelService();
     }
 
     public void LoadSession(GameRuntimeState state)
     {
         State = state;
+        ForcePauseOnSessionOpen();
         InitializeSystemTravelService();
     }
 
@@ -33,5 +35,23 @@ public class GameSessionService : IGameSessionService
     public void ClearSession()
     {
         State = null;
+    }
+
+    private void ForcePauseOnSessionOpen()
+    {
+        if (State?.Meta != null)
+            State.Meta.IsGameTimePaused = true;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IGameTimeService>(
+                out IGameTimeService gameTimeService))
+        {
+            gameTimeService.SetPaused(true);
+        }
     }
 }

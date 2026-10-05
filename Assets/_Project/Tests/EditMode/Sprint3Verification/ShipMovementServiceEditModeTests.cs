@@ -175,7 +175,7 @@ public sealed class ShipMovementServiceEditModeTests
     }
 
     [Test]
-    public void SetShipStats_OverridesSpeedAccelerationAndTurnRate()
+    public void SetShipStats_OverridesSpeedAccelerationAndTurnRadius()
     {
         ShipMovementConfig config =
             CreateConfig(
@@ -199,6 +199,7 @@ public sealed class ShipMovementServiceEditModeTests
                 maxSpeed: 2f,
                 acceleration: 100f,
                 turnRate: 45f,
+                turnRadius: 60f,
                 cargoCapacity: 10,
                 weaponSlotCount: 1,
                 moduleSlotCount: 1,
@@ -217,9 +218,12 @@ public sealed class ShipMovementServiceEditModeTests
             service.State.CurrentSpeed,
             2.0001f);
 
+        float expectedRotationDegrees =
+            2f / 60f * Mathf.Rad2Deg;
+
         Assert.That(
             service.State.RotationDegrees,
-            Is.EqualTo(45f).Within(0.0001f));
+            Is.EqualTo(expectedRotationDegrees).Within(0.0001f));
     }
 
     [Test]

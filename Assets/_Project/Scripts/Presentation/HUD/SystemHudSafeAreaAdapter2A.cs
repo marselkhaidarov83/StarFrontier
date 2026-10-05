@@ -99,12 +99,43 @@ public sealed class SystemHudSafeAreaAdapter2A :
 
     private void Update()
     {
-        /*
-         * Это не перестраивает HUD каждый кадр.
-         * Anchors меняются только при изменении
-         * размера экрана или safe area.
-         */
-        ApplySafeArea(false);
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
+
+        double applyMs = 0.0;
+
+        try
+        {
+            double phaseStartedAt =
+                Time.realtimeSinceStartupAsDouble;
+
+            ApplySafeArea(false);
+
+            applyMs =
+                (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;
+        }
+        finally
+        {
+            double elapsedMs =
+                (Time.realtimeSinceStartupAsDouble - startedAt) * 1000.0;
+
+            string details =
+                "Name=" + name +
+                " | HasApplied=" + _hasApplied +
+                " | Screen=" + Screen.width + "x" + Screen.height +
+                " | SafeArea=" + Screen.safeArea +
+                " | ApplyMs=" + applyMs.ToString("F3");
+
+            VisualUpdateAggregateLog.Record(
+                "SystemHudSafeAreaAdapter2A.Update",
+                elapsedMs,
+                details);
+
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemHudSafeAreaAdapter2A.Update",
+                startedAt,
+                details);
+        }
     }
 
     private void OnRectTransformDimensionsChange()

@@ -49,7 +49,9 @@ namespace StarFrontier.Tests.Sprint1
         public InteractionConfig InteractionConfig => null;
         public SystemHudConfig SystemHudConfig => null;
         public SystemVisualConfig SystemVisualConfig => null;
-
+        public CombatFxVisualConfig CombatFxVisualConfig => null;
+        public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig => null;
+        public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig => null;
         public TestConfigService(SaveConfig saveConfig) { SaveConfig = saveConfig; }
         public IReadOnlyList<SectorConfig> GetAllSectors() => new List<SectorConfig>();
         public StarSystemLink GetCurrentStarSystemLink(string id) => null;
@@ -63,8 +65,7 @@ namespace StarFrontier.Tests.Sprint1
         public PlanetConfig GetCurrentPlanetConfig() => null;
         public IReadOnlyList<ItemConfig> GetAllItems() => new List<ItemConfig>();
         public ItemConfig GetItemConfigById(string id) => null;
-        public IReadOnlyList<ShipConfig> GetAllShips() => new List<ShipConfig>();
-        public ShipConfig GetShipConfigById(string id) => null;
+        public IReadOnlyList<AllyConfig> GetAllAllies() => new List<AllyConfig>();
         public EnemyConfig GetEnemyConfigById(string id) => null;
         public AllyConfig GetAllyConfigById(string id) => null;
         public PirateConfig GetPirateConfigById(string id) => null;
@@ -84,7 +85,36 @@ namespace StarFrontier.Tests.Sprint1
 
     internal sealed class NullNpcSaveService : ISystemNpcSimulationSaveService
     {
-        public SystemNpcSimulationSaveData Capture() => new SystemNpcSimulationSaveData();
-        public void Restore(SystemNpcSimulationSaveData data) { }
+        public SystemNpcSimulationSaveData Capture()
+        {
+            return new SystemNpcSimulationSaveData();
+        }
+
+        public SystemNpcSimulationCaptureSession BeginIncrementalCapture()
+        {
+            return new SystemNpcSimulationCaptureSession
+            {
+                RuntimeScanComplete = true,
+                EntriesBuildComplete = true
+            };
+        }
+
+        public bool ContinueIncrementalCapture(
+            SystemNpcSimulationCaptureSession session,
+            float budgetMs,
+            int maxNpcItemsPerStep)
+        {
+            if (session == null)
+                return true;
+
+            session.RuntimeScanComplete = true;
+            session.EntriesBuildComplete = true;
+
+            return true;
+        }
+
+        public void Restore(SystemNpcSimulationSaveData data)
+        {
+        }
     }
 }

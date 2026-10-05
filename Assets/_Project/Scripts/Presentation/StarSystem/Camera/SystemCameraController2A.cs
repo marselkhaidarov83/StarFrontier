@@ -79,13 +79,13 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     public void Initialize()
     {
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] Initialize started"
         );
 
         if (_isInitialized)
         {
-            Debug.Log(
+            LogCustom(
                 "[SystemCameraController2A] Already initialized"
             );
 
@@ -196,7 +196,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         _isInitialized = true;
 
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] " +
             "Initialize finished safely"
         );
@@ -216,7 +216,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private void ActivateSystemCameraSafely()
     {
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] " +
             "ActivateSystemCameraSafely started"
         );
@@ -237,32 +237,38 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         ApplyCameraSizeForCurrentSystem();
 
-        Vector3 shipPosition =
-            GetShipTargetPosition();
+        bool startFrameApplied =
+            TryApplyNewGameStartFrame();
 
-        Vector3 initialCameraPosition =
-            new Vector3(
-                shipPosition.x,
-                shipPosition.y,
-                targetCamera.transform.position.z
-            );
+        if (!startFrameApplied)
+        {
+            Vector3 shipPosition =
+                GetShipTargetPosition();
 
-        /*
-         * Корабль центрируется только настолько,
-         * насколько позволяют заданные размеры карты.
-         */
-        MoveCameraTo(initialCameraPosition);
+            Vector3 initialCameraPosition =
+                new Vector3(
+                    shipPosition.x,
+                    shipPosition.y,
+                    targetCamera.transform.position.z
+                );
 
-        mode = SystemCameraMode2A.FollowShip;
+            /*
+             * Корабль центрируется только настолько,
+             * насколько позволяют заданные размеры карты.
+             */
+            MoveCameraTo(initialCameraPosition);
+
+            mode = SystemCameraMode2A.FollowShip;
+        }
 
         _cameraVelocity = Vector3.zero;
         _zoomVelocity = 0f;
 
-        Debug.Log(
+        LogCustom(
             "[SystemCameraController2A] " +
             "ActivateSystemCameraSafely finished. " +
-            "ShipPosition = " +
-            shipPosition
+            "StartFrameApplied = " +
+            startFrameApplied
         );
     }
 
@@ -273,36 +279,45 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_isInitialized)
-            return;
+        double startedAt =
+            Time.realtimeSinceStartupAsDouble;
 
-        if (!_isSystemCameraActive)
-            return;
-
-        if (targetCamera == null)
-            return;
-
-        switch (mode)
+        try
         {
-            case SystemCameraMode2A.FollowShip:
-                UpdateFollowShip();
-                break;
+            if (!_isInitialized)
+                return;
 
-            case SystemCameraMode2A.ReturningToShip:
-                UpdateReturnToShip();
-                break;
+            if (!_isSystemCameraActive)
+                return;
 
-            case SystemCameraMode2A.CenteringOnTarget:
-                UpdateCenterOnTarget();
-                break;
+            if (targetCamera == null)
+                return;
 
-            case SystemCameraMode2A.FreeLook:
-                /*
-                 * При изменении зума в FreeLook камера
-                 * также должна оставаться внутри карты.
-                 */
-                ReclampCurrentPosition();
-                break;
+            switch (mode)
+            {
+                case SystemCameraMode2A.FollowShip:
+                    UpdateFollowShip();
+                    break;
+
+                case SystemCameraMode2A.ReturningToShip:
+                    UpdateReturnToShip();
+                    break;
+
+                case SystemCameraMode2A.CenteringOnTarget:
+                    UpdateCenterOnTarget();
+                    break;
+
+                case SystemCameraMode2A.FreeLook:
+                    ReclampCurrentPosition();
+                    break;
+            }
+        }
+        finally
+        {
+            VisualUpdatePerfLog.LogIfSlow(
+                "SystemCameraController2A.LateUpdate",
+                startedAt,
+                "Mode=" + mode);
         }
     }
 
@@ -1044,6 +1059,134 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         );
     }
 
+    private bool TryApplyNewGameStartFrame()
+    {
+        if (targetCamera == null ||
+            cameraConfig == null ||
+            !cameraConfig.UseNewGameStartFrame ||
+            _gameSessionService == null ||
+            _gameSessionService.State == null ||
+            _gameSessionService.State.Player == null ||
+            _configService == null ||
+            _configService.NewGameConfig == null)
+        {
+            return false;
+        }
+
+        PlayerState player =
+            _gameSessionService
+                .State
+                .Player;
+
+        NewGameConfig newGameConfig =
+            _configService
+                .NewGameConfig;
+
+        if (newGameConfig.StartSystem == null ||
+            newGameConfig.StartSystem.Sun == null ||
+            string.IsNullOrWhiteSpace(player.CurrentSystemId) ||
+            player.CurrentSystemId != newGameConfig.StartSystem.Id)
+        {
+            return false;
+        }
+
+        Vector3 configuredStartPosition =
+            newGameConfig.StartShipPosition;
+
+        if (Vector2.Distance(
+                new Vector2(
+                    player.SystemMapShipPosition.x,
+                    player.SystemMapShipPosition.y),
+                new Vector2(
+                    configuredStartPosition.x,
+                    configuredStartPosition.y)) > 0.5f)
+        {
+            return false;
+        }
+
+        Vector3 shipPosition =
+            GetShipTargetPosition();
+
+        Vector3 sunPosition =
+            new Vector3(
+                newGameConfig.StartSystem.Sun.LocalOffset.x,
+                newGameConfig.StartSystem.Sun.LocalOffset.y,
+                shipPosition.z);
+
+        float shipViewportY =
+            cameraConfig
+                .StartFrameShipBottomViewportPercent;
+
+        float sunViewportY =
+            cameraConfig
+                .StartFrameSunBottomViewportPercent;
+
+        float viewportGap =
+            sunViewportY - shipViewportY;
+
+        float worldGap =
+            sunPosition.y - shipPosition.y;
+
+        if (viewportGap <= 0.0001f ||
+            worldGap <= 0.0001f)
+        {
+            return false;
+        }
+
+        float visibleHeight =
+            worldGap /
+            viewportGap;
+
+        float desiredOrthographicSize =
+            Mathf.Max(
+                visibleHeight * 0.5f,
+                cameraConfig.StartFrameMinOrthographicSize);
+
+        desiredOrthographicSize =
+            ClampNewGameStartFrameOrthographicSize(
+                desiredOrthographicSize);
+
+        SetZoomImmediate(
+            desiredOrthographicSize);
+
+        float cameraY =
+            shipPosition.y -
+            (shipViewportY - 0.5f) *
+            desiredOrthographicSize *
+            2f;
+
+        Vector3 cameraPosition =
+            new Vector3(
+                (shipPosition.x + sunPosition.x) * 0.5f,
+                cameraY,
+                targetCamera.transform.position.z);
+
+        MoveCameraTo(
+            cameraPosition);
+
+        mode =
+            SystemCameraMode2A.FreeLook;
+
+        return true;
+    }
+
+    private float ClampNewGameStartFrameOrthographicSize(
+        float value)
+    {
+        float maximum =
+            MaxOrthographicSizeWithoutEmptySpace;
+
+        float minimum =
+            Mathf.Min(
+                cameraConfig.StartFrameMinOrthographicSize,
+                maximum);
+
+        return Mathf.Clamp(
+            value,
+            minimum,
+            maximum);
+    }
+
     private float GetLargestObjectRadius(
         StarSystemConfig systemConfig
     )
@@ -1054,7 +1197,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         {
             largestRadius = Mathf.Max(
                 largestRadius,
-                systemConfig.Sun.VisualSize * 0.5f
+                GetSunWorldSize(systemConfig.Sun) * 0.5f
             );
         }
 
@@ -1073,8 +1216,8 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
                 largestRadius = Mathf.Max(
                     largestRadius,
-                    planet.PlanetOrbit
-                        .PlanetVisualSize * 0.5f
+                    GetPlanetWorldSize(
+                        planet) * 0.5f
                 );
             }
         }
@@ -1083,11 +1226,57 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         {
             largestRadius = Mathf.Max(
                 largestRadius,
-                systemConfig.Station.VisualSize * 0.5f
+                GetStationWorldSize(
+                    systemConfig.Station) * 0.5f
             );
         }
 
         return largestRadius;
+    }
+
+    private float GetSunWorldSize(SunConfig sun)
+    {
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            return _configService
+                .SystemVisualConfig
+                .GetSunWorldSize(sun);
+        }
+
+        return sun != null
+            ? sun.VisualSize
+            : 0f;
+    }
+
+    private float GetPlanetWorldSize(PlanetConfig planet)
+    {
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            return _configService
+                .SystemVisualConfig
+                .GetPlanetWorldSize(planet);
+        }
+
+        return planet != null
+            ? planet.VisualSize
+            : 0f;
+    }
+
+    private float GetStationWorldSize(StationConfig station)
+    {
+        if (_configService != null &&
+            _configService.SystemVisualConfig != null)
+        {
+            return _configService
+                .SystemVisualConfig
+                .GetStationWorldSize(station);
+        }
+
+        return station != null
+            ? station.VisualSize
+            : 0f;
     }
 
     private StarSystemConfig GetCurrentSystemConfig()
