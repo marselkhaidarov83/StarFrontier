@@ -30,4 +30,19 @@ public interface IInvasionService
 
     bool CleanupInvasion(
         string invasionId);
+
+    bool MarkSystemThreat(
+        string targetSystemId);
+
+    int GetActiveInvasionCount();
+
+    bool CanStartInvasion(
+        string targetSystemId);
+
+    bool CanCaptureSystemWithoutHopelessCollapse(
+        string targetSystemId);
+
+    int ProcessOfflineWarCatchUp(
+        GameRuntimeState state,
+        int targetQuantTick);
 }

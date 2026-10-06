@@ -346,6 +346,19 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
     [Test]
     public void EnemyServices_ExposeRequiredStage2AContracts()
     {
+        Assert.That(typeof(IInvasionService).GetMethod("ProcessOfflineWarCatchUp"), Is.Not.Null);
+
+        Assert.That(typeof(IInvasionService).GetMethod("CanCaptureSystemWithoutHopelessCollapse"), Is.Not.Null);
+
+        Assert.That(typeof(IEnemyFactionService).GetMethod("RefreshFactionFrontline"), Is.Not.Null);
+        Assert.That(typeof(IEnemyFactionService).GetMethod("IsFrontlineSystem"), Is.Not.Null);
+        Assert.That(typeof(IEnemyFactionService).GetMethod("IsFrontierSystem"), Is.Not.Null);
+
+        Assert.That(typeof(IInvasionService).GetMethod("GetActiveInvasionCount"), Is.Not.Null);
+        Assert.That(typeof(IInvasionService).GetMethod("CanStartInvasion"), Is.Not.Null);
+
+        Assert.That(typeof(IInvasionService).GetMethod("MarkSystemThreat"), Is.Not.Null);
+
         Assert.That(typeof(IEnemyFactionService).GetMethod("GetOrCreateFaction"), Is.Not.Null);
         Assert.That(typeof(IEnemyFactionService).GetMethod("AddOwnedSystem"), Is.Not.Null);
         Assert.That(typeof(IEnemyFactionService).GetMethod("RegisterEnemyGroup"), Is.Not.Null);
@@ -493,5 +506,842 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
         field.SetValue(
             target,
             value);
+    }
+
+    [Test]
+    public void StarSystemStatus_ThreatenedAlias_PreservesLegacyThreatValue()
+    {
+        Assert.That(
+            (int)StarSystemStatus.Threatened,
+            Is.EqualTo((int)StarSystemStatus.Threat));
+    }
+
+    [Test]
+    public void StarSystemRuntimeState_WarStatusHelpers_CoverThreatInvasionCapturedAndRecoveryReady()
+    {
+        StarSystemRuntimeState systemState =
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.Stable
+            };
+
+        Assert.That(systemState.IsUnderWarPressure(), Is.False);
+        Assert.That(systemState.IsRecoveryReady(), Is.False);
+        Assert.That(systemState.IsSecured(0), Is.True);
+
+        systemState.MarkThreat();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Threat));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+        Assert.That(systemState.IsSecured(0), Is.False);
+
+        systemState.MarkInvasion();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+
+        systemState.MarkCaptured();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+
+        systemState.MarkRecoveryReady();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(systemState.IsUnderWarPressure(), Is.False);
+        Assert.That(systemState.IsRecoveryReady(), Is.True);
+        Assert.That(systemState.IsSecured(0), Is.False);
+    }
+
+    [Test]
+    public void WarState_JsonRoundTrip_PreservesSystemWarStatus()
+    {
+        GameRuntimeState source =
+            new GameRuntimeState();
+
+        source.Galaxy.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                IsDiscovered = true,
+                IsVisited = true,
+                DevelopmentLevel = 1,
+                DangerLevel = 0,
+                Stability = 100,
+                SystemStatus = StarSystemStatus.RecoveryReady
+            });
+
+        string json =
+            JsonUtility.ToJson(source);
+
+        GameRuntimeState restored =
+            JsonUtility.FromJson<GameRuntimeState>(json);
+
+        Assert.That(restored.Galaxy.Systems.Count, Is.EqualTo(1));
+        Assert.That(restored.Galaxy.Systems[0].SystemId, Is.EqualTo("system_target"));
+        Assert.That(restored.Galaxy.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(restored.Galaxy.Systems[0].IsRecoveryReady(), Is.True);
+    }
+
+    [Test]
+    public void WarTransition_StateFlow_CoversThreatInvasionCaptured()
+    {
+        StarSystemRuntimeState systemState =
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.Stable
+            };
+
+        systemState.MarkThreat();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Threat));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+
+        systemState.MarkInvasion();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+
+        systemState.MarkCaptured();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+        Assert.That(systemState.IsSecured(0), Is.False);
+    }
+
+    [Test]
+    public void WarTransition_StateFlow_CoversThreatInvasionRecoveryReady()
+    {
+        StarSystemRuntimeState systemState =
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.Stable
+            };
+
+        systemState.MarkThreat();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Threat));
+
+        systemState.MarkInvasion();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+
+        systemState.MarkRecoveryReady();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(systemState.IsRecoveryReady(), Is.True);
+        Assert.That(systemState.IsUnderWarPressure(), Is.False);
+        Assert.That(systemState.IsSecured(0), Is.False);
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_AllowsActiveInvasionsForDifferentTargetsUntilLimit()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_01",
+                TargetSystemId = "system_alpha",
+                LifecycleState = InvasionLifecycleState.Active
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_02",
+                TargetSystemId = "system_beta",
+                LifecycleState = InvasionLifecycleState.Preparing
+            });
+
+        Assert.That(galaxyState.CountActiveInvasions(), Is.EqualTo(2));
+        Assert.That(galaxyState.HasActiveInvasionForTarget("system_alpha"), Is.True);
+        Assert.That(galaxyState.HasActiveInvasionForTarget("system_gamma"), Is.False);
+        Assert.That(galaxyState.CanStartAdditionalInvasion("system_gamma", 3), Is.True);
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_BlocksDuplicateTargetAndGlobalInvasionLimit()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_01",
+                TargetSystemId = "system_alpha",
+                LifecycleState = InvasionLifecycleState.Active
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_02",
+                TargetSystemId = "system_beta",
+                LifecycleState = InvasionLifecycleState.Active
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_03",
+                TargetSystemId = "system_gamma",
+                LifecycleState = InvasionLifecycleState.Active
+            });
+
+        Assert.That(galaxyState.CanStartAdditionalInvasion("system_alpha", 3), Is.False);
+        Assert.That(galaxyState.CanStartAdditionalInvasion("system_delta", 3), Is.False);
+    }
+
+    [Test]
+    public void SaveValidation_KeepsActiveInvasionsForDifferentTargets()
+    {
+        GameRuntimeState state =
+            new GameRuntimeState();
+
+        state.Galaxy.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_alpha",
+                TargetSystemId = "system_alpha",
+                LifecycleState = InvasionLifecycleState.Active
+            });
+
+        state.Galaxy.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_beta",
+                TargetSystemId = "system_beta",
+                LifecycleState = InvasionLifecycleState.Active
+            });
+
+        SaveValidationResult result =
+            new SaveValidationStage()
+                .ValidateAndNormalize(state);
+
+        Assert.That(result.IsValid, Is.True);
+        Assert.That(state.Galaxy.Invasions.Count, Is.EqualTo(2));
+        Assert.That(state.Galaxy.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(state.Galaxy.Invasions[1].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+    }
+
+    [Test]
+    public void EnemyFactionState_RebuildsFrontlineAndFrontierFromNeighborSystems()
+    {
+        EnemyFactionState faction =
+            new EnemyFactionState
+            {
+                FactionId = "ai",
+                OwnedSystemIds = new List<string>
+                {
+                    "system_owned"
+                },
+                TerritorySystemIds = new List<string>()
+            };
+
+        Dictionary<string, IReadOnlyList<string>> neighbors =
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                {
+                    "system_owned",
+                    new List<string>
+                    {
+                        "system_frontier"
+                    }
+                },
+                {
+                    "system_frontier",
+                    new List<string>
+                    {
+                        "system_owned"
+                    }
+                }
+            };
+
+        faction.RebuildFrontlineAndFrontier(neighbors);
+
+        Assert.That(faction.IsFrontlineSystem("system_owned"), Is.True);
+        Assert.That(faction.IsFrontierSystem("system_frontier"), Is.True);
+        Assert.That(faction.HasOwnershipLink("system_frontier"), Is.False);
+    }
+
+    [Test]
+    public void EnemyFactionState_FrontierDoesNotRequireRouteLock()
+    {
+        EnemyFactionState faction =
+            new EnemyFactionState
+            {
+                FactionId = "infected",
+                OwnedSystemIds = new List<string>
+                {
+                    "system_hive"
+                },
+                TerritorySystemIds = new List<string>
+                {
+                    "system_border"
+                }
+            };
+
+        Dictionary<string, IReadOnlyList<string>> neighbors =
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                {
+                    "system_hive",
+                    new List<string>
+                    {
+                        "system_border"
+                    }
+                }
+            };
+
+        faction.RebuildFrontlineAndFrontier(neighbors);
+
+        Assert.That(faction.HasOwnershipLink("system_hive"), Is.True);
+        Assert.That(faction.HasTerritoryLink("system_border"), Is.True);
+        Assert.That(faction.IsFrontierSystem("system_border"), Is.True);
+    }
+
+    [Test]
+    public void InvasionState_ApplyEscalation_UsesGalaxyLevelAndFactionRules()
+    {
+        InvasionState aiInvasion =
+            new InvasionState();
+
+        aiInvasion.ApplyEscalation(
+            "ai",
+            4);
+
+        Assert.That(aiInvasion.Level, Is.EqualTo(4));
+        Assert.That(aiInvasion.EscalationTier, Is.EqualTo(2));
+        Assert.That(aiInvasion.EscalationPressure, Is.EqualTo(6));
+        Assert.That(aiInvasion.EscalationRuleId, Is.EqualTo("ai_gl04_tier02"));
+        Assert.That(aiInvasion.UsesPlayerPowerScaling, Is.False);
+
+        InvasionState infectedInvasion =
+            new InvasionState();
+
+        infectedInvasion.ApplyEscalation(
+            "infected",
+            4);
+
+        Assert.That(infectedInvasion.Level, Is.EqualTo(4));
+        Assert.That(infectedInvasion.EscalationTier, Is.EqualTo(2));
+        Assert.That(infectedInvasion.EscalationPressure, Is.EqualTo(8));
+        Assert.That(infectedInvasion.EscalationRuleId, Is.EqualTo("infected_gl04_tier02"));
+        Assert.That(infectedInvasion.UsesPlayerPowerScaling, Is.False);
+    }
+
+    [Test]
+    public void InvasionState_ApplyEscalation_ClampsGalaxyLevelToOneTen()
+    {
+        InvasionState lowLevelInvasion =
+            new InvasionState();
+
+        lowLevelInvasion.ApplyEscalation(
+            "ancients",
+            -5);
+
+        Assert.That(lowLevelInvasion.Level, Is.EqualTo(1));
+        Assert.That(lowLevelInvasion.EscalationTier, Is.EqualTo(1));
+        Assert.That(lowLevelInvasion.UsesPlayerPowerScaling, Is.False);
+
+        InvasionState highLevelInvasion =
+            new InvasionState();
+
+        highLevelInvasion.ApplyEscalation(
+            "ancients",
+            99);
+
+        Assert.That(highLevelInvasion.Level, Is.EqualTo(10));
+        Assert.That(highLevelInvasion.EscalationTier, Is.EqualTo(3));
+        Assert.That(highLevelInvasion.EscalationRuleId, Is.EqualTo("ancients_gl10_tier03"));
+        Assert.That(highLevelInvasion.UsesPlayerPowerScaling, Is.False);
+    }
+
+    [Test]
+    public void WarState_JsonRoundTrip_PreservesInvasionEscalation()
+    {
+        GameRuntimeState source =
+            new GameRuntimeState();
+
+        InvasionState invasion =
+            new InvasionState
+            {
+                InvasionId = "invasion_escalation",
+                FactionId = "infected",
+                SourceSystemId = "system_source",
+                TargetSystemId = "system_target",
+                LifecycleState = InvasionLifecycleState.Active
+            };
+
+        invasion.ApplyEscalation(
+            "infected",
+            7);
+
+        source.Galaxy.Invasions.Add(invasion);
+
+        string json =
+            JsonUtility.ToJson(source);
+
+        GameRuntimeState restored =
+            JsonUtility.FromJson<GameRuntimeState>(json);
+
+        Assert.That(restored.Galaxy.Invasions.Count, Is.EqualTo(1));
+        Assert.That(restored.Galaxy.Invasions[0].Level, Is.EqualTo(7));
+        Assert.That(restored.Galaxy.Invasions[0].EscalationTier, Is.EqualTo(4));
+        Assert.That(restored.Galaxy.Invasions[0].EscalationPressure, Is.EqualTo(13));
+        Assert.That(restored.Galaxy.Invasions[0].EscalationRuleId, Is.EqualTo("infected_gl07_tier04"));
+        Assert.That(restored.Galaxy.Invasions[0].UsesPlayerPowerScaling, Is.False);
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_BlocksCaptureOfLastRecoverableSystem()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_last",
+                SystemStatus = StarSystemStatus.Invasion
+            });
+
+        Assert.That(
+            galaxyState.CanCaptureSystemWithoutHopelessCollapse("system_last"),
+            Is.False);
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_AllowsCaptureWhenAnotherRecoverableSystemRemains()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.Invasion
+            });
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_safe",
+                SystemStatus = StarSystemStatus.Stable
+            });
+
+        Assert.That(
+            galaxyState.CanCaptureSystemWithoutHopelessCollapse("system_target"),
+            Is.True);
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_RepairHopelessCollapse_RestoresOneRecoveryReadySystem()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_alpha",
+                SystemStatus = StarSystemStatus.Captured
+            });
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_beta",
+                SystemStatus = StarSystemStatus.Captured
+            });
+
+        bool repaired =
+            galaxyState.RepairHopelessCollapse();
+
+        Assert.That(repaired, Is.True);
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(galaxyState.Systems[1].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+    }
+
+    [Test]
+    public void SaveValidation_RepairsHopelessGalaxyCollapse()
+    {
+        GameRuntimeState state =
+            new GameRuntimeState();
+
+        state.Galaxy.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_alpha",
+                SystemStatus = StarSystemStatus.Captured
+            });
+
+        state.Galaxy.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_beta",
+                SystemStatus = StarSystemStatus.Captured
+            });
+
+        SaveValidationResult result =
+            new SaveValidationStage()
+                .ValidateAndNormalize(state);
+
+        Assert.That(result.IsValid, Is.True);
+        Assert.That(state.Galaxy.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_OfflineCatchUp_ResolvesExpiredActiveInvasion()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.Invasion,
+                Stability = 100
+            });
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_safe",
+                SystemStatus = StarSystemStatus.Stable,
+                Stability = 100
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_01",
+                FactionId = "ai",
+                TargetSystemId = "system_target",
+                LifecycleState = InvasionLifecycleState.Active,
+                ResolveAtTick = 5
+            });
+
+        int changedCount =
+            galaxyState.ProcessOfflineWarCatchUp(5);
+
+        Assert.That(changedCount, Is.GreaterThanOrEqualTo(1));
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_OfflineCatchUp_ThreatDegradesIntoInvasion()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_threat",
+                SystemStatus = StarSystemStatus.Threat,
+                Stability = 100
+            });
+
+        int changedCount =
+            galaxyState.ProcessOfflineWarCatchUp(1);
+
+        Assert.That(changedCount, Is.EqualTo(1));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_OfflineCatchUp_DegradesCapturedSystemStability()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_captured",
+                SystemStatus = StarSystemStatus.Captured,
+                Stability = 100
+            });
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_safe",
+                SystemStatus = StarSystemStatus.Stable,
+                Stability = 100
+            });
+
+        int changedCount =
+            galaxyState.ProcessOfflineWarCatchUp(3);
+
+        Assert.That(changedCount, Is.EqualTo(1));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(galaxyState.Systems[0].Stability, Is.EqualTo(97));
+    }
+
+    [Test]
+    public void GalaxyRuntimeState_OfflineCatchUp_RespectsHopelessnessBounds()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_last",
+                SystemStatus = StarSystemStatus.Invasion,
+                Stability = 100
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_last",
+                FactionId = "infected",
+                TargetSystemId = "system_last",
+                LifecycleState = InvasionLifecycleState.Active,
+                ResolveAtTick = 3
+            });
+
+        galaxyState.ProcessOfflineWarCatchUp(3);
+
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+    }
+
+    [Test]
+    public void T08_MultiSystemInvasion_ResolvesDifferentTargetsWithoutStateOverwrite()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_alpha",
+                SystemStatus = StarSystemStatus.Invasion,
+                Stability = 100
+            });
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_beta",
+                SystemStatus = StarSystemStatus.Invasion,
+                Stability = 100
+            });
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_safe",
+                SystemStatus = StarSystemStatus.Stable,
+                Stability = 100
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_alpha",
+                FactionId = "ai",
+                TargetSystemId = "system_alpha",
+                LifecycleState = InvasionLifecycleState.Active,
+                ResolveAtTick = 5
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_beta",
+                FactionId = "infected",
+                TargetSystemId = "system_beta",
+                LifecycleState = InvasionLifecycleState.Active,
+                ResolveAtTick = 5
+            });
+
+        int changedCount =
+            galaxyState.ProcessOfflineWarCatchUp(5);
+
+        Assert.That(changedCount, Is.GreaterThanOrEqualTo(2));
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
+        Assert.That(galaxyState.Invasions[1].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(galaxyState.Systems[1].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(galaxyState.Systems[2].SystemStatus, Is.EqualTo(StarSystemStatus.Stable));
+    }
+
+    [Test]
+    public void T08_ScalingCurves_IncreaseByGalaxyLevelAndFactionWithoutPlayerPower()
+    {
+        InvasionState aiLow =
+            new InvasionState();
+
+        aiLow.ApplyEscalation(
+            "ai",
+            1);
+
+        InvasionState aiHigh =
+            new InvasionState();
+
+        aiHigh.ApplyEscalation(
+            "ai",
+            10);
+
+        InvasionState infectedHigh =
+            new InvasionState();
+
+        infectedHigh.ApplyEscalation(
+            "infected",
+            10);
+
+        Assert.That(aiHigh.EscalationTier, Is.GreaterThan(aiLow.EscalationTier));
+        Assert.That(aiHigh.EscalationPressure, Is.GreaterThan(aiLow.EscalationPressure));
+        Assert.That(infectedHigh.EscalationPressure, Is.GreaterThan(aiHigh.EscalationPressure));
+
+        Assert.That(aiLow.UsesPlayerPowerScaling, Is.False);
+        Assert.That(aiHigh.UsesPlayerPowerScaling, Is.False);
+        Assert.That(infectedHigh.UsesPlayerPowerScaling, Is.False);
+    }
+
+    [Test]
+    public void T08_TerritoryTransitions_RebuildFrontlineAndFrontierAfterCapture()
+    {
+        EnemyFactionState faction =
+            new EnemyFactionState
+            {
+                FactionId = "ai",
+                OwnedSystemIds = new List<string>
+                {
+                    "system_core",
+                    "system_captured"
+                },
+                TerritorySystemIds = new List<string>
+                {
+                    "system_core",
+                    "system_captured"
+                }
+            };
+
+        Dictionary<string, IReadOnlyList<string>> neighbors =
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                {
+                    "system_core",
+                    new List<string>
+                    {
+                        "system_captured"
+                    }
+                },
+                {
+                    "system_captured",
+                    new List<string>
+                    {
+                        "system_core",
+                        "system_frontier"
+                    }
+                },
+                {
+                    "system_frontier",
+                    new List<string>
+                    {
+                        "system_captured"
+                    }
+                }
+            };
+
+        faction.RebuildFrontlineAndFrontier(neighbors);
+
+        Assert.That(faction.HasOwnershipLink("system_captured"), Is.True);
+        Assert.That(faction.HasTerritoryLink("system_captured"), Is.True);
+        Assert.That(faction.IsFrontlineSystem("system_captured"), Is.True);
+        Assert.That(faction.IsFrontierSystem("system_frontier"), Is.True);
+        Assert.That(faction.IsFrontlineSystem("system_core"), Is.False);
+    }
+
+    [Test]
+    public void T08_AntiHopelessness_LastRecoverableSystemStaysRecoveryReady()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        galaxyState.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_last",
+                SystemStatus = StarSystemStatus.Invasion,
+                Stability = 100
+            });
+
+        galaxyState.Invasions.Add(
+            new InvasionState
+            {
+                InvasionId = "invasion_last",
+                FactionId = "ancients",
+                TargetSystemId = "system_last",
+                LifecycleState = InvasionLifecycleState.Active,
+                ResolveAtTick = 10
+            });
+
+        galaxyState.ProcessOfflineWarCatchUp(10);
+
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(galaxyState.CanCaptureSystemWithoutHopelessCollapse("system_last"), Is.False);
+    }
+
+    [Test]
+    public void T08_Performance_OfflineWarCatchUp_HandlesLargeStateWithinBudget()
+    {
+        GalaxyRuntimeState galaxyState =
+            new GalaxyRuntimeState();
+
+        for (int i = 0; i < 120; i++)
+        {
+            galaxyState.Systems.Add(
+                new StarSystemRuntimeState
+                {
+                    SystemId = "system_" + i.ToString("000"),
+                    SystemStatus = i % 3 == 0
+                        ? StarSystemStatus.Invasion
+                        : StarSystemStatus.Stable,
+                    Stability = 100
+                });
+        }
+
+        for (int i = 0; i < 40; i++)
+        {
+            galaxyState.Invasions.Add(
+                new InvasionState
+                {
+                    InvasionId = "invasion_" + i.ToString("000"),
+                    FactionId = i % 2 == 0 ? "ai" : "infected",
+                    TargetSystemId = "system_" + i.ToString("000"),
+                    LifecycleState = InvasionLifecycleState.Active,
+                    ResolveAtTick = 10
+                });
+        }
+
+        System.Diagnostics.Stopwatch stopwatch =
+            System.Diagnostics.Stopwatch.StartNew();
+
+        int changedCount =
+            galaxyState.ProcessOfflineWarCatchUp(10);
+
+        stopwatch.Stop();
+
+        Assert.That(changedCount, Is.GreaterThan(0));
+        Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(250));
+        Assert.That(galaxyState.RepairHopelessCollapse(), Is.False);
     }
 }

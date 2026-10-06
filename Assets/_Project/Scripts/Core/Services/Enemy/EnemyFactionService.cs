@@ -11,12 +11,16 @@ public sealed class EnemyFactionService :
     private const string InfectedFactionId = "infected";
 
     private readonly IGameSessionService _gameSessionService;
+    private readonly IConfigService _configService;
 
     public EnemyFactionService()
     {
         _gameSessionService =
             Bootstrapper.Instance.ServiceRegistry
                 .Get<IGameSessionService>();
+
+        Bootstrapper.Instance.ServiceRegistry.TryGet(
+            out _configService);
 
         RepairFactionState();
     }
@@ -148,23 +152,28 @@ public sealed class EnemyFactionService :
         AddUniqueId(factionState.OwnedSystemIds, systemId);
         AddUniqueId(factionState.TerritorySystemIds, systemId);
 
+        RefreshFactionFrontline(factionId);
+
         return true;
     }
 
     public bool RemoveOwnedSystem(
-        string factionId,
-        string systemId)
+     string factionId,
+     string systemId)
     {
         if (!TryGetFaction(factionId, out EnemyFactionState factionState))
             return false;
 
         RemoveId(factionState.OwnedSystemIds, systemId);
+
+        RefreshFactionFrontline(factionId);
+
         return true;
     }
 
     public bool AddTerritorySystem(
-        string factionId,
-        string systemId)
+     string factionId,
+     string systemId)
     {
         EnemyFactionState factionState =
             GetOrCreateFaction(factionId, factionId);
@@ -178,18 +187,55 @@ public sealed class EnemyFactionService :
         EnsureFactionLists(factionState);
         AddUniqueId(factionState.TerritorySystemIds, systemId);
 
+        RefreshFactionFrontline(factionId);
+
         return true;
     }
 
     public bool RemoveTerritorySystem(
+    string factionId,
+    string systemId)
+    {
+        if (!TryGetFaction(factionId, out EnemyFactionState factionState))
+            return false;
+
+        RemoveId(factionState.TerritorySystemIds, systemId);
+
+        RefreshFactionFrontline(factionId);
+
+        return true;
+    }
+
+    public bool RefreshFactionFrontline(
+    string factionId)
+    {
+        if (!TryGetFaction(factionId, out EnemyFactionState factionState))
+            return false;
+
+        factionState.RebuildFrontlineAndFrontier(
+            BuildNeighborSystemIdMap());
+
+        return true;
+    }
+
+    public bool IsFrontlineSystem(
         string factionId,
         string systemId)
     {
         if (!TryGetFaction(factionId, out EnemyFactionState factionState))
             return false;
 
-        RemoveId(factionState.TerritorySystemIds, systemId);
-        return true;
+        return factionState.IsFrontlineSystem(systemId);
+    }
+
+    public bool IsFrontierSystem(
+        string factionId,
+        string systemId)
+    {
+        if (!TryGetFaction(factionId, out EnemyFactionState factionState))
+            return false;
+
+        return factionState.IsFrontierSystem(systemId);
     }
 
     public bool RegisterEnemyGroup(
@@ -355,12 +401,70 @@ public sealed class EnemyFactionService :
     }
 
     private static void EnsureFactionLists(
-        EnemyFactionState factionState)
+    EnemyFactionState factionState)
     {
-        factionState.OwnedSystemIds ??= new List<string>();
-        factionState.TerritorySystemIds ??= new List<string>();
-        factionState.ActiveGroupRuntimeIds ??= new List<string>();
-        factionState.ActiveInvasionIds ??= new List<string>();
+        factionState.EnsureWarTerritoryLists();
+    }
+
+    private IReadOnlyDictionary<string, IReadOnlyList<string>> BuildNeighborSystemIdMap()
+    {
+        Dictionary<string, IReadOnlyList<string>> result =
+            new Dictionary<string, IReadOnlyList<string>>();
+
+        if (_configService == null)
+            return result;
+
+        IReadOnlyList<StarSystemConfig> systems =
+            _configService.GetAllStarSystems();
+
+        if (systems == null)
+            return result;
+
+        for (int i = 0; i < systems.Count; i++)
+        {
+            StarSystemConfig system =
+                systems[i];
+
+            if (system == null ||
+                string.IsNullOrWhiteSpace(system.Id))
+            {
+                continue;
+            }
+
+            List<string> neighbors =
+                new List<string>();
+
+            if (system.Routes != null)
+            {
+                for (int routeIndex = 0;
+                     routeIndex < system.Routes.Count;
+                     routeIndex++)
+                {
+                    RouteConfig route =
+                        system.Routes[routeIndex];
+
+                    if (route == null)
+                        continue;
+
+                    StarSystemConfig otherSystem =
+                        route.GetOtherSystem(system.Id);
+
+                    if (otherSystem == null ||
+                        string.IsNullOrWhiteSpace(otherSystem.Id))
+                    {
+                        continue;
+                    }
+
+                    AddUniqueId(
+                        neighbors,
+                        otherSystem.Id);
+                }
+            }
+
+            result[system.Id] = neighbors;
+        }
+
+        return result;
     }
 
     private static string NormalizeFactionId(

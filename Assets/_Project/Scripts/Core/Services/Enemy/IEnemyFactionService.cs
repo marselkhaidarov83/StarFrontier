@@ -57,4 +57,15 @@ public interface IEnemyFactionService
         string invasionId);
 
     void RepairFactionState();
+
+    bool RefreshFactionFrontline(
+    string factionId);
+
+    bool IsFrontlineSystem(
+        string factionId,
+        string systemId);
+
+    bool IsFrontierSystem(
+        string factionId,
+        string systemId);
 }

@@ -117,6 +117,9 @@ public sealed class SaveValidationStage
         int cancelledDuplicateInvasions =
             CancelDuplicateActiveInvasions(state.Galaxy.Invasions);
 
+        bool repairedHopelessCollapse =
+            state.Galaxy.RepairHopelessCollapse();
+
         if (removedFactionCount > 0)
         {
             result.Normalizations.Add(
@@ -147,6 +150,12 @@ public sealed class SaveValidationStage
                 "Cancelled duplicate active invasions: " +
                 cancelledDuplicateInvasions +
                 ".");
+        }
+
+        if (repairedHopelessCollapse)
+        {
+            result.Normalizations.Add(
+                "Repaired hopeless galaxy collapse by restoring one system to RecoveryReady.");
         }
     }
 
@@ -182,11 +191,15 @@ public sealed class SaveValidationStage
 
             faction.OwnedSystemIds ??= new List<string>();
             faction.TerritorySystemIds ??= new List<string>();
+            faction.FrontlineSystemIds ??= new List<string>();
+            faction.FrontierSystemIds ??= new List<string>();
             faction.ActiveGroupRuntimeIds ??= new List<string>();
             faction.ActiveInvasionIds ??= new List<string>();
 
             RemoveEmptyAndDuplicateIds(faction.OwnedSystemIds);
             RemoveEmptyAndDuplicateIds(faction.TerritorySystemIds);
+            RemoveEmptyAndDuplicateIds(faction.FrontlineSystemIds);
+            RemoveEmptyAndDuplicateIds(faction.FrontierSystemIds);
             RemoveEmptyAndDuplicateIds(faction.ActiveGroupRuntimeIds);
             RemoveEmptyAndDuplicateIds(faction.ActiveInvasionIds);
         }
@@ -267,6 +280,10 @@ public sealed class SaveValidationStage
 
             invasion.Level =
                 UnityEngine.Mathf.Clamp(invasion.Level, 1, 10);
+
+            invasion.ApplyEscalation(
+                invasion.FactionId,
+                invasion.Level);
 
             if (!System.Enum.IsDefined(
                     typeof(InvasionLifecycleState),

@@ -158,6 +158,10 @@ public static class SaveMigrationService
 
                 invasionState.EnemyGroupRuntimeIds ??=
                     new List<string>();
+
+                invasionState.ApplyEscalation(
+                    invasionState.FactionId,
+                    invasionState.Level);
             }
         }
 
@@ -172,6 +176,12 @@ public static class SaveMigrationService
                     new List<string>();
 
                 factionState.TerritorySystemIds ??=
+                    new List<string>();
+
+                factionState.FrontlineSystemIds ??=
+                    new List<string>();
+
+                factionState.FrontierSystemIds ??=
                     new List<string>();
 
                 factionState.ActiveGroupRuntimeIds ??=

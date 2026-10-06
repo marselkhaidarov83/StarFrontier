@@ -11,6 +11,7 @@ public class ContinueGameService : CustomService, IContinueGameService
     private readonly ISystemNpcOfflineRelocationService _npcOfflineRelocationService;
     private readonly ISystemNpcPopulationService _npcPopulationService;
     private readonly ISystemNpcSimulationSaveService _npcSimulationSaveService;
+    private readonly IInvasionService _invasionService;
 
     public ContinueGameService()
     {
@@ -18,6 +19,8 @@ public class ContinueGameService : CustomService, IContinueGameService
         _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        Bootstrapper.Instance.ServiceRegistry.TryGet(
+            out _invasionService);
 
         Bootstrapper.Instance.ServiceRegistry.TryGet(
             out _npcOfflineRelocationService);
@@ -102,6 +105,7 @@ public class ContinueGameService : CustomService, IContinueGameService
             0.35f);
 
         _gameSessionService.LoadSession(save);
+        ProcessOfflineWarCatchUp(save);
 
         LogLoadingStep(
             "LoadSession.After",
@@ -271,6 +275,7 @@ public class ContinueGameService : CustomService, IContinueGameService
             System.Diagnostics.Stopwatch.StartNew();
 
         _gameSessionService.LoadSession(save);
+        ProcessOfflineWarCatchUp(save);
 
         if (_npcSimulationSaveService != null)
         {
@@ -452,5 +457,47 @@ public class ContinueGameService : CustomService, IContinueGameService
         return Bootstrapper.Instance
             .DebugLogConfig
             .LoadingSceneDiagnosticsLogs;
+    }
+
+    private void ProcessOfflineWarCatchUp(
+    GameRuntimeState save)
+    {
+        if (_invasionService == null ||
+            save == null ||
+            save.Meta == null)
+        {
+            return;
+        }
+
+        int targetQuantTick =
+            0;
+
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out IGameTimeService gameTimeService))
+        {
+            targetQuantTick =
+                gameTimeService.CurrentQuantTick;
+        }
+
+        if (targetQuantTick <= 0 &&
+            save.Galaxy != null)
+        {
+            targetQuantTick =
+                Math.Max(
+                    1,
+                    save.Galaxy.GalaxyDay);
+        }
+
+        int changedCount =
+            _invasionService.ProcessOfflineWarCatchUp(
+                save,
+                targetQuantTick);
+
+        LogCustom(
+            "[ContinueGameService] Offline war catch-up complete. " +
+            "ChangedCount: " + changedCount +
+            " | TargetQuantTick: " + targetQuantTick);
     }
 }
