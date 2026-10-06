@@ -6,6 +6,7 @@ public sealed class SystemSecurityService :
 {
     private readonly IGameSessionService _gameSessionService;
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
+    private readonly SimpleEventBus _eventBus;
 
     public SystemSecurityService()
     {
@@ -16,6 +17,10 @@ public sealed class SystemSecurityService :
         _npcRuntimeService =
             Bootstrapper.Instance.ServiceRegistry
                 .Get<ISystemNpcRuntimeService>();
+
+        _eventBus =
+            Bootstrapper.Instance.ServiceRegistry
+            .Get<SimpleEventBus>();
     }
 
     public bool TryGetSystemStatus(
@@ -209,6 +214,9 @@ public sealed class SystemSecurityService :
             return false;
         }
 
+        SystemInfrastructureDamageState previousDamageState =
+            systemState.InfrastructureDamageState;
+
         systemState.ApplyInfrastructureDamageFromWar(
             damageAmount,
             forceDestroyed);
@@ -218,6 +226,11 @@ public sealed class SystemSecurityService :
             "System: " + systemId +
             " | DamageState: " + systemState.InfrastructureDamageState +
             " | Damage: " + systemState.InfrastructureDamage);
+
+        PublishInfrastructureWarNews(
+            systemId,
+            previousDamageState,
+            systemState.InfrastructureDamageState);
 
         return true;
     }
@@ -271,5 +284,65 @@ public sealed class SystemSecurityService :
             " | Reason: " + systemState.RecoveryHookReason);
 
         return true;
+    }
+
+    private void PublishInfrastructureWarNews(
+    string systemId,
+    SystemInfrastructureDamageState previousState,
+    SystemInfrastructureDamageState currentState)
+    {
+        if (previousState == currentState)
+            return;
+
+        if (currentState == SystemInfrastructureDamageState.Damaged)
+        {
+            _eventBus?.Publish(
+                new WarNewsItemCreatedEvent(
+                    WarNewsEventKind.InfrastructureDamaged,
+                    systemId,
+                    string.Empty,
+                    "Инфраструктура повреждена",
+                    "Война повредила инфраструктуру системы " +
+                    systemId +
+                    ".",
+                    GetCurrentQuantTick(),
+                    70));
+
+            return;
+        }
+
+        if (currentState == SystemInfrastructureDamageState.Destroyed)
+        {
+            _eventBus?.Publish(
+                new WarNewsItemCreatedEvent(
+                    WarNewsEventKind.InfrastructureDestroyed,
+                    systemId,
+                    string.Empty,
+                    "Инфраструктура разрушена",
+                    "Инфраструктура системы " +
+                    systemId +
+                    " разрушена войной.",
+                    GetCurrentQuantTick(),
+                    85));
+        }
+    }
+
+    private int GetCurrentQuantTick()
+    {
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return 1;
+        }
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out IGameTimeService gameTimeService))
+        {
+            return System.Math.Max(
+                1,
+                gameTimeService.CurrentQuantTick);
+        }
+
+        return 1;
     }
 }

@@ -269,6 +269,18 @@ public sealed class InvasionService :
             ", Target: " + targetSystem.Id +
             ", Rule: " + invasionSpawnRule.Id);
 
+        PublishWarNews(
+            WarNewsEventKind.InvasionStarted,
+            targetSystem.Id,
+            normalizedFactionId,
+            "Вторжение началось",
+            "Система " + targetSystem.DisplayName +
+            " атакована фракцией " +
+            GetWarNewsFactionDisplayName(normalizedFactionId) + ".",
+            currentTick,
+            100);
+
+
         return true;
     }
 
@@ -393,13 +405,40 @@ public sealed class InvasionService :
             out targetStatus);
 
         LogCustom(
-            "[InvasionService] Invasion resolved. " +
-            "InvasionId: " + invasionId +
-            ", CapturedByEnemy: " + capturedByEnemy +
-            ", CaptureAllowed: " + captureAllowed +
-            ", CaptureApplied: " + captureApplied +
-            ", LiberationApplied: " + liberationApplied +
-            ", TargetStatus: " + targetStatus);
+    "[InvasionService] Invasion resolved. " +
+    "InvasionId: " + invasionId +
+    ", CapturedByEnemy: " + capturedByEnemy +
+    ", CaptureAllowed: " + captureAllowed +
+    ", CaptureApplied: " + captureApplied +
+    ", LiberationApplied: " + liberationApplied +
+    ", TargetStatus: " + targetStatus);
+
+        if (captureApplied)
+        {
+            PublishWarNews(
+                WarNewsEventKind.SystemCaptured,
+                invasionState.TargetSystemId,
+                invasionState.FactionId,
+                "Система захвачена",
+                "Враг закрепился в системе " +
+                invasionState.TargetSystemId +
+                ". Фронт войны сместился.",
+                currentTick,
+                90);
+        }
+        else if (liberationApplied)
+        {
+            PublishWarNews(
+                WarNewsEventKind.SystemLiberated,
+                invasionState.TargetSystemId,
+                invasionState.FactionId,
+                "Система освобождена",
+                "Контроль над системой " +
+                invasionState.TargetSystemId +
+                " возвращён цивилизации.",
+                currentTick,
+                80);
+        }
 
         return true;
     }
@@ -482,6 +521,17 @@ public sealed class InvasionService :
         LogCustom(
             "[InvasionService] Invasion cancelled. " +
             "InvasionId: " + invasionId);
+
+        PublishWarNews(
+            WarNewsEventKind.InvasionCancelled,
+            invasionState.TargetSystemId,
+            invasionState.FactionId,
+            "Вторжение сорвано",
+            "Атака на систему " +
+            invasionState.TargetSystemId +
+            " прекращена.",
+            currentTick,
+            60);
 
         return true;
     }
@@ -718,5 +768,49 @@ public sealed class InvasionService :
                     invasion.IsActive());
 
         return invasionState != null;
+    }
+
+    private void PublishWarNews(
+    WarNewsEventKind kind,
+    string systemId,
+    string factionId,
+    string title,
+    string body,
+    int createdAtTick,
+    int priority)
+    {
+        _eventBus?.Publish(
+            new WarNewsItemCreatedEvent(
+                kind,
+                systemId,
+                factionId,
+                title,
+                body,
+                createdAtTick,
+                priority));
+    }
+
+    private string GetWarNewsFactionDisplayName(
+        string factionId)
+    {
+        string normalizedFactionId =
+            NormalizeFactionId(factionId);
+
+        switch (normalizedFactionId)
+        {
+            case "ancients":
+                return "Древние";
+
+            case "ai":
+                return "Враждебный ИИ";
+
+            case "infected":
+                return "Заражённые";
+
+            default:
+                return string.IsNullOrWhiteSpace(factionId)
+                    ? "неизвестная фракция"
+                    : factionId;
+        }
     }
 }

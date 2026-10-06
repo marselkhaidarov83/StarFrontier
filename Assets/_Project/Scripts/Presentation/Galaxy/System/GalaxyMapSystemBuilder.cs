@@ -32,6 +32,13 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     [SerializeField]
     private float errorShowDuration = 2f;
 
+    [Header("Invasion Warning Limits")]
+    [SerializeField]
+    private float invasionWarningCooldownSeconds = 12f;
+
+    [SerializeField]
+    private int maxInvasionWarningsPerMapSession = 1;
+
     [Header("Adaptive Camera")]
     [SerializeField]
     private GalaxyMapViewFitter mapViewFitter;
@@ -46,8 +53,13 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     private IGameSessionService gameSessionService;
     private ITravelService travelService;
     private ISystemTravelService systemTravelService;
+    private IInvasionService invasionService;
     private IGameStateMachine gameStateMachine;
     private SimpleEventBus eventBus;
+
+    private string lastShownInvasionWarningId;
+    private float lastInvasionWarningShownAt = -999f;
+    private int invasionWarningsShownThisMapSession;
 
     private StarSystemNodeView2A[] systemNodes;
     private Coroutine currentRoutine;
@@ -96,6 +108,10 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         systemTravelService =
             Bootstrapper.Instance.ServiceRegistry
                 .Get<ISystemTravelService>();
+
+        invasionService =
+            Bootstrapper.Instance.ServiceRegistry
+            .Get<IInvasionService>();
 
         gameStateMachine =
             Bootstrapper.Instance.ServiceRegistry
@@ -303,19 +319,265 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 
     public void Refresh()
     {
-        if (systemNodes == null)
+        if (systemNodes != null)
+        {
+            foreach (
+                StarSystemNodeView2A systemNodeView
+                in systemNodes
+            )
+            {
+                if (systemNodeView == null)
+                    continue;
+
+                systemNodeView.SetState();
+            }
+        }
+
+        ShowActiveInvasionWarning();
+    }
+
+    /*
+     * 2A-S06-04-T07:
+     * The galaxy map only reads active invasions to show player-facing
+     * warnings. It must not start, resolve, cancel, or mutate invasion
+     * state from UI code.
+     */
+    private void ShowActiveInvasionWarning()
+    {
+        if (invasionService == null)
             return;
 
-        foreach (
-            StarSystemNodeView2A systemNodeView
-            in systemNodes
-        )
+        if (!CanShowInvasionWarningNow())
+            return;
+
+        if (!TryGetPriorityInvasion(
+                out InvasionState invasionState))
         {
-            if (systemNodeView == null)
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(
+                invasionState.InvasionId))
+        {
+            return;
+        }
+
+        if (string.Equals(
+                lastShownInvasionWarningId,
+                invasionState.InvasionId,
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        MarkInvasionWarningShown(
+            invasionState.InvasionId
+        );
+
+        ShowMessage(
+            BuildInvasionWarningText(invasionState)
+        );
+    }
+
+    private bool CanShowInvasionWarningNow()
+    {
+        if (maxInvasionWarningsPerMapSession <= 0)
+            return false;
+
+        if (invasionWarningsShownThisMapSession >=
+            maxInvasionWarningsPerMapSession)
+        {
+            return false;
+        }
+
+        float cooldown =
+            Mathf.Max(
+                0f,
+                invasionWarningCooldownSeconds
+            );
+
+        if (Time.unscaledTime - lastInvasionWarningShownAt <
+            cooldown)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void MarkInvasionWarningShown(
+        string invasionId)
+    {
+        lastShownInvasionWarningId =
+            invasionId;
+
+        lastInvasionWarningShownAt =
+            Time.unscaledTime;
+
+        invasionWarningsShownThisMapSession++;
+    }
+
+    private bool TryGetPriorityInvasion(
+        out InvasionState priorityInvasion)
+    {
+        priorityInvasion = null;
+
+        if (invasionService == null)
+            return false;
+
+        IReadOnlyList<InvasionState> invasions =
+            invasionService.GetActiveInvasions();
+
+        if (invasions == null ||
+            invasions.Count == 0)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < invasions.Count; i++)
+        {
+            InvasionState invasion =
+                invasions[i];
+
+            if (invasion == null)
                 continue;
 
-            systemNodeView.SetState();
+            if (!invasion.IsActive())
+                continue;
+
+            if (priorityInvasion == null ||
+                GetInvasionPriority(invasion) >
+                GetInvasionPriority(priorityInvasion))
+            {
+                priorityInvasion = invasion;
+            }
         }
+
+        return priorityInvasion != null;
+    }
+
+    private int GetInvasionPriority(
+        InvasionState invasionState)
+    {
+        if (invasionState == null)
+            return 0;
+
+        int priority =
+            invasionState.EscalationPressure;
+
+        if (invasionState.LifecycleState ==
+            InvasionLifecycleState.Active)
+        {
+            priority += 100;
+        }
+
+        if (invasionState.LifecycleState ==
+            InvasionLifecycleState.Preparing)
+        {
+            priority += 50;
+        }
+
+        return priority;
+    }
+
+    private string BuildInvasionWarningText(
+        InvasionState invasionState)
+    {
+        string systemName =
+            GetSystemDisplayName(
+                invasionState.TargetSystemId
+            );
+
+        string factionName =
+            GetFactionDisplayName(
+                invasionState.FactionId
+            );
+
+        string description =
+            GetFactionThreatDescription(
+                invasionState.FactionId
+            );
+
+        return
+            "Вторжение: " +
+            systemName +
+            "\nВраг: " +
+            factionName +
+            "\n" +
+            description;
+    }
+
+    private string GetSystemDisplayName(
+        string systemId)
+    {
+        if (configService != null &&
+            configService.TryGetStarSystem(
+                systemId,
+                out StarSystemConfig systemConfig) &&
+            systemConfig != null &&
+            !string.IsNullOrWhiteSpace(
+                systemConfig.DisplayName))
+        {
+            return systemConfig.DisplayName;
+        }
+
+        return string.IsNullOrWhiteSpace(systemId)
+            ? "неизвестная система"
+            : systemId;
+    }
+
+    private string GetFactionDisplayName(
+        string factionId)
+    {
+        string normalizedFactionId =
+            NormalizeFactionId(factionId);
+
+        switch (normalizedFactionId)
+        {
+            case "ancients":
+                return "Древние";
+
+            case "ai":
+                return "Враждебный ИИ";
+
+            case "infected":
+                return "Заражённые";
+
+            default:
+                return string.IsNullOrWhiteSpace(factionId)
+                    ? "неизвестная фракция"
+                    : factionId;
+        }
+    }
+
+    private string GetFactionThreatDescription(
+        string factionId)
+    {
+        string normalizedFactionId =
+            NormalizeFactionId(factionId);
+
+        switch (normalizedFactionId)
+        {
+            case "ancients":
+                return "Древняя сила атакует систему. Подготовься к тяжёлому бою.";
+
+            case "ai":
+                return "Боевые группы ИИ входят в систему. Реакция нужна быстро.";
+
+            case "infected":
+                return "Заражение распространяется через систему. Промедление усилит угрозу.";
+
+            default:
+                return "Вражеские силы атакуют систему. Проверь карту и подготовь маршрут.";
+        }
+    }
+
+    private string NormalizeFactionId(
+        string factionId)
+    {
+        return string.IsNullOrWhiteSpace(factionId)
+            ? string.Empty
+            : factionId.Trim().ToLowerInvariant();
     }
 
     /// <summary>
@@ -709,10 +971,12 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     }
 
     private void OnExitMapChanged(
-        ExitMapChangedEvent eventData
-    )
+    ExitMapChangedEvent eventData
+)
     {
         galaxyMapRoot?.SetActive(false);
+
+        invasionWarningsShownThisMapSession = 0;
     }
 
     public void ShowMessage(

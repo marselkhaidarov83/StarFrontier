@@ -1178,7 +1178,7 @@ MonoBehaviour:
   routesBuilder: {fileID: 1557526007}
   errorImage: {fileID: 562178308}
   errorText: {fileID: 164997712}
-  errorShowDuration: 2
+  errorShowDuration: 4
   mapViewFitter: {fileID: 1557526009}
   mapCameraController: {fileID: 26906030}
   sectorVisualFitter: {fileID: 1557526008}
