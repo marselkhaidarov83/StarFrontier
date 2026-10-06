@@ -12,6 +12,15 @@ public class StarSystemRuntimeState
     public int DangerLevel;
     public int Stability;
 
+    public SystemInfrastructureDamageState InfrastructureDamageState =
+    SystemInfrastructureDamageState.Intact;
+
+    public int InfrastructureDamage;
+
+    public bool HasPendingRecoveryHook;
+    public int RecoveryHookCreatedAtTick;
+    public string RecoveryHookReason = string.Empty;
+
     public StarSystemStatus SystemStatus =
         StarSystemStatus.Stable;
 
@@ -33,6 +42,71 @@ public class StarSystemRuntimeState
     public void MarkCaptured()
     {
         SetSystemStatus(StarSystemStatus.Captured);
+
+        HasPendingRecoveryHook = false;
+        RecoveryHookCreatedAtTick = 0;
+        RecoveryHookReason = string.Empty;
+
+        Stability =
+            Math.Max(
+                0,
+                Stability - 25);
+
+        DevelopmentLevel =
+            Math.Max(
+                0,
+                DevelopmentLevel - 1);
+
+        ApplyInfrastructureDamageFromWar(
+            35,
+            false);
+    }
+
+    public void ApplyInfrastructureDamageFromWar(
+    int damageAmount,
+    bool forceDestroyed)
+    {
+        int normalizedDamage =
+            Math.Max(
+                0,
+                damageAmount);
+
+        InfrastructureDamage =
+            Math.Min(
+                100,
+                InfrastructureDamage + normalizedDamage);
+
+        if (forceDestroyed ||
+            InfrastructureDamage >= 100)
+        {
+            InfrastructureDamage = 100;
+            InfrastructureDamageState =
+                SystemInfrastructureDamageState.Destroyed;
+
+            return;
+        }
+
+        if (InfrastructureDamage > 0)
+        {
+            InfrastructureDamageState =
+                SystemInfrastructureDamageState.Damaged;
+
+            return;
+        }
+
+        InfrastructureDamageState =
+            SystemInfrastructureDamageState.Intact;
+    }
+
+    public bool HasDamagedInfrastructure()
+    {
+        return InfrastructureDamageState == SystemInfrastructureDamageState.Damaged ||
+               InfrastructureDamageState == SystemInfrastructureDamageState.Destroyed;
+    }
+
+    public bool HasDestroyedInfrastructure()
+    {
+        return InfrastructureDamageState == SystemInfrastructureDamageState.Destroyed;
     }
 
     public void MarkRecoveryReady()
@@ -54,8 +128,8 @@ public class StarSystemRuntimeState
 
     public bool IsSecured(int aliveEnemyGroupsCount)
     {
-        return SystemStatus == StarSystemStatus.Stable
-               && aliveEnemyGroupsCount <= 0;
+        return SystemStatus == StarSystemStatus.Stable &&
+               aliveEnemyGroupsCount <= 0;
     }
 
     public void ApplyOfflineWarDegradation(
@@ -77,5 +151,45 @@ public class StarSystemRuntimeState
                     0,
                     Stability - Math.Min(offlineTicks, 25));
         }
+    }
+
+    public void MarkLiberatedByPlayer()
+    {
+        SetSystemStatus(StarSystemStatus.Liberated);
+
+        Stability =
+            Math.Max(
+                Stability,
+                10);
+    }
+
+    public void MarkRecoveryHookPending(
+    int currentTick,
+    string reason)
+    {
+        HasPendingRecoveryHook = true;
+
+        RecoveryHookCreatedAtTick =
+            Math.Max(
+                1,
+                currentTick);
+
+        RecoveryHookReason =
+            string.IsNullOrWhiteSpace(reason)
+                ? "player_liberation"
+                : reason.Trim();
+    }
+
+    public void ClearRecoveryHook()
+    {
+        HasPendingRecoveryHook = false;
+        RecoveryHookCreatedAtTick = 0;
+        RecoveryHookReason = string.Empty;
+    }
+
+    public bool CanBeTargetedByInvasion()
+    {
+        return SystemStatus == StarSystemStatus.Stable ||
+               SystemStatus == StarSystemStatus.RecoveryReady;
     }
 }

@@ -1344,4 +1344,202 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
         Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(250));
         Assert.That(galaxyState.RepairHopelessCollapse(), Is.False);
     }
+
+    [Test]
+    public void S06_03_T08_StateTransitionTable_CoversCaptureLiberationAndRepeatedCapture()
+    {
+        StarSystemRuntimeState systemState =
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.Stable,
+                Stability = 100,
+                DevelopmentLevel = 2
+            };
+
+        Assert.That(systemState.IsSecured(0), Is.True);
+
+        systemState.MarkThreat();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Threat));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+
+        systemState.MarkInvasion();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(systemState.IsUnderWarPressure(), Is.True);
+
+        systemState.MarkCaptured();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(systemState.IsSecured(0), Is.False);
+        Assert.That(systemState.Stability, Is.EqualTo(75));
+        Assert.That(systemState.DevelopmentLevel, Is.EqualTo(1));
+        Assert.That(systemState.HasDamagedInfrastructure(), Is.True);
+
+        systemState.MarkLiberatedByPlayer();
+        systemState.MarkRecoveryHookPending(
+            12,
+            "player_liberation_after_invasion");
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(systemState.IsRecoveryReady(), Is.True);
+        Assert.That(systemState.HasPendingRecoveryHook, Is.True);
+
+        systemState.MarkThreat();
+        systemState.MarkInvasion();
+        systemState.MarkCaptured();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(systemState.HasPendingRecoveryHook, Is.False);
+        Assert.That(systemState.Stability, Is.EqualTo(50));
+        Assert.That(systemState.DevelopmentLevel, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void S06_03_T08_CaptureSystem_AppliesInfrastructureDamageContract()
+    {
+        StarSystemRuntimeState systemState =
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.Invasion,
+                Stability = 100,
+                DevelopmentLevel = 3
+            };
+
+        systemState.MarkCaptured();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(systemState.InfrastructureDamageState, Is.EqualTo(SystemInfrastructureDamageState.Damaged));
+        Assert.That(systemState.InfrastructureDamage, Is.EqualTo(35));
+        Assert.That(systemState.HasDamagedInfrastructure(), Is.True);
+        Assert.That(systemState.HasDestroyedInfrastructure(), Is.False);
+    }
+
+    [Test]
+    public void S06_03_T08_RepeatedCapture_CanDestroyInfrastructureWithoutNegativeValues()
+    {
+        StarSystemRuntimeState systemState =
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.RecoveryReady,
+                Stability = 30,
+                DevelopmentLevel = 1
+            };
+
+        systemState.MarkCaptured();
+        systemState.MarkLiberatedByPlayer();
+        systemState.MarkCaptured();
+        systemState.MarkLiberatedByPlayer();
+        systemState.MarkCaptured();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(systemState.InfrastructureDamage, Is.EqualTo(100));
+        Assert.That(systemState.InfrastructureDamageState, Is.EqualTo(SystemInfrastructureDamageState.Destroyed));
+        Assert.That(systemState.Stability, Is.GreaterThanOrEqualTo(0));
+        Assert.That(systemState.DevelopmentLevel, Is.GreaterThanOrEqualTo(0));
+    }
+
+    [Test]
+    public void S06_03_T08_SaveLoad_PreservesCaptureLiberationInfrastructureAndRecoveryHook()
+    {
+        GameRuntimeState source =
+            new GameRuntimeState();
+
+        source.Galaxy.Systems.Add(
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.RecoveryReady,
+                Stability = 10,
+                DevelopmentLevel = 0,
+                InfrastructureDamageState = SystemInfrastructureDamageState.Damaged,
+                InfrastructureDamage = 35,
+                HasPendingRecoveryHook = true,
+                RecoveryHookCreatedAtTick = 12,
+                RecoveryHookReason = "player_liberation_after_invasion"
+            });
+
+        string json =
+            JsonUtility.ToJson(source);
+
+        GameRuntimeState restored =
+            JsonUtility.FromJson<GameRuntimeState>(json);
+
+        StarSystemRuntimeState restoredSystem =
+            restored.Galaxy.Systems[0];
+
+        Assert.That(restoredSystem.SystemId, Is.EqualTo("system_target"));
+        Assert.That(restoredSystem.SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(restoredSystem.InfrastructureDamageState, Is.EqualTo(SystemInfrastructureDamageState.Damaged));
+        Assert.That(restoredSystem.InfrastructureDamage, Is.EqualTo(35));
+        Assert.That(restoredSystem.HasPendingRecoveryHook, Is.True);
+        Assert.That(restoredSystem.RecoveryHookCreatedAtTick, Is.EqualTo(12));
+        Assert.That(restoredSystem.RecoveryHookReason, Is.EqualTo("player_liberation_after_invasion"));
+    }
+
+    [Test]
+    public void S06_03_T08_RecoveryHook_ClearsWhenSystemIsCapturedAgain()
+    {
+        StarSystemRuntimeState systemState =
+            new StarSystemRuntimeState
+            {
+                SystemId = "system_target",
+                SystemStatus = StarSystemStatus.RecoveryReady,
+                Stability = 25,
+                DevelopmentLevel = 1
+            };
+
+        systemState.MarkRecoveryHookPending(
+            20,
+            "player_liberation_after_invasion");
+
+        Assert.That(systemState.HasPendingRecoveryHook, Is.True);
+
+        systemState.MarkCaptured();
+
+        Assert.That(systemState.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(systemState.HasPendingRecoveryHook, Is.False);
+        Assert.That(systemState.RecoveryHookCreatedAtTick, Is.EqualTo(0));
+        Assert.That(systemState.RecoveryHookReason, Is.Empty);
+    }
+
+    [Test]
+    public void S06_03_T08_NoDuplicateWarOutcome_ResolvedInvasionIsNotActive()
+    {
+        InvasionState invasionState =
+            new InvasionState
+            {
+                InvasionId = "invasion_target",
+                TargetSystemId = "system_target",
+                LifecycleState = InvasionLifecycleState.Active
+            };
+
+        Assert.That(invasionState.IsActive(), Is.True);
+
+        invasionState.LifecycleState =
+            InvasionLifecycleState.Resolved;
+
+        Assert.That(invasionState.IsActive(), Is.False);
+
+        invasionState.LifecycleState =
+            InvasionLifecycleState.CleanedUp;
+
+        Assert.That(invasionState.IsActive(), Is.False);
+    }
+
+    [Test]
+    public void S06_03_T08_RequiredContracts_AreExposedForProductionServices()
+    {
+        Assert.That(typeof(ISystemSecurityService).GetMethod("CaptureSystem"), Is.Not.Null);
+        Assert.That(typeof(ISystemSecurityService).GetMethod("LiberateSystemByPlayer"), Is.Not.Null);
+        Assert.That(typeof(ISystemSecurityService).GetMethod("ApplyInfrastructureDamageFromWar"), Is.Not.Null);
+        Assert.That(typeof(ISystemSecurityService).GetMethod("MarkRecoveryHookPending"), Is.Not.Null);
+        Assert.That(typeof(ISystemSecurityService).GetMethod("IsNpcAutonomousLiberationAllowed"), Is.Not.Null);
+
+        Assert.That(typeof(IInvasionService).GetMethod("ResolveInvasionFromCombatOutcome"), Is.Not.Null);
+    }
+
 }

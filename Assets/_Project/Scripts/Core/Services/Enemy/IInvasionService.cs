@@ -45,4 +45,9 @@ public interface IInvasionService
     int ProcessOfflineWarCatchUp(
         GameRuntimeState state,
         int targetQuantTick);
+
+    bool ResolveInvasionFromCombatOutcome(
+        string systemId,
+        bool playerVictory);
+
 }

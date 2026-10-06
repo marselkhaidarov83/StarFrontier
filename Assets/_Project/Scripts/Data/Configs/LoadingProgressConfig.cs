@@ -1,8 +1,8 @@
 using UnityEngine;
 
 [CreateAssetMenu(
-    fileName = "LoadingProgressConfig",
-    menuName = "Star Frontier/Loading/Loading Progress Config")]
+    fileName = "loadingProgressConfig_01",
+    menuName = "StarFrontier/Configs/Loading/Loading Progress Config")]
 public sealed class LoadingProgressConfig : ScriptableObject
 {
     [Header("Scene Duration")]
