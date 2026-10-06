@@ -13,7 +13,10 @@ public static class GalaxyRuntimeStateFactory
             CurrentSystemId = string.Empty,
             Sectors = new List<SectorRuntimeState>(),
             Systems = new List<StarSystemRuntimeState>(),
-            Routes = new List<RouteRuntimeState>()
+            Routes = new List<RouteRuntimeState>(),
+            EnemyFactions = new List<EnemyFactionState>(),
+            EnemyGroups = new List<EnemyGroupState>(),
+            Invasions = new List<InvasionState>()
         };
 
         if (config == null || config.Sectors == null)

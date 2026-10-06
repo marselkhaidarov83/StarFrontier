@@ -10,7 +10,8 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
         new EnemyGroupEntryConfig[0];
 
     [Header("Level Rules")]
-    [SerializeField] private EnemyGroupSpawnLevelEntryConfig[] levelEntries =
+    [SerializeField]
+    private EnemyGroupSpawnLevelEntryConfig[] levelEntries =
         new EnemyGroupSpawnLevelEntryConfig[0];
 
     public IReadOnlyList<EnemyGroupSpawnLevelEntryConfig> LevelEntries =>
@@ -31,13 +32,19 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
         if (entry == null)
             return EmptyEnemies;
 
-        IReadOnlyList<EnemyGroupEntryConfig> pickedEnemies =
-            entry.PickEnemies();
+        int clampedLevel =
+            Mathf.Clamp(galaxyLevel, 1, 10);
 
-        if (pickedEnemies == null)
+        EnemyGroupSpawnOptionConfig group =
+            entry.PickStrictEnemyGroupForGalaxyLevel(clampedLevel);
+
+        if (group == null)
             return EmptyEnemies;
 
-        return pickedEnemies;
+        if (group.Enemies == null)
+            return EmptyEnemies;
+
+        return group.Enemies;
     }
 
     public EnemyGroupSpawnLevelEntryConfig GetEntryForGalaxyLevel(
@@ -102,8 +109,12 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
         if (entry == null)
             return false;
 
-        return entry.HasValidEnemies();
+        int clampedLevel =
+            Mathf.Clamp(galaxyLevel, 1, 10);
+
+        return entry.HasStrictEnemiesForGalaxyLevel(clampedLevel);
     }
+
 
     public int GetMinEnemyCount()
     {
@@ -162,16 +173,17 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
     private static readonly EnemyGroupEntryConfig[] EmptyEnemies =
         new EnemyGroupEntryConfig[0];
 
-    [SerializeField] [Range(1, 10)] private int galaxyLevel = 1;
+    [SerializeField][Range(1, 10)] private int galaxyLevel = 1;
 
     [Header("Spawn Timing")]
-    [SerializeField] [Min(0f)] private float spawnIntervalSeconds = 180f;
+    [SerializeField][Min(0f)] private float spawnIntervalSeconds = 180f;
 
     [Header("Spawn Limits")]
-    [SerializeField] [Min(1)] private int maxAliveGroupsFromThisRule = 1;
+    [SerializeField][Min(1)] private int maxAliveGroupsFromThisRule = 1;
 
     [Header("Enemy Groups")]
-    [SerializeField] private EnemyGroupSpawnOptionConfig[] enemyGroups =
+    [SerializeField]
+    private EnemyGroupSpawnOptionConfig[] enemyGroups =
         new EnemyGroupSpawnOptionConfig[0];
 
     public int GalaxyLevel => galaxyLevel;
@@ -207,6 +219,107 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
         }
 
         return false;
+    }
+
+    public bool HasStrictEnemiesForGalaxyLevel(
+    int galaxyLevel)
+    {
+        if (enemyGroups == null || enemyGroups.Length == 0)
+            return false;
+
+        int clampedLevel =
+            Mathf.Clamp(galaxyLevel, 1, 10);
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (group == null)
+                continue;
+
+            if (!IsStrictEnemyGroupForGalaxyLevel(group, clampedLevel))
+                continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public EnemyGroupSpawnOptionConfig PickStrictEnemyGroupForGalaxyLevel(
+        int galaxyLevel)
+    {
+        if (enemyGroups == null || enemyGroups.Length == 0)
+            return null;
+
+        int clampedLevel =
+            Mathf.Clamp(galaxyLevel, 1, 10);
+
+        int totalWeight = 0;
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (!IsStrictEnemyGroupForGalaxyLevel(group, clampedLevel))
+                continue;
+
+            totalWeight += Mathf.Max(1, group.Weight);
+        }
+
+        if (totalWeight <= 0)
+            return null;
+
+        int roll =
+            UnityEngine.Random.Range(0, totalWeight);
+
+        int cumulative = 0;
+
+        for (int i = 0; i < enemyGroups.Length; i++)
+        {
+            EnemyGroupSpawnOptionConfig group =
+                enemyGroups[i];
+
+            if (!IsStrictEnemyGroupForGalaxyLevel(group, clampedLevel))
+                continue;
+
+            cumulative += Mathf.Max(1, group.Weight);
+
+            if (roll < cumulative)
+                return group;
+        }
+
+        return null;
+    }
+
+    private static bool IsStrictEnemyGroupForGalaxyLevel(
+    EnemyGroupSpawnOptionConfig group,
+    int galaxyLevel)
+    {
+        if (group == null)
+            return false;
+
+        if (group.Enemies == null || group.Enemies.Count == 0)
+            return false;
+
+        for (int i = 0; i < group.Enemies.Count; i++)
+        {
+            EnemyGroupEntryConfig entry =
+                group.Enemies[i];
+
+            if (entry == null || !entry.IsValid())
+                return false;
+
+            if (entry.EnemyConfig == null)
+                return false;
+
+            if (entry.EnemyConfig.Level != galaxyLevel)
+                return false;
+        }
+
+        return true;
     }
 
     public IReadOnlyList<EnemyGroupEntryConfig> PickEnemies()
@@ -344,9 +457,10 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
 [System.Serializable]
 public sealed class EnemyGroupSpawnOptionConfig
 {
-    [SerializeField] [Min(1)] private int weight = 1;
+    [SerializeField][Min(1)] private int weight = 1;
 
-    [SerializeField] private EnemyGroupEntryConfig[] enemies =
+    [SerializeField]
+    private EnemyGroupEntryConfig[] enemies =
         new EnemyGroupEntryConfig[0];
 
     public int Weight => weight;

@@ -276,6 +276,9 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IDamageService2A, DamageService2A>();
         RegisterService<ISystemNpcRuntimeService, SystemNpcRuntimeService>();
         RegisterService<ISystemSecurityService, SystemSecurityService>();
+        RegisterService<IEnemyFactionService, EnemyFactionService>();
+        RegisterService<IEnemySpawnService, EnemySpawnService>();
+        RegisterService<IInvasionService, InvasionService>();
         RegisterService<ISystemNpcPopulationService, SystemNpcPopulationService>();
         RegisterService<IGalaxyPopulationService, GalaxyPopulationService>();
         RegisterService<IGalaxyNpcSimulationScheduleService, GalaxyNpcSimulationScheduleService>();

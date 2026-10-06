@@ -49,6 +49,14 @@ public static class SaveMigrationService
         {
             MigrateToSystemNpcPersistentState(state);
             changed = true;
+            sourceVersion = SaveDataVersions.SystemNpcPersistentState;
+        }
+
+        if (sourceVersion < SaveDataVersions.SystemWarState)
+        {
+            MigrateToSystemWarState(state);
+            changed = true;
+            sourceVersion = SaveDataVersions.SystemWarState;
         }
 
         if (state.Meta.SaveDataVersion != SaveDataVersions.Current)
@@ -67,6 +75,8 @@ public static class SaveMigrationService
         state.Player ??= new PlayerState();
         state.Galaxy ??= new GalaxyRuntimeState();
         state.Settings ??= new GameSettingsState();
+
+        state.Galaxy.EnsureWarStateCollections();
 
         state.Markets ??=
             new List<MarketRuntimeData>();
@@ -91,6 +101,86 @@ public static class SaveMigrationService
 
         state.Player.PlayerShipState.OwnedShips ??=
             new List<ShipRuntimeData>();
+    }
+
+    private static void MigrateToSystemWarState(
+        GameRuntimeState state)
+    {
+        if (state == null)
+            return;
+
+        state.Galaxy ??= new GalaxyRuntimeState();
+        state.Galaxy.EnsureWarStateCollections();
+
+        if (state.Galaxy.EnemyGroups != null)
+        {
+            foreach (EnemyGroupState groupState in state.Galaxy.EnemyGroups)
+            {
+                if (groupState == null)
+                    continue;
+
+                groupState.Level =
+                    Mathf.Clamp(groupState.Level, 1, 10);
+
+                if (!Enum.IsDefined(
+                        typeof(EnemyGroupLifecycleState),
+                        groupState.LifecycleState))
+                {
+                    groupState.LifecycleState =
+                        EnemyGroupLifecycleState.None;
+                }
+
+                groupState.MemberRuntimeNpcIds ??=
+                    new List<string>();
+
+                groupState.MemberConfigIds ??=
+                    new List<string>();
+            }
+        }
+
+        if (state.Galaxy.Invasions != null)
+        {
+            foreach (InvasionState invasionState in state.Galaxy.Invasions)
+            {
+                if (invasionState == null)
+                    continue;
+
+                invasionState.Level =
+                    Mathf.Clamp(invasionState.Level, 1, 10);
+
+                if (!Enum.IsDefined(
+                        typeof(InvasionLifecycleState),
+                        invasionState.LifecycleState))
+                {
+                    invasionState.LifecycleState =
+                        InvasionLifecycleState.None;
+                }
+
+                invasionState.EnemyGroupRuntimeIds ??=
+                    new List<string>();
+            }
+        }
+
+        if (state.Galaxy.EnemyFactions != null)
+        {
+            foreach (EnemyFactionState factionState in state.Galaxy.EnemyFactions)
+            {
+                if (factionState == null)
+                    continue;
+
+                factionState.OwnedSystemIds ??=
+                    new List<string>();
+
+                factionState.TerritorySystemIds ??=
+                    new List<string>();
+
+                factionState.ActiveGroupRuntimeIds ??=
+                    new List<string>();
+
+                factionState.ActiveInvasionIds ??=
+                    new List<string>();
+            }
+        }
     }
 
     private static void MigrateToShipDirection(

@@ -131,13 +131,31 @@ public sealed class S05_03_T08_NpcActivityVerificationTests
     [Test]
     public void NpcCombat_UsesGalaxyCombatServiceAndRuntimeProjectileEvents()
     {
+        string gameTimeText = ReadProjectFile(
+            "Assets/_Project/Scripts/Core/Services/Time/GameTimeService.cs");
+
+        Assert.That(
+            gameTimeText,
+            Does.Contain("GameTickStartedEvent"),
+            "Game time service must publish game tick events.");
+
+        Assert.That(
+            gameTimeText,
+            Does.Contain("IGalaxyNpcCombatService"),
+            "Game time service must depend on galaxy NPC combat service.");
+
+        Assert.That(
+            gameTimeText,
+            Does.Contain("_galaxyNpcCombatService.Tick(deltaTime, State.CurrentQuantTick)"),
+            "Galaxy NPC combat must run from the game time tick loop.");
+
         string galaxyCombatText = ReadProjectFile(
             "Assets/_Project/Scripts/Core/Services/Npc/Galaxy/GalaxyNpcCombatService.cs");
 
         Assert.That(
             galaxyCombatText,
-            Does.Contain("GameTickStartedEvent"),
-            "Galaxy NPC combat must run from game tick events.");
+            Does.Contain("_systemNpcCombatService.TickProjectiles(deltaTime)"),
+            "Galaxy NPC combat must tick runtime projectiles.");
 
         Assert.That(
             galaxyCombatText,

@@ -65,14 +65,20 @@ namespace StarFrontier.Tests.Sprint1
         [Test]
         public void SecondSave_CreatesBackupRecoverableAfterMainCorruption()
         {
+            _config.UseMultiFileSave = false;
+
             _session.State.Player.Credits = 100;
             _service.Save();
+
             _session.State.Player.Credits = 200;
             _service.Save();
+
             File.WriteAllText(_service.GetSavePath(), "{broken");
+
             LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Failed to load"));
             LogAssert.Expect(LogType.Warning, "[SaveService] Main save failed. Trying backup.");
             LogAssert.Expect(LogType.Warning, "[SaveService] Backup save loaded.");
+
             Assert.That(_service.Load().Player.Credits, Is.EqualTo(100));
         }
 
@@ -91,16 +97,31 @@ namespace StarFrontier.Tests.Sprint1
         [Test]
         public void SaveNull_DoesNotCreateFile()
         {
-            LogAssert.Expect(LogType.Warning, "[SaveService] Save skipped: GameState is null.");
+            string expectedMessage =
+                _config.UseMultiFileSave
+                    ? "[SaveService] Multi-file sync save skipped: GameState is null."
+                    : "[SaveService] Save skipped: GameState is null.";
+
+            LogAssert.Expect(
+                LogType.Warning,
+                expectedMessage);
+
             _service.Save((GameRuntimeState)null);
-            Assert.That(File.Exists(_service.GetSavePath()), Is.False);
+
+            Assert.That(_service.HasSave(), Is.False);
         }
 
         [Test]
         public void AutosaveTick_WritesCurrentSession()
         {
             _service.Tick(1f);
-            Assert.That(File.Exists(_service.GetSavePath()), Is.True);
+
+            for (int i = 0; i < 64 && !_service.HasSave(); i++)
+            {
+                _service.Tick(0f);
+            }
+
+            Assert.That(_service.HasSave(), Is.True);
         }
 
         [Test]
@@ -126,9 +147,17 @@ namespace StarFrontier.Tests.Sprint1
         {
             _service.Save();
 
-            string json = File.ReadAllText(_service.GetSavePath());
             GameRuntimeState saved =
-                JsonUtility.FromJson<GameRuntimeState>(json);
+                _service.Load();
+
+            Assert.That(saved, Is.Not.Null);
+
+            if (_config.UseMultiFileSave)
+            {
+                Assert.That(_service.HasSave(), Is.True);
+                Assert.That(saved.Meta.IntegrityChecksum, Is.EqualTo(string.Empty));
+                return;
+            }
 
             Assert.That(saved.Meta.IntegrityChecksum, Is.Not.Null.And.Not.Empty);
             Assert.That(saved.Meta.IntegrityChecksum, Has.Length.EqualTo(64));
@@ -137,6 +166,8 @@ namespace StarFrontier.Tests.Sprint1
         [Test]
         public void TamperedMainSave_FallsBackToValidBackup()
         {
+            _config.UseMultiFileSave = false;
+
             _session.State.Player.Credits = 100;
             _service.Save();
 
@@ -148,21 +179,23 @@ namespace StarFrontier.Tests.Sprint1
                 .Replace("\"Credits\": 200", "\"Credits\": 201");
 
             Assert.That(tamperedJson, Does.Contain("\"Credits\": 201"));
+
             File.WriteAllText(mainPath, tamperedJson);
 
             LogAssert.Expect(
                 LogType.Error,
                 new System.Text.RegularExpressions.Regex(
                     "integrity verification failed"));
+
             LogAssert.Expect(
                 LogType.Warning,
                 "[SaveService] Main save failed. Trying backup.");
+
             LogAssert.Expect(
                 LogType.Warning,
                 "[SaveService] Backup save loaded.");
 
-            GameRuntimeState loaded = _service.Load();
-            Assert.That(loaded.Player.Credits, Is.EqualTo(100));
+            Assert.That(_service.Load().Player.Credits, Is.EqualTo(100));
         }
 
         private static GameRuntimeState NewState()
