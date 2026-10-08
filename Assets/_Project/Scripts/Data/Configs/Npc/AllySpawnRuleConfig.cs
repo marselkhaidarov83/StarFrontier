@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Конфиг AllySpawnRuleConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [Serializable]
 [CreateAssetMenu(
     fileName = "AllySpawnRuleConfig",
@@ -9,8 +10,8 @@ using UnityEngine;
 public sealed class AllySpawnRuleConfig : BaseConfig
 {
     [Header("Profiles by Galaxy Level")]
-    [Tooltip("Exactly one entry is expected for every galaxy level from 1 to 10.")]
     [SerializeField]
+    [Tooltip("Правила по уровням галактики.")]
     private AllySpawnLevelEntryConfig[] levelEntries =
         new AllySpawnLevelEntryConfig[0];
 
@@ -111,6 +112,7 @@ public sealed class AllySpawnRuleConfig : BaseConfig
     public float SpawnIntervalSeconds =>
         GetSpawnIntervalSeconds(1);
 
+    [Tooltip("Конфиг союзника в записи появления.")]
     public AllyConfig AllyConfig
     {
         get
@@ -134,6 +136,7 @@ public sealed class AllySpawnRuleConfig : BaseConfig
         }
     }
 
+    [Tooltip("Минимальное количество таких кораблей в группе.")]
     public int MinCount
     {
         get
@@ -159,6 +162,7 @@ public sealed class AllySpawnRuleConfig : BaseConfig
         }
     }
 
+    [Tooltip("Максимальное количество таких кораблей в группе.")]
     public int MaxCount
     {
         get
@@ -222,21 +226,24 @@ public sealed class AllySpawnLevelEntryConfig
     [Header("Galaxy Level")]
     [SerializeField]
     [Range(1, 10)]
+    [Tooltip("Уровень галактики, для которого действует эта запись.")]
     private int galaxyLevel = 1;
 
     [Header("Population")]
     [SerializeField]
     [Min(0f)]
+    [Tooltip("Пауза между попытками появления группы в секундах.")]
     private float spawnIntervalSeconds = 60f;
 
     [Header("Offline Population")]
-    [Tooltip("Real-world hours between offline spawn checks while the player is not playing.")]
     [SerializeField]
     [Min(0f)]
+    [Tooltip("Интервал проверки появления, пока игрок не играет, в реальных часах.")]
     private float offlineSpawnIntervalHours = 6f;
 
     [Header("Allies")]
     [SerializeField]
+    [Tooltip("Список вариантов союзников для появления.")]
     private AllyGroupEntryConfig[] allies =
         new AllyGroupEntryConfig[0];
 
@@ -347,14 +354,17 @@ public sealed class AllySpawnLevelEntryConfig
 public sealed class AllyGroupEntryConfig
 {
     [SerializeField]
+    [Tooltip("Конфиг союзника в записи появления.")]
     private AllyConfig allyConfig;
 
     [SerializeField]
     [Min(0)]
+    [Tooltip("Минимальное количество таких кораблей в группе.")]
     private int minCount = 1;
 
     [SerializeField]
     [Min(0)]
+    [Tooltip("Максимальное количество таких кораблей в группе.")]
     private int maxCount = 1;
 
     public AllyConfig AllyConfig =>

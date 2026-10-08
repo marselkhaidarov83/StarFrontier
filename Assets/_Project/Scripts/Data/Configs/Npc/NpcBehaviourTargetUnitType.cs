@@ -1,3 +1,4 @@
+// Конфиг NpcBehaviourTargetUnitType содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 public enum NpcBehaviourTargetUnitType
 {
     None = 0,

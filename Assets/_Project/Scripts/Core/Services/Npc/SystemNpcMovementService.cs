@@ -8225,6 +8225,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         if (npc == null)
             return false;
 
+        TrySyncNpcPositionWithInitialRouteBuildPlanet(
+            npc,
+            currentTick,
+            "BeforeInitialRouteBuild");
+
         long phaseStartedAt = phaseStats != null ? BeginPerfMeasure() : 0;
 
         Vector2 direction =
@@ -8373,6 +8378,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return;
         }
 
+        TrySyncNpcPositionWithInitialRouteBuildPlanet(
+            npc,
+            currentTick,
+            "BeforeInitialRouteRelease");
+
         npc.IsWaitingForInitialRouteBuild = false;
 
         if (npc.ReleaseFromPlanetAfterInitialRouteBuild)
@@ -8413,6 +8423,89 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 routeState != null ? routeState.Destination : npc.TargetPosition),
             currentTick,
             routeState);
+    }
+
+    private bool TrySyncNpcPositionWithInitialRouteBuildPlanet(
+        SystemNpcRuntimeState npc,
+        int currentTick,
+        string reason)
+    {
+        if (npc == null)
+            return false;
+
+        if (!npc.ReleaseFromPlanetAfterInitialRouteBuild &&
+            !npc.IsWaitingForInitialRouteBuild)
+        {
+            return false;
+        }
+
+        string planetId =
+            !string.IsNullOrWhiteSpace(npc.InitialRouteBuildPlanetId)
+                ? npc.InitialRouteBuildPlanetId
+                : npc.CurrentPlanetId;
+
+        if (string.IsNullOrWhiteSpace(planetId))
+            return false;
+
+        if (_configService == null ||
+            Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null ||
+            !Bootstrapper.Instance.ServiceRegistry.TryGet<IOrbitalMotionService>(
+                out IOrbitalMotionService orbitalMotionService))
+        {
+            return false;
+        }
+
+        PlanetConfig planet =
+            _configService.GetPlanetConfigById(planetId);
+
+        if (planet == null ||
+            planet.PlanetOrbit == null)
+        {
+            return false;
+        }
+
+        Vector3 previousPosition =
+            npc.CurrentPosition;
+
+        Vector3 planetPosition =
+            orbitalMotionService.GetPlanetCurrentPosition(planet.PlanetOrbit);
+
+        planetPosition.z = previousPosition.z;
+
+        float distance =
+            Vector3.Distance(
+                previousPosition,
+                planetPosition);
+
+        if (distance <= 0.001f)
+            return false;
+
+        npc.CurrentPosition = planetPosition;
+        npc.StartPosition = planetPosition;
+
+        if (npc.CurrentMovementTargetPosition == previousPosition)
+            npc.CurrentMovementTargetPosition = planetPosition;
+
+        if (npc.TickMovementTargetPosition == previousPosition)
+            npc.TickMovementTargetPosition = planetPosition;
+
+        Debug.Log(
+            "[SystemNpcMovementService] NPC_INITIAL_ROUTE_PLANET_SYNC" +
+            " | Reason=" + reason +
+            " | Npc=" + npc.RuntimeNpcId +
+            " | Tick=" + currentTick +
+            " | PlanetId=" + planetId +
+            " | PreviousPosition=" + FormatVector3(previousPosition) +
+            " | PlanetPosition=" + FormatVector3(planetPosition) +
+            " | Distance=" + distance.ToString("0.###") +
+            " | IsOnPlanet=" + npc.IsOnPlanet +
+            " | IsWaitingForInitialRouteBuild=" + npc.IsWaitingForInitialRouteBuild +
+            " | ReleaseFromPlanetAfterInitialRouteBuild=" + npc.ReleaseFromPlanetAfterInitialRouteBuild +
+            " | InitialRouteBuildPlanetId=" + (npc.InitialRouteBuildPlanetId ?? string.Empty) +
+            " | CurrentPlanetId=" + (npc.CurrentPlanetId ?? string.Empty));
+
+        return true;
     }
 
     private bool TryCompleteMovementOrDelaySystemExit(

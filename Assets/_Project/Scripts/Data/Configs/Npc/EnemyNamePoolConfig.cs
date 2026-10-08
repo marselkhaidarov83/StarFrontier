@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Конфиг EnemyNamePoolConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(
     fileName = "EnemyNamePoolConfig",
     menuName = "StarFrontier/Configs/Npc/Enemy Name Pool")]
@@ -8,11 +9,13 @@ public sealed class EnemyNamePoolConfig : BaseConfig
 {
     [Header("Owner")]
     [SerializeField]
+    [Tooltip("Параметр faction. Используется связанными игровыми системами этого конфига.")]
     private WeaponGroupEnemyFaction faction =
         WeaponGroupEnemyFaction.AI;
 
     [Header("Names")]
     [SerializeField]
+    [Tooltip("Список имён для случайного выбора.")]
     private string[] names = new string[0];
 
     public WeaponGroupEnemyFaction Faction =>
@@ -21,6 +24,7 @@ public sealed class EnemyNamePoolConfig : BaseConfig
     public IReadOnlyList<string> Names =>
         names;
 
+    [Tooltip("Количество для параметра NameCount. Используется соответствующей системой при генерации или расчёте.")]
     public int NameCount
     {
         get

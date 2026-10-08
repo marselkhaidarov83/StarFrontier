@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// Конфиг RouteConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(
     fileName = "RouteConfig",
     menuName = "StarFrontier/Configs/Galaxy/Route"
@@ -9,20 +10,25 @@ public class RouteConfig : BaseConfig
     [Header("Системы")]
 
     [SerializeField]
+    [Tooltip("Параметр FromSystem. Используется связанными игровыми системами этого конфига.")]
     public StarSystemConfig FromSystem;
 
     [SerializeField]
+    [Tooltip("Параметр ToSystem. Используется связанными игровыми системами этого конфига.")]
     public StarSystemConfig ToSystem;
 
     [Header("Условия маршрута")]
 
     [SerializeField]
+    [Tooltip("Переключатель IsLockedAtStart. Включает или выключает соответствующее правило или отображение.")]
     public bool IsLockedAtStart;
 
     [SerializeField]
+    [Tooltip("Параметр RequiredScanLevel. Используется связанными игровыми системами этого конфига.")]
     public int RequiredScanLevel;
 
     [SerializeField]
+    [Tooltip("Параметр ParsecDistance. Используется связанными игровыми системами этого конфига.")]
     public int ParsecDistance;
 
     [Header("Точки входа и выхода")]
@@ -37,14 +43,9 @@ public class RouteConfig : BaseConfig
 
     [Header("Отображение на карте галактики")]
 
-    [Tooltip(
-        "Величина и направление выпуклости маршрута. " +
-        "0 — прямой маршрут. " +
-        "Положительное и отрицательное значения " +
-        "изгибают маршрут в разные стороны."
-    )]
     [SerializeField]
     [Range(-0.5f, 0.5f)]
+    [Tooltip("Параметр galaxyMapCurveStrength. Используется связанными игровыми системами этого конфига.")]
     private float galaxyMapCurveStrength =
         0f;
 

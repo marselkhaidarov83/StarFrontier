@@ -1,16 +1,19 @@
 using UnityEngine;
 
+// Конфиг SystemNpcSpawnPointConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(
     fileName = "SystemNpcSpawnPointConfig",
     menuName = "StarFrontier/Configs/System/System NPC Spawn Points")]
 public sealed class SystemNpcSpawnPointConfig : BaseConfig
 {
     [Header("Enemy Spawn Points")]
+    [Tooltip("Параметр enemySpawnPoints. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private Vector3[] enemySpawnPoints =
     {
         new Vector3(6f, 0f, 0f)
     };
 
+    [Tooltip("Радиус для параметра enemyRandomRadius. Используется при расчёте расстояний и зон действия.")]
     [SerializeField] [Min(0f)] private float enemyRandomRadius = 35f;
 
     public Vector3[] EnemySpawnPoints => enemySpawnPoints;

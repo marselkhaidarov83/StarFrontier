@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+// Конфиг описывает союзный корабль: характеристики, роль, имя, поведение, оружие и внешний вид.
 [CreateAssetMenu(
     fileName = "AllyConfig",
     menuName = "StarFrontier/Configs/Npc/Ally")]
@@ -13,102 +14,126 @@ public sealed class AllyConfig : BaseConfig
     [Header("Base Stats Range")]
     [FormerlySerializedAs("baseHull")]
     [SerializeField]
+    [Tooltip("Минимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
     private int baseHullMin = 50;
 
     [SerializeField]
+    [Tooltip("Максимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
     private int baseHullMax = 50;
 
     [FormerlySerializedAs("baseShield")]
     [SerializeField]
+    [Tooltip("Минимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
     private int baseShieldMin = 20;
 
     [SerializeField]
+    [Tooltip("Максимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
     private int baseShieldMax = 20;
 
     [FormerlySerializedAs("baseEnergy")]
     [SerializeField]
+    [Tooltip("Минимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
     private int baseEnergyMin = 50;
 
     [SerializeField]
+    [Tooltip("Максимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
     private int baseEnergyMax = 50;
 
     [SerializeField]
+    [Tooltip("Базовое восстановление энергии. Используется в расчётах боевой выносливости корабля.")]
     private float baseEnergyRegen = 0f;
 
     [FormerlySerializedAs("baseSpeed")]
     [SerializeField]
+    [Tooltip("Минимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
     private int baseSpeedMin = 2;
 
     [SerializeField]
+    [Tooltip("Максимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
     private int baseSpeedMax = 2;
 
     [Header("Movement")]
     [FormerlySerializedAs("baseAcceleration")]
     [SerializeField]
+    [Tooltip("Минимальное базовое ускорение корабля.")]
     private float baseAccelerationMin = 1f;
 
     [SerializeField]
+    [Tooltip("Максимальное базовое ускорение корабля.")]
     private float baseAccelerationMax = 1f;
 
     [FormerlySerializedAs("baseTurnRate")]
     [SerializeField]
+    [Tooltip("Минимальная базовая скорость поворота корабля.")]
     private float baseTurnRateMin = 90f;
 
     [SerializeField]
+    [Tooltip("Максимальная базовая скорость поворота корабля.")]
     private float baseTurnRateMax = 90f;
 
     [SerializeField]
     [Min(0f)]
+    [Tooltip("Радиус поворота корабля. Используется при движении и построении плавного маршрута.")]
     private float turnRadius = 60f;
 
     [Header("Capacity")]
     [FormerlySerializedAs("baseCargoCapacity")]
     [SerializeField]
+    [Tooltip("Минимальная вместимость грузового отсека.")]
     private int baseCargoCapacityMin = 0;
 
     [SerializeField]
+    [Tooltip("Максимальная вместимость грузового отсека.")]
     private int baseCargoCapacityMax = 0;
 
     [Header("Slots")]
     [SerializeField]
+    [Tooltip("Количество ячеек оружия у корабля.")]
     private int weaponSlotCount = 1;
 
     [SerializeField]
+    [Tooltip("Количество ячеек модулей у корабля.")]
     private int moduleSlotCount = 0;
 
     [SerializeField]
     [Range(0, 10)]
+    [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]
     private int level = 1;
 
     [Header("Ally Role")]
     [SerializeField]
+    [Tooltip("Роль союзника. Используется при создании союзных кораблей и выборе поведения.")]
     private AllyRole2A role = AllyRole2A.Ranger;
 
     [Header("Runtime Names")]
     [SerializeField]
+    [Tooltip("Набор имён для этого типа корабля.")]
     private AllyNamePoolConfig namePool;
 
     [Header("Behavior Scenarios")]
-    [Tooltip("Scenario enum and reference to the behavior profile.")]
     [SerializeField]
+    [Tooltip("Список сценариев поведения и связанных профилей.")]
     private AllyBehaviourScenarioEntry[] behaviorScenarios =
         new AllyBehaviourScenarioEntry[0];
 
     [Header("Weapon Groups")]
-    [Tooltip("One random group is selected when a real ally NPC is created.")]
     [SerializeField]
+    [Tooltip("Группы оружия, из которых выбирается оснащение реального корабля.")]
     private WeaponGroupConfig[] weaponGroups =
         new WeaponGroupConfig[0];
 
     [Header("Visuals")]
     [SerializeField]
+    [Tooltip("Спрайт корабля на карте системы.")]
     private Sprite mapSprite;
 
     [SerializeField]
+    [Tooltip("Спрайт корабля в боевой визуализации.")]
     private Sprite combatSprite;
 
     [SerializeField]
     [Min(0f)]
+    [Tooltip("Визуальный размер объекта на сцене.")]
     private float visualSize = 48f;
 
     public int BaseHullMin => baseHullMin;
@@ -152,6 +177,7 @@ public sealed class AllyConfig : BaseConfig
     public IReadOnlyList<WeaponConfig> WeaponConfigs =>
         GetFirstValidWeaponGroupWeapons();
 
+    [Tooltip("Параметр WeaponConfig. Используется связанными игровыми системами этого конфига.")]
     public WeaponConfig WeaponConfig
     {
         get
@@ -270,6 +296,7 @@ public sealed class AllyConfig : BaseConfig
         return WeaponGroupCount > 0;
     }
 
+    [Tooltip("Количество для параметра WeaponGroupCount. Используется соответствующей системой при генерации или расчёте.")]
     public int WeaponGroupCount
     {
         get
@@ -296,6 +323,7 @@ public sealed class AllyConfig : BaseConfig
         }
     }
 
+    [Tooltip("Количество для параметра WeaponCount. Используется соответствующей системой при генерации или расчёте.")]
     public int WeaponCount
     {
         get

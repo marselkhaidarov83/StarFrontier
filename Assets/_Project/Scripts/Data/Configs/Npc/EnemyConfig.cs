@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+// Конфиг описывает врага: характеристики, награды, поведение, оружие и внешний вид.
 [CreateAssetMenu(
     fileName = "EnemyConfig",
     menuName = "StarFrontier/Configs/Npc/Enemy")]
@@ -13,39 +14,49 @@ public class EnemyConfig : BaseConfig
     [Header("Base Stats Range")]
     [FormerlySerializedAs("baseHull")]
     [SerializeField]
+    [Tooltip("Минимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
     private int baseHullMin = 1;
 
     [SerializeField]
+    [Tooltip("Максимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
     private int baseHullMax = 1;
 
     [FormerlySerializedAs("baseShield")]
     [SerializeField]
+    [Tooltip("Минимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
     private int baseShieldMin = 0;
 
     [SerializeField]
+    [Tooltip("Максимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
     private int baseShieldMax = 0;
 
     [FormerlySerializedAs("baseEnergy")]
     [SerializeField]
+    [Tooltip("Минимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
     private int baseEnergyMin = 0;
 
     [SerializeField]
+    [Tooltip("Максимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
     private int baseEnergyMax = 0;
 
     [FormerlySerializedAs("baseSpeed")]
     [SerializeField]
+    [Tooltip("Минимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
     private int baseSpeedMin = 0;
 
     [SerializeField]
+    [Tooltip("Максимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
     private int baseSpeedMax = 0;
 
     [Header("Movement")]
     [SerializeField]
     [Min(0f)]
+    [Tooltip("Радиус поворота корабля. Используется при движении и построении плавного маршрута.")]
     private float turnRadius = 60f;
 
     [SerializeField]
     [Range(1, 10)]
+    [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]
     private int level = 1;
 
     // [Header("Combat Role")]
@@ -54,16 +65,18 @@ public class EnemyConfig : BaseConfig
 
     [Header("Runtime Names")]
     [SerializeField]
+    [Tooltip("Набор имён для этого типа корабля.")]
     private EnemyNamePoolConfig namePool;
 
     [Header("Behavior Scenarios")]
-    [Tooltip("Scenario enum and reference to the behavior profile.")]
     [SerializeField]
+    [Tooltip("Список сценариев поведения и связанных профилей.")]
     private NpcBehaviourScenarioEntry[] behaviorScenarios =
         new NpcBehaviourScenarioEntry[0];
 
     [Header("Weapon Groups")]
     [SerializeField]
+    [Tooltip("Группы оружия, из которых выбирается оснащение реального корабля.")]
     private WeaponGroupConfig[] weaponGroups =
         new WeaponGroupConfig[0];
 
@@ -71,34 +84,42 @@ public class EnemyConfig : BaseConfig
     [FormerlySerializedAs("weaponConfigs")]
     [SerializeField]
     [HideInInspector]
+    [Tooltip("Старый список оружия. Используется как запасной вариант совместимости.")]
     private WeaponConfig[] legacyWeaponConfigs =
         new WeaponConfig[0];
 
     [Header("Rewards Range")]
     [FormerlySerializedAs("creditReward")]
     [SerializeField]
+    [Tooltip("Минимальное значение параметра creditRewardMin. Используется как нижняя граница диапазона.")]
     private int creditRewardMin = 0;
 
     [SerializeField]
+    [Tooltip("Максимальное значение параметра creditRewardMax. Используется как верхняя граница диапазона.")]
     private int creditRewardMax = 0;
 
     [FormerlySerializedAs("xpReward")]
     [SerializeField]
+    [Tooltip("Минимальное значение параметра xpRewardMin. Используется как нижняя граница диапазона.")]
     private int xpRewardMin = 0;
 
     [SerializeField]
+    [Tooltip("Максимальное значение параметра xpRewardMax. Используется как верхняя граница диапазона.")]
     private int xpRewardMax = 0;
 
     [SerializeField]
     [Range(1, 5)]
+    [Tooltip("Параметр dangerTier. Используется связанными игровыми системами этого конфига.")]
     private int dangerTier = 1;
 
     [Header("Visuals")]
     [SerializeField]
+    [Tooltip("Спрайт корабля в боевой визуализации.")]
     private Sprite combatSprite;
 
     [SerializeField]
     [Min(0f)]
+    [Tooltip("Визуальный размер объекта на сцене.")]
     private float visualSize = 48f;
 
     public int BaseHullMin => baseHullMin;
@@ -129,6 +150,7 @@ public class EnemyConfig : BaseConfig
     public IReadOnlyList<WeaponConfig> WeaponConfigs =>
         GetFirstValidWeaponGroupWeaponsOrLegacy();
 
+    [Tooltip("Параметр WeaponConfig. Используется связанными игровыми системами этого конфига.")]
     public WeaponConfig WeaponConfig
     {
         get
@@ -261,6 +283,7 @@ public class EnemyConfig : BaseConfig
         return WeaponGroupCount > 0;
     }
 
+    [Tooltip("Количество для параметра WeaponGroupCount. Используется соответствующей системой при генерации или расчёте.")]
     public int WeaponGroupCount
     {
         get
@@ -288,6 +311,7 @@ public class EnemyConfig : BaseConfig
         }
     }
 
+    [Tooltip("Количество для параметра WeaponCount. Используется соответствующей системой при генерации или расчёте.")]
     public int WeaponCount
     {
         get

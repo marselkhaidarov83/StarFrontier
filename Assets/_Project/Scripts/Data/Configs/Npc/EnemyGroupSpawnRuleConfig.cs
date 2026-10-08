@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Конфиг EnemyGroupSpawnRuleConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(
     fileName = "EnemyGroupSpawnRuleConfig",
     menuName = "StarFrontier/Configs/Npc/Enemy Group Spawn Rule")]
@@ -11,6 +12,7 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
 
     [Header("Level Rules")]
     [SerializeField]
+    [Tooltip("Правила по уровням галактики.")]
     private EnemyGroupSpawnLevelEntryConfig[] levelEntries =
         new EnemyGroupSpawnLevelEntryConfig[0];
 
@@ -173,16 +175,20 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
     private static readonly EnemyGroupEntryConfig[] EmptyEnemies =
         new EnemyGroupEntryConfig[0];
 
+    [Tooltip("Уровень галактики, для которого действует эта запись.")]
     [SerializeField][Range(1, 10)] private int galaxyLevel = 1;
 
     [Header("Spawn Timing")]
+    [Tooltip("Пауза между попытками появления группы в секундах.")]
     [SerializeField][Min(0f)] private float spawnIntervalSeconds = 180f;
 
     [Header("Spawn Limits")]
+    [Tooltip("Максимум живых групп, созданных этим правилом одновременно.")]
     [SerializeField][Min(1)] private int maxAliveGroupsFromThisRule = 1;
 
     [Header("Enemy Groups")]
     [SerializeField]
+    [Tooltip("Варианты групп врагов для выбора.")]
     private EnemyGroupSpawnOptionConfig[] enemyGroups =
         new EnemyGroupSpawnOptionConfig[0];
 
@@ -457,9 +463,11 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
 [System.Serializable]
 public sealed class EnemyGroupSpawnOptionConfig
 {
+    [Tooltip("Относительный вес выбора этой записи. Чем больше значение, тем чаще запись выбирается среди других подходящих.")]
     [SerializeField][Min(1)] private int weight = 1;
 
     [SerializeField]
+    [Tooltip("Список врагов внутри выбранной группы.")]
     private EnemyGroupEntryConfig[] enemies =
         new EnemyGroupEntryConfig[0];
 

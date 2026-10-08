@@ -1,33 +1,51 @@
 using UnityEngine;
 
+// Конфиг StationConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(fileName = "StationConfig", menuName = "StarFrontier/Configs/System/Station")]
 public class StationConfig : BaseConfig
 {
     [Header("Type")]
+    [Tooltip("Параметр stationTypeConfig. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private StationTypeConfig stationTypeConfig;
 
     [Header("State")]
+    [Tooltip("Переключатель isMainStation. Включает или выключает соответствующее правило или отображение.")]
     [SerializeField] private bool isMainStation = true;
+    [Tooltip("Переключатель isActive. Включает или выключает соответствующее правило или отображение.")]
     [SerializeField] private bool isActive = true;
+    [Tooltip("Переключатель isDestroyed. Включает или выключает соответствующее правило или отображение.")]
     [SerializeField] private bool isDestroyed;
+    [Tooltip("Параметр visibleAtStart. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private bool visibleAtStart;
 
     [Header("Optional Content Overrides")]
+    [Tooltip("Параметр marketProfileOverride. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private MarketProfileConfig marketProfileOverride;
+    [Tooltip("Параметр missionPoolOverride. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private ScriptableObject missionPoolOverride;
+    [Tooltip("Количество для параметра encounterProfileOverride. Используется соответствующей системой при генерации или расчёте.")]
     [SerializeField] private ScriptableObject encounterProfileOverride;
 
     [Header("Optional Visual Overrides")]
+    [Tooltip("Спрайт для поля stationSpriteOverride. Используется визуальной частью игры при отображении объекта.")]
     [SerializeField] private Sprite stationSpriteOverride;
+    [Tooltip("Спрайт для поля destroyedSpriteOverride. Используется визуальной частью игры при отображении объекта.")]
     [SerializeField] private Sprite destroyedSpriteOverride;
+    [Tooltip("Спрайт для поля shadowSpriteOverride. Используется визуальной частью игры при отображении объекта.")]
     [SerializeField] private Sprite shadowSpriteOverride;
+    [Tooltip("Параметр overrideVisualSize. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private bool overrideVisualSize;
+    [Tooltip("Параметр visualSizeOverride. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private float visualSizeOverride = 180f;
 
     [Header("Map Placement")]
+    [Tooltip("Параметр stationOrbit. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private PlanetOrbitConfig stationOrbit;
+    [Tooltip("Параметр orbitAngleDegrees. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private float orbitAngleDegrees;
+    [Tooltip("Параметр overrideLocalOffset. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private bool overrideLocalOffset;
+    [Tooltip("Параметр localOffsetOverride. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private Vector2 localOffsetOverride = Vector2.zero;
 
     public StationTypeConfig StationTypeConfig => stationTypeConfig;

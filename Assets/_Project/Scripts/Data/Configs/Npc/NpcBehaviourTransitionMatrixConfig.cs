@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 
+// Конфиг NpcBehaviourTransitionMatrixConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(
     fileName = "NpcBehaviourTransitionMatrixConfig",
     menuName = "StarFrontier/Configs/Npc/NPC Behaviour Transition Matrix")]
 public sealed class NpcBehaviourTransitionMatrixConfig : BaseConfig
 {
     [SerializeField]
+    [Tooltip("Параметр rules. Используется связанными игровыми системами этого конфига.")]
     private NpcBehaviourTransitionRule[] rules =
         Array.Empty<NpcBehaviourTransitionRule>();
 
@@ -41,9 +43,11 @@ public sealed class NpcBehaviourTransitionMatrixConfig : BaseConfig
 public sealed class NpcBehaviourTransitionRule
 {
     [SerializeField]
+    [Tooltip("Параметр previousBehavior. Используется связанными игровыми системами этого конфига.")]
     private SystemNpcBehaviorType previousBehavior;
 
     [SerializeField]
+    [Tooltip("Переключатель allowedNextBehaviors. Включает или выключает соответствующее правило или отображение.")]
     private SystemNpcBehaviorType[] allowedNextBehaviors =
         Array.Empty<SystemNpcBehaviorType>();
 

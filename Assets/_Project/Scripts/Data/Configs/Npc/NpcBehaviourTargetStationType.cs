@@ -1,3 +1,4 @@
+// Конфиг NpcBehaviourTargetStationType содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 public enum NpcBehaviourTargetStationType
 {
     None = 0,
