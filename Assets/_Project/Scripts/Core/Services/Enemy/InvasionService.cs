@@ -10,6 +10,7 @@ public sealed class InvasionService :
     private readonly IGameSessionService _gameSessionService;
     private readonly IEnemySpawnService _enemySpawnService;
     private readonly ISystemSecurityService _systemSecurityService;
+    private readonly ISystemNpcRuntimeService _npcRuntimeService;
     private readonly IEnemyFactionService _enemyFactionService;
     private readonly SimpleEventBus _eventBus;
     private const int MaxActiveInvasions = 3;
@@ -35,11 +36,184 @@ public sealed class InvasionService :
         Bootstrapper.Instance.ServiceRegistry.TryGet(
             out _enemyFactionService);
 
+        Bootstrapper.Instance.ServiceRegistry.TryGet(
+            out _npcRuntimeService);
+
         _eventBus.Subscribe<SystemEncounterResolvedEvent>(
             OnSystemEncounterResolved);
 
         _eventBus.Subscribe<SystemEncounterDefeatedEvent>(
             OnSystemEncounterDefeated);
+
+        _eventBus.Subscribe<SystemNpcDestroyedEvent>(
+            OnSystemNpcDestroyed);
+    }
+
+    private void OnSystemNpcDestroyed(
+        SystemNpcDestroyedEvent evt)
+    {
+        if (evt.NpcType != SystemNpcType.Enemy)
+            return;
+
+        if (string.IsNullOrWhiteSpace(evt.SystemId))
+            return;
+
+        LogWarStateDebug(
+            "SYSTEM_NPC_DESTROYED_EVENT_RECEIVED" +
+            " | RuntimeNpcId=" + evt.RuntimeNpcId +
+            " | RuntimeNpcGroupId=" + evt.RuntimeNpcGroupId +
+            " | NpcType=" + evt.NpcType +
+            " | SystemId=" + evt.SystemId +
+            " | WasKilledByPlayer=" + evt.WasKilledByPlayer +
+            BuildWarStateSnapshot(evt.SystemId));
+
+        if (!TryGetActiveInvasionForTarget(
+                evt.SystemId,
+                out InvasionState invasionState))
+        {
+            LogWarStateDebug(
+                "SYSTEM_NPC_DESTROYED_EVENT_IGNORED" +
+                " | Reason=NoActiveInvasionForTarget" +
+                " | RuntimeNpcId=" + evt.RuntimeNpcId +
+                " | SystemId=" + evt.SystemId +
+                BuildWarStateSnapshot(evt.SystemId));
+
+            return;
+        }
+
+        if (!IsNpcFromInvasion(
+                evt.RuntimeNpcGroupId,
+                invasionState))
+        {
+            LogWarStateDebug(
+                "SYSTEM_NPC_DESTROYED_EVENT_IGNORED" +
+                " | Reason=NpcGroupDoesNotBelongToInvasion" +
+                " | RuntimeNpcId=" + evt.RuntimeNpcId +
+                " | RuntimeNpcGroupId=" + evt.RuntimeNpcGroupId +
+                " | InvasionId=" + invasionState.InvasionId +
+                " | SystemId=" + evt.SystemId +
+                BuildWarStateSnapshot(evt.SystemId));
+
+            return;
+        }
+
+        int aliveEnemyCount =
+            CountAliveEnemyNpcsForInvasion(invasionState);
+
+        LogWarStateDebug(
+            "SYSTEM_NPC_DESTROYED_EVENT_CHECKED" +
+            " | RuntimeNpcId=" + evt.RuntimeNpcId +
+            " | RuntimeNpcGroupId=" + evt.RuntimeNpcGroupId +
+            " | InvasionId=" + invasionState.InvasionId +
+            " | SystemId=" + evt.SystemId +
+            " | AliveEnemyCount=" + aliveEnemyCount +
+            BuildWarStateSnapshot(evt.SystemId));
+
+        if (aliveEnemyCount > 0)
+            return;
+
+        bool resolved =
+            ResolveInvasion(
+                invasionState.InvasionId,
+                false);
+
+        LogWarStateDebug(
+            "SYSTEM_NPC_DESTROYED_EVENT_RESOLVE_ATTEMPT" +
+            " | RuntimeNpcId=" + evt.RuntimeNpcId +
+            " | RuntimeNpcGroupId=" + evt.RuntimeNpcGroupId +
+            " | InvasionId=" + invasionState.InvasionId +
+            " | SystemId=" + evt.SystemId +
+            " | AliveEnemyCount=" + aliveEnemyCount +
+            " | ResolveInvasionResult=" + resolved +
+            BuildWarStateSnapshot(evt.SystemId));
+    }
+
+    private bool IsNpcFromInvasion(
+        string runtimeNpcGroupId,
+        InvasionState invasionState)
+    {
+        if (invasionState == null)
+            return false;
+
+        if (invasionState.EnemyGroupRuntimeIds == null ||
+            invasionState.EnemyGroupRuntimeIds.Count == 0)
+        {
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(runtimeNpcGroupId))
+            return false;
+
+        for (int i = 0; i < invasionState.EnemyGroupRuntimeIds.Count; i++)
+        {
+            string invasionGroupRuntimeId =
+                invasionState.EnemyGroupRuntimeIds[i];
+
+            if (invasionGroupRuntimeId == runtimeNpcGroupId)
+                return true;
+        }
+
+        return false;
+    }
+
+    private int CountAliveEnemyNpcsForInvasion(
+        InvasionState invasionState)
+    {
+        if (invasionState == null)
+            return 0;
+
+        if (_npcRuntimeService == null)
+        {
+            LogWarStateDebug(
+                "COUNT_ALIVE_INVASION_ENEMIES_FAILED" +
+                " | Reason=NpcRuntimeServiceNull" +
+                " | InvasionId=" + invasionState.InvasionId +
+                " | TargetSystemId=" + invasionState.TargetSystemId +
+                BuildWarStateSnapshot(invasionState.TargetSystemId));
+
+            return 0;
+        }
+
+        IReadOnlyList<SystemNpcRuntimeState> aliveEnemies =
+            _npcRuntimeService.GetAliveNpcsInSystemByType(
+                invasionState.TargetSystemId,
+                SystemNpcType.Enemy);
+
+        if (aliveEnemies == null ||
+            aliveEnemies.Count == 0)
+        {
+            return 0;
+        }
+
+        if (invasionState.EnemyGroupRuntimeIds == null ||
+            invasionState.EnemyGroupRuntimeIds.Count == 0)
+        {
+            return aliveEnemies.Count;
+        }
+
+        int count = 0;
+
+        for (int i = 0; i < aliveEnemies.Count; i++)
+        {
+            SystemNpcRuntimeState npc =
+                aliveEnemies[i];
+
+            if (npc == null)
+                continue;
+
+            if (string.IsNullOrWhiteSpace(npc.GroupRuntimeId))
+                continue;
+
+            if (!invasionState.EnemyGroupRuntimeIds.Contains(
+                    npc.GroupRuntimeId))
+            {
+                continue;
+            }
+
+            count++;
+        }
+
+        return count;
     }
 
     public IReadOnlyList<InvasionState> GetActiveInvasions()
@@ -332,21 +506,55 @@ public sealed class InvasionService :
         string invasionId,
         bool capturedByEnemy)
     {
+        LogWarStateDebug(
+            "RESOLVE_INVASION_ENTER" +
+            " | InvasionId=" + (invasionId ?? string.Empty) +
+            " | CapturedByEnemy=" + capturedByEnemy);
+
         if (!TryGetInvasion(
                 invasionId,
                 out InvasionState invasionState))
         {
+            LogWarStateDebug(
+                "RESOLVE_INVASION_FAILED" +
+                " | Reason=InvasionNotFound" +
+                " | InvasionId=" + (invasionId ?? string.Empty));
+
             return false;
         }
+
+        LogWarStateDebug(
+            "RESOLVE_INVASION_FOUND" +
+            " | InvasionId=" + invasionState.InvasionId +
+            " | TargetSystemId=" + invasionState.TargetSystemId +
+            " | SourceSystemId=" + invasionState.SourceSystemId +
+            " | FactionId=" + invasionState.FactionId +
+            " | LifecycleStateBefore=" + invasionState.LifecycleState +
+            " | CapturedByEnemy=" + capturedByEnemy +
+            BuildWarStateSnapshot(invasionState.TargetSystemId));
 
         if (invasionState.LifecycleState ==
             InvasionLifecycleState.CleanedUp)
         {
+            LogWarStateDebug(
+                "RESOLVE_INVASION_FAILED" +
+                " | Reason=AlreadyCleanedUp" +
+                " | InvasionId=" + invasionState.InvasionId +
+                BuildWarStateSnapshot(invasionState.TargetSystemId));
+
             return false;
         }
 
         int currentTick =
             GetCurrentQuantTick();
+
+        StarSystemStatus statusBeforeResolve =
+            StarSystemStatus.Stable;
+
+        bool hadStatusBeforeResolve =
+            _systemSecurityService.TryGetSystemStatus(
+                invasionState.TargetSystemId,
+                out statusBeforeResolve);
 
         invasionState.LifecycleState =
             InvasionLifecycleState.Resolved;
@@ -365,11 +573,29 @@ public sealed class InvasionService :
         bool captureApplied = false;
         bool liberationApplied = false;
 
+        LogWarStateDebug(
+            "RESOLVE_INVASION_STATUS_BEFORE_APPLY" +
+            " | InvasionId=" + invasionState.InvasionId +
+            " | TargetSystemId=" + invasionState.TargetSystemId +
+            " | HadStatusBeforeResolve=" + hadStatusBeforeResolve +
+            " | StatusBeforeResolve=" + statusBeforeResolve +
+            " | CapturedByEnemy=" + capturedByEnemy +
+            " | CaptureAllowed=" + captureAllowed +
+            " | CurrentTick=" + currentTick +
+            BuildWarStateSnapshot(invasionState.TargetSystemId));
+
         if (captureAllowed)
         {
             captureApplied =
                 _systemSecurityService.CaptureSystem(
                     invasionState.TargetSystemId);
+
+            LogWarStateDebug(
+                "RESOLVE_INVASION_CAPTURE_BRANCH" +
+                " | InvasionId=" + invasionState.InvasionId +
+                " | TargetSystemId=" + invasionState.TargetSystemId +
+                " | CaptureApplied=" + captureApplied +
+                BuildWarStateSnapshot(invasionState.TargetSystemId));
         }
         else
         {
@@ -377,16 +603,39 @@ public sealed class InvasionService :
                 _systemSecurityService.LiberateSystemByPlayer(
                     invasionState.TargetSystemId);
 
+            LogWarStateDebug(
+                "RESOLVE_INVASION_LIBERATION_BRANCH" +
+                " | InvasionId=" + invasionState.InvasionId +
+                " | TargetSystemId=" + invasionState.TargetSystemId +
+                " | LiberationApplied=" + liberationApplied +
+                BuildWarStateSnapshot(invasionState.TargetSystemId));
+
             if (liberationApplied)
             {
-                _systemSecurityService.MarkRecoveryHookPending(
-                    invasionState.TargetSystemId,
-                    currentTick,
-                    "player_liberation_after_invasion");
+                bool recoveryHookApplied =
+                    _systemSecurityService.MarkRecoveryHookPending(
+                        invasionState.TargetSystemId,
+                        currentTick,
+                        "player_liberation_after_invasion");
+
+                LogWarStateDebug(
+                    "RESOLVE_INVASION_RECOVERY_HOOK" +
+                    " | InvasionId=" + invasionState.InvasionId +
+                    " | TargetSystemId=" + invasionState.TargetSystemId +
+                    " | RecoveryHookApplied=" + recoveryHookApplied +
+                    " | CurrentTick=" + currentTick +
+                    BuildWarStateSnapshot(invasionState.TargetSystemId));
             }
 
             RemoveEnemyOwnershipForSystem(
                 invasionState.TargetSystemId);
+
+            LogWarStateDebug(
+                "RESOLVE_INVASION_ENEMY_OWNERSHIP_REMOVED" +
+                " | InvasionId=" + invasionState.InvasionId +
+                " | TargetSystemId=" + invasionState.TargetSystemId +
+                " | FactionId=" + invasionState.FactionId +
+                BuildWarStateSnapshot(invasionState.TargetSystemId));
         }
 
         if (captureApplied &&
@@ -395,14 +644,34 @@ public sealed class InvasionService :
             _enemyFactionService.AddOwnedSystem(
                 invasionState.FactionId,
                 invasionState.TargetSystemId);
+
+            LogWarStateDebug(
+                "RESOLVE_INVASION_ENEMY_OWNERSHIP_ADDED" +
+                " | InvasionId=" + invasionState.InvasionId +
+                " | TargetSystemId=" + invasionState.TargetSystemId +
+                " | FactionId=" + invasionState.FactionId +
+                BuildWarStateSnapshot(invasionState.TargetSystemId));
         }
 
         StarSystemStatus targetStatus =
             StarSystemStatus.Stable;
 
-        _systemSecurityService.TryGetSystemStatus(
-            invasionState.TargetSystemId,
-            out targetStatus);
+        bool hasTargetStatus =
+            _systemSecurityService.TryGetSystemStatus(
+                invasionState.TargetSystemId,
+                out targetStatus);
+
+        LogWarStateDebug(
+            "RESOLVE_INVASION_EXIT" +
+            " | InvasionId=" + invasionId +
+            " | TargetSystemId=" + invasionState.TargetSystemId +
+            " | CapturedByEnemy=" + capturedByEnemy +
+            " | CaptureAllowed=" + captureAllowed +
+            " | CaptureApplied=" + captureApplied +
+            " | LiberationApplied=" + liberationApplied +
+            " | HasTargetStatus=" + hasTargetStatus +
+            " | TargetStatus=" + targetStatus +
+            BuildWarStateSnapshot(invasionState.TargetSystemId));
 
         LogCustom(
     "[InvasionService] Invasion resolved. " +
@@ -633,6 +902,12 @@ public sealed class InvasionService :
 
     private int GetCurrentGalaxyLevel()
     {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.OverrideNpcGalaxyLevel)
+        {
+            return Bootstrapper.Instance.DebugNpcGalaxyLevel;
+        }
+
         if (_gameSessionService == null ||
             !_gameSessionService.HasActiveSession ||
             _gameSessionService.State == null ||
@@ -705,33 +980,150 @@ public sealed class InvasionService :
     }
 
     public bool ResolveInvasionFromCombatOutcome(
-    string systemId,
-    bool playerVictory)
+        string systemId,
+        bool playerVictory)
     {
+        LogWarStateDebug(
+            "RESOLVE_FROM_COMBAT_OUTCOME_ENTER" +
+            " | SystemId=" + (systemId ?? string.Empty) +
+            " | PlayerVictory=" + playerVictory +
+            BuildWarStateSnapshot(systemId));
+
         if (string.IsNullOrWhiteSpace(systemId))
+        {
+            LogWarStateDebug(
+                "RESOLVE_FROM_COMBAT_OUTCOME_FAILED" +
+                " | Reason=SystemIdEmpty");
             return false;
+        }
 
         if (!TryGetActiveInvasionForTarget(
                 systemId,
                 out InvasionState invasionState))
         {
+            LogWarStateDebug(
+                "RESOLVE_FROM_COMBAT_OUTCOME_FAILED" +
+                " | Reason=NoActiveInvasionForTarget" +
+                " | SystemId=" + systemId +
+                BuildWarStateSnapshot(systemId));
             return false;
         }
 
         bool capturedByEnemy =
             !playerVictory;
 
-        return ResolveInvasion(
-            invasionState.InvasionId,
-            capturedByEnemy);
+        LogWarStateDebug(
+            "RESOLVE_FROM_COMBAT_OUTCOME_FOUND_INVASION" +
+            " | SystemId=" + systemId +
+            " | InvasionId=" + invasionState.InvasionId +
+            " | LifecycleState=" + invasionState.LifecycleState +
+            " | CapturedByEnemy=" + capturedByEnemy +
+            BuildWarStateSnapshot(systemId));
+
+        bool resolved =
+            ResolveInvasion(
+                invasionState.InvasionId,
+                capturedByEnemy);
+
+        LogWarStateDebug(
+            "RESOLVE_FROM_COMBAT_OUTCOME_EXIT" +
+            " | SystemId=" + systemId +
+            " | InvasionId=" + invasionState.InvasionId +
+            " | Result=" + resolved +
+            BuildWarStateSnapshot(systemId));
+
+        return resolved;
+    }
+
+    private void LogWarStateDebug(string message)
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        if (!Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.Combat))
+            return;
+
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            "[InvasionService][WarState] " + message);
     }
 
     private void OnSystemEncounterResolved(
-    SystemEncounterResolvedEvent evt)
+        SystemEncounterResolvedEvent evt)
     {
-        ResolveInvasionFromCombatOutcome(
-            evt.SystemId,
-            true);
+        LogWarStateDebug(
+            "SYSTEM_ENCOUNTER_RESOLVED_EVENT_RECEIVED" +
+            " | EncounterId=" + evt.EncounterId +
+            " | SystemId=" + evt.SystemId +
+            BuildWarStateSnapshot(evt.SystemId));
+
+        bool resolved =
+            ResolveInvasionFromCombatOutcome(
+                evt.SystemId,
+                true);
+
+        LogWarStateDebug(
+            "SYSTEM_ENCOUNTER_RESOLVED_EVENT_HANDLED" +
+            " | EncounterId=" + evt.EncounterId +
+            " | SystemId=" + evt.SystemId +
+            " | ResolveInvasionResult=" + resolved +
+            BuildWarStateSnapshot(evt.SystemId));
+    }
+
+    private string BuildWarStateSnapshot(string systemId)
+    {
+        GalaxyRuntimeState galaxyState =
+            GetGalaxyState();
+
+        StarSystemStatus systemStatus =
+            StarSystemStatus.Stable;
+
+        bool hasSystemStatus =
+            _systemSecurityService != null &&
+            _systemSecurityService.TryGetSystemStatus(
+                systemId,
+                out systemStatus);
+
+        int activeInvasionsForSystem = 0;
+        string activeInvasionIds = string.Empty;
+        string activeInvasionStates = string.Empty;
+
+        if (galaxyState != null &&
+            galaxyState.Invasions != null)
+        {
+            for (int i = 0; i < galaxyState.Invasions.Count; i++)
+            {
+                InvasionState invasion =
+                    galaxyState.Invasions[i];
+
+                if (invasion == null)
+                    continue;
+
+                if (invasion.TargetSystemId != systemId)
+                    continue;
+
+                if (!invasion.IsActive())
+                    continue;
+
+                activeInvasionsForSystem++;
+
+                if (!string.IsNullOrWhiteSpace(activeInvasionIds))
+                    activeInvasionIds += ",";
+
+                if (!string.IsNullOrWhiteSpace(activeInvasionStates))
+                    activeInvasionStates += ",";
+
+                activeInvasionIds += invasion.InvasionId;
+                activeInvasionStates += invasion.LifecycleState.ToString();
+            }
+        }
+
+        return
+            " | HasSystemStatus=" + hasSystemStatus +
+            " | SystemStatus=" + systemStatus +
+            " | ActiveInvasionsForSystem=" + activeInvasionsForSystem +
+            " | ActiveInvasionIds=" + activeInvasionIds +
+            " | ActiveInvasionStates=" + activeInvasionStates;
     }
 
     private void OnSystemEncounterDefeated(

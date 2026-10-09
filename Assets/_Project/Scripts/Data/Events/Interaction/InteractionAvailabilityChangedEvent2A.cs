@@ -1,13 +1,19 @@
+/// <summary>
+/// Изменение доступности взаимодействия с выбранным игровым объектом.
+/// </summary>
 public sealed class
     InteractionAvailabilityChangedEvent2A
 {
+    /// <summary>Описатель выбранного игрового объекта.</summary>
     public InteractionDescriptor2A Descriptor
     {
         get;
     }
 
+    /// <summary>Признак доступности взаимодействия.</summary>
     public bool CanInteract { get; }
 
+    /// <summary>Причина неуспешного выполнения действия.</summary>
     public InteractionFailReason2A FailReason
     {
         get;

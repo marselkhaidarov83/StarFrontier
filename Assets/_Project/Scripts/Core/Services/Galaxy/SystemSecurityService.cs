@@ -65,6 +65,12 @@ public sealed class SystemSecurityService :
 
         if (systemState == null)
         {
+            LogSystemStatusDebug(
+                "SYSTEM_STATUS_SET_FAILED" +
+                " | Reason=SystemStateNotFound" +
+                " | SystemId=" + (systemId ?? string.Empty) +
+                " | RequestedStatus=" + newStatus);
+
             LogCustom(
                 "[SystemSecurityService] System state not found: " +
                 systemId);
@@ -72,11 +78,24 @@ public sealed class SystemSecurityService :
             return false;
         }
 
+        StarSystemStatus previousStatus =
+            systemState.SystemStatus;
+
         systemState.SetSystemStatus(newStatus);
+
+        LogSystemStatusDebug(
+            "SYSTEM_STATUS_CHANGED" +
+            " | Source=SetSystemStatus" +
+            " | SystemId=" + systemId +
+            " | PreviousStatus=" + previousStatus +
+            " | NewStatus=" + systemState.SystemStatus +
+            " | RequestedStatus=" + newStatus +
+            " | IsSecured=" + IsSystemSecured(systemId));
 
         LogCustom(
             "[SystemSecurityService] Status changed. " +
             "System: " + systemId +
+            " | PreviousStatus: " + previousStatus +
             " | Status: " + newStatus +
             " | IsSecured: " + IsSystemSecured(systemId));
 
@@ -90,6 +109,11 @@ public sealed class SystemSecurityService :
 
         if (systemState == null)
         {
+            LogSystemStatusDebug(
+                "SYSTEM_STATUS_CAPTURE_FAILED" +
+                " | Reason=SystemStateNotFound" +
+                " | SystemId=" + (systemId ?? string.Empty));
+
             LogCustom(
                 "[SystemSecurityService] Capture failed. System state not found: " +
                 systemId);
@@ -97,11 +121,27 @@ public sealed class SystemSecurityService :
             return false;
         }
 
+        StarSystemStatus previousStatus =
+            systemState.SystemStatus;
+
         systemState.MarkCaptured();
+
+        LogSystemStatusDebug(
+            "SYSTEM_STATUS_CHANGED" +
+            " | Source=CaptureSystem" +
+            " | SystemId=" + systemId +
+            " | PreviousStatus=" + previousStatus +
+            " | NewStatus=" + systemState.SystemStatus +
+            " | Stability=" + systemState.Stability +
+            " | DevelopmentLevel=" + systemState.DevelopmentLevel +
+            " | InfrastructureDamageState=" + systemState.InfrastructureDamageState +
+            " | InfrastructureDamage=" + systemState.InfrastructureDamage +
+            " | IsSecured=" + IsSystemSecured(systemId));
 
         LogCustom(
             "[SystemSecurityService] System captured. " +
             "System: " + systemId +
+            " | PreviousStatus: " + previousStatus +
             " | Status: " + systemState.SystemStatus +
             " | Stability: " + systemState.Stability +
             " | DevelopmentLevel: " + systemState.DevelopmentLevel +
@@ -152,6 +192,11 @@ public sealed class SystemSecurityService :
 
         if (systemState == null)
         {
+            LogSystemStatusDebug(
+                "SYSTEM_STATUS_LIBERATION_FAILED" +
+                " | Reason=SystemStateNotFound" +
+                " | SystemId=" + (systemId ?? string.Empty));
+
             LogCustom(
                 "[SystemSecurityService] Player liberation failed. System state not found: " +
                 systemId);
@@ -159,11 +204,25 @@ public sealed class SystemSecurityService :
             return false;
         }
 
+        StarSystemStatus previousStatus =
+            systemState.SystemStatus;
+
         systemState.MarkLiberatedByPlayer();
+
+        LogSystemStatusDebug(
+            "SYSTEM_STATUS_CHANGED" +
+            " | Source=LiberateSystemByPlayer" +
+            " | SystemId=" + systemId +
+            " | PreviousStatus=" + previousStatus +
+            " | NewStatus=" + systemState.SystemStatus +
+            " | Stability=" + systemState.Stability +
+            " | DevelopmentLevel=" + systemState.DevelopmentLevel +
+            " | IsSecured=" + IsSystemSecured(systemId));
 
         LogCustom(
             "[SystemSecurityService] System liberated by player. " +
             "System: " + systemId +
+            " | PreviousStatus: " + previousStatus +
             " | Status: " + systemState.SystemStatus +
             " | Stability: " + systemState.Stability +
             " | DevelopmentLevel: " + systemState.DevelopmentLevel +
@@ -266,6 +325,13 @@ public sealed class SystemSecurityService :
 
         if (systemState == null)
         {
+            LogSystemStatusDebug(
+                "RECOVERY_HOOK_PENDING_FAILED" +
+                " | Reason=SystemStateNotFound" +
+                " | SystemId=" + (systemId ?? string.Empty) +
+                " | Tick=" + currentTick +
+                " | HookReason=" + (reason ?? string.Empty));
+
             LogCustom(
                 "[SystemSecurityService] Recovery hook failed. System state not found: " +
                 systemId);
@@ -273,9 +339,28 @@ public sealed class SystemSecurityService :
             return false;
         }
 
+        bool hadPendingHook =
+            systemState.HasPendingRecoveryHook;
+
+        string previousHookReason =
+            systemState.RecoveryHookReason;
+
+        int previousHookTick =
+            systemState.RecoveryHookCreatedAtTick;
+
         systemState.MarkRecoveryHookPending(
             currentTick,
             reason);
+
+        LogSystemStatusDebug(
+            "RECOVERY_HOOK_PENDING_SET" +
+            " | SystemId=" + systemId +
+            " | SystemStatus=" + systemState.SystemStatus +
+            " | HadPendingHook=" + hadPendingHook +
+            " | PreviousHookTick=" + previousHookTick +
+            " | PreviousHookReason=" + previousHookReason +
+            " | NewHookTick=" + systemState.RecoveryHookCreatedAtTick +
+            " | NewHookReason=" + systemState.RecoveryHookReason);
 
         LogCustom(
             "[SystemSecurityService] Recovery hook pending. " +
@@ -344,5 +429,18 @@ public sealed class SystemSecurityService :
         }
 
         return 1;
+    }
+
+    private void LogSystemStatusDebug(string message)
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        if (!Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.Combat))
+            return;
+
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            "[SystemSecurityService][SystemStatus] " + message);
     }
 }

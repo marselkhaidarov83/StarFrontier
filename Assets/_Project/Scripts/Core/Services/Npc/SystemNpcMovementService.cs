@@ -1404,6 +1404,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             starSystem.Id,
             npcs,
             currentTick);
+
         int movedCount = 0;
         int blockedCount = 0;
 
@@ -1506,6 +1507,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
                 if (!npc.IsOnPlanet)
                     blockedInSpaceCount++;
+
+                LogBlockedUnknownRouteNpcIfNeeded(
+                    npc,
+                    blockReason,
+                    currentTick);
 
                 continue;
             }
@@ -1778,6 +1784,63 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             maxNpcRouteTargetKind,
             maxNpcRouteTargetMoveKind,
             aggregatePhaseStats);
+    }
+
+    private void LogBlockedUnknownRouteNpcIfNeeded(
+        SystemNpcRuntimeState npc,
+        string blockReason,
+        int currentTick)
+    {
+        if (!IsNpcMovementDebugEnabled())
+            return;
+
+        if (npc == null)
+            return;
+
+        if (!IsCurrentSystemForPerf(npc.CurrentSystemId))
+            return;
+
+        string routeTargetKind = GetNpcRouteTargetKind(npc);
+
+        if (routeTargetKind != "UNKNOWN_OR_FALLBACK")
+            return;
+
+        LogNpcMovementDebug(
+            "NPC_BLOCKED_UNKNOWN_ROUTE_TARGET" +
+            " | Tick=" + currentTick +
+            " | BlockReason=" + blockReason +
+            " | RuntimeNpcId=" + (npc.RuntimeNpcId ?? string.Empty) +
+            " | ConfigId=" + (npc.ConfigId ?? string.Empty) +
+            " | NpcType=" + npc.NpcType +
+            " | IsAlly=" + npc.IsAlly +
+            " | AllyRole=" + npc.AllyRole +
+            " | Level=" + npc.Level +
+            " | IsAlive=" + npc.IsAlive +
+            " | LifeState=" + npc.LifeState +
+            " | IsOnPlanet=" + npc.IsOnPlanet +
+            " | CurrentSystemId=" + (npc.CurrentSystemId ?? string.Empty) +
+            " | CurrentPlanetId=" + (npc.CurrentPlanetId ?? string.Empty) +
+            " | TargetSystemId=" + (npc.TargetSystemId ?? string.Empty) +
+            " | TargetPlanetId=" + (npc.TargetPlanetId ?? string.Empty) +
+            " | TravelState=" + npc.TravelState +
+            " | CurrentBehavior=" + npc.CurrentBehavior +
+            " | PrevBehavior=" + npc.PrevBehavior +
+            " | HasActiveBehavior=" + npc.HasActiveBehavior +
+            " | BehaviorTargetRuntimeNpcId=" + (npc.BehaviorTargetRuntimeNpcId ?? string.Empty) +
+            " | CurrentTargetRuntimeNpcId=" + (npc.CurrentTargetRuntimeNpcId ?? string.Empty) +
+            " | CombatState=" + npc.CombatState +
+            " | IsFighting=" + npc.IsFighting +
+            " | RouteTargetKind=" + routeTargetKind +
+            " | Position=" + FormatVector3(npc.CurrentPosition) +
+            " | StartPosition=" + FormatVector3(npc.StartPosition) +
+            " | TargetPosition=" + FormatVector3(npc.TargetPosition) +
+            " | TargetSystemExitPoint=" + FormatVector3(npc.TargetSystemExitPoint) +
+            " | CurrentMovementTargetPosition=" + FormatVector3(npc.CurrentMovementTargetPosition) +
+            " | TickMovementTargetPosition=" + FormatVector3(npc.TickMovementTargetPosition) +
+            " | IsWaitingForInitialRouteBuild=" + npc.IsWaitingForInitialRouteBuild +
+            " | ReleaseFromPlanetAfterInitialRouteBuild=" + npc.ReleaseFromPlanetAfterInitialRouteBuild +
+            " | InitialRouteBuildPlanetId=" + (npc.InitialRouteBuildPlanetId ?? string.Empty) +
+            " | TravelProgress01=" + npc.TravelProgress01.ToString("0.###"));
     }
 
     private string GetDominantRouteTargetKindForPerf(
@@ -4659,14 +4722,14 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         if (npc == null)
             return SystemShipRouteTargetKind2A.MapPoint;
 
-        if (npc.IsEnemy)
-            return SystemShipRouteTargetKind2A.Enemy;
-
         if (npc.TravelState == SystemNpcTravelState.EngagingEnemy ||
             !string.IsNullOrWhiteSpace(npc.CurrentTargetRuntimeNpcId))
         {
             return SystemShipRouteTargetKind2A.Npc;
         }
+
+        if (npc.IsEnemy)
+            return SystemShipRouteTargetKind2A.Enemy;
 
         string routeTargetKind =
             GetNpcRouteTargetKind(npc);
@@ -8439,6 +8502,32 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             return false;
         }
 
+        if (!npc.IsOnPlanet)
+        {
+            if (!string.IsNullOrWhiteSpace(npc.CurrentPlanetId) ||
+                npc.ReleaseFromPlanetAfterInitialRouteBuild ||
+                !string.IsNullOrWhiteSpace(npc.InitialRouteBuildPlanetId))
+            {
+                LogNpcMovementDebug(
+                    "NPC_INITIAL_ROUTE_PLANET_SYNC_SKIPPED_STALE_PLANET_STATE" +
+                    " | Reason=" + reason +
+                    " | Npc=" + npc.RuntimeNpcId +
+                    " | Tick=" + currentTick +
+                    " | IsOnPlanet=" + npc.IsOnPlanet +
+                    " | IsWaitingForInitialRouteBuild=" + npc.IsWaitingForInitialRouteBuild +
+                    " | ReleaseFromPlanetAfterInitialRouteBuild=" + npc.ReleaseFromPlanetAfterInitialRouteBuild +
+                    " | InitialRouteBuildPlanetId=" + (npc.InitialRouteBuildPlanetId ?? string.Empty) +
+                    " | CurrentPlanetId=" + (npc.CurrentPlanetId ?? string.Empty) +
+                    " | Position=" + FormatVector3(npc.CurrentPosition));
+
+                npc.CurrentPlanetId = null;
+                npc.ReleaseFromPlanetAfterInitialRouteBuild = false;
+                npc.InitialRouteBuildPlanetId = null;
+            }
+
+            return false;
+        }
+
         string planetId =
             !string.IsNullOrWhiteSpace(npc.InitialRouteBuildPlanetId)
                 ? npc.InitialRouteBuildPlanetId
@@ -8490,8 +8579,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         if (npc.TickMovementTargetPosition == previousPosition)
             npc.TickMovementTargetPosition = planetPosition;
 
-        Debug.Log(
-            "[SystemNpcMovementService] NPC_INITIAL_ROUTE_PLANET_SYNC" +
+        LogNpcMovementDebug(
+            "NPC_INITIAL_ROUTE_PLANET_SYNC" +
             " | Reason=" + reason +
             " | Npc=" + npc.RuntimeNpcId +
             " | Tick=" + currentTick +
@@ -8722,6 +8811,13 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         if (IsNpcFinalPlanetApproachRoutePriorityCandidate(npc))
             return NpcRouteBuildBudgetKind.FinalPlanetApproach;
+
+        if (npc.TravelState == SystemNpcTravelState.EngagingEnemy ||
+            npc.IsFighting ||
+            !string.IsNullOrWhiteSpace(npc.CurrentTargetRuntimeNpcId))
+        {
+            return NpcRouteBuildBudgetKind.FinalPlanetApproach;
+        }
 
         if (hasActiveRoute)
             return NpcRouteBuildBudgetKind.RefreshExistingRoute;

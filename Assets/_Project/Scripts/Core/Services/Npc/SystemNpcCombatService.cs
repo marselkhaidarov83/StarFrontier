@@ -2755,6 +2755,66 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     {
         CompleteBeamsForNpc(evt.RuntimeNpcId);
         MarkProjectilesTargetingNpcAsMiss(evt.RuntimeNpcId, evt.Position);
+        ClearDestroyedNpcTargetReferences(evt.RuntimeNpcId);
+    }
+
+    private void ClearDestroyedNpcTargetReferences(string destroyedRuntimeNpcId)
+    {
+        if (string.IsNullOrWhiteSpace(destroyedRuntimeNpcId))
+            return;
+
+        IReadOnlyList<SystemNpcRuntimeState> npcs = _runtimeService.Npcs;
+
+        if (npcs == null)
+            return;
+
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc = npcs[i];
+
+            if (npc == null || !npc.IsAlive)
+                continue;
+
+            bool targetsDestroyedNpc =
+                npc.CurrentTargetRuntimeNpcId == destroyedRuntimeNpcId ||
+                npc.BehaviorTargetRuntimeNpcId == destroyedRuntimeNpcId;
+
+            if (!targetsDestroyedNpc)
+                continue;
+
+            npc.CurrentTargetRuntimeNpcId = null;
+            npc.BehaviorTargetRuntimeNpcId = null;
+            npc.CombatState = SystemNpcCombatState.None;
+            npc.IsFighting = false;
+
+            if (npc.CurrentBehavior != SystemNpcBehaviorType.EngageEnemies &&
+                npc.TravelState != SystemNpcTravelState.EngagingEnemy)
+            {
+                continue;
+            }
+
+            GalaxyCombatTarget replacementTarget = FindTarget(npc);
+
+            if (replacementTarget.IsValid)
+            {
+                npc.CurrentTargetRuntimeNpcId =
+                    replacementTarget.IsNpc
+                        ? replacementTarget.TargetNpcId
+                        : null;
+
+                npc.BehaviorTargetRuntimeNpcId = npc.CurrentTargetRuntimeNpcId;
+                npc.TravelState = SystemNpcTravelState.EngagingEnemy;
+                npc.CombatState = SystemNpcCombatState.HasTarget;
+                npc.IsFighting = true;
+                continue;
+            }
+
+            npc.CurrentBehavior = SystemNpcBehaviorType.None;
+            npc.HasActiveBehavior = false;
+            npc.TravelState = npc.IsOnPlanet
+                ? SystemNpcTravelState.OnPlanet
+                : SystemNpcTravelState.Idle;
+        }
     }
 
     private void OnPlayerShipDestroyedByNpc(PlayerShipDestroyedByNpcEvent evt)

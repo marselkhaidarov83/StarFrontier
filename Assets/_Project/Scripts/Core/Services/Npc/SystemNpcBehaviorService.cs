@@ -143,6 +143,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     private readonly IConfigService _configService;
     private readonly IRouteService _routeService;
     private readonly IOrbitalMotionService _orbitalMotionService;
+    private IPlayerCombatTargetService _playerCombatTargetService;
     private readonly ISystemSecurityService _systemSecurityService;
 
     private readonly System.Random _offscreenNpcProcessingRandom = new();
@@ -159,8 +160,36 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         _routeService = Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _systemSecurityService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
+        // _playerCombatTargetService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerCombatTargetService>();
 
         LogCustom("[NPC-MILITARY-BEHAVIOR] Service debug disabled by default.");
+    }
+
+    private bool TryGetPlayerCombatTargetService(
+    out IPlayerCombatTargetService playerCombatTargetService)
+    {
+        if (_playerCombatTargetService != null)
+        {
+            playerCombatTargetService = _playerCombatTargetService;
+            return true;
+        }
+
+        playerCombatTargetService = null;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return false;
+        }
+
+        if (!Bootstrapper.Instance.ServiceRegistry.TryGet(
+                out playerCombatTargetService))
+        {
+            return false;
+        }
+
+        _playerCombatTargetService = playerCombatTargetService;
+        return true;
     }
 
     public void Tick(StarSystemConfig starSystem, int currentTick)
@@ -529,8 +558,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private bool ShouldInterruptForThreat(
-    SystemNpcRuntimeState npc,
-    bool hasEnemiesInSystem)
+        SystemNpcRuntimeState npc,
+        bool hasEnemiesInSystem)
     {
         if (npc == null || !npc.IsAlive)
             return false;
@@ -545,7 +574,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             npc.TravelState == SystemNpcTravelState.EngagingEnemy)
             return false;
 
-        return !string.IsNullOrWhiteSpace(FindCombatTargetId(npc));
+        return HasCombatEngagementTarget(npc);
     }
 
     private bool CanNpcReactToThreats(SystemNpcRuntimeState npc)
@@ -811,13 +840,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             npc.BehaviorTargetRuntimeNpcId = null;
             npc.CombatState = SystemNpcCombatState.None;
             npc.IsFighting = false;
-
-            if (CanNpcPatrolSystem(npc))
-            {
-                npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
-                SetupPatrolSystem(npc);
-                return;
-            }
 
             CompleteBehavior(npc, currentTick);
             return;
@@ -1394,11 +1416,14 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     }
 
     private bool CanUseBehaviorInCurrentConditions(
-    SystemNpcRuntimeState npc,
-    SystemNpcBehaviorType behaviorType)
+        SystemNpcRuntimeState npc,
+        SystemNpcBehaviorType behaviorType)
     {
         switch (behaviorType)
         {
+            case SystemNpcBehaviorType.EngageEnemies:
+                return HasCombatEngagementTarget(npc);
+
             case SystemNpcBehaviorType.StayOnPlanetForDays:
                 return IsNpcOnKnownPlanet(npc);
 
@@ -1414,33 +1439,29 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             case SystemNpcBehaviorType.AttackRangerBaseStation:
                 return HasAliveStation(npc, StationType.RangerBase);
 
-            case SystemNpcBehaviorType.AttackTradeStation:
-                return HasAliveStation(npc, StationType.Trade);
-
-            case SystemNpcBehaviorType.AttackScienceStation:
-                return HasAliveStation(npc, StationType.Science);
-
-            case SystemNpcBehaviorType.AttackMedicalStation:
-                return HasAliveStation(npc, StationType.Medical);
-
-            case SystemNpcBehaviorType.AttackMilitaryAlly:
-                return HasAliveAlly(npc, AllyRole2A.Military);
-
-            case SystemNpcBehaviorType.AttackRangerAlly:
-                return HasAliveAlly(npc, AllyRole2A.Ranger);
-
-            case SystemNpcBehaviorType.AttackTraderAlly:
-                return HasAliveAlly(npc, AllyRole2A.Trader);
-
-            case SystemNpcBehaviorType.AttackScienceAlly:
-                return HasAliveAlly(npc, AllyRole2A.Science);
-
-            case SystemNpcBehaviorType.AttackMedicAlly:
-                return HasAliveAlly(npc, AllyRole2A.Medic);
-
             default:
                 return true;
         }
+    }
+
+    private bool HasCombatEngagementTarget(SystemNpcRuntimeState npc)
+    {
+        if (npc == null || !npc.IsAlive)
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(FindCombatTargetId(npc)))
+            return true;
+
+        if (!npc.IsEnemy)
+            return false;
+
+        if (!TryGetPlayerCombatTargetService(
+                out IPlayerCombatTargetService playerCombatTargetService))
+        {
+            return false;
+        }
+
+        return playerCombatTargetService.IsPlayerAvailableInSystem(npc.CurrentSystemId);
     }
 
     private bool IsNpcOnKnownPlanet(SystemNpcRuntimeState npc)
@@ -2364,11 +2385,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (npc == null || !npc.IsAlive)
             return null;
 
-        float shotDistance = npc.getShotDistance();
-
-        if (shotDistance <= 0f)
-            return null;
-
         if (npc.IsEnemy)
         {
             List<SystemNpcRuntimeState> targets = new();
@@ -2381,8 +2397,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 if (npcRuntimeState.IsAlive &&
                     npcRuntimeState.IsAlly &&
                     npcRuntimeState.CurrentSystemId == npc.CurrentSystemId &&
-                    npcRuntimeState.IsAvailableForCombat() &&
-                    Vector3.Distance(npc.CurrentPosition, npcRuntimeState.CurrentPosition) <= shotDistance)
+                    npcRuntimeState.IsAvailableForCombat())
                 {
                     targets.Add(npcRuntimeState);
                 }

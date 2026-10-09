@@ -423,6 +423,7 @@ GameObject:
   m_Component:
   - component: {fileID: 860668904}
   - component: {fileID: 860668903}
+  - component: {fileID: 860668905}
   m_Layer: 0
   m_Name: BootstrapRoot
   m_TagString: MainCamera
@@ -918,6 +919,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &860668905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860668902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4723f8225fc1a44c0bb88dcfa5fbce5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::DebugController2A
+  _debugEnabled: 0
+  _debugStop: 0
+  debugSourceSystem: {fileID: 0}
+  debugTargetSystem: {fileID: 0}
+  debugInvasionSpawnRule: {fileID: 0}
+  debugFactionId: ai
+  debugResolveAfterTicks: 3
+  useCurrentSystemAsTargetIfEmpty: 1
 --- !u!1 &989972542
 GameObject:
   m_ObjectHideFlags: 0

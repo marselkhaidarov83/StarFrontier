@@ -317,6 +317,12 @@ public sealed class EnemySpawnService :
 
     private int GetCurrentGalaxyLevel()
     {
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.OverrideNpcGalaxyLevel)
+        {
+            return Bootstrapper.Instance.DebugNpcGalaxyLevel;
+        }
+
         if (_gameSessionService == null ||
             !_gameSessionService.HasActiveSession ||
             _gameSessionService.State == null ||

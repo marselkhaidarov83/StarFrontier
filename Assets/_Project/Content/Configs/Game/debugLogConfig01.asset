@@ -17,12 +17,12 @@ MonoBehaviour:
   includeShipRouteInternalLogs: 0
   npcRouteDecisionLogs: 0
   playerMovementLogs: 0
-  npcMovementLogs: 0
+  npcMovementLogs: 1
   enemyMovementLogs: 0
   movementTurnSpikeAngleDegrees: 60
-  combatLogs: 0
+  combatLogs: 1
   damageLogs: 0
-  populationLogs: 0
+  populationLogs: 1
   planetMovementLogs: 0
   saveLogs: 0
   timeLogs: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
   npcMovementLoadAnalyticsFpsCriticalThreshold: 30
   npcMovementLoadAnalyticsTickWarningMs: 6
   npcMovementLoadAnalyticsRegularLogIntervalTicks: 0
-  npcMovementLoadAnalyticsDetailLevel: 0
+  npcMovementLoadAnalyticsDetailLevel: 4
   npcBehaviorActionAnalyticsLogs: 0
   npcBehaviorActionAnalyticsTickWarningMs: 6
   npcBehaviorActionAnalyticsOnFpsWarning: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
   npcCombatPerformanceLogs: 0
   planetMovementPerformanceLogs: 0
   galaxyRoutePerformanceLogs: 0
-  savePerformanceLogs: 1
+  savePerformanceLogs: 0
   npcTurnSpikeLogs: 0
   enemyTurnSpikeLogs: 0
   npcMilitaryMovementVerboseLogs: 0
