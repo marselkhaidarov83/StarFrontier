@@ -7,6 +7,7 @@ public class SystemState : IGameState
 
     private readonly ISceneService _sceneService;
     private readonly IGalaxyNpcWarmupService _galaxyNpcWarmupService;
+    private readonly IGalaxyNpcSimulationScheduleService _galaxyNpcSimulationScheduleService;
     private readonly IGameSessionService _gameSessionService;
     private readonly ITravelService _travelService;
     private readonly string _pendingTravelTargetSystemId;
@@ -31,6 +32,7 @@ public class SystemState : IGameState
         registry.TryGet(out _gameSessionService);
         registry.TryGet(out _galaxyNpcWarmupService);
         registry.TryGet(out _travelService);
+        registry.TryGet(out _galaxyNpcSimulationScheduleService);
 
         _pendingTravelTargetSystemId =
             NormalizeSystemId(pendingTravelTargetSystemId);
@@ -65,6 +67,12 @@ public class SystemState : IGameState
 
     public void Enter()
     {
+        LogSystemOpenTrace(
+            "Enter.Start" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId) +
+            " | LoadingSceneRegistered=" + LoadingSceneContext.IsSceneRegistered +
+            " | ActiveScene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+
         if (_debugEnabled)
             Debug.Log("Entered SystemState");
 
@@ -78,6 +86,10 @@ public class SystemState : IGameState
 
         if (IsLoadingSceneReadyForSystemWarmup())
         {
+            LogSystemOpenTrace(
+                "Enter.LoadingSceneAlreadyReady" +
+                " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
             StartWarmupAfterLoadingSceneReady();
             return;
         }
@@ -85,6 +97,10 @@ public class SystemState : IGameState
         SubscribeToSceneEvents();
 
         _waitingForLoading = true;
+
+        LogSystemOpenTrace(
+            "Enter.LoadLoadingAsync.Before" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
 
         if (_sceneService.LoadLoadingAsync() == null &&
             _waitingForLoading)
@@ -109,6 +125,11 @@ public class SystemState : IGameState
 
     private void StartWarmupAfterLoadingSceneReady()
     {
+        LogSystemOpenTrace(
+            "StartWarmupAfterLoadingSceneReady.Start" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId) +
+            " | HasWarmupRoutine=" + (_warmupRoutine != null));
+
         if (_warmupRoutine != null)
             return;
 
@@ -124,6 +145,10 @@ public class SystemState : IGameState
         _warmupRoutine =
             Bootstrapper.Instance.StartCoroutine(
                 RunWarmupThenLoadSystem());
+
+        LogSystemOpenTrace(
+            "StartWarmupAfterLoadingSceneReady.CoroutineStarted" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
     }
 
     public void Exit()
@@ -165,6 +190,12 @@ public class SystemState : IGameState
 
     private void HandleSceneLoaded(string sceneName)
     {
+        LogSystemOpenTrace(
+            "HandleSceneLoaded" +
+            " | SceneName=" + FormatTraceValue(sceneName) +
+            " | WaitingForLoading=" + _waitingForLoading +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
         if (!_waitingForLoading ||
             sceneName != LOADING_SCENE)
         {
@@ -185,25 +216,77 @@ public class SystemState : IGameState
         LoadingSceneContext.Log(
             "SystemState.RunWarmupThenLoadSystem.Start");
 
-        LoadingSceneContext.SetProgress(
-            string.Empty,
-            LoadingSceneContext.WarmupFromProgress);
+        bool hasPendingTravel =
+            HasPendingSystemTravel();
 
-        yield return null;
+        bool initialWarmupComplete =
+            _galaxyNpcSimulationScheduleService != null &&
+            _galaxyNpcSimulationScheduleService.IsInitialWarmupComplete;
 
-        if (!RunPendingSystemTravel())
+        LogSystemOpenTrace(
+            "RunWarmupThenLoadSystem.Start" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId) +
+            " | HasPendingTravel=" + hasPendingTravel +
+            " | InitialWarmupComplete=" + initialWarmupComplete);
+
+        if (!hasPendingTravel &&
+            initialWarmupComplete)
         {
             _warmupRoutine = null;
 
             LoadingSceneContext.MarkWorkComplete(
                 string.Empty);
 
+            LogSystemOpenTrace(
+                "RunWarmupThenLoadSystem.LoadSystemWithoutPendingTravel.Before" +
+                " | Reason=InitialWarmupAlreadyComplete" +
+                " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
             _sceneService.LoadSystem();
+
+            LogSystemOpenTrace(
+                "RunWarmupThenLoadSystem.LoadSystemWithoutPendingTravel.After" +
+                " | Reason=InitialWarmupAlreadyComplete" +
+                " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
+            yield break;
+        }
+
+        LoadingSceneContext.SetProgress(
+            string.Empty,
+            LoadingSceneContext.WarmupFromProgress);
+
+        yield return null;
+
+        if (hasPendingTravel &&
+            !RunPendingSystemTravel())
+        {
+            _warmupRoutine = null;
+
+            LoadingSceneContext.MarkWorkComplete(
+                string.Empty);
+
+            LogSystemOpenTrace(
+                "RunWarmupThenLoadSystem.LoadSystemAfterFailedPendingTravel.Before" +
+                " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
+            _sceneService.LoadSystem();
+
+            LogSystemOpenTrace(
+                "RunWarmupThenLoadSystem.LoadSystemAfterFailedPendingTravel.After" +
+                " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
             yield break;
         }
 
         LoadingSceneContext.Log(
             "SystemState.BeforeWarmup");
+
+        LogSystemOpenTrace(
+            "RunWarmupThenLoadSystem.BeforeWarmup" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId) +
+            " | HasPendingTravel=" + hasPendingTravel +
+            " | InitialWarmupComplete=" + initialWarmupComplete);
 
         long warmupStartedAt =
             System.Diagnostics.Stopwatch.GetTimestamp();
@@ -211,7 +294,9 @@ public class SystemState : IGameState
         if (_galaxyNpcWarmupService != null)
         {
             yield return _galaxyNpcWarmupService.RunInitialWarmupRoutine(
-                "SystemState.LoadingScene",
+                hasPendingTravel
+                    ? "SystemState.PendingTravel"
+                    : "SystemState.InitialSystemOpen",
                 LoadingSceneContext.WarmupFromProgress,
                 LoadingSceneContext.WarmupToProgress);
         }
@@ -226,6 +311,12 @@ public class SystemState : IGameState
             (System.Diagnostics.Stopwatch.GetTimestamp() - warmupStartedAt) *
             1000.0 /
             System.Diagnostics.Stopwatch.Frequency;
+
+        LogSystemOpenTrace(
+            "RunWarmupThenLoadSystem.AfterWarmup" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId) +
+            " | HasPendingTravel=" + hasPendingTravel +
+            " | WarmupMs=" + warmupMs.ToString("0.00"));
 
         LoadingSceneContext.RecordWarmupMs(warmupMs);
 
@@ -252,7 +343,15 @@ public class SystemState : IGameState
             yield break;
         }
 
+        LogSystemOpenTrace(
+            "RunWarmupThenLoadSystem.LoadSystemAfterWarmup.Before" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
         _sceneService.LoadSystem();
+
+        LogSystemOpenTrace(
+            "RunWarmupThenLoadSystem.LoadSystemAfterWarmup.After" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
 
         LoadingSceneContext.MarkWorkComplete(
             string.Empty);
@@ -263,8 +362,17 @@ public class SystemState : IGameState
 
     private bool RunPendingSystemTravel()
     {
-        if (string.IsNullOrWhiteSpace(_pendingTravelTargetSystemId))
-            return true;
+        LogSystemOpenTrace(
+            "RunPendingSystemTravel.Start" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
+        if (!HasPendingSystemTravel())
+        {
+            LogSystemOpenTrace(
+                "RunPendingSystemTravel.NoPendingTravel.ReturnFalse");
+
+            return false;
+        }
 
         if (_travelService == null)
         {
@@ -279,9 +387,19 @@ public class SystemState : IGameState
             string.Empty,
             LoadingSceneContext.EnterSystemProgress);
 
+        LogSystemOpenTrace(
+            "RunPendingSystemTravel.TryTravel.Before" +
+            " | PendingTravelTargetSystemId=" + FormatTraceValue(_pendingTravelTargetSystemId));
+
         TravelResult result =
             _travelService.TryTravel(
                 _pendingTravelTargetSystemId);
+
+        LogSystemOpenTrace(
+            "RunPendingSystemTravel.TryTravel.After" +
+            " | HasResult=" + (result != null) +
+            " | Success=" + (result != null && result.Success) +
+            " | FailReason=" + (result != null ? result.FailReason.ToString() : "None"));
 
         if (result == null)
         {
@@ -304,6 +422,27 @@ public class SystemState : IGameState
             "SystemState.PendingTravel.Completed");
 
         return true;
+    }
+
+    private bool HasPendingSystemTravel()
+    {
+        return !string.IsNullOrWhiteSpace(
+            _pendingTravelTargetSystemId);
+    }
+
+    private static void LogSystemOpenTrace(string message)
+    {
+        Debug.Log(
+            "[SYSTEM_OPEN_TRACE] " +
+            message +
+            " | Realtime=" + Time.realtimeSinceStartup.ToString("0.000"));
+    }
+
+    private static string FormatTraceValue(string value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "None"
+            : value;
     }
 
     private void HandleLoadingFailure(

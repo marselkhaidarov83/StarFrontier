@@ -306,8 +306,13 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
                 continue;
             }
 
+            string weaponShotKey =
+                slotIndex +
+                ":" +
+                weaponConfigId;
+
             if (_lastShotTickByWeapon.TryGetValue(
-                    weaponConfigId,
+                    weaponShotKey,
                     out int lastTick))
             {
                 if (lastTick == quantTick)
@@ -323,11 +328,11 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
             if (!fired)
                 continue;
 
-            _lastShotTickByWeapon[weaponConfigId] =
+            _lastShotTickByWeapon[weaponShotKey] =
                 quantTick;
 
             LogCustom(
-                "[AttackTickDebug] Player fired once. Tick: " +
+                "[AttackTickDebug] Player weapon slot fired. Tick: " +
                 quantTick +
                 ", Slot: " +
                 slotIndex +
@@ -335,8 +340,6 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
                 weaponConfigId +
                 ", Target: " +
                 targetNpcId);
-
-            break;
         }
     }
 

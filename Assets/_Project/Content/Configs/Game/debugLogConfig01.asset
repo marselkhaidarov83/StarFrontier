@@ -15,9 +15,9 @@ MonoBehaviour:
   logsEnabled: 1
   shipRouteLogs: 0
   includeShipRouteInternalLogs: 0
-  npcRouteDecisionLogs: 0
+  npcRouteDecisionLogs: 1
   playerMovementLogs: 0
-  npcMovementLogs: 1
+  npcMovementLogs: 0
   enemyMovementLogs: 0
   movementTurnSpikeAngleDegrees: 60
   combatLogs: 1
@@ -30,9 +30,9 @@ MonoBehaviour:
   loadingSceneDiagnosticsLogs: 0
   waveVisualGeometryLogs: 0
   bootstrapLogs: 0
-  performanceLogs: 1
+  performanceLogs: 0
   disableInfoLogStackTrace: 1
-  gameTimeLoadAnalyticsLogs: 1
+  gameTimeLoadAnalyticsLogs: 0
   gameTimeFullFpsAnalyticsLogs: 1
   gameTimeFullFpsSampleIntervalFrames: 120
   gameTimeFrameSpikeWarningMs: 20
@@ -41,14 +41,14 @@ MonoBehaviour:
   gameTimeSimpleFrameLogs: 0
   gameTimeSimpleFrameLogIntervalFrames: 1
   npcMovementPerformanceLogs: 0
-  npcMovementRouteDecisionPerformanceLogs: 0
+  npcMovementRouteDecisionPerformanceLogs: 1
   shipRouteBuildDiagnosticsThresholdMs: 3
   npcMovementLoadAnalyticsLogs: 0
   npcMovementLoadAnalyticsFpsWarningThreshold: 35
   npcMovementLoadAnalyticsFpsCriticalThreshold: 30
   npcMovementLoadAnalyticsTickWarningMs: 6
   npcMovementLoadAnalyticsRegularLogIntervalTicks: 0
-  npcMovementLoadAnalyticsDetailLevel: 4
+  npcMovementLoadAnalyticsDetailLevel: 0
   npcBehaviorActionAnalyticsLogs: 0
   npcBehaviorActionAnalyticsTickWarningMs: 6
   npcBehaviorActionAnalyticsOnFpsWarning: 0

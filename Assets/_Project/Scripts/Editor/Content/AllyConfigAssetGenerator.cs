@@ -40,10 +40,11 @@ public static class AllyConfigAssetGenerator
     };
 
     private static readonly string[] ScenarioRoots =
-    {
-        "Assets/_Project/Content/Configs/NpcBehaviourScenarios/Ally",
-        "Assets/_Project/Content/Configs/AllyBehaviourScenarios"
-    };
+{
+    "Assets/_Project/Content/Configs/Population/NpcBehaviourScenarios/Ally",
+    "Assets/_Project/Content/Configs/NpcBehaviourScenarios/Ally",
+    "Assets/_Project/Content/Configs/AllyBehaviourScenarios"
+};
 
     [MenuItem("STAR FRONTIER/Content/04. Ally Configs/Create generated AllyConfig assets")]
     public static void CreateGeneratedAllyConfigs()
@@ -361,6 +362,11 @@ public static class AllyConfigAssetGenerator
         SetInt(serializedObject, "moduleSlotCount", stats.ModuleSlotCount);
         SetInt(serializedObject, "level", level);
         SetEnum(serializedObject, "role", (int)role);
+        SetBool(
+            serializedObject,
+            "avoidEnemyOwnedTravelDestinations",
+            role != AllyRole2A.Ranger);
+
         SetObject(serializedObject, "mapSprite", mapSprite);
         SetObject(serializedObject, "combatSprite", mapSprite);
         SetObject(serializedObject, "namePool", namePool);
@@ -378,6 +384,20 @@ public static class AllyConfigAssetGenerator
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
         asset.name = id;
+    }
+
+    private static void SetBool(
+        SerializedObject serializedObject,
+        string propertyName,
+        bool value)
+    {
+        SerializedProperty property =
+            serializedObject.FindProperty(propertyName);
+
+        if (property == null)
+            throw new InvalidOperationException($"Serialized bool field not found: {propertyName}");
+
+        property.boolValue = value;
     }
 
     private static void WriteScenarioEntries(
@@ -411,29 +431,79 @@ public static class AllyConfigAssetGenerator
             SerializedProperty behaviorConfigProperty =
                 item.FindPropertyRelative("behaviorConfig");
 
+            if (scenarioProperty == null)
+                throw new InvalidOperationException("AllyBehaviourScenarioEntry.scenario field was not found.");
+
+            if (behaviorConfigProperty == null)
+                throw new InvalidOperationException("AllyBehaviourScenarioEntry.behaviorConfig field was not found.");
+
             scenarioProperty.enumValueIndex =
                 Array.IndexOf(
                     Enum.GetValues(typeof(AllyBehaviourScenario)),
                     scenario);
 
-            string exactKey =
-                BuildScenarioKey(role, level, scenario);
+            NpcBehaviourScenarioConfig behaviorConfig =
+                ResolveScenarioConfig(
+                    role,
+                    level,
+                    scenario,
+                    scenarios);
 
-            string genericKey =
-                BuildGenericScenarioKey(scenario);
-
-            if (!scenarios.TryGetValue(
-                    exactKey,
-                    out NpcBehaviourScenarioConfig behaviorConfig))
+            if (behaviorConfig == null)
             {
-                scenarios.TryGetValue(
-                    genericKey,
-                    out behaviorConfig);
+                throw new InvalidOperationException(
+                    "AllyConfig generator: scenario config not found. " +
+                    $"Role={role}, Level={level}, Scenario={scenario}");
             }
 
             behaviorConfigProperty.objectReferenceValue =
                 behaviorConfig;
         }
+    }
+
+    private static NpcBehaviourScenarioConfig ResolveScenarioConfig(
+        AllyRole2A role,
+        int level,
+        AllyBehaviourScenario scenario,
+        Dictionary<string, NpcBehaviourScenarioConfig> scenarios)
+    {
+        if (scenarios == null)
+            return null;
+
+        string exactKey =
+            BuildScenarioKey(role, level, scenario);
+
+        if (scenarios.TryGetValue(
+                exactKey,
+                out NpcBehaviourScenarioConfig behaviorConfig))
+        {
+            return behaviorConfig;
+        }
+
+        if (IsRangerLevelZero(role, level))
+        {
+            string rangerLevelOneKey =
+                BuildScenarioKey(role, 1, scenario);
+
+            if (scenarios.TryGetValue(
+                    rangerLevelOneKey,
+                    out behaviorConfig))
+            {
+                return behaviorConfig;
+            }
+        }
+
+        string genericKey =
+            BuildGenericScenarioKey(scenario);
+
+        if (scenarios.TryGetValue(
+                genericKey,
+                out behaviorConfig))
+        {
+            return behaviorConfig;
+        }
+
+        return null;
     }
 
     private static void WriteWeaponGroups(

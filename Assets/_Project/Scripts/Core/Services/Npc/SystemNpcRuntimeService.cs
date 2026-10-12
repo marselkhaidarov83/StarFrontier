@@ -259,6 +259,105 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         LogCustom(
             $"[SystemNpcRuntimeService] NPC destroyed. Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, KilledByPlayer: {killedByPlayer}");
+
+        TryLiberateCurrentEnemyOwnedSystemAfterEnemyKilled(
+            npc,
+            killedByPlayer);
+    }
+
+    private void TryLiberateCurrentEnemyOwnedSystemAfterEnemyKilled(
+        SystemNpcRuntimeState killedNpc,
+        bool killedByPlayer)
+    {
+        if (killedNpc == null ||
+            !killedNpc.IsEnemy ||
+            !killedByPlayer)
+        {
+            return;
+        }
+
+        string systemId =
+            killedNpc.CurrentSystemId;
+
+        if (string.IsNullOrWhiteSpace(systemId))
+            return;
+
+        if (!IsCurrentPlayerSystem(systemId))
+            return;
+
+        if (!Bootstrapper.Instance.ServiceRegistry.TryGet<
+                ISystemSecurityService>(
+                out ISystemSecurityService systemSecurityService))
+        {
+            return;
+        }
+
+        if (!systemSecurityService.TryGetSystemStatus(
+                systemId,
+                out StarSystemStatus systemStatus))
+        {
+            return;
+        }
+
+        if (systemStatus != StarSystemStatus.Captured)
+            return;
+
+        int aliveEnemiesInSystem =
+            GetAliveNpcsInSystemByType(
+                systemId,
+                SystemNpcType.Enemy).Count;
+
+        Debug.Log(
+            "[EnemyOwnedSystemLiberation] CHECK" +
+            " | SystemId=" + systemId +
+            " | KilledNpcId=" + killedNpc.RuntimeNpcId +
+            " | AliveEnemiesInSystem=" + aliveEnemiesInSystem +
+            " | Status=" + systemStatus);
+
+        if (aliveEnemiesInSystem > 0)
+            return;
+
+        bool liberated =
+            systemSecurityService.LiberateSystemByPlayer(systemId);
+
+        Debug.Log(
+            "[EnemyOwnedSystemLiberation] APPLY" +
+            " | SystemId=" + systemId +
+            " | Liberated=" + liberated +
+            " | KilledNpcId=" + killedNpc.RuntimeNpcId);
+    }
+
+    private bool IsCurrentPlayerSystem(string systemId)
+    {
+        if (string.IsNullOrWhiteSpace(systemId))
+            return false;
+
+        if (Bootstrapper.Instance == null ||
+            Bootstrapper.Instance.ServiceRegistry == null)
+        {
+            return false;
+        }
+
+        if (!Bootstrapper.Instance.ServiceRegistry.TryGet<
+                IGameSessionService>(
+                out IGameSessionService gameSessionService))
+        {
+            return false;
+        }
+
+        GameRuntimeState gameState =
+            gameSessionService.State;
+
+        if (gameState == null ||
+            gameState.Galaxy == null)
+        {
+            return false;
+        }
+
+        return string.Equals(
+            gameState.Galaxy.CurrentSystemId,
+            systemId,
+            System.StringComparison.Ordinal);
     }
 
     private int GetCurrentQuantTick()

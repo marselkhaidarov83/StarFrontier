@@ -28,6 +28,15 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
     public IReadOnlyList<EnemyGroupEntryConfig> PickEnemiesForGalaxyLevel(
         int galaxyLevel)
     {
+        return PickEnemiesForGalaxyLevel(
+            galaxyLevel,
+            null);
+    }
+
+    public IReadOnlyList<EnemyGroupEntryConfig> PickEnemiesForGalaxyLevel(
+        int galaxyLevel,
+        EnemyFaction2A? faction)
+    {
         EnemyGroupSpawnLevelEntryConfig entry =
             GetEntryForGalaxyLevel(galaxyLevel);
 
@@ -38,7 +47,11 @@ public sealed class EnemyGroupSpawnRuleConfig : BaseConfig
             Mathf.Clamp(galaxyLevel, 1, 10);
 
         EnemyGroupSpawnOptionConfig group =
-            entry.PickStrictEnemyGroupForGalaxyLevel(clampedLevel);
+            faction.HasValue
+                ? entry.PickStrictEnemyGroupForGalaxyLevel(
+                    clampedLevel,
+                    faction.Value)
+                : entry.PickStrictEnemyGroupForGalaxyLevel(clampedLevel);
 
         if (group == null)
             return EmptyEnemies;
@@ -256,6 +269,24 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
     public EnemyGroupSpawnOptionConfig PickStrictEnemyGroupForGalaxyLevel(
         int galaxyLevel)
     {
+        return PickStrictEnemyGroupForGalaxyLevel(
+            galaxyLevel,
+            null);
+    }
+
+    public EnemyGroupSpawnOptionConfig PickStrictEnemyGroupForGalaxyLevel(
+        int galaxyLevel,
+        EnemyFaction2A faction)
+    {
+        return PickStrictEnemyGroupForGalaxyLevel(
+            galaxyLevel,
+            (EnemyFaction2A?)faction);
+    }
+
+    private EnemyGroupSpawnOptionConfig PickStrictEnemyGroupForGalaxyLevel(
+        int galaxyLevel,
+        EnemyFaction2A? faction)
+    {
         if (enemyGroups == null || enemyGroups.Length == 0)
             return null;
 
@@ -268,6 +299,13 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
         {
             EnemyGroupSpawnOptionConfig group =
                 enemyGroups[i];
+
+            if (faction.HasValue &&
+                group != null &&
+                group.Faction != faction.Value)
+            {
+                continue;
+            }
 
             if (!IsStrictEnemyGroupForGalaxyLevel(group, clampedLevel))
                 continue;
@@ -287,6 +325,13 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
         {
             EnemyGroupSpawnOptionConfig group =
                 enemyGroups[i];
+
+            if (faction.HasValue &&
+                group != null &&
+                group.Faction != faction.Value)
+            {
+                continue;
+            }
 
             if (!IsStrictEnemyGroupForGalaxyLevel(group, clampedLevel))
                 continue;
@@ -470,6 +515,11 @@ public sealed class EnemyGroupSpawnOptionConfig
     [Tooltip("Список врагов внутри выбранной группы.")]
     private EnemyGroupEntryConfig[] enemies =
         new EnemyGroupEntryConfig[0];
+
+    [Tooltip("Фракция врагов внутри этой группы.")]
+    [SerializeField] private EnemyFaction2A faction = EnemyFaction2A.AI;
+
+    public EnemyFaction2A Faction => faction;
 
     public int Weight => weight;
 

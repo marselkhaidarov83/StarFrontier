@@ -116,6 +116,11 @@ public sealed class AllyConfig : BaseConfig
     private AllyBehaviourScenarioEntry[] behaviorScenarios =
         new AllyBehaviourScenarioEntry[0];
 
+    [Header("Travel Rules")]
+    [SerializeField]
+    [Tooltip("Если включено, этот союзный NPC не выбирает для межсистемного перелёта системы, принадлежащие врагам.")]
+    private bool avoidEnemyOwnedTravelDestinations;
+
     [Header("Weapon Groups")]
     [SerializeField]
     [Tooltip("Группы оружия, из которых выбирается оснащение реального корабля.")]
@@ -173,6 +178,8 @@ public sealed class AllyConfig : BaseConfig
 
     public IReadOnlyList<WeaponGroupConfig> WeaponGroups =>
         weaponGroups;
+
+    public bool AvoidEnemyOwnedTravelDestinations => avoidEnemyOwnedTravelDestinations;
 
     public IReadOnlyList<WeaponConfig> WeaponConfigs =>
         GetFirstValidWeaponGroupWeapons();

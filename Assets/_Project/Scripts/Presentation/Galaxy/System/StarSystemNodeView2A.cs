@@ -107,6 +107,9 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
 
     public void SetSelected(bool selected)
     {
+        if (_isSelected == selected)
+            return;
+
         _isSelected = selected;
         SetState();
     }
@@ -509,13 +512,32 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        LogCustom("");
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] NodePointerClick" +
+            " | SystemId=" + SystemId +
+            " | CurrentSystemId=" + GetCurrentSystemId() +
+            " | Button=" + (eventData != null ? eventData.button.ToString() : "NULL") +
+            " | Time=" + Time.realtimeSinceStartup.ToString("F3"));
+
         OnClick();
     }
 
     public void OnClick()
     {
         StarSystemRuntimeState runtimeState = GetRuntimeState();
+
+        bool isDiscovered =
+            runtimeState != null &&
+            runtimeState.IsDiscovered;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] NodeOnClick" +
+            " | SystemId=" + SystemId +
+            " | CurrentSystemId=" + GetCurrentSystemId() +
+            " | HasRuntimeState=" + (runtimeState != null) +
+            " | IsDiscovered=" + isDiscovered +
+            " | WillInvoke=" + isDiscovered +
+            " | Time=" + Time.realtimeSinceStartup.ToString("F3"));
 
         if (runtimeState != null && !runtimeState.IsDiscovered)
             return;

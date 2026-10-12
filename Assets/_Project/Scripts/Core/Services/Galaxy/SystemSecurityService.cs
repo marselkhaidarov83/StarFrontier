@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Collections.Generic;
 
 public sealed class SystemSecurityService :
     CustomService,
@@ -6,6 +7,7 @@ public sealed class SystemSecurityService :
 {
     private readonly IGameSessionService _gameSessionService;
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
+    private readonly IEnemyFactionService _enemyFactionService;
     private readonly SimpleEventBus _eventBus;
 
     public SystemSecurityService()
@@ -21,6 +23,9 @@ public sealed class SystemSecurityService :
         _eventBus =
             Bootstrapper.Instance.ServiceRegistry
             .Get<SimpleEventBus>();
+
+        Bootstrapper.Instance.ServiceRegistry.TryGet(
+            out _enemyFactionService);
     }
 
     public bool TryGetSystemStatus(
@@ -209,6 +214,8 @@ public sealed class SystemSecurityService :
 
         systemState.MarkLiberatedByPlayer();
 
+        RemoveEnemyOwnershipForSystem(systemId);
+
         LogSystemStatusDebug(
             "SYSTEM_STATUS_CHANGED" +
             " | Source=LiberateSystemByPlayer" +
@@ -229,6 +236,41 @@ public sealed class SystemSecurityService :
             " | IsSecured: " + IsSystemSecured(systemId));
 
         return true;
+    }
+
+    private void RemoveEnemyOwnershipForSystem(string systemId)
+    {
+        if (_enemyFactionService == null ||
+            string.IsNullOrWhiteSpace(systemId))
+        {
+            return;
+        }
+
+        IReadOnlyList<EnemyFactionState> factions =
+            _enemyFactionService.GetFactions();
+
+        if (factions == null)
+            return;
+
+        for (int i = 0; i < factions.Count; i++)
+        {
+            EnemyFactionState faction =
+                factions[i];
+
+            if (faction == null ||
+                string.IsNullOrWhiteSpace(faction.FactionId))
+            {
+                continue;
+            }
+
+            _enemyFactionService.RemoveOwnedSystem(
+                faction.FactionId,
+                systemId);
+
+            _enemyFactionService.RemoveTerritorySystem(
+                faction.FactionId,
+                systemId);
+        }
     }
 
     public bool CanSystemBeTargetedByInvasion(string systemId)

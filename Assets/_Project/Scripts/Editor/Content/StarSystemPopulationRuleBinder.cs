@@ -5,13 +5,19 @@ using UnityEngine;
 public static class StarSystemPopulationRuleBinder
 {
     private const string StarSystemRoot =
-        "Assets/_Project/Content/Configs/StarSystems";
+        "Assets/_Project/Content/Configs/Galaxy/StarSystems";
 
     private const string PopulationRuleRoot =
-        "Assets/_Project/Content/Configs/SystemPopulationRules";
+        "Assets/_Project/Content/Configs/Population/SystemPopulationRules";
+
+    private const string EnemySpawnRuleRoot =
+        "Assets/_Project/Content/Configs/Population/EnemySpawnRules";
 
     private const string SectorRoot =
-        "Assets/_Project/Content/Configs/Sectors";
+        "Assets/_Project/Content/Configs/Galaxy/Sectors";
+
+    private const string EnemySpawnRuleSetId =
+        "enemy_spawn_rule_factions_01";
 
     [MenuItem("STAR FRONTIER/Content/09. System Population Rules/Bind rules to StarSystemConfig by station")]
     public static void BindRulesToStarSystemsByStation()
@@ -46,7 +52,22 @@ public static class StarSystemPopulationRuleBinder
             return;
         }
 
-        int updated = 0;
+        EnemySpawnRuleSetConfig enemyRuleSet =
+            FindEnemySpawnRuleSet(EnemySpawnRuleSetId);
+
+        if (enemyRuleSet == null)
+        {
+            EditorUtility.DisplayDialog(
+                "SystemPopulationRule binder",
+                "Required EnemySpawnRuleSetConfig was not found: " +
+                EnemySpawnRuleSetId +
+                ". Run Create generated EnemySpawnRule assets first.",
+                "OK");
+            return;
+        }
+
+        int populationUpdated = 0;
+        int enemyUpdated = 0;
         int unchanged = 0;
         int warnings = 0;
 
@@ -64,53 +85,103 @@ public static class StarSystemPopulationRuleBinder
             if (starSystem == null)
                 continue;
 
-            SystemPopulationRule rule =
+            SerializedObject serializedObject =
+                new SerializedObject(starSystem);
+
+            bool changed = false;
+
+            SystemPopulationRule populationRule =
                 PickRuleForSystem(
                     starSystem,
                     rules,
                     ref warnings);
 
-            if (rule == null)
-                continue;
+            string populationError = string.Empty;
+            bool populationChanged = false;
 
-            SerializedObject serializedObject =
-                new SerializedObject(starSystem);
+            if (populationRule != null)
+            {
+                if (TryBindObjectReference(
+                        serializedObject,
+                        "systemPopulationRule",
+                        populationRule,
+                        onlyMissing,
+                        out populationChanged,
+                        out populationError))
+                {
+                    if (populationChanged)
+                    {
+                        populationUpdated++;
+                        changed = true;
 
-            SerializedProperty ruleProperty =
-                serializedObject.FindProperty("systemPopulationRule");
+                        Debug.Log(
+                            "StarSystemPopulationRuleBinder: bound " +
+                            populationRule.Id + " to " + starSystem.Id +
+                            " by station " + DescribeStation(starSystem),
+                            starSystem);
+                    }
+                }
+            }
 
-            if (ruleProperty == null)
+            if (!string.IsNullOrWhiteSpace(populationError))
             {
                 warnings++;
                 Debug.LogWarning(
-                    "StarSystemPopulationRuleBinder: StarSystemConfig.systemPopulationRule field was not found. " +
-                    "Use the updated StarSystemConfig.cs first.",
+                    "StarSystemPopulationRuleBinder: " +
+                    populationError +
+                    " System: " +
+                    starSystem.Id,
                     starSystem);
-                continue;
             }
 
-            if (onlyMissing && ruleProperty.objectReferenceValue != null)
+            if (ShouldBindEnemySpawnRuleSet(starSystem))
+            {
+                string enemyError = string.Empty;
+                bool enemyChanged = false;
+
+                if (TryBindObjectReference(
+                        serializedObject,
+                        "enemySpawnRuleSet",
+                        enemyRuleSet,
+                        onlyMissing,
+                        out enemyChanged,
+                        out enemyError))
+                {
+                    if (enemyChanged)
+                    {
+                        enemyUpdated++;
+                        changed = true;
+
+                        Debug.Log(
+                            "StarSystemPopulationRuleBinder: bound " +
+                            enemyRuleSet.Id +
+                            " to enemySpawnRuleSet of " +
+                            starSystem.Id,
+                            starSystem);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(enemyError))
+                {
+                    warnings++;
+                    Debug.LogWarning(
+                        "StarSystemPopulationRuleBinder: " +
+                        enemyError +
+                        " System: " +
+                        starSystem.Id,
+                        starSystem);
+                }
+            }
+
+            if (changed)
+            {
+                serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(starSystem);
+            }
+            else
             {
                 unchanged++;
-                continue;
             }
-
-            if (ruleProperty.objectReferenceValue == rule)
-            {
-                unchanged++;
-                continue;
-            }
-
-            ruleProperty.objectReferenceValue = rule;
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
-
-            EditorUtility.SetDirty(starSystem);
-            updated++;
-
-            Debug.Log(
-                "StarSystemPopulationRuleBinder: bound " +
-                rule.Id + " to " + starSystem.Id +
-                " by station " + DescribeStation(starSystem));
         }
 
         AssetDatabase.SaveAssets();
@@ -118,7 +189,11 @@ public static class StarSystemPopulationRuleBinder
 
         EditorUtility.DisplayDialog(
             "SystemPopulationRule binder",
-            $"Done. Updated: {updated}. Unchanged: {unchanged}. Warnings: {warnings}.",
+            "Done. " +
+            $"Population updated: {populationUpdated}. " +
+            $"Enemy updated: {enemyUpdated}. " +
+            $"Unchanged: {unchanged}. " +
+            $"Warnings: {warnings}.",
             "OK");
 
         if (validateAfterBind)
@@ -136,6 +211,9 @@ public static class StarSystemPopulationRuleBinder
         RuleSet rules =
             LoadRules();
 
+        EnemySpawnRuleSetConfig enemyRuleSet =
+            FindEnemySpawnRuleSet(EnemySpawnRuleSetId);
+
         string[] guids =
             AssetDatabase.FindAssets("t:StarSystemConfig", new[] { StarSystemRoot });
 
@@ -152,40 +230,88 @@ public static class StarSystemPopulationRuleBinder
 
             checkedAssets++;
 
-            if (starSystem.SystemPopulationRule != null)
-                continue;
-
-            SystemPopulationRule expectedRule =
+            SystemPopulationRule expectedPopulationRule =
                 PickRuleForSystem(
                     starSystem,
                     rules,
                     ref warnings);
 
-            string assignError = string.Empty;
-
-            if (expectedRule != null &&
-                TryAssignPopulationRule(
-                    starSystem,
-                    expectedRule,
-                    out assignError))
+            if (starSystem.SystemPopulationRule == null)
             {
-                repaired++;
-                Debug.Log(
-                    "StarSystemPopulationRule validation: repaired missing SystemPopulationRule at " +
-                    path + " (" + starSystem.Id + "). Assigned: " +
-                    expectedRule.Id + ". Station: " + DescribeStation(starSystem),
+                string assignError = string.Empty;
+
+                if (expectedPopulationRule != null &&
+                    TryAssignPopulationRule(
+                        starSystem,
+                        expectedPopulationRule,
+                        out assignError))
+                {
+                    repaired++;
+
+                    Debug.Log(
+                        "StarSystemPopulationRule validation: repaired missing SystemPopulationRule at " +
+                        path + " (" + starSystem.Id + "). Assigned: " +
+                        expectedPopulationRule.Id + ". Station: " + DescribeStation(starSystem),
+                        starSystem);
+                }
+                else
+                {
+                    errors++;
+
+                    Debug.LogError(
+                        "StarSystemPopulationRule validation: missing SystemPopulationRule at " +
+                        path + " (" + starSystem.Id + "). Expected: " +
+                        (expectedPopulationRule != null ? expectedPopulationRule.Id : "none") +
+                        ". Station: " + DescribeStation(starSystem) +
+                        ". AssignError: " + assignError,
+                        starSystem);
+                }
+            }
+
+            if (!ShouldBindEnemySpawnRuleSet(starSystem))
+                continue;
+
+            if (enemyRuleSet == null)
+            {
+                errors++;
+
+                Debug.LogError(
+                    "StarSystemPopulationRule validation: missing EnemySpawnRuleSetConfig asset " +
+                    EnemySpawnRuleSetId +
+                    ". Run EnemySpawnRuleAssetGenerator first.",
                     starSystem);
                 continue;
             }
 
-            errors++;
-            Debug.LogError(
-                "StarSystemPopulationRule validation: missing SystemPopulationRule at " +
-                path + " (" + starSystem.Id + "). Expected: " +
-                (expectedRule != null ? expectedRule.Id : "none") +
-                ". Station: " + DescribeStation(starSystem) +
-                ". AssignError: " + assignError,
-                starSystem);
+            if (starSystem.EnemySpawnRuleSet != null)
+                continue;
+
+            string enemyAssignError = string.Empty;
+
+            if (TryAssignEnemySpawnRuleSet(
+                    starSystem,
+                    enemyRuleSet,
+                    out enemyAssignError))
+            {
+                repaired++;
+
+                Debug.Log(
+                    "StarSystemPopulationRule validation: repaired missing EnemySpawnRuleSet at " +
+                    path + " (" + starSystem.Id + "). Assigned: " +
+                    enemyRuleSet.Id + ".",
+                    starSystem);
+            }
+            else
+            {
+                errors++;
+
+                Debug.LogError(
+                    "StarSystemPopulationRule validation: missing EnemySpawnRuleSet at " +
+                    path + " (" + starSystem.Id + "). Expected: " +
+                    enemyRuleSet.Id +
+                    ". AssignError: " + enemyAssignError,
+                    starSystem);
+            }
         }
 
         if (repaired > 0)
@@ -234,6 +360,86 @@ public static class StarSystemPopulationRuleBinder
         ruleProperty.objectReferenceValue = rule;
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(starSystem);
+        return true;
+    }
+
+    private static bool TryAssignEnemySpawnRuleSet(
+        StarSystemConfig starSystem,
+        EnemySpawnRuleSetConfig ruleSet,
+        out string error)
+    {
+        error = string.Empty;
+
+        if (starSystem == null)
+        {
+            error = "StarSystemConfig is null.";
+            return false;
+        }
+
+        if (ruleSet == null)
+        {
+            error = "EnemySpawnRuleSetConfig is null.";
+            return false;
+        }
+
+        SerializedObject serializedObject =
+            new SerializedObject(starSystem);
+
+        SerializedProperty ruleProperty =
+            serializedObject.FindProperty("enemySpawnRuleSet");
+
+        if (ruleProperty == null)
+        {
+            error = "StarSystemConfig.enemySpawnRuleSet field was not found.";
+            return false;
+        }
+
+        ruleProperty.objectReferenceValue = ruleSet;
+        serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(starSystem);
+        return true;
+    }
+
+    private static bool TryBindObjectReference(
+        SerializedObject serializedObject,
+        string propertyName,
+        UnityEngine.Object value,
+        bool onlyMissing,
+        out bool changed,
+        out string error)
+    {
+        changed = false;
+        error = string.Empty;
+
+        if (serializedObject == null)
+        {
+            error = "SerializedObject is null.";
+            return false;
+        }
+
+        if (value == null)
+        {
+            error = "Value for " + propertyName + " is null.";
+            return false;
+        }
+
+        SerializedProperty property =
+            serializedObject.FindProperty(propertyName);
+
+        if (property == null)
+        {
+            error = "StarSystemConfig." + propertyName + " field was not found.";
+            return false;
+        }
+
+        if (onlyMissing && property.objectReferenceValue != null)
+            return true;
+
+        if (property.objectReferenceValue == value)
+            return true;
+
+        property.objectReferenceValue = value;
+        changed = true;
         return true;
     }
 
@@ -343,11 +549,23 @@ public static class StarSystemPopulationRuleBinder
         return regularRule;
     }
 
+    private static bool ShouldBindEnemySpawnRuleSet(
+        StarSystemConfig starSystem)
+    {
+        return GetSectorOrderForSystem(starSystem) >= 2;
+    }
+
     private static bool IsFirstSectorSystem(
         StarSystemConfig starSystem)
     {
+        return GetSectorOrderForSystem(starSystem) == 1;
+    }
+
+    private static int GetSectorOrderForSystem(
+        StarSystemConfig starSystem)
+    {
         if (starSystem == null)
-            return false;
+            return 0;
 
         string[] guids =
             AssetDatabase.FindAssets("t:SectorConfig", new[] { SectorRoot });
@@ -361,8 +579,7 @@ public static class StarSystemPopulationRuleBinder
                 AssetDatabase.LoadAssetAtPath<SectorConfig>(path);
 
             if (sector == null ||
-                sector.Systems == null ||
-                sector.Order != 1)
+                sector.Systems == null)
             {
                 continue;
             }
@@ -370,11 +587,11 @@ public static class StarSystemPopulationRuleBinder
             for (int systemIndex = 0; systemIndex < sector.Systems.Length; systemIndex++)
             {
                 if (sector.Systems[systemIndex] == starSystem)
-                    return true;
+                    return sector.Order;
             }
         }
 
-        return false;
+        return 0;
     }
 
     private static SystemPopulationRule FindRule(
@@ -399,6 +616,35 @@ public static class StarSystemPopulationRuleBinder
 
             if (rule != null)
                 return rule;
+        }
+
+        return null;
+    }
+
+    private static EnemySpawnRuleSetConfig FindEnemySpawnRuleSet(
+        string id)
+    {
+        string[] guids =
+            AssetDatabase.FindAssets("t:EnemySpawnRuleSetConfig", new[] { EnemySpawnRuleRoot });
+
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string path =
+                AssetDatabase.GUIDToAssetPath(guids[i]);
+
+            EnemySpawnRuleSetConfig ruleSet =
+                AssetDatabase.LoadAssetAtPath<EnemySpawnRuleSetConfig>(path);
+
+            if (ruleSet == null)
+                continue;
+
+            if (string.Equals(
+                    ruleSet.Id,
+                    id,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return ruleSet;
+            }
         }
 
         return null;

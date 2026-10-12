@@ -1,0 +1,171 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d7c4af25336f4c9c83e56983cd82f68, type: 3}
+  m_Name: enemy_spawn_rule_ai_01
+  m_EditorClassIdentifier: Data::EnemySpawnRuleConfig
+  id: enemy_spawn_rule_ai_01
+  displayName: "\u0421\u043F\u0430\u0432\u043D \u0432\u0440\u0430\u0433\u043E\u0432:
+    \u0418\u0418"
+  description: "\u041F\u0440\u0430\u0432\u0438\u043B\u043E population-\u0441\u043F\u0430\u0432\u043D\u0430
+    \u0432\u0440\u0430\u0433\u043E\u0432 \u0444\u0440\u0430\u043A\u0446\u0438\u0438
+    AI \u043F\u043E \u0443\u0440\u043E\u0432\u043D\u044F\u043C \u0433\u0430\u043B\u0430\u043A\u0442\u0438\u043A\u0438."
+  icon: {fileID: 0}
+  faction: 0
+  levelEntries:
+  - galaxyLevel: 1
+    spawnIntervalSeconds: 180
+    maxAliveGroupsFromThisRule: 1
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: 78172c88849d445a38e39ed596230ceb, type: 2}
+      minCount: 2
+      maxCount: 3
+      weight: 3
+  - galaxyLevel: 2
+    spawnIntervalSeconds: 165
+    maxAliveGroupsFromThisRule: 1
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: dba55c967cfe8461d81e255c35f5cec1, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: 78172c88849d445a38e39ed596230ceb, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+  - galaxyLevel: 3
+    spawnIntervalSeconds: 150
+    maxAliveGroupsFromThisRule: 1
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: f5495e2f121d74f25b5d5f582951a22e, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: dba55c967cfe8461d81e255c35f5cec1, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: 78172c88849d445a38e39ed596230ceb, type: 2}
+      minCount: 0
+      maxCount: 1
+      weight: 1
+  - galaxyLevel: 4
+    spawnIntervalSeconds: 135
+    maxAliveGroupsFromThisRule: 2
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: a6d9aac29bea14b0297ce0c7a0474dc8, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: f5495e2f121d74f25b5d5f582951a22e, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: dba55c967cfe8461d81e255c35f5cec1, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 1
+  - galaxyLevel: 5
+    spawnIntervalSeconds: 120
+    maxAliveGroupsFromThisRule: 2
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: c19ad57b7e84a41fdae06e56c12fc350, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: a6d9aac29bea14b0297ce0c7a0474dc8, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: f5495e2f121d74f25b5d5f582951a22e, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 1
+  - galaxyLevel: 6
+    spawnIntervalSeconds: 105
+    maxAliveGroupsFromThisRule: 2
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: 1de3c55d268ea438da02c383f998a5f0, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: c19ad57b7e84a41fdae06e56c12fc350, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: a6d9aac29bea14b0297ce0c7a0474dc8, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 1
+  - galaxyLevel: 7
+    spawnIntervalSeconds: 90
+    maxAliveGroupsFromThisRule: 2
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: 6b0f6db7f17f2457fb2a09175199b3f0, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: 1de3c55d268ea438da02c383f998a5f0, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: c19ad57b7e84a41fdae06e56c12fc350, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 1
+  - galaxyLevel: 8
+    spawnIntervalSeconds: 75
+    maxAliveGroupsFromThisRule: 3
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: d96e37eab1e1445818a2bde8a117224e, type: 2}
+      minCount: 2
+      maxCount: 3
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: 6b0f6db7f17f2457fb2a09175199b3f0, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: 1de3c55d268ea438da02c383f998a5f0, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 1
+  - galaxyLevel: 9
+    spawnIntervalSeconds: 60
+    maxAliveGroupsFromThisRule: 3
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: e09837e8f7f464558850fd22e7fc3109, type: 2}
+      minCount: 2
+      maxCount: 3
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: d96e37eab1e1445818a2bde8a117224e, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: 6b0f6db7f17f2457fb2a09175199b3f0, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 1
+  - galaxyLevel: 10
+    spawnIntervalSeconds: 45
+    maxAliveGroupsFromThisRule: 3
+    enemies:
+    - enemyConfig: {fileID: 11400000, guid: 82168e9ab178b40c9a67ec13ec8deafd, type: 2}
+      minCount: 2
+      maxCount: 3
+      weight: 3
+    - enemyConfig: {fileID: 11400000, guid: e09837e8f7f464558850fd22e7fc3109, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 2
+    - enemyConfig: {fileID: 11400000, guid: d96e37eab1e1445818a2bde8a117224e, type: 2}
+      minCount: 1
+      maxCount: 2
+      weight: 1

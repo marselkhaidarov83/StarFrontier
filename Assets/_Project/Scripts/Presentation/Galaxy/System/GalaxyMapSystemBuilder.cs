@@ -682,10 +682,18 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         bool openCurrentSystem
     )
     {
-        if (string.IsNullOrWhiteSpace(
-                targetSystemId
-            ))
+        float startedAt =
+            Time.realtimeSinceStartup;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.Start" +
+            " | TargetSystemId=" + targetSystemId +
+            " | OpenCurrentSystem=" + openCurrentSystem +
+            " | Time=" + startedAt.ToString("F3"));
+
+        if (string.IsNullOrWhiteSpace(targetSystemId))
         {
+            LogCustom("[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=EmptyTarget");
             return false;
         }
 
@@ -694,9 +702,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             gameSessionService.State.Player == null)
         {
             Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "Game-session player state is unavailable."
-            );
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=MissingPlayerState");
 
             return false;
         }
@@ -704,9 +710,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         if (travelService == null)
         {
             Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "ITravelService is null."
-            );
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=MissingTravelService");
 
             return false;
         }
@@ -714,48 +718,74 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         string currentSystemId =
             GetCurrentSystemId();
 
-        if (string.IsNullOrWhiteSpace(
-                currentSystemId
-            ))
+        if (string.IsNullOrWhiteSpace(currentSystemId))
         {
-            ShowMessage(
-                "Текущая система не найдена"
-            );
+            ShowMessage("Текущая система не найдена");
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=EmptyCurrentSystem");
 
             return false;
         }
 
-        LogCustom(
-            "[GalaxyMapSystemBuilder] " +
-            "Select system. Current = " +
-            currentSystemId +
-            " | Target = " +
-            targetSystemId
-        );
-
-        if (string.Equals(
+        bool isCurrentSystem =
+            string.Equals(
                 currentSystemId,
                 targetSystemId,
-                StringComparison.Ordinal
-            ))
+                StringComparison.Ordinal);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.Context" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | TargetSystemId=" + targetSystemId +
+            " | IsCurrentSystem=" + isCurrentSystem +
+            " | OpenCurrentSystem=" + openCurrentSystem);
+
+        if (isCurrentSystem)
         {
-            ClearSelectedSystem();
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.CurrentSystemBranch" +
+                " | WillEnterSystemState=" + openCurrentSystem +
+                " | WillBuildPath=False" +
+                " | WillCallTravelFailReason=False");
 
             if (openCurrentSystem)
             {
+                LogCustom(
+                    "[GALAXY_CLICK_TRACE] EnterSystemState.Before" +
+                    " | Reason=CurrentSystemClick" +
+                    " | SystemId=" + currentSystemId);
+
                 gameStateMachine?.Enter(
                     new SystemState()
                 );
 
+                LogCustom(
+                    "[GALAXY_CLICK_TRACE] EnterSystemState.After" +
+                    " | Reason=CurrentSystemClick" +
+                    " | SystemId=" + currentSystemId);
+
                 eventBus?.Publish(
                     new StarSystemEnteredEvent(
-                        targetSystemId
+                        currentSystemId
                     )
                 );
             }
+            else
+            {
+                ClearSelectedSystem();
+            }
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End" +
+                " | Reason=CurrentSystem" +
+                " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
 
             return false;
         }
+
+        float pathStartedAt =
+            Time.realtimeSinceStartup;
 
         List<string> path =
             BuildPath(
@@ -763,16 +793,21 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                 targetSystemId
             );
 
-        if (path == null ||
-            path.Count < 2)
-        {
-            SetSelectedSystemVisual(
-                string.Empty
-            );
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.AfterBuildPath" +
+            " | PathCount=" + (path != null ? path.Count : -1) +
+            " | Path=" + FormatPathForGalaxyClickTrace(path) +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - pathStartedAt) * 1000f).ToString("F2"));
 
-            ShowMessage(
-                "Маршрут к выбранной системе не найден"
-            );
+        if (path == null || path.Count < 2)
+        {
+            SetSelectedSystemVisual(string.Empty);
+            ShowMessage("Маршрут к выбранной системе не найден");
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End" +
+                " | Reason=PathMissing" +
+                " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
 
             return false;
         }
@@ -783,20 +818,23 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                 targetSystemId
             );
 
-        if (string.IsNullOrWhiteSpace(
-                nextSystemId
-            ))
-        {
-            SetSelectedSystemVisual(
-                string.Empty
-            );
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.NextSystem" +
+            " | NextSystemId=" + nextSystemId);
 
-            ShowMessage(
-                "Первая система маршрута не найдена"
-            );
+        if (string.IsNullOrWhiteSpace(nextSystemId))
+        {
+            SetSelectedSystemVisual(string.Empty);
+            ShowMessage("Первая система маршрута не найдена");
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=NextSystemMissing");
 
             return false;
         }
+
+        float failReasonStartedAt =
+            Time.realtimeSinceStartup;
 
         TravelFailReason result =
             travelService.GetTravelFailReason(
@@ -805,16 +843,22 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             );
 
         LogCustom(
-            "[GalaxyMapSystemBuilder] " +
-            "Travel result = " +
-            result
-        );
+            "[GALAXY_CLICK_TRACE] SelectSystem.AfterGetTravelFailReason" +
+            " | From=" + currentSystemId +
+            " | To=" + nextSystemId +
+            " | Result=" + result +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - failReasonStartedAt) * 1000f).ToString("F2"));
 
         ShowTravelWarning(result);
 
-        SetSelectedSystemVisual(
-            targetSystemId
-        );
+        float visualStartedAt =
+            Time.realtimeSinceStartup;
+
+        SetSelectedSystemVisual(targetSystemId);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.AfterSetSelectedSystemVisual" +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - visualStartedAt) * 1000f).ToString("F2"));
 
         eventBus?.Publish(
             new GalaxyMapSystemSelectedEvent(
@@ -826,7 +870,167 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             )
         );
 
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.TargetSelectedWithoutOpeningSystem" +
+            " | TargetSystemId=" + targetSystemId +
+            " | NextSystemId=" + nextSystemId +
+            " | TravelFailReason=" + result);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.End" +
+            " | Reason=SelectedTargetOnly" +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
+
         return true;
+    }
+
+    private void OpenCurrentSystemWithRouteDestination(
+        string currentSystemId,
+        string nextSystemId)
+    {
+        float startedAt =
+            Time.realtimeSinceStartup;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] OpenCurrentSystemWithRouteDestination.Start" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | NextSystemId=" + nextSystemId +
+            " | HasSystemTravelService=" + (systemTravelService != null));
+
+        if (systemTravelService == null)
+        {
+            Debug.LogError(
+                "[GALAXY_CLICK_TRACE] OpenCurrentSystemWithRouteDestination.End | Reason=MissingSystemTravelService");
+
+            return;
+        }
+
+        RouteConfig routeConfig =
+            FindRouteConfig(
+                currentSystemId,
+                nextSystemId
+            );
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] OpenCurrentSystemWithRouteDestination.AfterFindRoute" +
+            " | RouteId=" + (routeConfig != null ? routeConfig.Id : "NULL"));
+
+        if (routeConfig == null)
+        {
+            ShowMessage("Маршрут к первой системе не найден");
+            return;
+        }
+
+        Vector3 exitPoint =
+            routeConfig.GetExitPoint(currentSystemId);
+
+        Vector3 entryPoint =
+            routeConfig.GetEntryPoint(nextSystemId);
+
+        RouteEndpointConfig departureEndpoint =
+            routeConfig.GetDepartureEndpoint(currentSystemId);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SetSystemExitDestination.Before" +
+            " | RouteId=" + routeConfig.Id +
+            " | From=" + currentSystemId +
+            " | To=" + nextSystemId +
+            " | ExitPoint=" + exitPoint +
+            " | EntryPoint=" + entryPoint);
+
+        systemTravelService.SetSystemExitDestination(
+            new RouteExitMapChangedEvent(
+                routeConfig,
+                currentSystemId,
+                nextSystemId,
+                exitPoint,
+                entryPoint,
+                departureEndpoint != null
+                    ? departureEndpoint.VisualSize
+                    : 0f
+            )
+        );
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SetSystemExitDestination.After");
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] EnterSystemState.Before" +
+            " | Reason=TargetSystemClick" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | NextSystemId=" + nextSystemId);
+
+        gameStateMachine?.Enter(
+            new SystemState()
+        );
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] EnterSystemState.After" +
+            " | Reason=TargetSystemClick" +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
+
+        eventBus?.Publish(
+            new StarSystemEnteredEvent(
+                currentSystemId
+            )
+        );
+    }
+
+    private static string FormatPathForGalaxyClickTrace(
+        IReadOnlyList<string> path)
+    {
+        if (path == null)
+            return "NULL";
+
+        if (path.Count == 0)
+            return "EMPTY";
+
+        return string.Join(">", path);
+    }
+
+    private RouteConfig FindRouteConfig(
+        string currentSystemId,
+        string nextSystemId)
+    {
+        if (configService == null)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(currentSystemId) ||
+            string.IsNullOrWhiteSpace(nextSystemId))
+        {
+            return null;
+        }
+
+        StarSystemConfig currentSystem =
+            configService.GetStarSystemConfigById(currentSystemId);
+
+        if (currentSystem == null ||
+            currentSystem.Routes == null)
+        {
+            return null;
+        }
+
+        foreach (RouteConfig routeConfig in currentSystem.Routes)
+        {
+            if (routeConfig == null)
+                continue;
+
+            StarSystemConfig otherSystem =
+                routeConfig.GetOtherSystem(currentSystemId);
+
+            if (otherSystem == null)
+                continue;
+
+            if (string.Equals(
+                    otherSystem.Id,
+                    nextSystemId,
+                    StringComparison.Ordinal))
+            {
+                return routeConfig;
+            }
+        }
+
+        return null;
     }
 
     private List<string> BuildPath(
@@ -834,6 +1038,15 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         string targetSystemId
     )
     {
+        float startedAt =
+            Time.realtimeSinceStartup;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] BuildPath.Start" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | TargetSystemId=" + targetSystemId +
+            " | HasRoutesBuilder=" + (routesBuilder != null));
+
         if (routesBuilder != null)
         {
             List<string> selectedPath =
@@ -842,7 +1055,17 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                     targetSystemId
                 );
 
-            if (!routesBuilder.HasSelectedPath())
+            bool hasSelectedPath =
+                routesBuilder.HasSelectedPath();
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] BuildPath.AfterShowShortestPath" +
+                " | HasSelectedPath=" + hasSelectedPath +
+                " | PathCount=" + (selectedPath != null ? selectedPath.Count : -1) +
+                " | Path=" + FormatPathForGalaxyClickTrace(selectedPath) +
+                " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
+
+            if (!hasSelectedPath)
                 return new List<string>();
 
             return selectedPath != null
@@ -853,19 +1076,20 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         List<string> fallbackPath =
             new List<string>
             {
-                currentSystemId
+            currentSystemId
             };
 
         if (!string.Equals(
                 currentSystemId,
                 targetSystemId,
-                StringComparison.Ordinal
-            ))
+                StringComparison.Ordinal))
         {
-            fallbackPath.Add(
-                targetSystemId
-            );
+            fallbackPath.Add(targetSystemId);
         }
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] BuildPath.Fallback" +
+            " | Path=" + FormatPathForGalaxyClickTrace(fallbackPath));
 
         return fallbackPath;
     }

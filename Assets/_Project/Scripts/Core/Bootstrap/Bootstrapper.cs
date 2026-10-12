@@ -14,6 +14,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
     [SerializeField] private DebugLogConfig debugLogConfig;
+    [SerializeField] private DebugSettings debugSettings;
 
     [Header("Sprint 3 System Gameplay")]
     [SerializeField] private PlayerControlConfig playerControlConfig;
@@ -48,16 +49,6 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] public bool SectorAllOpened = false;
     [SerializeField] public bool RouteAllUnlocked = false;
     [SerializeField] private bool _globalDebugEnabled;
-
-    [Header("Debug / NPC Population")]
-    [Tooltip("Спавнить NPC только в текущей системе. Существующие NPC в других системах не удаляются.")]
-    [SerializeField] private bool debugSpawnOnlyInCurrentSystem;
-    [SerializeField] private bool stopAutomaticAllySpawns;
-    [SerializeField] private bool stopAutomaticEnemySpawns;
-    [SerializeField] private bool overrideAutomaticAllySpawnInterval;
-    [SerializeField, Min(0.1f)] private float debugAutomaticAllySpawnIntervalSeconds = 5f;
-    [SerializeField] private bool overrideNpcGalaxyLevel;
-    [SerializeField, Range(1, 10)] private int debugNpcGalaxyLevel = 1;
 
 
     public static Bootstrapper Instance;
@@ -104,22 +95,57 @@ public class Bootstrapper : CustomMonoBehaviour
     private double _lastBootstrapperUpdateMs;
 
     public bool GlobalDebugEnabled => _globalDebugEnabled;
-    public bool StopAutomaticAllySpawns => stopAutomaticAllySpawns;
-    public bool StopAutomaticEnemySpawns => stopAutomaticEnemySpawns;
-    public bool DebugSpawnOnlyInCurrentSystem => debugSpawnOnlyInCurrentSystem;
-    public bool OverrideAutomaticAllySpawnInterval => overrideAutomaticAllySpawnInterval;
+
     public OffscreenNpcSimulationScheduleConfig OffscreenNpcSimulationScheduleConfig =>
     offscreenNpcSimulationScheduleConfig;
     public CurrentSystemNpcSimulationConfig CurrentSystemNpcSimulationConfig =>
     currentSystemNpcSimulationConfig;
 
-    public float DebugAutomaticAllySpawnIntervalSeconds =>
-        Mathf.Max(0.1f, debugAutomaticAllySpawnIntervalSeconds);
+    public bool StopAutomaticAllySpawns =>
+      NpcPopulationDebugSettings != null &&
+      NpcPopulationDebugSettings.StopAutomaticAllySpawns;
 
-    public bool OverrideNpcGalaxyLevel => overrideNpcGalaxyLevel;
+    public bool StopAutomaticEnemySpawns =>
+        NpcPopulationDebugSettings != null &&
+        NpcPopulationDebugSettings.StopAutomaticEnemySpawns;
+
+    public bool DebugSpawnOnlyInCurrentSystem =>
+        NpcPopulationDebugSettings != null &&
+        NpcPopulationDebugSettings.DebugSpawnOnlyInCurrentSystem;
+
+    public bool OverrideAutomaticSpawnInterval =>
+        NpcPopulationDebugSettings != null &&
+        NpcPopulationDebugSettings.OverrideAutomaticSpawnInterval;
+
+    public float DebugAutomaticSpawnIntervalSeconds =>
+        NpcPopulationDebugSettings != null
+            ? NpcPopulationDebugSettings.DebugAutomaticSpawnIntervalSeconds
+            : 5f;
+
+    public bool OverrideAutomaticAllySpawnInterval => OverrideAutomaticSpawnInterval;
+
+    public float DebugAutomaticAllySpawnIntervalSeconds =>
+        DebugAutomaticSpawnIntervalSeconds;
+
+    public bool OverrideNpcGalaxyLevel =>
+        NpcPopulationDebugSettings != null &&
+        NpcPopulationDebugSettings.OverrideNpcGalaxyLevel;
 
     public int DebugNpcGalaxyLevel =>
-        Mathf.Clamp(debugNpcGalaxyLevel, 1, 10);
+        NpcPopulationDebugSettings != null
+            ? NpcPopulationDebugSettings.DebugNpcGalaxyLevel
+            : 1;
+
+    private DebugSettings NpcPopulationDebugSettings
+    {
+        get
+        {
+            if (debugSettings != null)
+                return debugSettings;
+
+            return GetComponent<DebugSettings>();
+        }
+    }
 
     public DebugLogConfig DebugLogConfig => debugLogConfig;
 

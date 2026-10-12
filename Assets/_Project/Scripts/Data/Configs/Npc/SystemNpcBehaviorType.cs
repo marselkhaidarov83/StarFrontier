@@ -1,4 +1,3 @@
-// Конфиг SystemNpcBehaviorType содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 public enum SystemNpcBehaviorType
 {
     None = 0,
@@ -10,6 +9,7 @@ public enum SystemNpcBehaviorType
     PlanetToPlanetTravel = 21,
     TravelToAnotherSystem = 22,
     PatrolSystem = 23,
+    TravelToEnemySystem = 24,
 
     CollectDebris = 30,
     AttackMeteorite = 31,

@@ -32,7 +32,9 @@ MonoBehaviour:
   missionTags: 010000000200000005000000
   mapPosition: {x: 4.3, y: -1}
   systemPopulationRule: {fileID: 11400000, guid: 66c62cc24edfc4f1dbb54807b1cd44e5, type: 2}
+  enemySystemPopulationRule: {fileID: 0}
   npcSpawnPoints: {fileID: 11400000, guid: 1d5bc5a3093e84715a7824de582e33e1, type: 2}
+  enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
   isHiddenAtStart: 1
   recommendedPower: 6

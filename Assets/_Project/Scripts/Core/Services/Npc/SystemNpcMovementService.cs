@@ -1277,6 +1277,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private readonly IGameSessionService _gameSessionService;
     private readonly ISystemShipRouteService2A _shipRouteService;
     private readonly ISystemShipRoutePlanner2A _sharedRoutePlanner;
+    private readonly ISystemSecurityService _systemSecurityService;
     private readonly SystemSharedShipRoutePlanResult2A _sharedRoutePlanResult =
         new SystemSharedShipRoutePlanResult2A();
     private readonly SystemShipRouteResult2A _npcRouteBuildResult =
@@ -1313,6 +1314,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         _shipRouteService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemShipRouteService2A>();
         _sharedRoutePlanner = Bootstrapper.Instance.ServiceRegistry.Get<ISystemShipRoutePlanner2A>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+        _systemSecurityService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
 
         LogCustom(
             "[NpcRouteDebug] Service created | " +
@@ -9474,6 +9476,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 continue;
             }
 
+            if (!CanNpcTravelToSystem(npc, targetSystem))
+                continue;
+
             Vector3 exitPoint =
                 route.GetExitPoint(currentSystem.Id);
 
@@ -9573,6 +9578,49 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         }
 
         return true;
+    }
+
+    private bool CanNpcTravelToSystem(
+        SystemNpcRuntimeState npc,
+        StarSystemConfig targetSystem)
+    {
+        if (targetSystem == null ||
+            string.IsNullOrWhiteSpace(targetSystem.Id))
+        {
+            return false;
+        }
+
+        if (npc == null || !npc.IsAlly)
+            return true;
+
+        AllyConfig allyConfig =
+            _configService.GetAllyConfigById(npc.ConfigId);
+
+        if (allyConfig == null)
+            return true;
+
+        if (!allyConfig.AvoidEnemyOwnedTravelDestinations)
+            return true;
+
+        return !IsEnemyOwnedSystem(targetSystem.Id);
+    }
+
+    private bool IsEnemyOwnedSystem(string systemId)
+    {
+        if (string.IsNullOrWhiteSpace(systemId))
+            return false;
+
+        if (_systemSecurityService == null)
+            return false;
+
+        if (!_systemSecurityService.TryGetSystemStatus(
+                systemId,
+                out StarSystemStatus systemStatus))
+        {
+            return false;
+        }
+
+        return systemStatus == StarSystemStatus.Captured;
     }
 
     private bool TryRerollNpcMapTarget(
