@@ -39,5 +39,12 @@ public static class SaveDataVersions
     /// </summary>
     public const int SystemNpcPersistentState = 5;
 
-    public const int Current = SystemNpcPersistentState;
+    /// <summary>
+    /// Версия с сохраняемым war-state:
+    /// EnemyFactions, EnemyGroups и Invasions внутри GalaxyRuntimeState.
+    /// </summary>
+    public const int SystemWarState = 6;
+
+    public const int Current = SystemWarState;
+
 }

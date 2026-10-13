@@ -115,12 +115,16 @@ public sealed class S04_04_T03_PlayerThreatListHudTests
                 "Assets/_Project/Scripts/Core/Services/Npc/SystemNpcSimulationSaveService.cs");
 
         Assert.IsTrue(
-            saveServiceText.Contains("RestoreRuntimeDisplayName"),
-            "Restored enemies must rebuild display names for the threat list.");
+            saveServiceText.Contains("SystemNpcRuntimeFactory.CreateEnemy"),
+            "Restored enemies must be recreated through SystemNpcRuntimeFactory.CreateEnemy.");
 
         Assert.IsTrue(
-            saveServiceText.Contains("config.PickRuntimeDisplayName(npc.RuntimeNpcId)"),
-            "Restored enemy names must come from the name pool with the runtime NPC id as stable seed.");
+            saveServiceText.Contains("CreateRestoredNpcOnPlanet"),
+            "NPC restore must use the compact restore path that recreates runtime NPC state.");
+
+        Assert.IsTrue(
+            factoryText.Contains("config.PickRuntimeDisplayName(runtimeNpcId)"),
+            "Restored enemy names must come from the name pool because CreateEnemy uses the runtime NPC id as stable seed.");
     }
 
     [Test]
@@ -134,21 +138,25 @@ public sealed class S04_04_T03_PlayerThreatListHudTests
             saveDataText.Contains("public float ShotDistance"),
             "NPC weapon saves must store runtime shot distance.");
 
-        string saveServiceText =
+        string factoryText =
             ReadProjectFile(
-                "Assets/_Project/Scripts/Core/Services/Npc/SystemNpcSimulationSaveService.cs");
+                "Assets/_Project/Scripts/Core/Services/Npc/SystemNpcRuntimeFactory.cs");
 
         Assert.IsTrue(
-            saveServiceText.Contains("ShotDistance = weapon.ShotDistance"),
-            "NPC simulation save must capture weapon shot distance.");
+            factoryText.Contains("ShotDistance = weaponStats.Range"),
+            "Restored compact NPCs must rebuild weapon shot distance through SystemNpcRuntimeFactory.");
+
+        string threatHudText =
+            ReadProjectFile(
+                "Assets/_Project/Scripts/Presentation/HUD/SystemPlayerThreatListHud2A.cs");
 
         Assert.IsTrue(
-            saveServiceText.Contains("ResolveRestoredWeaponShotDistance"),
-            "NPC simulation restore must rebuild missing shot distance for old saves.");
+            threatHudText.Contains("weapon.ShotDistance"),
+            "Threat HUD range must use runtime weapon shot distance.");
 
         Assert.IsTrue(
-            saveServiceText.Contains("return weaponConfig.RangeMax"),
-            "Old saves without shot distance must use weapon config range for threat HUD visibility.");
+            threatHudText.Contains("fallbackShotDistance"),
+            "Threat HUD must keep a fallback distance when restored weapons have no range.");
     }
 
     [Test]

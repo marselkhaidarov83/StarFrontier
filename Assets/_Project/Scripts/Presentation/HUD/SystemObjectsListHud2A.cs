@@ -43,6 +43,7 @@ public sealed class SystemObjectsListHud2A :
     private IConfigService _configService;
     private ITargetService2A _targetService;
     private IOrbitalMotionService _orbitalMotionService;
+    private IRouteService _routeService;
     private bool _isBound;
 
     public bool IsBound => _isBound;
@@ -71,6 +72,8 @@ public sealed class SystemObjectsListHud2A :
 
         _eventBus = context.Get<SimpleEventBus>();
         _configService = context.Get<IConfigService>();
+        _routeService = context.Get<IRouteService>();
+
         context.TryGet(out _gameSessionService);
         context.TryGet(out _targetService);
         context.TryGet(out _orbitalMotionService);
@@ -105,6 +108,7 @@ public sealed class SystemObjectsListHud2A :
         _eventBus = null;
         _gameSessionService = null;
         _configService = null;
+        _routeService = null;
         _targetService = null;
         _orbitalMotionService = null;
         _isBound = false;
@@ -266,6 +270,13 @@ public sealed class SystemObjectsListHud2A :
     private int AppendExits(
         StarSystemConfig system)
     {
+        if (system == null ||
+            string.IsNullOrWhiteSpace(system.Id) ||
+            _routeService == null)
+        {
+            return 0;
+        }
+
         List<RouteConfig> routes =
             GetRoutesForSystem(system.Id);
 
@@ -281,6 +292,20 @@ public sealed class SystemObjectsListHud2A :
             if (route == null)
                 continue;
 
+            if (route.FromSystem == null ||
+                route.ToSystem == null)
+            {
+                continue;
+            }
+
+            bool isUnlocked =
+                _routeService.HasUnlockedRoute(
+                    route.FromSystem.Id,
+                    route.ToSystem.Id);
+
+            if (!isUnlocked)
+                continue;
+
             StarSystemConfig targetSystem =
                 route.GetOtherSystem(system.Id);
 
@@ -294,12 +319,14 @@ public sealed class SystemObjectsListHud2A :
             }
 
             int index = _routes.Count;
+
             _routes.Add(route);
             _exitTargets.Add(targetSystem);
 
             AppendLink(
                 ExitPrefix + index,
                 targetSystem.DisplayName);
+
             rows++;
         }
 

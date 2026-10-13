@@ -32,6 +32,13 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     [SerializeField]
     private float errorShowDuration = 2f;
 
+    [Header("Invasion Warning Limits")]
+    [SerializeField]
+    private float invasionWarningCooldownSeconds = 12f;
+
+    [SerializeField]
+    private int maxInvasionWarningsPerMapSession = 1;
+
     [Header("Adaptive Camera")]
     [SerializeField]
     private GalaxyMapViewFitter mapViewFitter;
@@ -46,8 +53,13 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     private IGameSessionService gameSessionService;
     private ITravelService travelService;
     private ISystemTravelService systemTravelService;
+    private IInvasionService invasionService;
     private IGameStateMachine gameStateMachine;
     private SimpleEventBus eventBus;
+
+    private string lastShownInvasionWarningId;
+    private float lastInvasionWarningShownAt = -999f;
+    private int invasionWarningsShownThisMapSession;
 
     private StarSystemNodeView2A[] systemNodes;
     private Coroutine currentRoutine;
@@ -96,6 +108,10 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         systemTravelService =
             Bootstrapper.Instance.ServiceRegistry
                 .Get<ISystemTravelService>();
+
+        invasionService =
+            Bootstrapper.Instance.ServiceRegistry
+            .Get<IInvasionService>();
 
         gameStateMachine =
             Bootstrapper.Instance.ServiceRegistry
@@ -303,19 +319,263 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 
     public void Refresh()
     {
-        if (systemNodes == null)
+        if (systemNodes != null)
+        {
+            foreach (
+                StarSystemNodeView2A systemNodeView
+                in systemNodes
+            )
+            {
+                if (systemNodeView == null)
+                    continue;
+
+                systemNodeView.SetState();
+            }
+        }
+    }
+
+    /*
+     * 2A-S06-04-T07:
+     * The galaxy map only reads active invasions to show player-facing
+     * warnings. It must not start, resolve, cancel, or mutate invasion
+     * state from UI code.
+     */
+    private void ShowActiveInvasionWarning()
+    {
+        if (invasionService == null)
             return;
 
-        foreach (
-            StarSystemNodeView2A systemNodeView
-            in systemNodes
-        )
+        if (!CanShowInvasionWarningNow())
+            return;
+
+        if (!TryGetPriorityInvasion(
+                out InvasionState invasionState))
         {
-            if (systemNodeView == null)
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(
+                invasionState.InvasionId))
+        {
+            return;
+        }
+
+        if (string.Equals(
+                lastShownInvasionWarningId,
+                invasionState.InvasionId,
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        MarkInvasionWarningShown(
+            invasionState.InvasionId
+        );
+
+        ShowMessage(
+            BuildInvasionWarningText(invasionState)
+        );
+    }
+
+    private bool CanShowInvasionWarningNow()
+    {
+        if (maxInvasionWarningsPerMapSession <= 0)
+            return false;
+
+        if (invasionWarningsShownThisMapSession >=
+            maxInvasionWarningsPerMapSession)
+        {
+            return false;
+        }
+
+        float cooldown =
+            Mathf.Max(
+                0f,
+                invasionWarningCooldownSeconds
+            );
+
+        if (Time.unscaledTime - lastInvasionWarningShownAt <
+            cooldown)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void MarkInvasionWarningShown(
+        string invasionId)
+    {
+        lastShownInvasionWarningId =
+            invasionId;
+
+        lastInvasionWarningShownAt =
+            Time.unscaledTime;
+
+        invasionWarningsShownThisMapSession++;
+    }
+
+    private bool TryGetPriorityInvasion(
+        out InvasionState priorityInvasion)
+    {
+        priorityInvasion = null;
+
+        if (invasionService == null)
+            return false;
+
+        IReadOnlyList<InvasionState> invasions =
+            invasionService.GetActiveInvasions();
+
+        if (invasions == null ||
+            invasions.Count == 0)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < invasions.Count; i++)
+        {
+            InvasionState invasion =
+                invasions[i];
+
+            if (invasion == null)
                 continue;
 
-            systemNodeView.SetState();
+            if (!invasion.IsActive())
+                continue;
+
+            if (priorityInvasion == null ||
+                GetInvasionPriority(invasion) >
+                GetInvasionPriority(priorityInvasion))
+            {
+                priorityInvasion = invasion;
+            }
         }
+
+        return priorityInvasion != null;
+    }
+
+    private int GetInvasionPriority(
+        InvasionState invasionState)
+    {
+        if (invasionState == null)
+            return 0;
+
+        int priority =
+            invasionState.EscalationPressure;
+
+        if (invasionState.LifecycleState ==
+            InvasionLifecycleState.Active)
+        {
+            priority += 100;
+        }
+
+        if (invasionState.LifecycleState ==
+            InvasionLifecycleState.Preparing)
+        {
+            priority += 50;
+        }
+
+        return priority;
+    }
+
+    private string BuildInvasionWarningText(
+        InvasionState invasionState)
+    {
+        string systemName =
+            GetSystemDisplayName(
+                invasionState.TargetSystemId
+            );
+
+        string factionName =
+            GetFactionDisplayName(
+                invasionState.FactionId
+            );
+
+        string description =
+            GetFactionThreatDescription(
+                invasionState.FactionId
+            );
+
+        return
+            "Вторжение: " +
+            systemName +
+            "\nВраг: " +
+            factionName +
+            "\n" +
+            description;
+    }
+
+    private string GetSystemDisplayName(
+        string systemId)
+    {
+        if (configService != null &&
+            configService.TryGetStarSystem(
+                systemId,
+                out StarSystemConfig systemConfig) &&
+            systemConfig != null &&
+            !string.IsNullOrWhiteSpace(
+                systemConfig.DisplayName))
+        {
+            return systemConfig.DisplayName;
+        }
+
+        return string.IsNullOrWhiteSpace(systemId)
+            ? "неизвестная система"
+            : systemId;
+    }
+
+    private string GetFactionDisplayName(
+        string factionId)
+    {
+        string normalizedFactionId =
+            NormalizeFactionId(factionId);
+
+        switch (normalizedFactionId)
+        {
+            case "ancients":
+                return "Древние";
+
+            case "ai":
+                return "Враждебный ИИ";
+
+            case "infected":
+                return "Заражённые";
+
+            default:
+                return string.IsNullOrWhiteSpace(factionId)
+                    ? "неизвестная фракция"
+                    : factionId;
+        }
+    }
+
+    private string GetFactionThreatDescription(
+        string factionId)
+    {
+        string normalizedFactionId =
+            NormalizeFactionId(factionId);
+
+        switch (normalizedFactionId)
+        {
+            case "ancients":
+                return "Древняя сила атакует систему. Подготовься к тяжёлому бою.";
+
+            case "ai":
+                return "Боевые группы ИИ входят в систему. Реакция нужна быстро.";
+
+            case "infected":
+                return "Заражение распространяется через систему. Промедление усилит угрозу.";
+
+            default:
+                return "Вражеские силы атакуют систему. Проверь карту и подготовь маршрут.";
+        }
+    }
+
+    private string NormalizeFactionId(
+        string factionId)
+    {
+        return string.IsNullOrWhiteSpace(factionId)
+            ? string.Empty
+            : factionId.Trim().ToLowerInvariant();
     }
 
     /// <summary>
@@ -420,10 +680,18 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         bool openCurrentSystem
     )
     {
-        if (string.IsNullOrWhiteSpace(
-                targetSystemId
-            ))
+        float startedAt =
+            Time.realtimeSinceStartup;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.Start" +
+            " | TargetSystemId=" + targetSystemId +
+            " | OpenCurrentSystem=" + openCurrentSystem +
+            " | Time=" + startedAt.ToString("F3"));
+
+        if (string.IsNullOrWhiteSpace(targetSystemId))
         {
+            LogCustom("[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=EmptyTarget");
             return false;
         }
 
@@ -432,9 +700,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             gameSessionService.State.Player == null)
         {
             Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "Game-session player state is unavailable."
-            );
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=MissingPlayerState");
 
             return false;
         }
@@ -442,9 +708,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         if (travelService == null)
         {
             Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "ITravelService is null."
-            );
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=MissingTravelService");
 
             return false;
         }
@@ -452,48 +716,74 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         string currentSystemId =
             GetCurrentSystemId();
 
-        if (string.IsNullOrWhiteSpace(
-                currentSystemId
-            ))
+        if (string.IsNullOrWhiteSpace(currentSystemId))
         {
-            ShowMessage(
-                "Текущая система не найдена"
-            );
+            ShowMessage("Текущая система не найдена");
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=EmptyCurrentSystem");
 
             return false;
         }
 
-        LogCustom(
-            "[GalaxyMapSystemBuilder] " +
-            "Select system. Current = " +
-            currentSystemId +
-            " | Target = " +
-            targetSystemId
-        );
-
-        if (string.Equals(
+        bool isCurrentSystem =
+            string.Equals(
                 currentSystemId,
                 targetSystemId,
-                StringComparison.Ordinal
-            ))
+                StringComparison.Ordinal);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.Context" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | TargetSystemId=" + targetSystemId +
+            " | IsCurrentSystem=" + isCurrentSystem +
+            " | OpenCurrentSystem=" + openCurrentSystem);
+
+        if (isCurrentSystem)
         {
-            ClearSelectedSystem();
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.CurrentSystemBranch" +
+                " | WillEnterSystemState=" + openCurrentSystem +
+                " | WillBuildPath=False" +
+                " | WillCallTravelFailReason=False");
 
             if (openCurrentSystem)
             {
+                LogCustom(
+                    "[GALAXY_CLICK_TRACE] EnterSystemState.Before" +
+                    " | Reason=CurrentSystemClick" +
+                    " | SystemId=" + currentSystemId);
+
                 gameStateMachine?.Enter(
                     new SystemState()
                 );
 
+                LogCustom(
+                    "[GALAXY_CLICK_TRACE] EnterSystemState.After" +
+                    " | Reason=CurrentSystemClick" +
+                    " | SystemId=" + currentSystemId);
+
                 eventBus?.Publish(
                     new StarSystemEnteredEvent(
-                        targetSystemId
+                        currentSystemId
                     )
                 );
             }
+            else
+            {
+                ClearSelectedSystem();
+            }
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End" +
+                " | Reason=CurrentSystem" +
+                " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
 
             return false;
         }
+
+        float pathStartedAt =
+            Time.realtimeSinceStartup;
 
         List<string> path =
             BuildPath(
@@ -501,16 +791,21 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                 targetSystemId
             );
 
-        if (path == null ||
-            path.Count < 2)
-        {
-            SetSelectedSystemVisual(
-                string.Empty
-            );
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.AfterBuildPath" +
+            " | PathCount=" + (path != null ? path.Count : -1) +
+            " | Path=" + FormatPathForGalaxyClickTrace(path) +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - pathStartedAt) * 1000f).ToString("F2"));
 
-            ShowMessage(
-                "Маршрут к выбранной системе не найден"
-            );
+        if (path == null || path.Count < 2)
+        {
+            SetSelectedSystemVisual(string.Empty);
+            ShowMessage("Маршрут к выбранной системе не найден");
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End" +
+                " | Reason=PathMissing" +
+                " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
 
             return false;
         }
@@ -521,20 +816,23 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                 targetSystemId
             );
 
-        if (string.IsNullOrWhiteSpace(
-                nextSystemId
-            ))
-        {
-            SetSelectedSystemVisual(
-                string.Empty
-            );
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.NextSystem" +
+            " | NextSystemId=" + nextSystemId);
 
-            ShowMessage(
-                "Первая система маршрута не найдена"
-            );
+        if (string.IsNullOrWhiteSpace(nextSystemId))
+        {
+            SetSelectedSystemVisual(string.Empty);
+            ShowMessage("Первая система маршрута не найдена");
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=NextSystemMissing");
 
             return false;
         }
+
+        float failReasonStartedAt =
+            Time.realtimeSinceStartup;
 
         TravelFailReason result =
             travelService.GetTravelFailReason(
@@ -543,16 +841,22 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             );
 
         LogCustom(
-            "[GalaxyMapSystemBuilder] " +
-            "Travel result = " +
-            result
-        );
+            "[GALAXY_CLICK_TRACE] SelectSystem.AfterGetTravelFailReason" +
+            " | From=" + currentSystemId +
+            " | To=" + nextSystemId +
+            " | Result=" + result +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - failReasonStartedAt) * 1000f).ToString("F2"));
 
         ShowTravelWarning(result);
 
-        SetSelectedSystemVisual(
-            targetSystemId
-        );
+        float visualStartedAt =
+            Time.realtimeSinceStartup;
+
+        SetSelectedSystemVisual(targetSystemId);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.AfterSetSelectedSystemVisual" +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - visualStartedAt) * 1000f).ToString("F2"));
 
         eventBus?.Publish(
             new GalaxyMapSystemSelectedEvent(
@@ -564,7 +868,167 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             )
         );
 
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.TargetSelectedWithoutOpeningSystem" +
+            " | TargetSystemId=" + targetSystemId +
+            " | NextSystemId=" + nextSystemId +
+            " | TravelFailReason=" + result);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SelectSystem.End" +
+            " | Reason=SelectedTargetOnly" +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
+
         return true;
+    }
+
+    private void OpenCurrentSystemWithRouteDestination(
+        string currentSystemId,
+        string nextSystemId)
+    {
+        float startedAt =
+            Time.realtimeSinceStartup;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] OpenCurrentSystemWithRouteDestination.Start" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | NextSystemId=" + nextSystemId +
+            " | HasSystemTravelService=" + (systemTravelService != null));
+
+        if (systemTravelService == null)
+        {
+            Debug.LogError(
+                "[GALAXY_CLICK_TRACE] OpenCurrentSystemWithRouteDestination.End | Reason=MissingSystemTravelService");
+
+            return;
+        }
+
+        RouteConfig routeConfig =
+            FindRouteConfig(
+                currentSystemId,
+                nextSystemId
+            );
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] OpenCurrentSystemWithRouteDestination.AfterFindRoute" +
+            " | RouteId=" + (routeConfig != null ? routeConfig.Id : "NULL"));
+
+        if (routeConfig == null)
+        {
+            ShowMessage("Маршрут к первой системе не найден");
+            return;
+        }
+
+        Vector3 exitPoint =
+            routeConfig.GetExitPoint(currentSystemId);
+
+        Vector3 entryPoint =
+            routeConfig.GetEntryPoint(nextSystemId);
+
+        RouteEndpointConfig departureEndpoint =
+            routeConfig.GetDepartureEndpoint(currentSystemId);
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SetSystemExitDestination.Before" +
+            " | RouteId=" + routeConfig.Id +
+            " | From=" + currentSystemId +
+            " | To=" + nextSystemId +
+            " | ExitPoint=" + exitPoint +
+            " | EntryPoint=" + entryPoint);
+
+        systemTravelService.SetSystemExitDestination(
+            new RouteExitMapChangedEvent(
+                routeConfig,
+                currentSystemId,
+                nextSystemId,
+                exitPoint,
+                entryPoint,
+                departureEndpoint != null
+                    ? departureEndpoint.VisualSize
+                    : 0f
+            )
+        );
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] SetSystemExitDestination.After");
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] EnterSystemState.Before" +
+            " | Reason=TargetSystemClick" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | NextSystemId=" + nextSystemId);
+
+        gameStateMachine?.Enter(
+            new SystemState()
+        );
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] EnterSystemState.After" +
+            " | Reason=TargetSystemClick" +
+            " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
+
+        eventBus?.Publish(
+            new StarSystemEnteredEvent(
+                currentSystemId
+            )
+        );
+    }
+
+    private static string FormatPathForGalaxyClickTrace(
+        IReadOnlyList<string> path)
+    {
+        if (path == null)
+            return "NULL";
+
+        if (path.Count == 0)
+            return "EMPTY";
+
+        return string.Join(">", path);
+    }
+
+    private RouteConfig FindRouteConfig(
+        string currentSystemId,
+        string nextSystemId)
+    {
+        if (configService == null)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(currentSystemId) ||
+            string.IsNullOrWhiteSpace(nextSystemId))
+        {
+            return null;
+        }
+
+        StarSystemConfig currentSystem =
+            configService.GetStarSystemConfigById(currentSystemId);
+
+        if (currentSystem == null ||
+            currentSystem.Routes == null)
+        {
+            return null;
+        }
+
+        foreach (RouteConfig routeConfig in currentSystem.Routes)
+        {
+            if (routeConfig == null)
+                continue;
+
+            StarSystemConfig otherSystem =
+                routeConfig.GetOtherSystem(currentSystemId);
+
+            if (otherSystem == null)
+                continue;
+
+            if (string.Equals(
+                    otherSystem.Id,
+                    nextSystemId,
+                    StringComparison.Ordinal))
+            {
+                return routeConfig;
+            }
+        }
+
+        return null;
     }
 
     private List<string> BuildPath(
@@ -572,6 +1036,15 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         string targetSystemId
     )
     {
+        float startedAt =
+            Time.realtimeSinceStartup;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] BuildPath.Start" +
+            " | CurrentSystemId=" + currentSystemId +
+            " | TargetSystemId=" + targetSystemId +
+            " | HasRoutesBuilder=" + (routesBuilder != null));
+
         if (routesBuilder != null)
         {
             List<string> selectedPath =
@@ -580,7 +1053,17 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                     targetSystemId
                 );
 
-            if (!routesBuilder.HasSelectedPath())
+            bool hasSelectedPath =
+                routesBuilder.HasSelectedPath();
+
+            LogCustom(
+                "[GALAXY_CLICK_TRACE] BuildPath.AfterShowShortestPath" +
+                " | HasSelectedPath=" + hasSelectedPath +
+                " | PathCount=" + (selectedPath != null ? selectedPath.Count : -1) +
+                " | Path=" + FormatPathForGalaxyClickTrace(selectedPath) +
+                " | DurationMs=" + ((Time.realtimeSinceStartup - startedAt) * 1000f).ToString("F2"));
+
+            if (!hasSelectedPath)
                 return new List<string>();
 
             return selectedPath != null
@@ -591,19 +1074,20 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
         List<string> fallbackPath =
             new List<string>
             {
-                currentSystemId
+            currentSystemId
             };
 
         if (!string.Equals(
                 currentSystemId,
                 targetSystemId,
-                StringComparison.Ordinal
-            ))
+                StringComparison.Ordinal))
         {
-            fallbackPath.Add(
-                targetSystemId
-            );
+            fallbackPath.Add(targetSystemId);
         }
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] BuildPath.Fallback" +
+            " | Path=" + FormatPathForGalaxyClickTrace(fallbackPath));
 
         return fallbackPath;
     }
@@ -709,10 +1193,12 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     }
 
     private void OnExitMapChanged(
-        ExitMapChangedEvent eventData
-    )
+    ExitMapChangedEvent eventData
+)
     {
         galaxyMapRoot?.SetActive(false);
+
+        invasionWarningsShownThisMapSession = 0;
     }
 
     public void ShowMessage(

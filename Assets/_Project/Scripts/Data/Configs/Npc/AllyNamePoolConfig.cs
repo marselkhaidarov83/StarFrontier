@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Конфиг AllyNamePoolConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(
     fileName = "AllyNamePoolConfig",
     menuName = "StarFrontier/Configs/Npc/Ally Name Pool")]
@@ -9,10 +10,12 @@ public sealed class AllyNamePoolConfig : BaseConfig
 {
     [Header("Owner")]
     [SerializeField]
+    [Tooltip("Роль союзника. Используется при создании союзных кораблей и выборе поведения.")]
     private AllyRole2A role = AllyRole2A.Ranger;
 
     [Header("Names")]
     [SerializeField]
+    [Tooltip("Список имён для случайного выбора.")]
     private string[] names = new string[0];
 
     public AllyRole2A Role =>
@@ -21,6 +24,7 @@ public sealed class AllyNamePoolConfig : BaseConfig
     public IReadOnlyList<string> Names =>
         names;
 
+    [Tooltip("Количество для параметра NameCount. Используется соответствующей системой при генерации или расчёте.")]
     public int NameCount
     {
         get

@@ -117,12 +117,23 @@ namespace StarFrontier.Tests.Sprint1
 
         private ConfigService CreateService(IEnumerable<ItemConfig> items)
         {
-            return new ConfigService(null, null, null, null, null,
-                Array.Empty<SectorConfig>(), Array.Empty<StarSystemConfig>(),
-                Array.Empty<PlanetConfig>(), items, 
-                Array.Empty<EnemyConfig>(), Array.Empty<AllyConfig>(),
-                Array.Empty<AllySpawnRuleConfig>(), Array.Empty<PirateConfig>(),
-                Array.Empty<PirateGroupSpawnRuleConfig>(), Array.Empty<ModuleConfig>(),
+            return new ConfigService(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Array.Empty<SectorConfig>(),
+                Array.Empty<StarSystemConfig>(),
+                Array.Empty<PlanetConfig>(),
+                items,
+                Array.Empty<EnemyConfig>(),
+                Array.Empty<AllyConfig>(),
+                Array.Empty<AllySpawnRuleConfig>(),
+                Array.Empty<PirateConfig>(),
+                Array.Empty<PirateGroupSpawnRuleConfig>(),
+                Array.Empty<ModuleConfig>(),
                 Array.Empty<WeaponConfig>());
         }
 

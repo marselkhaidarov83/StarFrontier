@@ -9,6 +9,7 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
     [Header("View")]
     [SerializeField] private SpriteRenderer starSystemImage;
     [SerializeField] private SpriteRenderer starSystemCurrentIcon;
+    [SerializeField] private SpriteRenderer warStateIcon;
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text fuelText;
     [SerializeField] private SpriteRenderer fuelImage;
@@ -43,10 +44,24 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
     [SerializeField] private Color systemColorDisabled = new Color(0.45f, 0.45f, 0.45f, 1f);
     [SerializeField] private Color systemColorHidden = new Color(0.35f, 0.35f, 0.45f, 1f);
 
+    [Header("War State Tint")]
+    [SerializeField] private Color systemColorThreat = new Color(1f, 0.63f, 0.16f, 1f);
+    [SerializeField] private Color systemColorInvasion = new Color(1f, 0.16f, 0.12f, 1f);
+    [SerializeField] private Color systemColorCaptured = new Color(0.45f, 0.05f, 0.05f, 1f);
+
+    [Header("War State Icon")]
+    [SerializeField] private Sprite warThreatSprite;
+    [SerializeField] private Sprite warInvasionSprite;
+    [SerializeField] private Sprite warCapturedSprite;
+    [SerializeField] private Color warIconThreatColor = new Color(1f, 0.82f, 0.18f, 1f);
+    [SerializeField] private Color warIconInvasionColor = new Color(1f, 0.08f, 0.04f, 1f);
+    [SerializeField] private Color warIconCapturedColor = new Color(0.7f, 0.02f, 0.02f, 1f);
+
     [Header("Sorting")]
     [SerializeField] private string sortingLayerName = "Default";
     [SerializeField] private int systemImageOrder = 20;
     [SerializeField] private int currentIconOrder = 25;
+    [SerializeField] private int warStateIconOrder = 26;
     [SerializeField] private int titleOrder = 30;
     [SerializeField] private int fuelImageOrder = 31;
     [SerializeField] private int fuelTextOrder = 32;
@@ -92,6 +107,9 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
 
     public void SetSelected(bool selected)
     {
+        if (_isSelected == selected)
+            return;
+
         _isSelected = selected;
         SetState();
     }
@@ -134,7 +152,8 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
                 fuelColor,
                 fuelVisible,
                 fuelCount,
-                isCurrent
+                isCurrent,
+                null
             );
 
             return;
@@ -148,7 +167,6 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
             starSystemConfig.Id
         );
 
-        LogCustom("travelFailReason = " + starSystemConfig.Id + " / " +travelFailReason);
         switch (travelFailReason)
         {
             case TravelFailReason.TargetSystemIsCurrent:
@@ -193,16 +211,24 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
                 break;
         }
 
+        systemColor = GetWarStateColor(
+            runtimeState,
+            systemColor
+        );
+
         if (_isSelected && !isCurrent)
         {
-            systemColor = systemColorSelected;
+            systemColor = Color.Lerp(
+                systemColor,
+                systemColorSelected,
+                0.35f
+            );
         }
 
         int travelCost = _travelService.GetTravelCost(
             GetCurrentSystemId(),
             starSystemConfig.Id
         );
-        LogCustom("travelCost = " + GetCurrentSystemId() + " / " + starSystemConfig.Id + " / " +travelCost);
 
         fuelCount = travelCost == 0 ? string.Empty : travelCost.ToString();
 
@@ -213,8 +239,30 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
             fuelColor,
             fuelVisible,
             fuelCount,
-            isCurrent
+            isCurrent,
+            runtimeState
         );
+    }
+
+    private Color GetWarStateColor(
+     StarSystemRuntimeState runtimeState,
+     Color fallbackColor)
+    {
+        if (runtimeState == null)
+            return fallbackColor;
+
+        switch (runtimeState.SystemStatus)
+        {
+            case StarSystemStatus.Captured:
+                return systemColorCaptured;
+
+            case StarSystemStatus.Threat:
+            case StarSystemStatus.Invasion:
+            case StarSystemStatus.Stable:
+            case StarSystemStatus.RecoveryReady:
+            default:
+                return fallbackColor;
+        }
     }
 
     private void ApplyVisual(
@@ -224,26 +272,21 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
         Color fuelColor,
         bool fuelVisible,
         string fuelCount,
-        bool isCurrent)
+        bool isCurrent,
+        StarSystemRuntimeState runtimeState)
     {
         if (starSystemImage != null)
         {
             starSystemImage.sprite = systemSprite;
             starSystemImage.color = systemColor;
-
-            // float scale = _isSelected ? selectedScale : normalScale;
-
-            // starSystemImage.transform.localScale = new Vector3(
-            //     scale,
-            //     scale,
-            //     1f
-            // );
         }
 
         if (starSystemCurrentIcon != null)
         {
             starSystemCurrentIcon.gameObject.SetActive(isCurrent);
         }
+
+        ApplyWarStateIcon(runtimeState);
 
         if (fuelImage != null)
         {
@@ -256,6 +299,80 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
         {
             fuelText.text = fuelCount;
             fuelText.gameObject.SetActive(fuelVisible);
+        }
+    }
+
+    private void ApplyWarStateIcon(
+    StarSystemRuntimeState runtimeState)
+    {
+        if (warStateIcon == null)
+            return;
+
+        if (!HasVisibleWarState(runtimeState))
+        {
+            warStateIcon.gameObject.SetActive(false);
+            return;
+        }
+
+        Sprite iconSprite =
+            GetWarStateIconSprite(runtimeState);
+
+        if (iconSprite == null)
+        {
+            warStateIcon.gameObject.SetActive(false);
+            return;
+        }
+
+        warStateIcon.sprite = iconSprite;
+        warStateIcon.color = GetWarStateIconColor(runtimeState);
+        warStateIcon.gameObject.SetActive(true);
+    }
+
+    private bool HasVisibleWarState(
+     StarSystemRuntimeState runtimeState)
+    {
+        if (runtimeState == null)
+            return false;
+
+        return runtimeState.SystemStatus == StarSystemStatus.Threat ||
+               runtimeState.SystemStatus == StarSystemStatus.Invasion;
+    }
+
+    private Sprite GetWarStateIconSprite(
+      StarSystemRuntimeState runtimeState)
+    {
+        if (runtimeState == null)
+            return null;
+
+        switch (runtimeState.SystemStatus)
+        {
+            case StarSystemStatus.Threat:
+                return warThreatSprite;
+
+            case StarSystemStatus.Invasion:
+                return warInvasionSprite;
+
+            default:
+                return null;
+        }
+    }
+
+    private Color GetWarStateIconColor(
+    StarSystemRuntimeState runtimeState)
+    {
+        if (runtimeState == null)
+            return Color.white;
+
+        switch (runtimeState.SystemStatus)
+        {
+            case StarSystemStatus.Threat:
+                return warIconThreatColor;
+
+            case StarSystemStatus.Invasion:
+                return warIconInvasionColor;
+
+            default:
+                return Color.white;
         }
     }
 
@@ -289,6 +406,13 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
         }
     }
 
+    /*
+     * 2A-S06-04-T07:
+     * Galaxy map UI is read-only for war state.
+     * This view reads StarSystemRuntimeState.SystemStatus only to update
+     * color and icons. Gameplay services remain the only place where
+     * war state can be changed.
+     */
     private StarSystemRuntimeState GetRuntimeState()
     {
         if (_galaxyRuntimeState == null || _galaxyRuntimeState.Systems == null)
@@ -340,6 +464,12 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
             starSystemCurrentIcon.sortingOrder = currentIconOrder;
         }
 
+        if (warStateIcon != null)
+        {
+            warStateIcon.sortingLayerName = sortingLayerName;
+            warStateIcon.sortingOrder = warStateIconOrder;
+        }
+
         if (fuelImage != null)
         {
             fuelImage.sortingLayerName = sortingLayerName;
@@ -371,13 +501,32 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        LogCustom("");
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] NodePointerClick" +
+            " | SystemId=" + SystemId +
+            " | CurrentSystemId=" + GetCurrentSystemId() +
+            " | Button=" + (eventData != null ? eventData.button.ToString() : "NULL") +
+            " | Time=" + Time.realtimeSinceStartup.ToString("F3"));
+
         OnClick();
     }
 
     public void OnClick()
     {
         StarSystemRuntimeState runtimeState = GetRuntimeState();
+
+        bool isDiscovered =
+            runtimeState != null &&
+            runtimeState.IsDiscovered;
+
+        LogCustom(
+            "[GALAXY_CLICK_TRACE] NodeOnClick" +
+            " | SystemId=" + SystemId +
+            " | CurrentSystemId=" + GetCurrentSystemId() +
+            " | HasRuntimeState=" + (runtimeState != null) +
+            " | IsDiscovered=" + isDiscovered +
+            " | WillInvoke=" + isDiscovered +
+            " | Time=" + Time.realtimeSinceStartup.ToString("F3"));
 
         if (runtimeState != null && !runtimeState.IsDiscovered)
             return;

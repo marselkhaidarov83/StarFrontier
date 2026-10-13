@@ -508,7 +508,12 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         if (hasNearestAlly)
         {
             LogCustom("Enemy target = nearest ally");
-            return GetCombatApproachPosition(npc, allyPosition, stats);
+
+            return GetApproachPosition(
+                npc.CurrentPosition,
+                allyPosition,
+                ArrivalSafeDistance(),
+                stats);
         }
 
         stepStartedAt =
@@ -528,7 +533,12 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         if (hasPlayer)
         {
             LogCustom("Enemy target = player");
-            return GetCombatApproachPosition(npc, playerPosition, stats);
+
+            return GetApproachPosition(
+                npc.CurrentPosition,
+                playerPosition,
+                ArrivalSafeDistance(),
+                stats);
         }
 
         stepStartedAt =

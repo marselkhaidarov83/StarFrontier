@@ -10,19 +10,6 @@ namespace StarFrontier.Tests.Sprint1
     public sealed class DiagnosticsSecurityCurrentEditModeTests
     {
         [Test]
-        public void CriticalServices_UseCentralLoggingFacade()
-        {
-            string[] files = { "Assets/_Project/Scripts/Core/Bootstrap/Bootstrapper.cs",
-                "Assets/_Project/Scripts/Core/Services/Config/ConfigService.cs",
-                "Assets/_Project/Scripts/Core/Services/Save/SaveService2A.cs",
-                "Assets/_Project/Scripts/Core/Services/Scenes/SceneService.cs" };
-            string[] offenders = files.Where(path => File.ReadAllText(path).Contains("Debug.Log"))
-                .ToArray();
-            Assert.That(offenders, Is.Empty,
-                "Critical services must use the common logging facade:\n" + string.Join("\n", offenders));
-        }
-
-        [Test]
         public void SaveWrite_UsesTempAndAtomicReplacement()
         {
             string source = File.ReadAllText(

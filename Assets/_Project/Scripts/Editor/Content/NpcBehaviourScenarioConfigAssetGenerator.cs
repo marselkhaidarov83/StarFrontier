@@ -13,10 +13,10 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         "STAR FRONTIER/Content/03. NPC Behaviour Scenarios/";
 
     private const string DefaultAssetCsvPath =
-        "Assets/_Project/Content/Configs/Population/NpcBehaviourScenarios/STAR_FRONTIER_NpcBehaviourScenarioConfig_assets_v0.3.csv";
+        "Assets/_Project/Content/Configs/Population/NpcBehaviourScenarios/STAR_FRONTIER_NpcBehaviourScenarioConfig_assets_v0.4.csv";
 
     private const string DefaultWeightsCsvPath =
-        "Assets/_Project/Content/Configs/Population/NpcBehaviourScenarios/STAR_FRONTIER_NpcBehaviourScenarioConfig_weights_v0.3.csv";
+        "Assets/_Project/Content/Configs/Population/NpcBehaviourScenarios/STAR_FRONTIER_NpcBehaviourScenarioConfig_weights_v0.4.csv";
 
     private const string OutputRoot =
         "Assets/_Project/Content/Configs/Population/NpcBehaviourScenarios";

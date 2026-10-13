@@ -44,11 +44,12 @@ MonoBehaviour:
   namePool: {fileID: 11400000, guid: 9a60b2cb449c5430b80aa4d69d0d508b, type: 2}
   behaviorScenarios:
   - scenario: 0
-    behaviorConfig: {fileID: 0}
+    behaviorConfig: {fileID: 11400000, guid: 3216239f6acf84590abb5a91d14340c7, type: 2}
   - scenario: 10
-    behaviorConfig: {fileID: 0}
+    behaviorConfig: {fileID: 11400000, guid: be8fae2eef9c248d3b495b59f095f074, type: 2}
   - scenario: 20
-    behaviorConfig: {fileID: 0}
+    behaviorConfig: {fileID: 11400000, guid: ad0b3eb116bba4ea89abcdea8ef7c8d3, type: 2}
+  avoidEnemyOwnedTravelDestinations: 0
   weaponGroups: []
   mapSprite: {fileID: 21300000, guid: 03422772af242424aa6284c53fa5f828, type: 3}
   combatSprite: {fileID: 21300000, guid: 03422772af242424aa6284c53fa5f828, type: 3}

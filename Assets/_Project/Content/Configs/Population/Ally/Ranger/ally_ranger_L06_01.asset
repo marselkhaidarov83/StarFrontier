@@ -49,6 +49,7 @@ MonoBehaviour:
     behaviorConfig: {fileID: 11400000, guid: f13de361f7846405ea0b6a691cc3fa3d, type: 2}
   - scenario: 20
     behaviorConfig: {fileID: 11400000, guid: 609193c650a994e83b91e7f4337d3706, type: 2}
+  avoidEnemyOwnedTravelDestinations: 0
   weaponGroups:
   - {fileID: 11400000, guid: 78b76e0b3bd834d24957540efbd4533e, type: 2}
   - {fileID: 11400000, guid: f3cbadce5a5c9436e9994b992dfabd4b, type: 2}

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// Конфиг SystemPopulationRule содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(
     fileName = "SystemPopulationRule",
     menuName = "StarFrontier/Configs/System/System Population Rule")]
@@ -9,10 +10,12 @@ public sealed class SystemPopulationRule : BaseConfig
         new EnemyGroupSpawnRuleConfig[0];
 
     [Header("Allies")]
+    [Tooltip("Параметр allySpawnRules. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private AllySpawnRuleConfig[] allySpawnRules =
         new AllySpawnRuleConfig[0];
 
     [Header("Enemies")]
+    [Tooltip("Параметр enemyGroupSpawnRuleEntries. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private SystemPopulationEnemyGroupRuleEntry[] enemyGroupSpawnRuleEntries =
         new SystemPopulationEnemyGroupRuleEntry[0];
 
@@ -137,7 +140,9 @@ public sealed class SystemPopulationRule : BaseConfig
 [System.Serializable]
 public sealed class SystemPopulationEnemyGroupRuleEntry
 {
+    [Tooltip("Параметр enemyGroupSpawnRule. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private EnemyGroupSpawnRuleConfig enemyGroupSpawnRule;
+    [Tooltip("Относительный вес выбора этой записи. Чем больше значение, тем чаще запись выбирается среди других подходящих.")]
     [SerializeField] [Min(1)] private int weight = 1;
 
     public EnemyGroupSpawnRuleConfig EnemyGroupSpawnRule => enemyGroupSpawnRule;

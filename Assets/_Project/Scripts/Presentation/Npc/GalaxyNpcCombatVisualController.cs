@@ -169,6 +169,17 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private void OnNpcDestroyed(SystemNpcDestroyedEvent evt)
     {
+        if (_runtimeService != null &&
+            _runtimeService.TryGetNpc(evt.RuntimeNpcId, out SystemNpcRuntimeState npc) &&
+            npc != null &&
+            (npc.IsOnPlanet ||
+             npc.LifeState == SystemNpcLifeState.Annihilated ||
+             npc.CurrentBehavior == SystemNpcBehaviorType.AnnihilateOnPlanet ||
+             npc.PrevBehavior == SystemNpcBehaviorType.AnnihilateOnPlanet))
+        {
+            return;
+        }
+
         Color fxColor = ResolveNpcFxColor(
             evt.RuntimeNpcId,
             CombatTargetType.Npc,

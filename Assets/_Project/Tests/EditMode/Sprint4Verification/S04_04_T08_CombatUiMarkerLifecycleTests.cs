@@ -135,12 +135,19 @@ public sealed class S04_04_T08_CombatUiMarkerLifecycleTests
             "Enemy status marker must hide when NPC is destroyed.");
 
         Assert.IsTrue(
-            statusText.Contains("!npc.IsAlive"),
-            "Enemy status marker must hide when NPC state is no longer alive.");
+            statusText.Contains("npcAlive =") &&
+            statusText.Contains("npc.IsAlive"),
+            "Enemy status marker must read NPC alive state.");
 
         Assert.IsTrue(
-            statusText.Contains("!npc.IsHostileToPlayer"),
-            "Enemy status marker must hide for non-hostile NPC.");
+            statusText.Contains("npcHostile =") &&
+            statusText.Contains("npc.IsHostileToPlayer"),
+            "Enemy status marker must read NPC hostile state.");
+
+        Assert.IsTrue(
+            statusText.Contains("if (!npcAlive || !npcHostile)") &&
+            statusText.Contains("SetVisible(false)"),
+            "Enemy status marker must hide when NPC is dead or non-hostile.");
     }
 
     [Test]
@@ -220,8 +227,16 @@ public sealed class S04_04_T08_CombatUiMarkerLifecycleTests
             "Marker visibility scaler must use player weapon range.");
 
         Assert.IsTrue(
-            scalerText.Contains("SetRenderersVisible(statusMarkerRoot"),
-            "Marker visibility scaler may hide enemy status marker.");
+            scalerText.Contains("_statusMarkerRenderers") &&
+            scalerText.Contains("_statusMarkerTexts") &&
+            scalerText.Contains("SetStatusVisible"),
+            "Marker visibility scaler may hide enemy status marker through cached status marker renderers.");
+
+        Assert.IsTrue(
+            scalerText.Contains("SetRenderersVisible(") &&
+            scalerText.Contains("_statusMarkerRenderers") &&
+            scalerText.Contains("_statusMarkerTexts"),
+            "Marker visibility scaler must apply visibility to cached enemy status marker components.");
 
         Assert.IsFalse(
             scalerText.Contains("SetRenderersVisible(targetMarkerRoot"),

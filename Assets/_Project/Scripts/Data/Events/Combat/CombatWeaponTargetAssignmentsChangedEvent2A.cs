@@ -18,11 +18,17 @@ public readonly struct CombatWeaponTargetAssignment2A
     }
 }
 
+/// <summary>
+/// Изменение распределения оружия игрока по назначенным целям; обновляет HUD и маркеры.
+/// </summary>
 public readonly struct CombatWeaponTargetAssignmentsChangedEvent2A
 {
+    /// <summary>Идентификатор текущей выбранной NPC-цели.</summary>
     public readonly string SelectedTargetNpcId;
+    /// <summary>Список назначений оружия на цели.</summary>
     public readonly CombatWeaponTargetAssignment2A[] Assignments;
 
+    /// <summary>Признак наличия назначенной цели.</summary>
     public bool HasSelectedTarget =>
         !string.IsNullOrWhiteSpace(SelectedTargetNpcId);
 

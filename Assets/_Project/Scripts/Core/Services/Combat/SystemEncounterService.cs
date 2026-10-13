@@ -205,14 +205,41 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
     public bool TryResolvePendingReward()
     {
         if (Current == null)
+        {
+            LogCombatStateDebug(
+                "TRY_RESOLVE_PENDING_REWARD_FAILED" +
+                " | Reason=CurrentNull");
             return false;
+        }
+
+        LogCombatStateDebug(
+            "TRY_RESOLVE_PENDING_REWARD_ENTER" +
+            " | EncounterId=" + Current.EncounterId +
+            " | SystemId=" + Current.SystemId +
+            " | State=" + Current.State +
+            " | EnemiesAlive=" + Current.EnemiesAlive +
+            " | PlayerKills=" + Current.PlayerKills);
 
         if (Current.State != SystemEncounterState.VictoryPendingReward)
+        {
+            LogCombatStateDebug(
+                "TRY_RESOLVE_PENDING_REWARD_FAILED" +
+                " | Reason=WrongState" +
+                " | EncounterId=" + Current.EncounterId +
+                " | SystemId=" + Current.SystemId +
+                " | State=" + Current.State);
             return false;
+        }
 
         Current.State = SystemEncounterState.Resolved;
 
         LogCustom("Encounter resolved.");
+
+        LogCombatStateDebug(
+            "ENCOUNTER_RESOLVED_EVENT_PUBLISH" +
+            " | EncounterId=" + Current.EncounterId +
+            " | SystemId=" + Current.SystemId +
+            " | State=" + Current.State);
 
         _eventBus.Publish(new SystemEncounterResolvedEvent(
             Current.EncounterId,
@@ -221,6 +248,19 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
         PublishStateChanged();
 
         return true;
+    }
+
+    private void LogCombatStateDebug(string message)
+    {
+        if (Bootstrapper.Instance == null)
+            return;
+
+        if (!Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.Combat))
+            return;
+
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            "[SystemEncounterService][WarState] " + message);
     }
 
     public void ClearEncounter()
@@ -255,17 +295,57 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
     private void CheckVictory()
     {
         if (!HasActiveEncounter)
+        {
+            LogCombatStateDebug(
+                "CHECK_VICTORY_SKIPPED" +
+                " | Reason=NoActiveEncounter" +
+                " | CurrentIsNull=" + (Current == null));
             return;
+        }
+
+        LogCombatStateDebug(
+            "CHECK_VICTORY_ENTER" +
+            " | EncounterId=" + Current.EncounterId +
+            " | SystemId=" + Current.SystemId +
+            " | State=" + Current.State +
+            " | EnemiesAlive=" + Current.EnemiesAlive +
+            " | PlayerKills=" + Current.PlayerKills +
+            " | AlliesAlive=" + Current.AlliesAlive);
 
         if (Current.EnemiesAlive > 0)
+        {
+            LogCombatStateDebug(
+                "CHECK_VICTORY_BLOCKED" +
+                " | Reason=EnemiesStillAlive" +
+                " | EncounterId=" + Current.EncounterId +
+                " | SystemId=" + Current.SystemId +
+                " | EnemiesAlive=" + Current.EnemiesAlive);
             return;
+        }
 
         if (Current.PlayerKills <= 0)
+        {
+            LogCombatStateDebug(
+                "CHECK_VICTORY_BLOCKED" +
+                " | Reason=PlayerKillsZero" +
+                " | EncounterId=" + Current.EncounterId +
+                " | SystemId=" + Current.SystemId +
+                " | EnemiesAlive=" + Current.EnemiesAlive +
+                " | PlayerKills=" + Current.PlayerKills);
             return;
+        }
 
         Current.State = SystemEncounterState.VictoryPendingReward;
 
         Debug.Log("[SystemEncounterService] Victory pending reward.");
+
+        LogCombatStateDebug(
+            "VICTORY_PENDING_REWARD_SET" +
+            " | EncounterId=" + Current.EncounterId +
+            " | SystemId=" + Current.SystemId +
+            " | State=" + Current.State +
+            " | EnemiesAlive=" + Current.EnemiesAlive +
+            " | PlayerKills=" + Current.PlayerKills);
 
         _eventBus.Publish(new SystemEncounterVictoryPendingRewardEvent(
             Current.EncounterId,

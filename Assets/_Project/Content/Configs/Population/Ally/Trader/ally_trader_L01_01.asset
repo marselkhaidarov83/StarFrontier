@@ -36,7 +36,7 @@ MonoBehaviour:
   baseTurnRateMax: 75
   turnRadius: 300
   baseCargoCapacityMin: 90
-  baseCargoCapacityMax: 94
+  baseCargoCapacityMax: 102
   weaponSlotCount: 1
   moduleSlotCount: 3
   level: 1
@@ -47,6 +47,7 @@ MonoBehaviour:
     behaviorConfig: {fileID: 11400000, guid: 098692775872e4eb98d3abdf920000f8, type: 2}
   - scenario: 10
     behaviorConfig: {fileID: 11400000, guid: 3c692a5e86fd64bd0b183e0be77530a0, type: 2}
+  avoidEnemyOwnedTravelDestinations: 1
   weaponGroups:
   - {fileID: 11400000, guid: 953babc643f9e4d41a2c3076ac62bd26, type: 2}
   - {fileID: 11400000, guid: 761f64c00983f42368685c6aab44a885, type: 2}

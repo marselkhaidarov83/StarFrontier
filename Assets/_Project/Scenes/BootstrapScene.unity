@@ -423,6 +423,8 @@ GameObject:
   m_Component:
   - component: {fileID: 860668904}
   - component: {fileID: 860668903}
+  - component: {fileID: 860668905}
+  - component: {fileID: 860668906}
   m_Layer: 0
   m_Name: BootstrapRoot
   m_TagString: MainCamera
@@ -449,7 +451,9 @@ MonoBehaviour:
   debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
   newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
+  invasionScheduleConfig: {fileID: 11400000, guid: 6dfe35b0aae854788b3a10665161c166, type: 2}
   debugLogConfig: {fileID: 11400000, guid: 9a599d852cc9340e5a75b4b8ac4a48be, type: 2}
+  debugSettings: {fileID: 860668906}
   playerControlConfig: {fileID: 11400000, guid: 95e8e46b1c94b45d786dcc5063dd9447, type: 2}
   shipMovementConfig: {fileID: 11400000, guid: 236d385373c6d4e9791453bc1f51bc6d, type: 2}
   systemCameraConfig: {fileID: 11400000, guid: 86e99c2d948214bd6aaee0b92c06ceae, type: 2}
@@ -888,21 +892,6 @@ MonoBehaviour:
   SectorAllOpened: 1
   RouteAllUnlocked: 0
   _globalDebugEnabled: 0
-  debugSpawnOnlyInCurrentSystem: 1
-  stopAutomaticAllySpawns: 1
-  stopAutomaticEnemySpawns: 1
-  overrideAutomaticAllySpawnInterval: 0
-  debugAutomaticAllySpawnIntervalSeconds: 5
-  overrideNpcGalaxyLevel: 1
-  debugNpcGalaxyLevel: 1
-  debugCombatTargetRuntimeNpcId: 
-  debugCombatTargetDamage: 10
-  debugCombatPlayerDamage: 10
-  debugNpcOfflineStepHours: 1
-  debugNpcStressSpawnAttempts: 10
-  debugNpcStressSpawnWaves: 1
-  debugNpcStressSpawnAllies: 1
-  debugNpcStressSpawnEnemyGroups: 1
 --- !u!4 &860668904
 Transform:
   m_ObjectHideFlags: 0
@@ -918,6 +907,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &860668905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860668902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4723f8225fc1a44c0bb88dcfa5fbce5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::DebugController2A
+  _debugEnabled: 0
+  _debugStop: 0
+  debugTargetSystem: {fileID: 11400000, guid: fa762db6a87814477af7a564fc083f1f, type: 2}
+  useCurrentSystemAsTargetIfEmpty: 1
+  warDebugLogChannel: 7
+  logWarCandidateDetails: 1
+  debugSystemStatusTarget: 0
+  debugCreateRecoveryHookOnLiberation: 1
+  debugOfflineWarTargetTickOffset: 3
+  debugOfflineWarUseCurrentTickAsBase: 1
+  debugCombatTargetRuntimeNpcId: 
+  debugCombatTargetDamage: 10
+  debugCombatPlayerDamage: 10
+  debugNpcOfflineStepHours: 1
+  debugNpcStressSpawnAttempts: 25
+  debugNpcStressSpawnWaves: 1
+  debugNpcStressSpawnAllies: 1
+  debugNpcStressSpawnEnemyGroups: 1
+  debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
+--- !u!114 &860668906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860668902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c93710ee2d92c4771a147db7ae18225e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::DebugSettings
+  debugSpawnOnlyInCurrentSystem: 0
+  stopAutomaticAllySpawns: 0
+  stopAutomaticEnemySpawns: 0
+  overrideAutomaticSpawnInterval: 0
+  debugAutomaticSpawnIntervalSeconds: 10
+  overrideNpcGalaxyLevel: 1
+  debugNpcGalaxyLevel: 3
+  stopAutomaticInvasions: 0
+  overrideAutomaticInvasionSchedule: 0
+  debugAutomaticInvasionPeriodSeconds: 15
+  debugMaxActiveInvasions: 2
 --- !u!1 &989972542
 GameObject:
   m_ObjectHideFlags: 0

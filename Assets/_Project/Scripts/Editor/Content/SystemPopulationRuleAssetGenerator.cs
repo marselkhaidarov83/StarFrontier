@@ -6,13 +6,13 @@ using UnityEngine;
 public static class SystemPopulationRuleAssetGenerator
 {
     private const string OutputRoot =
-        "Assets/_Project/Content/Configs/SystemPopulationRules";
+    "Assets/_Project/Content/Configs/Population/SystemPopulationRules";
 
     private const string AllySpawnRuleRoot =
-        "Assets/_Project/Content/Configs/AllySpawnRules";
+        "Assets/_Project/Content/Configs/Population/AllySpawnRules";
 
     private const string EnemyGroupSpawnRuleRoot =
-        "Assets/_Project/Content/Configs/EnemyGroupSpawnRules";
+        "Assets/_Project/Content/Configs/Population/EnemyGroupSpawnRules";
 
     [MenuItem("STAR FRONTIER/Content/08. System Population Rules/Create generated SystemPopulationRule assets")]
     public static void CreateGeneratedSystemPopulationRules()
@@ -196,26 +196,43 @@ public static class SystemPopulationRuleAssetGenerator
             return warnings;
         }
 
-        EnemyGroupSpawnRuleConfig enemyRule =
-            FindEnemyGroupSpawnRule(profile.EnemyGroupRuleKey);
+        string[] enemyRuleKeys =
+            profile.EnemyGroupRuleKeys;
 
-        if (enemyRule == null)
+        if (enemyRuleKeys == null || enemyRuleKeys.Length == 0)
+            enemyRuleKeys = BuildDefaultEnemyGroupRuleKeys();
+
+        SystemPopulationEnemyGroupRuleEntry[] enemyEntries =
+            new SystemPopulationEnemyGroupRuleEntry[enemyRuleKeys.Length];
+
+        for (int i = 0; i < enemyRuleKeys.Length; i++)
         {
-            warnings++;
-            Debug.LogWarning(
-                $"SystemPopulationRule generator: missing EnemyGroupSpawnRuleConfig '{profile.EnemyGroupRuleKey}' for {id}.");
+            string enemyRuleKey =
+                enemyRuleKeys[i];
+
+            EnemyGroupSpawnRuleConfig enemyRule =
+                FindEnemyGroupSpawnRule(enemyRuleKey);
+
+            if (enemyRule == null)
+            {
+                warnings++;
+                Debug.LogWarning(
+                    $"SystemPopulationRule generator: missing EnemyGroupSpawnRuleConfig '{enemyRuleKey}' for {id}.");
+            }
+
+            SystemPopulationEnemyGroupRuleEntry enemyEntry =
+                new SystemPopulationEnemyGroupRuleEntry();
+
+            SetPrivateField(enemyEntry, "enemyGroupSpawnRule", enemyRule);
+            SetPrivateField(enemyEntry, "weight", 1);
+
+            enemyEntries[i] = enemyEntry;
         }
-
-        SystemPopulationEnemyGroupRuleEntry enemyEntry =
-            new SystemPopulationEnemyGroupRuleEntry();
-
-        SetPrivateField(enemyEntry, "enemyGroupSpawnRule", enemyRule);
-        SetPrivateField(enemyEntry, "weight", 1);
 
         SetPrivateField(
             asset,
             "enemyGroupSpawnRuleEntries",
-            new[] { enemyEntry });
+            enemyEntries);
 
         return warnings;
     }
@@ -233,38 +250,105 @@ public static class SystemPopulationRuleAssetGenerator
             Debug.LogError(
                 $"SystemPopulationRule validation: exactly one ally spawn rule is required at {path}",
                 rule);
+
             isValid = false;
         }
 
-        if (rule.EnemyGroupSpawnRuleEntries == null ||
-            rule.EnemyGroupSpawnRuleEntries.Length == 0)
+        bool isNoEnemiesRule =
+            IsNoEnemiesPopulationRulePath(path);
+
+        if (isNoEnemiesRule)
         {
+            if (rule.EnemyGroupSpawnRuleEntries != null &&
+                rule.EnemyGroupSpawnRuleEntries.Length > 0)
+            {
+                Debug.LogError(
+                    $"SystemPopulationRule validation: no_enemies rule must not contain enemy group spawn rules at {path}",
+                    rule);
+
+                isValid = false;
+            }
+
             return isValid;
         }
 
-        if (rule.EnemyGroupSpawnRuleEntries.Length != 1)
+        if (rule.EnemyGroupSpawnRuleEntries == null ||
+            rule.EnemyGroupSpawnRuleEntries.Length != 3)
         {
             Debug.LogError(
-                $"SystemPopulationRule validation: zero or one enemy group spawn rule entry is required at {path}",
+                $"SystemPopulationRule validation: regular rule must contain exactly 3 enemy group spawn rule entries at {path}",
                 rule);
+
             return false;
         }
 
-        SystemPopulationEnemyGroupRuleEntry enemyEntry =
-            rule.EnemyGroupSpawnRuleEntries[0];
+        string[] requiredEnemyRuleIds =
+            BuildDefaultEnemyGroupRuleKeys();
 
-        if (enemyEntry == null || !enemyEntry.IsValid())
+        for (int i = 0; i < rule.EnemyGroupSpawnRuleEntries.Length; i++)
         {
-            Debug.LogError(
-                $"SystemPopulationRule validation: missing or invalid enemy group spawn rule entry at {path}",
-                rule);
-            isValid = false;
+            SystemPopulationEnemyGroupRuleEntry enemyEntry =
+                rule.EnemyGroupSpawnRuleEntries[i];
+
+            if (enemyEntry == null || !enemyEntry.IsValid())
+            {
+                Debug.LogError(
+                    $"SystemPopulationRule validation: missing or invalid enemy group spawn rule entry at {path}",
+                    rule);
+
+                isValid = false;
+                continue;
+            }
+
+            if (enemyEntry.Weight != 1)
+            {
+                Debug.LogError(
+                    $"SystemPopulationRule validation: enemy group spawn rule entry weight must be 1 at {path}",
+                    rule);
+
+                isValid = false;
+            }
         }
-        else if (enemyEntry.Weight != 1)
+
+        for (int requiredIndex = 0;
+             requiredIndex < requiredEnemyRuleIds.Length;
+             requiredIndex++)
         {
+            string requiredId =
+                requiredEnemyRuleIds[requiredIndex];
+
+            bool found = false;
+
+            for (int entryIndex = 0;
+                 entryIndex < rule.EnemyGroupSpawnRuleEntries.Length;
+                 entryIndex++)
+            {
+                SystemPopulationEnemyGroupRuleEntry enemyEntry =
+                    rule.EnemyGroupSpawnRuleEntries[entryIndex];
+
+                if (enemyEntry == null ||
+                    enemyEntry.EnemyGroupSpawnRule == null)
+                {
+                    continue;
+                }
+
+                if (string.Equals(
+                        enemyEntry.EnemyGroupSpawnRule.Id,
+                        requiredId,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+                continue;
+
             Debug.LogError(
-                $"SystemPopulationRule validation: enemy group spawn rule entry weight must be 1 at {path}",
+                $"SystemPopulationRule validation: missing required enemy group spawn rule '{requiredId}' at {path}",
                 rule);
+
             isValid = false;
         }
 
@@ -385,63 +469,66 @@ public static class SystemPopulationRuleAssetGenerator
 
     private static PopulationRuleProfile[] BuildProfiles()
     {
+        string[] defaultEnemyGroupRuleKeys =
+            BuildDefaultEnemyGroupRuleKeys();
+
         PopulationRuleProfile[] enemyProfiles =
         {
-            new PopulationRuleProfile
-            {
-                Key = "balanced",
-                DisplayName = "Популяция системы: сбалансированная",
-                Description = "Сбалансированные союзники и сбалансированная вражеская группа.",
-                AllyRuleKey = "ally_spawn_balanced_01",
-                EnemyGroupRuleKey = "enemy_group_spawn_balanced_01",
-                HasEnemies = true
-            },
-            new PopulationRuleProfile
-            {
-                Key = "trade",
-                DisplayName = "Популяция системы: торговцы",
-                Description = "В системе превалируют торговцы. Враги используют сбалансированную группу.",
-                AllyRuleKey = "ally_spawn_trade_01",
-                EnemyGroupRuleKey = "enemy_group_spawn_balanced_01",
-                HasEnemies = true
-            },
-            new PopulationRuleProfile
-            {
-                Key = "military",
-                DisplayName = "Популяция системы: военные",
-                Description = "В системе превалируют военные союзники. Основная вражеская группа: Древние.",
-                AllyRuleKey = "ally_spawn_military_01",
-                EnemyGroupRuleKey = "enemy_group_spawn_ancients_01",
-                HasEnemies = true
-            },
-            new PopulationRuleProfile
-            {
-                Key = "ranger",
-                DisplayName = "Популяция системы: рейнджеры",
-                Description = "В системе превалируют рейнджеры. Враги используют сбалансированную группу.",
-                AllyRuleKey = "ally_spawn_ranger_01",
-                EnemyGroupRuleKey = "enemy_group_spawn_balanced_01",
-                HasEnemies = true
-            },
-            new PopulationRuleProfile
-            {
-                Key = "medical",
-                DisplayName = "Популяция системы: медики",
-                Description = "В системе превалируют медики. Основная вражеская группа: Зараженные.",
-                AllyRuleKey = "ally_spawn_medical_01",
-                EnemyGroupRuleKey = "enemy_group_spawn_infected_01",
-                HasEnemies = true
-            },
-            new PopulationRuleProfile
-            {
-                Key = "science",
-                DisplayName = "Популяция системы: научная база",
-                Description = "В системе превалируют научные союзники. Основная вражеская группа: ИИ.",
-                AllyRuleKey = "ally_spawn_science_01",
-                EnemyGroupRuleKey = "enemy_group_spawn_ai_01",
-                HasEnemies = true
-            }
-        };
+        new PopulationRuleProfile
+        {
+            Key = "balanced",
+            DisplayName = "Популяция системы: сбалансированная",
+            Description = "Сбалансированные союзники. Для вторжений доступны группы ИИ, Древних и Зараженных.",
+            AllyRuleKey = "ally_spawn_balanced_01",
+            EnemyGroupRuleKeys = defaultEnemyGroupRuleKeys,
+            HasEnemies = true
+        },
+        new PopulationRuleProfile
+        {
+            Key = "trade",
+            DisplayName = "Популяция системы: торговцы",
+            Description = "В системе превалируют торговцы. Для вторжений доступны группы ИИ, Древних и Зараженных.",
+            AllyRuleKey = "ally_spawn_trade_01",
+            EnemyGroupRuleKeys = defaultEnemyGroupRuleKeys,
+            HasEnemies = true
+        },
+        new PopulationRuleProfile
+        {
+            Key = "military",
+            DisplayName = "Популяция системы: военные",
+            Description = "В системе превалируют военные союзники. Для вторжений доступны группы ИИ, Древних и Зараженных.",
+            AllyRuleKey = "ally_spawn_military_01",
+            EnemyGroupRuleKeys = defaultEnemyGroupRuleKeys,
+            HasEnemies = true
+        },
+        new PopulationRuleProfile
+        {
+            Key = "ranger",
+            DisplayName = "Популяция системы: рейнджеры",
+            Description = "В системе превалируют рейнджеры. Для вторжений доступны группы ИИ, Древних и Зараженных.",
+            AllyRuleKey = "ally_spawn_ranger_01",
+            EnemyGroupRuleKeys = defaultEnemyGroupRuleKeys,
+            HasEnemies = true
+        },
+        new PopulationRuleProfile
+        {
+            Key = "medical",
+            DisplayName = "Популяция системы: медики",
+            Description = "В системе превалируют медики. Для вторжений доступны группы ИИ, Древних и Зараженных.",
+            AllyRuleKey = "ally_spawn_medical_01",
+            EnemyGroupRuleKeys = defaultEnemyGroupRuleKeys,
+            HasEnemies = true
+        },
+        new PopulationRuleProfile
+        {
+            Key = "science",
+            DisplayName = "Популяция системы: научная база",
+            Description = "В системе превалируют научные союзники. Для вторжений доступны группы ИИ, Древних и Зараженных.",
+            AllyRuleKey = "ally_spawn_science_01",
+            EnemyGroupRuleKeys = defaultEnemyGroupRuleKeys,
+            HasEnemies = true
+        }
+    };
 
         PopulationRuleProfile[] noEnemyProfiles =
             new PopulationRuleProfile[enemyProfiles.Length];
@@ -458,7 +545,7 @@ public static class SystemPopulationRuleAssetGenerator
                     DisplayName = source.DisplayName + " без врагов",
                     Description = source.Description + " Вражеские группы не создаются.",
                     AllyRuleKey = source.AllyRuleKey,
-                    EnemyGroupRuleKey = string.Empty,
+                    EnemyGroupRuleKeys = Array.Empty<string>(),
                     HasEnemies = false
                 };
         }
@@ -481,6 +568,30 @@ public static class SystemPopulationRuleAssetGenerator
             noEnemyProfiles.Length);
 
         return result;
+    }
+
+    private static string[] BuildDefaultEnemyGroupRuleKeys()
+    {
+        return new[]
+        {
+        "enemy_group_spawn_ai_01",
+        "enemy_group_spawn_ancients_01",
+        "enemy_group_spawn_infected_01"
+    };
+    }
+
+    private static bool IsNoEnemiesPopulationRulePath(
+        string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        string fileName =
+            System.IO.Path.GetFileNameWithoutExtension(path);
+
+        return fileName.IndexOf(
+            "_no_enemies_",
+            StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     private static int DeleteGeneratedPopulationRulesWithoutDialog()
@@ -579,7 +690,7 @@ public static class SystemPopulationRuleAssetGenerator
         public string DisplayName;
         public string Description;
         public string AllyRuleKey;
-        public string EnemyGroupRuleKey;
+        public string[] EnemyGroupRuleKeys;
         public bool HasEnemies;
     }
 }

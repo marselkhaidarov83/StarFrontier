@@ -37,6 +37,7 @@ namespace StarFrontier.Tests.Sprint1
 
     internal sealed class TestConfigService : IConfigService
     {
+        public InvasionScheduleConfig InvasionScheduleConfig => null;
         public GameConfig GameConfig => null;
         public DebugConfig DebugConfig => null;
         public SaveConfig SaveConfig { get; }
