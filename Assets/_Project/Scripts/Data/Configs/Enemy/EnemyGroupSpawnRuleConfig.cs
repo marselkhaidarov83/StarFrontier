@@ -346,8 +346,8 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
     }
 
     private static bool IsStrictEnemyGroupForGalaxyLevel(
-    EnemyGroupSpawnOptionConfig group,
-    int galaxyLevel)
+        EnemyGroupSpawnOptionConfig group,
+        int galaxyLevel)
     {
         if (group == null)
             return false;
@@ -364,9 +364,6 @@ public sealed class EnemyGroupSpawnLevelEntryConfig
                 return false;
 
             if (entry.EnemyConfig == null)
-                return false;
-
-            if (entry.EnemyConfig.Level != galaxyLevel)
                 return false;
         }
 

@@ -13,6 +13,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private DebugConfig debugConfig;
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
+    [SerializeField] private InvasionScheduleConfig invasionScheduleConfig;
     [SerializeField] private DebugLogConfig debugLogConfig;
     [SerializeField] private DebugSettings debugSettings;
 
@@ -108,6 +109,24 @@ public class Bootstrapper : CustomMonoBehaviour
     public bool StopAutomaticEnemySpawns =>
         NpcPopulationDebugSettings != null &&
         NpcPopulationDebugSettings.StopAutomaticEnemySpawns;
+
+    public bool StopAutomaticInvasions =>
+        NpcPopulationDebugSettings != null &&
+        NpcPopulationDebugSettings.StopAutomaticInvasions;
+
+    public bool OverrideAutomaticInvasionSchedule =>
+        NpcPopulationDebugSettings != null &&
+        NpcPopulationDebugSettings.OverrideAutomaticInvasionSchedule;
+
+    public float DebugAutomaticInvasionPeriodSeconds =>
+        NpcPopulationDebugSettings != null
+            ? NpcPopulationDebugSettings.DebugAutomaticInvasionPeriodSeconds
+            : 30f;
+
+    public int DebugMaxActiveInvasions =>
+        NpcPopulationDebugSettings != null
+            ? NpcPopulationDebugSettings.DebugMaxActiveInvasions
+            : 1;
 
     public bool DebugSpawnOnlyInCurrentSystem =>
         NpcPopulationDebugSettings != null &&
@@ -229,6 +248,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 saveConfig,
                 galaxyConfig,
                 newGameConfig,
+                invasionScheduleConfig,
                 playerControlConfig,
                 shipMovementConfig,
                 systemCameraConfig,
@@ -293,6 +313,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IEnemyFactionService, EnemyFactionService>();
         RegisterService<IEnemySpawnService, EnemySpawnService>();
         RegisterService<IInvasionService, InvasionService>();
+        RegisterService<IInvasionSchedulerService, InvasionSchedulerService>();
         RegisterService<ISystemNpcPopulationService, SystemNpcPopulationService>();
         RegisterService<IGalaxyPopulationService, GalaxyPopulationService>();
         RegisterService<IGalaxyNpcSimulationScheduleService, GalaxyNpcSimulationScheduleService>();

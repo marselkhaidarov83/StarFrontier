@@ -28,14 +28,15 @@ public sealed class EnemySpawnService :
     }
 
     public bool TrySpawnSystemGuardGroup(
-        StarSystemConfig starSystem,
-        EnemyGroupSpawnRuleConfig rule,
-        out EnemyGroupState enemyGroupState)
+    StarSystemConfig starSystem,
+    EnemyGroupSpawnRuleConfig rule,
+    out EnemyGroupState enemyGroupState)
     {
         return TrySpawnEnemyGroup(
             starSystem,
             starSystem,
             rule,
+            string.Empty,
             string.Empty,
             out enemyGroupState);
     }
@@ -47,39 +48,249 @@ public sealed class EnemySpawnService :
         string invasionId,
         out EnemyGroupState enemyGroupState)
     {
+        return TrySpawnInvasionGroup(
+            ownerSystem,
+            targetSystem,
+            rule,
+            invasionId,
+            string.Empty,
+            out enemyGroupState);
+    }
+
+    public bool TrySpawnInvasionGroup(
+        StarSystemConfig ownerSystem,
+        StarSystemConfig targetSystem,
+        EnemyGroupSpawnRuleConfig rule,
+        string invasionId,
+        string factionId,
+        out EnemyGroupState enemyGroupState)
+    {
         return TrySpawnEnemyGroup(
             ownerSystem,
             targetSystem,
             rule,
             invasionId,
+            factionId,
             out enemyGroupState);
     }
 
-    public bool TryGetEnemyGroupState(
-        string runtimeGroupId,
+    private bool TrySpawnEnemyGroup(
+        StarSystemConfig ownerSystem,
+        StarSystemConfig targetSystem,
+        EnemyGroupSpawnRuleConfig rule,
+        string invasionId,
+        string factionId,
         out EnemyGroupState enemyGroupState)
     {
         enemyGroupState = null;
 
-        if (string.IsNullOrWhiteSpace(runtimeGroupId))
+        if (ownerSystem == null)
+            return false;
+
+        if (targetSystem == null)
+            return false;
+
+        if (rule == null)
             return false;
 
         GalaxyRuntimeState galaxyState =
             GetGalaxyState();
 
-        if (galaxyState == null ||
-            galaxyState.EnemyGroups == null)
+        if (galaxyState == null)
+            return false;
+
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
+
+        IReadOnlyList<EnemyGroupEntryConfig> enemies;
+
+        if (TryConvertFactionId(
+                factionId,
+                out EnemyFaction2A requestedFaction))
         {
+            enemies =
+                rule.PickEnemiesForGalaxyLevel(
+                    currentGalaxyLevel,
+                    requestedFaction);
+        }
+        else
+        {
+            enemies =
+                rule.PickEnemiesForGalaxyLevel(
+                    currentGalaxyLevel);
+        }
+
+        if (enemies == null || enemies.Count == 0)
+            return false;
+
+        string runtimeGroupId =
+            Guid.NewGuid().ToString("N");
+
+        string resolvedFactionId =
+            string.IsNullOrWhiteSpace(factionId)
+                ? ResolveFactionId(enemies)
+                : NormalizeFactionId(factionId);
+
+        int currentTick =
+            GetCurrentQuantTick();
+
+        enemyGroupState =
+            new EnemyGroupState
+            {
+                RuntimeGroupId = runtimeGroupId,
+                FactionId = resolvedFactionId,
+                SystemId = targetSystem.Id,
+                SpawnRuleId = rule.Id,
+                InvasionId = string.IsNullOrWhiteSpace(invasionId)
+                    ? string.Empty
+                    : invasionId,
+                Level = currentGalaxyLevel,
+                LifecycleState = EnemyGroupLifecycleState.Spawning,
+                CreatedAtTick = currentTick,
+                LastUpdatedTick = currentTick,
+                NextSpawnTick = 0,
+                CleanupAfterTick = 0,
+                OwnerSystemId = ownerSystem.Id,
+                TargetSystemId = targetSystem.Id,
+                MemberRuntimeNpcIds = new List<string>(),
+                MemberConfigIds = new List<string>()
+            };
+
+        galaxyState.EnemyGroups.Add(enemyGroupState);
+
+        Vector3 groupSpawnBasePosition =
+            PickEnemyGroupSpawnBasePosition(targetSystem);
+
+        for (int entryIndex = 0; entryIndex < enemies.Count; entryIndex++)
+        {
+            EnemyGroupEntryConfig entry =
+                enemies[entryIndex];
+
+            if (entry == null || !entry.IsValid())
+                continue;
+
+            EnemyConfig enemyConfig =
+                entry.EnemyConfig;
+
+            if (enemyConfig == null)
+                continue;
+
+            if (enemyConfig.Level != currentGalaxyLevel)
+                continue;
+
+            int count =
+                UnityEngine.Random.Range(
+                    entry.MinCount,
+                    entry.MaxCount + 1);
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 position =
+                    BuildEnemySpawnPosition(
+                        targetSystem,
+                        groupSpawnBasePosition);
+
+                SystemNpcRuntimeState enemy =
+                    SystemNpcRuntimeFactory.CreateEnemy(
+                        enemyConfig,
+                        ownerSystem.Id,
+                        targetSystem.Id,
+                        position,
+                        rule.Id,
+                        runtimeGroupId);
+
+                ApplyInitialFacingToSun(
+                    enemy,
+                    targetSystem);
+
+                enemy.CanChangeLocationOnRestore = false;
+
+                _npcRuntimeService.AddNpc(enemy);
+
+                enemyGroupState.MemberRuntimeNpcIds.Add(
+                    enemy.RuntimeNpcId);
+
+                enemyGroupState.MemberConfigIds.Add(
+                    enemyConfig.Id);
+            }
+        }
+
+        if (enemyGroupState.MemberRuntimeNpcIds.Count == 0)
+        {
+            galaxyState.EnemyGroups.Remove(enemyGroupState);
+            enemyGroupState = null;
             return false;
         }
 
-        enemyGroupState =
-            galaxyState.EnemyGroups.FirstOrDefault(
-                group =>
-                    group != null &&
-                    group.RuntimeGroupId == runtimeGroupId);
+        enemyGroupState.LifecycleState =
+            EnemyGroupLifecycleState.Active;
 
-        return enemyGroupState != null;
+        enemyGroupState.LastUpdatedTick =
+            GetCurrentQuantTick();
+
+        if (_enemyFactionService != null)
+        {
+            _enemyFactionService.RegisterEnemyGroup(
+                resolvedFactionId,
+                runtimeGroupId);
+
+            if (!string.IsNullOrWhiteSpace(invasionId))
+            {
+                _enemyFactionService.RegisterInvasion(
+                    resolvedFactionId,
+                    invasionId);
+            }
+        }
+
+        LogCustom(
+            "[EnemySpawnService] Enemy group spawned. " +
+            "System: " + targetSystem.Id +
+            ", OwnerSystem: " + ownerSystem.Id +
+            ", Rule: " + rule.Id +
+            ", Faction: " + resolvedFactionId +
+            ", GroupRuntimeId: " + runtimeGroupId +
+            ", Members: " + enemyGroupState.MemberRuntimeNpcIds.Count +
+            ", GalaxyLevel: " + currentGalaxyLevel);
+
+        return true;
+    }
+
+    private static string NormalizeFactionId(
+        string factionId)
+    {
+        return string.IsNullOrWhiteSpace(factionId)
+            ? UnknownFactionId
+            : factionId.Trim().ToLowerInvariant();
+    }
+
+    private static bool TryConvertFactionId(
+        string factionId,
+        out EnemyFaction2A enemyFaction)
+    {
+        enemyFaction = EnemyFaction2A.AI;
+
+        string normalized =
+            string.IsNullOrWhiteSpace(factionId)
+                ? string.Empty
+                : factionId.Trim().ToLowerInvariant();
+
+        switch (normalized)
+        {
+            case "ai":
+                enemyFaction = EnemyFaction2A.AI;
+                return true;
+
+            case "ancients":
+                enemyFaction = EnemyFaction2A.Ancients;
+                return true;
+
+            case "infected":
+                enemyFaction = EnemyFaction2A.Infected;
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     public IReadOnlyList<EnemyGroupState> GetActiveEnemyGroupsInSystem(
@@ -520,5 +731,32 @@ public sealed class EnemySpawnService :
             return Vector3.up;
 
         return directionToSun.normalized;
+    }
+
+    public bool TryGetEnemyGroupState(
+    string runtimeGroupId,
+    out EnemyGroupState enemyGroupState)
+    {
+        enemyGroupState = null;
+
+        if (string.IsNullOrWhiteSpace(runtimeGroupId))
+            return false;
+
+        GalaxyRuntimeState galaxyState =
+            GetGalaxyState();
+
+        if (galaxyState == null ||
+            galaxyState.EnemyGroups == null)
+        {
+            return false;
+        }
+
+        enemyGroupState =
+            galaxyState.EnemyGroups.FirstOrDefault(
+                group =>
+                    group != null &&
+                    group.RuntimeGroupId == runtimeGroupId);
+
+        return enemyGroupState != null;
     }
 }

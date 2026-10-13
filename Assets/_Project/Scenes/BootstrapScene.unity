@@ -451,6 +451,7 @@ MonoBehaviour:
   debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
   newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
+  invasionScheduleConfig: {fileID: 11400000, guid: 6dfe35b0aae854788b3a10665161c166, type: 2}
   debugLogConfig: {fileID: 11400000, guid: 9a599d852cc9340e5a75b4b8ac4a48be, type: 2}
   debugSettings: {fileID: 860668906}
   playerControlConfig: {fileID: 11400000, guid: 95e8e46b1c94b45d786dcc5063dd9447, type: 2}
@@ -920,7 +921,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::DebugController2A
   _debugEnabled: 0
   _debugStop: 0
-  debugTargetSystem: {fileID: 0}
+  debugTargetSystem: {fileID: 11400000, guid: fa762db6a87814477af7a564fc083f1f, type: 2}
   useCurrentSystemAsTargetIfEmpty: 1
   warDebugLogChannel: 7
   logWarCandidateDetails: 1
@@ -956,6 +957,10 @@ MonoBehaviour:
   debugAutomaticSpawnIntervalSeconds: 10
   overrideNpcGalaxyLevel: 1
   debugNpcGalaxyLevel: 3
+  stopAutomaticInvasions: 0
+  overrideAutomaticInvasionSchedule: 0
+  debugAutomaticInvasionPeriodSeconds: 15
+  debugMaxActiveInvasions: 2
 --- !u!1 &989972542
 GameObject:
   m_ObjectHideFlags: 0

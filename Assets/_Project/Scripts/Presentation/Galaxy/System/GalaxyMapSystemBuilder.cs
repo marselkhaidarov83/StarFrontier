@@ -332,8 +332,6 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                 systemNodeView.SetState();
             }
         }
-
-        ShowActiveInvasionWarning();
     }
 
     /*

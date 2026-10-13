@@ -245,23 +245,19 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
     }
 
     private Color GetWarStateColor(
-        StarSystemRuntimeState runtimeState,
-        Color fallbackColor)
+     StarSystemRuntimeState runtimeState,
+     Color fallbackColor)
     {
         if (runtimeState == null)
             return fallbackColor;
 
         switch (runtimeState.SystemStatus)
         {
-            case StarSystemStatus.Threat:
-                return systemColorThreat;
-
-            case StarSystemStatus.Invasion:
-                return systemColorInvasion;
-
             case StarSystemStatus.Captured:
                 return systemColorCaptured;
 
+            case StarSystemStatus.Threat:
+            case StarSystemStatus.Invasion:
             case StarSystemStatus.Stable:
             case StarSystemStatus.RecoveryReady:
             default:
@@ -333,18 +329,17 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
     }
 
     private bool HasVisibleWarState(
-        StarSystemRuntimeState runtimeState)
+     StarSystemRuntimeState runtimeState)
     {
         if (runtimeState == null)
             return false;
 
         return runtimeState.SystemStatus == StarSystemStatus.Threat ||
-               runtimeState.SystemStatus == StarSystemStatus.Invasion ||
-               runtimeState.SystemStatus == StarSystemStatus.Captured;
+               runtimeState.SystemStatus == StarSystemStatus.Invasion;
     }
 
     private Sprite GetWarStateIconSprite(
-        StarSystemRuntimeState runtimeState)
+      StarSystemRuntimeState runtimeState)
     {
         if (runtimeState == null)
             return null;
@@ -357,16 +352,13 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
             case StarSystemStatus.Invasion:
                 return warInvasionSprite;
 
-            case StarSystemStatus.Captured:
-                return warCapturedSprite;
-
             default:
                 return null;
         }
     }
 
     private Color GetWarStateIconColor(
-        StarSystemRuntimeState runtimeState)
+    StarSystemRuntimeState runtimeState)
     {
         if (runtimeState == null)
             return Color.white;
@@ -378,9 +370,6 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
 
             case StarSystemStatus.Invasion:
                 return warIconInvasionColor;
-
-            case StarSystemStatus.Captured:
-                return warIconCapturedColor;
 
             default:
                 return Color.white;

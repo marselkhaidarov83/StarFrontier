@@ -286,7 +286,16 @@ public sealed class InvasionService :
     }
 
     public bool CanStartInvasion(
-    string targetSystemId)
+        string targetSystemId)
+    {
+        return CanStartInvasion(
+            targetSystemId,
+            MaxActiveInvasions);
+    }
+
+    public bool CanStartInvasion(
+        string targetSystemId,
+        int maxActiveInvasions)
     {
         GalaxyRuntimeState galaxyState =
             GetGalaxyState();
@@ -302,7 +311,7 @@ public sealed class InvasionService :
 
         return galaxyState.CanStartAdditionalInvasion(
             targetSystemId,
-            MaxActiveInvasions);
+            maxActiveInvasions);
     }
 
     public bool TryStartInvasion(
@@ -311,6 +320,25 @@ public sealed class InvasionService :
         EnemyGroupSpawnRuleConfig invasionSpawnRule,
         string factionId,
         int resolveAfterTicks,
+        out InvasionState invasionState)
+    {
+        return TryStartInvasion(
+            sourceSystem,
+            targetSystem,
+            invasionSpawnRule,
+            factionId,
+            resolveAfterTicks,
+            MaxActiveInvasions,
+            out invasionState);
+    }
+
+    public bool TryStartInvasion(
+        StarSystemConfig sourceSystem,
+        StarSystemConfig targetSystem,
+        EnemyGroupSpawnRuleConfig invasionSpawnRule,
+        string factionId,
+        int resolveAfterTicks,
+        int maxActiveInvasions,
         out InvasionState invasionState)
     {
         invasionState = null;
@@ -333,8 +361,12 @@ public sealed class InvasionService :
         if (sourceSystem.Id == targetSystem.Id)
             return false;
 
-        if (!CanStartInvasion(targetSystem.Id))
+        if (!CanStartInvasion(
+                targetSystem.Id,
+                maxActiveInvasions))
+        {
             return false;
+        }
 
         GalaxyRuntimeState galaxyState =
             GetGalaxyState();
@@ -364,7 +396,8 @@ public sealed class InvasionService :
         string invasionId =
             Guid.NewGuid().ToString("N");
 
-        int currentGalaxyLevel = GetCurrentGalaxyLevel();
+        int currentGalaxyLevel =
+            GetCurrentGalaxyLevel();
 
         invasionState =
             new InvasionState
@@ -395,6 +428,7 @@ public sealed class InvasionService :
                 targetSystem,
                 invasionSpawnRule,
                 invasionId,
+                normalizedFactionId,
                 out EnemyGroupState enemyGroupState);
 
         if (!spawned ||
@@ -453,7 +487,6 @@ public sealed class InvasionService :
             GetWarNewsFactionDisplayName(normalizedFactionId) + ".",
             currentTick,
             100);
-
 
         return true;
     }

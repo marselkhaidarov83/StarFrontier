@@ -16,6 +16,7 @@ public sealed class ConfigService : IConfigService
     public ShipMovementConfig ShipMovementConfig { get; }
     public SystemCameraConfig SystemCameraConfig { get; }
     public TargetingConfig TargetingConfig { get; }
+    public InvasionScheduleConfig InvasionScheduleConfig { get; }
     public InteractionConfig InteractionConfig { get; }
     public SystemHudConfig SystemHudConfig { get; }
     public SystemVisualConfig SystemVisualConfig { get; }
@@ -48,31 +49,33 @@ public sealed class ConfigService : IConfigService
 
     private readonly IGameSessionService gameSessionService;
 
-        public ConfigService(GameConfig gameConfig,
-                    DebugConfig debugConfig,
-                    SaveConfig saveConfig,
-                    GalaxyConfig galaxyConfig,
-                    NewGameConfig newGameConfig,
-                    IEnumerable<SectorConfig> sectors,
-                    IEnumerable<StarSystemConfig> starSystems,
-                    IEnumerable<PlanetConfig> planets,
-                    IEnumerable<ItemConfig> items,
-                    IEnumerable<EnemyConfig> enemies,
-                    IEnumerable<AllyConfig> allies,
-                    IEnumerable<AllySpawnRuleConfig> allySpawnRules,
-                    IEnumerable<PirateConfig> pirates,
-                    IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
-                    IEnumerable<ModuleConfig> modules,
-                    IEnumerable<WeaponConfig> weapons,
-                    CombatFxVisualConfig combatFxVisualConfig = null,
-                    CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
-                    NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
+    public ConfigService(GameConfig gameConfig,
+                DebugConfig debugConfig,
+                SaveConfig saveConfig,
+                GalaxyConfig galaxyConfig,
+                NewGameConfig newGameConfig,
+                InvasionScheduleConfig invasionScheduleConfig,
+                IEnumerable<SectorConfig> sectors,
+                IEnumerable<StarSystemConfig> starSystems,
+                IEnumerable<PlanetConfig> planets,
+                IEnumerable<ItemConfig> items,
+                IEnumerable<EnemyConfig> enemies,
+                IEnumerable<AllyConfig> allies,
+                IEnumerable<AllySpawnRuleConfig> allySpawnRules,
+                IEnumerable<PirateConfig> pirates,
+                IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
+                IEnumerable<ModuleConfig> modules,
+                IEnumerable<WeaponConfig> weapons,
+                CombatFxVisualConfig combatFxVisualConfig = null,
+                CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
+                NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
         DebugConfig = debugConfig;
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
+        InvasionScheduleConfig = invasionScheduleConfig;
         CombatFxVisualConfig = combatFxVisualConfig;
         CombatDamagePopupVisualConfig = combatDamagePopupVisualConfig;
         NpcBehaviourTransitionMatrixConfig = npcBehaviourTransitionMatrixConfig;
@@ -92,35 +95,37 @@ public sealed class ConfigService : IConfigService
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
     }
 
-        public ConfigService(GameConfig gameConfig,
-                    DebugConfig debugConfig,
-                    SaveConfig saveConfig,
-                    GalaxyConfig galaxyConfig,
-                    NewGameConfig newGameConfig,
-                    PlayerControlConfig playerControlConfig,
-                    ShipMovementConfig shipMovementConfig,
-                    SystemCameraConfig systemCameraConfig,
-                    TargetingConfig targetingConfig,
-                    InteractionConfig interactionConfig,
-                    SystemHudConfig systemHudConfig,
-                    SystemVisualConfig systemVisualConfig,
-                    IEnumerable<ItemConfig> items,
-                    IEnumerable<EnemyConfig> enemies,
-                    IEnumerable<AllyConfig> allies,
-                    IEnumerable<AllySpawnRuleConfig> allySpawnRules,
-                    IEnumerable<PirateConfig> pirates,
-                    IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
-                    IEnumerable<ModuleConfig> modules,
-                    IEnumerable<WeaponConfig> weapons,
-                    CombatFxVisualConfig combatFxVisualConfig = null,
-                    CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
-                    NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
+    public ConfigService(GameConfig gameConfig,
+                DebugConfig debugConfig,
+                SaveConfig saveConfig,
+                GalaxyConfig galaxyConfig,
+                NewGameConfig newGameConfig,
+                InvasionScheduleConfig invasionScheduleConfig,
+                PlayerControlConfig playerControlConfig,
+                ShipMovementConfig shipMovementConfig,
+                SystemCameraConfig systemCameraConfig,
+                TargetingConfig targetingConfig,
+                InteractionConfig interactionConfig,
+                SystemHudConfig systemHudConfig,
+                SystemVisualConfig systemVisualConfig,
+                IEnumerable<ItemConfig> items,
+                IEnumerable<EnemyConfig> enemies,
+                IEnumerable<AllyConfig> allies,
+                IEnumerable<AllySpawnRuleConfig> allySpawnRules,
+                IEnumerable<PirateConfig> pirates,
+                IEnumerable<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules,
+                IEnumerable<ModuleConfig> modules,
+                IEnumerable<WeaponConfig> weapons,
+                CombatFxVisualConfig combatFxVisualConfig = null,
+                CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
+                NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
         DebugConfig = debugConfig;
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
+        InvasionScheduleConfig = invasionScheduleConfig;
         PlayerControlConfig = playerControlConfig;
         ShipMovementConfig = shipMovementConfig;
         SystemCameraConfig = systemCameraConfig;

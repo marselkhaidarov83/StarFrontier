@@ -19,6 +19,15 @@ public interface IInvasionService
         int resolveAfterTicks,
         out InvasionState invasionState);
 
+    bool TryStartInvasion(
+        StarSystemConfig sourceSystem,
+        StarSystemConfig targetSystem,
+        EnemyGroupSpawnRuleConfig invasionSpawnRule,
+        string factionId,
+        int resolveAfterTicks,
+        int maxActiveInvasions,
+        out InvasionState invasionState);
+
     void UpdateInvasions();
 
     bool ResolveInvasion(
@@ -39,6 +48,10 @@ public interface IInvasionService
     bool CanStartInvasion(
         string targetSystemId);
 
+    bool CanStartInvasion(
+        string targetSystemId,
+        int maxActiveInvasions);
+
     bool CanCaptureSystemWithoutHopelessCollapse(
         string targetSystemId);
 
@@ -49,5 +62,4 @@ public interface IInvasionService
     bool ResolveInvasionFromCombatOutcome(
         string systemId,
         bool playerVictory);
-
 }
