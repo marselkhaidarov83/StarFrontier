@@ -13,28 +13,28 @@ public class RewardService : IRewardService
         if (mission == null)
         {
             _lastRewardMessage = "Reward failed: mission is null.";
-            Debug.LogWarning(_lastRewardMessage);
+            AppLog.Warning(DebugLogChannel.Mission, _lastRewardMessage);
             return false;
         }
 
         if (profile == null)
         {
             _lastRewardMessage = "Reward failed: profile is null.";
-            Debug.LogWarning(_lastRewardMessage);
+            AppLog.Warning(DebugLogChannel.Mission, _lastRewardMessage);
             return false;
         }
 
         if (mission.Reward == null)
         {
             _lastRewardMessage = $"Reward failed: mission reward is null for {mission.Title}.";
-            Debug.LogWarning(_lastRewardMessage);
+            AppLog.Warning(DebugLogChannel.Mission, _lastRewardMessage);
             return false;
         }
 
         if (_grantedMissionRewards.Contains(mission.MissionRuntimeId))
         {
             _lastRewardMessage = $"Reward skipped: already granted for {mission.Title}.";
-            Debug.Log(_lastRewardMessage);
+            AppLog.Info(DebugLogChannel.Mission, _lastRewardMessage);
             return false;
         }
 
@@ -44,7 +44,7 @@ public class RewardService : IRewardService
         _grantedMissionRewards.Add(mission.MissionRuntimeId);
 
         _lastRewardMessage = $"Granted reward for {mission.Title}: +{mission.Reward.Credits} credits, +{mission.Reward.Xp} XP";
-        Debug.Log(_lastRewardMessage);
+        AppLog.Info(DebugLogChannel.Mission, _lastRewardMessage);
 
         return true;
     }

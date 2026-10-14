@@ -101,8 +101,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             enemyCount,
             allyCount);
 
-        Debug.Log(
-            "[SystemNpcCombatService] Auto-started encounter for NPC player attack. " +
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemNpcCombatService),
+            "Auto-started encounter for NPC player attack. " +
             $"Encounter: {encounterId}, System: {shooter.CurrentSystemId}, " +
             $"Enemies: {enemyCount}, Allies: {allyCount}");
     }
@@ -231,7 +232,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     {
         if (!_runtimeService.TryGetNpc(shooterNpcId, out SystemNpcRuntimeState shooter))
         {
-            Debug.LogWarning($"[SystemNpcCombatService] Shooter not found: {shooterNpcId}");
+            AppLog.Warning(DebugLogChannel.Combat,
+                typeof(SystemNpcCombatService),
+                $"Shooter not found: {shooterNpcId}");
             return;
         }
 
@@ -397,8 +400,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
         if (weaponConfig == null)
         {
-            Debug.LogWarning(
-                "[SystemNpcCombatService] WeaponConfig not found: " +
+            AppLog.Warning(DebugLogChannel.Combat,
+                typeof(SystemNpcCombatService),
+                "WeaponConfig not found: " +
                 weaponRuntime.WeaponConfigId);
 
             return false;
@@ -1066,8 +1070,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
         if (weaponConfig == null)
         {
-            Debug.LogWarning(
-                "[SystemNpcCombatService] WeaponConfig not found: " +
+            AppLog.Warning(DebugLogChannel.Combat,
+                typeof(SystemNpcCombatService),
+                "WeaponConfig not found: " +
                 weaponConfigId);
 
             return false;
@@ -2549,7 +2554,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             if (beam.ElapsedSeconds < requiredTime)
                 return;
 
-            Debug.Log(
+            AppLog.Info(DebugLogChannel.Combat,
                 "[BEAM_DAMAGE_SHOT] " +
                 "BeamId=" + beam.BeamId +
                 ", WeaponConfigId=" + beam.WeaponConfigId +

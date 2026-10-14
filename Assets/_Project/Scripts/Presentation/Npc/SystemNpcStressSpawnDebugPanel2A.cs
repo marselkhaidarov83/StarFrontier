@@ -1,4 +1,3 @@
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,20 +29,20 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 
     public static void EnsureCreated()
     {
+        if (!DeveloperModeGate.IsEnabled)
+            return;
+
         if (FindFirstObjectByType<SystemNpcStressSpawnDebugPanel2A>() != null)
             return;
 
-        SystemSceneRoot2A sceneRoot =
-            FindFirstObjectByType<SystemSceneRoot2A>();
-
         Canvas canvas =
-            sceneRoot != null && sceneRoot.MetaCanvas != null
-                ? sceneRoot.MetaCanvas
-                : FindFirstObjectByType<Canvas>();
+            FindFirstObjectByType<Canvas>();
 
         if (canvas == null)
         {
-            Debug.LogWarning("[SystemNpcStressSpawnDebugPanel2A] Canvas not found.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(SystemNpcStressSpawnDebugPanel2A),
+                "Canvas not found.");
             return;
         }
 
@@ -315,8 +314,9 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 
         RefreshNpcCountTexts();
 
-        Debug.Log(
-            "[SystemNpcStressSpawnDebugPanel2A] Spawn " + SpawnCountOtherSystem + " NPC in other systems requested. " +
+        AppLog.Info(DebugLogChannel.DebugTools,
+            typeof(SystemNpcStressSpawnDebugPanel2A),
+            "Spawn " + SpawnCountOtherSystem + " NPC in other systems requested. " +
             "NpcAliveBefore: " + beforeCount +
             ", NpcAliveAfter: " + afterCount +
             ", Delta: " + (afterCount - beforeCount) +
@@ -407,8 +407,9 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 
         RefreshNpcCountTexts();
 
-        Debug.Log(
-            "[SystemNpcStressSpawnDebugPanel2A] Spawn " + SpawnCount + " NPC requested. " +
+        AppLog.Info(DebugLogChannel.DebugTools,
+            typeof(SystemNpcStressSpawnDebugPanel2A),
+            "Spawn " + SpawnCount + " NPC requested. " +
             "NpcAliveBefore: " + beforeCount +
             ", NpcAliveAfter: " + afterCount +
             ", Delta: " + (afterCount - beforeCount) +
@@ -447,8 +448,9 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 
         RefreshNpcCountTexts();
 
-        Debug.Log(
-            "[SystemNpcStressSpawnDebugPanel2A] Spawn Enemy Wave requested. " +
+        AppLog.Info(DebugLogChannel.DebugTools,
+            typeof(SystemNpcStressSpawnDebugPanel2A),
+            "Spawn Enemy Wave requested. " +
             "RequestedEnemies: " + EnemySpawnCount +
             ", SpawnedEnemies: " + spawnedEnemies +
             ", FailedEnemies: " + failedEnemies +
@@ -526,7 +528,9 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         if (Bootstrapper.Instance == null ||
             Bootstrapper.Instance.ServiceRegistry == null)
         {
-            Debug.LogWarning("[SystemNpcStressSpawnDebugPanel2A] Bootstrapper is unavailable.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(SystemNpcStressSpawnDebugPanel2A),
+                "Bootstrapper is unavailable.");
             return false;
         }
 
@@ -537,7 +541,9 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
                 out populationService) ||
             populationService == null)
         {
-            Debug.LogWarning("[SystemNpcStressSpawnDebugPanel2A] ISystemNpcPopulationService is not registered.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(SystemNpcStressSpawnDebugPanel2A),
+                "ISystemNpcPopulationService is not registered.");
             return false;
         }
 
@@ -545,7 +551,9 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
                 out runtimeService) ||
             runtimeService == null)
         {
-            Debug.LogWarning("[SystemNpcStressSpawnDebugPanel2A] ISystemNpcRuntimeService is not registered.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(SystemNpcStressSpawnDebugPanel2A),
+                "ISystemNpcRuntimeService is not registered.");
             return false;
         }
 
@@ -691,4 +699,3 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         rectTransform.offsetMax = Vector2.zero;
     }
 }
-#endif

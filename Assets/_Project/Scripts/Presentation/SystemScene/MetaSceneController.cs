@@ -44,9 +44,8 @@ public class MetaSceneController : CustomMonoBehaviour
         missionScreenController?.Initialize();
         systemShipMarkerController2?.Initialize();
         systemCameraController2A?.Initialize();
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                SystemNpcStressSpawnDebugPanel2A.EnsureCreated();
-        #endif
+        if (DeveloperModeGate.IsEnabled)
+            SystemNpcStressSpawnDebugPanel2A.EnsureCreated();
 
         if (galaxyMapScreenRoot2 != null)
             galaxyMapScreenRoot2.SetActive(false);

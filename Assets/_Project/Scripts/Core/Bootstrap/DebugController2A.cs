@@ -939,19 +939,25 @@ public sealed class DebugController2A : CustomMonoBehaviour
 
         if (ServiceRegistry == null)
         {
-            Debug.LogWarning("[DebugController2A] Bootstrapper or ServiceRegistry is not ready.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(DebugController2A),
+                "Bootstrapper or ServiceRegistry is not ready.");
             return false;
         }
 
         if (!ServiceRegistry.TryGet(out invasionService) || invasionService == null)
         {
-            Debug.LogWarning("[DebugController2A] IInvasionService is not registered.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(DebugController2A),
+                "IInvasionService is not registered.");
             return false;
         }
 
         if (!ServiceRegistry.TryGet(out configService) || configService == null)
         {
-            Debug.LogWarning("[DebugController2A] IConfigService is not registered.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(DebugController2A),
+                "IConfigService is not registered.");
             return false;
         }
 
@@ -959,7 +965,9 @@ public sealed class DebugController2A : CustomMonoBehaviour
             gameSessionService == null ||
             gameSessionService.State == null)
         {
-            Debug.LogWarning("[DebugController2A] IGameSessionService state is unavailable.");
+            AppLog.Warning(DebugLogChannel.DebugTools,
+                typeof(DebugController2A),
+                "IGameSessionService state is unavailable.");
             return false;
         }
 

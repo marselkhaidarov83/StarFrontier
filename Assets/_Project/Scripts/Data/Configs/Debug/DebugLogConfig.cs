@@ -14,6 +14,29 @@ public enum DebugLogChannel
     Time,
     UI,
     PlanetMovement,
+
+    MainMenu,
+    Settings,
+    Loading,
+    GalaxyMap,
+    SystemMap,
+    SystemHud,
+    Market,
+    Hangar,
+    Mission,
+    Economy,
+    Navigation,
+    Interaction,
+    Targeting,
+    Travel,
+    PlanetUi,
+    StationUi,
+    CombatPresentation,
+    DebugTools,
+    DataValidation,
+    EventBus,
+    Config,
+    EditorGenerators
 }
 
 public enum NpcMovementLoadAnalyticsDetailLevel
@@ -107,6 +130,73 @@ public sealed class DebugLogConfig : ScriptableObject
 
     [Tooltip("Включает сообщения начальной загрузки игры. Используется главным загрузчиком при создании систем.")]
     [SerializeField] private bool bootstrapLogs;
+
+    [Header("Feature Logs")]
+    [Tooltip("Включает сообщения главного меню.")]
+    [SerializeField] private bool mainMenuLogs;
+
+    [Tooltip("Включает сообщения экрана настроек.")]
+    [SerializeField] private bool settingsLogs;
+
+    [Tooltip("Включает сообщения загрузочных экранов и загрузочного flow.")]
+    [SerializeField] private bool loadingLogs;
+
+    [Tooltip("Включает сообщения карты галактики.")]
+    [SerializeField] private bool galaxyMapLogs;
+
+    [Tooltip("Включает сообщения системной карты.")]
+    [SerializeField] private bool systemMapLogs;
+
+    [Tooltip("Включает сообщения HUD системной сцены.")]
+    [SerializeField] private bool systemHudLogs;
+
+    [Tooltip("Включает сообщения рынка.")]
+    [SerializeField] private bool marketLogs;
+
+    [Tooltip("Включает сообщения ангара.")]
+    [SerializeField] private bool hangarLogs;
+
+    [Tooltip("Включает сообщения миссий.")]
+    [SerializeField] private bool missionLogs;
+
+    [Tooltip("Включает сообщения экономики.")]
+    [SerializeField] private bool economyLogs;
+
+    [Tooltip("Включает сообщения навигации.")]
+    [SerializeField] private bool navigationLogs;
+
+    [Tooltip("Включает сообщения взаимодействий игрока с объектами.")]
+    [SerializeField] private bool interactionLogs;
+
+    [Tooltip("Включает сообщения выбора целей.")]
+    [SerializeField] private bool targetingLogs;
+
+    [Tooltip("Включает сообщения перелётов и travel UI.")]
+    [SerializeField] private bool travelLogs;
+
+    [Tooltip("Включает сообщения планетарного UI.")]
+    [SerializeField] private bool planetUiLogs;
+
+    [Tooltip("Включает сообщения UI станций.")]
+    [SerializeField] private bool stationUiLogs;
+
+    [Tooltip("Включает сообщения боевого presentation/view-слоя.")]
+    [SerializeField] private bool combatPresentationLogs;
+
+    [Tooltip("Включает сообщения debug-инструментов и debug-панелей.")]
+    [SerializeField] private bool debugToolsLogs;
+
+    [Tooltip("Включает сообщения проверки данных, графов, конфигов и статической валидации.")]
+    [SerializeField] private bool dataValidationLogs;
+
+    [Tooltip("Включает сообщения шины событий.")]
+    [SerializeField] private bool eventBusLogs;
+
+    [Tooltip("Включает сообщения конфигурационного сервиса и индексации конфигов.")]
+    [SerializeField] private bool configLogs;
+
+    [Tooltip("Включает сообщения редакторских генераторов контента.")]
+    [SerializeField] private bool editorGeneratorsLogs;
 
     [Header("Performance Main")]
     [Tooltip("Главный выключатель сообщений о скорости работы. Если он выключен, отдельные разделы замеров не выводятся.")]
@@ -371,11 +461,77 @@ Mathf.Max(0f, visualUpdateSpikeThresholdMs);
             case DebugLogChannel.Time:
                 return timeLogs;
 
+            case DebugLogChannel.UI:
+                return uiLogs;
+
             case DebugLogChannel.PlanetMovement:
                 return planetMovementLogs;
 
-            case DebugLogChannel.UI:
-                return uiLogs;
+            case DebugLogChannel.MainMenu:
+                return mainMenuLogs;
+
+            case DebugLogChannel.Settings:
+                return settingsLogs;
+
+            case DebugLogChannel.Loading:
+                return loadingLogs;
+
+            case DebugLogChannel.GalaxyMap:
+                return galaxyMapLogs;
+
+            case DebugLogChannel.SystemMap:
+                return systemMapLogs;
+
+            case DebugLogChannel.SystemHud:
+                return systemHudLogs;
+
+            case DebugLogChannel.Market:
+                return marketLogs;
+
+            case DebugLogChannel.Hangar:
+                return hangarLogs;
+
+            case DebugLogChannel.Mission:
+                return missionLogs;
+
+            case DebugLogChannel.Economy:
+                return economyLogs;
+
+            case DebugLogChannel.Navigation:
+                return navigationLogs;
+
+            case DebugLogChannel.Interaction:
+                return interactionLogs;
+
+            case DebugLogChannel.Targeting:
+                return targetingLogs;
+
+            case DebugLogChannel.Travel:
+                return travelLogs;
+
+            case DebugLogChannel.PlanetUi:
+                return planetUiLogs;
+
+            case DebugLogChannel.StationUi:
+                return stationUiLogs;
+
+            case DebugLogChannel.CombatPresentation:
+                return combatPresentationLogs;
+
+            case DebugLogChannel.DebugTools:
+                return debugToolsLogs;
+
+            case DebugLogChannel.DataValidation:
+                return dataValidationLogs;
+
+            case DebugLogChannel.EventBus:
+                return eventBusLogs;
+
+            case DebugLogChannel.Config:
+                return configLogs;
+
+            case DebugLogChannel.EditorGenerators:
+                return editorGeneratorsLogs;
 
             default:
                 return false;

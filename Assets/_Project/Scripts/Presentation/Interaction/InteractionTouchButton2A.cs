@@ -44,10 +44,9 @@ public sealed class InteractionTouchButton2A :
 
         if (inputBridge == null)
         {
-            Debug.LogError(
-                "[InteractionTouchButton2A] " +
-                "PlayerInputBridge2A is not assigned.",
-                this);
+            AppLog.Error(DebugLogChannel.Interaction,
+                typeof(InteractionTouchButton2A),
+                "PlayerInputBridge2A is not assigned.");
 
             return;
         }

@@ -47,14 +47,14 @@ public static class ValidationMenu
             "system_helios_01",
             true));
 
-        Debug.Log($"Validation finished. Issues found: {issues.Count}");
+        AppLog.Info(DebugLogChannel.DataValidation, $"Validation finished. Issues found: {issues.Count}");
 
         foreach (var issue in issues)
         {
             if (issue.Severity == ValidationSeverity.Error)
-                Debug.LogError(issue.ToString(), issue.SourceObject);
+                AppLog.Error(DebugLogChannel.DataValidation, issue.ToString());
             else
-                Debug.LogWarning(issue.ToString(), issue.SourceObject);
+                AppLog.Warning(DebugLogChannel.DataValidation, issue.ToString());
         }
     }
 }

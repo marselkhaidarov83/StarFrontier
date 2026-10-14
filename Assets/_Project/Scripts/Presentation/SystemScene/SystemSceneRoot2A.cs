@@ -33,7 +33,6 @@ public sealed class SystemSceneRoot2A : MonoBehaviour
     [Header("Stage 2A Structural Roots")]
     [SerializeField] private Transform boundsRoot;
     [SerializeField] private Transform markersRoot;
-    [SerializeField] private Transform debugRoot;
 
     [Header("Existing UI Roots")]
     [SerializeField] private Canvas metaCanvas;
@@ -59,7 +58,6 @@ public sealed class SystemSceneRoot2A : MonoBehaviour
 
     public Transform BoundsRoot => boundsRoot;
     public Transform MarkersRoot => markersRoot;
-    public Transform DebugRoot => debugRoot;
 
     public Canvas MetaCanvas => metaCanvas;
     public RectTransform SystemMapHudRoot => systemMapHudRoot;
@@ -78,9 +76,9 @@ public sealed class SystemSceneRoot2A : MonoBehaviour
 
         if (!HasRequiredReferences())
         {
-            Debug.LogWarning(
-                GetMissingReferencesReport(),
-                this);
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
+                GetMissingReferencesReport());
         }
     }
 
@@ -99,7 +97,6 @@ public sealed class SystemSceneRoot2A : MonoBehaviour
             && vfxRoot != null
             && boundsRoot != null
             && markersRoot != null
-            && debugRoot != null
             && metaCanvas != null
             && systemMapHudRoot != null
             && planetRoot != null
@@ -129,7 +126,6 @@ public sealed class SystemSceneRoot2A : MonoBehaviour
 
         AppendMissing(builder, boundsRoot, nameof(boundsRoot));
         AppendMissing(builder, markersRoot, nameof(markersRoot));
-        AppendMissing(builder, debugRoot, nameof(debugRoot));
 
         AppendMissing(builder, metaCanvas, nameof(metaCanvas));
         AppendMissing(builder, systemMapHudRoot, nameof(systemMapHudRoot));

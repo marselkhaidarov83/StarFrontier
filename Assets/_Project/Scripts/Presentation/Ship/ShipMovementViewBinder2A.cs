@@ -173,11 +173,10 @@ public sealed class ShipMovementViewBinder2A :
             {
                 _missingServiceLogged = true;
 
-                Debug.LogError(
-                    "[ShipMovementViewBinder2A] " +
+                AppLog.Error(DebugLogChannel.Navigation,
+                    typeof(ShipMovementViewBinder2A),
                     "IShipMovementService was not found " +
-                    "in ServiceRegistry.",
-                    this);
+                    "in ServiceRegistry.");
             }
 
             return false;
@@ -191,10 +190,9 @@ public sealed class ShipMovementViewBinder2A :
         {
             _successfulBindingLogged = true;
 
-            Debug.Log(
-                "[ShipMovementViewBinder2A] " +
-                "View is bound to IShipMovementService.State.",
-                this);
+            AppLog.Info(DebugLogChannel.Navigation,
+                typeof(ShipMovementViewBinder2A),
+                "View is bound to IShipMovementService.State.");
         }
 
         return true;
@@ -204,10 +202,9 @@ public sealed class ShipMovementViewBinder2A :
     {
         if (shipView == null)
         {
-            Debug.LogError(
-                "[ShipMovementViewBinder2A] " +
-                "Ship View is not assigned.",
-                this);
+            AppLog.Error(DebugLogChannel.Navigation,
+                typeof(ShipMovementViewBinder2A),
+                "Ship View is not assigned.");
 
             enabled = false;
             return;
@@ -240,10 +237,9 @@ public sealed class ShipMovementViewBinder2A :
     {
         if (!IsFinite(statePosition))
         {
-            Debug.LogError(
-                "[ShipMovementViewBinder2A] " +
-                "Movement State contains invalid position.",
-                this);
+            AppLog.Error(DebugLogChannel.Navigation,
+                typeof(ShipMovementViewBinder2A),
+                "Movement State contains invalid position.");
 
             return;
         }

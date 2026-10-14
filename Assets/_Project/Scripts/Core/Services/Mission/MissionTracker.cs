@@ -45,7 +45,9 @@ public class MissionTracker : CustomService, IMissionTracker
     {
         var activeMissions = _missionService.GetActiveMissions();
 
-        Debug.Log("[MissionTracker] activeMissions.Count = " + activeMissions.Count);
+        AppLog.Info(DebugLogChannel.Mission,
+            typeof(MissionTracker),
+            "activeMissions.Count = " + activeMissions.Count);
         foreach (MissionInstanceData mission in activeMissions)
         {
             if (mission == null || mission.Objective == null)
@@ -54,8 +56,12 @@ public class MissionTracker : CustomService, IMissionTracker
             if (mission.MissionType != MissionType.Delivery)
                 continue;
 
-            Debug.Log("[MissionTracker] TargetPlanetId = " + mission.TargetPlanetId);
-            Debug.Log("[MissionTracker] PlanetId = " + eventData.PlanetId);
+            AppLog.Info(DebugLogChannel.Mission,
+                typeof(MissionTracker),
+                "TargetPlanetId = " + mission.TargetPlanetId);
+            AppLog.Info(DebugLogChannel.Mission,
+                typeof(MissionTracker),
+                "PlanetId = " + eventData.PlanetId);
             if (mission.TargetPlanetId == eventData.PlanetId)
             {
                 mission.Status = MissionStatus.ReadyToComplete;
@@ -75,7 +81,9 @@ public class MissionTracker : CustomService, IMissionTracker
             if (mission == null || mission.Objective == null)
                 continue;
 
-            Debug.Log("[MissionTracker] mission.MissionType = " + mission.MissionType);
+            AppLog.Info(DebugLogChannel.Mission,
+                typeof(MissionTracker),
+                "mission.MissionType = " + mission.MissionType);
             // if (mission.MissionType == MissionType.Delivery)
             // {
             //     if (mission.TargetSystemId == eventData.EnteredSystemId)

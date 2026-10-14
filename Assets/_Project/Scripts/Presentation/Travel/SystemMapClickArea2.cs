@@ -68,10 +68,10 @@ public sealed class SystemMapClickArea2 : CustomMonoBehaviour,
         {
             if (IsDebug())
             {
-                Debug.Log(
-                    "[SystemMapClickArea2] Empty map click ignored because pointer movement was drag. " +
-                    "Distance = " + Vector2.Distance(_pointerDownPosition, eventData.position)
-                );
+                AppLog.Info(DebugLogChannel.Travel,
+                    typeof(SystemMapClickArea2),
+                    "Empty map click ignored because pointer movement was drag. " +
+                    "Distance = " + Vector2.Distance(_pointerDownPosition, eventData.position));
             }
 
             return;
@@ -85,7 +85,9 @@ public sealed class SystemMapClickArea2 : CustomMonoBehaviour,
 
         if (IsDebug())
         {
-            Debug.Log("[SystemMapClickArea2] Empty map clicked. WorldPosition = " + worldPosition);
+            AppLog.Info(DebugLogChannel.Travel,
+                typeof(SystemMapClickArea2),
+                "Empty map clicked. WorldPosition = " + worldPosition);
         }
 
         EmptyMapClicked?.Invoke(new Vector3(

@@ -80,7 +80,7 @@ public static class CurrentSystemNpcSimulationConfigAssetGenerator
 
         Selection.activeObject = asset;
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.EditorGenerators,
             "Current System NPC Simulation Config generated: " +
             AssetPath);
     }

@@ -230,7 +230,7 @@ public sealed class HudLegacyAuditWindow2A : EditorWindow
 
                     report.AppendLine();
 
-                    Debug.LogException(exception);
+                    AppLog.Exception(DebugLogChannel.DataValidation, exception);
                 }
             }
 
@@ -257,7 +257,7 @@ public sealed class HudLegacyAuditWindow2A : EditorWindow
                 MappingAssetPath,
                 "OK");
 
-            Debug.Log(
+            AppLog.Info(DebugLogChannel.DataValidation,
                 "[2A-S03-03-T01] HUD audit completed. " +
                 "Report: " + ReportAssetPath);
         }
@@ -788,10 +788,10 @@ public sealed class HudLegacyAuditWindow2A : EditorWindow
 
         if (File.Exists(fullPath))
         {
-            Debug.Log(
+            AppLog.Info(
+                DebugLogChannel.DataValidation,
                 "[2A-S03-03-T01] Mapping file already exists " +
-                "and was not overwritten: " +
-                MappingAssetPath);
+                "and was not overwritten: " + MappingAssetPath);
 
             return;
         }

@@ -32,8 +32,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
     {
         if (Bootstrapper.Instance == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "Bootstrapper.Instance is null.");
 
             return;
@@ -41,8 +41,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (Bootstrapper.Instance.ServiceRegistry == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "ServiceRegistry is null.");
 
             return;
@@ -68,8 +68,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (_eventBus == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "SimpleEventBus not found.");
 
             return;
@@ -77,8 +77,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (_travelService == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "ITravelService not found.");
 
             return;
@@ -86,8 +86,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (_systemTravelService == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "ISystemTravelService not found.");
 
             return;
@@ -95,8 +95,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (_gameSessionService == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "IGameSessionService not found.");
 
             return;
@@ -104,8 +104,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (_gameStateMachine == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "IGameStateMachine not found.");
 
             return;
@@ -146,8 +146,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
             _gameSessionService.State == null ||
             _gameSessionService.State.Player == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "Player state is not available.");
 
             return;
@@ -160,10 +160,9 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (IsDebug())
         {
-            Debug.Log(
-                "[SystemTransitionController2] " +
-                "System exit reached. Target system: " +
-                targetSystemId);
+            AppLog.Info(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
+                "System exit reached. Target system: " + targetSystemId);
         }
 
         string currentSystemId =
@@ -186,8 +185,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (_travelService == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "Cannot perform travel: ITravelService is null.");
 
             return;
@@ -206,8 +205,8 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         if (_gameStateMachine == null)
         {
-            Debug.LogError(
-                "[SystemTransitionController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTransitionController2),
                 "Cannot enter target system: IGameStateMachine is null.");
 
             return;

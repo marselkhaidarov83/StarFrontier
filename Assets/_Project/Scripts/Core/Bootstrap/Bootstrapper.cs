@@ -49,7 +49,6 @@ public class Bootstrapper : CustomMonoBehaviour
     [Header("Debug")]
     [SerializeField] public bool SectorAllOpened = false;
     [SerializeField] public bool RouteAllUnlocked = false;
-    [SerializeField] private bool _globalDebugEnabled;
 
 
     public static Bootstrapper Instance;
@@ -94,8 +93,6 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private bool _externalFrameProfilersStarted;
     private double _lastBootstrapperUpdateMs;
-
-    public bool GlobalDebugEnabled => _globalDebugEnabled;
 
     public OffscreenNpcSimulationScheduleConfig OffscreenNpcSimulationScheduleConfig =>
     offscreenNpcSimulationScheduleConfig;
@@ -178,15 +175,22 @@ public class Bootstrapper : CustomMonoBehaviour
 
     public void LogDebug(DebugLogChannel channel, string message)
     {
-        EnsureDebugLogRuntimeSettingsApplied();
+        AppLog.Info(channel, message);
+    }
 
-        if (!IsDebugLogEnabled(channel) ||
-            string.IsNullOrWhiteSpace(message))
-        {
-            return;
-        }
+    public void LogDebugWarning(DebugLogChannel channel, string message)
+    {
+        AppLog.Warning(channel, message);
+    }
 
-        Debug.Log("[DebugLog][" + channel + "] " + message);
+    public void LogDebugError(DebugLogChannel channel, string message)
+    {
+        AppLog.Error(channel, message);
+    }
+
+    public void LogDebugException(DebugLogChannel channel, Exception exception)
+    {
+        AppLog.Exception(channel, exception);
     }
 
     public Action<string> CreateDebugLogAction(DebugLogChannel channel)
@@ -210,6 +214,7 @@ public class Bootstrapper : CustomMonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        AppLog.Configure(new UnityLogService());
 
         LogDebug(
             DebugLogChannel.Bootstrap,
@@ -834,8 +839,9 @@ public class Bootstrapper : CustomMonoBehaviour
 
         if (_saveService == null)
         {
-            AppLog.Warning(
-                "[Bootstrapper] SaveCurrentGame skipped: ISaveService is missing.");
+            AppLog.Warning(DebugLogChannel.Save,
+                typeof(Bootstrapper),
+                "SaveCurrentGame skipped: ISaveService is missing.");
 
             LogSaveLifecycle(
                 "[Bootstrapper] SAVE_CURRENT_GAME_SKIPPED" +
@@ -848,14 +854,6 @@ public class Bootstrapper : CustomMonoBehaviour
         }
 
         _saveService.Save(normalizedReason);
-
-        LogSaveLifecycle(
-            "[Bootstrapper] SAVE_CURRENT_GAME_COMPLETE" +
-            " | Reason=" + normalizedReason +
-            " | UnityFrame=" + Time.frameCount +
-            " | Tick=" +
-            (_gameTimeService != null ? _gameTimeService.CurrentQuantTick : -1) +
-            " | HasSave=" + _saveService.HasSave());
     }
 
     private void LogSaveLifecycle(string message)
@@ -920,7 +918,8 @@ public class Bootstrapper : CustomMonoBehaviour
                 callerFileName = callerFileName.Substring(separatorIndex + 1);
         }
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Bootstrap,
             "[PerfLog][" + area + "] " +
             message +
             " | Source=" + callerFileName +

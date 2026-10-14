@@ -153,9 +153,9 @@ public sealed class SystemPlayerThreatListHud2A :
     {
         if (context == null)
         {
-            Debug.LogError(
-                "[SystemPlayerThreatListHud2A] Missing HUD binding context.",
-                this);
+            AppLog.Error(DebugLogChannel.SystemHud,
+                typeof(SystemPlayerThreatListHud2A),
+                "Missing HUD binding context.");
             return;
         }
 
@@ -163,9 +163,9 @@ public sealed class SystemPlayerThreatListHud2A :
 
         if (!HasRequiredUi())
         {
-            Debug.LogError(
-                "[SystemPlayerThreatListHud2A] Threat HUD prefab UI is not fully bound.",
-                this);
+            AppLog.Error(DebugLogChannel.SystemHud,
+                typeof(SystemPlayerThreatListHud2A),
+                "Threat HUD prefab UI is not fully bound.");
             return;
         }
 
@@ -748,7 +748,9 @@ public sealed class SystemPlayerThreatListHud2A :
         if (Application.isPlaying)
             _nextDebugLogTime = Time.unscaledTime + debugLogIntervalSeconds;
 
-        Debug.Log("[ThreatHUD] " + message, this);
+        AppLog.Info(
+            DebugLogChannel.SystemHud,
+            "[ThreatHUD] " + message);
     }
 
     private static string BuildDebugNpcName(SystemNpcRuntimeState npc)

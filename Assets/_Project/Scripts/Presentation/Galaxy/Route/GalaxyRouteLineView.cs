@@ -163,16 +163,16 @@ public class GalaxyRouteLineView :
 
         if (debugLogs)
         {
-            Debug.Log(
-                "[GalaxyRouteLineView] Route " +
+            AppLog.Info(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyRouteLineView),
+                "Route " +
                 _fromSystemId +
                 " -> " +
                 _toSystemId +
                 "; visible points = " +
                 _routePoints.Count +
                 "; curve = " +
-                GetCurveStrength()
-            );
+                GetCurveStrength());
         }
     }
 
@@ -262,22 +262,18 @@ public class GalaxyRouteLineView :
     {
         if (pointsRoot == null)
         {
-            Debug.LogError(
-                "[GalaxyRouteLineView] " +
-                "Points Root не назначен.",
-                this
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyRouteLineView),
+                "Points Root не назначен.");
 
             return;
         }
 
         if (pointTemplate == null)
         {
-            Debug.LogError(
-                "[GalaxyRouteLineView] " +
-                "Point Template не назначен.",
-                this
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyRouteLineView),
+                "Point Template не назначен.");
 
             return;
         }

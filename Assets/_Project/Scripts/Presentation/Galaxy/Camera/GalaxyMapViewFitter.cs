@@ -93,18 +93,18 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
     {
         if (mapCamera == null)
         {
-            Debug.LogError(
-                "[GalaxyMapViewFitter] Камера не назначена."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapViewFitter),
+                "Камера не назначена.");
 
             return 0f;
         }
 
         if (!mapCamera.orthographic)
         {
-            Debug.LogError(
-                "[GalaxyMapViewFitter] Камера должна быть ортографической."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapViewFitter),
+                "Камера должна быть ортографической.");
 
             return 0f;
         }
@@ -127,9 +127,9 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
         if (usableWidthFraction <= 0f ||
             usableHeightFraction <= 0f)
         {
-            Debug.LogError(
-                "[GalaxyMapViewFitter] Некорректная рабочая область экрана."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapViewFitter),
+                "Некорректная рабочая область экрана.");
 
             return 0f;
         }
@@ -275,10 +275,10 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
 
         if (result.width <= 1f || result.height <= 1f)
         {
-            Debug.LogWarning(
-                "[GalaxyMapViewFitter] Не удалось определить рабочую область. " +
-                "Используется весь экран."
-            );
+            AppLog.Warning(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapViewFitter),
+                "Не удалось определить рабочую область. " +
+                "Используется весь экран.");
 
             return new Rect(
                 0f,

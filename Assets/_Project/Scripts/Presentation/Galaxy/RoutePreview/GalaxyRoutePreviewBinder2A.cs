@@ -408,9 +408,8 @@ public sealed class GalaxyRoutePreviewBinder2A :
         if (!logInitializationErrors)
             return;
 
-        Debug.LogWarning(
-            "[GalaxyRoutePreviewBinder2A] " +
-            message,
-            this);
+        AppLog.Warning(DebugLogChannel.GalaxyMap,
+            typeof(GalaxyRoutePreviewBinder2A),
+            message);
     }
 }

@@ -92,20 +92,18 @@ public sealed class SystemExitNodeView2A :
 
         if (_routeConfig == null)
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
-                "RouteConfig is null.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
+                "RouteConfig is null.");
 
             return;
         }
 
         if (_endpointConfig == null)
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
-                "RouteEndpointConfig is null.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
+                "RouteEndpointConfig is null.");
 
             return;
         }
@@ -113,10 +111,9 @@ public sealed class SystemExitNodeView2A :
         if (string.IsNullOrWhiteSpace(
                 _currentSystemId))
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
-                "Current system ID is empty.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
+                "Current system ID is empty.");
 
             return;
         }
@@ -124,10 +121,9 @@ public sealed class SystemExitNodeView2A :
         if (string.IsNullOrWhiteSpace(
                 _targetSystemId))
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
-                "Target system ID is empty.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
+                "Target system ID is empty.");
 
             return;
         }
@@ -177,11 +173,10 @@ public sealed class SystemExitNodeView2A :
 
         if (interactionTarget == null)
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "TravelPointInteractionTarget2A " +
-                "component is missing.",
-                this);
+                "component is missing.");
 
             return;
         }
@@ -210,18 +205,17 @@ public sealed class SystemExitNodeView2A :
         }
         else
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
-                "TargetSelectableView2A component is missing.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
+                "TargetSelectableView2A component is missing.");
         }
 
         ResolveSystemTransitionController();
 
         if (IsDebug())
         {
-            Debug.Log(
-                "[SystemExitNodeView2A] " +
+            AppLog.Info(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "Initialized route = " +
                 _routeConfig.Id +
                 " | current = " +
@@ -229,8 +223,7 @@ public sealed class SystemExitNodeView2A :
                 " | target = " +
                 _targetSystemId +
                 " | exitPoint = " +
-                _endpointConfig.ExitPoint,
-                this);
+                _endpointConfig.ExitPoint);
         }
     }
 
@@ -280,22 +273,20 @@ public sealed class SystemExitNodeView2A :
 
         if (_routeConfig == null)
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "Cannot click exit. " +
-                "RouteConfig is null.",
-                this);
+                "RouteConfig is null.");
 
             return;
         }
 
         if (_endpointConfig == null)
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "Cannot click exit. " +
-                "RouteEndpointConfig is null.",
-                this);
+                "RouteEndpointConfig is null.");
 
             return;
         }
@@ -303,11 +294,10 @@ public sealed class SystemExitNodeView2A :
         if (string.IsNullOrWhiteSpace(
                 _currentSystemId))
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "Cannot click exit. " +
-                "Current system ID is empty.",
-                this);
+                "Current system ID is empty.");
 
             return;
         }
@@ -315,33 +305,30 @@ public sealed class SystemExitNodeView2A :
         if (string.IsNullOrWhiteSpace(
                 _targetSystemId))
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "Cannot click exit. " +
-                "Target system ID is empty.",
-                this);
+                "Target system ID is empty.");
 
             return;
         }
 
         if (_simpleEventBus == null)
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "Cannot click exit. " +
-                "SimpleEventBus is null.",
-                this);
+                "SimpleEventBus is null.");
 
             return;
         }
 
         if (_travelService == null)
         {
-            Debug.LogError(
-                "[SystemExitNodeView2A] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemExitNodeView2A),
                 "Cannot check travel. " +
-                "ITravelService is null.",
-                this);
+                "ITravelService is null.");
 
             return;
         }
@@ -399,11 +386,10 @@ public sealed class SystemExitNodeView2A :
             }
             else
             {
-                Debug.LogError(
-                    "[SystemExitNodeView2A] " +
+                AppLog.Error(DebugLogChannel.Travel,
+                    typeof(SystemExitNodeView2A),
                     "SystemTransitionController2 " +
-                    "was not found on SystemScene.",
-                    this);
+                    "was not found on SystemScene.");
             }
 
             LogCustom(

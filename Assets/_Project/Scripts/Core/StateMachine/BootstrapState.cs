@@ -39,6 +39,7 @@ public class BootstrapState : IGameState
         if (_debugEnabled)
         {
             AppLog.Info(
+                DebugLogChannel.Bootstrap,
                 "BootstrapState | NewGameService = " +
                 _newGameService);
         }
@@ -47,11 +48,16 @@ public class BootstrapState : IGameState
     public void Enter()
     {
         if (_debugEnabled)
-            AppLog.Info("BootstrapState | Entered BootstrapState");
+        {
+            AppLog.Info(
+                DebugLogChannel.Bootstrap,
+                "BootstrapState | Entered BootstrapState");
+        }
 
         if (_sceneService == null || _newGameService == null)
         {
             AppLog.Error(
+                DebugLogChannel.Bootstrap,
                 "BootstrapState cannot start: " +
                 "SceneService or NewGameService is missing.");
             return;
@@ -89,7 +95,11 @@ public class BootstrapState : IGameState
         UnsubscribeFromSceneEvents();
 
         if (_debugEnabled)
-            AppLog.Info("BootstrapState | Exited BootstrapState");
+        {
+            AppLog.Info(
+                DebugLogChannel.Bootstrap,
+                "BootstrapState | Exited BootstrapState");
+        }
     }
 
     private void SubscribeToSceneEvents()
@@ -123,6 +133,7 @@ public class BootstrapState : IGameState
         if (Bootstrapper.Instance == null)
         {
             AppLog.Error(
+                DebugLogChannel.Bootstrap,
                 "BootstrapState cannot continue loading: " +
                 "Bootstrapper.Instance is null.");
 
@@ -173,11 +184,14 @@ public class BootstrapState : IGameState
         _waitingForLoading = false;
         UnsubscribeFromSceneEvents();
 
-        AppLog.Error($"Bootstrap Loading failed. {error}");
+        AppLog.Error(
+            DebugLogChannel.Bootstrap,
+            $"Bootstrap Loading failed. {error}");
 
         if (!_sceneService.TryLoadFallback(MAIN_MENU_SCENE))
         {
             AppLog.Error(
+                DebugLogChannel.Bootstrap,
                 "Bootstrap fallback to MainMenuScene " +
                 "could not be started.");
         }
@@ -190,6 +204,9 @@ public class BootstrapState : IGameState
 
         _waitingForLoading = false;
         UnsubscribeFromSceneEvents();
-        AppLog.Warning("Bootstrap Loading was cancelled.");
+
+        AppLog.Warning(
+            DebugLogChannel.Bootstrap,
+            "Bootstrap Loading was cancelled.");
     }
 }

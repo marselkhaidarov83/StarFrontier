@@ -97,40 +97,36 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         if (targetCamera == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "Target Camera is null and Camera.main not found"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "Target Camera is null and Camera.main not found");
 
             return;
         }
 
         if (cameraConfig == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "Camera Config is not assigned"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "Camera Config is not assigned");
 
             return;
         }
 
         if (Bootstrapper.Instance == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "Bootstrapper.Instance is null"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "Bootstrapper.Instance is null");
 
             return;
         }
 
         if (Bootstrapper.Instance.ServiceRegistry == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "ServiceRegistry is null"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "ServiceRegistry is null");
 
             return;
         }
@@ -157,36 +153,32 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         if (_eventBus == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "SimpleEventBus not found"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "SimpleEventBus not found");
 
             return;
         }
 
         if (_gameSessionService == null)
         {
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
-                "IGameSessionService not found"
-            );
+            AppLog.Warning(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "IGameSessionService not found");
         }
 
         if (_configService == null)
         {
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
-                "IConfigService not found"
-            );
+            AppLog.Warning(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "IConfigService not found");
         }
 
         if (_systemTravelService == null)
         {
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
-                "ISystemTravelService not found"
-            );
+            AppLog.Warning(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "ISystemTravelService not found");
         }
 
         ResolveMapCameraController();
@@ -225,10 +217,9 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         if (targetCamera == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "Cannot activate: targetCamera is null"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "Cannot activate: targetCamera is null");
 
             return;
         }
@@ -334,21 +325,19 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     {
         if (targetCamera == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "ReturnToShip failed: targetCamera is null"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "ReturnToShip failed: targetCamera is null");
 
             return;
         }
 
         if (!_isSystemCameraActive)
         {
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
+            AppLog.Warning(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
                 "ReturnToShip called while camera is inactive. " +
-                "Reactivating."
-            );
+                "Reactivating.");
 
             ActivateSystemCameraSafely();
         }
@@ -409,11 +398,10 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     {
         if (!CanCenterOnMovementTarget)
         {
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
+            AppLog.Warning(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
                 "CenterOnMovementTarget skipped: " +
-                "movement target is unavailable."
-            );
+                "movement target is unavailable.");
 
             return false;
         }
@@ -938,20 +926,18 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     {
         if (_isSubscribedToEvents)
         {
-            Debug.LogWarning(
-                "[SystemCameraController2A] " +
-                "SubscribeToEvents skipped: already subscribed"
-            );
+            AppLog.Warning(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "SubscribeToEvents skipped: already subscribed");
 
             return;
         }
 
         if (_eventBus == null)
         {
-            Debug.LogError(
-                "[SystemCameraController2A] " +
-                "Cannot subscribe: eventBus is null"
-            );
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemCameraController2A),
+                "Cannot subscribe: eventBus is null");
 
             return;
         }

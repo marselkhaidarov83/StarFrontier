@@ -53,9 +53,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
             DefeatReason = SystemEncounterDefeatReason.None
         };
 
-        Debug.Log(
-            $"[SystemEncounterService] Started. Encounter: {encounterId}, System: {systemId}, Enemies: {enemyCount}, Allies: {allyCount}"
-        );
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemEncounterService),
+            $"Started. Encounter: {encounterId}, System: {systemId}, Enemies: {enemyCount}, Allies: {allyCount}");
 
         _eventBus.Publish(new SystemEncounterStartedEvent(
             Current.EncounterId,
@@ -91,9 +91,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
             "enemy",
             killedByPlayer ? "player" : "ally"));
 
-        Debug.Log(
-            $"[SystemEncounterService] Enemy destroyed. KilledByPlayer: {killedByPlayer}, EnemiesAlive: {Current.EnemiesAlive}, PlayerKills: {Current.PlayerKills}"
-        );
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemEncounterService),
+            $"Enemy destroyed. KilledByPlayer: {killedByPlayer}, EnemiesAlive: {Current.EnemiesAlive}, PlayerKills: {Current.PlayerKills}");
 
         CheckVictory();
     }
@@ -114,9 +114,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
             "ally",
             "enemy"));
 
-        Debug.Log(
-            $"[SystemEncounterService] Ally destroyed. AlliesAlive: {Current.AlliesAlive}"
-        );
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemEncounterService),
+            $"Ally destroyed. AlliesAlive: {Current.AlliesAlive}");
 
         CheckAlliesDestroyedDefeat();
     }
@@ -125,14 +125,17 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
     {
         if (Current == null)
         {
-            Debug.LogWarning("[SystemEncounterService] Player destroyed ignored: Current encounter is null.");
+            AppLog.Warning(DebugLogChannel.Combat,
+                typeof(SystemEncounterService),
+                "Player destroyed ignored: Current encounter is null.");
             return;
         }
 
         if (Current.State != SystemEncounterState.Active)
         {
-            Debug.LogWarning(
-                "[SystemEncounterService] Player destroyed ignored: encounter is not Active. " +
+            AppLog.Warning(DebugLogChannel.Combat,
+                typeof(SystemEncounterService),
+                "Player destroyed ignored: encounter is not Active. " +
                 $"Current state: {Current.State}, Encounter: {Current.EncounterId}, System: {Current.SystemId}");
 
             return;
@@ -140,7 +143,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
 
         Current.PlayerDestroyed = true;
 
-        Debug.Log("[SystemEncounterService] Player destroyed registered.");
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemEncounterService),
+            "Player destroyed registered.");
 
         Defeat(SystemEncounterDefeatReason.PlayerDestroyed);
     }
@@ -153,7 +158,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
         Current.PlayerIsOnPlanet = true;
         Current.DaysPlayerStayedOnPlanetDuringEncounter = 0;
 
-        Debug.Log("[SystemEncounterService] Player entered planet during encounter.");
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            "[SystemEncounterService] Player entered planet during encounter.");
 
         CheckAlliesDestroyedDefeat();
     }
@@ -166,8 +173,11 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
         Current.PlayerIsOnPlanet = false;
         Current.DaysPlayerStayedOnPlanetDuringEncounter = 0;
 
-        Debug.Log("[SystemEncounterService] Player launched from planet during encounter.");
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            "[SystemEncounterService] Player launched from planet during encounter.");
     }
+
 
     public void RegisterPlanetDayPassed()
     {
@@ -179,9 +189,12 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
 
         Current.DaysPlayerStayedOnPlanetDuringEncounter++;
 
-        Debug.Log(
-            $"[SystemEncounterService] Planet day passed. Days: {Current.DaysPlayerStayedOnPlanetDuringEncounter}/{PlanetStayDefeatDays}"
-        );
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            "[SystemEncounterService] Planet day passed. Days: " +
+            Current.DaysPlayerStayedOnPlanetDuringEncounter +
+            "/" +
+            PlanetStayDefeatDays);
 
         CheckAlliesDestroyedDefeat();
     }
@@ -197,7 +210,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
         if (Current.EnemiesAlive <= 0)
             return;
 
-        Debug.Log("[SystemEncounterService] Player left system while enemies are alive.");
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.Combat,
+            "[SystemEncounterService] Player left system while enemies are alive.");
 
         Defeat(SystemEncounterDefeatReason.PlayerLeftSystem);
     }
@@ -337,7 +352,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
 
         Current.State = SystemEncounterState.VictoryPendingReward;
 
-        Debug.Log("[SystemEncounterService] Victory pending reward.");
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemEncounterService),
+            "Victory pending reward.");
 
         LogCombatStateDebug(
             "VICTORY_PENDING_REWARD_SET" +
@@ -396,7 +413,9 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
         Current.State = SystemEncounterState.Defeated;
         Current.DefeatReason = reason;
 
-        Debug.Log($"[SystemEncounterService] Encounter defeated. Reason: {reason}");
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemEncounterService),
+            $"Encounter defeated. Reason: {reason}");
 
         _eventBus.Publish(new SystemEncounterDefeatedEvent(
             Current.EncounterId,
@@ -429,15 +448,17 @@ public sealed class SystemEncounterService : CustomService, ISystemEncounterServ
 
         if (Current == null)
         {
-            Debug.Log("[SystemEncounterService] Restore: no encounter.");
+            AppLog.Info(DebugLogChannel.Combat,
+                typeof(SystemEncounterService),
+                "Restore: no encounter.");
             return;
         }
 
-        Debug.Log(
-            $"[SystemEncounterService] Restored. Encounter: {Current.EncounterId}, " +
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(SystemEncounterService),
+            $"Restored. Encounter: {Current.EncounterId}, " +
             $"System: {Current.SystemId}, State: {Current.State}, " +
-            $"Enemies: {Current.EnemiesAlive}, Allies: {Current.AlliesAlive}"
-        );
+            $"Enemies: {Current.EnemiesAlive}, Allies: {Current.AlliesAlive}");
 
         PublishStateChanged();
     }

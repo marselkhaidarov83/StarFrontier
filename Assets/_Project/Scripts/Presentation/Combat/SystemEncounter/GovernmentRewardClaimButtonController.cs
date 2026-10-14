@@ -54,10 +54,18 @@ public sealed class GovernmentRewardClaimButtonController : CustomMonoBehaviour
 
         if (IsDebug())
         {
-            Debug.Log("[GovernmentRewardClaimButtonController] _governmentRewardService = " + _governmentRewardService);
-            Debug.Log("[GovernmentRewardClaimButtonController] currentSystemId = " + currentSystemId);
-            Debug.Log("[GovernmentRewardClaimButtonController] isCurrentPlanetInhabited = " + isCurrentPlanetInhabited);
-            Debug.Log("[GovernmentRewardClaimButtonController] canClaim = " + canClaim);
+            AppLog.Info(DebugLogChannel.CombatPresentation,
+                typeof(GovernmentRewardClaimButtonController),
+                "_governmentRewardService = " + _governmentRewardService);
+            AppLog.Info(DebugLogChannel.CombatPresentation,
+                typeof(GovernmentRewardClaimButtonController),
+                "currentSystemId = " + currentSystemId);
+            AppLog.Info(DebugLogChannel.CombatPresentation,
+                typeof(GovernmentRewardClaimButtonController),
+                "isCurrentPlanetInhabited = " + isCurrentPlanetInhabited);
+            AppLog.Info(DebugLogChannel.CombatPresentation,
+                typeof(GovernmentRewardClaimButtonController),
+                "canClaim = " + canClaim);
         }
 
         if (root != null)
@@ -92,7 +100,8 @@ public sealed class GovernmentRewardClaimButtonController : CustomMonoBehaviour
             isCurrentPlanetInhabited
         );
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.CombatPresentation,
             $"[GovernmentRewardClaimButton] Claim result: {result.Success}, Credits: {result.Credits}, XP: {result.Xp}, Reason: {result.Reason}"
         );
 

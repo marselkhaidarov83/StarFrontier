@@ -110,10 +110,9 @@ public sealed class TargetSelectableView2A :
     {
         if (!ResolveService())
         {
-            Debug.LogError(
-                "[TargetSelectableView2A] " +
-                "ITargetService2A not found.",
-                this);
+            AppLog.Error(DebugLogChannel.Targeting,
+                typeof(TargetSelectableView2A),
+                "ITargetService2A not found.");
 
             return false;
         }
@@ -136,16 +135,15 @@ public sealed class TargetSelectableView2A :
         if (selected)
             return true;
 
-        Debug.LogWarning(
-            "[TargetSelectableView2A] " +
+        AppLog.Warning(DebugLogChannel.Targeting,
+            typeof(TargetSelectableView2A),
             "Target selection failed. " +
             "TargetId = " +
             targetId +
             " | Type = " +
             targetType +
             " | Reason = " +
-            failReason,
-            this);
+            failReason);
 
         return false;
     }

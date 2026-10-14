@@ -28,9 +28,9 @@ public sealed class StationSelectableView2A :
     {
         if (station == null)
         {
-            Debug.LogWarning(
-                "[StationSelectableView2A] StationConfig is null.",
-                this);
+            AppLog.Warning(DebugLogChannel.StationUi,
+                typeof(StationSelectableView2A),
+                "StationConfig is null.");
 
             return;
         }
@@ -59,22 +59,21 @@ public sealed class StationSelectableView2A :
 
             if (!selected)
             {
-                Debug.LogWarning(
-                    "[StationSelectableView2A] " +
+                AppLog.Warning(DebugLogChannel.StationUi,
+                    typeof(StationSelectableView2A),
                     "Target selection failed. " +
                     "StationId = " +
                     station.Id +
                     " | Reason = " +
-                    failReason,
-                    this);
+                    failReason);
             }
         }
 
         if (_eventBus == null)
         {
-            Debug.LogError(
-                "[StationSelectableView2A] SimpleEventBus not found.",
-                this);
+            AppLog.Error(DebugLogChannel.StationUi,
+                typeof(StationSelectableView2A),
+                "SimpleEventBus not found.");
 
             return;
         }

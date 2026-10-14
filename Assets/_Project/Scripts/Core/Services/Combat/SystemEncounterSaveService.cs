@@ -85,7 +85,9 @@ using UnityEngine;
                 });
             }
 
-            Debug.Log("[SystemEncounterSaveService] Captured encounter save data.");
+            AppLog.Info(DebugLogChannel.Combat,
+                typeof(SystemEncounterSaveService),
+                "Captured encounter save data.");
 
             return saveData;
         }
@@ -130,7 +132,9 @@ using UnityEngine;
 
                 if (enemyConfig == null)
                 {
-                    Debug.LogWarning($"[SystemEncounterSaveService] EnemyConfig not found: {enemySave.EnemyConfigId}");
+                    AppLog.Warning(DebugLogChannel.Combat,
+                        typeof(SystemEncounterSaveService),
+                        $"EnemyConfig not found: {enemySave.EnemyConfigId}");
                     continue;
                 }
 
@@ -170,7 +174,9 @@ using UnityEngine;
 
                 if (allyConfig == null)
                 {
-                    Debug.LogWarning($"[SystemEncounterSaveService] AllyConfig not found: {allySave.AllyConfigId}");
+                    AppLog.Warning(DebugLogChannel.Combat,
+                        typeof(SystemEncounterSaveService),
+                        $"AllyConfig not found: {allySave.AllyConfigId}");
                     continue;
                 }
 
@@ -216,7 +222,9 @@ using UnityEngine;
             _enemyService.RestoreEnemies(restoredEnemies);
             _allyService.RestoreAllies(restoredAllies);
 
-            Debug.Log("[SystemEncounterSaveService] Restored encounter save data.");
+            AppLog.Info(DebugLogChannel.Combat,
+                typeof(SystemEncounterSaveService),
+                "Restored encounter save data.");
         }
 
         private static int ValidateIntRange(

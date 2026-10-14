@@ -304,7 +304,8 @@ public sealed class LoadingSceneController : CustomMonoBehaviour
         if (!IsLoadingSceneDiagnosticsLogEnabled())
             return;
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Loading,
             "[LOADING_DIAG][Controller] " +
             phase +
             " | Frame=" + Time.frameCount +

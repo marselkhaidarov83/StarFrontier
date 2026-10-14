@@ -573,7 +573,8 @@ public static class LoadingSceneContext
         if (!IsLoadingSceneDiagnosticsLogEnabled())
             return;
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Loading,
             "[LOADING_DIAG][Context] " +
             phase +
             " | Frame=" + Time.frameCount +

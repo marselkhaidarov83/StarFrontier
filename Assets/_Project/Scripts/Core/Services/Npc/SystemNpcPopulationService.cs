@@ -294,7 +294,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         _npcRuntimeService.AddNpc(enemy);
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.NpcMovement,
             "[SystemPopulationService] Enemy system population spawned. " +
             "System: " + starSystem.Id + ", " +
             "Rule: " + rule.Id + ", " +
@@ -429,7 +429,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
                 _npcRuntimeService.AddNpc(enemy);
 
-                Debug.Log(
+                AppLog.Info(DebugLogChannel.NpcMovement,
                     "[SystemPopulationService] Enemy system population spawned. " +
                     "System: " + starSystem.Id + ", " +
                     "Rule: " + rule.Id + ", " +
@@ -1269,7 +1269,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
                 _npcRuntimeService.AddNpc(enemy);
 
-                Debug.Log(
+                AppLog.Info(DebugLogChannel.NpcMovement,
                     "[SystemPopulationService] Enemy spawned. " +
                     "System: " + starSystem.Id + ", " +
                     "GroupRule: " + rule.Id + ", " +
@@ -1340,7 +1340,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (starSystem == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug enemy spawn failed. " +
                 "Current player StarSystemConfig was not resolved.");
 
@@ -1352,7 +1352,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (populationRule == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug enemy spawn failed. " +
                 "System has no SystemPopulationRule. System: " +
                 starSystem.Id);
@@ -1363,7 +1363,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (populationRule.EnemyGroupSpawnRuleEntries == null ||
             populationRule.EnemyGroupSpawnRuleEntries.Length == 0)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug enemy spawn failed. " +
                 "SystemPopulationRule has no EnemyGroupSpawnRuleEntries. Rule: " +
                 populationRule.Id);
@@ -1416,7 +1416,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (selectedEntry == null ||
             selectedEntry.EnemyGroupSpawnRule == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug enemy spawn failed. " +
                 "No eligible enemy group rule for system: " +
                 starSystem.Id +
@@ -1441,7 +1441,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             starSystem,
             selectedRule);
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.NpcMovement,
             "[SystemPopulationService] Debug enemy attack group spawned. " +
             "System: " +
             starSystem.Id +
@@ -1463,7 +1463,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (starSystem == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug ally spawn failed. " +
                 "Current player StarSystemConfig was not resolved.");
 
@@ -1475,7 +1475,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (populationRule == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug ally spawn failed. " +
                 "System has no SystemPopulationRule. System: " +
                 starSystem.Id);
@@ -1486,7 +1486,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (populationRule.AllySpawnRules == null ||
             populationRule.AllySpawnRules.Length == 0)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug ally spawn failed. " +
                 "SystemPopulationRule has no AllySpawnRules. Rule: " +
                 populationRule.Id);
@@ -1540,7 +1540,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                     rule,
                     allyConfig);
 
-                Debug.Log(
+                AppLog.Info(DebugLogChannel.NpcMovement,
                     "[SystemPopulationService] Debug ally spawned. " +
                     "System: " +
                     starSystem.Id +
@@ -1555,7 +1555,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             }
         }
 
-        Debug.LogWarning(
+        AppLog.Warning(DebugLogChannel.NpcMovement,
             "[SystemPopulationService] Debug ally spawn failed. " +
             "No eligible ally for system: " +
             starSystem.Id +
@@ -1627,7 +1627,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
                 _npcRuntimeService.AddNpc(pirate);
 
-                Debug.Log(
+                AppLog.Info(DebugLogChannel.NpcMovement,
                     "[SystemPopulationService] Pirate spawned. " +
                     "System: " + currentSystemId + ", " +
                     "GroupRule: " + rule.Id + ", " +
@@ -2210,7 +2210,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (starSystem == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug enemy spawn failed. " +
                 "Current player StarSystemConfig was not resolved.");
 
@@ -2224,7 +2224,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             populationRule.EnemyGroupSpawnRuleEntries == null ||
             populationRule.EnemyGroupSpawnRuleEntries.Length == 0)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug enemy spawn failed. " +
                 "System has no enemy spawn rules. System: " +
                 starSystem.Id);
@@ -2290,7 +2290,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
                 _npcRuntimeService.AddNpc(enemy);
 
-                Debug.Log(
+                AppLog.Info(DebugLogChannel.NpcMovement,
                     "[SystemPopulationService] Debug single enemy spawned. " +
                     "System: " + starSystem.Id +
                     ", Rule: " + rule.Id +
@@ -2302,7 +2302,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             }
         }
 
-        Debug.LogWarning(
+        AppLog.Warning(DebugLogChannel.NpcMovement,
             "[SystemPopulationService] Debug enemy spawn failed. " +
             "No eligible enemy config for system: " +
             starSystem.Id +
@@ -2321,7 +2321,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 out AllySpawnRuleConfig rule,
                 out AllyConfig allyConfig))
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug other-system ally spawn failed. " +
                 "No eligible other system ally. Role: " +
                 role +
@@ -2336,7 +2336,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             rule,
             allyConfig);
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.NpcMovement,
             "[SystemPopulationService] Debug other-system ally spawned. " +
             "System: " +
             starSystem.Id +

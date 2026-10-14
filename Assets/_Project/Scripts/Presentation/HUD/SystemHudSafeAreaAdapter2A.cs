@@ -168,7 +168,7 @@ public sealed class SystemHudSafeAreaAdapter2A :
 
         if (Application.isPlaying)
         {
-            ApplySafeArea(true);
+            _hasApplied = false;
         }
     }
 
@@ -185,10 +185,10 @@ public sealed class SystemHudSafeAreaAdapter2A :
 
         if (transform.parent == null)
         {
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.SystemHud,
                 "[2A-S03-03-T03] Safe Area root " +
-                "does not have a parent.",
-                this);
+                "does not have a parent.");
 
             return;
         }
@@ -198,10 +198,10 @@ public sealed class SystemHudSafeAreaAdapter2A :
 
         if (directParentCanvas == null)
         {
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.SystemHud,
                 "[2A-S03-03-T03] Safe Area root must " +
-                "be a direct child of a Canvas.",
-                this);
+                "be a direct child of a Canvas.");
 
             return;
         }
@@ -211,10 +211,10 @@ public sealed class SystemHudSafeAreaAdapter2A :
 
         if (canvasScaler == null)
         {
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.SystemHud,
                 "[2A-S03-03-T03] Parent Canvas does " +
-                "not have CanvasScaler.",
-                directParentCanvas);
+                "not have CanvasScaler.");
 
             return;
         }
@@ -238,22 +238,22 @@ public sealed class SystemHudSafeAreaAdapter2A :
             !resolutionValid ||
             !matchModeValid)
         {
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.SystemHud,
                 "[2A-S03-03-T03] CanvasScaler setup " +
                 "does not match the required " +
                 "1080x1920 Scale With Screen Size " +
-                "configuration.",
-                directParentCanvas);
+                "configuration.");
 
             return;
         }
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.SystemHud,
             "[2A-S03-03-T03] Safe Area setup is valid " +
             "for " +
             gameObject.name +
-            ".",
-            this);
+            ".");
     }
 
     private void ApplySafeArea(
@@ -377,13 +377,13 @@ public sealed class SystemHudSafeAreaAdapter2A :
 
         if (logChanges)
         {
-            Debug.Log(
+            AppLog.Info(
+                DebugLogChannel.SystemHud,
                 "[2A-S03-03-T03] Applied Safe Area " +
                 effectiveSafeArea +
                 " to " +
                 gameObject.name +
-                ".",
-                this);
+                ".");
         }
     }
 

@@ -11,7 +11,6 @@ public sealed class DebugHudController : MonoBehaviour
             gameObject.SetActive(false);
     }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
     [SerializeField] private TMP_Text outputText;
     [SerializeField, Min(0.1f)] private float refreshIntervalSeconds = 0.5f;
 
@@ -142,5 +141,4 @@ public sealed class DebugHudController : MonoBehaviour
             ? "unavailable"
             : value;
     }
-#endif
 }

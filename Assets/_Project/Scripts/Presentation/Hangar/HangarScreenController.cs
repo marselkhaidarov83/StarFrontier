@@ -83,7 +83,9 @@ public class HangarScreenController : MonoBehaviour
 
     private void SwitchShip(string shipId)
     {
-        Debug.Log("[HangarScreenController] SwitchShip " + shipId);
+        AppLog.Info(DebugLogChannel.Hangar,
+            typeof(HangarScreenController),
+            "SwitchShip " + shipId);
         var result = _hangarService.SwitchShip(shipId);
 
         if (!result.Success)

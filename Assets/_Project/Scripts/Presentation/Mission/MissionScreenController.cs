@@ -138,7 +138,7 @@ public class MissionScreenController : CustomMonoBehaviour
 
         if (!accepted)
         {
-            Debug.LogWarning($"MissionBoard: Failed to accept mission {mission.MissionRuntimeId}");
+            AppLog.Warning(DebugLogChannel.Mission, $"MissionBoard: Failed to accept mission {mission.MissionRuntimeId}");
             return;
         }
 

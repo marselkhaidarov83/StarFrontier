@@ -65,7 +65,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         int deleted =
             DeleteScenarioAssets(confirm: true);
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.EditorGenerators,
             $"NpcBehaviourScenarioConfig: deleted generated scenario assets/folders: {deleted}");
     }
 
@@ -723,7 +723,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         int deletedFolders =
             DeleteEmptyFoldersUnderOutputRoot();
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.EditorGenerators,
             $"NpcBehaviourScenarioConfig: deleted assets={deletedAssets}, deleted empty folders={deletedFolders}.");
 
         return deletedAssets;
@@ -1224,7 +1224,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             if (errors.Count > 25)
                 message += $"\n...и ещё {errors.Count - 25} ошибок.";
 
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.EditorGenerators,
                 $"NpcBehaviourScenarioConfig CSV generation failed. Errors={errors.Count}\n{message}");
 
             EditorUtility.DisplayDialog(
@@ -1237,13 +1237,13 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
 
         foreach (string warning in warnings.Take(50))
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
                 $"NpcBehaviourScenarioConfig CSV generator: {warning}");
         }
 
         if (warnings.Count > 50)
         {
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
                 $"NpcBehaviourScenarioConfig CSV generator: and {warnings.Count - 50} more warnings.");
         }
 
@@ -1262,7 +1262,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             $"Warnings: {warnings.Count}\n" +
             $"Elapsed: {elapsed.TotalSeconds:F1}s";
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.EditorGenerators,
             $"NpcBehaviourScenarioConfig {result}");
 
         EditorUtility.DisplayDialog(

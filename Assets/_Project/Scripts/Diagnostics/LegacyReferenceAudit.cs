@@ -129,14 +129,15 @@ public static class LegacyReferenceAudit
                 outputDirectory,
                 "S3-02_Automated_Reference_Report.md");
 
-            Debug.Log(
-                $"[LegacyReferenceAudit] Аудит завершён: {reportPath}");
+            AppLog.Info(DebugLogChannel.DataValidation,
+                typeof(LegacyReferenceAudit),
+                $"Аудит завершён: {reportPath}");
 
             EditorUtility.RevealInFinder(reportPath);
         }
         catch (Exception exception)
         {
-            Debug.LogException(exception);
+            AppLog.Exception(DebugLogChannel.DataValidation, exception);
 
             EditorUtility.DisplayDialog(
                 "Legacy Reference Audit",
@@ -217,9 +218,9 @@ public static class LegacyReferenceAudit
             }
             catch (Exception exception)
             {
-                Debug.LogError(
-                    $"Не удалось проверить prefab {path}: " +
-                    exception.Message);
+                AppLog.Error(
+                    DebugLogChannel.DataValidation,
+                    $"Не удалось проверить prefab {path}: " + exception.Message);
             }
             finally
             {
@@ -269,9 +270,9 @@ public static class LegacyReferenceAudit
             }
             catch (Exception exception)
             {
-                Debug.LogError(
-                    $"Не удалось проверить сцену {path}: " +
-                    exception.Message);
+                AppLog.Error(
+                    DebugLogChannel.DataValidation,
+                    $"Не удалось проверить сцену {path}: " + exception.Message);
             }
             finally
             {

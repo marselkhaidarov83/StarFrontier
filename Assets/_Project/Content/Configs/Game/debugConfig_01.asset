@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85535fabc391c40aea0d04fa4d1147ee, type: 3}
   m_Name: debugConfig_01
   m_EditorClassIdentifier: Data::DebugConfig
-  showDebugOverlay: 1
-  showServiceLogs: 1
-  showEventLogs: 1
-  enableGodMode: 0
-  enableFastTravelDebug: 0
-  enableSpawnDebug: 0
+  showDebugOverlayInEditor: 0
+  showDebugOverlayInMobileBuild: 0
+  enableGodMode: 1

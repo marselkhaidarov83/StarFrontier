@@ -131,7 +131,9 @@ public sealed class SimpleEventBus
     public void Clear()
     {
         _handlers.Clear();
-        Debug.Log("[SimpleEventBus] Cleared all listeners");
+        AppLog.Info(DebugLogChannel.EventBus,
+            typeof(SimpleEventBus),
+            "Cleared all listeners");
     }
 
     private static string GetSubscriberName(Delegate subscriber)

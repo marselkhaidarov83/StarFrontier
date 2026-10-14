@@ -11,12 +11,12 @@ public class MenuState : IGameState
 
     public void Enter()
     {
-        Debug.Log("Entered MenuState");
+        AppLog.Info(DebugLogChannel.MainMenu, "Entered MenuState");
         _sceneService.LoadMainMenu();
     }
 
     public void Exit()
     {
-        Debug.Log("Exited MenuState");
+        AppLog.Info(DebugLogChannel.MainMenu, "Exited MenuState");
     }
 }

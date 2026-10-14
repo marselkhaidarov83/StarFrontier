@@ -106,7 +106,9 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
 
         if (string.IsNullOrWhiteSpace(currentSystemId))
         {
-            Debug.LogWarning("[SystemNpcViewBinder] Current system id is empty.");
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcViewBinder),
+                "Current system id is empty.");
             return;
         }
 
@@ -202,7 +204,9 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
 
         if (npcViewPrefab == null)
         {
-            Debug.LogError("[SystemNpcViewBinder] NPC view prefab is missing.");
+            AppLog.Error(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcViewBinder),
+                "NPC view prefab is missing.");
             return;
         }
 
@@ -239,8 +243,9 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
         }
         else
         {
-            Debug.Log(
-                "[SystemNpcViewBinder] VIEW_REMOVED" +
+            AppLog.Info(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcViewBinder),
+                "VIEW_REMOVED" +
                 " | Source=" + source +
                 " | RuntimeNpcId=" + runtimeNpcId +
                 " | CurrentSystemId=" + GetCurrentSystemId() +
@@ -261,8 +266,9 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
     {
         if (npc == null)
         {
-            Debug.Log(
-                "[SystemNpcViewBinder] " + marker +
+            AppLog.Info(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcViewBinder),
+                marker +
                 " | Source=" + source +
                 " | RuntimeNpcId=null" +
                 " | CurrentSystemId=" + GetCurrentSystemId() +
@@ -292,8 +298,9 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
                 npc.InitialRouteBuildPlanetId,
                 npc.CurrentPosition);
 
-        Debug.Log(
-            "[SystemNpcViewBinder] " + marker +
+        AppLog.Info(DebugLogChannel.NpcMovement,
+            typeof(SystemNpcViewBinder),
+            marker +
             " | Source=" + source +
             " | RuntimeNpcId=" + npc.RuntimeNpcId +
             " | ConfigId=" + npc.ConfigId +

@@ -175,8 +175,8 @@ public sealed class SystemDestinationMarkerController2 :
     {
         if (evt == null)
         {
-            Debug.LogError(
-                "[SystemDestinationMarkerController2] " +
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemDestinationMarkerController2),
                 "RouteExitMapChangedEvent is null.");
 
             return;

@@ -177,7 +177,7 @@ public static class SystemPopulationRuleAssetGenerator
         if (allyRule == null)
         {
             warnings++;
-            Debug.LogWarning(
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
                 $"SystemPopulationRule generator: missing AllySpawnRuleConfig '{profile.AllyRuleKey}'.");
         }
 
@@ -216,7 +216,7 @@ public static class SystemPopulationRuleAssetGenerator
             if (enemyRule == null)
             {
                 warnings++;
-                Debug.LogWarning(
+                AppLog.Warning(DebugLogChannel.EditorGenerators,
                     $"SystemPopulationRule generator: missing EnemyGroupSpawnRuleConfig '{enemyRuleKey}' for {id}.");
             }
 
@@ -247,9 +247,8 @@ public static class SystemPopulationRuleAssetGenerator
             rule.AllySpawnRules.Length != 1 ||
             rule.AllySpawnRules[0] == null)
         {
-            Debug.LogError(
-                $"SystemPopulationRule validation: exactly one ally spawn rule is required at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"SystemPopulationRule validation: exactly one ally spawn rule is required at {path}");
 
             isValid = false;
         }
@@ -262,9 +261,8 @@ public static class SystemPopulationRuleAssetGenerator
             if (rule.EnemyGroupSpawnRuleEntries != null &&
                 rule.EnemyGroupSpawnRuleEntries.Length > 0)
             {
-                Debug.LogError(
-                    $"SystemPopulationRule validation: no_enemies rule must not contain enemy group spawn rules at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"SystemPopulationRule validation: no_enemies rule must not contain enemy group spawn rules at {path}");
 
                 isValid = false;
             }
@@ -275,9 +273,8 @@ public static class SystemPopulationRuleAssetGenerator
         if (rule.EnemyGroupSpawnRuleEntries == null ||
             rule.EnemyGroupSpawnRuleEntries.Length != 3)
         {
-            Debug.LogError(
-                $"SystemPopulationRule validation: regular rule must contain exactly 3 enemy group spawn rule entries at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"SystemPopulationRule validation: regular rule must contain exactly 3 enemy group spawn rule entries at {path}");
 
             return false;
         }
@@ -292,9 +289,8 @@ public static class SystemPopulationRuleAssetGenerator
 
             if (enemyEntry == null || !enemyEntry.IsValid())
             {
-                Debug.LogError(
-                    $"SystemPopulationRule validation: missing or invalid enemy group spawn rule entry at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"SystemPopulationRule validation: missing or invalid enemy group spawn rule entry at {path}");
 
                 isValid = false;
                 continue;
@@ -302,9 +298,8 @@ public static class SystemPopulationRuleAssetGenerator
 
             if (enemyEntry.Weight != 1)
             {
-                Debug.LogError(
-                    $"SystemPopulationRule validation: enemy group spawn rule entry weight must be 1 at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"SystemPopulationRule validation: enemy group spawn rule entry weight must be 1 at {path}");
 
                 isValid = false;
             }
@@ -345,9 +340,8 @@ public static class SystemPopulationRuleAssetGenerator
             if (found)
                 continue;
 
-            Debug.LogError(
-                $"SystemPopulationRule validation: missing required enemy group spawn rule '{requiredId}' at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"SystemPopulationRule validation: missing required enemy group spawn rule '{requiredId}' at {path}");
 
             isValid = false;
         }

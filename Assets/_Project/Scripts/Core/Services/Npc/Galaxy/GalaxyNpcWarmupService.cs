@@ -39,8 +39,9 @@ public sealed class GalaxyNpcWarmupService :
         if (_simulationScheduleService == null ||
             _systemNpcBehaviorService == null)
         {
-            AppLog.Error(
-                "[GalaxyNpcWarmupService] Cannot run warmup: " +
+            AppLog.Error(DebugLogChannel.NpcMovement,
+                typeof(GalaxyNpcWarmupService),
+                "Cannot run warmup: " +
                 "required services are missing.");
 
             return;
@@ -160,8 +161,9 @@ public sealed class GalaxyNpcWarmupService :
         if (_simulationScheduleService == null ||
             _systemNpcBehaviorService == null)
         {
-            AppLog.Error(
-                "[GalaxyNpcWarmupService] Cannot run warmup: " +
+            AppLog.Error(DebugLogChannel.NpcMovement,
+                typeof(GalaxyNpcWarmupService),
+                "Cannot run warmup: " +
                 "required services are missing.");
 
             yield break;

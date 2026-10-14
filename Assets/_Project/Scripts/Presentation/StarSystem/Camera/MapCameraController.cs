@@ -100,7 +100,8 @@ public class MapCameraController : MonoBehaviour
 
         if (cam == null)
         {
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.SystemMap,
                 "MapCameraController должен висеть на объекте с Camera."
             );
 

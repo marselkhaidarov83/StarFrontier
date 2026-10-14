@@ -6,22 +6,13 @@ using UnityEngine;
 public class DebugConfig : ScriptableObject
 {
     [Header("Debug UI")]
-    [Tooltip("Показывает или скрывает отладочный слой интерфейса. В текущем коде хранится в конфиге и готов к подключению панели.")]
-    public bool showDebugOverlay = true;
+    [Tooltip("Показывает или скрывает отладочный интерфейс при запуске в Unity Editor.")]
+    public bool showDebugOverlayInEditor = true;
 
-    [Tooltip("Разрешает служебные сообщения игровых систем. В текущем коде хранится в конфиге и может использоваться отладочными панелями.")]
-    public bool showServiceLogs = true;
-
-    [Tooltip("Разрешает сообщения о событиях игры. В текущем коде хранится в конфиге и может использоваться отладочными панелями.")]
-    public bool showEventLogs = true;
+    [Tooltip("Показывает или скрывает отладочный интерфейс в Android/iOS-сборке.")]
+    public bool showDebugOverlayInMobileBuild = false;
 
     [Header("Gameplay Debug")]
     [Tooltip("Включает неуязвимость игрока. Используется при расчёте урона по игроку и может переключаться через меню главного загрузчика.")]
-    public bool enableGodMode = false;
-
-    [Tooltip("Разрешает отладку быстрого путешествия. В текущем коде хранится в конфиге и готов к подключению отладочного перехода.")]
-    public bool enableFastTravelDebug = false;
-
-    [Tooltip("Разрешает отладку создания объектов. В текущем коде хранится в конфиге и готов к подключению отладочного создания кораблей или событий.")]
-    public bool enableSpawnDebug = false;
+    public bool enableGodMode = true;
 }

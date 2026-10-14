@@ -20,7 +20,9 @@ public class SystemMapHUDController : CustomMonoBehaviour
         BindButtons();
 
         if (IsDebug())
-            Debug.Log("[SystemMapHUDController] initialized");
+            AppLog.Info(DebugLogChannel.SystemHud,
+                typeof(SystemMapHUDController),
+                "initialized");
     }
 
     private void OnDestroy()
@@ -40,7 +42,9 @@ public class SystemMapHUDController : CustomMonoBehaviour
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
         if (IsDebug())
-            Debug.Log("[SystemMapHUDController] events subscribed");
+            AppLog.Info(DebugLogChannel.SystemHud,
+                typeof(SystemMapHUDController),
+                "events subscribed");
     }
 
     private void UnsubscribeFromEvents()
@@ -54,7 +58,9 @@ public class SystemMapHUDController : CustomMonoBehaviour
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
         if (IsDebug())
-            Debug.Log("[SystemMapHUDController] events unsubscribed");
+            AppLog.Info(DebugLogChannel.SystemHud,
+                typeof(SystemMapHUDController),
+                "events unsubscribed");
     }
 
     private void OnGalaxyEntered(GalaxyEnteredEvent evt)
@@ -63,7 +69,9 @@ public class SystemMapHUDController : CustomMonoBehaviour
             systemMapHUDRoot.SetActive(false);
 
         if (IsDebug())
-            Debug.Log("[SystemMapHUDController] galaxy entered");
+            AppLog.Info(DebugLogChannel.SystemHud,
+                typeof(SystemMapHUDController),
+                "galaxy entered");
     }
 
     private void OnSystemEntered(StarSystemEnteredEvent evt)
@@ -72,7 +80,9 @@ public class SystemMapHUDController : CustomMonoBehaviour
             systemMapHUDRoot.SetActive(true);
 
         if (IsDebug())
-            Debug.Log("[SystemMapHUDController] system entered");
+            AppLog.Info(DebugLogChannel.SystemHud,
+                typeof(SystemMapHUDController),
+                "system entered");
     }
 
     private void OnExitMapChanged(ExitMapChangedEvent evt)
@@ -88,7 +98,9 @@ public class SystemMapHUDController : CustomMonoBehaviour
             systemMapHUDRoot.SetActive(false);
 
         if (IsDebug())
-            Debug.Log("[SystemMapHUDController] planet entered");
+            AppLog.Info(DebugLogChannel.SystemHud,
+                typeof(SystemMapHUDController),
+                "planet entered");
     }
 
     private void BindButtons()

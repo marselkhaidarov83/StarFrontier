@@ -42,7 +42,7 @@ public class SceneService : ISceneService
         catch (Exception exception)
         {
             NotifyFailure(sceneName, exception.Message);
-            AppLog.Exception(exception);
+            AppLog.Exception(DebugLogChannel.Loading, exception);
         }
     }
 
@@ -89,7 +89,11 @@ public class SceneService : ISceneService
             operation.completed += _activeLoadCompleted;
 
             if (_debugEnabled)
-                AppLog.Info($"Async scene load started: {sceneName}");
+            {
+                AppLog.Info(
+                    DebugLogChannel.Loading,
+                    $"Async scene load started: {sceneName}");
+            }
 
             return operation;
         }
@@ -97,7 +101,7 @@ public class SceneService : ISceneService
         {
             ClearActiveLoad();
             NotifyFailure(sceneName, exception.Message);
-            AppLog.Exception(exception);
+            AppLog.Exception(DebugLogChannel.Loading, exception);
             return null;
         }
     }
@@ -116,6 +120,7 @@ public class SceneService : ISceneService
         ClearActiveLoad();
 
         AppLog.Warning(
+            DebugLogChannel.Loading,
             $"Scene load callbacks cancelled: {cancelledSceneName}. " +
             "Unity may still finish the underlying AsyncOperation.");
 
@@ -126,7 +131,11 @@ public class SceneService : ISceneService
     public bool TryLoadFallback(string fallbackSceneName)
     {
         if (_debugEnabled)
-            AppLog.Warning($"Trying fallback scene: {fallbackSceneName}");
+        {
+            AppLog.Warning(
+                DebugLogChannel.Loading,
+                $"Trying fallback scene: {fallbackSceneName}");
+        }
 
         return LoadSceneAsync(fallbackSceneName) != null;
     }
@@ -134,7 +143,11 @@ public class SceneService : ISceneService
     public void LoadBootstrap()
     {
         if (_debugEnabled)
-            AppLog.Info("LoadBootstrap started");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "LoadBootstrap started");
+        }
 
         LoadSceneAsync(BOOTSTRAP_SCENE);
     }
@@ -142,7 +155,11 @@ public class SceneService : ISceneService
     public void LoadMainMenu()
     {
         if (_debugEnabled)
-            AppLog.Info("LoadMainMenu started");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "LoadMainMenu started");
+        }
 
         LoadSceneAsync(MAIN_MENU_SCENE);
     }
@@ -150,7 +167,11 @@ public class SceneService : ISceneService
     public void LoadMeta()
     {
         if (_debugEnabled)
-            AppLog.Info("LoadMeta started");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "LoadMeta started");
+        }
 
         LoadSceneAsync(META_SCENE);
     }
@@ -158,7 +179,11 @@ public class SceneService : ISceneService
     public void LoadGalaxy()
     {
         if (_debugEnabled)
-            AppLog.Info("LoadGalaxy started");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "LoadGalaxy started");
+        }
 
         LoadSceneAsync(GALAXY_SCENE);
     }
@@ -166,7 +191,11 @@ public class SceneService : ISceneService
     public void LoadSystem()
     {
         if (_debugEnabled)
-            AppLog.Info("LoadSystem started");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "LoadSystem started");
+        }
 
         LoadSceneAsync(SYSTEM_SCENE);
     }
@@ -174,7 +203,11 @@ public class SceneService : ISceneService
     public void LoadCombat()
     {
         if (_debugEnabled)
-            AppLog.Info("LoadCombat started");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "LoadCombat started");
+        }
 
         LoadSceneAsync(COMBAT_SCENE);
     }
@@ -216,7 +249,11 @@ public class SceneService : ISceneService
     private void NotifyCompleted(string sceneName)
     {
         if (_debugEnabled)
-            AppLog.Info($"Scene load completed: {sceneName}");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                $"Scene load completed: {sceneName}");
+        }
 
         try
         {
@@ -224,7 +261,9 @@ public class SceneService : ISceneService
         }
         catch (Exception exception)
         {
-            AppLog.Exception(exception);
+            AppLog.Exception(
+                DebugLogChannel.Loading,
+                exception);
         }
     }
 
@@ -236,7 +275,9 @@ public class SceneService : ISceneService
         }
         catch (Exception exception)
         {
-            AppLog.Exception(exception);
+            AppLog.Exception(
+                DebugLogChannel.Loading,
+                exception);
         }
     }
 
@@ -249,6 +290,7 @@ public class SceneService : ISceneService
             : error;
 
         AppLog.Error(
+            DebugLogChannel.Loading,
             $"Scene load failed: {safeSceneName}. {safeError}");
 
         try
@@ -257,7 +299,9 @@ public class SceneService : ISceneService
         }
         catch (Exception exception)
         {
-            AppLog.Exception(exception);
+            AppLog.Exception(
+                DebugLogChannel.Loading,
+                exception);
         }
     }
 }

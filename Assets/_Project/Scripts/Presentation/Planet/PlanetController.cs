@@ -148,7 +148,9 @@ public class PlanetController : CustomMonoBehaviour
         eventBus.Publish(new HangarEnteredEvent());
 
         if (IsDebug())
-            Debug.Log("[PlanetController] Open Hangar clicked");
+            AppLog.Info(DebugLogChannel.PlanetUi,
+                typeof(PlanetController),
+                "Open Hangar clicked");
     }
 
     private void OnOpenMarketClicked()
@@ -167,7 +169,9 @@ public class PlanetController : CustomMonoBehaviour
         eventBus.Publish(new MarketEnteredEvent());
 
         if (IsDebug())
-            Debug.Log("[PlanetController] Open Market clicked");
+            AppLog.Info(DebugLogChannel.PlanetUi,
+                typeof(PlanetController),
+                "Open Market clicked");
     }
 
     private void OnOpenGovernmentClicked()
@@ -175,7 +179,9 @@ public class PlanetController : CustomMonoBehaviour
         PlanetGovernmentEntered();
 
         if (IsDebug())
-            Debug.Log("[PlanetController] Open Government clicked");
+            AppLog.Info(DebugLogChannel.PlanetUi,
+                typeof(PlanetController),
+                "Open Government clicked");
     }
 
     private void OnRefuelClicked()
@@ -194,20 +200,26 @@ public class PlanetController : CustomMonoBehaviour
         eventBus.Publish(new RefuelEnteredEvent());
 
         if (IsDebug())
-            Debug.Log("[PlanetController] Refuel clicked");
+            AppLog.Info(DebugLogChannel.PlanetUi,
+                typeof(PlanetController),
+                "Refuel clicked");
     }
 
     private void OnPlanetEntered(PlanetEnteredEvent evt)
     {
         if (IsDebug())
-            Debug.Log("[PlanetController] planet entered started");
+            AppLog.Info(DebugLogChannel.PlanetUi,
+                typeof(PlanetController),
+                "planet entered started");
 
         RefreshBackground();
         RefreshActionAvailability();
         PlanetGovernmentEntered();
 
         if (IsDebug())
-            Debug.Log("[PlanetController] planet entered");
+            AppLog.Info(DebugLogChannel.PlanetUi,
+                typeof(PlanetController),
+                "planet entered");
     }
 
     private void RefreshBackground()
@@ -253,36 +265,48 @@ public class PlanetController : CustomMonoBehaviour
     private void PlanetGovernmentEntered()
     {
         if (IsDebug())
-            Debug.Log("[PlanetController] PlanetGovernmentEntered() started");
+            AppLog.Info(DebugLogChannel.PlanetUi,
+                typeof(PlanetController),
+                "PlanetGovernmentEntered() started");
 
         if (planetRoot != null)
         {
             if (IsDebug())
-                Debug.Log("[PlanetController] planetRoot = " + planetRoot);
+                AppLog.Info(DebugLogChannel.PlanetUi,
+                    typeof(PlanetController),
+                    "planetRoot = " + planetRoot);
             planetRoot.SetActive(true);
         }
         if (governmentBlock != null)
         {
             if (IsDebug())
-                Debug.Log("[PlanetController] governmentBlock = " + governmentBlock);
+                AppLog.Info(DebugLogChannel.PlanetUi,
+                    typeof(PlanetController),
+                    "governmentBlock = " + governmentBlock);
             governmentBlock.SetActive(true);
         }
         if (marketBlock != null)
         {
             if (IsDebug())
-                Debug.Log("[PlanetController] marketBlock = " + marketBlock);
+                AppLog.Info(DebugLogChannel.PlanetUi,
+                    typeof(PlanetController),
+                    "marketBlock = " + marketBlock);
             marketBlock.SetActive(false);
         }
         if (hangarBlock != null)
         {
             if (IsDebug())
-                Debug.Log("[PlanetController] hangarBlock = " + hangarBlock);
+                AppLog.Info(DebugLogChannel.PlanetUi,
+                    typeof(PlanetController),
+                    "hangarBlock = " + hangarBlock);
             hangarBlock.SetActive(false);
         }
         if (fuelBlock != null)
         {
             if (IsDebug())
-                Debug.Log("[PlanetController] fuelBlock = " + fuelBlock);
+                AppLog.Info(DebugLogChannel.PlanetUi,
+                    typeof(PlanetController),
+                    "fuelBlock = " + fuelBlock);
             fuelBlock.SetActive(false);
         }
 

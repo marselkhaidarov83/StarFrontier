@@ -40,7 +40,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             npc.ConfigId,
             npc.CurrentSystemId));
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.NpcMovement,
             $"[NPC_COUNT] NPC spawned. TotalNpcs: {_npcs.Count}, Id: {npc.RuntimeNpcId}, Type: {npc.NpcType}, Config: {npc.ConfigId}, System: {npc.CurrentSystemId}");
 
         LogCustom(
@@ -307,7 +307,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
                 systemId,
                 SystemNpcType.Enemy).Count;
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.NpcMovement,
             "[EnemyOwnedSystemLiberation] CHECK" +
             " | SystemId=" + systemId +
             " | KilledNpcId=" + killedNpc.RuntimeNpcId +
@@ -320,7 +320,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         bool liberated =
             systemSecurityService.LiberateSystemByPlayer(systemId);
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.NpcMovement,
             "[EnemyOwnedSystemLiberation] APPLY" +
             " | SystemId=" + systemId +
             " | Liberated=" + liberated +
@@ -435,14 +435,17 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     {
         if (string.IsNullOrWhiteSpace(runtimeNpcId))
         {
-            Debug.LogWarning("[SystemNpcRuntimeService] DespawnNpc failed. RuntimeNpcId is empty.");
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcRuntimeService),
+                "DespawnNpc failed. RuntimeNpcId is empty.");
             return false;
         }
 
         if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) || npc == null)
         {
-            Debug.LogWarning(
-                "[SystemNpcRuntimeService] DespawnNpc failed. NPC not found. RuntimeNpcId: " +
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcRuntimeService),
+                "DespawnNpc failed. NPC not found. RuntimeNpcId: " +
                 runtimeNpcId);
 
             return false;
@@ -481,14 +484,17 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     {
         if (string.IsNullOrWhiteSpace(runtimeNpcId))
         {
-            Debug.LogWarning("[SystemNpcRuntimeService] KillNpc failed. RuntimeNpcId is empty.");
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcRuntimeService),
+                "KillNpc failed. RuntimeNpcId is empty.");
             return false;
         }
 
         if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) || npc == null)
         {
-            Debug.LogWarning(
-                "[SystemNpcRuntimeService] KillNpc failed. NPC not found. RuntimeNpcId: " +
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcRuntimeService),
+                "KillNpc failed. NPC not found. RuntimeNpcId: " +
                 runtimeNpcId);
 
             return false;
@@ -496,8 +502,9 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
 
         if (!npc.IsAlive || npc.LifeState != SystemNpcLifeState.Alive)
         {
-            Debug.LogWarning(
-                "[SystemNpcRuntimeService] KillNpc failed. NPC is not alive. RuntimeNpcId: " +
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcRuntimeService),
+                "KillNpc failed. NPC is not alive. RuntimeNpcId: " +
                 runtimeNpcId +
                 ", LifeState: " +
                 npc.LifeState);
@@ -524,14 +531,17 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
     {
         if (string.IsNullOrWhiteSpace(runtimeNpcId))
         {
-            Debug.LogWarning("[SystemNpcRuntimeService] ResetNpc failed. RuntimeNpcId is empty.");
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcRuntimeService),
+                "ResetNpc failed. RuntimeNpcId is empty.");
             return false;
         }
 
         if (!TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) || npc == null)
         {
-            Debug.LogWarning(
-                "[SystemNpcRuntimeService] ResetNpc failed. NPC not found. RuntimeNpcId: " +
+            AppLog.Warning(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcRuntimeService),
+                "ResetNpc failed. NPC not found. RuntimeNpcId: " +
                 runtimeNpcId);
 
             return false;

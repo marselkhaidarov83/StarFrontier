@@ -53,20 +53,18 @@ public class GalaxySceneController : CustomMonoBehaviour
 
         if (Bootstrapper.Instance == null)
         {
-            Debug.LogError(
-                "[GalaxySceneController] " +
-                "Bootstrapper.Instance is null."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxySceneController),
+                "Bootstrapper.Instance is null.");
 
             return;
         }
 
         if (Bootstrapper.Instance.ServiceRegistry == null)
         {
-            Debug.LogError(
-                "[GalaxySceneController] " +
-                "ServiceRegistry is null."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxySceneController),
+                "ServiceRegistry is null.");
 
             return;
         }

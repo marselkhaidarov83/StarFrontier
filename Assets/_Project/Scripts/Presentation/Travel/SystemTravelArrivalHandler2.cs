@@ -19,7 +19,7 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
 
         if (_eventBus == null)
         {
-            Debug.LogError("[SystemTravelArrivalHandler] SimpleEventBus not found.");
+            AppLog.Error(DebugLogChannel.Travel, "[SystemTravelArrivalHandler] SimpleEventBus not found.");
             return;
         }
 
@@ -57,14 +57,14 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
                 break;
 
             default:
-                Debug.Log("[SystemTravelArrivalHandler] Arrival with no destination type.");
+                AppLog.Info(DebugLogChannel.Travel, "[SystemTravelArrivalHandler] Arrival with no destination type.");
                 break;
         }
     }
 
     private void HandlePlanetArrival(SystemTravelCompletedEvent evt)
     {
-        Debug.Log($"[SystemTravelArrivalHandler] Arrived at planet: {evt.PlanetId}");
+        AppLog.Info(DebugLogChannel.Travel, $"[SystemTravelArrivalHandler] Arrived at planet: {evt.PlanetId}");
 
         if (arrivalFlash != null)
             arrivalFlash.Play(evt.FinalPosition);
@@ -80,9 +80,9 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
 
     private void HandleStationArrival(SystemTravelCompletedEvent evt)
     {
-        Debug.Log(
-            "[SystemTravelArrivalHandler] Arrived at station point: " +
-            evt.FinalPosition);
+        AppLog.Info(
+            DebugLogChannel.Travel,
+            "[SystemTravelArrivalHandler] Arrived at station point: " + evt.FinalPosition);
 
         if (arrivalFlash != null)
             arrivalFlash.Play(evt.FinalPosition);
@@ -92,7 +92,7 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
 
     private void HandleMapPointArrival(SystemTravelCompletedEvent evt)
     {
-        Debug.Log($"[SystemTravelArrivalHandler] Arrived at map point: {evt.FinalPosition}");
+        AppLog.Info(DebugLogChannel.Travel, $"[SystemTravelArrivalHandler] Arrived at map point: {evt.FinalPosition}");
 
         if (arrivalFlash != null)
             arrivalFlash.Play(evt.FinalPosition);
@@ -102,9 +102,9 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
 
     private void HandleNpcArrival(SystemTravelCompletedEvent evt)
     {
-        Debug.Log(
-            "[SystemTravelArrivalHandler] Arrived at NPC point: " +
-            evt.FinalPosition);
+        AppLog.Info(
+            DebugLogChannel.Travel,
+            "[SystemTravelArrivalHandler] Arrived at NPC point: " + evt.FinalPosition);
 
         if (arrivalFlash != null)
             arrivalFlash.Play(evt.FinalPosition);
@@ -114,7 +114,7 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
 
     private void HandleSystemExitArrival(SystemTravelCompletedEvent evt)
     {
-        Debug.Log($"[SystemTravelArrivalHandler] Reached system exit. Target system: {evt.TargetSystemId}");
+        AppLog.Info(DebugLogChannel.Travel, $"[SystemTravelArrivalHandler] Reached system exit. Target system: {evt.TargetSystemId}");
 
         if (systemJumpFlash != null)
             systemJumpFlash.Play(evt.FinalPosition);

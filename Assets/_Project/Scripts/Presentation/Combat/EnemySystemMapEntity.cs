@@ -140,7 +140,9 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
     {
         if (runtimeEnemy == null)
         {
-            Debug.LogError("[EnemySystemMapEntity] Cannot bind null runtime enemy.");
+            AppLog.Error(DebugLogChannel.CombatPresentation,
+                typeof(EnemySystemMapEntity),
+                "Cannot bind null runtime enemy.");
             return;
         }
 
@@ -214,7 +216,9 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
 
         if (!_isBound)
         {
-            Debug.LogWarning("[EnemySystemMapEntity] Click ignored: enemy is not bound.");
+            AppLog.Warning(DebugLogChannel.CombatPresentation,
+                typeof(EnemySystemMapEntity),
+                "Click ignored: enemy is not bound.");
             return;
         }
 
@@ -236,7 +240,9 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
     {
         if (!_isBound)
         {
-            Debug.LogWarning("[EnemySystemMapEntity] Cannot apply damage: enemy view is not bound.");
+            AppLog.Warning(DebugLogChannel.CombatPresentation,
+                typeof(EnemySystemMapEntity),
+                "Cannot apply damage: enemy view is not bound.");
             return;
         }
 

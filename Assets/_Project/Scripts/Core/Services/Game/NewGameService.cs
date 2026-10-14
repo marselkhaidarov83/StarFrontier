@@ -27,6 +27,7 @@ public class NewGameService : CustomService, INewGameService
         if (Bootstrapper.Instance == null)
         {
             AppLog.Error(
+                DebugLogChannel.Bootstrap,
                 "NewGameService cannot start loading: Bootstrapper.Instance is null.");
 
             return;
@@ -189,7 +190,8 @@ public class NewGameService : CustomService, INewGameService
             return;
         }
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Loading,
             "[LOADING_DIAG][NewGameService] " +
             phase +
             " | Frame=" + Time.frameCount +

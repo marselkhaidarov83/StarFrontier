@@ -50,7 +50,7 @@ public sealed class GalaxyGraphModel
     {
         if (!TryGetSystem(systemId, out var system))
         {
-            Debug.LogWarning($"GalaxyGraphModel.GetNeighbors: system '{systemId}' was not found.");
+            AppLog.Warning(DebugLogChannel.DataValidation, $"GalaxyGraphModel.GetNeighbors: system '{systemId}' was not found.");
             return Array.Empty<GalaxyNodeData>();
         }
 
@@ -64,7 +64,7 @@ public sealed class GalaxyGraphModel
             }
             else
             {
-                Debug.LogWarning(
+                AppLog.Warning(DebugLogChannel.DataValidation,
                     $"GalaxyGraphModel.GetNeighbors: system '{system.SystemId}' references missing neighbor '{neighborId}'.");
             }
         }
@@ -98,13 +98,13 @@ public sealed class GalaxyGraphModel
         {
             if (system == null)
             {
-                Debug.LogWarning("GalaxyGraphModel.BuildIndex: null system entry was skipped.");
+                AppLog.Warning(DebugLogChannel.DataValidation, "GalaxyGraphModel.BuildIndex: null system entry was skipped.");
                 continue;
             }
 
             if (string.IsNullOrWhiteSpace(system.SystemId))
             {
-                Debug.LogWarning("GalaxyGraphModel.BuildIndex: system with empty id was skipped.");
+                AppLog.Warning(DebugLogChannel.DataValidation, "GalaxyGraphModel.BuildIndex: system with empty id was skipped.");
                 continue;
             }
 
@@ -112,7 +112,7 @@ public sealed class GalaxyGraphModel
 
             if (_systemsById.ContainsKey(normalizedId))
             {
-                Debug.LogWarning($"GalaxyGraphModel.BuildIndex: duplicate system id '{normalizedId}' was skipped.");
+                AppLog.Warning(DebugLogChannel.DataValidation, $"GalaxyGraphModel.BuildIndex: duplicate system id '{normalizedId}' was skipped.");
                 continue;
             }
 
@@ -130,7 +130,7 @@ public sealed class GalaxyGraphModel
             {
                 if (!_systemsById.ContainsKey(neighborId))
                 {
-                    Debug.LogWarning(
+                    AppLog.Warning(DebugLogChannel.DataValidation,
                         $"GalaxyGraphModel.ValidateNeighborLinks: system '{system.SystemId}' has missing neighbor '{neighborId}'.");
                 }
             }

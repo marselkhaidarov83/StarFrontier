@@ -39,7 +39,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         SubscribeToEvents();
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] initialized");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "initialized");
     }
 
     private void OnDestroy()
@@ -54,21 +56,27 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (gameSessionService == null)
         {
             if (IsDebug())
-                Debug.LogError($"[SystemMapController2] gameSessionService is null");
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    $"gameSessionService is null");
             return;
         }
 
         if (configService == null)
         {
             if (IsDebug())
-                Debug.LogError($"[SystemMapController2] configService is null");
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    $"configService is null");
             return;
         }
 
         string currentSystemId = gameSessionService.State.Player.CurrentSystemId;
         if (!configService.TryGetStarSystem(currentSystemId, out StarSystemConfig starSystem))
         {
-            Debug.LogError($"[SystemMapController2] No StarSystemData for id: {currentSystemId}");
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                $"No StarSystemData for id: {currentSystemId}");
             return;
         }
 
@@ -78,7 +86,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         SpawnExits2(starSystem);
 
         if (IsDebug())
-            Debug.Log($"[SystemMapController2] system map builded");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                $"system map builded");
     }
 
     private void SpawnStation(StarSystemConfig starSystem)
@@ -97,7 +107,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (systemMapStationPrefab == null)
         {
             if (IsDebug())
-                Debug.LogError("[SystemMapController2] systemMapStationPrefab is null");
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    "systemMapStationPrefab is null");
 
             return;
         }
@@ -129,7 +141,9 @@ public class SystemMapController2 : CustomMonoBehaviour
             systemVisualConfig);
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] station builded");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "station builded");
     }
 
     private void SpawnSun(StarSystemConfig starSystem)
@@ -137,14 +151,18 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (systemMapSunPrefab == null)
         {
             if (IsDebug())
-                Debug.LogError($"[SystemMapController2] sunPrefab is null");
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    $"sunPrefab is null");
             return;
         }
 
         if (starSystem.Sun == null)
         {
             if (IsDebug())
-                Debug.LogError($"[SystemMapController2] starSystem.Sun is null");
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    $"starSystem.Sun is null");
             return;
         }
 
@@ -156,7 +174,9 @@ public class SystemMapController2 : CustomMonoBehaviour
             systemVisualConfig);
 
         if (IsDebug())
-            Debug.Log($"[SystemMapController2] sun builded");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                $"sun builded");
     }
 
     private void OnSunClicked(string sunId)
@@ -169,13 +189,17 @@ public class SystemMapController2 : CustomMonoBehaviour
     {
         if (systemMapPlanetPrefab == null)
         {
-            Debug.LogError($"[SystemMapController2] systemMapPlanetPrefab is null");
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                $"systemMapPlanetPrefab is null");
             return;
         }
 
         if (starSystem.PlanetRefs == null)
         {
-            Debug.LogError($"[SystemMapController2] starSystem.PlanetRefs is null");
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                $"starSystem.PlanetRefs is null");
             return;
         }
 
@@ -184,7 +208,9 @@ public class SystemMapController2 : CustomMonoBehaviour
             center = starSystem.Sun.LocalOffset;
 
         if (IsDebug())
-            Debug.Log($"[SystemMapController2] planetRefs: " + starSystem.PlanetRefs.Length);
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                $"planetRefs: " + starSystem.PlanetRefs.Length);
 
         List<PlanetSelectableView2> planetSelectableViews = new();
         foreach (PlanetConfig planet in starSystem.PlanetRefs)
@@ -192,14 +218,18 @@ public class SystemMapController2 : CustomMonoBehaviour
             if (planet == null)
             {
                 if (IsDebug())
-                    Debug.LogError($"[SystemMapController2] planet is null");
+                    AppLog.Error(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        $"planet is null");
                 continue;
             }
 
             if (planet.PlanetOrbit == null)
             {
                 if (IsDebug())
-                    Debug.LogError($"[SystemMapController2] planet.PlanetOrbit is null");
+                    AppLog.Error(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        $"planet.PlanetOrbit is null");
                 continue;
             }
 
@@ -219,7 +249,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         }
 
         if (IsDebug())
-            Debug.Log($"[SystemMapController2] planets builded");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                $"planets builded");
     }
 
     // private void SpawnExits(StarSystemConfig starSystem)
@@ -275,7 +307,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (starSystem == null)
         {
             if (IsDebug())
-                Debug.LogError("[SystemMapController2] starSystem is null");
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    "starSystem is null");
 
             return;
         }
@@ -285,7 +319,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (string.IsNullOrWhiteSpace(currentSystemId))
         {
             if (IsDebug())
-                Debug.LogError("[SystemMapController2] currentSystemId is empty");
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    "currentSystemId is empty");
 
             return;
         }
@@ -295,7 +331,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         if (routes == null || routes.Count == 0)
         {
             if (IsDebug())
-                Debug.Log("[SystemMapController2] routes not found for system: " + currentSystemId);
+                AppLog.Info(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    "routes not found for system: " + currentSystemId);
 
             return;
         }
@@ -306,14 +344,18 @@ public class SystemMapController2 : CustomMonoBehaviour
             center = starSystem.Sun.LocalOffset;
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] Routes.Count: " + routes.Count);
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "Routes.Count: " + routes.Count);
 
         foreach (RouteConfig routeConfig in routes)
         {
             if (routeConfig == null)
             {
                 if (IsDebug())
-                    Debug.LogError("[SystemMapController2] routeConfig is null");
+                    AppLog.Error(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        "routeConfig is null");
 
                 continue;
             }
@@ -322,12 +364,12 @@ public class SystemMapController2 : CustomMonoBehaviour
             {
                 if (IsDebug())
                 {
-                    Debug.LogError(
-                        "[SystemMapController2] routeConfig does not contain current system. RouteId: " +
+                    AppLog.Error(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        "routeConfig does not contain current system. RouteId: " +
                         routeConfig.Id +
                         " currentSystemId: " +
-                        currentSystemId
-                    );
+                        currentSystemId);
                 }
 
                 continue;
@@ -337,10 +379,10 @@ public class SystemMapController2 : CustomMonoBehaviour
             {
                 if (IsDebug())
                 {
-                    Debug.Log(
-                        "[SystemMapController2] route locked. RouteId: " +
-                        routeConfig.Id
-                    );
+                    AppLog.Info(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        "route locked. RouteId: " +
+                        routeConfig.Id);
                 }
 
                 continue;
@@ -352,10 +394,10 @@ public class SystemMapController2 : CustomMonoBehaviour
             {
                 if (IsDebug())
                 {
-                    Debug.LogError(
-                        "[SystemMapController2] targetSystem is null for route: " +
-                        routeConfig.Id
-                    );
+                    AppLog.Error(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        "targetSystem is null for route: " +
+                        routeConfig.Id);
                 }
 
                 continue;
@@ -368,12 +410,12 @@ public class SystemMapController2 : CustomMonoBehaviour
             {
                 if (IsDebug())
                 {
-                    Debug.LogError(
-                        "[SystemMapController2] endpointConfig is null for route: " +
+                    AppLog.Error(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        "endpointConfig is null for route: " +
                         routeConfig.Id +
                         " currentSystemId: " +
-                        currentSystemId
-                    );
+                        currentSystemId);
                 }
 
                 continue;
@@ -388,21 +430,23 @@ public class SystemMapController2 : CustomMonoBehaviour
             if (exitNodeView == null)
             {
                 if (IsDebug())
-                    Debug.LogError("[SystemMapController2] SystemExitNodeView2 is missing on exit prefab");
+                    AppLog.Error(DebugLogChannel.SystemMap,
+                        typeof(SystemMapController2),
+                        "SystemExitNodeView2 is missing on exit prefab");
 
                 continue;
             }
 
             if (IsDebug())
             {
-                Debug.Log(
-                    "[SystemMapController2] SpawnExits.route = " +
+                AppLog.Info(DebugLogChannel.SystemMap,
+                    typeof(SystemMapController2),
+                    "SpawnExits.route = " +
                     routeConfig.Id +
                     " | current = " +
                     currentSystemId +
                     " | target = " +
-                    targetSystem.DisplayName
-                );
+                    targetSystem.DisplayName);
             }
 
             exitNodeView.Initialize(
@@ -416,7 +460,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         }
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] exits builded");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "exits builded");
     }
 
     private List<RouteConfig> GetRoutesForSystem(string systemId)
@@ -514,7 +560,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] events subscribed");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "events subscribed");
     }
 
     private void UnsubscribeFromEvents()
@@ -528,7 +576,9 @@ public class SystemMapController2 : CustomMonoBehaviour
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] events unsubscribed");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "events unsubscribed");
     }
 
     private void OnGalaxyEntered(GalaxyEnteredEvent evt)
@@ -537,7 +587,9 @@ public class SystemMapController2 : CustomMonoBehaviour
             systemMapRoot.SetActive(false);
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] galaxy entered");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "galaxy entered");
     }
 
     private void OnSystemEntered(StarSystemEnteredEvent evt)
@@ -548,7 +600,9 @@ public class SystemMapController2 : CustomMonoBehaviour
             systemMapRoot.SetActive(true);
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] system entered");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "system entered");
     }
 
     private void OnExitMapChanged(ExitMapChangedEvent evt)
@@ -564,6 +618,8 @@ public class SystemMapController2 : CustomMonoBehaviour
             systemMapRoot.SetActive(false);
 
         if (IsDebug())
-            Debug.Log("[SystemMapController2] planet entered");
+            AppLog.Info(DebugLogChannel.SystemMap,
+                typeof(SystemMapController2),
+                "planet entered");
     }
 }

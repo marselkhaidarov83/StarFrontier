@@ -8,12 +8,19 @@ public class CustomMonoBehaviour : MonoBehaviour
 
     protected bool IsDebug()
     {
-        return (_debugEnabled || Bootstrapper.Instance.GlobalDebugEnabled) && !_debugStop;
+        return _debugEnabled && !_debugStop;
     }
 
     protected void LogCustom(string message, [CallerMemberName] string methodName = "")
     {
-        if (IsDebug())
-            Debug.Log($"{GetType().Name}.{methodName}: {message}");
-    }    
+        if (!IsDebug())
+            return;
+
+        if (Bootstrapper.Instance == null)
+            return;
+
+        Bootstrapper.Instance.LogDebug(
+            DebugLogChannel.UI,
+            $"{GetType().Name}.{methodName}: {message}");
+    }
 }

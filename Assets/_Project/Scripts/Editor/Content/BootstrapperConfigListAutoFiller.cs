@@ -86,8 +86,9 @@ public static class BootstrapperConfigListAutoFiller
             "SystemPopulationRules: " + systemPopulationRules.Count,
             "OK");
 
-        Debug.Log(
-            "[BootstrapperConfigListAutoFiller] Updated Bootstrappers: " +
+        AppLog.Info(DebugLogChannel.EditorGenerators,
+            typeof(BootstrapperConfigListAutoFiller),
+            "Updated Bootstrappers: " +
             updatedCount +
             ", Weapons: " + weapons.Count +
             ", Enemies: " + enemies.Count +
@@ -104,8 +105,9 @@ public static class BootstrapperConfigListAutoFiller
 
         if (bootstrapperScript == null)
         {
-            Debug.LogError(
-                "[BootstrapperConfigListAutoFiller] Bootstrapper script was not found at: " +
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                typeof(BootstrapperConfigListAutoFiller),
+                "Bootstrapper script was not found at: " +
                 BootstrapperScriptPath);
 
             return new List<MonoBehaviour>();
@@ -245,8 +247,9 @@ public static class BootstrapperConfigListAutoFiller
 
         if (property == null)
         {
-            Debug.LogError(
-                "[BootstrapperConfigListAutoFiller] Field not found on Bootstrapper: " +
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                typeof(BootstrapperConfigListAutoFiller),
+                "Field not found on Bootstrapper: " +
                 propertyName);
 
             return;
@@ -266,8 +269,9 @@ public static class BootstrapperConfigListAutoFiller
 
         if (property == null)
         {
-            Debug.LogError(
-                "[BootstrapperConfigListAutoFiller] Field not found on Bootstrapper: " +
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                typeof(BootstrapperConfigListAutoFiller),
+                "Field not found on Bootstrapper: " +
                 propertyName);
 
             return;
@@ -275,8 +279,9 @@ public static class BootstrapperConfigListAutoFiller
 
         if (!property.isArray)
         {
-            Debug.LogError(
-                "[BootstrapperConfigListAutoFiller] Field is not a list/array: " +
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                typeof(BootstrapperConfigListAutoFiller),
+                "Field is not a list/array: " +
                 propertyName);
 
             return;

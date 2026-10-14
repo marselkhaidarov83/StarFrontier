@@ -107,9 +107,9 @@ public static class AllyConfigAssetGenerator
                 else
                 {
                     warnings++;
-                    Debug.LogWarning(
-                        $"AllyConfig generator: no map sprite found in ally* art folders for {role} L{level:00}.",
-                        asset);
+                    AppLog.Warning(
+                        DebugLogChannel.EditorGenerators,
+                        $"AllyConfig generator: no map sprite found in ally* art folders for {role} L{level:00}.");
                 }
 
                 List<WeaponGroupConfig> weaponGroups =
@@ -119,7 +119,7 @@ public static class AllyConfigAssetGenerator
                     !IsRangerLevelZero(role, level))
                 {
                     warnings++;
-                    Debug.LogWarning(
+                    AppLog.Warning(DebugLogChannel.EditorGenerators,
                         $"AllyConfig generator: no weapon groups for {role} L{level:00}.");
                 }
                 else
@@ -186,13 +186,13 @@ public static class AllyConfigAssetGenerator
             if (string.IsNullOrWhiteSpace(config.Id))
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: empty id at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: empty id at {path}");
             }
 
             if (!IsAllowedGeneratedLevel(config.Role, config.Level))
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: invalid level at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: invalid level at {path}");
             }
 
             if (config.BaseHullMin <= 0 ||
@@ -214,13 +214,13 @@ public static class AllyConfigAssetGenerator
                 config.ModuleSlotCount < 0)
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: invalid stat range at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: invalid stat range at {path}");
             }
 
             if (config.HasDuplicateBehaviorScenarios())
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: duplicate scenarios at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: duplicate scenarios at {path}");
             }
 
             List<AllyBehaviourScenario> expectedScenarios =
@@ -236,9 +236,9 @@ public static class AllyConfigAssetGenerator
                 if (!config.HasBehaviorScenario(expectedScenario))
                 {
                     errors++;
-                    Debug.LogError(
-                        $"AllyConfig validation: missing behavior scenario {expectedScenario} at {path}",
-                        config);
+                    AppLog.Error(
+                        DebugLogChannel.EditorGenerators,
+                        $"AllyConfig validation: missing behavior scenario {expectedScenario} at {path}");
                 }
             }
 
@@ -246,13 +246,13 @@ public static class AllyConfigAssetGenerator
                 !IsRangerLevelZero(config.Role, config.Level))
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: no valid weapon groups at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: no valid weapon groups at {path}");
             }
 
             if (config.NamePool == null || config.NamePool.NameCount < 100)
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: name pool has less than 100 names at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: name pool has less than 100 names at {path}");
             }
 
             SerializedObject serializedConfig =
@@ -265,7 +265,7 @@ public static class AllyConfigAssetGenerator
                 mapSpriteProperty.objectReferenceValue == null)
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: mapSprite is not assigned at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: mapSprite is not assigned at {path}");
             }
 
             SerializedProperty combatSpriteProperty =
@@ -275,7 +275,7 @@ public static class AllyConfigAssetGenerator
                 combatSpriteProperty.objectReferenceValue == null)
             {
                 errors++;
-                Debug.LogError($"AllyConfig validation: combatSprite is not assigned at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: combatSprite is not assigned at {path}");
             }
         }
 

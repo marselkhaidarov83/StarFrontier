@@ -38,17 +38,18 @@ public static class FindDuplicatePlanetConfigById
 
             matches.Add(asset);
 
-            Debug.Log(
+            AppLog.Info(
+                DebugLogChannel.DataValidation,
                 $"[MATCH] PlanetConfig с ID '{TargetId}'\n" +
                 $"Имя объекта: {asset.name}\n" +
                 $"Путь: {assetPath}\n" +
-                $"GUID: {guid}",
-                asset);
+                $"GUID: {guid}");
         }
 
         if (matches.Count == 0)
         {
-            Debug.LogWarning(
+            AppLog.Warning(
+                DebugLogChannel.DataValidation,
                 $"PlanetConfig с ID '{TargetId}' не найден.\n" +
                 $"Всего проверено конфигов: {guids.Length}");
 
@@ -60,15 +61,16 @@ public static class FindDuplicatePlanetConfigById
 
         if (matches.Count == 1)
         {
-            Debug.Log(
+            AppLog.Info(
+                DebugLogChannel.DataValidation,
                 $"Дубликаты не найдены.\n" +
-                $"Обнаружен один PlanetConfig с ID '{TargetId}'.",
-                matches[0]);
+                $"Обнаружен один PlanetConfig с ID '{TargetId}'.");
 
             return;
         }
 
-        Debug.LogError(
+        AppLog.Error(
+            DebugLogChannel.DataValidation,
             $"ОБНАРУЖЕНЫ ДУБЛИКАТЫ PLANET CONFIG.\n" +
             $"ID: '{TargetId}'\n" +
             $"Количество объектов с одинаковым ID: {matches.Count}\n" +

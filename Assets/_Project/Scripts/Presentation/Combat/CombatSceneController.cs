@@ -1,9 +1,9 @@
 using UnityEngine;
 
-    public sealed class CombatSceneController : MonoBehaviour
+public sealed class CombatSceneController : MonoBehaviour
+{
+    private void Start()
     {
-        private void Start()
-        {
-            Debug.Log("[CombatScene] Combat scene loaded");
-        }
+        AppLog.Info(DebugLogChannel.CombatPresentation, "[CombatScene] Combat scene loaded");
     }
+}

@@ -54,24 +54,26 @@ public static class FindDuplicatePlanetsInStarSystems
 
         if (duplicateGroups == 0)
         {
-            Debug.Log(
-                "[STAR FRONTIER — PLANET DIAGNOSTICS]\n" +
-                "Дублирующиеся планеты не найдены.\n" +
-                $"Проверено конфигов систем: {systemGuids.Length}\n" +
-                $"Найдено ссылок на планеты: {allReferences.Count}\n" +
-                $"Уникальных PlanetConfig: {uniquePlanets}");
+            AppLog.Info(
+                  DebugLogChannel.DataValidation,
+                  "[STAR FRONTIER — PLANET DIAGNOSTICS]\n" +
+                  "Дублирующиеся планеты не найдены.\n" +
+                  $"Проверено конфигов систем: {systemGuids.Length}\n" +
+                  $"Найдено ссылок на планеты: {allReferences.Count}\n" +
+                  $"Уникальных PlanetConfig: {uniquePlanets}");
 
             return;
         }
 
-        Debug.LogError(
-            "[STAR FRONTIER — PLANET DIAGNOSTICS]\n" +
-            "Обнаружены дублирующиеся планеты.\n" +
-            $"Групп проблем: {duplicateGroups}\n" +
-            $"Проверено конфигов систем: {systemGuids.Length}\n" +
-            $"Найдено ссылок на планеты: {allReferences.Count}\n" +
-            $"Уникальных PlanetConfig: {uniquePlanets}\n\n" +
-            "Подробности находятся выше в Console.");
+        AppLog.Error(
+             DebugLogChannel.DataValidation,
+             "[STAR FRONTIER — PLANET DIAGNOSTICS]\n" +
+             "Обнаружены дублирующиеся планеты.\n" +
+             $"Групп проблем: {duplicateGroups}\n" +
+             $"Проверено конфигов систем: {systemGuids.Length}\n" +
+             $"Найдено ссылок на планеты: {allReferences.Count}\n" +
+             $"Уникальных PlanetConfig: {uniquePlanets}\n\n" +
+             "Подробности находятся выше в Console.");
     }
 
     private static void CollectPlanetReferences(
@@ -148,7 +150,8 @@ public static class FindDuplicatePlanetsInStarSystems
                 group.Select(reference =>
                     $"• {reference.PropertyPath}"));
 
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.DataValidation,
                 "[DUPLICATE PLANET INSIDE SYSTEM]\n" +
                 $"Система: {first.System.name}\n" +
                 $"Путь системы: {first.SystemPath}\n" +
@@ -157,8 +160,7 @@ public static class FindDuplicatePlanetsInStarSystems
                 $"Путь планеты: {first.PlanetPath}\n" +
                 $"Количество повторений: {group.Count()}\n" +
                 "Поля в StarSystemConfig:\n" +
-                propertyPaths,
-                first.System);
+                propertyPaths);
         }
 
         return problemCount;
@@ -198,14 +200,14 @@ public static class FindDuplicatePlanetsInStarSystems
                             $"  {location.SystemPath}";
                     }));
 
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.DataValidation,
                 "[SAME PLANET USED IN MULTIPLE SYSTEMS]\n" +
                 $"Планета: {first.Planet.name}\n" +
                 $"Planet ID: {FormatId(first.PlanetId)}\n" +
                 $"Путь планеты: {first.PlanetPath}\n" +
                 "Используется в системах:\n" +
-                systems,
-                first.Planet);
+                systems);
         }
 
         return problemCount;
@@ -248,14 +250,14 @@ public static class FindDuplicatePlanetsInStarSystems
                     $"{reference.System.name}\n" +
                     $"  {reference.SystemPath}"));
 
-            Debug.LogError(
+            AppLog.Error(
+                DebugLogChannel.DataValidation,
                 "[DIFFERENT PLANET ASSETS WITH SAME ID]\n" +
                 $"Повторяющийся Planet ID: {group.PlanetId}\n" +
                 $"Количество разных PlanetConfig: " +
                 $"{group.Assets.Count}\n" +
                 "Объекты:\n" +
-                assets,
-                group.Assets[0].Planet);
+                assets);
         }
 
         return problemCount;

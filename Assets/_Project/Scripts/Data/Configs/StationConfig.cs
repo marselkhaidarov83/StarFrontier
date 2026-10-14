@@ -144,7 +144,7 @@ public class StationConfig : BaseConfig
     {
         if (stationTypeConfig == null)
         {
-            Debug.LogWarning($"StationConfig '{name}' has no StationTypeConfig assigned.", this);
+            AppLog.Warning(DebugLogChannel.Config, $"StationConfig '{name}' has no StationTypeConfig assigned.");
         }
     }
 #endif

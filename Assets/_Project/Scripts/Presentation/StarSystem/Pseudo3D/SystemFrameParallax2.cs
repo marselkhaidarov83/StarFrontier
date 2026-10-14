@@ -197,16 +197,15 @@ public sealed class SystemFrameParallax2 : MonoBehaviour
 
             if (debugLogs)
             {
-                Debug.Log(
-                    "[SystemFrameParallax2] " +
+                AppLog.Info(DebugLogChannel.SystemMap,
+                    typeof(SystemFrameParallax2),
                     layer.debugName +
                     " | targetDelta = " + targetDelta +
                     " | manualOffset = " + manualOffset +
                     " | parallaxOffset = " + parallaxOffset +
                     " | finalPosition = " + layer.layer.localPosition +
                     " | cameraSize = " + cameraSize +
-                    " | useMaxOffset = " + useMaxOffset
-                );
+                    " | useMaxOffset = " + useMaxOffset);
             }
         }
     }

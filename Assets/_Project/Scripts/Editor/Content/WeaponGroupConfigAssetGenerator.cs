@@ -59,7 +59,7 @@ public static class WeaponGroupConfigAssetGenerator
     public static void DeleteGeneratedGroups()
     {
         var deleted = DeleteWeaponGroupAssets(confirm: true);
-        Debug.Log($"WeaponGroupConfig: deleted generated group assets/folders: {deleted}");
+        AppLog.Info(DebugLogChannel.EditorGenerators, $"WeaponGroupConfig: deleted generated group assets/folders: {deleted}");
     }
 
     private static void GenerateFromCsv(string csvAssetPath, bool validateOnly)
@@ -185,7 +185,7 @@ public static class WeaponGroupConfigAssetGenerator
         AssetDatabase.Refresh();
 
         var deletedEmptyFolders = DeleteEmptyFoldersUnderOutputRoot();
-        Debug.Log($"WeaponGroupConfig: deleted assets={deletedAssets}, deleted empty folders={deletedEmptyFolders}.");
+        AppLog.Info(DebugLogChannel.EditorGenerators, $"WeaponGroupConfig: deleted assets={deletedAssets}, deleted empty folders={deletedEmptyFolders}.");
 
         return deletedAssets;
     }
@@ -669,7 +669,7 @@ public static class WeaponGroupConfigAssetGenerator
             if (errors.Count > 25)
                 message += $"\n...и ещё {errors.Count - 25} ошибок.";
 
-            Debug.LogError($"WeaponGroupConfig CSV generation failed. Errors={errors.Count}\n{message}");
+            AppLog.Error(DebugLogChannel.EditorGenerators, $"WeaponGroupConfig CSV generation failed. Errors={errors.Count}\n{message}");
             EditorUtility.DisplayDialog(
                 "WeaponGroupConfig CSV generator — ERROR",
                 $"Ошибок: {errors.Count}\n\n{message}",
@@ -678,10 +678,10 @@ public static class WeaponGroupConfigAssetGenerator
         }
 
         foreach (var warning in warnings.Take(50))
-            Debug.LogWarning($"WeaponGroupConfig CSV generator: {warning}");
+            AppLog.Warning(DebugLogChannel.EditorGenerators, $"WeaponGroupConfig CSV generator: {warning}");
 
         if (warnings.Count > 50)
-            Debug.LogWarning($"WeaponGroupConfig CSV generator: and {warnings.Count - 50} more warnings.");
+            AppLog.Warning(DebugLogChannel.EditorGenerators, $"WeaponGroupConfig CSV generator: and {warnings.Count - 50} more warnings.");
 
         var mode = validateOnly ? "Validation" : "Creation";
         var result =
@@ -694,7 +694,7 @@ public static class WeaponGroupConfigAssetGenerator
             $"Warnings: {warnings.Count}\n" +
             $"Elapsed: {elapsed.TotalSeconds:F1}s";
 
-        Debug.Log($"WeaponGroupConfig {result}");
+        AppLog.Info(DebugLogChannel.EditorGenerators, $"WeaponGroupConfig {result}");
         EditorUtility.DisplayDialog("WeaponGroupConfig CSV generator", result, "OK");
     }
 

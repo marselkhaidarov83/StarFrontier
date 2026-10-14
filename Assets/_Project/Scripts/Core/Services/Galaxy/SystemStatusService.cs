@@ -29,7 +29,7 @@ public sealed class SystemStatusService : ISystemStatusService
 
         if (newStatus == StarSystemStatus.Captured)
         {
-            Debug.Log($"[SystemStatus] System captured: {systemId}. Secured=false.");
+            AppLog.Info(DebugLogChannel.GalaxyMap, $"[SystemStatus] System captured: {systemId}. Secured=false.");
         }
     }
 

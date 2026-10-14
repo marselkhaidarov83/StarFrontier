@@ -42,16 +42,24 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         _targetService = Bootstrapper.Instance.ServiceRegistry.Get<ITargetService2A>();
 
         if (_simpleEventBus == null)
-            Debug.LogError("[SystemMapDestinationController2] _simpleEventBus not found.");
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemMapDestinationController2),
+                "_simpleEventBus not found.");
 
         if (_systemTravelService == null)
-            Debug.LogError("[SystemMapDestinationController2] ISystemTravelService not found.");
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemMapDestinationController2),
+                "ISystemTravelService not found.");
 
         if (_orbitalMotionService == null)
-            Debug.LogError("[SystemMapDestinationController2] IOrbitalMotionService not found.");
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemMapDestinationController2),
+                "IOrbitalMotionService not found.");
 
         if (_gameTimeService == null)
-            Debug.LogError("[SystemMapDestinationController2] IGameTimeService not found.");
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemMapDestinationController2),
+                "IGameTimeService not found.");
 
         Subscribe();
     }

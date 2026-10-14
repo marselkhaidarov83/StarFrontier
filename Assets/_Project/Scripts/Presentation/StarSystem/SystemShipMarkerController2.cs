@@ -55,8 +55,8 @@ public sealed class SystemShipMarkerController2 :
 
         if (_systemTravelService == null)
         {
-            Debug.LogError(
-                "[SystemShipMarkerController2] " +
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemShipMarkerController2),
                 "SystemTravelService not found.");
 
             return;
@@ -64,8 +64,8 @@ public sealed class SystemShipMarkerController2 :
 
         if (_hangarService == null)
         {
-            Debug.LogError(
-                "[SystemShipMarkerController2] " +
+            AppLog.Error(DebugLogChannel.SystemMap,
+                typeof(SystemShipMarkerController2),
                 "HangarService not found.");
 
             return;
@@ -317,8 +317,8 @@ public sealed class SystemShipMarkerController2 :
         {
             if (IsDebug())
             {
-                Debug.LogError(
-                    "[SystemShipMarkerController2] " +
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemShipMarkerController2),
                     "SystemTravelService is null.");
             }
 
@@ -329,8 +329,8 @@ public sealed class SystemShipMarkerController2 :
         {
             if (IsDebug())
             {
-                Debug.LogError(
-                    "[SystemShipMarkerController2] " +
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemShipMarkerController2),
                     "SystemTravelState is null.");
             }
 
@@ -341,8 +341,8 @@ public sealed class SystemShipMarkerController2 :
         {
             if (IsDebug())
             {
-                Debug.LogError(
-                    "[SystemShipMarkerController2] " +
+                AppLog.Error(DebugLogChannel.SystemMap,
+                    typeof(SystemShipMarkerController2),
                     "ShipMarkerView2 is null.");
             }
 

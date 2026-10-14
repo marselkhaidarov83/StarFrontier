@@ -258,9 +258,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
         if (entries == null || entries.Count != 10)
         {
-            Debug.LogError(
-                $"EnemyGroupSpawnRule validation: expected exactly 10 level entries at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"EnemyGroupSpawnRule validation: expected exactly 10 level entries at {path}");
             return false;
         }
 
@@ -271,9 +270,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
             if (levelEntry == null)
             {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: missing level {level} at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"EnemyGroupSpawnRule validation: missing level {level} at {path}");
                 isValid = false;
                 continue;
             }
@@ -352,9 +350,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
             if (result.ContainsKey(key))
             {
-                Debug.LogWarning(
-                    $"EnemyGroupSpawnRule generator: duplicate EnemyConfig for {faction} L{level:00}. Keeping first one. Duplicate path: {path}",
-                    config);
+                AppLog.Warning(DebugLogChannel.EditorGenerators,
+                    $"EnemyGroupSpawnRule generator: duplicate EnemyConfig for {faction} L{level:00}. Keeping first one. Duplicate path: {path}");
                 continue;
             }
 
@@ -573,7 +570,7 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
             if (enemyConfig == null)
             {
                 warnings++;
-                Debug.LogWarning(
+                AppLog.Warning(DebugLogChannel.EditorGenerators,
                     $"EnemyGroupSpawnRule generator: missing grouped EnemyConfig for {faction} L{enemyLevel:00} in galaxy L{galaxyLevel:00}.");
             }
             else
@@ -622,17 +619,15 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
         if (groups == null || groups.Count == 0)
         {
-            Debug.LogError(
-                $"EnemyGroupSpawnRule validation: level {galaxyLevel} must contain enemy groups at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"EnemyGroupSpawnRule validation: level {galaxyLevel} must contain enemy groups at {path}");
             return false;
         }
 
         if (groups.Count != GetFactions().Length)
         {
-            Debug.LogError(
-                $"EnemyGroupSpawnRule validation: level {galaxyLevel} must contain exactly {GetFactions().Length} enemy groups at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"EnemyGroupSpawnRule validation: level {galaxyLevel} must contain exactly {GetFactions().Length} enemy groups at {path}");
             return false;
         }
 
@@ -649,9 +644,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
             if (group == null)
             {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: empty enemy group at level {galaxyLevel}, index {groupIndex}, path: {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"EnemyGroupSpawnRule validation: empty enemy group at level {galaxyLevel}, index {groupIndex}, path: {path}");
                 isValid = false;
                 continue;
             }
@@ -673,9 +667,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
             if (enemies == null || enemies.Count != expectedLevels.Length)
             {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: group {groupIndex} at level {galaxyLevel} must contain enemy levels {DescribeEnemyLevelsForGalaxyLevel(galaxyLevel)} at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"EnemyGroupSpawnRule validation: group {groupIndex} at level {galaxyLevel} must contain enemy levels {DescribeEnemyLevelsForGalaxyLevel(galaxyLevel)} at {path}");
                 isValid = false;
                 continue;
             }
@@ -696,9 +689,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
                 if (entry == null || entry.EnemyConfig == null)
                 {
-                    Debug.LogError(
-                        $"EnemyGroupSpawnRule validation: empty grouped enemy entry at level {galaxyLevel}, group {groupIndex}, index {enemyIndex}, path: {path}",
-                        rule);
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        $"EnemyGroupSpawnRule validation: empty grouped enemy entry at level {galaxyLevel}, group {groupIndex}, index {enemyIndex}, path: {path}");
                     isValid = false;
                     continue;
                 }
@@ -708,9 +700,8 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
                 if (!TryResolveFaction(entry.EnemyConfig, out EnemyFaction2A entryFaction) ||
                     entryFaction != faction)
                 {
-                    Debug.LogError(
-                        $"EnemyGroupSpawnRule validation: grouped enemy faction mismatch at {path}. Group faction {faction}, enemy {entry.EnemyConfig.Id}.",
-                        rule);
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        $"EnemyGroupSpawnRule validation: grouped enemy faction mismatch at {path}. Group faction {faction}, enemy {entry.EnemyConfig.Id}.");
                     isValid = false;
                 }
 
@@ -720,27 +711,24 @@ public static class EnemyGroupSpawnRuleConfigAssetGenerator
 
             if (!ContainsExpectedEnemyLevels(enemyLevels, galaxyLevel))
             {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: grouped level {galaxyLevel}, group {groupIndex} must contain enemy levels {DescribeEnemyLevelsForGalaxyLevel(galaxyLevel)} at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"EnemyGroupSpawnRule validation: grouped level {galaxyLevel}, group {groupIndex} must contain enemy levels {DescribeEnemyLevelsForGalaxyLevel(galaxyLevel)} at {path}");
                 isValid = false;
             }
 
             if (totalMinCount != BuildMinTotal(galaxyLevel) ||
                 totalMaxCount != BuildMaxTotal(galaxyLevel))
             {
-                Debug.LogError(
-                    $"EnemyGroupSpawnRule validation: grouped total count mismatch at {path}, L{galaxyLevel:00}, group {groupIndex}. Expected total {BuildMinTotal(galaxyLevel)}-{BuildMaxTotal(galaxyLevel)}, actual total {totalMinCount}-{totalMaxCount}.",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"EnemyGroupSpawnRule validation: grouped total count mismatch at {path}, L{galaxyLevel:00}, group {groupIndex}. Expected total {BuildMinTotal(galaxyLevel)}-{BuildMaxTotal(galaxyLevel)}, actual total {totalMinCount}-{totalMaxCount}.");
                 isValid = false;
             }
         }
 
         if (!ContainsAllFactions(factions))
         {
-            Debug.LogError(
-                $"EnemyGroupSpawnRule validation: grouped level {galaxyLevel} must contain AI, Ancients and Infected groups at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"EnemyGroupSpawnRule validation: grouped level {galaxyLevel} must contain AI, Ancients and Infected groups at {path}");
             isValid = false;
         }
 

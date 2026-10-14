@@ -36,7 +36,7 @@ using System.Collections.Generic;
         {
             if (string.IsNullOrWhiteSpace(config.Id))
             {
-                UnityEngine.Debug.LogWarning(
+                AppLog.Warning(DebugLogChannel.DataValidation,
                     "GalaxyGraphFactory: StarSystemConfig has empty Id.");
                 return null;
             }

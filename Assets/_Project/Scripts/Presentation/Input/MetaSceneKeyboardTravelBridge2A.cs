@@ -311,7 +311,7 @@ public sealed class MetaSceneKeyboardTravelBridge2A :
             return;
 
         _errorReported = true;
-        Debug.LogError(message, this);
+        AppLog.Error(DebugLogChannel.Travel, message);
     }
 
     private void OnDisable()

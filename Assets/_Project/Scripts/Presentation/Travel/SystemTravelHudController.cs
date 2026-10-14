@@ -282,10 +282,9 @@ public sealed class SystemTravelHudController :
     {
         if (Bootstrapper.Instance == null)
         {
-            Debug.LogError(
-                "[SystemTravelHudController] " +
-                "Bootstrapper.Instance is null.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
+                "Bootstrapper.Instance is null.");
 
             return;
         }
@@ -293,10 +292,9 @@ public sealed class SystemTravelHudController :
         if (Bootstrapper.Instance
                 .ServiceRegistry == null)
         {
-            Debug.LogError(
-                "[SystemTravelHudController] " +
-                "ServiceRegistry is null.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
+                "ServiceRegistry is null.");
 
             return;
         }
@@ -325,52 +323,46 @@ public sealed class SystemTravelHudController :
 
         if (_gameTimeService == null)
         {
-            Debug.LogError(
-                "[SystemTravelHudController] " +
-                "IGameTimeService not found.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
+                "IGameTimeService not found.");
         }
 
         if (_travelService == null)
         {
-            Debug.LogError(
-                "[SystemTravelHudController] " +
-                "ISystemTravelService not found.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
+                "ISystemTravelService not found.");
         }
 
         if (_configService == null)
         {
-            Debug.LogError(
-                "[SystemTravelHudController] " +
-                "IConfigService not found.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
+                "IConfigService not found.");
         }
 
         if (_eventBus == null)
         {
-            Debug.LogError(
-                "[SystemTravelHudController] " +
-                "SimpleEventBus not found.",
-                this);
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
+                "SimpleEventBus not found.");
         }
 
         if (_shipMovementService == null)
         {
-            Debug.LogWarning(
-                "[SystemTravelHudController] " +
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
                 "IShipMovementService not found. " +
-                "Legacy travel speed will be used.",
-                this);
+                "Legacy travel speed will be used.");
         }
 
         if (_hangarService == null)
         {
-            Debug.LogWarning(
-                "[SystemTravelHudController] " +
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelHudController),
                 "IHangarService not found. " +
-                "Legacy travel speed is unavailable.",
-                this);
+                "Legacy travel speed is unavailable.");
         }
     }
 

@@ -84,7 +84,9 @@ public class MarketScreenController : CustomMonoBehaviour
     //     Refresh();
 
     //     if (IsDebug())
-    //         Debug.Log("[MarketScreenController] awaked");
+    //         AppLog.Info(DebugLogChannel.Market,
+    //             typeof(MarketScreenController),
+    //             "awaked");
     // }
 
     public void Refresh()
@@ -93,7 +95,9 @@ public class MarketScreenController : CustomMonoBehaviour
         RebuildItemList();
 
         if (IsDebug())
-            Debug.Log("[MarketScreenController] refreshed");
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                "refreshed");
     }
 
     private void RefreshHeader()
@@ -101,28 +105,28 @@ public class MarketScreenController : CustomMonoBehaviour
         if (_gameSessionService == null)
         {
             if (IsDebug())
-                Debug.LogError("MarketScreenController | _gameSessionService is null");
+                AppLog.Error(DebugLogChannel.Market, "MarketScreenController | _gameSessionService is null");
             return;
         }
 
         if (_gameSessionService.State == null)
         {
             if (IsDebug())
-                Debug.Log("MarketScreenController | _gameSessionService.CurrentSave is null");
+                AppLog.Info(DebugLogChannel.Market, "MarketScreenController | _gameSessionService.CurrentSave is null");
             return;
         }
 
         if (_gameSessionService.State.Player == null)
         {
             if (IsDebug())
-                Debug.Log("MarketScreenController | _gameSessionService.CurrentSave.PlayerProfile is null");
+                AppLog.Info(DebugLogChannel.Market, "MarketScreenController | _gameSessionService.CurrentSave.PlayerProfile is null");
             return;
         }
 
         PlayerState playerProfile = _gameSessionService.State.Player;
         // if (playerProfile == null)
         // {
-        //     if (cargoText != null) cargoText.text = 
+        //     if (cargoText != null) cargoText.text =
         //             $"Cargo: {_gameSessionService.CurrentSave.PlayerProfile.CurrentShipRuntimeData.CargoCapacity} / {_gameSessionService.CurrentSave.PlayerProfile.CurrentShipRuntimeData.CargoCapacity}";
         //     return;
         // }
@@ -137,7 +141,9 @@ public class MarketScreenController : CustomMonoBehaviour
         }
 
         if (IsDebug())
-            Debug.Log("[MarketScreenController] header refreshed");
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                "header refreshed");
     }
 
     private void RebuildItemList()
@@ -147,13 +153,17 @@ public class MarketScreenController : CustomMonoBehaviour
         if (_marketItemsProvider == null)
         {
             if (IsDebug())
-                Debug.LogError("[MarketScreenController] MarketItemsProvider is null.");
+                AppLog.Error(DebugLogChannel.Market,
+                    typeof(MarketScreenController),
+                    "MarketItemsProvider is null.");
             return;
         }
         IReadOnlyList<MarketItemEntry> items = _marketItemsProvider.GetAvailableItems();
 
         if (IsDebug())
-            Debug.Log("[MarketScreenController] Items.Count = " + items.Count);
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                "Items.Count = " + items.Count);
         foreach (var item in items)
         {
             var row = Instantiate(marketItemRowPrefab, itemsContent);
@@ -183,7 +193,9 @@ public class MarketScreenController : CustomMonoBehaviour
         }
 
         if (IsDebug())
-            Debug.Log("[MarketScreenController] rows builded");
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                "rows builded");
     }
 
     private void BuyOne(string itemId)
@@ -191,13 +203,17 @@ public class MarketScreenController : CustomMonoBehaviour
         if (_economyService == null)
         {
             if (IsDebug())
-                Debug.LogError("[MarketScreenController] EconomyService is null.");
+                AppLog.Error(DebugLogChannel.Market,
+                    typeof(MarketScreenController),
+                    "EconomyService is null.");
             return;
         }
 
         EconomyOperationResult result = _economyService.BuyItem(itemId, 1);
         if (IsDebug())
-            Debug.Log("[MarketScreenController] buy operation result = " + result.Success +
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                "buy operation result = " + result.Success +
                     " " + result.ErrorCode);
 
         Refresh();
@@ -208,13 +224,17 @@ public class MarketScreenController : CustomMonoBehaviour
         if (_economyService == null)
         {
             if (IsDebug())
-                Debug.LogError("[MarketScreenController] EconomyService is null.");
+                AppLog.Error(DebugLogChannel.Market,
+                    typeof(MarketScreenController),
+                    "EconomyService is null.");
             return;
         }
 
         EconomyOperationResult result = _economyService.SellItem(itemId, 1);
         if (IsDebug())
-            Debug.Log("[MarketScreenController] buy operation result = " + result.Success +
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                "buy operation result = " + result.Success +
                     " " + result.ErrorCode);
 
         Refresh();
@@ -227,21 +247,27 @@ public class MarketScreenController : CustomMonoBehaviour
     //     if (_economyService == null)
     //     {
     //         if (IsDebug())
-    //             Debug.Log("[MarketScreenController] economyService is null");
+    //             AppLog.Info(DebugLogChannel.Market,
+    //                 typeof(MarketScreenController),
+    //                 "economyService is null");
     //         return;
     //     }
 
     //     if (itemsContent == null)
     //     {
     //         if (IsDebug())
-    //             Debug.Log("[MarketScreenController] itemsContent is null");
+    //             AppLog.Info(DebugLogChannel.Market,
+    //                 typeof(MarketScreenController),
+    //                 "itemsContent is null");
     //         return;
     //     }
 
     //     if (marketItemRowPrefab == null)
     //     {
     //         if (IsDebug())
-    //             Debug.Log("[MarketScreenController] marketItemRowPrefab is null");
+    //             AppLog.Info(DebugLogChannel.Market,
+    //                 typeof(MarketScreenController),
+    //                 "marketItemRowPrefab is null");
     //         return;
     //     }
 
@@ -250,7 +276,9 @@ public class MarketScreenController : CustomMonoBehaviour
     //     CargoInventory cargo = playerProfile != null ? playerProfile.CurrentShipRuntimeData.Cargo : null;
 
     //     if (IsDebug())
-    //         Debug.Log("[MarketScreenController] marketItems.Count = " + marketItems.Count);
+    //         AppLog.Info(DebugLogChannel.Market,
+    //             typeof(MarketScreenController),
+    //             "marketItems.Count = " + marketItems.Count);
     //     for (int i = 0; i < marketItems.Count; i++)
     //     {
     //         MarketItemData itemData = marketItems[i];
@@ -271,7 +299,9 @@ public class MarketScreenController : CustomMonoBehaviour
     //     }
 
     //     if (IsDebug())
-    //         Debug.Log("[MarketScreenController] rows builded");
+    //         AppLog.Info(DebugLogChannel.Market,
+    //             typeof(MarketScreenController),
+    //             "rows builded");
     // }
 
     private void ClearSpawnedRows()
@@ -283,7 +313,9 @@ public class MarketScreenController : CustomMonoBehaviour
         _spawnedRows.Clear();
 
         if (IsDebug())
-            Debug.Log("[MarketScreenController] rows cleared");
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                "rows cleared");
     }
 
     private void OnBuyClicked(string itemId)
@@ -291,13 +323,17 @@ public class MarketScreenController : CustomMonoBehaviour
         if (_marketTransactionService == null)
         {
             if (IsDebug())
-                Debug.LogError("[MarketScreenController] MarketTransactionService is null.");
+                AppLog.Error(DebugLogChannel.Market,
+                    typeof(MarketScreenController),
+                    "MarketTransactionService is null.");
             return;
         }
 
         BuyItemResult result = _marketTransactionService.BuyItem(itemId, 1);
         if (IsDebug())
-            Debug.Log($"[MarketScreenController] Buy result: {result.resultType} | item={result.itemId} | total={result.totalPrice}");
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                $"Buy result: {result.resultType} | item={result.itemId} | total={result.totalPrice}");
 
         Refresh();
     }
@@ -307,13 +343,17 @@ public class MarketScreenController : CustomMonoBehaviour
         if (_marketTransactionService == null)
         {
             if (IsDebug())
-                Debug.LogError("[MarketScreenController] MarketTransactionService is null.");
+                AppLog.Error(DebugLogChannel.Market,
+                    typeof(MarketScreenController),
+                    "MarketTransactionService is null.");
             return;
         }
 
         SellItemResult result = _marketTransactionService.SellItem(itemId, 1);
         if (IsDebug())
-            Debug.Log($"[MarketScreenController] Sell result: {result.resultType} | item={result.itemId} | total={result.totalPrice}");
+            AppLog.Info(DebugLogChannel.Market,
+                typeof(MarketScreenController),
+                $"Sell result: {result.resultType} | item={result.itemId} | total={result.totalPrice}");
 
         Refresh();
     }

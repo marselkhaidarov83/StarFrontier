@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 305e505661dee42c58da12e2624f7c3f, type: 3}
   m_Name: debugLogConfig01
   m_EditorClassIdentifier: Data::DebugLogConfig
-  logsEnabled: 1
+  logsEnabled: 0
   shipRouteLogs: 0
   includeShipRouteInternalLogs: 0
   npcRouteDecisionLogs: 0
@@ -30,6 +30,28 @@ MonoBehaviour:
   loadingSceneDiagnosticsLogs: 0
   waveVisualGeometryLogs: 0
   bootstrapLogs: 0
+  mainMenuLogs: 0
+  settingsLogs: 0
+  loadingLogs: 0
+  galaxyMapLogs: 0
+  systemMapLogs: 0
+  systemHudLogs: 0
+  marketLogs: 0
+  hangarLogs: 0
+  missionLogs: 0
+  economyLogs: 0
+  navigationLogs: 0
+  interactionLogs: 0
+  targetingLogs: 0
+  travelLogs: 0
+  planetUiLogs: 0
+  stationUiLogs: 0
+  combatPresentationLogs: 0
+  debugToolsLogs: 0
+  dataValidationLogs: 0
+  eventBusLogs: 0
+  configLogs: 0
+  editorGeneratorsLogs: 0
   performanceLogs: 0
   disableInfoLogStackTrace: 1
   gameTimeLoadAnalyticsLogs: 0

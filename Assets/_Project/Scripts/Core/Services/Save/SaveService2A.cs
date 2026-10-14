@@ -216,7 +216,9 @@ public class SaveService2A : CustomService, ISaveService
             if (multiFileSave != null)
                 return multiFileSave;
 
-            AppLog.Warning("[SaveService] Active multi-file save failed. Trying multi-file backup.");
+            AppLog.Warning(
+                DebugLogChannel.Save,
+                "[SaveService] Active multi-file save failed. Trying multi-file backup.");
 
             GameRuntimeState multiFileBackup =
                 TryLoadMultiFileFromDirectory(GetBackupMultiFileDirectoryPath(), "backup");
@@ -233,17 +235,23 @@ public class SaveService2A : CustomService, ISaveService
             return mainSave;
         }
 
-        AppLog.Warning("[SaveService] Main save failed. Trying backup.");
+        AppLog.Warning(
+            DebugLogChannel.Save,
+            "[SaveService] Main save failed. Trying backup.");
 
         GameRuntimeState backupSave = TryLoadFromPath(GetBackupPath());
 
         if (backupSave != null)
         {
-            AppLog.Warning("[SaveService] Backup save loaded.");
+            AppLog.Warning(
+                DebugLogChannel.Save,
+                "[SaveService] Backup save loaded.");
             return backupSave;
         }
 
-        AppLog.Warning("[SaveService] No valid save found.");
+        AppLog.Warning(
+            DebugLogChannel.Save,
+            "[SaveService] No valid save found.");
         return null;
     }
 
@@ -294,7 +302,9 @@ public class SaveService2A : CustomService, ISaveService
 
         if (state == null)
         {
-            AppLog.Warning("[SaveService] Multi-file staged save skipped: GameState is null.");
+            AppLog.Warning(
+                DebugLogChannel.Save,
+                "[SaveService] Multi-file staged save skipped: GameState is null.");
             return;
         }
 
@@ -1340,7 +1350,9 @@ public class SaveService2A : CustomService, ISaveService
 
         if (state == null)
         {
-            AppLog.Warning("[SaveService] Multi-file sync save skipped: GameState is null.");
+            AppLog.Warning(
+                DebugLogChannel.Save,
+                "[SaveService] Multi-file sync save skipped: GameState is null.");
             return;
         }
 
@@ -1549,7 +1561,9 @@ public class SaveService2A : CustomService, ISaveService
                 manifest.Parts == null ||
                 manifest.Parts.Count == 0)
             {
-                AppLog.Error("[SaveService] Multi-file manifest is invalid: " + source);
+                AppLog.Error(
+                    DebugLogChannel.Save,
+                    "[SaveService] Multi-file manifest is invalid: " + source);
                 return null;
             }
 
@@ -1575,6 +1589,7 @@ public class SaveService2A : CustomService, ISaveService
             if (!versionValidation.IsValid)
             {
                 AppLog.Error(
+                    DebugLogChannel.Save,
                     "[SaveService] Unsupported multi-file save version: " +
                     versionValidation.BuildErrorMessage());
                 return null;
@@ -1586,6 +1601,7 @@ public class SaveService2A : CustomService, ISaveService
             if (wasMigrated)
             {
                 AppLog.Info(
+                    DebugLogChannel.Save,
                     "[SaveService] Multi-file save migrated to data version " +
                     state.Meta.SaveDataVersion);
             }
@@ -1598,6 +1614,7 @@ public class SaveService2A : CustomService, ISaveService
             if (!validation.IsValid)
             {
                 AppLog.Error(
+                    DebugLogChannel.Save,
                     "[SaveService] Multi-file post-load validation failed: " +
                     validation.BuildErrorMessage());
                 return null;
@@ -1634,6 +1651,7 @@ public class SaveService2A : CustomService, ISaveService
         catch (Exception exception)
         {
             AppLog.Error(
+                DebugLogChannel.Save,
                 "[SaveService] Failed to load multi-file save from " +
                 source +
                 ": " +
@@ -1791,7 +1809,9 @@ public class SaveService2A : CustomService, ISaveService
     {
         if (state == null)
         {
-            AppLog.Warning("[SaveService] Staged save skipped: GameState is null.");
+            AppLog.Warning(
+                DebugLogChannel.Save,
+                "[SaveService] Staged save skipped: GameState is null.");
             return;
         }
 
@@ -1809,7 +1829,9 @@ public class SaveService2A : CustomService, ISaveService
 
         if (state == null)
         {
-            AppLog.Warning("[SaveService] Save skipped: GameState is null.");
+            AppLog.Warning(
+                DebugLogChannel.Save,
+                "[SaveService] Save skipped: GameState is null.");
             return;
         }
 
@@ -1901,7 +1923,9 @@ public class SaveService2A : CustomService, ISaveService
         }
         catch (Exception e)
         {
-            AppLog.Error("[SaveService] Failed to save: " + e.Message);
+            AppLog.Error(
+                DebugLogChannel.Save,
+                "[SaveService] Failed to save: " + e.Message);
         }
         finally
         {
@@ -1945,7 +1969,9 @@ public class SaveService2A : CustomService, ISaveService
 
             if (state == null)
             {
-                AppLog.Error("[SaveService] Parsed GameState is null: " + path);
+                AppLog.Error(
+                    DebugLogChannel.Save,
+                    "[SaveService] Parsed GameState is null: " + path);
                 return null;
             }
 
@@ -1955,6 +1981,7 @@ public class SaveService2A : CustomService, ISaveService
             if (!versionValidation.IsValid)
             {
                 AppLog.Error(
+                    DebugLogChannel.Save,
                     "[SaveService] Unsupported save version: " +
                     versionValidation.BuildErrorMessage());
                 return null;
@@ -1966,6 +1993,7 @@ public class SaveService2A : CustomService, ISaveService
             if (integrityStatus == SaveIntegrityStatus.Invalid)
             {
                 AppLog.Error(
+                    DebugLogChannel.Save,
                     "[SaveService] Save integrity verification failed: " +
                     path);
                 return null;
@@ -1974,6 +2002,7 @@ public class SaveService2A : CustomService, ISaveService
             if (integrityStatus == SaveIntegrityStatus.Missing)
             {
                 AppLog.Warning(
+                    DebugLogChannel.Save,
                     "[SaveService] Legacy save has no integrity checksum: " +
                     path);
             }
@@ -1984,6 +2013,7 @@ public class SaveService2A : CustomService, ISaveService
             if (wasMigrated)
             {
                 AppLog.Info(
+                    DebugLogChannel.Save,
                     "[SaveService] Save migrated to data version " +
                     state.Meta.SaveDataVersion);
             }
@@ -1996,6 +2026,7 @@ public class SaveService2A : CustomService, ISaveService
             if (!validation.IsValid)
             {
                 AppLog.Error(
+                    DebugLogChannel.Save,
                     "[SaveService] Post-load validation failed: " +
                     validation.BuildErrorMessage());
                 return null;
@@ -2020,14 +2051,18 @@ public class SaveService2A : CustomService, ISaveService
         }
         catch (Exception e)
         {
-            AppLog.Error("[SaveService] Failed to load from " + path + ": " + e.Message);
+            AppLog.Error(
+                DebugLogChannel.Save,
+                "[SaveService] Failed to load from " + path + ": " + e.Message);
             return null;
         }
     }
 
     private void FailStagedSave(string message)
     {
-        AppLog.Error("[SaveService] Multi-file staged save failed: " + message);
+        AppLog.Error(
+            DebugLogChannel.Save,
+            "[SaveService] Multi-file staged save failed: " + message);
 
         LogSavePerf(
             EndPerfMeasureMs(_stagedSaveTotalStartedAt),
@@ -2357,6 +2392,7 @@ public class SaveService2A : CustomService, ISaveService
         catch (Exception exception)
         {
             AppLog.Warning(
+                DebugLogChannel.Save,
                 "[SaveService] Failed to delete temp save: " +
                 exception.Message);
         }
@@ -2368,7 +2404,10 @@ public class SaveService2A : CustomService, ISaveService
             return;
 
         File.Delete(path);
-        AppLog.Info("[SaveService] Deleted file: " + path);
+
+        AppLog.Info(
+            DebugLogChannel.Save,
+            "[SaveService] Deleted file: " + path);
     }
 
     private static void DeleteDirectoryIfExists(string path)

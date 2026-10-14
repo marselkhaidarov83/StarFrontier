@@ -166,8 +166,8 @@ public sealed class TravelService2A :
                 out FuelConsumeFailReason
                     consumeReason))
         {
-            Debug.LogWarning(
-                "[TravelService2A] " +
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(TravelService2A),
                 "Fuel consumption rejected. " +
                 "From = " +
                 normalizedFromId +

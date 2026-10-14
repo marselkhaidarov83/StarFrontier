@@ -28,9 +28,9 @@ public class MapCameraController2A : MonoBehaviour
 
         if (cam == null)
         {
-            Debug.LogError(
-                "[MapCameraController2A] Скрипт должен находиться на объекте с Camera."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(MapCameraController2A),
+                "Скрипт должен находиться на объекте с Camera.");
 
             return;
         }
@@ -297,10 +297,10 @@ public class MapCameraController2A : MonoBehaviour
             float.IsInfinity(fitOrthographicSize) ||
             fitOrthographicSize <= 0f)
         {
-            Debug.LogError(
-                "[MapCameraController2A] Некорректный размер камеры: " +
-                fitOrthographicSize
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(MapCameraController2A),
+                "Некорректный размер камеры: " +
+                fitOrthographicSize);
 
             return;
         }
@@ -331,11 +331,11 @@ public class MapCameraController2A : MonoBehaviour
 
         ClampCameraPosition();
 
-        Debug.Log(
-            "[MapCameraController2A] Zoom out limit updated. " +
+        AppLog.Info(DebugLogChannel.GalaxyMap,
+            typeof(MapCameraController2A),
+            "Zoom out limit updated. " +
             "fitSize = " + fitOrthographicSize +
             " | maxZoom = " + maxZoom +
-            " | currentSize = " + cam.orthographicSize
-        );
+            " | currentSize = " + cam.orthographicSize);
     }
 }

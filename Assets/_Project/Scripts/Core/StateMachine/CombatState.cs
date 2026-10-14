@@ -11,12 +11,12 @@ public class CombatState : IGameState
 
     public void Enter()
     {
-        Debug.Log("Entered CombatState");
+        AppLog.Info(DebugLogChannel.CombatPresentation, "Entered CombatState");
         _sceneService.LoadCombat();
     }
 
     public void Exit()
     {
-        Debug.Log("Exited CombatState");
+        AppLog.Info(DebugLogChannel.CombatPresentation, "Exited CombatState");
     }
 }

@@ -73,10 +73,9 @@ public sealed class PlanetSelectableView2 :
     {
         if (_planet == null)
         {
-            Debug.LogWarning(
-                "[PlanetSelectableView2] " +
-                "PlanetConfig is null.",
-                this);
+            AppLog.Warning(DebugLogChannel.PlanetUi,
+                typeof(PlanetSelectableView2),
+                "PlanetConfig is null.");
 
             return;
         }
@@ -122,14 +121,13 @@ public sealed class PlanetSelectableView2 :
 
         if (!selected)
         {
-            Debug.LogWarning(
-                "[PlanetSelectableView2] " +
+            AppLog.Warning(DebugLogChannel.PlanetUi,
+                typeof(PlanetSelectableView2),
                 "Target selection failed. " +
                 "PlanetId = " +
                 _planet.Id +
                 " | Reason = " +
-                failReason,
-                this);
+                failReason);
         }
 
         /*

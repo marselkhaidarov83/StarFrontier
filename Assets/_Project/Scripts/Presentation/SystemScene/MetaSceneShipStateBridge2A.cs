@@ -77,9 +77,9 @@ public sealed class MetaSceneShipStateBridge2A : MonoBehaviour
         {
             if (logMissingServices)
             {
-                Debug.LogWarning(
-                    "[MetaSceneShipStateBridge2A] IShipMovementService not found.",
-                    this);
+                AppLog.Warning(DebugLogChannel.Navigation,
+                    typeof(MetaSceneShipStateBridge2A),
+                    "IShipMovementService not found.");
             }
 
             return;

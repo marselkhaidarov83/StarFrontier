@@ -353,18 +353,22 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
     private void LogMissing(string message)
     {
         if (!logMissingServices)
+        {
             return;
+        }
 
-        Debug.LogWarning(message, this);
+        AppLog.Warning(DebugLogChannel.SystemHud, message);
     }
 
     private void LogMissingSprite(string fieldName)
     {
         if (!logMissingSprites)
+        {
             return;
+        }
 
-        Debug.LogWarning(
-            $"[SystemTopHudFuelIndicator2A] Missing sprite: {fieldName}",
-            this);
+        AppLog.Warning(DebugLogChannel.SystemHud,
+            typeof(SystemTopHudFuelIndicator2A),
+            $"Missing sprite: {fieldName}");
     }
 }

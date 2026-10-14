@@ -16,7 +16,7 @@ public class MainMenuController : MonoBehaviour
         if (Bootstrapper.Instance == null)
         {
             if (_debugEnabled)
-                Debug.LogError("Bootstrapper.Instance is null.");
+                AppLog.Error(DebugLogChannel.MainMenu, "Bootstrapper.Instance is null.");
             return;
         }
 
@@ -27,11 +27,11 @@ public class MainMenuController : MonoBehaviour
 
         if (_newGameService == null)
             if (_debugEnabled)
-                Debug.LogError("NewGameService not found in ServiceRegistry.");
+                AppLog.Error(DebugLogChannel.MainMenu, "NewGameService not found in ServiceRegistry.");
 
         if (_continueGameService == null)
             if (_debugEnabled)
-                Debug.LogError("ContinueGameService not found in ServiceRegistry.");
+                AppLog.Error(DebugLogChannel.MainMenu, "ContinueGameService not found in ServiceRegistry.");
     }
 
     private void Start()
@@ -43,7 +43,7 @@ public class MainMenuController : MonoBehaviour
     {
         if (_newGameService == null)
         {
-            Debug.LogError("NewGameService is not initialized.");
+            AppLog.Error(DebugLogChannel.MainMenu, "NewGameService is not initialized.");
             return;
         }
 
@@ -70,7 +70,7 @@ public class MainMenuController : MonoBehaviour
         if (_continueGameService == null)
         {
             if (_debugEnabled)
-                Debug.LogError("ContinueGameService is not initialized.");
+                AppLog.Error(DebugLogChannel.MainMenu, "ContinueGameService is not initialized.");
             return;
         }
 
@@ -79,7 +79,7 @@ public class MainMenuController : MonoBehaviour
         if (!success)
         {
             if (_debugEnabled)
-                Debug.LogWarning("Continue game failed.");
+                AppLog.Warning(DebugLogChannel.MainMenu, "Continue game failed.");
             RefreshContinueButton();
         }
     }
@@ -95,17 +95,17 @@ public class MainMenuController : MonoBehaviour
     public void OnSettingsClicked()
     {
         if (_debugEnabled)
-            Debug.Log("Settings clicked");
+            AppLog.Info(DebugLogChannel.MainMenu, "Settings clicked");
     }
 
     public void OnExitClicked()
     {
         if (_debugEnabled)
-            Debug.Log("Exit clicked");
+            AppLog.Info(DebugLogChannel.MainMenu, "Exit clicked");
 
 #if UNITY_EDITOR
         if (_debugEnabled)
-            Debug.Log("Exit works only in build");
+            AppLog.Info(DebugLogChannel.MainMenu, "Exit works only in build");
 #else
         Application.Quit();
 #endif

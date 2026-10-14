@@ -27,6 +27,6 @@ public class GalaxyState : CustomService, IGameState
     public void Exit()
     {
         if (_debugEnabled)
-            Debug.Log("Exited GalaxyState");
+            AppLog.Info(DebugLogChannel.GalaxyMap, "Exited GalaxyState");
     }
 }

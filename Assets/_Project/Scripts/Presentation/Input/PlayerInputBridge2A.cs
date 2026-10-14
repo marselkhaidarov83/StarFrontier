@@ -481,12 +481,11 @@ public sealed class PlayerInputBridge2A : CustomMonoBehaviour
 
             if (destinationAdapter == null)
             {
-                Debug.LogWarning(
-                    "[PlayerInputBridge2A] " +
+                AppLog.Warning(DebugLogChannel.Navigation,
+                    typeof(PlayerInputBridge2A),
                     "Destination Adapter is not assigned. " +
                     "Stop will clear control input, but it " +
-                    "will not cancel point/click destination.",
-                    this);
+                    "will not cancel point/click destination.");
             }
         }
 
@@ -850,9 +849,9 @@ public sealed class PlayerInputBridge2A : CustomMonoBehaviour
 
         _errorReported = true;
 
-        Debug.LogError(
-            message,
-            this);
+        AppLog.Error(
+            DebugLogChannel.Navigation,
+            message);
     }
 
     private static bool IsFinite(

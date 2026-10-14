@@ -42,18 +42,18 @@ public sealed class GalaxySectorVisualFitter2A : MonoBehaviour
     {
         if (mapCamera == null)
         {
-            Debug.LogError(
-                "[GalaxySectorVisualFitter2A] Map Camera не назначена."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxySectorVisualFitter2A),
+                "Map Camera не назначена.");
 
             return;
         }
 
         if (sectorNodesRoot == null)
         {
-            Debug.LogError(
-                "[GalaxySectorVisualFitter2A] Sector Nodes Root не назначен."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxySectorVisualFitter2A),
+                "Sector Nodes Root не назначен.");
 
             return;
         }

@@ -101,9 +101,8 @@ public static class EnemyConfigAssetGenerator
                 else
                 {
                     warnings++;
-                    Debug.LogWarning(
-                        $"EnemyConfig generator: no combatSprite found in {GetEnemyArtFolder(faction)} for {faction} L{level:00}.",
-                        asset);
+                    AppLog.Warning(DebugLogChannel.EditorGenerators,
+                        $"EnemyConfig generator: no combatSprite found in {GetEnemyArtFolder(faction)} for {faction} L{level:00}.");
                 }
 
                 List<WeaponGroupConfig> weaponGroups =
@@ -112,9 +111,8 @@ public static class EnemyConfigAssetGenerator
                 if (weaponGroups.Count == 0)
                 {
                     warnings++;
-                    Debug.LogWarning(
-                        $"EnemyConfig generator: no weapon groups for {faction} L{level:00}.",
-                        asset);
+                    AppLog.Warning(DebugLogChannel.EditorGenerators,
+                        $"EnemyConfig generator: no weapon groups for {faction} L{level:00}.");
                 }
 
                 EnemyNamePoolConfig namePool = null;
@@ -182,19 +180,19 @@ public static class EnemyConfigAssetGenerator
             if (string.IsNullOrWhiteSpace(config.Id))
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: empty id at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: empty id at {path}");
             }
 
             if (string.IsNullOrWhiteSpace(config.DisplayName))
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: empty displayName at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: empty displayName at {path}");
             }
 
             if (config.Level < 1 || config.Level > 10)
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: invalid level at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: invalid level at {path}");
             }
 
             if (config.BaseHullMin <= 0 ||
@@ -207,7 +205,7 @@ public static class EnemyConfigAssetGenerator
                 config.BaseSpeedMax < config.BaseSpeedMin)
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: invalid stat range at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: invalid stat range at {path}");
             }
 
             if (config.CreditRewardMin < 0 ||
@@ -218,13 +216,13 @@ public static class EnemyConfigAssetGenerator
                 config.DangerTier > 5)
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: invalid reward range at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: invalid reward range at {path}");
             }
 
             if (config.HasDuplicateBehaviorScenarios())
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: duplicate scenarios at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: duplicate scenarios at {path}");
             }
 
             List<AllyBehaviourScenario> expectedScenarios =
@@ -240,23 +238,22 @@ public static class EnemyConfigAssetGenerator
                 if (!config.HasBehaviorScenario(expectedScenario))
                 {
                     errors++;
-                    Debug.LogError(
-                        $"EnemyConfig validation: missing behavior scenario {expectedScenario} at {path}",
-                        config);
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        $"EnemyConfig validation: missing behavior scenario {expectedScenario} at {path}");
                 }
             }
 
             if (config.WeaponGroupCount == 0)
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: no valid weapon groups at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: no valid weapon groups at {path}");
             }
 
             if (config.NamePool == null ||
                 config.NamePool.NameCount < 100)
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: name pool has less than 100 names at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: name pool has less than 100 names at {path}");
             }
 
             SerializedObject serializedConfig =
@@ -269,7 +266,7 @@ public static class EnemyConfigAssetGenerator
                 combatSpriteProperty.objectReferenceValue == null)
             {
                 errors++;
-                Debug.LogError($"EnemyConfig validation: combatSprite is not assigned at {path}", config);
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: combatSprite is not assigned at {path}");
             }
         }
 

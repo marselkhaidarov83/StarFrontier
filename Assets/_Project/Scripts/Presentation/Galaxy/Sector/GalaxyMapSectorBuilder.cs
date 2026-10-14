@@ -18,19 +18,19 @@ public class GalaxyMapSectorBuilder : CustomMonoBehaviour
 
         if (_galaxyConfig == null)
         {
-            Debug.LogError("[GalaxySectorMapBuilder] GalaxyConfig не назначен.");
+            AppLog.Error(DebugLogChannel.GalaxyMap, "[GalaxySectorMapBuilder] GalaxyConfig не назначен.");
             return;
         }
 
         if (sectorNodesRoot == null)
         {
-            Debug.LogError("[GalaxySectorMapBuilder] SectorNodesRoot не назначен.");
+            AppLog.Error(DebugLogChannel.GalaxyMap, "[GalaxySectorMapBuilder] SectorNodesRoot не назначен.");
             return;
         }
 
         if (sectorPrefab == null)
         {
-            Debug.LogError("[GalaxySectorMapBuilder] SectorPrefab не назначен.");
+            AppLog.Error(DebugLogChannel.GalaxyMap, "[GalaxySectorMapBuilder] SectorPrefab не назначен.");
             return;
         }
 

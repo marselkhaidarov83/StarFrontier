@@ -69,9 +69,7 @@ public abstract class SystemHudWidgetBinderBase2A :
 
     public void Unbind()
     {
-        if (!isBound &&
-            Context == null &&
-            _subscriptions.Count == 0)
+        if (!isBound)
         {
             return;
         }
@@ -82,13 +80,10 @@ public abstract class SystemHudWidgetBinderBase2A :
         }
         catch (Exception exception)
         {
-            Debug.LogException(
-                exception,
-                this);
+            AppLog.Exception(DebugLogChannel.SystemHud, exception);
         }
 
         SafeClearSubscriptions();
-
         Context = null;
         isBound = false;
     }
@@ -128,9 +123,7 @@ public abstract class SystemHudWidgetBinderBase2A :
         }
         catch (Exception exception)
         {
-            Debug.LogException(
-                exception,
-                this);
+            AppLog.Exception(DebugLogChannel.SystemHud, exception);
         }
     }
 }

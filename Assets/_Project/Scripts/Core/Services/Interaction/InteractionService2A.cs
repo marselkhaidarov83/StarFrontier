@@ -289,7 +289,8 @@ public sealed class InteractionService2A :
         }
         catch (Exception exception)
         {
-            Debug.LogException(
+            AppLog.Exception(
+                DebugLogChannel.Interaction,
                 exception);
 
             result =
@@ -336,8 +337,8 @@ public sealed class InteractionService2A :
             new InteractionExecutionEvent2A(
                 result));
 
-        Debug.Log(
-            "[InteractionService2A] " +
+        AppLog.Info(DebugLogChannel.Interaction,
+            typeof(InteractionService2A),
             "Target = " +
             (descriptor != null
                 ? descriptor.TargetId
@@ -499,8 +500,8 @@ public sealed class InteractionService2A :
             new InteractionExecutionEvent2A(
                 result));
 
-        Debug.LogWarning(
-            "[InteractionService2A] " +
+        AppLog.Warning(DebugLogChannel.Interaction,
+            typeof(InteractionService2A),
             "Interaction rejected. " +
             "Reason = " +
             reason +

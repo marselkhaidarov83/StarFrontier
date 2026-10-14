@@ -472,11 +472,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (routeConfig == null)
         {
-            Debug.LogWarning(
-                "[SystemTravelService] Cannot set arrival position. RouteConfig not found. " +
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot set arrival position. RouteConfig not found. " +
                 "From = " + evt.FromSystemId +
-                " | To = " + evt.ToSystemId
-            );
+                " | To = " + evt.ToSystemId);
 
             return;
         }
@@ -514,12 +514,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (IsDebug())
         {
-            Debug.Log(
-                "[SystemTravelService] Ship arrival position set. " +
+            AppLog.Info(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Ship arrival position set. " +
                 "From = " + evt.FromSystemId +
                 " | To = " + evt.ToSystemId +
-                " | EntryPoint = " + entryPoint
-            );
+                " | EntryPoint = " + entryPoint);
         }
     }
 
@@ -584,7 +584,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     {
         if (planetData == null)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot set planet destination: planetData is null.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot set planet destination: planetData is null.");
             return;
         }
 
@@ -610,7 +612,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     {
         if (stationData == null)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot set station destination: stationData is null.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot set station destination: stationData is null.");
             return;
         }
 
@@ -733,8 +737,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     {
         if (!TryGetNpcDestinationPosition(runtimeNpcId, out Vector3 npcPosition))
         {
-            Debug.LogWarning(
-                "[SystemTravelService] Cannot set NPC destination: NPC is missing or inactive. RuntimeNpcId: " +
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot set NPC destination: NPC is missing or inactive. RuntimeNpcId: " +
                 runtimeNpcId);
 
             return;
@@ -788,13 +793,17 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     {
         if (link == null)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot set system exit destination: link is null.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot set system exit destination: link is null.");
             return;
         }
 
         if (link.LinkedSystem == null)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot set system exit destination: linked system is null.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot set system exit destination: linked system is null.");
             return;
         }
 
@@ -820,7 +829,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     {
         if (evt == null)
         {
-            Debug.LogError("[SystemTravelService] RouteExitMapChangedEvent is null");
+            AppLog.Error(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "RouteExitMapChangedEvent is null");
             return;
         }
 
@@ -838,14 +849,14 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (IsDebug())
         {
-            Debug.Log(
-                "[SystemTravelService] Route exit destination set. " +
+            AppLog.Info(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Route exit destination set. " +
                 "Route = " + (evt.RouteConfig != null ? evt.RouteConfig.Id : "null") +
                 " | From = " + evt.FromSystemId +
                 " | To = " + evt.ToSystemId +
                 " | ExitPoint = " + evt.ExitPoint +
-                " | EntryPoint = " + evt.EntryPoint
-            );
+                " | EntryPoint = " + evt.EntryPoint);
         }
 
         LogCustom("State = " + State);
@@ -860,13 +871,17 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (!State.HasDestination)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot start travel: no destination selected.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot start travel: no destination selected.");
             return;
         }
 
         if (State.Status == SystemTravelStatus.Flying)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot start travel: already flying.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot start travel: already flying.");
             return;
         }
 
@@ -937,7 +952,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         if (_activeRouteDestinationCase ==
             RouteDestinationCase.ForbiddenDestination)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot start travel: destination is inside the sun blocking radius.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot start travel: destination is inside the sun blocking radius.");
 
             LogPlayerRouteBuildPerformance(
                 "FORBIDDEN_DESTINATION",
@@ -1026,7 +1043,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (_activeTravelRoutePath.Count <= 1)
         {
-            Debug.LogWarning("[SystemTravelService] Cannot start travel: route could not be built.");
+            AppLog.Warning(DebugLogChannel.Travel,
+                typeof(SystemTravelService),
+                "Cannot start travel: route could not be built.");
 
             LogRouteDebugSnapshot(
                 "Route build failed",
@@ -3738,7 +3757,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return;
         }
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.Travel,
             "[DebugLog][PlayerMovement] [PLAYER-BOUNDARY-ROUTE]" +
             " | Label=" + label +
             " | DestinationType=" + (State != null && State.Destination != null ? State.Destination.Type.ToString() : "None") +

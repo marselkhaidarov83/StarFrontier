@@ -165,13 +165,17 @@ public class GalaxyMapRoutesBuilder2A : CustomMonoBehaviour
     {
         if (routesRoot == null)
         {
-            Debug.LogError("[GalaxyMapRoutesBuilder2A] RoutesRoot не назначен.");
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapRoutesBuilder2A),
+                "RoutesRoot не назначен.");
             return;
         }
 
         if (routeLinePrefab == null)
         {
-            Debug.LogError("[GalaxyMapRoutesBuilder2A] RouteLinePrefab не назначен.");
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapRoutesBuilder2A),
+                "RouteLinePrefab не назначен.");
             return;
         }
 

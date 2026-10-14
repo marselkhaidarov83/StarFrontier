@@ -41,9 +41,9 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
 
         Selection.activeObject = asset;
 
-        Debug.Log(
-            "Offscreen NPC Simulation Schedule generated: " +
-            AssetPath);
+        AppLog.Info(
+            DebugLogChannel.EditorGenerators,
+            "Offscreen NPC Simulation Schedule generated: " + AssetPath);
     }
 
     [MenuItem("STAR FRONTIER/Content/08a. Offscreen NPC Simulation/Validate Offscreen NPC Simulation Schedule Config")]
@@ -109,7 +109,7 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
 
         if (ticksProperty == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.EditorGenerators,
                 "OffscreenNpcSimulationScheduleConfig.ticks field was not found.");
 
             return;
@@ -264,9 +264,9 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
             }
         }
 
-        Debug.LogError(
-            "OffscreenNpcSimulationSystemLimitMode value was not found: " +
-            enumName);
+        AppLog.Error(
+            DebugLogChannel.EditorGenerators,
+            "OffscreenNpcSimulationSystemLimitMode value was not found: " + enumName);
     }
 
     private static int ValidateAsset(
@@ -276,45 +276,45 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
 
         if (asset.UnreachableSystemPriority < 1)
         {
-            Debug.LogError(
-                "Offscreen NPC schedule has invalid unreachable priority.",
-                asset);
+            AppLog.Error(
+                DebugLogChannel.EditorGenerators,
+                "Offscreen NPC schedule has invalid unreachable priority.");
 
             errors++;
         }
 
         if (asset.MaxOffscreenAssignNewPerSystemTick < 1)
         {
-            Debug.LogError(
-                "Offscreen NPC schedule has invalid AssignNew limit.",
-                asset);
+            AppLog.Error(
+                DebugLogChannel.EditorGenerators,
+                "Offscreen NPC schedule has invalid AssignNew limit.");
 
             errors++;
         }
 
         if (asset.MaxOffscreenReassignPerSystemTick < 1)
         {
-            Debug.LogError(
-                "Offscreen NPC schedule has invalid Reassign limit.",
-                asset);
+            AppLog.Error(
+                DebugLogChannel.EditorGenerators,
+                "Offscreen NPC schedule has invalid Reassign limit.");
 
             errors++;
         }
 
         if (asset.MaxOffscreenActiveBehaviorPerSystemTick < 1)
         {
-            Debug.LogError(
-                "Offscreen NPC schedule has invalid ActiveBehavior limit.",
-                asset);
+            AppLog.Error(
+                DebugLogChannel.EditorGenerators,
+                "Offscreen NPC schedule has invalid ActiveBehavior limit.");
 
             errors++;
         }
 
         if (asset.MaxOffscreenCompletedTravelsPerSystemTick < 1)
         {
-            Debug.LogError(
-                "Offscreen NPC schedule has invalid CompletedTravels limit.",
-                asset);
+            AppLog.Error(
+                DebugLogChannel.EditorGenerators,
+                "Offscreen NPC schedule has invalid CompletedTravels limit.");
 
             errors++;
         }
@@ -324,9 +324,9 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
 
         if (ticks == null || ticks.Length == 0)
         {
-            Debug.LogError(
-                "Offscreen NPC schedule has no ticks.",
-                asset);
+            AppLog.Error(
+                 DebugLogChannel.EditorGenerators,
+                 "Offscreen NPC schedule has no ticks.");
 
             errors++;
             return errors;
@@ -339,9 +339,9 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
 
             if (tick == null)
             {
-                Debug.LogError(
-                    "Offscreen NPC schedule tick is null. Index: " + i,
-                    asset);
+                AppLog.Error(
+                    DebugLogChannel.EditorGenerators,
+                    "Offscreen NPC schedule tick is null. Index: " + i);
 
                 errors++;
                 continue;
@@ -349,10 +349,10 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
 
             if (tick.Priority < 1)
             {
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.EditorGenerators,
                     "Offscreen NPC schedule tick has invalid priority. Index: " +
-                    i,
-                    asset);
+                    i);
 
                 errors++;
             }
@@ -360,10 +360,10 @@ public static class OffscreenNpcSimulationScheduleConfigAssetGenerator
             if (!tick.ProcessAll &&
                 (tick.MaxSystems < 1 || tick.MaxSystems > 10))
             {
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.EditorGenerators,
                     "Offscreen NPC schedule tick has invalid max systems. Index: " +
-                    i,
-                    asset);
+                    i);
 
                 errors++;
             }

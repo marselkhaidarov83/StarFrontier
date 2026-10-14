@@ -27,9 +27,9 @@ public sealed class SunSelectableView2A :
 
         if (sunNodeView == null)
         {
-            Debug.LogWarning(
-                "[SunSelectableView2A] SunNodeView is null.",
-                this);
+            AppLog.Warning(DebugLogChannel.PlanetUi,
+                typeof(SunSelectableView2A),
+                "SunNodeView is null.");
 
             return;
         }

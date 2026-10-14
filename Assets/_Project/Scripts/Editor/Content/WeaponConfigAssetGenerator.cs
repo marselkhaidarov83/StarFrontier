@@ -75,9 +75,9 @@ public static class WeaponConfigAssetGenerator
                 "CSV file not found:\n" + InputCsvPath,
                 "OK");
 
-            Debug.LogError(
-                "[WeaponConfigAssetGenerator] CSV file not found: " +
-                InputCsvPath);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                typeof(WeaponConfigAssetGenerator),
+                "CSV file not found: " + InputCsvPath);
 
             return;
         }
@@ -98,9 +98,9 @@ public static class WeaponConfigAssetGenerator
                 "CSV file not found:\n" + InputCsvPath,
                 "OK");
 
-            Debug.LogError(
-                "[WeaponConfigAssetGenerator] CSV file not found: " +
-                InputCsvPath);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                typeof(WeaponConfigAssetGenerator),
+                "CSV file not found: " + InputCsvPath);
 
             return;
         }
@@ -137,8 +137,8 @@ public static class WeaponConfigAssetGenerator
 
         for (int i = 0; i < warnings.Count; i++)
         {
-            Debug.LogWarning(
-                "[WeaponConfigAssetGenerator] " +
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
+                typeof(WeaponConfigAssetGenerator),
                 warnings[i]);
         }
 
@@ -263,9 +263,9 @@ public static class WeaponConfigAssetGenerator
                         AssetDatabase.DeleteAsset(assetPath);
                     }
 
-                    Debug.LogError(
-                        "[WeaponConfigAssetGenerator] Asset skipped because required serialized fields are missing: " +
-                        id);
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        typeof(WeaponConfigAssetGenerator),
+                        "Asset skipped because required serialized fields are missing: " + id);
 
                     continue;
                 }
@@ -289,8 +289,8 @@ public static class WeaponConfigAssetGenerator
 
         for (int i = 0; i < warnings.Count; i++)
         {
-            Debug.LogWarning(
-                "[WeaponConfigAssetGenerator] " +
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
+                typeof(WeaponConfigAssetGenerator),
                 warnings[i]);
         }
 
@@ -311,8 +311,8 @@ public static class WeaponConfigAssetGenerator
             resultMessage,
             "OK");
 
-        Debug.Log(
-            "[WeaponConfigAssetGenerator] " +
+        AppLog.Info(DebugLogChannel.EditorGenerators,
+            typeof(WeaponConfigAssetGenerator),
             resultMessage);
     }
 
@@ -1448,20 +1448,21 @@ public static class WeaponConfigAssetGenerator
     {
         for (int i = 0; i < validationResult.Errors.Count; i++)
         {
-            Debug.LogError(
-                "[WeaponConfigAssetGenerator] " +
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                typeof(WeaponConfigAssetGenerator),
                 validationResult.Errors[i]);
         }
 
         for (int i = 0; i < validationResult.Warnings.Count; i++)
         {
-            Debug.LogWarning(
-                "[WeaponConfigAssetGenerator] " +
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
+                typeof(WeaponConfigAssetGenerator),
                 validationResult.Warnings[i]);
         }
 
-        Debug.Log(
-            "[WeaponConfigAssetGenerator] CSV rows: " +
+        AppLog.Info(DebugLogChannel.EditorGenerators,
+            typeof(WeaponConfigAssetGenerator),
+            "CSV rows: " +
             validationResult.RowCount +
             ", errors: " +
             validationResult.Errors.Count +

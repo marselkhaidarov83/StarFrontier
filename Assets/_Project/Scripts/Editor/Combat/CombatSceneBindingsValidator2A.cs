@@ -29,13 +29,13 @@ public static class CombatSceneBindingsValidator2A
 
         if (errors.Count == 0)
         {
-            Debug.Log(
+            AppLog.Info(DebugLogChannel.DataValidation,
                 "[2A-S04-05-T06] Combat scene bindings validation passed.");
 
             return;
         }
 
-        Debug.LogError(
+        AppLog.Error(DebugLogChannel.DataValidation,
             "[2A-S04-05-T06] Combat scene bindings validation failed:\n" +
             string.Join("\n", errors));
     }

@@ -363,7 +363,9 @@ public sealed class SystemNpcView : CustomMonoBehaviour, IPointerClickHandler
 
         if (npc == null)
         {
-            Debug.LogError("[SystemNpcView] Cannot bind null NPC.");
+            AppLog.Error(DebugLogChannel.NpcMovement,
+                typeof(SystemNpcView),
+                "Cannot bind null NPC.");
             return;
         }
 

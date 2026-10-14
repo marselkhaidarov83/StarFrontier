@@ -90,10 +90,9 @@ public sealed class
         if (link == null ||
             link.LinkedSystem == null)
         {
-            Debug.LogWarning(
-                "[TravelPointInteractionTarget2A] " +
-                "StarSystemLink or LinkedSystem is null.",
-                this);
+            AppLog.Warning(DebugLogChannel.Targeting,
+                typeof(TravelPointInteractionTarget2A),
+                "StarSystemLink or LinkedSystem is null.");
 
             return;
         }
@@ -111,10 +110,9 @@ public sealed class
     {
         if (evt == null)
         {
-            Debug.LogWarning(
-                "[TravelPointInteractionTarget2A] " +
-                "RouteExitMapChangedEvent is null.",
-                this);
+            AppLog.Warning(DebugLogChannel.Targeting,
+                typeof(TravelPointInteractionTarget2A),
+                "RouteExitMapChangedEvent is null.");
 
             return;
         }
@@ -157,10 +155,9 @@ public sealed class
         if (string.IsNullOrWhiteSpace(
                 destinationSystemId))
         {
-            Debug.LogWarning(
-                "[TravelPointInteractionTarget2A] " +
-                "Destination system ID is empty.",
-                this);
+            AppLog.Warning(DebugLogChannel.Targeting,
+                typeof(TravelPointInteractionTarget2A),
+                "Destination system ID is empty.");
 
             return;
         }
@@ -168,12 +165,11 @@ public sealed class
         if (targetType ==
             SystemGameplayTargetType.None)
         {
-            Debug.LogError(
-                "[TravelPointInteractionTarget2A] " +
+            AppLog.Error(DebugLogChannel.Targeting,
+                typeof(TravelPointInteractionTarget2A),
                 "Target Type is None. " +
                 "Select TravelPoint, SystemExit " +
-                "or Route in Inspector.",
-                this);
+                "or Route in Inspector.");
 
             return;
         }
@@ -182,11 +178,10 @@ public sealed class
 
         if (selectableView == null)
         {
-            Debug.LogError(
-                "[TravelPointInteractionTarget2A] " +
+            AppLog.Error(DebugLogChannel.Targeting,
+                typeof(TravelPointInteractionTarget2A),
                 "TargetSelectableView2A component " +
-                "is missing.",
-                this);
+                "is missing.");
 
             return;
         }

@@ -539,36 +539,28 @@ public sealed class SystemNpcOfflineRelocationService :
         float maxRadiusSqr =
             maxRadius * maxRadius;
 
-        for (int i = 0; i < 20; i++)
-        {
-            float angle =
+        float angle =
+            UnityEngine.Random.Range(
+                0f,
+                Mathf.PI * 2f);
+
+        float radius =
+            Mathf.Sqrt(
                 UnityEngine.Random.Range(
-                    0f,
-                    Mathf.PI * 2f);
+                    minRadiusSqr,
+                    maxRadiusSqr));
 
-            float radius =
-                Mathf.Sqrt(
-                    UnityEngine.Random.Range(
-                        minRadiusSqr,
-                        maxRadiusSqr));
+        Vector2 direction =
+            new Vector2(
+                Mathf.Cos(angle),
+                Mathf.Sin(angle));
 
-            Vector2 direction =
-                new Vector2(
-                    Mathf.Cos(angle),
-                    Mathf.Sin(angle));
-
-            Vector2 candidate =
-                center + direction * radius;
-
-            return new Vector3(
-                candidate.x,
-                candidate.y,
-                0f);
-        }
+        Vector2 candidate =
+            center + direction * radius;
 
         return new Vector3(
-            center.x,
-            center.y - minRadius,
+            candidate.x,
+            candidate.y,
             0f);
     }
 
@@ -1218,7 +1210,8 @@ public sealed class SystemNpcOfflineRelocationService :
                 ? movedCount * 100f / targetEligibleCount
                 : 0f;
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.NpcMovement,
             "[LOADING_DIAG][OfflineRelocation] " +
             reason +
             " | Frame=" + Time.frameCount +

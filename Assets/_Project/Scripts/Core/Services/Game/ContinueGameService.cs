@@ -63,7 +63,8 @@ public class ContinueGameService : CustomService, IContinueGameService
         if (!hasSave)
         {
             if (_debugEnabled)
-                Debug.LogWarning(
+                AppLog.Warning(
+                    DebugLogChannel.Loading,
                     "ContinueGame failed: save file does not exist.");
 
             LogLoadingStep(
@@ -89,7 +90,8 @@ public class ContinueGameService : CustomService, IContinueGameService
         if (save == null)
         {
             if (_debugEnabled)
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.Loading,
                     "ContinueGame failed: save could not be loaded.");
 
             LogLoadingStep(
@@ -151,7 +153,7 @@ public class ContinueGameService : CustomService, IContinueGameService
         if (_gameStateMachine == null)
         {
             if (_debugEnabled)
-                Debug.Log("GameStateMachine is null");
+                AppLog.Info(DebugLogChannel.Loading, "GameStateMachine is null");
 
             LogLoadingStep(
                 "GameStateMachine.Null",
@@ -213,7 +215,8 @@ public class ContinueGameService : CustomService, IContinueGameService
         if (!hasSave)
         {
             if (_debugEnabled)
-                Debug.LogWarning(
+                AppLog.Warning(
+                    DebugLogChannel.Loading,
                     "ContinueGame failed: save file does not exist.");
 
             LogLoadingStep(
@@ -248,7 +251,8 @@ public class ContinueGameService : CustomService, IContinueGameService
         if (save == null)
         {
             if (_debugEnabled)
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.Loading,
                     "ContinueGame failed: save could not be loaded.");
 
             LogLoadingStep(
@@ -372,7 +376,7 @@ public class ContinueGameService : CustomService, IContinueGameService
         if (_gameStateMachine == null)
         {
             if (_debugEnabled)
-                Debug.Log("GameStateMachine is null");
+                AppLog.Info(DebugLogChannel.Loading, "GameStateMachine is null");
 
             LogLoadingStep(
                 "GameStateMachine.Null",
@@ -413,7 +417,8 @@ public class ContinueGameService : CustomService, IContinueGameService
             return;
         }
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Loading,
             "[LOADING_DIAG][ContinueGameService] " +
             phase +
             " | Frame=" + Time.frameCount +

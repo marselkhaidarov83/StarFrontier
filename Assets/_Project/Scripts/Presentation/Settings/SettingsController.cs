@@ -14,7 +14,7 @@ public class SettingsController : MonoBehaviour
         if (Bootstrapper.Instance == null)
         {
             if (_debugEnabled)
-                Debug.LogError("Bootstrapper.Instance is null.");
+                AppLog.Error(DebugLogChannel.Settings, "Bootstrapper.Instance is null.");
             return;
         }
 
@@ -25,11 +25,11 @@ public class SettingsController : MonoBehaviour
 
         if (_newGameService == null)
             if (_debugEnabled)
-                Debug.LogError("NewGameService not found in ServiceRegistry.");
+                AppLog.Error(DebugLogChannel.Settings, "NewGameService not found in ServiceRegistry.");
 
         if (_continueGameService == null)
             if (_debugEnabled)
-                Debug.LogError("ContinueGameService not found in ServiceRegistry.");
+                AppLog.Error(DebugLogChannel.Settings, "ContinueGameService not found in ServiceRegistry.");
     }
 
     private void Start()
@@ -40,6 +40,6 @@ public class SettingsController : MonoBehaviour
     public void OnBackClicked()
     {
         if (_debugEnabled)
-            Debug.Log("Back clicked");
+            AppLog.Info(DebugLogChannel.Settings, "Back clicked");
     }
 }

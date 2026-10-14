@@ -958,8 +958,8 @@ MonoBehaviour:
   overrideNpcGalaxyLevel: 1
   debugNpcGalaxyLevel: 3
   stopAutomaticInvasions: 0
-  overrideAutomaticInvasionSchedule: 0
-  debugAutomaticInvasionPeriodSeconds: 15
+  overrideAutomaticInvasionSchedule: 1
+  debugAutomaticInvasionPeriodSeconds: 30
   debugMaxActiveInvasions: 2
 --- !u!1 &989972542
 GameObject:

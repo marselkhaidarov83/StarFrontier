@@ -74,11 +74,16 @@ public class SystemState : IGameState
             " | ActiveScene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 
         if (_debugEnabled)
-            Debug.Log("Entered SystemState");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "Entered SystemState");
+        }
 
         if (_sceneService == null)
         {
             AppLog.Error(
+                DebugLogChannel.Loading,
                 "SystemState cannot start: SceneService is missing.");
 
             return;
@@ -110,7 +115,6 @@ public class SystemState : IGameState
                 "Loading operation was not created.");
         }
     }
-
     private static bool IsLoadingSceneReadyForSystemWarmup()
     {
         if (LoadingSceneContext.IsSceneRegistered)
@@ -136,6 +140,7 @@ public class SystemState : IGameState
         if (Bootstrapper.Instance == null)
         {
             AppLog.Error(
+                DebugLogChannel.Loading,
                 "SystemState cannot run warmup: Bootstrapper.Instance is null.");
 
             _sceneService.LoadSystem();
@@ -168,7 +173,11 @@ public class SystemState : IGameState
         UnsubscribeFromSceneEvents();
 
         if (_debugEnabled)
-            Debug.Log("Exited SystemState");
+        {
+            AppLog.Info(
+                DebugLogChannel.Loading,
+                "Exited SystemState");
+        }
     }
 
     private void SubscribeToSceneEvents()
@@ -303,6 +312,7 @@ public class SystemState : IGameState
         else
         {
             AppLog.Warning(
+                DebugLogChannel.Loading,
                 "SystemState warmup skipped: " +
                 "IGalaxyNpcWarmupService is missing.");
         }
@@ -338,6 +348,7 @@ public class SystemState : IGameState
         if (_sceneService == null)
         {
             AppLog.Error(
+                DebugLogChannel.Loading,
                 "SystemState cannot load SystemScene: SceneService is missing.");
 
             yield break;
@@ -377,6 +388,7 @@ public class SystemState : IGameState
         if (_travelService == null)
         {
             AppLog.Error(
+                DebugLogChannel.Travel,
                 "SystemState cannot perform pending system travel: " +
                 "ITravelService is missing.");
 
@@ -404,6 +416,7 @@ public class SystemState : IGameState
         if (result == null)
         {
             AppLog.Error(
+                DebugLogChannel.Travel,
                 "SystemState pending system travel failed: result is null.");
 
             return false;
@@ -412,6 +425,7 @@ public class SystemState : IGameState
         if (!result.Success)
         {
             AppLog.Warning(
+                DebugLogChannel.Travel,
                 "SystemState pending system travel rejected. Reason=" +
                 result.FailReason);
 
@@ -432,7 +446,8 @@ public class SystemState : IGameState
 
     private static void LogSystemOpenTrace(string message)
     {
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Loading,
             "[SYSTEM_OPEN_TRACE] " +
             message +
             " | Realtime=" + Time.realtimeSinceStartup.ToString("0.000"));
@@ -459,6 +474,7 @@ public class SystemState : IGameState
         UnsubscribeFromSceneEvents();
 
         AppLog.Error(
+            DebugLogChannel.Loading,
             "SystemState Loading failed. " + error);
 
         _sceneService.LoadSystem();
@@ -473,6 +489,7 @@ public class SystemState : IGameState
         UnsubscribeFromSceneEvents();
 
         AppLog.Warning(
+            DebugLogChannel.Loading,
             "SystemState Loading was cancelled.");
     }
 

@@ -157,15 +157,15 @@ public static class Sprint3PlaceholderArtGenerator
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log(
-                $"[Sprint3PlaceholderArtGenerator] " +
+            AppLog.Info(DebugLogChannel.EditorGenerators,
+                typeof(Sprint3PlaceholderArtGenerator),
                 $"Создано временных изображений: {Specs.Length}");
 
             EditorUtility.RevealInFinder(OutputFolder);
         }
         catch (Exception exception)
         {
-            Debug.LogException(exception);
+            AppLog.Exception(DebugLogChannel.EditorGenerators, exception);
 
             EditorUtility.DisplayDialog(
                 "Ошибка",
@@ -232,7 +232,7 @@ public static class Sprint3PlaceholderArtGenerator
 
         if (importer == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.EditorGenerators,
                 $"Не найден TextureImporter: {assetPath}");
 
             return;

@@ -19,13 +19,13 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
     {
         if (planetConfig == null)
         {
-            Debug.LogWarning("PlanetMissionOfferGenerator: planetConfig is null.");
+            AppLog.Warning(DebugLogChannel.Mission, "PlanetMissionOfferGenerator: planetConfig is null.");
             return null;
         }
 
         if (existingOffer != null && existingOffer.OfferedMission != null)
         {
-            Debug.Log($"PlanetMissionOfferGenerator: Existing offer reused for planet {planetConfig.Id}");
+            AppLog.Info(DebugLogChannel.Mission, $"PlanetMissionOfferGenerator: Existing offer reused for planet {planetConfig.Id}");
             return existingOffer;
         }
 
@@ -34,7 +34,7 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
 
         if (alreadyHasMissionFromPlanet)
         {
-            Debug.Log($"PlanetMissionOfferGenerator: Player already has mission from planet {planetConfig.Id}");
+            AppLog.Info(DebugLogChannel.Mission, $"PlanetMissionOfferGenerator: Player already has mission from planet {planetConfig.Id}");
             return null;
         }
 
@@ -44,7 +44,7 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
 
         if (validEntries.Count == 0)
         {
-            Debug.LogWarning($"PlanetMissionOfferGenerator: No valid entries for planet {planetConfig.Id}");
+            AppLog.Warning(DebugLogChannel.Mission, $"PlanetMissionOfferGenerator: No valid entries for planet {planetConfig.Id}");
             return null;
         }
 
@@ -53,7 +53,7 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
 
         if (mission == null)
         {
-            Debug.LogWarning($"PlanetMissionOfferGenerator: Failed to build mission from template {selectedEntry.MissionTemplateConfig.Id}");
+            AppLog.Warning(DebugLogChannel.Mission, $"PlanetMissionOfferGenerator: Failed to build mission from template {selectedEntry.MissionTemplateConfig.Id}");
             return null;
         }
 
@@ -182,9 +182,15 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
 
     private MissionInstanceData BuildReconMission(StarSystemConfig starSystem, PlanetConfig planet, MissionTemplateConfig missionTemplate)
     {
-        Debug.Log("[PlanetMissionOfferGenerator] starSystem = " + starSystem);
-        Debug.Log("[PlanetMissionOfferGenerator] planet = " + planet);
-        Debug.Log("[PlanetMissionOfferGenerator] missionTemplate = " + missionTemplate);
+        AppLog.Info(DebugLogChannel.Mission,
+            typeof(PlanetMissionOfferGenerator),
+            "starSystem = " + starSystem);
+        AppLog.Info(DebugLogChannel.Mission,
+            typeof(PlanetMissionOfferGenerator),
+            "planet = " + planet);
+        AppLog.Info(DebugLogChannel.Mission,
+            typeof(PlanetMissionOfferGenerator),
+            "missionTemplate = " + missionTemplate);
 
         return new MissionInstanceData
         {

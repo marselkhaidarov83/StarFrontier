@@ -66,7 +66,7 @@ public class MissionService : CustomService, IMissionService
         if (mission == null)
         {
             if (IsDebug())
-                Debug.LogWarning($"MissionService: AcceptMission failed. Mission not found: {missionRuntimeId}");
+                AppLog.Warning(DebugLogChannel.Mission, $"MissionService: AcceptMission failed. Mission not found: {missionRuntimeId}");
             return false;
         }
 
@@ -87,7 +87,7 @@ public class MissionService : CustomService, IMissionService
 
         if (rule == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.Mission,
                 $"MissionService: pirate rule not found: " +
                 $"{mission.PirateGroupSpawnRuleId}");
             return false;
@@ -116,7 +116,7 @@ public class MissionService : CustomService, IMissionService
         if (mission == null)
         {
             if (IsDebug())
-                Debug.LogWarning($"MissionService: CompleteMission failed. Active mission not found: {missionRuntimeId}");
+                AppLog.Warning(DebugLogChannel.Mission, $"MissionService: CompleteMission failed. Active mission not found: {missionRuntimeId}");
             return false;
         }
 
@@ -125,12 +125,14 @@ public class MissionService : CustomService, IMissionService
             if (!mission.IsReadyToTurnIn)
             {
                 if (IsDebug())
-                    Debug.LogWarning($"MissionService: Delivery mission is not ready to turn in: {mission.Title}");
+                    AppLog.Warning(DebugLogChannel.Mission, $"MissionService: Delivery mission is not ready to turn in: {mission.Title}");
                 return false;
             }
 
             if (IsDebug())
-                Debug.Log("[MissionService] mission.Objective = " + mission.Objective);
+                AppLog.Info(DebugLogChannel.Mission,
+                    typeof(MissionService),
+                    "mission.Objective = " + mission.Objective);
             if (mission.Objective != null)
                 mission.Objective.IsMissionCargoDelivered = true;
         }
@@ -143,7 +145,7 @@ public class MissionService : CustomService, IMissionService
         _saveService.EnableSave(true);
 
         if (IsDebug())
-            Debug.Log($"MissionService: Mission completed: {mission.Title}");
+            AppLog.Info(DebugLogChannel.Mission, $"MissionService: Mission completed: {mission.Title}");
         return true;
     }
 
@@ -154,7 +156,7 @@ public class MissionService : CustomService, IMissionService
         if (mission == null)
         {
             if (IsDebug())
-                Debug.LogWarning($"MissionService: FailMission failed. Active mission not found: {missionRuntimeId}");
+                AppLog.Warning(DebugLogChannel.Mission, $"MissionService: FailMission failed. Active mission not found: {missionRuntimeId}");
             return false;
         }
 
@@ -164,7 +166,7 @@ public class MissionService : CustomService, IMissionService
         _saveService.EnableSave(true);
 
         if (IsDebug())
-            Debug.Log($"MissionService: Mission failed: {mission.Title}");
+            AppLog.Info(DebugLogChannel.Mission, $"MissionService: Mission failed: {mission.Title}");
         return true;
     }
 
@@ -214,5 +216,5 @@ public class MissionService : CustomService, IMissionService
     //     {
     //         _completedMissions.AddRange(completedMissions);
     //     }
-    // }        
+    // }
 }

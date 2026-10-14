@@ -193,13 +193,17 @@ public sealed class ConfigService : IConfigService
         {
             if (config == null)
             {
-                AppLog.Warning($"ConfigService: null {configName} was skipped.");
+                AppLog.Warning(
+                    DebugLogChannel.Config,
+                    $"ConfigService: null {configName} was skipped.");
                 continue;
             }
 
             if (string.IsNullOrWhiteSpace(config.Id))
             {
-                AppLog.Warning($"ConfigService: {configName} with empty Id was skipped.");
+                AppLog.Warning(
+                    DebugLogChannel.Config,
+                    $"ConfigService: {configName} with empty Id was skipped.");
                 continue;
             }
 
@@ -207,7 +211,9 @@ public sealed class ConfigService : IConfigService
 
             if (targetById.ContainsKey(normalizedId))
             {
-                AppLog.Warning($"ConfigService: duplicate {configName} Id '{normalizedId}' was skipped.");
+                AppLog.Warning(
+                    DebugLogChannel.Config,
+                    $"ConfigService: duplicate {configName} Id '{normalizedId}' was skipped.");
                 continue;
             }
 

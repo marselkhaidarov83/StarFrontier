@@ -164,7 +164,9 @@ public sealed class SystemObjectsListHud2A :
             panelRoot.SetActive(true);
         else
         {
-            Debug.LogWarning("[SystemObjectsHUD] panelRoot is null.");
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
+                "[SystemObjectsHUD] panelRoot is null.");
         }
     }
 
@@ -196,7 +198,9 @@ public sealed class SystemObjectsListHud2A :
 
         if (system == null)
         {
-            Debug.LogWarning("[SystemObjectsHUD] Current system is null.");
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
+                "[SystemObjectsHUD] Current system is null.");
             AppendMutedLine("Система не найдена");
             visualRows++;
             ApplyHeight(visualRows);
@@ -207,15 +211,6 @@ public sealed class SystemObjectsListHud2A :
         visualRows += AppendPlanets(system);
         visualRows += AppendStation(system);
         visualRows += AppendExits(system);
-
-        if (visualRows == 0)
-        {
-            AppendMutedLine("Нет доступных объектов");
-            visualRows++;
-        }
-
-        ApplyHeight(visualRows);
-        SetRowsText();
     }
 
     private int AppendPlanets(
@@ -482,7 +477,8 @@ public sealed class SystemObjectsListHud2A :
 
         if (endpoint == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
                 "[SystemObjectsHUD] Cannot select exit. Endpoint is null. " +
                 "Route=" + route.Id +
                 " CurrentSystem=" + currentSystem.Id);
@@ -601,7 +597,8 @@ public sealed class SystemObjectsListHud2A :
             _gameSessionService.State.Player == null ||
             _configService == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
                 "[SystemObjectsHUD] Cannot resolve current system. " +
                 "Session=" + (_gameSessionService != null) +
                 " Config=" + (_configService != null));
@@ -616,7 +613,9 @@ public sealed class SystemObjectsListHud2A :
 
         if (string.IsNullOrWhiteSpace(systemId))
         {
-            Debug.LogWarning("[SystemObjectsHUD] CurrentSystemId is empty.");
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
+                "[SystemObjectsHUD] CurrentSystemId is empty.");
             return null;
         }
 
@@ -629,7 +628,7 @@ public sealed class SystemObjectsListHud2A :
     }
 
     private List<RouteConfig> GetRoutesForSystem(
-        string systemId)
+    string systemId)
     {
         List<RouteConfig> result = new();
         HashSet<string> addedRouteIds = new();
@@ -637,7 +636,8 @@ public sealed class SystemObjectsListHud2A :
         if (string.IsNullOrWhiteSpace(systemId) ||
             _configService == null)
         {
-            Debug.LogWarning(
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
                 "[SystemObjectsHUD] Cannot collect routes. " +
                 "SystemId=" + systemId +
                 " Config=" + (_configService != null));
@@ -649,7 +649,9 @@ public sealed class SystemObjectsListHud2A :
 
         if (systems == null)
         {
-            Debug.LogWarning("[SystemObjectsHUD] GetAllStarSystems returned null.");
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
+                "[SystemObjectsHUD] GetAllStarSystems returned null.");
             return result;
         }
 

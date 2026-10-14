@@ -114,11 +114,11 @@ public static class StarSystemPopulationRuleBinder
                         populationUpdated++;
                         changed = true;
 
-                        Debug.Log(
+                        AppLog.Info(
+                            DebugLogChannel.DataValidation,
                             "StarSystemPopulationRuleBinder: bound " +
                             populationRule.Id + " to " + starSystem.Id +
-                            " by station " + DescribeStation(starSystem),
-                            starSystem);
+                            " by station " + DescribeStation(starSystem));
                     }
                 }
             }
@@ -126,12 +126,12 @@ public static class StarSystemPopulationRuleBinder
             if (!string.IsNullOrWhiteSpace(populationError))
             {
                 warnings++;
-                Debug.LogWarning(
+                AppLog.Warning(
+                    DebugLogChannel.DataValidation,
                     "StarSystemPopulationRuleBinder: " +
                     populationError +
                     " System: " +
-                    starSystem.Id,
-                    starSystem);
+                    starSystem.Id);
             }
 
             if (ShouldBindEnemySpawnRuleSet(starSystem))
@@ -152,24 +152,24 @@ public static class StarSystemPopulationRuleBinder
                         enemyUpdated++;
                         changed = true;
 
-                        Debug.Log(
+                        AppLog.Info(
+                            DebugLogChannel.DataValidation,
                             "StarSystemPopulationRuleBinder: bound " +
                             enemyRuleSet.Id +
                             " to enemySpawnRuleSet of " +
-                            starSystem.Id,
-                            starSystem);
+                            starSystem.Id);
                     }
                 }
 
                 if (!string.IsNullOrWhiteSpace(enemyError))
                 {
                     warnings++;
-                    Debug.LogWarning(
+                    AppLog.Warning(
+                        DebugLogChannel.DataValidation,
                         "StarSystemPopulationRuleBinder: " +
                         enemyError +
                         " System: " +
-                        starSystem.Id,
-                        starSystem);
+                        starSystem.Id);
                 }
             }
 
@@ -248,23 +248,23 @@ public static class StarSystemPopulationRuleBinder
                 {
                     repaired++;
 
-                    Debug.Log(
+                    AppLog.Info(
+                        DebugLogChannel.DataValidation,
                         "StarSystemPopulationRule validation: repaired missing SystemPopulationRule at " +
                         path + " (" + starSystem.Id + "). Assigned: " +
-                        expectedPopulationRule.Id + ". Station: " + DescribeStation(starSystem),
-                        starSystem);
+                        expectedPopulationRule.Id + ". Station: " + DescribeStation(starSystem));
                 }
                 else
                 {
                     errors++;
 
-                    Debug.LogError(
+                    AppLog.Error(
+                        DebugLogChannel.DataValidation,
                         "StarSystemPopulationRule validation: missing SystemPopulationRule at " +
                         path + " (" + starSystem.Id + "). Expected: " +
                         (expectedPopulationRule != null ? expectedPopulationRule.Id : "none") +
                         ". Station: " + DescribeStation(starSystem) +
-                        ". AssignError: " + assignError,
-                        starSystem);
+                        ". AssignError: " + assignError);
                 }
             }
 
@@ -275,11 +275,11 @@ public static class StarSystemPopulationRuleBinder
             {
                 errors++;
 
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.DataValidation,
                     "StarSystemPopulationRule validation: missing EnemySpawnRuleSetConfig asset " +
                     EnemySpawnRuleSetId +
-                    ". Run EnemySpawnRuleAssetGenerator first.",
-                    starSystem);
+                    ". Run EnemySpawnRuleAssetGenerator first.");
                 continue;
             }
 
@@ -295,22 +295,22 @@ public static class StarSystemPopulationRuleBinder
             {
                 repaired++;
 
-                Debug.Log(
+                AppLog.Info(
+                    DebugLogChannel.DataValidation,
                     "StarSystemPopulationRule validation: repaired missing EnemySpawnRuleSet at " +
                     path + " (" + starSystem.Id + "). Assigned: " +
-                    enemyRuleSet.Id + ".",
-                    starSystem);
+                    enemyRuleSet.Id + ".");
             }
             else
             {
                 errors++;
 
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.DataValidation,
                     "StarSystemPopulationRule validation: missing EnemySpawnRuleSet at " +
                     path + " (" + starSystem.Id + "). Expected: " +
                     enemyRuleSet.Id +
-                    ". AssignError: " + enemyAssignError,
-                    starSystem);
+                    ". AssignError: " + enemyAssignError);
             }
         }
 
@@ -463,10 +463,10 @@ public static class StarSystemPopulationRuleBinder
         if (station == null)
         {
             warnings++;
-            Debug.LogWarning(
+            AppLog.Warning(
+                DebugLogChannel.DataValidation,
                 "StarSystemPopulationRuleBinder: system has no StationConfig, using balanced rule: " +
-                starSystem.Id,
-                starSystem);
+                starSystem.Id);
 
             return PickEnemyModeRule(
                 rules.Balanced,
@@ -508,10 +508,11 @@ public static class StarSystemPopulationRuleBinder
 
             default:
                 warnings++;
-                Debug.LogWarning(
+                AppLog.Warning(
+                    DebugLogChannel.DataValidation,
                     "StarSystemPopulationRuleBinder: unsupported station type " +
-                    station.StationType + ", using balanced rule: " + starSystem.Id,
-                    starSystem);
+                    station.StationType + ", using balanced rule: " + starSystem.Id);
+
                 return PickEnemyModeRule(
                     rules.Balanced,
                     rules.BalancedNoEnemies,

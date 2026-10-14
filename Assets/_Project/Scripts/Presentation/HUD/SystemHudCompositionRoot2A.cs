@@ -120,10 +120,10 @@ public sealed class SystemHudCompositionRoot2A :
     {
         if (!Application.isPlaying)
         {
-            Debug.LogWarning(
+            AppLog.Warning(
+                DebugLogChannel.SystemHud,
                 "HUD binding is available only " +
-                "in Play Mode.",
-                this);
+                "in Play Mode.");
 
             return;
         }
@@ -150,9 +150,7 @@ public sealed class SystemHudCompositionRoot2A :
             }
             catch (Exception exception)
             {
-                Debug.LogException(
-                    exception,
-                    this);
+                AppLog.Exception(DebugLogChannel.SystemHud, exception);
             }
         }
 
@@ -188,10 +186,10 @@ public sealed class SystemHudCompositionRoot2A :
                     $"{registryWaitTimeoutSeconds:0.0} " +
                     "seconds.";
 
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.SystemHud,
                     "[2A-S03-03-T02] " +
-                    lastError,
-                    this);
+                    lastError);
 
                 _bindingRoutine = null;
                 yield break;
@@ -281,9 +279,7 @@ public sealed class SystemHudCompositionRoot2A :
              */
             UnbindAll();
 
-            Debug.LogException(
-                exception,
-                this);
+            AppLog.Exception(DebugLogChannel.SystemHud, exception);
         }
     }
 
@@ -407,12 +403,12 @@ public sealed class SystemHudCompositionRoot2A :
         {
             if (isExplicit)
             {
-                Debug.LogError(
+                AppLog.Error(
+                    DebugLogChannel.SystemHud,
                     component.name +
                     " does not implement " +
                     nameof(ISystemHudWidgetBinder2A) +
-                    ".",
-                    component);
+                    ".");
             }
 
             return;

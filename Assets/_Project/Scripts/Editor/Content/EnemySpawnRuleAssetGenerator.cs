@@ -324,7 +324,7 @@ public static class EnemySpawnRuleAssetGenerator
             {
                 warnings++;
 
-                Debug.LogWarning(
+                AppLog.Warning(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRule generator: missing EnemyConfig for " +
                     faction +
                     " L" +
@@ -401,10 +401,9 @@ public static class EnemySpawnRuleAssetGenerator
                     out EnemyFaction2A faction,
                     out int level))
             {
-                Debug.LogWarning(
+                AppLog.Warning(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRule generator: cannot resolve faction/level for EnemyConfig at " +
-                    path,
-                    config);
+                    path);
                 continue;
             }
 
@@ -415,14 +414,13 @@ public static class EnemySpawnRuleAssetGenerator
 
             if (result.ContainsKey(key))
             {
-                Debug.LogWarning(
+                AppLog.Warning(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRule generator: duplicate EnemyConfig for " +
                     faction +
                     " L" +
                     level.ToString("00") +
                     ". Keeping first one. Duplicate path: " +
-                    path,
-                    config);
+                    path);
                 continue;
             }
 
@@ -462,7 +460,7 @@ public static class EnemySpawnRuleAssetGenerator
 
         if (rule == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.EditorGenerators,
                 "EnemySpawnRule validation: missing rule at " + path);
             return false;
         }
@@ -470,9 +468,8 @@ public static class EnemySpawnRuleAssetGenerator
         if (rule.LevelEntries == null ||
             rule.LevelEntries.Count != 10)
         {
-            Debug.LogError(
-                "EnemySpawnRule validation: expected exactly 10 level entries at " + path,
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                "EnemySpawnRule validation: expected exactly 10 level entries at " + path);
             return false;
         }
 
@@ -483,24 +480,22 @@ public static class EnemySpawnRuleAssetGenerator
 
             if (entry == null)
             {
-                Debug.LogError(
+                AppLog.Error(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRule validation: missing level " +
                     galaxyLevel +
                     " at " +
-                    path,
-                    rule);
+                    path);
                 isValid = false;
                 continue;
             }
 
             if (!entry.HasValidEnemies())
             {
-                Debug.LogError(
+                AppLog.Error(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRule validation: level " +
                     galaxyLevel +
                     " has no valid enemies at " +
-                    path,
-                    rule);
+                    path);
                 isValid = false;
                 continue;
             }
@@ -511,14 +506,13 @@ public static class EnemySpawnRuleAssetGenerator
             if (entry.Enemies == null ||
                 entry.Enemies.Count != expectedLevels.Length)
             {
-                Debug.LogError(
+                AppLog.Error(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRule validation: level " +
                     galaxyLevel +
                     " must contain enemy levels " +
                     DescribeLevels(expectedLevels) +
                     " at " +
-                    path,
-                    rule);
+                    path);
                 isValid = false;
                 continue;
             }
@@ -532,30 +526,28 @@ public static class EnemySpawnRuleAssetGenerator
                     enemyEntry.EnemyConfig == null ||
                     !enemyEntry.IsValid())
                 {
-                    Debug.LogError(
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
                         "EnemySpawnRule validation: invalid enemy entry at " +
                         path +
                         ", galaxy level " +
                         galaxyLevel +
                         ", index " +
                         enemyIndex +
-                        ".",
-                        rule);
+                        ".");
                     isValid = false;
                     continue;
                 }
 
                 if (enemyEntry.EnemyConfig.Level != expectedLevels[enemyIndex])
                 {
-                    Debug.LogError(
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
                         "EnemySpawnRule validation: wrong enemy level at " +
                         path +
                         ". Expected L" +
                         expectedLevels[enemyIndex].ToString("00") +
                         ", got L" +
                         enemyEntry.EnemyConfig.Level.ToString("00") +
-                        ".",
-                        enemyEntry.EnemyConfig);
+                        ".");
                     isValid = false;
                 }
 
@@ -564,15 +556,14 @@ public static class EnemySpawnRuleAssetGenerator
                         out EnemyFaction2A enemyFaction) ||
                     enemyFaction != rule.Faction)
                 {
-                    Debug.LogError(
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
                         "EnemySpawnRule validation: enemy faction mismatch at " +
                         path +
                         ". Rule faction: " +
                         rule.Faction +
                         ", enemy: " +
                         enemyEntry.EnemyConfig.Id +
-                        ".",
-                        enemyEntry.EnemyConfig);
+                        ".");
                     isValid = false;
                 }
             }
@@ -587,7 +578,7 @@ public static class EnemySpawnRuleAssetGenerator
     {
         if (ruleSet == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.EditorGenerators,
                 "EnemySpawnRuleSet validation: missing rule set at " + path);
             return false;
         }
@@ -604,24 +595,22 @@ public static class EnemySpawnRuleAssetGenerator
 
             if (rule == null)
             {
-                Debug.LogError(
+                AppLog.Error(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRuleSet validation: missing rule for faction " +
                     factions[i] +
                     " at " +
-                    path,
-                    ruleSet);
+                    path);
                 isValid = false;
                 continue;
             }
 
             if (rule.Faction != factions[i])
             {
-                Debug.LogError(
+                AppLog.Error(DebugLogChannel.EditorGenerators,
                     "EnemySpawnRuleSet validation: rule faction mismatch for " +
                     factions[i] +
                     " at " +
-                    path,
-                    rule);
+                    path);
                 isValid = false;
             }
         }

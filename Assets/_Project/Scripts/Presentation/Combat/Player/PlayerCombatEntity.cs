@@ -33,11 +33,11 @@ public sealed class PlayerCombatEntity : MonoBehaviour
     {
         if (IsGodModeEnabled())
         {
-            Debug.Log(
-                "[PlayerCombatEntity] Damage blocked by player god mode. " +
+            AppLog.Info(DebugLogChannel.CombatPresentation,
+                typeof(PlayerCombatEntity),
+                "Damage blocked by player god mode. " +
                 "RequestedDamage: " +
-                damage,
-                this);
+                damage);
 
             return;
         }

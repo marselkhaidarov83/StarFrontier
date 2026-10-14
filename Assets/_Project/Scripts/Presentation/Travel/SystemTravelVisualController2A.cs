@@ -31,12 +31,12 @@ public sealed class SystemTravelVisualController2A : CustomMonoBehaviour
 
         if (_travelService == null)
         {
-            Debug.LogError("[SystemTravelVisualController2] ISystemTravelService not found.");
+            AppLog.Error(DebugLogChannel.Travel, "[SystemTravelVisualController2] ISystemTravelService not found.");
             return;
         }
 
         if (_hangarService == null)
-            Debug.LogWarning("[SystemTravelVisualController2] IHangarService not found. Fallback speed will be used.");
+            AppLog.Warning(DebugLogChannel.Travel, "[SystemTravelVisualController2] IHangarService not found. Fallback speed will be used.");
 
         _lastShipPosition = _travelService.State.GetCurrentPosition();
 

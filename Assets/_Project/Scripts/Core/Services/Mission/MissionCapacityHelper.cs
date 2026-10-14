@@ -18,7 +18,9 @@ public static class MissionCapacityHelper
                     result++;
             }
 
-            Debug.Log("[MissionCapacityHelper] CountMissionsInWork = " + result);
+            AppLog.Info(DebugLogChannel.Mission,
+                typeof(MissionCapacityHelper),
+                "CountMissionsInWork = " + result);
             return result;
         }
 

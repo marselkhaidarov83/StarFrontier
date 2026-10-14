@@ -127,7 +127,9 @@ public sealed class PlayerSystemMapShipView :
 
         gameObject.SetActive(false);
 
-        Debug.Log("[PlayerSystemMapShipView] Player ship hidden after destruction.");
+        AppLog.Info(DebugLogChannel.CombatPresentation,
+            typeof(PlayerSystemMapShipView),
+            "Player ship hidden after destruction.");
     }
 
     private ShipRuntimeData GetActiveShip()

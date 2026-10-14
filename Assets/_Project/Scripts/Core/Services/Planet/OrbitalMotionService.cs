@@ -60,7 +60,9 @@ public sealed class OrbitalMotionService : CustomService, IOrbitalMotionService
     {
         if (orbitConfig == null)
         {
-            Debug.LogError("[OrbitalMotionService] PlanetOrbitConfig is null. Returning zero position.");
+            AppLog.Error(DebugLogChannel.PlanetMovement,
+                typeof(OrbitalMotionService),
+                "PlanetOrbitConfig is null. Returning zero position.");
             return Vector3.zero;
         }
 

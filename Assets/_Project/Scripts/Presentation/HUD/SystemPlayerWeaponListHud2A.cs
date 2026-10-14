@@ -141,9 +141,9 @@ public sealed class SystemPlayerWeaponListHud2A :
     {
         if (context == null)
         {
-            Debug.LogError(
-                "[SystemPlayerWeaponListHud2A] Missing HUD binding context.",
-                this);
+            AppLog.Error(DebugLogChannel.SystemHud,
+                typeof(SystemPlayerWeaponListHud2A),
+                "Missing HUD binding context.");
             return;
         }
 
@@ -151,9 +151,9 @@ public sealed class SystemPlayerWeaponListHud2A :
 
         if (!HasRequiredUi())
         {
-            Debug.LogError(
-                "[SystemPlayerWeaponListHud2A] Weapon HUD prefab UI is not fully bound.",
-                this);
+            AppLog.Error(DebugLogChannel.SystemHud,
+                typeof(SystemPlayerWeaponListHud2A),
+                "Weapon HUD prefab UI is not fully bound.");
             return;
         }
 
@@ -173,7 +173,6 @@ public sealed class SystemPlayerWeaponListHud2A :
 
         _isBound = true;
         _nextRefreshTime = 0f;
-        RefreshState();
     }
 
     public void Unbind()

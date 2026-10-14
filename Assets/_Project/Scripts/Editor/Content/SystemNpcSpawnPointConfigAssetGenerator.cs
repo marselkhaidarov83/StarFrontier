@@ -53,9 +53,8 @@ public static class SystemNpcSpawnPointConfigAssetGenerator
                     out string warning))
             {
                 warnings++;
-                Debug.LogWarning(
-                    $"SystemNpcSpawnPoint generator: skipped {starSystem.Id}. {warning}",
-                    starSystem);
+                AppLog.Warning(DebugLogChannel.EditorGenerators,
+                    $"SystemNpcSpawnPoint generator: skipped {starSystem.Id}. {warning}");
                 continue;
             }
 
@@ -130,9 +129,8 @@ public static class SystemNpcSpawnPointConfigAssetGenerator
             if (starSystem.NpcSpawnPoints == null)
             {
                 errors++;
-                Debug.LogError(
-                    $"SystemNpcSpawnPoint validation: missing npcSpawnPoints at {systemPath} ({starSystem.Id})",
-                    starSystem);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"SystemNpcSpawnPoint validation: missing npcSpawnPoints at {systemPath} ({starSystem.Id})");
                 continue;
             }
 
@@ -142,9 +140,8 @@ public static class SystemNpcSpawnPointConfigAssetGenerator
             if (points == null || points.Length != SpawnPointCount)
             {
                 errors++;
-                Debug.LogError(
-                    $"SystemNpcSpawnPoint validation: expected {SpawnPointCount} enemy spawn points at {systemPath} ({starSystem.Id}), actual {points?.Length ?? 0}",
-                    starSystem.NpcSpawnPoints);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"SystemNpcSpawnPoint validation: expected {SpawnPointCount} enemy spawn points at {systemPath} ({starSystem.Id}), actual {points?.Length ?? 0}");
                 continue;
             }
 
@@ -160,10 +157,9 @@ public static class SystemNpcSpawnPointConfigAssetGenerator
             if (randomRadius <= 0f)
             {
                 errors++;
-                Debug.LogError(
+                AppLog.Error(DebugLogChannel.EditorGenerators,
                     $"SystemNpcSpawnPoint validation: EnemyRandomRadius must be greater than 0 for visible enemy scatter. " +
-                    $"Actual={randomRadius}, System={starSystem.Id}",
-                    starSystem.NpcSpawnPoints);
+                    $"Actual={randomRadius}, System={starSystem.Id}");
             }
 
             for (int p = 0; p < points.Length; p++)
@@ -175,10 +171,9 @@ public static class SystemNpcSpawnPointConfigAssetGenerator
                     continue;
 
                 errors++;
-                Debug.LogError(
+                AppLog.Error(DebugLogChannel.EditorGenerators,
                     $"SystemNpcSpawnPoint validation: point {p} must be exactly on required orbit 8. " +
-                    $"PointRadius={pointRadius}, RequiredRadius={requiredRadius}, System={starSystem.Id}",
-                    starSystem.NpcSpawnPoints);
+                    $"PointRadius={pointRadius}, RequiredRadius={requiredRadius}, System={starSystem.Id}");
             }
         }
 

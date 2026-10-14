@@ -92,10 +92,9 @@ public sealed class PointDestinationMovementAdapter2A :
             {
                 cancelledInvalid = true;
 
-                Debug.LogError(
-                    "[PointDestinationMovementAdapter2A] " +
-                    "Movement State contains invalid position.",
-                    this);
+                AppLog.Error(DebugLogChannel.Navigation,
+                    typeof(PointDestinationMovementAdapter2A),
+                    "Movement State contains invalid position.");
 
                 CancelDestination(
                     immediateStop: true);
@@ -207,10 +206,9 @@ public sealed class PointDestinationMovementAdapter2A :
     {
         if (!IsFinite(worldPosition))
         {
-            Debug.LogError(
-                "[PointDestinationMovementAdapter2A] " +
-                "Destination contains NaN or Infinity.",
-                this);
+            AppLog.Error(DebugLogChannel.Navigation,
+                typeof(PointDestinationMovementAdapter2A),
+                "Destination contains NaN or Infinity.");
 
             return;
         }
@@ -223,10 +221,9 @@ public sealed class PointDestinationMovementAdapter2A :
 
         if (logCommands)
         {
-            Debug.Log(
-                "[PointDestinationMovementAdapter2A] " +
-                $"Destination set: {_destination}.",
-                this);
+            AppLog.Info(DebugLogChannel.Navigation,
+                typeof(PointDestinationMovementAdapter2A),
+                $"Destination set: {_destination}.");
         }
     }
 
@@ -274,11 +271,10 @@ public sealed class PointDestinationMovementAdapter2A :
         if (hadDestination &&
             logCommands)
         {
-            Debug.Log(
-                "[PointDestinationMovementAdapter2A] " +
+            AppLog.Info(DebugLogChannel.Navigation,
+                typeof(PointDestinationMovementAdapter2A),
                 "Destination cancelled. " +
-                $"Immediate stop: {immediateStop}.",
-                this);
+                $"Immediate stop: {immediateStop}.");
         }
     }
 
@@ -309,10 +305,9 @@ public sealed class PointDestinationMovementAdapter2A :
 
         if (logCommands)
         {
-            Debug.Log(
-                "[PointDestinationMovementAdapter2A] " +
-                "Destination reached.",
-                this);
+            AppLog.Info(DebugLogChannel.Navigation,
+                typeof(PointDestinationMovementAdapter2A),
+                "Destination reached.");
         }
     }
 
@@ -349,11 +344,10 @@ public sealed class PointDestinationMovementAdapter2A :
         {
             _errorReported = true;
 
-            Debug.LogError(
-                "[PointDestinationMovementAdapter2A] " +
+            AppLog.Error(DebugLogChannel.Navigation,
+                typeof(PointDestinationMovementAdapter2A),
                 "IPlayerControlService or " +
-                "IShipMovementService was not found.",
-                this);
+                "IShipMovementService was not found.");
         }
 
         return isReady;

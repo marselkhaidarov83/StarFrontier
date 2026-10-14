@@ -41,7 +41,7 @@ public static class NpcBehaviourTransitionMatrixAssetGenerator
 
         Selection.activeObject = asset;
 
-        Debug.Log(
+        AppLog.Info(DebugLogChannel.EditorGenerators,
             "NPC Behaviour Transition Matrix generated: " +
             AssetPath);
     }
@@ -79,7 +79,7 @@ public static class NpcBehaviourTransitionMatrixAssetGenerator
 
         if (rulesProperty == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.EditorGenerators,
                 "NpcBehaviourTransitionMatrixConfig.rules field was not found.");
 
             return;
@@ -137,7 +137,7 @@ public static class NpcBehaviourTransitionMatrixAssetGenerator
             }
         }
 
-        Debug.LogError(
+        AppLog.Error(DebugLogChannel.EditorGenerators,
             "SystemNpcBehaviorType value was not found in SerializedProperty enum names: " +
             enumName);
     }

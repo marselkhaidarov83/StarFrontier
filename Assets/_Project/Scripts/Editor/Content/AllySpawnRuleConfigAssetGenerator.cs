@@ -196,7 +196,7 @@ public static class AllySpawnRuleConfigAssetGenerator
                 if (allyConfig == null)
                 {
                     warnings++;
-                    Debug.LogWarning(
+                    AppLog.Warning(DebugLogChannel.EditorGenerators,
                         $"AllySpawnRule generator: missing AllyConfig for {plan.Role} L{level:00}.");
                 }
                 else
@@ -239,9 +239,8 @@ public static class AllySpawnRuleConfigAssetGenerator
 
         if (entries == null || entries.Count != 10)
         {
-            Debug.LogError(
-                $"AllySpawnRule validation: expected exactly 10 level entries at {path}",
-                rule);
+            AppLog.Error(DebugLogChannel.EditorGenerators,
+                $"AllySpawnRule validation: expected exactly 10 level entries at {path}");
             return false;
         }
 
@@ -252,26 +251,23 @@ public static class AllySpawnRuleConfigAssetGenerator
 
             if (levelEntry == null)
             {
-                Debug.LogError(
-                    $"AllySpawnRule validation: missing level {level} at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"AllySpawnRule validation: missing level {level} at {path}");
                 isValid = false;
                 continue;
             }
 
             if (!levelEntry.HasValidAllies())
             {
-                Debug.LogError(
-                    $"AllySpawnRule validation: no valid allies for level {level} at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"AllySpawnRule validation: no valid allies for level {level} at {path}");
                 isValid = false;
             }
 
             if (!HasEveryRole(levelEntry))
             {
-                Debug.LogError(
-                    $"AllySpawnRule validation: level {level} must include Ranger, Military, Trader, Science and Medic at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"AllySpawnRule validation: level {level} must include Ranger, Military, Trader, Science and Medic at {path}");
                 isValid = false;
             }
 
@@ -280,17 +276,15 @@ public static class AllySpawnRuleConfigAssetGenerator
 
             if (level == 1 && maxCount != 5)
             {
-                Debug.LogError(
-                    $"AllySpawnRule validation: L01 max count must be 5 so every ally type is present, actual {maxCount} at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"AllySpawnRule validation: L01 max count must be 5 so every ally type is present, actual {maxCount} at {path}");
                 isValid = false;
             }
 
             if (level == 10 && maxCount != 30)
             {
-                Debug.LogError(
-                    $"AllySpawnRule validation: L10 max count must be 30, actual {maxCount} at {path}",
-                    rule);
+                AppLog.Error(DebugLogChannel.EditorGenerators,
+                    $"AllySpawnRule validation: L10 max count must be 30, actual {maxCount} at {path}");
                 isValid = false;
             }
         }
@@ -387,9 +381,8 @@ public static class AllySpawnRuleConfigAssetGenerator
 
         if (alliesByRoleAndLevel.ContainsKey(key))
         {
-            Debug.LogWarning(
-                $"AllySpawnRule generator: duplicate AllyConfig for {role} L{level:00}. Keeping first one. Duplicate path: {path}",
-                config);
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
+                $"AllySpawnRule generator: duplicate AllyConfig for {role} L{level:00}. Keeping first one. Duplicate path: {path}");
             return;
         }
 

@@ -79,11 +79,15 @@ public class HangarService : IHangarService
         var activeShip = GetActiveShipState();
         var shipData = GetActiveShipData();
 
-        Debug.Log("[HangarService] EquipWeapon " + weaponId);
+        AppLog.Info(DebugLogChannel.Hangar,
+            typeof(HangarService),
+            "EquipWeapon " + weaponId);
 
         WeaponConfig weaponData = _configService.GetWeaponConfigById(weaponId);
 
-        Debug.Log("[HangarService] weaponData " + weaponData);
+        AppLog.Info(DebugLogChannel.Hangar,
+            typeof(HangarService),
+            "weaponData " + weaponData);
 
         var result = ShipSlotRules.CanEquipWeapon(
             activeShip,
@@ -91,7 +95,9 @@ public class HangarService : IHangarService
             weaponData,
             weaponId);
 
-        Debug.Log("[HangarService] CanEquipWeapon " + result.Error);
+        AppLog.Info(DebugLogChannel.Hangar,
+            typeof(HangarService),
+            "CanEquipWeapon " + result.Error);
 
         if (!result.Success)
             return result;
@@ -199,11 +205,15 @@ public class HangarService : IHangarService
         try
         {
             _eventBus.Publish(new SaveNeedEvent());
-            Debug.Log($"[HangarService] Autosaved after: {operationName}");
+            AppLog.Info(DebugLogChannel.Hangar,
+                typeof(HangarService),
+                $"Autosaved after: {operationName}");
         }
         catch (Exception exception)
         {
-            Debug.LogError($"[HangarService] Autosave failed after {operationName}: {exception.Message}");
+            AppLog.Error(DebugLogChannel.Hangar,
+                typeof(HangarService),
+                $"Autosave failed after {operationName}: {exception.Message}");
         }
     }
 }

@@ -73,18 +73,18 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 
         if (Bootstrapper.Instance == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] Bootstrapper.Instance is null."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "Bootstrapper.Instance is null.");
 
             return;
         }
 
         if (Bootstrapper.Instance.ServiceRegistry == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] ServiceRegistry is null."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "ServiceRegistry is null.");
 
             return;
         }
@@ -174,29 +174,27 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     {
         if (configService == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] IConfigService is null."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "IConfigService is null.");
 
             return;
         }
 
         if (starSystemNodePrefab2 == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "Star System Node Prefab 2 is not assigned."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "Star System Node Prefab 2 is not assigned.");
 
             return;
         }
 
         if (systemNodesContainer == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "System Nodes Container is not assigned."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "System Nodes Container is not assigned.");
 
             return;
         }
@@ -206,10 +204,9 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 
         if (systems == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "Star-system config collection is null."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "Star-system config collection is null.");
 
             return;
         }
@@ -287,20 +284,18 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 
         if (mapViewFitter == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "MapViewFitter is not assigned."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "MapViewFitter is not assigned.");
 
             yield break;
         }
 
         if (mapCameraController == null)
         {
-            Debug.LogError(
-                "[GalaxyMapSystemBuilder] " +
-                "MapCameraController is not assigned."
-            );
+            AppLog.Error(DebugLogChannel.GalaxyMap,
+                typeof(GalaxyMapSystemBuilder),
+                "MapCameraController is not assigned.");
 
             yield break;
         }
@@ -699,7 +694,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
             gameSessionService.State == null ||
             gameSessionService.State.Player == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.GalaxyMap,
                 "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=MissingPlayerState");
 
             return false;
@@ -707,7 +702,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 
         if (travelService == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.GalaxyMap,
                 "[GALAXY_CLICK_TRACE] SelectSystem.End | Reason=MissingTravelService");
 
             return false;
@@ -897,7 +892,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
 
         if (systemTravelService == null)
         {
-            Debug.LogError(
+            AppLog.Error(DebugLogChannel.GalaxyMap,
                 "[GALAXY_CLICK_TRACE] OpenCurrentSystemWithRouteDestination.End | Reason=MissingSystemTravelService");
 
             return;

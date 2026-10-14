@@ -78,7 +78,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
         int snapshotNpcCount =
             CountSnapshotNpcs(saveData.PopulationEntries);
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Save,
             "[NPC_COMPACT_SAVE_CAPTURE]" +
             " RuntimeNpcs=" + runtimeNpcs +
             " | AliveNpcs=" + aliveNpcs +
@@ -99,7 +100,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
 
         if (saveData == null)
         {
-            Debug.Log("[NPC_COMPACT_SAVE_RESTORE] Result=Skipped | Reason=SaveDataNull");
+            AppLog.Info(DebugLogChannel.Save, "[NPC_COMPACT_SAVE_RESTORE] Result=Skipped | Reason=SaveDataNull");
             return;
         }
 
@@ -187,7 +188,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             }
         }
 
-        Debug.Log(
+        AppLog.Info(
+            DebugLogChannel.Save,
             "[NPC_COMPACT_SAVE_RESTORE]" +
             " Source=" + source +
             " | Entries=" + entries.Count +
@@ -900,7 +902,8 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
         {
             session.EntriesBuildComplete = true;
 
-            Debug.Log(
+            AppLog.Info(
+                DebugLogChannel.Save,
                 "[NPC_COMPACT_SAVE_CAPTURE_INCREMENTAL]" +
                 " RuntimeNpcs=" + session.RuntimeNpcs +
                 " | AliveNpcs=" + session.AliveNpcs +

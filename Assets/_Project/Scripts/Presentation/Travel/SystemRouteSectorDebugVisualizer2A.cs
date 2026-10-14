@@ -156,7 +156,7 @@ public sealed class SystemRouteSectorDebugVisualizer2A : MonoBehaviour
         {
             if (logDebug && !_loggedMissingService)
             {
-                Debug.LogWarning("[RouteSectorDebug] Bootstrapper is not ready.");
+                AppLog.Warning(DebugLogChannel.Travel, "[RouteSectorDebug] Bootstrapper is not ready.");
                 _loggedMissingService = true;
             }
 
@@ -170,7 +170,7 @@ public sealed class SystemRouteSectorDebugVisualizer2A : MonoBehaviour
         {
             if (logDebug && !_loggedMissingService)
             {
-                Debug.LogWarning("[RouteSectorDebug] ISystemTravelService not found.");
+                AppLog.Warning(DebugLogChannel.Travel, "[RouteSectorDebug] ISystemTravelService not found.");
                 _loggedMissingService = true;
             }
 
@@ -180,7 +180,7 @@ public sealed class SystemRouteSectorDebugVisualizer2A : MonoBehaviour
         _loggedMissingService = false;
 
         if (logDebug)
-            Debug.Log("[RouteSectorDebug] ISystemTravelService resolved.");
+            AppLog.Info(DebugLogChannel.Travel, "[RouteSectorDebug] ISystemTravelService resolved.");
     }
 
     private void Rebuild()
@@ -272,7 +272,8 @@ public sealed class SystemRouteSectorDebugVisualizer2A : MonoBehaviour
 
         if (logDebug)
         {
-            Debug.Log(
+            AppLog.Info(
+                DebugLogChannel.Travel,
                 "[RouteSectorDebug] Drawn. Points = " +
                 pointIndex +
                 " | ShipPosition = " +

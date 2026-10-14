@@ -41,14 +41,20 @@ public sealed class GovernmentRewardService : CustomService, IGovernmentRewardSe
 
         if (encounter.SystemId != currentSystemId)
         {
-            Debug.Log("[GovernmentRewardService] encounter.SystemId = " + encounter.SystemId);
-            Debug.Log("[GovernmentRewardService] currentSystemId = " + currentSystemId);
+            AppLog.Info(DebugLogChannel.Combat,
+                typeof(GovernmentRewardService),
+                "encounter.SystemId = " + encounter.SystemId);
+            AppLog.Info(DebugLogChannel.Combat,
+                typeof(GovernmentRewardService),
+                "currentSystemId = " + currentSystemId);
             return false;
         }
 
         if (encounter.PlayerKills <= 0)
         {
-            Debug.Log("[GovernmentRewardService] encounter.PlayerKills = " + encounter.PlayerKills);
+            AppLog.Info(DebugLogChannel.Combat,
+                typeof(GovernmentRewardService),
+                "encounter.PlayerKills = " + encounter.PlayerKills);
             return false;
         }
 
@@ -83,9 +89,9 @@ public sealed class GovernmentRewardService : CustomService, IGovernmentRewardSe
             credits,
             xp));
 
-        Debug.Log(
-            $"[GovernmentRewardService] Reward claimed. Credits: {credits}, XP: {xp}"
-        );
+        AppLog.Info(DebugLogChannel.Combat,
+            typeof(GovernmentRewardService),
+            $"Reward claimed. Credits: {credits}, XP: {xp}");
 
         return GovernmentRewardResult.Granted(credits, xp);
     }
