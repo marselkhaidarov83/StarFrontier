@@ -18,18 +18,26 @@ public class NewGameFactory
             Player = CreatePlayerProfile(_configService.NewGameConfig),
             Galaxy = GalaxyRuntimeStateFactory.CreateNewGalaxyRuntimeState(
                 _configService.GalaxyConfig,
-                Bootstrapper.Instance.SectorAllOpened,
-                Bootstrapper.Instance.RouteAllUnlocked)
+                false,
+                false,
+                IsMobileTestMode,
+                _configService.DebugSettings != null ? _configService.DebugSettings.mobileTestUnlockedSectorCount : 0,
+                _configService.DebugSettings != null ? _configService.DebugSettings.mobileTestAlliedSectorCount : 0)
         };
 
         return save;
     }
 
+    private bool IsMobileTestMode =>
+        _configService.DebugSettings != null && _configService.DebugSettings.mobileTestMode;
+
     private PlayerState CreatePlayerProfile(NewGameConfig newGameConfig)
     {
         return new PlayerState
         {
-            Credits = newGameConfig.StartCredit,
+            Credits = IsMobileTestMode
+                ? Mathf.Max(0, _configService.DebugSettings.mobileTestCredits)
+                : newGameConfig.StartCredit,
             CurrentSystemId = newGameConfig.StartSystem.Id,
             SystemMapShipPosition = newGameConfig.StartShipPosition,
             SystemMapShipDirection = GetStartShipDirection(newGameConfig),
@@ -62,6 +70,13 @@ public class NewGameFactory
                 ? starterShipConfig.BaseCargoCapacity
                 : 30;
 
+        int fuelCapacity = IsMobileTestMode
+            ? Mathf.Max(1, _configService.DebugSettings.mobileTestFuelCapacity)
+            : newGameConfig.FuelCapacity;
+        int currentFuel = IsMobileTestMode
+            ? Mathf.Clamp(_configService.DebugSettings.mobileTestCurrentFuel, 0, fuelCapacity)
+            : newGameConfig.CurrentFuel;
+
         return new ShipRuntimeState
         {
             ActiveShipId = "runtime_ship_001",
@@ -76,8 +91,8 @@ public class NewGameFactory
                     CurrentHull = hullCapacity,
                     CurrentShield = shieldCapacity,
                     CurrentEnergy = energyCapacity,
-                    CurrentFuel = newGameConfig.CurrentFuel,
-                    FuelCapacity = newGameConfig.FuelCapacity,
+                    CurrentFuel = currentFuel,
+                    FuelCapacity = fuelCapacity,
                     CargoCapacity = cargoCapacity,
                     HullCapacity = hullCapacity,
                     EquippedWeaponIds = CreateStarterWeaponIds(starterShipConfig),
@@ -90,6 +105,9 @@ public class NewGameFactory
     private AllyConfig ResolveStarterShipConfig(
         NewGameConfig newGameConfig)
     {
+        if (IsMobileTestMode && _configService.DebugSettings.mobileTestStarterShip != null)
+            return _configService.DebugSettings.mobileTestStarterShip;
+
         if (newGameConfig != null &&
             newGameConfig.StarterShipConfig != null)
         {

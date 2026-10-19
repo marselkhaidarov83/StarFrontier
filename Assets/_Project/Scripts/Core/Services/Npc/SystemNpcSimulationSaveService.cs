@@ -188,6 +188,15 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             }
         }
 
+        // Resolve after registration: the relocation service is registered after this service.
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemNpcOfflineRelocationService>(
+                out ISystemNpcOfflineRelocationService relocationService) &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<IGameSessionService>(
+                out IGameSessionService sessionService))
+        {
+            relocationService.InitializeMilitaryStartLocations(sessionService.State);
+        }
+
         AppLog.Info(
             DebugLogChannel.Save,
             "[NPC_COMPACT_SAVE_RESTORE]" +

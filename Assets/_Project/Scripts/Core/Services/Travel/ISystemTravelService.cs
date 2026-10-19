@@ -11,6 +11,8 @@ public interface ISystemTravelService
     void SetCurrentPlanet(string planetId, Vector3 planetPosition);
     void SetCurrentPosition(Vector3 position);
 
+    bool StartPlanetTakeoff();
+
     void SetPlanetDestination(PlanetConfig planetData);
     void SetStationDestination(StationConfig stationData);
     void SetMapPointDestination(Vector3 mapPosition);

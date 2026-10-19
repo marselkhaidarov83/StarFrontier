@@ -39,7 +39,7 @@ namespace StarFrontier.Tests.Sprint1
     {
         public InvasionScheduleConfig InvasionScheduleConfig => null;
         public GameConfig GameConfig => null;
-        public DebugConfig DebugConfig => null;
+        public DebugSettings DebugSettings => null;
         public SaveConfig SaveConfig { get; }
         public GalaxyConfig GalaxyConfig => null;
         public NewGameConfig NewGameConfig => null;

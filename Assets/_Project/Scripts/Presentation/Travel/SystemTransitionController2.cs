@@ -219,6 +219,31 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
             new SystemState(targetSystemId));
     }
 
+    // Проверка выбора выхода общая для карты и списка объектов.
+    // Топливо здесь не списывается; фактический прыжок проверяет его повторно.
+    public bool ValidateSystemExitSelection(string fromSystemId, string toSystemId)
+    {
+        IServiceRegistry registry = Bootstrapper.Instance != null
+            ? Bootstrapper.Instance.ServiceRegistry
+            : null;
+        if (_travelService == null && registry != null)
+            registry.TryGet(out _travelService);
+
+        if (_travelService == null)
+        {
+            AppLog.Error(DebugLogChannel.Travel,
+                "[SystemTransitionController2] Cannot validate exit: ITravelService is missing.");
+            return false;
+        }
+
+        TravelFailReason failReason = _travelService.GetTravelFailReason(fromSystemId, toSystemId);
+        if (failReason != TravelFailReason.NotEnoughFuel)
+            return true;
+
+        ShowTravelFailReason(failReason);
+        return true;
+    }
+
     /// <summary>
     /// Показывает сообщение для причины отказа перелёта.
     ///

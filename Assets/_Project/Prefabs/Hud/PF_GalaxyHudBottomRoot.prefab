@@ -238,7 +238,8 @@ MonoBehaviour:
   routePriceText: {fileID: 461533641609687145}
   flyButton: {fileID: 6448479137462971668}
   routePriceNormalColor: {r: 1, g: 1, b: 1, a: 1}
-  routePriceNotEnoughFuelColor: {r: 0.9245283, g: 0.004360993, b: 0.004360993, a: 1}
+  routePriceNotEnoughFuelColor: {r: 1, g: 0.33333334, b: 0.33333334, a: 1}
+  enemyTargetColor: {r: 0.9137255, g: 0.67058825, b: 0.3882353, a: 1}
 --- !u!1 &3340992285504417290
 GameObject:
   m_ObjectHideFlags: 0

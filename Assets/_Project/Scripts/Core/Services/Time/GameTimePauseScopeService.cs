@@ -15,7 +15,7 @@ public sealed class GameTimePauseScopeService : CustomService, IGameTimePauseSco
     private bool _savedPauseState;
     private bool _hasSavedPauseState;
 
-    private bool _isInternalPauseChange;
+    private bool _planetSelectedPauseState;
     private bool _pauseWasManuallyChangedInsidePlanetScope;
 
     public GameTimePauseScopeService()
@@ -34,7 +34,7 @@ public sealed class GameTimePauseScopeService : CustomService, IGameTimePauseSco
         _eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         _eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
-        _eventBus.Subscribe<GameTimePauseChangedEvent>(OnGameTimePauseChanged);
+        _eventBus.Subscribe<GameTimePauseModeSelectedEvent>(OnGameTimePauseModeSelected);
     }
 
     private void OnGalaxyEntered(GalaxyEnteredEvent evt)
@@ -52,19 +52,17 @@ public sealed class GameTimePauseScopeService : CustomService, IGameTimePauseSco
         RestorePauseScopeIfNeeded();
     }
 
-    private void OnGameTimePauseChanged(GameTimePauseChangedEvent evt)
+    private void OnGameTimePauseModeSelected(GameTimePauseModeSelectedEvent evt)
     {
         if (_activeScope != PauseScope.Planet)
             return;
 
-        if (_isInternalPauseChange)
-            return;
-
         _pauseWasManuallyChangedInsidePlanetScope = true;
+        _planetSelectedPauseState = evt.IsPaused;
 
         LogCustom(
             "[GameTimePauseScopeService] Player changed Play/Pause inside planet scope. " +
-            "CurrentPauseState = " + _gameTimeService.IsPaused
+            "SelectedPauseState = " + _planetSelectedPauseState
         );
     }
 
@@ -131,18 +129,14 @@ public sealed class GameTimePauseScopeService : CustomService, IGameTimePauseSco
     private bool GetPlanetPauseStateToRestore()
     {
         if (_pauseWasManuallyChangedInsidePlanetScope)
-            return _gameTimeService.IsPaused;
+            return _planetSelectedPauseState;
 
         return _savedPauseState;
     }
 
     private void SetPausedInternally(bool paused)
     {
-        _isInternalPauseChange = true;
-
         _gameTimeService.SetPaused(paused);
-
-        _isInternalPauseChange = false;
     }
 
     private void ResetScopeState()
@@ -150,6 +144,6 @@ public sealed class GameTimePauseScopeService : CustomService, IGameTimePauseSco
         _activeScope = PauseScope.None;
         _hasSavedPauseState = false;
         _pauseWasManuallyChangedInsidePlanetScope = false;
-        _isInternalPauseChange = false;
+        _planetSelectedPauseState = false;
     }
 }

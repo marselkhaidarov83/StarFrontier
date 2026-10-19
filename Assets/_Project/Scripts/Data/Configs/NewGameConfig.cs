@@ -13,7 +13,7 @@ public class NewGameConfig : BaseConfig
     [Tooltip("Количество кредитов у игрока при начале новой игры.")]
     public int StartCredit = 1000;
     [Tooltip("Текущий запас топлива у стартового корабля.")]
-    public int CurrentFuel = 1000;
+    public int CurrentFuel = 100;
     [Tooltip("Максимальный запас топлива у стартового корабля.")]
-    public int FuelCapacity = 1000;
+    public int FuelCapacity = 100;
 }

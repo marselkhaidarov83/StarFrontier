@@ -19,6 +19,7 @@ public sealed class SystemObjectsListHud2A :
     [SerializeField] private GameObject panelRoot;
     [SerializeField] private RectTransform panelRect;
     [SerializeField] private TMP_Text headerText;
+    [SerializeField] private SystemHudPointerClickRelay2A headerClickRelay;
     [SerializeField] private TMP_Text rowsText;
     [SerializeField] private SystemHudPointerClickRelay2A rowsClickRelay;
 
@@ -44,7 +45,10 @@ public sealed class SystemObjectsListHud2A :
     private ITargetService2A _targetService;
     private IOrbitalMotionService _orbitalMotionService;
     private IRouteService _routeService;
+    private ITravelService _travelService;
+    private IRefuelService _refuelService;
     private bool _isBound;
+    private bool _displayedSystemCaptured;
 
     public bool IsBound => _isBound;
 
@@ -65,6 +69,20 @@ public sealed class SystemObjectsListHud2A :
             Unbind();
     }
 
+    private void Update()
+    {
+        if (_isBound && panelRoot != null && panelRoot.activeSelf &&
+            _displayedSystemCaptured != IsCurrentSystemCaptured())
+            RefreshRows();
+    }
+
+    private bool IsCurrentSystemCaptured()
+    {
+        return SystemExitTargetColor2A.IsEnemySystem(
+            _gameSessionService?.State?.Galaxy,
+            _gameSessionService?.State?.Player?.CurrentSystemId);
+    }
+
     public void Bind(SystemHudBindingContext2A context)
     {
         if (context == null)
@@ -73,10 +91,15 @@ public sealed class SystemObjectsListHud2A :
         _eventBus = context.Get<SimpleEventBus>();
         _configService = context.Get<IConfigService>();
         _routeService = context.Get<IRouteService>();
+        _travelService = context.Get<ITravelService>();
+        _refuelService = context.Get<IRefuelService>();
 
         context.TryGet(out _gameSessionService);
         context.TryGet(out _targetService);
         context.TryGet(out _orbitalMotionService);
+
+        if (headerClickRelay != null)
+            headerClickRelay.SetReceiver(this);
 
         if (rowsClickRelay != null)
             rowsClickRelay.SetReceiver(this);
@@ -105,10 +128,14 @@ public sealed class SystemObjectsListHud2A :
                 OnPanelCloseRequested);
         }
 
+        if (headerClickRelay != null)
+            headerClickRelay.SetReceiver(null);
         _eventBus = null;
         _gameSessionService = null;
         _configService = null;
         _routeService = null;
+        _travelService = null;
+        _refuelService = null;
         _targetService = null;
         _orbitalMotionService = null;
         _isBound = false;
@@ -121,10 +148,16 @@ public sealed class SystemObjectsListHud2A :
         if (source == null)
             return;
 
+        if (headerClickRelay != null && source == headerClickRelay.gameObject)
+        {
+            HidePanel();
+            return;
+        }
+
         if (systemTitleClickRelay != null &&
             source == systemTitleClickRelay.gameObject)
         {
-            ShowPanel();
+            _eventBus?.Publish(new SystemObjectsPanelRequestedEvent2A());
             return;
         }
 
@@ -138,6 +171,17 @@ public sealed class SystemObjectsListHud2A :
     private void OnPanelRequested(
         SystemObjectsPanelRequestedEvent2A evt)
     {
+        TogglePanel();
+    }
+
+    private void TogglePanel()
+    {
+        if (panelRoot != null && panelRoot.activeSelf)
+        {
+            HidePanel();
+            return;
+        }
+
         ShowPanel();
     }
 
@@ -179,6 +223,7 @@ public sealed class SystemObjectsListHud2A :
     private void RefreshRows()
     {
         StarSystemConfig system = GetCurrentSystem();
+        _displayedSystemCaptured = IsCurrentSystemCaptured();
 
         _planets.Clear();
         _stations.Clear();
@@ -188,10 +233,8 @@ public sealed class SystemObjectsListHud2A :
 
         if (headerText != null)
         {
-            headerText.SetText(
-                system != null
-                    ? system.DisplayName.ToUpperInvariant()
-                    : "Система");
+            string systemName = system != null ? system.DisplayName.ToUpperInvariant() : "Система";
+            headerText.SetText("<color=" + GetObjectNameColor(false) + ">" + systemName + "</color>");
         }
 
         int visualRows = 0;
@@ -211,6 +254,9 @@ public sealed class SystemObjectsListHud2A :
         visualRows += AppendPlanets(system);
         visualRows += AppendStation(system);
         visualRows += AppendExits(system);
+
+        ApplyHeight(visualRows);
+        SetRowsText();
     }
 
     private int AppendPlanets(
@@ -221,13 +267,27 @@ public sealed class SystemObjectsListHud2A :
         if (planets == null || planets.Length == 0)
             return 0;
 
+        var sortedPlanets = new List<PlanetConfig>();
+        foreach (PlanetConfig planet in planets)
+        {
+            if (planet != null)
+                sortedPlanets.Add(planet);
+        }
+        sortedPlanets.Sort((left, right) =>
+        {
+            int availabilityOrder = right.IsInhabited.CompareTo(left.IsInhabited);
+            return availabilityOrder != 0
+                ? availabilityOrder
+                : System.StringComparer.CurrentCultureIgnoreCase.Compare(left.DisplayName, right.DisplayName);
+        });
+
         int rows = 0;
         AppendGroup("Планеты");
         rows++;
 
-        for (int i = 0; i < planets.Length; i++)
+        for (int i = 0; i < sortedPlanets.Count; i++)
         {
-            PlanetConfig planet = planets[i];
+            PlanetConfig planet = sortedPlanets[i];
 
             if (planet == null)
                 continue;
@@ -236,11 +296,17 @@ public sealed class SystemObjectsListHud2A :
             _planets.Add(planet);
             AppendLink(
                 PlanetPrefix + index,
-                planet.DisplayName);
+                planet.DisplayName + (planet.IsInhabited ? string.Empty : " - необитаемая"),
+                GetObjectNameColor(!planet.IsInhabited));
             rows++;
         }
 
         return rows;
+    }
+
+    private string GetObjectNameColor(bool isUnavailable)
+    {
+        return isUnavailable || _displayedSystemCaptured ? "#E9AB63" : "#FFFFFF";
     }
 
     private int AppendStation(
@@ -257,7 +323,7 @@ public sealed class SystemObjectsListHud2A :
         AppendGroup("Станция");
         AppendLink(
             StationPrefix + index,
-            station.DisplayName);
+            station.DisplayName + (station.IsActive ? string.Empty : " - не построена"));
 
         return 2;
     }
@@ -278,6 +344,12 @@ public sealed class SystemObjectsListHud2A :
         if (routes == null || routes.Count == 0)
             return 0;
 
+        routes.Sort((left, right) =>
+            System.StringComparer.CurrentCultureIgnoreCase.Compare(
+                left != null ? left.GetOtherSystem(system.Id)?.DisplayName : null,
+                right != null ? right.GetOtherSystem(system.Id)?.DisplayName : null));
+
+        int currentFuel = _refuelService.GetCurrentFuel();
         int rows = 0;
 
         for (int i = 0; i < routes.Count; i++)
@@ -318,9 +390,13 @@ public sealed class SystemObjectsListHud2A :
             _routes.Add(route);
             _exitTargets.Add(targetSystem);
 
+            int fuelCost = _travelService.GetTravelCost(system.Id, targetSystem.Id);
             AppendLink(
                 ExitPrefix + index,
-                targetSystem.DisplayName);
+                targetSystem.DisplayName + " - " + fuelCost + " топлива",
+                SystemExitTargetColor2A.GetColor(
+                    currentFuel >= fuelCost,
+                    SystemExitTargetColor2A.IsEnemySystem(_gameSessionService?.State?.Galaxy, targetSystem.Id)));
 
             rows++;
         }
@@ -342,12 +418,15 @@ public sealed class SystemObjectsListHud2A :
 
     private void AppendLink(
         string linkId,
-        string text)
+        string text,
+        string color = "#FFFFFF")
     {
         _builder
             .Append("<link=\"")
             .Append(linkId)
-            .Append("\"><color=#FFFFFF>")
+            .Append("\"><color=")
+            .Append(color)
+            .Append(">")
             .Append(string.IsNullOrWhiteSpace(text)
                 ? "-"
                 : text)
@@ -484,6 +563,18 @@ public sealed class SystemObjectsListHud2A :
                 " CurrentSystem=" + currentSystem.Id);
             return true;
         }
+
+        SystemTransitionController2 transitionController =
+            Object.FindFirstObjectByType<SystemTransitionController2>();
+        if (transitionController == null)
+        {
+            AppLog.Error(DebugLogChannel.SystemHud,
+                "[SystemObjectsHUD] SystemTransitionController2 was not found on SystemScene.");
+            return true;
+        }
+
+        if (!transitionController.ValidateSystemExitSelection(currentSystem.Id, targetSystem.Id))
+            return true;
 
         PublishCloseRequest();
         SelectTargetMarkerForSystemExit(
@@ -759,6 +850,9 @@ public sealed class SystemObjectsListHud2A :
             if (header != null)
                 headerText = header.GetComponent<TMP_Text>();
         }
+
+        if (headerClickRelay == null && headerText != null)
+            headerClickRelay = headerText.GetComponent<SystemHudPointerClickRelay2A>();
 
         if (rowsText == null && panelRoot != null)
         {

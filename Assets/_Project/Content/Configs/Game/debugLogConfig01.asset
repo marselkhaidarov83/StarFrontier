@@ -16,13 +16,13 @@ MonoBehaviour:
   shipRouteLogs: 0
   includeShipRouteInternalLogs: 0
   npcRouteDecisionLogs: 0
-  playerMovementLogs: 0
+  playerMovementLogs: 1
   npcMovementLogs: 0
   enemyMovementLogs: 0
   movementTurnSpikeAngleDegrees: 60
   combatLogs: 0
   damageLogs: 0
-  populationLogs: 1
+  populationLogs: 0
   planetMovementLogs: 0
   saveLogs: 0
   timeLogs: 0
@@ -43,10 +43,10 @@ MonoBehaviour:
   navigationLogs: 0
   interactionLogs: 0
   targetingLogs: 0
-  travelLogs: 0
+  travelLogs: 1
   planetUiLogs: 0
   stationUiLogs: 0
-  combatPresentationLogs: 0
+  combatPresentationLogs: 1
   debugToolsLogs: 0
   dataValidationLogs: 0
   eventBusLogs: 0

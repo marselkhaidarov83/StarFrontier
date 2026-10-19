@@ -11,3 +11,14 @@ public readonly struct GameTimePauseChangedEvent
             IsPaused = isPaused;
         }
     }
+
+/// <summary>Режим, явно выбранный игроком кнопкой Игра/Пауза.</summary>
+public readonly struct GameTimePauseModeSelectedEvent
+{
+    public readonly bool IsPaused;
+
+    public GameTimePauseModeSelectedEvent(bool isPaused)
+    {
+        IsPaused = isPaused;
+    }
+}

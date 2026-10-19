@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e5c02c8150cb4c7ebf30d3dc3f8110e, type: 3}
   m_Name: shipMovementConfig_01
   m_EditorClassIdentifier: Data::ShipMovementConfig
+  planetTakeoffDistance: 100
+  planetTakeoffAngleDegrees: 0
   maxSpeed: 7
   acceleration: 18
   deceleration: 22

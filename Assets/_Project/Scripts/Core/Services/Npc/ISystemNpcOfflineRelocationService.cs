@@ -3,6 +3,8 @@ using System.Collections;
 
 public interface ISystemNpcOfflineRelocationService
 {
+    void InitializeMilitaryStartLocations(GameRuntimeState state);
+
     bool TryProcessOffline(GameRuntimeState state);
 
     IEnumerator TryProcessOfflineRoutine(

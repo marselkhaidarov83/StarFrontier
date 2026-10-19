@@ -286,7 +286,7 @@ public sealed class SystemPlayerThreatListHud2A :
             }
         }
 
-        SortThreatsByDistanceToPlayer();
+        SortThreatsByName();
         currentThreatCount = _threats.Count;
         RebuildRows();
 
@@ -394,29 +394,17 @@ public sealed class SystemPlayerThreatListHud2A :
         return maxDistance;
     }
 
-    private void SortThreatsByDistanceToPlayer()
+    private void SortThreatsByName()
     {
-        if (_playerTargetService == null)
-            return;
-
-        Vector3 playerPosition =
-            ToFlat(_playerTargetService.GetPlayerPosition());
-
-        _threats.Sort(
-            (left, right) =>
-            {
-                float leftDistance =
-                    Vector3.Distance(
-                        playerPosition,
-                        ToFlat(left.CurrentPosition));
-
-                float rightDistance =
-                    Vector3.Distance(
-                        playerPosition,
-                        ToFlat(right.CurrentPosition));
-
-                return leftDistance.CompareTo(rightDistance);
-            });
+        _threats.Sort((left, right) =>
+        {
+            string leftName = string.IsNullOrWhiteSpace(left?.DisplayName) ? "Враг" : left.DisplayName.Trim();
+            string rightName = string.IsNullOrWhiteSpace(right?.DisplayName) ? "Враг" : right.DisplayName.Trim();
+            int nameOrder = System.StringComparer.CurrentCultureIgnoreCase.Compare(leftName, rightName);
+            return nameOrder != 0
+                ? nameOrder
+                : System.StringComparer.Ordinal.Compare(left?.RuntimeNpcId, right?.RuntimeNpcId);
+        });
     }
 
     private void RebuildRows()
@@ -433,7 +421,7 @@ public sealed class SystemPlayerThreatListHud2A :
             if (i > 0)
                 rowsText += System.Environment.NewLine;
 
-            rowsText += BuildThreatRowText(threat);
+            rowsText += "<link=\"" + i + "\">" + BuildThreatRowText(threat) + "</link>";
         }
 
         threatRowsText.text = rowsText;
@@ -514,32 +502,16 @@ public sealed class SystemPlayerThreatListHud2A :
             return;
         }
 
-        RectTransform contentRect =
-            contentRoot.GetComponent<RectTransform>();
+        int linkIndex = TMP_TextUtilities.FindIntersectingLink(
+            threatRowsText,
+            eventData.position,
+            eventData.pressEventCamera);
 
-        if (contentRect == null)
+        if (linkIndex < 0 || linkIndex >= threatRowsText.textInfo.linkCount)
             return;
 
-        Camera eventCamera = null;
-        Canvas canvas = contentRoot.GetComponentInParent<Canvas>();
-
-        if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            eventCamera = canvas.worldCamera;
-
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                contentRect,
-                eventData.position,
-                eventCamera,
-                out Vector2 localPoint))
-        {
-            return;
-        }
-
-        float yFromTop = contentRect.rect.yMax - localPoint.y;
-        float rowStep = Mathf.Max(1f, rowHeight + rowSpacing);
-        int rowIndex = Mathf.FloorToInt(yFromTop / rowStep);
-
-        if (rowIndex < 0 || rowIndex >= _threats.Count)
+        if (!int.TryParse(threatRowsText.textInfo.linkInfo[linkIndex].GetLinkID(), out int rowIndex) ||
+            rowIndex < 0 || rowIndex >= _threats.Count)
             return;
 
         SystemNpcRuntimeState threat = _threats[rowIndex];
@@ -592,9 +564,14 @@ public sealed class SystemPlayerThreatListHud2A :
 
             if (rowCount > 0)
             {
-                targetHeight +=
-                    rowCount * Mathf.Max(1f, rowHeight) +
-                    Mathf.Max(0, rowCount - 1) * Mathf.Max(0f, rowSpacing);
+                float contentHeight = threatRowsText != null
+                    ? threatRowsText.GetPreferredValues(
+                        threatRowsText.text,
+                        Mathf.Max(1f, threatRowsText.rectTransform.rect.width),
+                        Mathf.Infinity).y
+                    : rowCount * Mathf.Max(1f, rowHeight) +
+                        Mathf.Max(0, rowCount - 1) * Mathf.Max(0f, rowSpacing);
+                targetHeight += contentHeight;
             }
         }
 
@@ -659,6 +636,7 @@ public sealed class SystemPlayerThreatListHud2A :
 
         if (threatRowsText != null)
         {
+            threatRowsText.alignment = TextAlignmentOptions.TopLeft;
             threatRowsText.text = string.Empty;
             threatRowsText.gameObject.SetActive(false);
         }

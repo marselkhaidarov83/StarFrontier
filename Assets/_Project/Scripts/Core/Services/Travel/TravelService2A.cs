@@ -267,6 +267,10 @@ public sealed class TravelService2A :
     public void TryTravelToPlanet(
         string planetId)
     {
+        AppLog.Info(DebugLogChannel.PlayerMovement,
+            "[PLANET_ARRIVAL] Phase=DirectTryTravelToPlanet | Planet=" + planetId +
+            " | Frame=" + Time.frameCount +
+            " | PlayerSavedPosition=" + _gameSessionService.State.Player.SystemMapShipPosition);
         _gameSessionService
             .State
             .Player

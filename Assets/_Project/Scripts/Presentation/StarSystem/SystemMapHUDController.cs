@@ -8,16 +8,22 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
     [Header("Objects")]
     [SerializeField] private Button openGalaxyButton;
+    [SerializeField] private Button openSystemObjectsButton;
 
     private SimpleEventBus eventBus;
     private IGameStateMachine gameStateMachine;
+    private IConfigService configService;
+    private IGameSessionService gameSessionService;
 
     public void Initialize()
     {
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         gameStateMachine = Bootstrapper.Instance.ServiceRegistry.Get<IGameStateMachine>();
+        configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         SubscribeToEvents();
         BindButtons();
+        RefreshSunButtonIcon();
 
         if (IsDebug())
             AppLog.Info(DebugLogChannel.SystemHud,
@@ -76,6 +82,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
     private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
+        RefreshSunButtonIcon(evt.SystemId);
         if (systemMapHUDRoot != null)
             systemMapHUDRoot.SetActive(true);
 
@@ -87,6 +94,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
     private void OnExitMapChanged(ExitMapChangedEvent evt)
     {
+        RefreshSunButtonIcon();
         if (systemMapHUDRoot != null)
             systemMapHUDRoot.SetActive(true);
     }
@@ -107,13 +115,47 @@ public class SystemMapHUDController : CustomMonoBehaviour
     {
         if (openGalaxyButton != null)
             openGalaxyButton.onClick.AddListener(OnOpenGalaxyClicked);
+
+        if (openSystemObjectsButton != null)
+        {
+            openSystemObjectsButton.onClick.RemoveListener(OnOpenSystemObjectsClicked);
+            openSystemObjectsButton.onClick.AddListener(OnOpenSystemObjectsClicked);
+        }
     }
 
     private void UnbindButtons()
     {
         if (openGalaxyButton != null)
             openGalaxyButton.onClick.RemoveListener(OnOpenGalaxyClicked);
+
+        if (openSystemObjectsButton != null)
+            openSystemObjectsButton.onClick.RemoveListener(OnOpenSystemObjectsClicked);
     }    
+
+    private void RefreshSunButtonIcon(string systemId = null)
+    {
+        if (openSystemObjectsButton == null || configService == null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(systemId))
+            systemId = gameSessionService?.State?.Player?.CurrentSystemId;
+
+        StarSystemConfig system = configService.GetStarSystemConfigById(systemId);
+        Image image = openSystemObjectsButton.targetGraphic as Image;
+        if (image == null)
+            image = openSystemObjectsButton.GetComponent<Image>();
+        if (image == null)
+            return;
+
+        image.sprite = system?.Sun?.SunSprite;
+        image.preserveAspect = true;
+        image.enabled = image.sprite != null;
+    }
+
+    private void OnOpenSystemObjectsClicked()
+    {
+        eventBus?.Publish(new SystemObjectsPanelRequestedEvent2A());
+    }
 
     private void OnOpenGalaxyClicked()
     {

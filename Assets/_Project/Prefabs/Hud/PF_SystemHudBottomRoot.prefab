@@ -1285,6 +1285,8 @@ GameObject:
   - component: {fileID: 5232430946564413476}
   - component: {fileID: 5232430946564413477}
   - component: {fileID: 9200000}
+  - component: {fileID: 9210000}
+  - component: {fileID: 9210001}
   m_Layer: 5
   m_Name: PF_SystemHudBottomRoot
   m_TagString: MainCamera
@@ -2599,3 +2601,29 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+
+--- !u!114 &9210000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 596079668931163624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b7b7f1335c14e8fb63646555bc6e73e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Presentation::SystemOffscreenEnemyIndicatorsHud2A
+
+--- !u!114 &9210001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 596079668931163624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecf66cb3d10d4029a8e9032720454c72, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Presentation::SystemInvasionWarningHud2A

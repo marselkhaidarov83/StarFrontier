@@ -5,8 +5,12 @@ public static class GalaxyRuntimeStateFactory
     public static GalaxyRuntimeState CreateNewGalaxyRuntimeState(
         GalaxyConfig config,
         bool sectorAllOpened,
-        bool routeAllUnlocked)
+        bool routeAllUnlocked,
+        bool mobileTestMode = false,
+        int unlockedSectorCount = 0,
+        int alliedSectorCount = 0)
     {
+
         GalaxyRuntimeState state = new GalaxyRuntimeState
         {
             GalaxyDay = 1,
@@ -22,15 +26,25 @@ public static class GalaxyRuntimeStateFactory
         if (config == null || config.Sectors == null)
             return state;
 
-        foreach (SectorConfig sectorConfig in config.Sectors)
+        var orderedSectors = new List<SectorConfig>();
+        foreach (SectorConfig sector in config.Sectors)
         {
-            if (sectorConfig == null)
-                continue;
+            if (sector != null)
+                orderedSectors.Add(sector);
+        }
+        if (mobileTestMode)
+            orderedSectors.Sort((left, right) => left.Order.CompareTo(right.Order));
+
+        for (int sectorIndex = 0; sectorIndex < orderedSectors.Count; sectorIndex++)
+        {
+            SectorConfig sectorConfig = orderedSectors[sectorIndex];
 
             SectorRuntimeState sectorState = new SectorRuntimeState
             {
                 SectorId = sectorConfig.Id,
-                IsUnlocked = sectorAllOpened || sectorConfig.IsUnlocked
+                IsUnlocked = mobileTestMode
+                    ? sectorIndex < unlockedSectorCount
+                    : sectorAllOpened || sectorConfig.IsUnlocked
             };
 
             state.Sectors.Add(sectorState);
@@ -44,7 +58,9 @@ public static class GalaxyRuntimeStateFactory
                     continue;
 
                 bool isEnemyAtStart =
-                    sectorConfig.IsEnemyAtStart;
+                    mobileTestMode
+                        ? sectorIndex >= System.Math.Max(0, alliedSectorCount)
+                        : sectorConfig.IsEnemyAtStart;
 
                 StarSystemRuntimeState systemState = new StarSystemRuntimeState
                 {

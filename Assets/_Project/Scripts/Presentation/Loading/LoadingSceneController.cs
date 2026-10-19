@@ -34,6 +34,8 @@ public sealed class LoadingSceneController : CustomMonoBehaviour
 
     [Header("Texts")]
     [SerializeField] private TMP_Text bottomText;
+    [SerializeField] private GameObject titleRoot;
+    [SerializeField] private TMP_Text versionText;
     [SerializeField] private string[] gameStartTexts;
     [SerializeField] private string[] systemTravelTexts;
     [SerializeField, Min(0.1f)] private float textChangeSeconds = 1f;
@@ -49,12 +51,31 @@ public sealed class LoadingSceneController : CustomMonoBehaviour
     {
         Active = this;
 
+        ApplyPresentation();
+
         SelectActiveTexts();
         ApplyRandomBackground();
         ConfigureProgressImage();
         UpdateText(force: true);
 
         LogState("Awake");
+    }
+
+    private void ApplyPresentation()
+    {
+        bool isGameStart =
+            LoadingSceneContext.Mode == LoadingSceneMode.GameStart;
+
+        if (titleRoot != null)
+        {
+            titleRoot.SetActive(isGameStart);
+        }
+
+        if (versionText != null)
+        {
+            versionText.gameObject.SetActive(isGameStart);
+            versionText.text = $"v{Application.version}";
+        }
     }
 
     private void OnEnable()

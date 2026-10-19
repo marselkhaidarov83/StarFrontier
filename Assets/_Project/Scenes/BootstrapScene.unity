@@ -448,7 +448,6 @@ MonoBehaviour:
   _debugStop: 0
   targetFrameRate: 60
   gameConfig: {fileID: 11400000, guid: f76b09e1774ab45c7a1c5e6e6af8934e, type: 2}
-  debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
   newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
   invasionScheduleConfig: {fileID: 11400000, guid: 6dfe35b0aae854788b3a10665161c166, type: 2}
@@ -889,9 +888,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 428d2c88302a6432292246d686d3aa33, type: 2}
   - {fileID: 11400000, guid: d75f4106697cd44e2856cdf8c0ed902a, type: 2}
   MaxAcceptedMissionCount: 3
-  SectorAllOpened: 1
-  RouteAllUnlocked: 0
-  _globalDebugEnabled: 0
 --- !u!4 &860668904
 Transform:
   m_ObjectHideFlags: 0
@@ -937,7 +933,6 @@ MonoBehaviour:
   debugNpcStressSpawnWaves: 1
   debugNpcStressSpawnAllies: 1
   debugNpcStressSpawnEnemyGroups: 1
-  debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
 --- !u!114 &860668906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -950,6 +945,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c93710ee2d92c4771a147db7ae18225e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::DebugSettings
+  showDebugOverlayInEditor: 0
+  showDebugOverlayInMobileBuild: 0
+  mobileTestMode: 1
+  mobileTestFuelCapacity: 100
+  mobileTestCurrentFuel: 0
+  mobileTestCredits: 9999
+  mobileTestGodMode: 1
+  mobileTestUnlockedSectorCount: 5
+  mobileTestAlliedSectorCount: 2
+  mobileTestStarterShip: {fileID: 11400000, guid: 4c2a2051227654d3482411204af5b8ae, type: 2}
   debugSpawnOnlyInCurrentSystem: 0
   stopAutomaticAllySpawns: 0
   stopAutomaticEnemySpawns: 0

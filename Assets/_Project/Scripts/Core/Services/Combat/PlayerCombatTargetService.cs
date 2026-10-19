@@ -84,6 +84,14 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             "REQUEST | " +
             "Damage=" + damage);
 
+        // Notify presentation of the impact even when god mode blocks stat changes.
+        ShipRuntimeData hitShip = GetActiveShip();
+        if (damage > 0 && hitShip != null && hitShip.CurrentHull > 0)
+        {
+            _eventBus.Publish(new PlayerDamageImpactEvent2A(
+                _gameSessionService.State.Player.CurrentSystemId, damage));
+        }
+
         if (IsGodModeEnabled())
         {
             LogPlayerDamage(
@@ -256,8 +264,8 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
     private bool IsGodModeEnabled()
     {
         return _configService != null &&
-               _configService.DebugConfig != null &&
-               _configService.DebugConfig.enableGodMode;
+               _configService.DebugSettings != null &&
+               _configService.DebugSettings.IsGodModeEnabled;
     }
 
     private static IDamageService2A ResolveDamageService()

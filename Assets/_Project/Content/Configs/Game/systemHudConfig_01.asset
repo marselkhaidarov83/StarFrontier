@@ -17,6 +17,27 @@ MonoBehaviour:
   showShield: 1
   showCurrentTarget: 1
   showSystemName: 1
+  showOffscreenEnemyIndicators: 1
+  showOffscreenNpcIndicators: 1
+  showOffscreenPlayerIndicator: 1
+  offscreenEnemyRangeMultiplier: 3
+  offscreenEnemyIndicatorColor: {r: 1, g: 0.33333334, b: 0.33333334, a: 1}
+  offscreenPlayerIndicatorColor: {r: 1, g: 1, b: 1, a: 1}
+  offscreenNpcIndicatorColor: {r: 0.5, g: 0.8, b: 1, a: 1}
+  offscreenEnemyIndicatorSize: {x: 24, y: 28}
+  offscreenEnemyIndicatorEdgePadding: 16
+  showInvasionWarning: 1
+  invasionWarningDurationSeconds: 4.5
+  invasionWarningPulseCount: 3
+  invasionWarningColor: {r: 1, g: 0.16, b: 0.2, a: 1}
+  invasionWarningEdgeOpacity: 0.28
+  invasionWarningEdgeWidth: 0.07
+  invasionWarningSignSize: 300
+  showPlayerDamagePulse: 1
+  playerDamagePulseDurationSeconds: 0.7
+  playerDamagePulseColor: {r: 1, g: 0.6, b: 0.12, a: 1}
+  playerDamagePulseOpacity: 0.3
+  playerDamagePulseWidth: 0.07
   useSafeArea: 1
   hudPadding: {x: 32, y: 32}
   barWidth: 320

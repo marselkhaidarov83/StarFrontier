@@ -7,7 +7,7 @@ using UnityEngine;
 public sealed class ConfigService : IConfigService
 {
     public GameConfig GameConfig { get; }
-    public DebugConfig DebugConfig { get; }
+    public DebugSettings DebugSettings { get; }
     public SaveConfig SaveConfig { get; }
     public GalaxyConfig GalaxyConfig { get; }
     public NewGameConfig NewGameConfig { get; }
@@ -50,7 +50,7 @@ public sealed class ConfigService : IConfigService
     private readonly IGameSessionService gameSessionService;
 
     public ConfigService(GameConfig gameConfig,
-                DebugConfig debugConfig,
+                DebugSettings debugSettings,
                 SaveConfig saveConfig,
                 GalaxyConfig galaxyConfig,
                 NewGameConfig newGameConfig,
@@ -71,7 +71,7 @@ public sealed class ConfigService : IConfigService
                 NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
-        DebugConfig = debugConfig;
+        DebugSettings = debugSettings;
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;
@@ -96,7 +96,7 @@ public sealed class ConfigService : IConfigService
     }
 
     public ConfigService(GameConfig gameConfig,
-                DebugConfig debugConfig,
+                DebugSettings debugSettings,
                 SaveConfig saveConfig,
                 GalaxyConfig galaxyConfig,
                 NewGameConfig newGameConfig,
@@ -121,7 +121,7 @@ public sealed class ConfigService : IConfigService
                 NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
     {
         GameConfig = gameConfig;
-        DebugConfig = debugConfig;
+        DebugSettings = debugSettings;
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
         NewGameConfig = newGameConfig;

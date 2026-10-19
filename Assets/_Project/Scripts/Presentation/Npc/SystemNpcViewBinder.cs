@@ -20,6 +20,13 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
     private readonly Dictionary<string, SystemNpcView> _viewsByNpcId = new();
     public int VisibleViewCount => _viewsByNpcId.Count;
 
+    public bool TryGetView(string npcId, out SystemNpcView view)
+    {
+        view = null;
+        return !string.IsNullOrWhiteSpace(npcId) &&
+               _viewsByNpcId.TryGetValue(npcId, out view) && view != null;
+    }
+
     private void Awake()
     {
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();

@@ -28,6 +28,16 @@ public sealed class SystemExitNodeView2A :
     [SerializeField]
     private TMP_Text systemNameText;
 
+    [Header("Fuel Badge")]
+    [SerializeField] private TMP_Text fuelText;
+    [SerializeField] private SpriteRenderer fuelImage;
+    [SerializeField] private Sprite fuelNormalSprite;
+    [SerializeField] private Sprite fuelEnemySprite;
+    [SerializeField] private Sprite fuelNotEnoughSprite;
+    [SerializeField, Min(0.1f)] private float fuelBadgeWidthFactor = 0.85f;
+    [SerializeField, Min(0f)] private float fuelBadgeGapFactor = 0.1f;
+    [SerializeField, Min(0.05f)] private float fuelRefreshInterval = 0.2f;
+
     [Header("Interaction")]
 
     [Tooltip(
@@ -55,6 +65,11 @@ public sealed class SystemExitNodeView2A :
     private ITravelService _travelService;
     private ISystemTravelService _systemTravelService;
     private ITargetService2A _targetService;
+    private IRefuelService _refuelService;
+    private IGameSessionService _gameSessionService;
+    private Vector2 _sunCenter;
+    private float _nextFuelRefreshTime;
+    private Renderer _fuelTextRenderer;
 
     private SystemTransitionController2
         _systemTransitionController;
@@ -76,6 +91,7 @@ public sealed class SystemExitNodeView2A :
     {
         ResolveRuntimeDependencies();
 
+        _sunCenter = center;
         _routeConfig =
             routeConfig;
 
@@ -164,6 +180,9 @@ public sealed class SystemExitNodeView2A :
          */
         transform.position =
             _endpointConfig.ExitPoint;
+
+        RefreshFuelBadge();
+        RefreshFuelBadgeLayout();
 
         /*
          * Передаём ID системы назначения
@@ -333,88 +352,20 @@ public sealed class SystemExitNodeView2A :
             return;
         }
 
-        /*
-         * GetTravelFailReason только проверяет
-         * возможность перелёта.
-         *
-         * Топливо здесь не списывается.
-         */
-        TravelFailReason failReason =
-            _travelService.GetTravelFailReason(
-                _currentSystemId,
-                _targetSystemId);
-
-        if (failReason ==
-            TravelFailReason.NotEnoughFuel)
+        ResolveSystemTransitionController();
+        if (_systemTransitionController == null)
         {
-            /*
-             * Сбрасываем локальную цель движения.
-             *
-             * CancelTravel также отправляет
-             * SystemTravelCancelledEvent,
-             * благодаря которому существующие
-             * маркеры маршрута скрываются.
-             */
-            if (_systemTravelService != null)
-            {
-                _systemTravelService.CancelTravel();
-            }
-
-            /*
-             * Отдельно очищаем игровую цель,
-             * чтобы точка выхода не оставалась
-             * выбранной даже при другом порядке
-             * вызова компонентов Unity.
-             */
-            if (_targetService != null)
-            {
-                _targetService.ClearTarget();
-            }
-
-            /*
-             * Используем существующий объект
-             * SystemTransitionController2
-             * на SystemScene.
-             */
-            ResolveSystemTransitionController();
-
-            if (_systemTransitionController != null)
-            {
-                _systemTransitionController
-                    .ShowTravelFailReason(
-                        failReason);
-            }
-            else
-            {
-                AppLog.Error(DebugLogChannel.Travel,
-                    typeof(SystemExitNodeView2A),
-                    "SystemTransitionController2 " +
-                    "was not found on SystemScene.");
-            }
-
-            LogCustom(
-                "System exit selection rejected. " +
-                "Not enough fuel. " +
-                "Route = " +
-                _routeConfig.Id +
-                " | From = " +
-                _currentSystemId +
-                " | To = " +
-                _targetSystemId);
-
-            /*
-             * Важно:
-             * RouteExitMapChangedEvent не публикуется.
-             *
-             * Поэтому новая цель движения
-             * не назначается.
-             */
+            AppLog.Error(DebugLogChannel.Travel,
+                "[SystemExitNodeView2A] SystemTransitionController2 was not found on SystemScene.");
             return;
         }
 
+        if (!_systemTransitionController.ValidateSystemExitSelection(_currentSystemId, _targetSystemId))
+            return;
+
         /*
-         * Если топлива хватает,
-         * сохраняем прежнее поведение выбора цели.
+         * Нехватка топлива предупреждает игрока,
+         * но не мешает выбрать выход и построить локальный маршрут.
          */
         if (_selectableView != null)
         {
@@ -437,6 +388,97 @@ public sealed class SystemExitNodeView2A :
                 _endpointConfig.VisualSize));
     }
 
+    private void LateUpdate()
+    {
+        if (_endpointConfig == null || fuelImage == null || fuelText == null)
+            return;
+
+        if (Time.unscaledTime >= _nextFuelRefreshTime)
+        {
+            _nextFuelRefreshTime = Time.unscaledTime + Mathf.Max(0.05f, fuelRefreshInterval);
+            RefreshFuelBadge();
+        }
+        RefreshFuelBadgeLayout();
+    }
+
+    private void RefreshFuelBadge()
+    {
+        if (fuelImage == null || fuelText == null)
+            return;
+        ResolveRuntimeDependencies();
+        if (_travelService == null || _refuelService == null ||
+            string.IsNullOrWhiteSpace(_currentSystemId) || string.IsNullOrWhiteSpace(_targetSystemId))
+            return;
+
+        int fuelCost = _travelService.GetTravelCost(_currentSystemId, _targetSystemId);
+        bool enoughFuel = _refuelService.GetCurrentFuel() >= fuelCost;
+        bool enemySystem = SystemExitTargetColor2A.IsEnemySystem(
+            _gameSessionService?.State?.Galaxy, _targetSystemId);
+        fuelImage.sprite = !enoughFuel
+            ? fuelNotEnoughSprite
+            : enemySystem && fuelEnemySprite != null ? fuelEnemySprite : fuelNormalSprite;
+        fuelImage.color = Color.white;
+        fuelText.color = Color.white;
+        fuelText.SetText(fuelCost.ToString());
+    }
+
+    private static Vector2 GetUpperFuelBadgeDirection(Vector2 radial)
+    {
+        if (radial.sqrMagnitude <= 0.0001f)
+            return Vector2.up;
+
+        Vector2 direction = radial.normalized;
+        Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+        if (perpendicular.y < 0f || (perpendicular.y == 0f && perpendicular.x < 0f))
+            perpendicular = -perpendicular;
+        return perpendicular;
+    }
+
+    private void RefreshFuelBadgeLayout()
+    {
+        if (fuelImage == null || fuelText == null || systemExitImage == null || systemExitImage.sprite == null)
+            return;
+
+        Vector2 exitSize = systemExitImage.sprite.bounds.size;
+        float diameter = Mathf.Max(exitSize.x, exitSize.y);
+        float width = diameter * Mathf.Max(0.1f, fuelBadgeWidthFactor);
+        float height = width * (23f / 46.3312f);
+        float textHeight = fuelText.GetPreferredValues(fuelText.text).y * Mathf.Abs(fuelText.transform.localScale.y);
+        Vector2 direction = GetUpperFuelBadgeDirection((Vector2)transform.position - _sunCenter);
+        Vector3 localDirection = transform.InverseTransformVector(new Vector3(direction.x, direction.y, 0f)).normalized;
+        float badgeHalfExtent = (Mathf.Abs(localDirection.x) * width +
+            Mathf.Abs(localDirection.y) * Mathf.Max(height, textHeight)) * 0.5f;
+        float distance = diameter * 0.5f + badgeHalfExtent +
+            diameter * Mathf.Max(0f, fuelBadgeGapFactor);
+        Vector3 localOffset = localDirection * distance;
+        fuelImage.transform.localPosition = new Vector3(localOffset.x, localOffset.y, -0.01f);
+        fuelText.transform.localPosition = new Vector3(localOffset.x, localOffset.y, -0.02f);
+        fuelImage.transform.rotation = Quaternion.identity;
+        fuelText.transform.rotation = Quaternion.identity;
+
+        if (fuelImage.sprite != null)
+        {
+            Vector2 spriteSize = fuelImage.sprite.bounds.size;
+            if (spriteSize.x > 0f && spriteSize.y > 0f)
+                fuelImage.transform.localScale = new Vector3(width / spriteSize.x, height / spriteSize.y, 1f);
+        }
+
+        Vector3 textScale = fuelText.transform.localScale;
+        fuelText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+            width * 0.9f / Mathf.Max(0.001f, Mathf.Abs(textScale.x)));
+        fuelText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
+            height * 0.9f / Mathf.Max(0.001f, Mathf.Abs(textScale.y)));
+        fuelImage.sortingLayerID = systemExitImage.sortingLayerID;
+        fuelImage.sortingOrder = systemExitImage.sortingOrder + 1;
+        if (_fuelTextRenderer == null)
+            _fuelTextRenderer = fuelText.GetComponent<Renderer>();
+        if (_fuelTextRenderer != null)
+        {
+            _fuelTextRenderer.sortingLayerID = systemExitImage.sortingLayerID;
+            _fuelTextRenderer.sortingOrder = systemExitImage.sortingOrder + 2;
+        }
+    }
+
     private void ResolveRuntimeDependencies()
     {
         if (Bootstrapper.Instance == null)
@@ -448,6 +490,11 @@ public sealed class SystemExitNodeView2A :
         IServiceRegistry registry =
             Bootstrapper.Instance
                 .ServiceRegistry;
+
+        if (_refuelService == null)
+            registry.TryGet(out _refuelService);
+        if (_gameSessionService == null)
+            registry.TryGet(out _gameSessionService);
 
         if (_simpleEventBus == null)
         {

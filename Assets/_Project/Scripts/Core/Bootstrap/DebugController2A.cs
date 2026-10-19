@@ -34,7 +34,6 @@ public sealed class DebugController2A : CustomMonoBehaviour
     [SerializeField] private bool debugNpcStressSpawnEnemyGroups = true;
 
     [Header("Debug / Player")]
-    [SerializeField] private DebugConfig debugConfig;
 
     private IServiceRegistry ServiceRegistry =>
         Bootstrapper.Instance != null
@@ -199,6 +198,34 @@ public sealed class DebugController2A : CustomMonoBehaviour
             "[DebugController2A] Debug Kill All NPCs In This System completed. " +
             "System: " + currentSystemId +
             ", Removed NPCs: " + npcIdsToRemove.Count);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn/Spawn Single Enemy In Current System")]
+    private void DebugSpawnSingleEnemyInCurrentSystem()
+    {
+        if (!TryGetPopulationService(out ISystemNpcPopulationService populationService))
+            return;
+
+        bool spawned = populationService.DebugSpawnEnemyInCurrentSystem();
+
+        LogCustom("[DebugController2A] Debug Spawn Single Enemy In Current System result: " + spawned);
+    }
+
+    [ContextMenu("STAR FRONTIER/Spawn/Spawn 5 Enemies In Current System")]
+    private void DebugSpawnFiveEnemiesInCurrentSystem()
+    {
+        if (!TryGetPopulationService(out ISystemNpcPopulationService populationService))
+            return;
+
+        int spawnedCount = 0;
+        for (int i = 0; i < 5; i++)
+        {
+            if (!populationService.DebugSpawnEnemyInCurrentSystem())
+                break;
+            spawnedCount++;
+        }
+
+        LogCustom("[DebugController2A] Spawned enemies in current system: " + spawnedCount + "/5");
     }
 
     [ContextMenu("STAR FRONTIER/Spawn/Spawn Enemy Attack Group In Current System")]
@@ -539,18 +566,6 @@ public sealed class DebugController2A : CustomMonoBehaviour
         encounterService.ClearEncounter();
 
         DebugCombatLog("[DebugController2A] Debug Reset Current Encounter completed.");
-    }
-
-    [ContextMenu("STAR FRONTIER/God Mode/Enable Player God Mode")]
-    private void DebugEnablePlayerGodMode()
-    {
-        SetDebugPlayerGodMode(true);
-    }
-
-    [ContextMenu("STAR FRONTIER/God Mode/Disable Player God Mode")]
-    private void DebugDisablePlayerGodMode()
-    {
-        SetDebugPlayerGodMode(false);
     }
 
     [ContextMenu("STAR FRONTIER/State/Print All NPC Debug State")]
@@ -1351,19 +1366,6 @@ public sealed class DebugController2A : CustomMonoBehaviour
         }
 
         return hangarService.GetActiveShipStats();
-    }
-
-    private void SetDebugPlayerGodMode(bool enabled)
-    {
-        if (debugConfig == null)
-        {
-            DebugCombatWarning("[DebugController2A] DebugConfig is not assigned.");
-            return;
-        }
-
-        debugConfig.enableGodMode = enabled;
-
-        DebugCombatLog("[DebugController2A] Player God Mode: " + enabled);
     }
 
     private void AppendDebugEncounterState(StringBuilder text)

@@ -11,6 +11,7 @@ public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
     private ISystemNpcCombatService _combatService;
     private ProjectileWeaponVisualSettings2A _settings;
     private Vector3 _lastPosition;
+    private bool _diagnosticFirstVisibleLogged;
 
     private static int _aggregateFrame = -1;
     private static int _aggregateCount;
@@ -27,6 +28,7 @@ public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
     {
         ProjectileId = evt.ProjectileId;
         IsActive = true;
+        _diagnosticFirstVisibleLogged = false;
 
         ResolveSettings();
         ResolveSpriteRenderer();
@@ -141,6 +143,29 @@ public sealed class GalaxyNpcProjectileView : CustomMonoBehaviour
                 " | TryGetProjectileMs=" + tryGetProjectileMs.ToString("F3") +
                 " | SetPositionMs=" + setPositionMs.ToString("F3"));
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (!IsActive || _diagnosticFirstVisibleLogged ||
+            !SpaceShotVisualDiagnostics2A.Enabled || _combatService == null ||
+            !_combatService.TryGetProjectile(ProjectileId, out GalaxyNpcProjectileRuntimeState projectile) ||
+            projectile == null || projectile.IsResolved ||
+            projectile.ElapsedSeconds < projectile.StartDelaySeconds)
+            return;
+
+        _diagnosticFirstVisibleLogged = true;
+        SpaceShotVisualDiagnostics2A.Log(
+            "FirstVisible", projectile.ProjectileId, projectile.SystemId,
+            projectile.WeaponConfigId, projectile.ShooterType, projectile.ShooterNpcId,
+            projectile.TargetType, projectile.TargetNpcId,
+            projectile.StartPosition, projectile.LastKnownTargetPosition,
+            " | ProjectileVisual=" + transform.position.ToString("F3") +
+            " | ProjectileModel=" + projectile.CurrentPosition.ToString("F3") +
+            " | RendererEnabled=" + (spriteRenderer != null && spriteRenderer.enabled) +
+            " | RendererVisible=" + (spriteRenderer != null && spriteRenderer.isVisible) +
+            " | Elapsed=" + projectile.ElapsedSeconds.ToString("F3") +
+            " | Delay=" + projectile.StartDelaySeconds.ToString("F3"));
     }
 
     private static void RecordUpdateAggregate(

@@ -34,6 +34,7 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private SimpleEventBus _eventBus;
     private ISystemNpcRuntimeService _runtimeService;
+    private IGameSessionService _gameSessionService;
     private IConfigService _configService;
     private ISystemNpcCombatService _combatService;
     private IPlayerCombatTargetService _playerTargetService;
@@ -111,6 +112,7 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
             return;
 
         bootstrapper.ServiceRegistry.TryGet(out _runtimeService);
+        bootstrapper.ServiceRegistry.TryGet(out _gameSessionService);
         bootstrapper.ServiceRegistry.TryGet(out _configService);
         bootstrapper.ServiceRegistry.TryGet(out _combatService);
         bootstrapper.ServiceRegistry.TryGet(out _playerTargetService);
@@ -147,6 +149,32 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
         _eventBus = null;
     }
 
+    private bool CanShowSystemEffect(string systemId, string effectType, string effectId)
+    {
+        if (_gameSessionService == null)
+        {
+            Bootstrapper bootstrapper = Bootstrapper.Instance;
+            if (bootstrapper != null && bootstrapper.ServiceRegistry != null)
+                bootstrapper.ServiceRegistry.TryGet(out _gameSessionService);
+        }
+
+        string currentSystemId = _gameSessionService?.State?.Player?.CurrentSystemId;
+        if (!string.IsNullOrWhiteSpace(systemId) &&
+            !string.IsNullOrWhiteSpace(currentSystemId) &&
+            systemId == currentSystemId)
+            return true;
+
+        if (Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.CombatPresentation))
+        {
+            AppLog.Info(DebugLogChannel.CombatPresentation,
+                "[SPACE_SHOT_VISUAL] Phase=SkippedOtherSystem | Frame=" + Time.frameCount +
+                " | Type=" + effectType + " | Id=" + effectId +
+                " | System=" + systemId + " | CurrentSystem=" + currentSystemId);
+        }
+        return false;
+    }
+
     private void OnProjectileCreated(GalaxyNpcProjectileCreatedEvent evt)
     {
         SpawnProjectile(evt);
@@ -156,7 +184,7 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
     {
         CompleteProjectile(evt.ProjectileId);
 
-        if (!evt.DidHit)
+        if (!CanShowSystemEffect(evt.SystemId, "Impact", evt.ProjectileId) || !evt.DidHit)
             return;
 
         Color fxColor = ResolveNpcFxColor(
@@ -169,6 +197,9 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private void OnNpcDestroyed(SystemNpcDestroyedEvent evt)
     {
+        if (!CanShowSystemEffect(evt.SystemId, "Explosion", evt.RuntimeNpcId))
+            return;
+
         if (_runtimeService != null &&
             _runtimeService.TryGetNpc(evt.RuntimeNpcId, out SystemNpcRuntimeState npc) &&
             npc != null &&
@@ -190,6 +221,9 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     public GalaxyNpcProjectileView SpawnProjectile(GalaxyNpcProjectileCreatedEvent evt)
     {
+        if (!CanShowSystemEffect(evt.SystemId, "Projectile", evt.ProjectileId))
+            return null;
+
         if (string.IsNullOrWhiteSpace(evt.ProjectileId))
             return null;
 
@@ -254,6 +288,12 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private void OnBeamStarted(CombatBeamStartedEvent2A evt)
     {
+        if (!CanShowSystemEffect(evt.SystemId, "Beam", evt.BeamId))
+            return;
+
+        SpaceShotVisualDiagnostics2A.Log("BeamStarted", evt.BeamId, evt.SystemId,
+            evt.WeaponConfigId, evt.ShooterType, evt.ShooterNpcId, evt.TargetType,
+            evt.TargetNpcId, evt.StartPosition, evt.TargetPosition);
         SpawnBeam(evt);
         SpawnBeamHitFx(evt);
     }
@@ -467,6 +507,13 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private void OnWaveStarted(CombatWaveStartedEvent2A evt)
     {
+        if (!CanShowSystemEffect(evt.SystemId, "Wave", evt.WaveId))
+            return;
+
+        SpaceShotVisualDiagnostics2A.Log("WaveStarted", evt.WaveId, evt.SystemId,
+            evt.WeaponConfigId, evt.ShooterType, evt.ShooterNpcId, evt.TargetType,
+            evt.PrimaryTargetNpcId, evt.CenterPosition, evt.CenterPosition,
+            " | Radius=" + evt.FinalRadius);
         ResolveCombatService();
 
         int createdTick =
@@ -983,6 +1030,16 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
 
     private void OnDamagePopupRequested(CombatDamagePopupEvent2A evt)
     {
+        // Popup events have no system id; resolve it from the affected NPC.
+        if (evt.TargetType == CombatTargetType.Npc)
+        {
+            if (_runtimeService == null ||
+                !_runtimeService.TryGetNpc(evt.TargetNpcId, out SystemNpcRuntimeState target) ||
+                target == null ||
+                !CanShowSystemEffect(target.CurrentSystemId, "DamagePopup", evt.TargetNpcId))
+                return;
+        }
+
         SpawnDamagePopup(evt);
     }
 
@@ -1038,5 +1095,110 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
         }
 
         return _configService.CombatDamagePopupVisualConfig;
+    }
+}
+
+// Diagnostic snapshots only. No combat, visibility or movement decisions are made here.
+internal static class SpaceShotVisualDiagnostics2A
+{
+    private static SystemNpcViewBinder _binder;
+    private static PlayerSystemMapShipView _playerView;
+    private static SystemCameraController2A _cameraController;
+
+    public static bool Enabled => Bootstrapper.Instance != null &&
+        Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.CombatPresentation);
+
+    public static void Log(string phase, string id, string systemId, string weaponId,
+        CombatShooterType shooterType, string shooterId, CombatTargetType targetType,
+        string targetId, Vector3 start, Vector3 target, string extra = "")
+    {
+        if (!Enabled)
+            return;
+
+        var registry = Bootstrapper.Instance.ServiceRegistry;
+        if (registry == null)
+            return;
+
+        registry.TryGet(out ISystemNpcRuntimeService runtime);
+        registry.TryGet(out IGameSessionService session);
+        registry.TryGet(out IPlayerCombatTargetService player);
+
+        if (_binder == null)
+            _binder = Object.FindFirstObjectByType<SystemNpcViewBinder>();
+        if (_playerView == null)
+            _playerView = Object.FindFirstObjectByType<PlayerSystemMapShipView>(FindObjectsInactive.Include);
+        if (_cameraController == null)
+            _cameraController = Object.FindFirstObjectByType<SystemCameraController2A>();
+
+        Camera camera = _cameraController != null ? _cameraController.TargetCamera : null;
+        string currentSystem = session?.State?.Player?.CurrentSystemId;
+        string shooter = DescribeEndpoint(shooterType == CombatShooterType.Player,
+            shooterId, systemId, start, runtime, player, camera);
+        string destination = DescribeEndpoint(targetType == CombatTargetType.Player,
+            targetId, systemId, target, runtime, player, camera);
+
+        AppLog.Info(DebugLogChannel.CombatPresentation,
+            "[SPACE_SHOT_VISUAL] Phase=" + phase + " | Frame=" + Time.frameCount +
+            " | Time=" + Time.time.ToString("F3") + " | Id=" + id +
+            " | System=" + systemId + " | CurrentSystem=" + currentSystem +
+            " | SameSystem=" + (systemId == currentSystem) + " | Weapon=" + weaponId +
+            " | Start=" + start.ToString("F3") + " | Target=" + target.ToString("F3") +
+            " | Shooter={" + shooter + "} | Destination={" + destination + "}" + extra);
+    }
+
+    private static string DescribeEndpoint(bool isPlayer, string npcId, string systemId,
+        Vector3 shotPoint, ISystemNpcRuntimeService runtime, IPlayerCombatTargetService player,
+        Camera camera)
+    {
+        Transform visual = null;
+        Vector3 model = Vector3.zero;
+        bool modelFound = false;
+        string state;
+        if (isPlayer)
+        {
+            modelFound = player != null && player.IsPlayerAvailableInSystem(systemId);
+            if (player != null)
+                model = player.GetPlayerPosition();
+            if (_playerView != null)
+                visual = _playerView.transform;
+            state = "Player | Available=" + modelFound;
+        }
+        else
+        {
+            SystemNpcRuntimeState npc = null;
+            modelFound = runtime != null && runtime.TryGetNpc(npcId, out npc) && npc != null;
+            state = "Npc=" + npcId + " | Found=" + modelFound;
+            if (modelFound)
+            {
+                model = npc.CurrentPosition;
+                state += " | Name=" + npc.DisplayName + " | System=" + npc.CurrentSystemId +
+                    " | Alive=" + npc.IsAlive + " | OnPlanet=" + npc.IsOnPlanet +
+                    " | Travel=" + npc.TravelState + " | Behavior=" + npc.CurrentBehavior +
+                    " | Life=" + npc.LifeState;
+            }
+            if (_binder != null && _binder.TryGetView(npcId, out SystemNpcView view))
+                visual = view.transform;
+        }
+
+        state += " | Model=" + model.ToString("F3") + " | HasView=" + (visual != null);
+        if (visual == null)
+            return state;
+
+        SpriteRenderer renderer = visual.GetComponentInChildren<SpriteRenderer>(true);
+        state += " | View=" + visual.position.ToString("F3") +
+            " | Active=" + visual.gameObject.activeInHierarchy +
+            " | ViewModelDistance=" + (modelFound ? Vector2.Distance(visual.position, model) : -1f).ToString("F3") +
+            " | ShotPointViewDistance=" + Vector2.Distance(shotPoint, visual.position).ToString("F3") +
+            " | RendererEnabled=" + (renderer != null && renderer.enabled) +
+            " | RendererVisible=" + (renderer != null && renderer.isVisible);
+        if (renderer != null)
+            state += " | Sprite=" + (renderer.sprite != null ? renderer.sprite.name : "null") +
+                " | Alpha=" + renderer.color.a.ToString("F3") +
+                " | SpritePosition=" + renderer.transform.position.ToString("F3") +
+                " | Layer=" + renderer.gameObject.layer +
+                " | Sorting=" + renderer.sortingLayerName + ":" + renderer.sortingOrder;
+        if (camera != null)
+            state += " | Viewport=" + camera.WorldToViewportPoint(visual.position).ToString("F3");
+        return state;
     }
 }

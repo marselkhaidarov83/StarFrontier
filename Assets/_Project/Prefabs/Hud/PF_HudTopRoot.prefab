@@ -89,6 +89,7 @@ GameObject:
   - component: {fileID: 9300011}
   - component: {fileID: 9300012}
   - component: {fileID: 9300013}
+  - component: {fileID: 9300014}
   m_Layer: 5
   m_Name: HeaderText
   m_TagString: Untagged
@@ -137,7 +138,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2530,6 +2531,7 @@ MonoBehaviour:
   panelRoot: {fileID: 9300001}
   panelRect: {fileID: 9300002}
   headerText: {fileID: 9300013}
+  headerClickRelay: {fileID: 9300014}
   rowsText: {fileID: 9300023}
   rowsClickRelay: {fileID: 9300024}
   systemTitleClickRelay: {fileID: 9300030}
@@ -3547,3 +3549,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Presentation::FpsCounter
   fpsText: {fileID: 8888053568284030140}
+
+--- !u!114 &9300014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9300010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6db35ca9680d4b6ea2f87e7107828a1a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Presentation::SystemHudPointerClickRelay2A
+  receiver: {fileID: 9300004}

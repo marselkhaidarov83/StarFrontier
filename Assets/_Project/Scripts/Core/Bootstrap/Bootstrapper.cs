@@ -10,14 +10,13 @@ public class Bootstrapper : CustomMonoBehaviour
     [Range(30, 120)]
     [SerializeField] private int targetFrameRate = 60;
     [SerializeField] private GameConfig gameConfig;
-    [SerializeField] private DebugConfig debugConfig;
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
     [SerializeField] private InvasionScheduleConfig invasionScheduleConfig;
     [SerializeField] private DebugLogConfig debugLogConfig;
     [SerializeField] private DebugSettings debugSettings;
 
-    [Header("Sprint 3 System Gameplay")]
+    [Header("System Gameplay")]
     [SerializeField] private PlayerControlConfig playerControlConfig;
     [SerializeField] private ShipMovementConfig shipMovementConfig;
     [SerializeField] private SystemCameraConfig systemCameraConfig;
@@ -46,9 +45,6 @@ public class Bootstrapper : CustomMonoBehaviour
 
     [SerializeField] public int MaxAcceptedMissionCount = 3;
 
-    [Header("Debug")]
-    [SerializeField] public bool SectorAllOpened = false;
-    [SerializeField] public bool RouteAllUnlocked = false;
 
 
     public static Bootstrapper Instance;
@@ -249,7 +245,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IConfigService>(
             new ConfigService(
                 gameConfig,
-                debugConfig,
+                NpcPopulationDebugSettings,
                 saveConfig,
                 galaxyConfig,
                 newGameConfig,

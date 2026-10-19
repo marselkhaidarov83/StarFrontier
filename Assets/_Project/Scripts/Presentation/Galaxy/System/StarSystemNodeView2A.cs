@@ -30,6 +30,7 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
 
     [Header("Fuel Visual")]
     [SerializeField] private Sprite fuelNormalSprite;
+    [SerializeField] private Sprite fuelEnemySprite;
     [SerializeField] private Sprite fuelNotEnoughSprite;
 
     [SerializeField] private Color fuelColorNormal = Color.white;
@@ -179,7 +180,11 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
             case TravelFailReason.None:
                 systemSprite = GetEconomySprite();
                 systemColor = systemColorNormal;
-                fuelSprite = fuelNormalSprite;
+                fuelSprite = runtimeState != null &&
+                    runtimeState.SystemStatus == StarSystemStatus.Captured &&
+                    fuelEnemySprite != null
+                        ? fuelEnemySprite
+                        : fuelNormalSprite;
                 fuelColor = fuelColorNormal;
                 fuelVisible = true;
                 break;

@@ -13,6 +13,7 @@ public sealed class PlayerCombatEntity : MonoBehaviour
     private ISystemEncounterService _encounterService;
     private IDamageService2A _damageService;
     private IConfigService _configService;
+    private IGameSessionService _gameSessionService;
 
     public PlayerCombatRuntimeState State => _state;
     public bool IsAlive => _state.IsAlive;
@@ -23,6 +24,7 @@ public sealed class PlayerCombatEntity : MonoBehaviour
         _encounterService = ResolveEncounterService();
         _damageService = ResolveDamageService();
         _configService = ResolveConfigService();
+        Bootstrapper.Instance.ServiceRegistry.TryGet(out _gameSessionService);
 
         _state.Init(maxHull, maxShield, maxEnergy);
 
@@ -31,6 +33,12 @@ public sealed class PlayerCombatEntity : MonoBehaviour
 
     public void ApplyDamage(int damage)
     {
+        if (damage > 0 && _state.IsAlive)
+        {
+            _eventBus.Publish(new PlayerDamageImpactEvent2A(
+                _gameSessionService?.State?.Player?.CurrentSystemId, damage));
+        }
+
         if (IsGodModeEnabled())
         {
             AppLog.Info(DebugLogChannel.CombatPresentation,
@@ -86,8 +94,8 @@ public sealed class PlayerCombatEntity : MonoBehaviour
     private bool IsGodModeEnabled()
     {
         return _configService != null &&
-               _configService.DebugConfig != null &&
-               _configService.DebugConfig.enableGodMode;
+               _configService.DebugSettings != null &&
+               _configService.DebugSettings.IsGodModeEnabled;
     }
 
     private void PublishStatsChanged()

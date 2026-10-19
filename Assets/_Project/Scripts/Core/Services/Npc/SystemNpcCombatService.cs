@@ -601,6 +601,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
             projectile.HasReleased = true;
             projectile.CurrentPosition = projectile.StartPosition;
+            LogSpaceShotDiagnostics("Released", projectile);
         }
 
         Vector3 targetPosition = projectile.LastKnownTargetPosition;
@@ -836,6 +837,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 ResolveNpcProjectile(projectile, ref hitPosition, ref didHit);
             }
         }
+
+        LogSpaceShotDiagnostics("Resolved:Hit=" + didHit + ":AllowDamage=" + allowDamage, projectile);
 
         bool shouldSpawnHitFx =
             didHit || projectile.ShouldSpawnHitFxOnMiss;
@@ -2357,11 +2360,41 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         return true;
     }
 
+    private void LogSpaceShotDiagnostics(string phase, GalaxyNpcProjectileRuntimeState projectile)
+    {
+        if (projectile == null || Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.CombatPresentation))
+            return;
+
+        bool shooterAvailable = TryGetCurrentProjectileShooterPosition(projectile, out Vector3 shooterPosition);
+        bool targetAvailable = TryGetCurrentProjectileTargetPosition(projectile, out Vector3 targetPosition);
+        AppLog.Info(DebugLogChannel.CombatPresentation,
+            "[SPACE_SHOT] Phase=" + phase + " | Frame=" + Time.frameCount +
+            " | Time=" + Time.time.ToString("F3") +
+            " | Id=" + projectile.ProjectileId + " | System=" + projectile.SystemId +
+            " | Weapon=" + projectile.WeaponConfigId + " | Type=" + projectile.ShotType +
+            " | Shooter=" + projectile.ShooterType + ":" + projectile.ShooterNpcId +
+            " | ShooterAvailable=" + shooterAvailable + " | ShooterPosition=" + shooterPosition.ToString("F3") +
+            " | Target=" + projectile.TargetType + ":" + projectile.TargetNpcId +
+            " | TargetAvailable=" + targetAvailable + " | TargetPosition=" + targetPosition.ToString("F3") +
+            " | Start=" + projectile.StartPosition.ToString("F3") +
+            " | Current=" + projectile.CurrentPosition.ToString("F3") +
+            " | LastTarget=" + projectile.LastKnownTargetPosition.ToString("F3") +
+            " | Offset=" + projectile.PathOffset.ToString("F3") +
+            " | CreatedTick=" + projectile.CreatedTick + " | ImpactTick=" + projectile.ImpactTick +
+            " | Elapsed=" + projectile.ElapsedSeconds.ToString("F3") +
+            " | Delay=" + projectile.StartDelaySeconds.ToString("F3") +
+            " | Lifetime=" + projectile.LifetimeSeconds.ToString("F3") +
+            " | Released=" + projectile.HasReleased + " | DamageOnArrival=" + projectile.ShouldDamageOnArrival);
+    }
+
     private void PublishProjectileCreated(
      GalaxyNpcProjectileRuntimeState projectile)
     {
         if (projectile == null)
             return;
+
+        LogSpaceShotDiagnostics("Created", projectile);
 
         _eventBus.Publish(new GalaxyNpcProjectileCreatedEvent(
             projectile.ProjectileId,
@@ -2959,6 +2992,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (projectile == null)
             return;
 
+        LogSpaceShotDiagnostics("TargetMarkedAsMiss", projectile);
         lastKnownTargetPosition.z = 0f;
 
         projectile.ShouldDamageOnArrival = false;

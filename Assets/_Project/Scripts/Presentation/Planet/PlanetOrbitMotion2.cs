@@ -4,6 +4,8 @@ public class PlanetOrbitMotion2 : CustomMonoBehaviour
 {
     private PlanetConfig _planet;
 
+    public string PlanetId => _planet != null ? _planet.Id : string.Empty;
+
     private IOrbitalMotionService _orbitalMotionService;
 
     public void Initialize(PlanetConfig planet)

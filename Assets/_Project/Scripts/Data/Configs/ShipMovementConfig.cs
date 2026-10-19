@@ -6,6 +6,18 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Sprint 3/Ship Movement")]
 public sealed class ShipMovementConfig : BaseConfig
 {
+    [Header("Planet Takeoff")]
+    [SerializeField, Min(0.01f)]
+    [Tooltip("Расстояние от точки взлёта до конечной точки маршрута в единицах сцены. Маршрут проходится за один игровой тик.")]
+    private float planetTakeoffDistance = 100f;
+
+    [SerializeField, Range(-180f, 180f)]
+    [Tooltip("Угол взлёта относительно текущего направления корабля. 0 — прямо по курсу; положительный угол — против часовой стрелки.")]
+    private float planetTakeoffAngleDegrees = 0f;
+
+    public float PlanetTakeoffDistance => Mathf.Max(0.01f, planetTakeoffDistance);
+    public float PlanetTakeoffAngleDegrees => planetTakeoffAngleDegrees;
+
     [Header("Linear Movement")]
     [SerializeField]
     [Min(0f)]

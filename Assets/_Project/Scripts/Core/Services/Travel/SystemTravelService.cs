@@ -195,6 +195,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private Vector2 _routePreviewStartFacingDirection = Vector2.up;
     private float _routeTurnAdjustmentFactor = 1f;
     private float _routeSpeedAdjustmentFactor = 1f;
+    private float _routeSpeedRecoveryDistance = -1f;
     private bool _useRouteInitialSpeedLimit;
     private float _routeInitialSpeedLimitFactor = 1f;
     private int _movingDestinationRouteRefreshBlockStartQuantTick = -1;
@@ -205,11 +206,18 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
     private Vector2 _sunFacingStartTurnInPlaceDirection = Vector2.up;
     private Vector2 _fallbackStartTurnInPlaceDirection = Vector2.up;
     private float _activeRouteDistanceTravelled;
+    private float _planetTakeoffDistancePerTick;
     private int _lastNpcDestinationRefreshTick = -1;
     private int _activeRouteBuildQuantTick = -1;
     private int _lastMovingDestinationRouteRefreshKey = -1;
     private int _movingDestinationRouteRefreshBlockedSlotsRemaining;
     private int _mapPointRouteTraceFrameCount;
+    private int _speedDiagnosticRouteId;
+    private int _lastPlanetArrivalDiagnosticTick = int.MinValue;
+    private int _lastSpeedDiagnosticTick = int.MinValue;
+    private float _lastSpeedDiagnosticFactor = -1f;
+    private float _lastSpeedDiagnosticRouteFactor = -1f;
+    private bool _lastSpeedDiagnosticInitialLimit;
     private int _mapPointRouteBuildId;
     private bool _isMapPointRouteBuildTraceEnabled;
     private RouteDestinationCase _activeRouteDestinationCase =
@@ -637,6 +645,47 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         StartTravelAutomaticallyIfPossible();
     }
 
+    public bool StartPlanetTakeoff()
+    {
+        ShipMovementConfig config = _configService.ShipMovementConfig;
+        if (config == null)
+            return false;
+
+        // Capture the current heading before clearing any previous route.
+        Vector2 heading = GetCurrentShipFacingDirection();
+        float angle = config.PlanetTakeoffAngleDegrees * Mathf.Deg2Rad;
+        Vector2 direction = new Vector2(
+            heading.x * Mathf.Cos(angle) - heading.y * Mathf.Sin(angle),
+            heading.x * Mathf.Sin(angle) + heading.y * Mathf.Cos(angle));
+        Vector3 start = State.GetCurrentPosition();
+        Vector3 destination = start + new Vector3(direction.x, direction.y, 0f) *
+            config.PlanetTakeoffDistance;
+
+        CancelTravel();
+        State.CurrentPlanetId = string.Empty;
+        _shipMovementService?.StopImmediately();
+        _shipMovementService?.SetPosition(new Vector2(start.x, start.y));
+        _shipMovementService?.SetFacingDirection(heading);
+        SetMapPointDestination(destination);
+        if (!State.IsFlying)
+            return false;
+
+        // Reuse the normal route (including sun avoidance), but cover it in one tick.
+        _consumeSunFacingStartTurnTick = false;
+        _activeTravelRoutePlan.Clear();
+        _activeTravelRoutePlan.SetMovePath(_activeTravelRoutePath);
+        ClearRouteInitialSpeedLimit();
+        _routeSpeedAdjustmentFactor = 1f;
+        float remainingTickFactor = 1f;
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IGameTimeService>(
+                out IGameTimeService gameTime) && !gameTime.IsPaused)
+        {
+            remainingTickFactor = Mathf.Max(0.0001f, GetCurrentTickRemainingFactor());
+        }
+        _planetTakeoffDistancePerTick = State.TravelDistance / remainingTickFactor;
+        return true;
+    }
+
     public void SetMapPointDestination(Vector3 mapPosition)
     {
         if (IsMapPointInsideSunForbiddenDestinationRadius(mapPosition))
@@ -866,6 +915,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void StartTravel()
     {
+        _planetTakeoffDistancePerTick = 0f;
         double startedAt =
             Time.realtimeSinceStartupAsDouble;
 
@@ -1111,6 +1161,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             _isMapPointRouteBuildTraceEnabled = false;
         }
 
+        _routeSpeedRecoveryDistance = GetRouteSpeedRecoveryDistance(
+            _activeTravelRoutePath, _routeSpeedAdjustmentFactor, _consumeSunFacingStartTurnTick);
+        _speedDiagnosticRouteId++;
+        LogPlayerTravelSpeedDiagnostics("RouteStarted", GetCurrentTravelQuantTick(), true);
+        LogPlanetArrivalDiagnostics("RouteStarted", GetCurrentTravelQuantTick(), true);
         _eventBus.Publish(new SystemTravelStartedEvent(
             State.Destination.Type,
             State.StartPosition,
@@ -1400,6 +1455,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void CancelTravel()
     {
+        _planetTakeoffDistancePerTick = 0f;
         if (State.Status != SystemTravelStatus.Flying &&
             State.Status != SystemTravelStatus.DestinationSelected)
         {
@@ -1702,6 +1758,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     private float GetCurrentEffectiveTravelSpeed()
     {
+        if (_planetTakeoffDistancePerTick > 0f && State.IsFlying)
+            return _planetTakeoffDistancePerTick / GetSpeedMultiplier();
+
         float speed =
             GetCurrentShipTravelSpeed();
 
@@ -1717,8 +1776,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     private float GetCurrentEffectiveTravelSpeedFactor()
     {
-        float speedFactor =
-            Mathf.Clamp01(_routeSpeedAdjustmentFactor);
+        bool recovered = HasRecoveredRouteSpeed(_activeRouteDistanceTravelled, _routeSpeedRecoveryDistance);
+        float speedFactor = recovered ? 1f : Mathf.Clamp01(_routeSpeedAdjustmentFactor);
 
         if (_consumeSunFacingStartTurnTick)
         {
@@ -1728,7 +1787,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                     Mathf.Clamp01(_routeInitialSpeedLimitFactor));
         }
 
-        if (_useRouteInitialSpeedLimit &&
+        if (!recovered && _useRouteInitialSpeedLimit &&
             _activeRouteDistanceTravelled <
             _routeInitialSpeedLimitDistance - RouteSegmentEpsilon)
         {
@@ -1743,6 +1802,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     private float GetCurrentPreviewTravelSpeed()
     {
+        if (_planetTakeoffDistancePerTick > 0f && State.IsFlying)
+            return GetCurrentEffectiveTravelSpeed();
+
         float speed =
             GetCurrentShipTravelSpeed();
 
@@ -1754,8 +1816,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (State.Status == SystemTravelStatus.Flying)
         {
-            return speed *
-                   Mathf.Clamp01(_routeSpeedAdjustmentFactor);
+            return speed * GetCurrentEffectiveTravelSpeedFactor();
         }
 
         Vector3 startPosition =
@@ -2275,6 +2336,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     private void ClearRouteInitialSpeedLimit()
     {
+        _routeSpeedRecoveryDistance = -1f;
         _useRouteInitialSpeedLimit = false;
         _routeInitialSpeedLimitFactor = 1f;
         _routeInitialSpeedLimitDistance = 0f;
@@ -2491,6 +2553,99 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                ")";
     }
 
+    private void LogPlanetArrivalDiagnostics(string phase, int quantTick, bool force = false)
+    {
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.PlayerMovement) ||
+            State?.Destination == null || State.Destination.Type != TravelDestinationType.Planet)
+            return;
+        if (!force && _lastPlanetArrivalDiagnosticTick == quantTick)
+            return;
+        _lastPlanetArrivalDiagnosticTick = quantTick;
+        Vector3 ship = State.GetCurrentPosition();
+        Vector3 routeEnd = _activeTravelRoutePath.Count > 0
+            ? _activeTravelRoutePath[_activeTravelRoutePath.Count - 1] : State.DestinationPosition;
+        bool hasLivePlanet = TryGetLiveDestinationPosition(out Vector3 livePlanet);
+        AppLog.Info(DebugLogChannel.PlayerMovement,
+            "[PLANET_ARRIVAL] Phase=" + phase +
+            " | RouteId=" + _speedDiagnosticRouteId + " | Tick=" + quantTick + " | Frame=" + Time.frameCount +
+            " | Planet=" + State.Destination.PlanetId + " | Status=" + State.Status +
+            " | Ship=" + FormatVector3(ship) + " | RouteEnd=" + FormatVector3(routeEnd) +
+            " | Destination=" + FormatVector3(State.DestinationPosition) +
+            " | HasLivePlanet=" + hasLivePlanet + " | LivePlanet=" + FormatVector3(livePlanet) +
+            " | ShipToLivePlanet=" + (hasLivePlanet ? Vector2.Distance(ship, livePlanet) : -1f).ToString("0.###") +
+            " | ShipToRouteEnd=" + Vector2.Distance(ship, routeEnd).ToString("0.###") +
+            " | RouteEndToLivePlanet=" + (hasLivePlanet ? Vector2.Distance(routeEnd, livePlanet) : -1f).ToString("0.###") +
+            " | ArrivalThreshold=" + ArrivalDistanceThreshold.ToString("0.###") +
+            " | PassedDistance=" + _activeRouteDistanceTravelled.ToString("0.###") +
+            " | RouteLength=" + State.TravelDistance.ToString("0.###") +
+            " | RemainingDistance=" + Mathf.Max(0f, State.TravelDistance - _activeRouteDistanceTravelled).ToString("0.###") +
+            " | PathPoints=" + _activeTravelRoutePath.Count +
+            " | PlayerSavedPosition=" + FormatVector3(_gameSessionService.State.Player.SystemMapShipPosition) +
+            " | MovementPosition=" + (_shipMovementService?.State != null
+                ? _shipMovementService.State.Position.ToString("F3") : "missing") +
+            " | RefreshBlockStartTick=" + _movingDestinationRouteRefreshBlockStartQuantTick +
+            " | RefreshBlockedSlots=" + _movingDestinationRouteRefreshBlockedSlotsRemaining +
+            " | LastRouteRejectReason=" + _playerShipRouteBuildResult.LastRejectReason);
+    }
+
+    private void LogPlayerTravelSpeedDiagnostics(string phase, int quantTick, bool force = false)
+    {
+        if (Bootstrapper.Instance == null ||
+            !Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.PlayerMovement))
+            return;
+
+        float baseSpeed = GetCurrentShipTravelSpeed();
+        float effectiveSpeed = GetCurrentEffectiveTravelSpeed();
+        float effectiveFactor = baseSpeed > 0f ? effectiveSpeed / baseSpeed : 0f;
+        bool initialLimitActive = !HasRecoveredRouteSpeed(_activeRouteDistanceTravelled, _routeSpeedRecoveryDistance) &&
+            _useRouteInitialSpeedLimit && _activeRouteDistanceTravelled < _routeInitialSpeedLimitDistance - RouteSegmentEpsilon;
+        if (!force && quantTick == _lastSpeedDiagnosticTick &&
+            Mathf.Abs(effectiveFactor - _lastSpeedDiagnosticFactor) < 0.0001f &&
+            Mathf.Abs(_routeSpeedAdjustmentFactor - _lastSpeedDiagnosticRouteFactor) < 0.0001f &&
+            initialLimitActive == _lastSpeedDiagnosticInitialLimit)
+            return;
+
+        _lastSpeedDiagnosticTick = quantTick;
+        _lastSpeedDiagnosticFactor = effectiveFactor;
+        _lastSpeedDiagnosticRouteFactor = _routeSpeedAdjustmentFactor;
+        _lastSpeedDiagnosticInitialLimit = initialLimitActive;
+        Vector3 position = State.GetCurrentPosition();
+        Vector2 toTarget = (Vector2)(State.DestinationPosition - position);
+        AppLog.Info(DebugLogChannel.PlayerMovement,
+            "[PLAYER_TRAVEL_SPEED]" +
+            " Phase=" + phase +
+            " | RouteId=" + _speedDiagnosticRouteId +
+            " | Tick=" + quantTick +
+            " | Target=" + (State.Destination != null ? State.Destination.Type.ToString() : "None") +
+            " | Case=" + _activeRouteDestinationCase +
+            " | BaseSpeed=" + baseSpeed.ToString("0.###") +
+            " | EffectiveSpeed=" + effectiveSpeed.ToString("0.###") +
+            " | EffectiveFactor=" + effectiveFactor.ToString("0.###") +
+            " | RouteFactor=" + (HasRecoveredRouteSpeed(_activeRouteDistanceTravelled, _routeSpeedRecoveryDistance)
+                ? 1f : _routeSpeedAdjustmentFactor).ToString("0.###") +
+            " | TurnSpeedFactor=" + _routeSpeedAdjustmentFactor.ToString("0.###") +
+            " | SpeedRecoveryDistance=" + _routeSpeedRecoveryDistance.ToString("0.###") +
+            " | BuilderFactor=" + _playerShipRouteBuildResult.SpeedFactor.ToString("0.###") +
+            " | InitialLimitActive=" + initialLimitActive +
+            " | InitialLimitFactor=" + _routeInitialSpeedLimitFactor.ToString("0.###") +
+            " | InitialLimitDistance=" + _routeInitialSpeedLimitDistance.ToString("0.###") +
+            " | TurnInPlace=" + _consumeSunFacingStartTurnTick +
+            " | PassedDistance=" + _activeRouteDistanceTravelled.ToString("0.###") +
+            " | RouteLength=" + State.TravelDistance.ToString("0.###") +
+            " | HeadingToTargetAngle=" + Vector2.Angle(_travelFacingDirection, toTarget).ToString("0.###") +
+            " | SpeedMultiplier=" + GetSpeedMultiplier().ToString("0.###") +
+            " | TakeoffDistancePerTick=" + _planetTakeoffDistancePerTick.ToString("0.###") +
+            " | RouteSource=" + _playerShipRouteBuildResult.SelectedRouteSource +
+            " | LastRejectReason=" + _playerShipRouteBuildResult.LastRejectReason +
+            " | SunAvoidance=" + _playerShipRouteBuildResult.UsedSunAvoidance +
+            " | TurnRadiusFactor=" + _routeTurnAdjustmentFactor.ToString("0.###") +
+            " | Position=" + FormatVector3(position) +
+            " | Destination=" + FormatVector3(State.DestinationPosition) +
+            " | Facing=" + FormatVector2(_travelFacingDirection) +
+            " | StartFacing=" + FormatVector2(_routePreviewStartFacingDirection));
+    }
+
     private void LogMapPointRouteTraceTick(
         string phase,
         float deltaTime,
@@ -2638,6 +2793,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             }
 
             _consumeSunFacingStartTurnTick = false;
+            LogPlayerTravelSpeedDiagnostics("TurnInPlaceCompleted", quantTick, true);
 
             SyncShipMovementStateWithTravel(
                 State.GetCurrentPosition(),
@@ -2687,6 +2843,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 return;
             }
 
+            LogPlanetArrivalDiagnostics("Complete.Trigger.DirectDistanceBeforeMove", quantTick, true);
             CompleteTravel();
             return;
         }
@@ -2695,6 +2852,20 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             GetCurrentEffectiveTravelSpeed() *
             normalizedTickDeltaTime *
             GetSpeedMultiplier();
+
+        if (_routeSpeedRecoveryDistance >= 0f && _planetTakeoffDistancePerTick <= 0f)
+        {
+            // Split this frame's time at speed boundaries, just like the route preview.
+            movementDistance = AdvancePreviewRouteDistanceForOneTick(
+                _activeRouteDistanceTravelled,
+                GetCurrentShipTravelSpeed() * normalizedTickDeltaTime * GetSpeedMultiplier(),
+                State.TravelDistance,
+                _routeSpeedAdjustmentFactor,
+                _useRouteInitialSpeedLimit,
+                _routeInitialSpeedLimitFactor,
+                _routeInitialSpeedLimitDistance,
+                _routeSpeedRecoveryDistance) - _activeRouteDistanceTravelled;
+        }
 
         Vector3 positionBeforeMove =
             State.GetCurrentPosition();
@@ -2715,6 +2886,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             nextPosition,
             GetCurrentEffectiveTravelSpeed());
 
+        LogPlayerTravelSpeedDiagnostics("Moving", quantTick);
+        LogPlanetArrivalDiagnostics("Moving", quantTick);
         LogMapPointRouteTraceTick(
             "AfterMove",
             deltaTime,
@@ -2758,6 +2931,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 return;
             }
 
+            LogPlanetArrivalDiagnostics("Complete.Trigger." + completionReason, quantTick, true);
             CompleteTravel();
             return;
         }
@@ -2826,6 +3000,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void CompleteTravel()
     {
+        LogPlanetArrivalDiagnostics("Complete.BeforeSnap", GetCurrentTravelQuantTick(), true);
+        LogPlayerTravelSpeedDiagnostics("Arrived", GetCurrentTravelQuantTick(), true);
+        _planetTakeoffDistancePerTick = 0f;
         if (IsMapPointDestination())
         {
             LogCustom(
@@ -2851,6 +3028,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         }
 
         State.SetCurrentPosition(State.DestinationPosition);
+        LogPlanetArrivalDiagnostics("Complete.AfterSnap", GetCurrentTravelQuantTick(), true);
         State.Status = SystemTravelStatus.Arrived;
         State.TravelProgress01 = 1f;
 
@@ -2862,6 +3040,13 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         if (destinationType == TravelDestinationType.Planet)
             State.CurrentPlanetId = planetId;
+
+        // Arrival handlers may immediately hide the system and open a planet.
+        // Publish the final position to player data and the ship view first.
+        SyncShipMovementStateWithTravel(
+            State.GetCurrentPosition(),
+            GetCurrentEffectiveTravelSpeed());
+        PublishTravelProgress(1f);
 
         _eventBus.Publish(new SystemTravelCompletedEvent(
             destinationType,
@@ -2911,9 +3096,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         if (!IsMovingTravelDestination())
             return false;
 
+        LogPlanetArrivalDiagnostics("ArrivalCheck.BeforeRefresh", quantTick, true);
+
         if (!TryGetLiveDestinationPosition(
                 out Vector3 liveDestinationPosition))
         {
+            LogPlanetArrivalDiagnostics("ArrivalCheck.LivePositionMissing", quantTick, true);
             if (IsNpcDestination())
                 CancelTravel();
 
@@ -2924,15 +3112,17 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 State.GetCurrentPosition(),
                 liveDestinationPosition) <= ArrivalDistanceThreshold)
         {
+            LogPlanetArrivalDiagnostics("ArrivalCheck.WithinLivePlanetThreshold", quantTick, true);
             State.DestinationPosition =
                 liveDestinationPosition;
 
             return false;
         }
 
-        return TryRebuildActiveRouteToMovingDestination(
-            liveDestinationPosition,
-            quantTick);
+        bool rebuilt = TryRebuildActiveRouteToMovingDestination(liveDestinationPosition, quantTick);
+        LogPlanetArrivalDiagnostics(rebuilt ? "ArrivalCheck.Rebuilt" : "ArrivalCheck.RebuildFailed",
+            quantTick, true);
+        return rebuilt;
     }
 
     private void TryRefreshActiveRouteForMovingDestination(
@@ -3314,6 +3504,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
         float previousTurnFactor = _routeTurnAdjustmentFactor;
         float previousSpeedFactor = _routeSpeedAdjustmentFactor;
+        float previousSpeedRecoveryDistance = _routeSpeedRecoveryDistance;
         bool previousUseInitialSpeedLimit = _useRouteInitialSpeedLimit;
         float previousInitialSpeedLimitFactor = _routeInitialSpeedLimitFactor;
         float previousInitialSpeedLimitDistance = _routeInitialSpeedLimitDistance;
@@ -3357,6 +3548,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         }
         else
         {
+            // A failed preserved-prefix attempt may have populated these outputs
+            // with the old route state. This fallback starts a new path here.
+            nextStateStartPosition = routeStartPosition;
+            nextRoutePreviewStartFacingDirection = routeStartFacingDirection;
+            nextRouteDistanceTravelled = 0f;
+
             if (!TryBuildPlayerShipRoutePath2A(
                     routeStartPosition,
                     liveDestinationPosition,
@@ -3367,6 +3564,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             {
                 _routeTurnAdjustmentFactor = previousTurnFactor;
                 _routeSpeedAdjustmentFactor = previousSpeedFactor;
+                _routeSpeedRecoveryDistance = previousSpeedRecoveryDistance;
                 _useRouteInitialSpeedLimit = previousUseInitialSpeedLimit;
                 _routeInitialSpeedLimitFactor = previousInitialSpeedLimitFactor;
                 _routeInitialSpeedLimitDistance = previousInitialSpeedLimitDistance;
@@ -3385,6 +3583,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         {
             _routeTurnAdjustmentFactor = previousTurnFactor;
             _routeSpeedAdjustmentFactor = previousSpeedFactor;
+            _routeSpeedRecoveryDistance = previousSpeedRecoveryDistance;
             _useRouteInitialSpeedLimit = previousUseInitialSpeedLimit;
             _routeInitialSpeedLimitFactor = previousInitialSpeedLimitFactor;
             _routeInitialSpeedLimitDistance = previousInitialSpeedLimitDistance;
@@ -3462,6 +3661,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 routeStartFacingDirection);
         }
 
+        _routeSpeedRecoveryDistance = GetRouteSpeedRecoveryDistance(
+            _activeTravelRoutePath, _routeSpeedAdjustmentFactor, _consumeSunFacingStartTurnTick);
         return true;
     }
 
@@ -3831,7 +4032,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 _activeTravelRoutePlan.HasTurnInPlaceAtStart,
                 _useRouteInitialSpeedLimit,
                 _routeInitialSpeedLimitFactor,
-                _routeInitialSpeedLimitDistance);
+                _routeInitialSpeedLimitDistance,
+                _routeSpeedRecoveryDistance);
 
         lockedPrefixDistance =
             Mathf.Clamp(
@@ -4098,7 +4300,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         float baseDistancePerTick =
             Mathf.Max(
                 0.01f,
-                GetCurrentShipTravelSpeed() * GetSpeedMultiplier());
+                _planetTakeoffDistancePerTick > 0f
+                    ? _planetTakeoffDistancePerTick
+                    : GetCurrentShipTravelSpeed() * GetSpeedMultiplier());
 
         if (State.Destination != null &&
             (State.Destination.Type == TravelDestinationType.Planet ||
@@ -4263,6 +4467,10 @@ float baseDistancePerTick)
             Mathf.Clamp01(
                 routeAdjustment.SpeedFactor);
 
+        float speedRecoveryDistance = isFlying
+            ? _routeSpeedRecoveryDistance
+            : GetRouteSpeedRecoveryDistance(_routePreviewPathBuffer, routeSpeedFactor, hasStartTurnTick);
+
         float currentTickRemainingFactor =
             isFlying
                 ? GetCurrentTickRemainingFactor()
@@ -4282,7 +4490,8 @@ float baseDistancePerTick)
                         useInitialSpeedLimit,
                         initialSpeedLimitFactor,
                         initialSpeedLimitDistance,
-                        currentTickRemainingFactor)
+                        currentTickRemainingFactor,
+                        speedRecoveryDistance)
                     : GetPreviewRouteDistanceAtTick(
                         tickIndex - 1,
                         baseDistancePerTick,
@@ -4291,7 +4500,8 @@ float baseDistancePerTick)
                         hasStartTurnTick,
                         useInitialSpeedLimit,
                         initialSpeedLimitFactor,
-                        initialSpeedLimitDistance);
+                        initialSpeedLimitDistance,
+                        speedRecoveryDistance);
 
             float distanceAtTick =
                 isFlying
@@ -4305,7 +4515,8 @@ float baseDistancePerTick)
                         useInitialSpeedLimit,
                         initialSpeedLimitFactor,
                         initialSpeedLimitDistance,
-                        currentTickRemainingFactor)
+                        currentTickRemainingFactor,
+                        speedRecoveryDistance)
                     : GetPreviewRouteDistanceAtTick(
                         tickIndex,
                         baseDistancePerTick,
@@ -4314,7 +4525,8 @@ float baseDistancePerTick)
                         hasStartTurnTick,
                         useInitialSpeedLimit,
                         initialSpeedLimitFactor,
-                        initialSpeedLimitDistance);
+                        initialSpeedLimitDistance,
+                        speedRecoveryDistance);
 
             if (isFlying &&
                 distanceAtTick <= passedDistance + 0.001f)
@@ -4388,7 +4600,8 @@ float baseDistancePerTick)
         bool useInitialSpeedLimit,
         float initialSpeedLimitFactor,
         float initialSpeedLimitDistance,
-        float currentTickRemainingFactor)
+        float currentTickRemainingFactor,
+        float speedRecoveryDistance = -1f)
     {
         float distance =
             Mathf.Clamp(
@@ -4421,7 +4634,8 @@ float baseDistancePerTick)
                     routeSpeedFactor,
                     useInitialSpeedLimit,
                     initialSpeedLimitFactor,
-                    initialSpeedLimitDistance);
+                    initialSpeedLimitDistance,
+                    speedRecoveryDistance);
 
             if (distance >= totalPathLength)
                 return totalPathLength;
@@ -4494,7 +4708,8 @@ float baseDistancePerTick)
     bool hasStartTurnTick,
     bool useInitialSpeedLimit,
     float initialSpeedLimitFactor,
-    float initialSpeedLimitDistance)
+    float initialSpeedLimitDistance,
+    float speedRecoveryDistance = -1f)
     {
         if (tickIndex <= 0)
             return 0f;
@@ -4518,7 +4733,8 @@ float baseDistancePerTick)
                     routeSpeedFactor,
                     useInitialSpeedLimit,
                     initialSpeedLimitFactor,
-                    initialSpeedLimitDistance);
+                    initialSpeedLimitDistance,
+                    speedRecoveryDistance);
 
             if (distance >= totalPathLength)
                 return totalPathLength;
@@ -4530,75 +4746,81 @@ float baseDistancePerTick)
             totalPathLength);
     }
 
-    private float AdvancePreviewRouteDistanceForOneTick(
-    float currentDistance,
-    float baseDistancePerTick,
-    float totalPathLength,
-    float routeSpeedFactor,
-    bool useInitialSpeedLimit,
-    float initialSpeedLimitFactor,
-    float initialSpeedLimitDistance)
+    private static bool HasRecoveredRouteSpeed(float distance, float recoveryDistance)
     {
-        float safeBaseDistancePerTick =
-            Mathf.Max(
-                0.01f,
-                baseDistancePerTick);
+        return recoveryDistance >= 0f && distance >= recoveryDistance - RouteSegmentEpsilon;
+    }
 
-        float normalSpeedFactor =
-            Mathf.Max(
-                0.0001f,
-                Mathf.Clamp01(routeSpeedFactor));
+    private float GetRouteSpeedRecoveryDistance(
+        IReadOnlyList<Vector3> path, float speedFactor, bool hasStartTurnTick = false)
+    {
+        if (speedFactor >= 0.9999f || path == null || path.Count <= 1)
+            return -1f;
+        if (path.Count == 2)
+            return hasStartTurnTick ? 0f : -1f;
 
-        if (!useInitialSpeedLimit ||
-            initialSpeedLimitDistance <= RouteSegmentEpsilon ||
-            currentDistance >= initialSpeedLimitDistance - RouteSegmentEpsilon)
+        float totalLength = GetPathLength(path);
+        float straightLength = 0f;
+        Vector2 finalDirection = Vector2.zero;
+        // Walk back over the final straight. A 0.5 degree tolerance handles float noise.
+        const float straightDirectionDot = 0.9999619f;
+        for (int i = path.Count - 1; i > 0; i--)
         {
-            return Mathf.Min(
-                totalPathLength,
-                currentDistance +
-                safeBaseDistancePerTick *
-                normalSpeedFactor);
+            Vector2 segment = (Vector2)(path[i] - path[i - 1]);
+            float length = segment.magnitude;
+            if (length <= RouteSegmentEpsilon)
+                continue;
+            Vector2 direction = segment / length;
+            if (finalDirection.sqrMagnitude <= RouteSegmentEpsilon)
+                finalDirection = direction;
+            else if (Vector2.Dot(direction, finalDirection) < straightDirectionDot)
+                break;
+            straightLength += length;
         }
 
-        float limitedSpeedFactor =
-            Mathf.Min(
-                normalSpeedFactor,
-                Mathf.Max(
-                    0.0001f,
-                    Mathf.Clamp01(initialSpeedLimitFactor)));
+        float recoveryDistance = Mathf.Max(0f, totalLength - straightLength);
+        if (recoveryDistance > RouteSegmentEpsilon && straightLength > ArrivalDistanceThreshold)
+            return recoveryDistance;
+        // A straight route without a starting turn keeps its deliberate short-route limit.
+        return hasStartTurnTick ? 0f : -1f;
+    }
 
-        float distanceToInitialLimit =
-            Mathf.Max(
-                0f,
-                initialSpeedLimitDistance - currentDistance);
-
-        float limitedDistancePerTick =
-            safeBaseDistancePerTick *
-            limitedSpeedFactor;
-
-        if (distanceToInitialLimit >= limitedDistancePerTick)
+    private float AdvancePreviewRouteDistanceForOneTick(
+        float currentDistance,
+        float baseDistancePerTick,
+        float totalPathLength,
+        float routeSpeedFactor,
+        bool useInitialSpeedLimit,
+        float initialSpeedLimitFactor,
+        float initialSpeedLimitDistance,
+        float speedRecoveryDistance = -1f)
+    {
+        float distance = Mathf.Clamp(currentDistance, 0f, totalPathLength);
+        float timeBudget = Mathf.Max(0f, baseDistancePerTick);
+        // At most three phases: initial limit, remaining turn, then the straight.
+        for (int phase = 0; phase < 3 && timeBudget > 0f && distance < totalPathLength; phase++)
         {
-            return Mathf.Min(
-                totalPathLength,
-                currentDistance +
-                limitedDistancePerTick);
+            bool recovered = HasRecoveredRouteSpeed(distance, speedRecoveryDistance);
+            float factor = recovered ? 1f : Mathf.Max(0.0001f, Mathf.Clamp01(routeSpeedFactor));
+            float boundary = totalPathLength;
+            if (!recovered && speedRecoveryDistance >= 0f)
+                boundary = Mathf.Min(boundary, speedRecoveryDistance);
+            if (!recovered && useInitialSpeedLimit &&
+                distance < initialSpeedLimitDistance - RouteSegmentEpsilon)
+            {
+                factor = Mathf.Min(factor, Mathf.Max(0.0001f, Mathf.Clamp01(initialSpeedLimitFactor)));
+                boundary = Mathf.Min(boundary, initialSpeedLimitDistance);
+            }
+
+            float distanceToBoundary = Mathf.Max(0f, boundary - distance);
+            float availableDistance = timeBudget * factor;
+            if (availableDistance < distanceToBoundary)
+                return Mathf.Min(totalPathLength, distance + availableDistance);
+
+            timeBudget = Mathf.Max(0f, timeBudget - distanceToBoundary / factor);
+            distance = boundary;
         }
-
-        float usedTickPart =
-            limitedDistancePerTick > RouteSegmentEpsilon
-                ? distanceToInitialLimit / limitedDistancePerTick
-                : 1f;
-
-        float remainingTickPart =
-            Mathf.Clamp01(
-                1f - usedTickPart);
-
-        return Mathf.Min(
-            totalPathLength,
-            initialSpeedLimitDistance +
-            safeBaseDistancePerTick *
-            normalSpeedFactor *
-            remainingTickPart);
+        return Mathf.Min(totalPathLength, distance);
     }
 
     private void AddSmallRoutePreviewDots2A(

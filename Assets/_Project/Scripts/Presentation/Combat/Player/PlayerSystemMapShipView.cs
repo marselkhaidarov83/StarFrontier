@@ -28,6 +28,7 @@ public sealed class PlayerSystemMapShipView :
     private void OnEnable()
     {
         _eventBus.Subscribe<PlayerShipDestroyedByNpcEvent>(OnPlayerShipDestroyed);
+        _eventBus.Subscribe<SystemTravelProgressChangedEvent>(OnTravelProgressChanged);
     }
 
     private void OnDisable()
@@ -36,6 +37,7 @@ public sealed class PlayerSystemMapShipView :
             return;
 
         _eventBus.Unsubscribe<PlayerShipDestroyedByNpcEvent>(OnPlayerShipDestroyed);
+        _eventBus.Unsubscribe<SystemTravelProgressChangedEvent>(OnTravelProgressChanged);
     }
 
     private void Update()
@@ -108,6 +110,21 @@ public sealed class PlayerSystemMapShipView :
                 startedAt,
                 details);
         }
+    }
+
+    private void OnTravelProgressChanged(SystemTravelProgressChangedEvent evt)
+    {
+        if (_isDestroyed)
+            return;
+
+        ShipRuntimeData activeShip = GetActiveShip();
+        if (activeShip == null || activeShip.CurrentHull <= 0)
+            return;
+
+        transform.position = new Vector3(
+            evt.CurrentPosition.x,
+            evt.CurrentPosition.y,
+            transform.position.z);
     }
 
     private void OnPlayerShipDestroyed(PlayerShipDestroyedByNpcEvent evt)

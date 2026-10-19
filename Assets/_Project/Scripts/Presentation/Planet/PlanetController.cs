@@ -124,12 +124,30 @@ public class PlanetController : CustomMonoBehaviour
 
     private void OnOpenSystemClicked()
     {
+        if (string.IsNullOrWhiteSpace(gameSessionService.State.Player.CurrentPlanetId))
+            return;
+
         Vector2 planetPosition = _orbitalMotionService.GetPlanetCurrentPosition(
                 _configService.GetCurrentPlanetConfig().PlanetOrbit);
+        _systemTravelService.CancelTravel();
         _systemTravelService.SetCurrentPosition(planetPosition);
+        gameSessionService.State.Player.SystemMapShipPosition =
+            _systemTravelService.State.GetCurrentPosition();
         gameSessionService.State.Player.CurrentPlanetId = "";
 
         eventBus.Publish(new StarSystemEnteredEvent(gameSessionService.State.Player.CurrentSystemId));
+
+        if (_systemTravelService.StartPlanetTakeoff())
+        {
+            // In Play mode time already advances. In Pause mode run exactly one step.
+            if (_gameTimeService.IsPaused)
+                _gameTimeService.StepOneDay();
+        }
+        else
+        {
+            AppLog.Warning(DebugLogChannel.Travel, typeof(PlanetController),
+                "Could not build the planet takeoff route. Check ShipMovementConfig and the destination.");
+        }
     }
 
     private void OnOpenHangarClicked()
@@ -207,6 +225,7 @@ public class PlanetController : CustomMonoBehaviour
 
     private void OnPlanetEntered(PlanetEnteredEvent evt)
     {
+        LogPlanetPanelOpening(evt.PlanetId);
         if (IsDebug())
             AppLog.Info(DebugLogChannel.PlanetUi,
                 typeof(PlanetController),
@@ -220,6 +239,46 @@ public class PlanetController : CustomMonoBehaviour
             AppLog.Info(DebugLogChannel.PlanetUi,
                 typeof(PlanetController),
                 "planet entered");
+    }
+
+    private void LogPlanetPanelOpening(string planetId)
+    {
+        if (!Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.PlayerMovement))
+            return;
+
+        PlanetConfig planet = _configService.GetPlanetConfigById(planetId);
+        bool hasPlanetModel = planet != null && planet.PlanetOrbit != null;
+        Vector3 planetModel = hasPlanetModel
+            ? _orbitalMotionService.GetPlanetCurrentPosition(planet.PlanetOrbit) : Vector3.zero;
+        PlayerSystemMapShipView shipView = FindFirstObjectByType<PlayerSystemMapShipView>(FindObjectsInactive.Include);
+        PlanetOrbitMotion2 planetView = null;
+        foreach (PlanetOrbitMotion2 candidate in FindObjectsByType<PlanetOrbitMotion2>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (candidate.PlanetId == planetId)
+            {
+                planetView = candidate;
+                break;
+            }
+        }
+
+        Vector3 shipModel = _systemTravelService.State.GetCurrentPosition();
+        Vector3 shipVisual = shipView != null ? shipView.transform.position : Vector3.zero;
+        Vector3 planetVisual = planetView != null ? planetView.transform.position : Vector3.zero;
+        AppLog.Info(DebugLogChannel.PlayerMovement,
+            "[PLANET_ARRIVAL] Phase=PlanetPanel.BeforeOpen | Planet=" + planetId +
+            " | Frame=" + Time.frameCount + " | Tick=" + _gameTimeService.CurrentQuantTick +
+            " | TravelStatus=" + _systemTravelService.State.Status +
+            " | ShipModel=" + shipModel.ToString("F3") +
+            " | PlayerSavedPosition=" + gameSessionService.State.Player.SystemMapShipPosition.ToString("F3") +
+            " | HasPlanetModel=" + hasPlanetModel + " | PlanetModel=" + planetModel.ToString("F3") +
+            " | HasShipVisual=" + (shipView != null) + " | ShipVisual=" + shipVisual.ToString("F3") +
+            " | HasPlanetVisual=" + (planetView != null) + " | PlanetVisual=" + planetVisual.ToString("F3") +
+            " | ModelDistance=" + (hasPlanetModel ? Vector2.Distance(shipModel, planetModel) : -1f).ToString("0.###") +
+            " | VisualDistance=" + (shipView != null && planetView != null
+                ? Vector2.Distance(shipVisual, planetVisual) : -1f).ToString("0.###") +
+            " | PlanetVisualModelOffset=" + (hasPlanetModel && planetView != null
+                ? Vector2.Distance(planetModel, planetVisual) : -1f).ToString("0.###"));
     }
 
     private void RefreshBackground()

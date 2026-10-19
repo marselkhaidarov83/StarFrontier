@@ -3,7 +3,7 @@ using System.Collections.Generic;
 public interface IConfigService
 {
     GameConfig GameConfig { get; }
-    DebugConfig DebugConfig { get; }
+    DebugSettings DebugSettings { get; }
     SaveConfig SaveConfig { get; }
     GalaxyConfig GalaxyConfig { get; }
     NewGameConfig NewGameConfig { get; }

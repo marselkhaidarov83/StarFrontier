@@ -4,25 +4,25 @@ public static class DeveloperModeGate
     {
         get
         {
-            return IsEnabledForConfig(GetDebugConfigFromServices());
+            return IsEnabledForSettings(GetDebugSettingsFromServices());
         }
     }
 
-    public static bool IsEnabledForConfig(DebugConfig debugConfig)
+    public static bool IsEnabledForSettings(DebugSettings debugSettings)
     {
-        if (debugConfig == null)
+        if (debugSettings == null || !debugSettings.mobileTestMode)
             return false;
 
 #if UNITY_EDITOR
-        return debugConfig.showDebugOverlayInEditor;
+        return debugSettings.showDebugOverlayInEditor;
 #elif UNITY_ANDROID || UNITY_IOS
-        return debugConfig.showDebugOverlayInMobileBuild;
+        return debugSettings.showDebugOverlayInMobileBuild;
 #else
         return false;
 #endif
     }
 
-    private static DebugConfig GetDebugConfigFromServices()
+    private static DebugSettings GetDebugSettingsFromServices()
     {
         Bootstrapper bootstrapper = Bootstrapper.Instance;
 
@@ -38,6 +38,6 @@ public static class DeveloperModeGate
             return null;
         }
 
-        return configService.DebugConfig;
+        return configService.DebugSettings;
     }
 }

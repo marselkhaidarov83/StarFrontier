@@ -127,6 +127,12 @@ public sealed class SystemTravelHudController :
     private IHangarService
         _hangarService;
 
+    private ITravelService _galaxyTravelService;
+    private IRefuelService _refuelService;
+    private IGameSessionService _gameSessionService;
+    private int _lastExitLabelFuel = -1;
+    private bool _lastExitLabelEnemyOwned;
+
     private string _currentTargetLabel =
         NoTargetText;
 
@@ -311,6 +317,10 @@ public sealed class SystemTravelHudController :
 
         _configService =
             registry.Get<IConfigService>();
+
+        _galaxyTravelService = registry.Get<ITravelService>();
+        _refuelService = registry.Get<IRefuelService>();
+        _gameSessionService = registry.Get<IGameSessionService>();
 
         _eventBus =
             registry.Get<SimpleEventBus>();
@@ -706,8 +716,13 @@ public sealed class SystemTravelHudController :
         if (!hasActiveTravel)
             return;
 
-        if (_currentTargetLabel ==
-            NoTargetText)
+        bool exitAppearanceChanged = state.Destination != null &&
+            state.Destination.Type == TravelDestinationType.SystemExit &&
+            ((_refuelService != null && _refuelService.GetCurrentFuel() != _lastExitLabelFuel) ||
+             SystemExitTargetColor2A.IsEnemySystem(_gameSessionService?.State?.Galaxy, state.Destination.TargetSystemId) !=
+                _lastExitLabelEnemyOwned);
+
+        if (_currentTargetLabel == NoTargetText || exitAppearanceChanged)
         {
             _currentTargetLabel =
                 BuildTargetLabelFromState();
@@ -726,16 +741,10 @@ public sealed class SystemTravelHudController :
         switch (evt.DestinationType)
         {
             case TravelDestinationType.Planet:
-                return
-                    "планета " +
-                    GetPlanetDisplayName(
-                        evt.PlanetId);
+                return BuildPlanetTargetLabel(evt.PlanetId);
 
             case TravelDestinationType.Station:
-                return
-                    "станция " +
-                    GetStationDisplayName(
-                        evt.StationId);
+                return BuildStationTargetLabel(evt.StationId);
 
             case TravelDestinationType.MapPoint:
                 return "космос";
@@ -747,10 +756,7 @@ public sealed class SystemTravelHudController :
                         evt.RuntimeNpcId);
 
             case TravelDestinationType.SystemExit:
-                return
-                    "система " +
-                    GetSystemDisplayName(
-                        evt.TargetSystemId);
+                return BuildSystemExitTargetLabel(evt.TargetSystemId);
 
             default:
                 return NoTargetText;
@@ -774,18 +780,10 @@ public sealed class SystemTravelHudController :
         switch (state.Destination.Type)
         {
             case TravelDestinationType.Planet:
-                return
-                    "планета " +
-                    GetPlanetDisplayName(
-                        state.Destination
-                            .PlanetId);
+                return BuildPlanetTargetLabel(state.Destination.PlanetId);
 
             case TravelDestinationType.Station:
-                return
-                    "станция " +
-                    GetStationDisplayName(
-                        state.Destination
-                            .StationId);
+                return BuildStationTargetLabel(state.Destination.StationId);
 
             case TravelDestinationType.MapPoint:
                 return "космос";
@@ -798,15 +796,47 @@ public sealed class SystemTravelHudController :
                             .RuntimeNpcId);
 
             case TravelDestinationType.SystemExit:
-                return
-                    "система " +
-                    GetSystemDisplayName(
-                        state.Destination
-                            .TargetSystemId);
+                return BuildSystemExitTargetLabel(state.Destination.TargetSystemId);
 
             default:
                 return NoTargetText;
         }
+    }
+
+    private string BuildSystemExitTargetLabel(string targetSystemId)
+    {
+        string label = "система " + GetSystemDisplayName(targetSystemId);
+        string fromSystemId = _gameSessionService?.State?.Player?.CurrentSystemId;
+        if (string.IsNullOrWhiteSpace(fromSystemId))
+            fromSystemId = _travelService?.State?.CurrentSystemId;
+        if (_galaxyTravelService == null || _refuelService == null ||
+            string.IsNullOrWhiteSpace(fromSystemId) || string.IsNullOrWhiteSpace(targetSystemId))
+            return label;
+
+        _lastExitLabelFuel = _refuelService.GetCurrentFuel();
+        int fuelCost = _galaxyTravelService.GetTravelCost(fromSystemId, targetSystemId);
+        _lastExitLabelEnemyOwned = SystemExitTargetColor2A.IsEnemySystem(
+            _gameSessionService?.State?.Galaxy, targetSystemId);
+        string color = SystemExitTargetColor2A.GetColor(_lastExitLabelFuel >= fuelCost, _lastExitLabelEnemyOwned);
+        return color == "#FFFFFF" ? label : "<color=" + color + ">" + label + "</color>";
+    }
+
+    private string BuildPlanetTargetLabel(string planetId)
+    {
+        string label = "планета " + GetPlanetDisplayName(planetId);
+        PlanetConfig planet = FindPlanetConfig(planetId);
+        return planet != null && !planet.IsInhabited
+            ? "<color=#E9AB63>" + label + "</color>"
+            : label;
+    }
+
+    private string BuildStationTargetLabel(string stationId)
+    {
+        string label = "станция " + GetStationDisplayName(stationId);
+        StationConfig station = FindStationConfig(stationId);
+        return station != null && !station.IsActive
+            ? "<color=#E9AB63>" + label + "</color>"
+            : label;
     }
 
     private string GetPlanetDisplayName(
@@ -1135,12 +1165,6 @@ public sealed class SystemTravelHudController :
         usesLegacyTravelSpeed =
             false;
 
-        if (_gameTimeService != null &&
-            _gameTimeService.IsPaused)
-        {
-            return 0f;
-        }
-
         float travelSpeed =
             GetLegacyTravelSpeed();
 
@@ -1151,6 +1175,12 @@ public sealed class SystemTravelHudController :
                 true;
 
             return travelSpeed;
+        }
+
+        if (_gameTimeService != null &&
+            _gameTimeService.IsPaused)
+        {
+            return 0f;
         }
 
         if (_shipMovementService != null &&

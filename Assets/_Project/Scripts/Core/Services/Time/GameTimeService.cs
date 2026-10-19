@@ -139,6 +139,9 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
     public void TogglePause()
     {
+        bool selectedPauseState = !State.IsPaused && !_pauseAfterCurrentTick;
+        _eventBus.Publish(new GameTimePauseModeSelectedEvent(selectedPauseState));
+
         if (State.IsPaused)
         {
             SetPaused(false);

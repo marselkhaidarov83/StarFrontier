@@ -32,6 +32,32 @@ public sealed class SystemNpcOfflineRelocationService :
             Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
     }
 
+    public void InitializeMilitaryStartLocations(GameRuntimeState state)
+    {
+        if (state?.Galaxy?.Systems == null)
+            return;
+
+        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
+        IReadOnlyList<SystemNpcRuntimeState> npcs = _npcRuntimeService.Npcs;
+        for (int i = 0; i < npcs.Count; i++)
+        {
+            SystemNpcRuntimeState npc = npcs[i];
+            if (npc == null || !npc.IsAlive || !npc.IsAlly || npc.AllyRole != AllyRole2A.Military ||
+                string.IsNullOrWhiteSpace(npc.CurrentSystemId) ||
+                capturedSystemIds.Contains(npc.CurrentSystemId))
+            {
+                continue;
+            }
+
+            StarSystemConfig currentSystem = _configService.GetStarSystemConfigById(npc.CurrentSystemId);
+            if (currentSystem == null)
+                continue;
+
+            // Reuse the normal 50/50 placement and space spawn point, within the same system.
+            ApplyOfflineRelocation(npc, currentSystem);
+        }
+    }
+
     public bool TryProcessOffline(GameRuntimeState state)
     {
         if (state == null || state.Meta == null)
@@ -49,10 +75,11 @@ public sealed class SystemNpcOfflineRelocationService :
         if (npcs == null || npcs.Count == 0)
             return false;
 
+        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
         List<StarSystemConfig> destinationCandidates =
             BuildOfflineDestinationCandidates(
                 state,
-                npcs);
+                capturedSystemIds);
 
         if (destinationCandidates.Count == 0)
             return false;
@@ -68,6 +95,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
             if (!CanNpcTryOfflineRelocation(
                     npc,
+                    capturedSystemIds,
                     travelScenarioByConfigId))
             {
                 continue;
@@ -128,7 +156,9 @@ public sealed class SystemNpcOfflineRelocationService :
             offlineHours);
     }
 
-    private bool CanNpcTryOfflineRelocation(SystemNpcRuntimeState npc)
+    private bool CanNpcTryOfflineRelocation(
+        SystemNpcRuntimeState npc,
+        HashSet<string> capturedSystemIds)
     {
         if (npc == null)
             return false;
@@ -136,10 +166,13 @@ public sealed class SystemNpcOfflineRelocationService :
         if (!npc.IsAlive)
             return false;
 
-        if (!npc.IsAlly)
+        if (!npc.IsAlly || npc.AllyRole == AllyRole2A.Military)
             return false;
 
         if (string.IsNullOrWhiteSpace(npc.CurrentSystemId))
+            return false;
+
+        if (capturedSystemIds.Contains(npc.CurrentSystemId))
             return false;
 
         return AllyHasTravelToAnotherSystemScenario(npc.ConfigId);
@@ -190,6 +223,7 @@ public sealed class SystemNpcOfflineRelocationService :
     private bool TryPickDestinationSystem(
         SystemNpcRuntimeState npc,
         GameRuntimeState state,
+        HashSet<string> capturedSystemIds,
         out StarSystemConfig destinationSystem)
     {
         destinationSystem = null;
@@ -214,10 +248,10 @@ public sealed class SystemNpcOfflineRelocationService :
             if (system.Id == npc.CurrentSystemId)
                 continue;
 
-            if (!IsSystemOpen(system, state))
+            if (capturedSystemIds.Contains(system.Id))
                 continue;
 
-            if (HasAliveHostiles(system.Id))
+            if (!IsSystemOpen(system, state))
                 continue;
 
             candidates.Add(system);
@@ -343,39 +377,11 @@ public sealed class SystemNpcOfflineRelocationService :
         return sector.IsUnlocked;
     }
 
-    private bool HasAliveHostiles(string systemId)
-    {
-        IReadOnlyList<SystemNpcRuntimeState> npcs =
-            _npcRuntimeService.Npcs;
-
-        if (npcs == null)
-            return false;
-
-        for (int i = 0; i < npcs.Count; i++)
-        {
-            SystemNpcRuntimeState npc =
-                npcs[i];
-
-            if (npc == null)
-                continue;
-
-            if (!npc.IsAlive)
-                continue;
-
-            if (npc.CurrentSystemId != systemId)
-                continue;
-
-            if (npc.IsHostileToPlayer)
-                return true;
-        }
-
-        return false;
-    }
-
     private void ApplyOfflineRelocation(
         SystemNpcRuntimeState npc,
         StarSystemConfig destinationSystem)
     {
+        bool changesSystem = npc.CurrentSystemId != destinationSystem.Id;
         npc.CurrentSystemId =
             destinationSystem.Id;
 
@@ -412,8 +418,9 @@ public sealed class SystemNpcOfflineRelocationService :
         npc.TravelEndTick =
             0;
 
-        npc.PrevBehavior =
-            SystemNpcBehaviorType.TravelToAnotherSystem;
+        npc.PrevBehavior = changesSystem
+            ? SystemNpcBehaviorType.TravelToAnotherSystem
+            : npc.CurrentBehavior;
 
         npc.CurrentBehavior =
             SystemNpcBehaviorType.None;
@@ -830,18 +837,20 @@ public sealed class SystemNpcOfflineRelocationService :
         if (npcs == null || npcs.Count == 0)
             return false;
 
+        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
         int movedCount = 0;
 
         for (int i = 0; i < npcs.Count; i++)
         {
             SystemNpcRuntimeState npc = npcs[i];
 
-            if (!CanNpcTryOfflineRelocation(npc))
+            if (!CanNpcTryOfflineRelocation(npc, capturedSystemIds))
                 continue;
 
             if (!TryPickDestinationSystem(
                     npc,
                     state,
+                    capturedSystemIds,
                     out StarSystemConfig destinationSystem))
                 continue;
 
@@ -1027,10 +1036,11 @@ public sealed class SystemNpcOfflineRelocationService :
 
         yield return null;
 
+        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
         List<StarSystemConfig> destinationCandidates =
             BuildOfflineDestinationCandidates(
                 state,
-                npcs);
+                capturedSystemIds);
 
         int candidateCount =
             destinationCandidates != null
@@ -1061,6 +1071,7 @@ public sealed class SystemNpcOfflineRelocationService :
         int eligibleCount =
             CountOfflineRelocationEligibleNpcs(
                 npcs,
+                capturedSystemIds,
                 travelScenarioByConfigId);
 
         int targetEligibleCount =
@@ -1105,6 +1116,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
             if (!CanNpcTryOfflineRelocation(
                     npc,
+                    capturedSystemIds,
                     travelScenarioByConfigId))
             {
                 continue;
@@ -1244,6 +1256,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
     private int CountOfflineRelocationEligibleNpcs(
         IReadOnlyList<SystemNpcRuntimeState> npcs,
+        HashSet<string> capturedSystemIds,
         Dictionary<string, bool> travelScenarioByConfigId)
     {
         if (npcs == null || npcs.Count == 0)
@@ -1255,6 +1268,7 @@ public sealed class SystemNpcOfflineRelocationService :
         {
             if (CanNpcTryOfflineRelocation(
                     npcs[i],
+                    capturedSystemIds,
                     travelScenarioByConfigId))
             {
                 count++;
@@ -1266,6 +1280,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
     private bool CanNpcTryOfflineRelocation(
         SystemNpcRuntimeState npc,
+        HashSet<string> capturedSystemIds,
         Dictionary<string, bool> travelScenarioByConfigId)
     {
         if (npc == null)
@@ -1274,10 +1289,13 @@ public sealed class SystemNpcOfflineRelocationService :
         if (!npc.IsAlive)
             return false;
 
-        if (!npc.IsAlly)
+        if (!npc.IsAlly || npc.AllyRole == AllyRole2A.Military)
             return false;
 
         if (string.IsNullOrWhiteSpace(npc.CurrentSystemId))
+            return false;
+
+        if (capturedSystemIds.Contains(npc.CurrentSystemId))
             return false;
 
         string configId =
@@ -1297,9 +1315,26 @@ public sealed class SystemNpcOfflineRelocationService :
         return hasTravelScenario;
     }
 
+    private static HashSet<string> BuildCapturedSystemIds(GameRuntimeState state)
+    {
+        var capturedSystemIds = new HashSet<string>();
+        if (state?.Galaxy?.Systems == null)
+            return capturedSystemIds;
+
+        foreach (StarSystemRuntimeState system in state.Galaxy.Systems)
+        {
+            if (system != null && system.SystemStatus == StarSystemStatus.Captured &&
+                !string.IsNullOrWhiteSpace(system.SystemId))
+            {
+                capturedSystemIds.Add(system.SystemId);
+            }
+        }
+        return capturedSystemIds;
+    }
+
     private List<StarSystemConfig> BuildOfflineDestinationCandidates(
         GameRuntimeState state,
-        IReadOnlyList<SystemNpcRuntimeState> npcs)
+        HashSet<string> capturedSystemIds)
     {
         List<StarSystemConfig> candidates =
             new List<StarSystemConfig>();
@@ -1309,9 +1344,6 @@ public sealed class SystemNpcOfflineRelocationService :
 
         if (allSystems == null || allSystems.Count == 0)
             return candidates;
-
-        HashSet<string> hostileSystemIds =
-            BuildAliveHostileSystemIds(npcs);
 
         for (int i = 0; i < allSystems.Count; i++)
         {
@@ -1324,49 +1356,16 @@ public sealed class SystemNpcOfflineRelocationService :
                 continue;
             }
 
-            if (!IsSystemOpen(system, state))
+            if (capturedSystemIds.Contains(system.Id))
                 continue;
 
-            if (hostileSystemIds.Contains(system.Id))
+            if (!IsSystemOpen(system, state))
                 continue;
 
             candidates.Add(system);
         }
 
         return candidates;
-    }
-
-    private HashSet<string> BuildAliveHostileSystemIds(
-        IReadOnlyList<SystemNpcRuntimeState> npcs)
-    {
-        HashSet<string> hostileSystemIds =
-            new HashSet<string>();
-
-        if (npcs == null)
-            return hostileSystemIds;
-
-        for (int i = 0; i < npcs.Count; i++)
-        {
-            SystemNpcRuntimeState npc =
-                npcs[i];
-
-            if (npc == null)
-                continue;
-
-            if (!npc.IsAlive)
-                continue;
-
-            if (!npc.IsHostileToPlayer)
-                continue;
-
-            if (string.IsNullOrWhiteSpace(npc.CurrentSystemId))
-                continue;
-
-            hostileSystemIds.Add(
-                npc.CurrentSystemId);
-        }
-
-        return hostileSystemIds;
     }
 
     private bool TryPickDestinationSystemFromCandidates(

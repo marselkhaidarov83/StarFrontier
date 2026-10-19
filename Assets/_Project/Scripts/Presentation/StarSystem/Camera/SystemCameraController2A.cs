@@ -51,6 +51,8 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     public SystemCameraMode2A Mode => mode;
 
+    public Camera TargetCamera => targetCamera;
+
     public bool IsSystemCameraActive =>
         _isSystemCameraActive;
 

@@ -19,7 +19,10 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
     [Header("Route Price Colors")]
     [SerializeField] private Color routePriceNormalColor = Color.white;
-    [SerializeField] private Color routePriceNotEnoughFuelColor = Color.red;
+    [SerializeField] private Color routePriceNotEnoughFuelColor = new Color(1f, 85f / 255f, 85f / 255f, 1f);
+
+    [Header("Target Colors")]
+    [SerializeField] private Color enemyTargetColor = new Color(233f / 255f, 171f / 255f, 99f / 255f, 1f);
 
     private IConfigService _configService;
     private ITravelService _travelService;
@@ -132,7 +135,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
         SetPlanetsText(targetSystemConfig);
         SetBaseText(targetSystemConfig);
         SetStatusText(targetSystemConfig, targetSystemState, currentSystemId);
-        SetTargetSystemText(targetSystemConfig);
+        SetTargetSystemText(targetSystemConfig, targetSystemState, travelFailReason);
         SetRouteSystemCountText(_currentPath);
 
         SetRoutePriceText(
@@ -236,16 +239,32 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             statusText.text = text;
     }
 
-    private void SetTargetSystemText(StarSystemConfig targetSystemConfig)
+    private void SetTargetSystemText(
+        StarSystemConfig targetSystemConfig,
+        StarSystemRuntimeState targetSystemState = null,
+        TravelFailReason travelFailReason = TravelFailReason.None)
     {
+        if (targetSystemText == null)
+            return;
+
         if (targetSystemConfig == null)
         {
             targetSystemText.text = "Цель: не определена";
             return;
         }
 
-        if (targetSystemText != null)
-            targetSystemText.text = "Цель: " + targetSystemConfig.DisplayName;
+        string value = targetSystemConfig.DisplayName;
+        if (travelFailReason == TravelFailReason.NotEnoughFuel)
+            value = ColorValue(value, routePriceNotEnoughFuelColor);
+        else if (targetSystemState != null && targetSystemState.SystemStatus == StarSystemStatus.Captured)
+            value = ColorValue(value, enemyTargetColor);
+
+        targetSystemText.text = "Цель: " + value;
+    }
+
+    private static string ColorValue(string value, Color color)
+    {
+        return "<color=#" + ColorUtility.ToHtmlStringRGB(color) + ">" + value + "</color>";
     }
 
     private void SetRouteSystemCountText(List<string> path)
@@ -265,6 +284,10 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
         string nextSystemId,
         TravelFailReason travelFailReason)
     {
+        if (routePriceText == null)
+            return;
+
+        routePriceText.color = routePriceNormalColor;
         if (path == null)
         {
             routePriceText.text = "Стоимость:";
@@ -272,23 +295,12 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
         }
 
         int totalPrice = CalculateTotalRoutePrice(path);
-        int firstJumpPrice = CalculateFirstJumpPrice(
-            currentSystemId,
-            nextSystemId
-        );
+        int firstJumpPrice = CalculateFirstJumpPrice(currentSystemId, nextSystemId);
+        string value = "всего " + totalPrice + " / первый прыжок " + firstJumpPrice;
+        if (travelFailReason == TravelFailReason.NotEnoughFuel)
+            value = ColorValue(value, routePriceNotEnoughFuelColor);
 
-        if (routePriceText == null)
-            return;
-
-        routePriceText.text =
-            "Стоимость: всего " +
-            totalPrice +
-            " / первый прыжок " +
-            firstJumpPrice;
-
-        routePriceText.color = travelFailReason == TravelFailReason.NotEnoughFuel
-            ? routePriceNotEnoughFuelColor
-            : routePriceNormalColor;
+        routePriceText.text = "Стоимость: " + value;
     }
 
     private int CalculateFirstJumpPrice(
