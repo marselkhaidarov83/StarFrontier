@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatService
 {
     private const double PerfLogThresholdMs = 1.0;
 
-    private int _prevTick = int.MinValue;
+    private int _lastProcessedFrame = int.MinValue;
+    private int _lastCurrentSystemQuantTick = int.MinValue;
 
     private readonly IGalaxyNpcSimulationScheduleService _simulationScheduleService;
     private readonly ISystemNpcCombatService _systemNpcCombatService;
@@ -42,7 +44,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
         LastOffscreenMs = 0d;
         LastTotalMs = 0d;
 
-        if (_prevTick == quantTick)
+        if (_lastProcessedFrame == Time.frameCount)
             return;
 
         long totalStartedAt =
@@ -58,7 +60,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
         StarSystemConfig currentSystem =
             _simulationScheduleService.GetCurrentSystem();
 
-        if (currentSystem != null)
+        if (currentSystem != null && _lastCurrentSystemQuantTick != quantTick)
         {
             long currentStartedAt =
                 BeginPerfMeasure();
@@ -67,6 +69,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
                 currentSystem,
                 quantTick);
 
+            _lastCurrentSystemQuantTick = quantTick;
             currentSystemMs =
                 EndPerfMeasureMs(currentStartedAt);
 
@@ -121,7 +124,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
         LastOffscreenMs = offscreenMs;
         LastTotalMs = totalMs;
 
-        _prevTick = quantTick;
+        _lastProcessedFrame = Time.frameCount;
 
         LogNpcCombatSplitAnalytics(
             quantTick,
@@ -157,7 +160,8 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
         Bootstrapper.Instance.LogPerformance(
             DebugLogPerformanceArea.GameTimeLoadAnalytics,
             "[NPC_COMBAT_SPLIT]" +
-            " Tick=" + quantTick +
+            " UnityFrame=" + Time.frameCount +
+            " | Tick=" + quantTick +
             " | TotalMs=" + totalMs.ToString("F2") +
             " | CurrentSystemMs=" + currentSystemMs.ToString("F2") +
             " | OffscreenMs=" + offscreenMs.ToString("F2") +

@@ -121,7 +121,8 @@ public sealed class S05_05_NpcDebugVerificationTests
         string debugControllerText =
             ReadProjectFile("Assets/_Project/Scripts/Core/Bootstrap/DebugController2A.cs");
 
-        Assert.That(runtimeText, Does.Contain("Debug.LogWarning"));
+        Assert.That(runtimeText, Does.Contain("AppLog.Warning(DebugLogChannel.NpcMovement,"),
+            "Invalid NPC commands must produce warnings through the application logger.");
         Assert.That(runtimeText, Does.Contain("RuntimeNpcId is empty"));
         Assert.That(runtimeText, Does.Contain("NPC not found"));
 

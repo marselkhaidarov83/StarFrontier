@@ -24,4 +24,5 @@ MonoBehaviour:
   icon: {fileID: 0}
   allySpawnRules:
   - {fileID: 11400000, guid: 7e5034cfc14c441829bf3d9b9c8337f4, type: 2}
+  invasionSpawnRuleSet: {fileID: 0}
   enemyGroupSpawnRuleEntries: []

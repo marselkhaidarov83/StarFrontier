@@ -30,7 +30,7 @@ public class StarSystemConfig : BaseConfig
     [SerializeField] private Vector2 mapPosition;
 
     [Header("Npc")]
-    [Tooltip("Правило населения системы союзниками и врагами для обычной или дружественной системы.")]
+    [Tooltip("Правила союзной популяции. Группы вторжения назначаются отдельным набором в профиле.")]
     [SerializeField] private SystemPopulationRule systemPopulationRule;
     [Tooltip("Точки появления неигровых кораблей в системе.")]
     [SerializeField] private SystemNpcSpawnPointConfig npcSpawnPoints;
@@ -66,4 +66,6 @@ public class StarSystemConfig : BaseConfig
     public System.Collections.Generic.List<RouteConfig> Routes => routes;
     public StationConfig Station => station;
     public EnemySpawnRuleSetConfig EnemySpawnRuleSet => enemySpawnRuleSet;
+    public InvasionSpawnRuleSetConfig InvasionSpawnRuleSet =>
+        systemPopulationRule != null ? systemPopulationRule.InvasionSpawnRuleSet : null;
 }

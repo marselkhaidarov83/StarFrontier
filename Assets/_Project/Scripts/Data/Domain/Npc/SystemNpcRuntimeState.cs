@@ -43,6 +43,10 @@ public sealed class SystemNpcRuntimeState
     public int TickMovementDirectionTick = -1;
     public bool TickMovementArrived;
 
+    // Runtime-only movement credit in game ticks, independent of scheduling/frame rate.
+    [NonSerialized] public double MovementAccountedThroughTicks = -1d;
+    [NonSerialized] public double PendingMovementTicks;
+
     [Header("Travel")]
     public SystemNpcTravelState TravelState;
     public float TravelProgress01;

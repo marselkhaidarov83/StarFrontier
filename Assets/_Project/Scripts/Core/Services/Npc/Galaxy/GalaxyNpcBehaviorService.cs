@@ -10,8 +10,8 @@ public sealed class GalaxyNpcBehaviorService : CustomService, IGalaxyNpcBehavior
     private const double GalaxyBehaviorPerfLogThresholdMs = 1.0;
     private const double SystemBehaviorPerfLogThresholdMs = 1.0;
 
-    //Параметр, чтобы по 1 тику логика запускалась только 1 раз
-    private int _prevTick = 0;
+    private int _lastProcessedFrame = int.MinValue;
+    private int _lastCurrentSystemQuantTick = int.MinValue;
 
     private readonly IGalaxyNpcSimulationScheduleService _simulationScheduleService;
     private readonly ISystemNpcBehaviorService _systemNpcBehaviorService;
@@ -33,7 +33,7 @@ public sealed class GalaxyNpcBehaviorService : CustomService, IGalaxyNpcBehavior
         LastOffscreenMs = 0d;
         LastTotalMs = 0d;
 
-        if (_prevTick == quantTick)
+        if (_lastProcessedFrame == Time.frameCount)
             return;
 
         if (!_simulationScheduleService.IsInitialWarmupComplete)
@@ -48,7 +48,7 @@ public sealed class GalaxyNpcBehaviorService : CustomService, IGalaxyNpcBehavior
                 " | PrioritySourceSystemId=" +
                 _simulationScheduleService.PrioritySourceSystemId);
 
-            _prevTick = quantTick;
+            _lastProcessedFrame = Time.frameCount;
             return;
         }
 
@@ -71,7 +71,7 @@ public sealed class GalaxyNpcBehaviorService : CustomService, IGalaxyNpcBehavior
         string maxSystemId = "";
         string maxSystemName = "";
 
-        if (currentSystem != null)
+        if (currentSystem != null && _lastCurrentSystemQuantTick != quantTick)
         {
             currentSystemMs =
                 TickSystem(
@@ -83,6 +83,7 @@ public sealed class GalaxyNpcBehaviorService : CustomService, IGalaxyNpcBehavior
                     ref maxSystemId,
                     ref maxSystemName);
 
+            _lastCurrentSystemQuantTick = quantTick;
             systemsTotalMs += currentSystemMs;
             processedSystems++;
             detailedSystems++;
@@ -165,7 +166,7 @@ public sealed class GalaxyNpcBehaviorService : CustomService, IGalaxyNpcBehavior
             " | MaxSystemName=" + maxSystemName +
             " | MaxSystemMs=" + maxSystemMs.ToString("0.00"));
 
-        _prevTick = quantTick;
+        _lastProcessedFrame = Time.frameCount;
     }
 
     private void LogNpcBehaviorSplitAnalytics(
@@ -196,7 +197,8 @@ public sealed class GalaxyNpcBehaviorService : CustomService, IGalaxyNpcBehavior
         Bootstrapper.Instance.LogPerformance(
             DebugLogPerformanceArea.GameTimeLoadAnalytics,
             "[NPC_BEHAVIOR_SPLIT]" +
-            " Tick=" + quantTick +
+            " UnityFrame=" + Time.frameCount +
+            " | Tick=" + quantTick +
             " | TotalMs=" + totalMs.ToString("F2") +
             " | CurrentSystemMs=" + currentSystemMs.ToString("F2") +
             " | OffscreenMs=" + offscreenSystemsMs.ToString("F2") +

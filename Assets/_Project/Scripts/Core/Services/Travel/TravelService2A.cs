@@ -267,6 +267,12 @@ public sealed class TravelService2A :
     public void TryTravelToPlanet(
         string planetId)
     {
+        if (PlanetLandingRules2A.IsBlocked(_gameSessionService.State, _configService.DebugSettings))
+        {
+            _eventBus.Publish(new PlanetLandingBlockedEvent2A(planetId));
+            return;
+        }
+
         AppLog.Info(DebugLogChannel.PlayerMovement,
             "[PLANET_ARRIVAL] Phase=DirectTryTravelToPlanet | Planet=" + planetId +
             " | Frame=" + Time.frameCount +

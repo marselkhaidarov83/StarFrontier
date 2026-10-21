@@ -12,6 +12,8 @@ public class NewGameConfig : BaseConfig
     public Vector3 StartShipPosition = new Vector3(0f, -360f, -2f);
     [Tooltip("Количество кредитов у игрока при начале новой игры.")]
     public int StartCredit = 1000;
+    [Tooltip("Количество алмазов у игрока при начале обычной новой игры.")]
+    [Min(0)] public int StartDiamonds = 10;
     [Tooltip("Текущий запас топлива у стартового корабля.")]
     public int CurrentFuel = 100;
     [Tooltip("Максимальный запас топлива у стартового корабля.")]

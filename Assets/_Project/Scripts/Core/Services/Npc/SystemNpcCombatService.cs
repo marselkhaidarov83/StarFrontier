@@ -211,6 +211,10 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         TickBeams(deltaTime);
         double beamLoopMs = EndPerfMeasureMs(beamLoopStartedAt);
 
+        long waveLoopStartedAt = BeginPerfMeasure();
+        TickWaves(deltaTime);
+        double waveLoopMs = EndPerfMeasureMs(waveLoopStartedAt);
+
         double totalMs = EndPerfMeasureMs(totalStartedAt);
 
         if (totalMs >= NpcPerfLogThresholdMs)
@@ -220,11 +224,13 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 "TotalMs=" + totalMs.ToString("F2") +
                 ", ProjectileLoopMs=" + projectileLoopMs.ToString("F2") +
                 ", BeamLoopMs=" + beamLoopMs.ToString("F2") +
+                ", WaveLoopMs=" + waveLoopMs.ToString("F2") +
                 ", ProjectilesBefore=" + projectilesBefore +
                 ", ProjectileTicks=" + projectileTickCount +
                 ", ProjectileRemoved=" + projectileRemovedCount +
                 ", ProjectilesAfter=" + _activeProjectiles.Count +
-                ", BeamsAfter=" + _activeBeams.Count);
+                ", BeamsAfter=" + _activeBeams.Count +
+                ", WavesAfter=" + _activeWaves.Count);
         }
     }
 
@@ -914,11 +920,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (target.CurrentSystemId != projectile.SystemId)
             return;
 
-        CombatDamageResult2A damageResult = _runtimeService.ApplyDamage(
-            projectile.TargetNpcId,
-            projectile.Damage,
-            killedByPlayer: projectile.ShooterType == CombatShooterType.Player,
-            damagedByPlayer: projectile.ShooterType == CombatShooterType.Player);
+        CombatDamageResult2A damageResult = ApplyNpcDamageWithDiagnostics(
+            projectile.TargetNpcId, projectile.Damage, projectile.ShooterType, projectile.ShooterNpcId,
+            projectile.WeaponConfigId, "Projectile", projectile.ProjectileId);
 
         if (damageResult.AppliedDamage <= 0)
             return;
@@ -931,6 +935,81 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             projectile.StartPosition);
 
         didHit = true;
+    }
+
+    private CombatDamageResult2A ApplyNpcDamageWithDiagnostics(
+        string targetNpcId,
+        int requestedDamage,
+        CombatShooterType shooterType,
+        string shooterNpcId,
+        string weaponConfigId,
+        string attackKind,
+        string attackId)
+    {
+        bool logDamage = Bootstrapper.Instance != null &&
+            Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.Damage);
+
+        SystemNpcRuntimeState target = null;
+        if (logDamage)
+            _runtimeService.TryGetNpc(targetNpcId, out target);
+
+        // Snapshot before damage: destruction events can change runtime state.
+        int hullBefore = target != null ? target.CurrentHull : 0;
+        int shieldBefore = target != null ? target.CurrentShield : 0;
+        bool aliveBefore = target != null && target.IsAlive;
+        string systemId = target != null ? target.CurrentSystemId : string.Empty;
+        string configId = target != null ? target.ConfigId : string.Empty;
+        string targetType = target != null ? target.NpcType.ToString() : "Missing";
+        string targetRole = target != null ? target.AllyRole.ToString() : "Missing";
+        bool onPlanetBefore = target != null && target.IsOnPlanet;
+        string travelState = target != null ? target.TravelState.ToString() : "Missing";
+
+        CombatDamageResult2A result = _runtimeService.ApplyDamage(
+            targetNpcId,
+            requestedDamage,
+            killedByPlayer: shooterType == CombatShooterType.Player,
+            damagedByPlayer: shooterType == CombatShooterType.Player);
+
+        if (!logDamage)
+            return result;
+
+        int tick = -1;
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet(out IGameTimeService gameTime))
+            tick = gameTime.CurrentQuantTick;
+
+        bool applied = result.AppliedDamage > 0;
+        string reason = target == null ? "TargetMissing" :
+            !aliveBefore ? "TargetAlreadyDead" : applied ? "Applied" : "NoDamage";
+
+        AppLog.Info(DebugLogChannel.Damage,
+            "[NPC_DAMAGE_RESULT]" +
+            " | Tick=" + tick +
+            " | SystemId=" + systemId +
+            " | AttackKind=" + attackKind +
+            " | AttackId=" + attackId +
+            " | WeaponConfigId=" + weaponConfigId +
+            " | ShooterType=" + shooterType +
+            " | ShooterNpcId=" + shooterNpcId +
+            " | TargetNpcId=" + targetNpcId +
+            " | TargetConfigId=" + configId +
+            " | TargetType=" + targetType +
+            " | TargetRole=" + targetRole +
+            " | IsOnPlanetBefore=" + onPlanetBefore +
+            " | TravelStateBefore=" + travelState +
+            " | RequestedDamage=" + requestedDamage +
+            " | AppliedDamage=" + result.AppliedDamage +
+            " | ShieldDamage=" + result.ShieldDamage +
+            " | HullDamage=" + result.HullDamage +
+            " | ShieldBefore=" + shieldBefore +
+            " | ShieldAfter=" + (applied ? result.CurrentShield : shieldBefore) +
+            " | HullBefore=" + hullBefore +
+            " | HullAfter=" + (applied ? result.CurrentHull : hullBefore) +
+            " | AliveBefore=" + aliveBefore +
+            " | AliveAfter=" + (applied ? !result.IsDestroyed : aliveBefore) +
+            " | DestroyedByThisHit=" + (applied && result.IsDestroyed) +
+            " | Reason=" + reason);
+
+        return result;
     }
 
     private GalaxyCombatTarget FindTarget(SystemNpcRuntimeState shooter)
@@ -1601,11 +1680,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 " | RadiusMinusDistance=" + (wave.CurrentRadius - distance).ToString("F2") +
                 " | Progress01=" + wave.Progress01.ToString("F3"));
 
-            CombatDamageResult2A damageResult = _runtimeService.ApplyDamage(
-                candidate.RuntimeNpcId,
-                wave.Damage,
-                killedByPlayer: wave.ShooterType == CombatShooterType.Player,
-                damagedByPlayer: wave.ShooterType == CombatShooterType.Player);
+            CombatDamageResult2A damageResult = ApplyNpcDamageWithDiagnostics(
+                candidate.RuntimeNpcId, wave.Damage, wave.ShooterType, wave.ShooterNpcId,
+                wave.WeaponConfigId, "Wave", wave.WaveId);
 
             PublishDamagePopup(
                 CombatTargetType.Npc,
@@ -2628,11 +2705,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (beam.TargetType != CombatTargetType.Npc)
             return;
 
-        CombatDamageResult2A npcDamageResult = _runtimeService.ApplyDamage(
-            beam.TargetNpcId,
-            damage,
-            killedByPlayer: beam.ShooterType == CombatShooterType.Player,
-            damagedByPlayer: beam.ShooterType == CombatShooterType.Player);
+        CombatDamageResult2A npcDamageResult = ApplyNpcDamageWithDiagnostics(
+            beam.TargetNpcId, damage, beam.ShooterType, beam.ShooterNpcId,
+            beam.WeaponConfigId, "Beam", beam.BeamId);
 
         PublishDamagePopup(
             CombatTargetType.Npc,

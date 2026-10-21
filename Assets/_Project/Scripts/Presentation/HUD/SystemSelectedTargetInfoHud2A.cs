@@ -3,6 +3,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class SystemSelectedTargetInfoHud2A :
@@ -14,6 +15,11 @@ public sealed class SystemSelectedTargetInfoHud2A :
     [SerializeField] private RectTransform panelRect;
     [SerializeField] private TMP_Text headerText;
     [SerializeField] private TMP_Text rowsText;
+
+    [Header("Target Header")]
+    [SerializeField] private Image headerIcon;
+    [SerializeField] private Color allyHeaderColor = new Color32(88, 187, 246, 255);
+    [SerializeField] private Color enemyHeaderColor = new Color32(255, 80, 80, 255);
 
     [Header("Layout")]
     [SerializeField] private float headerHeight = 48f;
@@ -288,7 +294,7 @@ public sealed class SystemSelectedTargetInfoHud2A :
         if (npc == null || !npc.IsAlive)
             return false;
 
-        SetHeader(BuildNpcDisplayName(npc));
+        SetHeader(BuildNpcDisplayName(npc), npc.IsHostileToPlayer, ResolveNpcIcon(npc));
 
         _builder.Clear();
         int rows = 0;
@@ -312,7 +318,7 @@ public sealed class SystemSelectedTargetInfoHud2A :
         if (enemy == null || !enemy.IsAlive)
             return false;
 
-        SetHeader(BuildEnemyDisplayName(enemy));
+        SetHeader(BuildEnemyDisplayName(enemy), true, ResolveEnemyIcon(enemy));
 
         _builder.Clear();
         int rows = 0;
@@ -434,15 +440,83 @@ public sealed class SystemSelectedTargetInfoHud2A :
             .AppendLine();
     }
 
-    private void SetHeader(string text)
+    private Sprite ResolveNpcIcon(SystemNpcRuntimeState npc)
     {
+        if (_configService == null)
+            return null;
+
+        if (npc.NpcType == SystemNpcType.Enemy)
+        {
+            EnemyConfig config = _configService.GetEnemyConfigById(npc.ConfigId);
+            return config != null ? (config.CombatSprite != null ? config.CombatSprite : config.Icon) : null;
+        }
+
+        if (npc.NpcType == SystemNpcType.Pirate)
+        {
+            PirateConfig config = _configService.GetPirateConfigById(npc.ConfigId);
+            return config != null ? (config.CombatSprite != null ? config.CombatSprite : config.Icon) : null;
+        }
+
+        AllyConfig ally = _configService.GetAllyConfigById(npc.ConfigId);
+        return ally != null ? (ally.MapSprite != null ? ally.MapSprite : ally.Icon) : null;
+    }
+
+    private Sprite ResolveEnemyIcon(SystemEnemyRuntimeState enemy)
+    {
+        EnemyConfig config = enemy.EnemyConfig;
+        if (config == null && _configService != null)
+            config = _configService.GetEnemyConfigById(enemy.EnemyConfigId);
+
+        return config != null ? (config.CombatSprite != null ? config.CombatSprite : config.Icon) : null;
+    }
+
+    private void SetHeader(string text, bool isHostile, Sprite icon)
+    {
+        if (headerIcon != null)
+        {
+            headerIcon.sprite = icon;
+            headerIcon.enabled = icon != null;
+        }
+
         if (headerText == null)
             return;
 
+        headerText.color = isHostile ? enemyHeaderColor : allyHeaderColor;
         headerText.SetText(
             string.IsNullOrWhiteSpace(text)
                 ? "ЦЕЛЬ"
                 : text.ToUpperInvariant());
+
+        LayoutHeader();
+    }
+
+    private void LayoutHeader()
+    {
+        if (panelRect == null || headerText == null)
+            return;
+
+        bool hasIcon = headerIcon != null && headerIcon.enabled;
+        float iconWidth = hasIcon ? headerIcon.rectTransform.rect.width : 0f;
+        float iconGap = hasIcon ? 8f : 0f;
+        float groupOffset = (iconWidth + iconGap) * 0.5f;
+        float availableWidth = Mathf.Max(0f, panelRect.rect.width - 16f - iconWidth - iconGap);
+        float textWidth = Mathf.Min(headerText.preferredWidth, availableWidth);
+
+        RectTransform textRect = headerText.rectTransform;
+        Vector2 textSize = textRect.sizeDelta;
+        textSize.x = textWidth - panelRect.rect.width;
+        textRect.sizeDelta = textSize;
+        Vector2 textPosition = textRect.anchoredPosition;
+        textPosition.x = groupOffset;
+        textRect.anchoredPosition = textPosition;
+
+        if (!hasIcon)
+            return;
+
+        Vector2 iconPosition = headerIcon.rectTransform.anchoredPosition;
+        iconPosition.x = panelRect.rect.width * 0.5f + groupOffset
+            - textWidth * 0.5f - iconGap - iconWidth * 0.5f;
+        headerIcon.rectTransform.anchoredPosition = iconPosition;
     }
 
     private void SetRowsText()
@@ -599,6 +673,9 @@ public sealed class SystemSelectedTargetInfoHud2A :
                 .transform
                 .Find("HeaderText")
                 ?.GetComponent<TMP_Text>();
+
+        if (headerIcon == null && panelRoot != null)
+            headerIcon = panelRoot.transform.Find("HeaderIcon")?.GetComponent<Image>();
 
         if (rowsText == null && panelRoot != null)
             rowsText = panelRoot

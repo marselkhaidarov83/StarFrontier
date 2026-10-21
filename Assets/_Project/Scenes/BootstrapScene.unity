@@ -951,10 +951,12 @@ MonoBehaviour:
   mobileTestFuelCapacity: 100
   mobileTestCurrentFuel: 0
   mobileTestCredits: 9999
+  mobileTestDiamonds: 1000
   mobileTestGodMode: 1
   mobileTestUnlockedSectorCount: 5
   mobileTestAlliedSectorCount: 2
   mobileTestStarterShip: {fileID: 11400000, guid: 4c2a2051227654d3482411204af5b8ae, type: 2}
+  mobileTestBlockEnemyPlanetLanding: 0
   debugSpawnOnlyInCurrentSystem: 0
   stopAutomaticAllySpawns: 0
   stopAutomaticEnemySpawns: 0
@@ -962,6 +964,8 @@ MonoBehaviour:
   debugAutomaticSpawnIntervalSeconds: 10
   overrideNpcGalaxyLevel: 1
   debugNpcGalaxyLevel: 3
+  overrideEnemyGalaxyLevel: 1
+  debugEnemyGalaxyLevel: 3
   stopAutomaticInvasions: 0
   overrideAutomaticInvasionSchedule: 1
   debugAutomaticInvasionPeriodSeconds: 30

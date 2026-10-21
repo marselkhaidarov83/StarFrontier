@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92c10b1540fb4c96b030d849710d2c5a, type: 3}
+  m_Name: invasionSpawnRules_01
+  m_EditorClassIdentifier: Data::InvasionSpawnRuleSetConfig
+  id: invasion_spawn_rules_01
+  displayName: Invasion groups
+  description: Dedicated invasion groups; never used by regular population.
+  icon: {fileID: 0}
+  entries:
+  - enemyGroupSpawnRule: {fileID: 11400000, guid: 93c1621b1cc9b4600bb324c1db023873, type: 2}
+    weight: 1
+  - enemyGroupSpawnRule: {fileID: 11400000, guid: bcf1c9904eefc4df4bfb784f169fe4c6, type: 2}
+    weight: 1
+  - enemyGroupSpawnRule: {fileID: 11400000, guid: b3cffafcfa21a48e59df05721bc90b66, type: 2}
+    weight: 1

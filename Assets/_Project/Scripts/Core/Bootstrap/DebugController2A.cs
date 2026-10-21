@@ -641,20 +641,20 @@ public sealed class DebugController2A : CustomMonoBehaviour
             return false;
         }
 
-        if (targetSystem.SystemPopulationRule == null)
+        if (targetSystem.InvasionSpawnRuleSet == null)
         {
-            LogWarDebug("Candidate scan failed: SystemPopulationRule is null. Target=" + targetSystem.Id);
+            LogWarDebug("Candidate scan failed: InvasionSpawnRuleSet is null. Target=" + targetSystem.Id);
             return false;
         }
 
-        if (targetSystem.SystemPopulationRule.EnemyGroupSpawnRuleEntries == null)
+        if (targetSystem.InvasionSpawnRuleSet.Entries == null)
         {
             LogWarDebug("Candidate scan failed: EnemyGroupSpawnRuleEntries is null. Target=" + targetSystem.Id);
             return false;
         }
 
         SystemPopulationEnemyGroupRuleEntry[] entries =
-            targetSystem.SystemPopulationRule.EnemyGroupSpawnRuleEntries;
+            targetSystem.InvasionSpawnRuleSet.Entries;
 
         LogWarDebug(
             "Candidate scan started. " +
@@ -898,9 +898,9 @@ public sealed class DebugController2A : CustomMonoBehaviour
     private int GetCurrentGalaxyLevel(IGameSessionService gameSessionService)
     {
         if (Bootstrapper.Instance != null &&
-            Bootstrapper.Instance.OverrideNpcGalaxyLevel)
+            Bootstrapper.Instance.OverrideEnemyGalaxyLevel)
         {
-            return Bootstrapper.Instance.DebugNpcGalaxyLevel;
+            return Bootstrapper.Instance.DebugEnemyGalaxyLevel;
         }
 
         if (gameSessionService == null ||

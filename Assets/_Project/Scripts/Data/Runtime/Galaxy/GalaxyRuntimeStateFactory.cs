@@ -65,8 +65,8 @@ public static class GalaxyRuntimeStateFactory
                 StarSystemRuntimeState systemState = new StarSystemRuntimeState
                 {
                     SystemId = systemConfig.Id,
-                    // IsDiscovered = isDiscoveredAtStart,
-                    IsDiscovered = true,
+                    IsDiscovered = systemConfig.IsStartSystem ||
+                        (mobileTestMode ? sectorState.IsUnlocked : !systemConfig.IsHiddenAtStart),
                     IsVisited = systemConfig.IsStartSystem,
                     DevelopmentLevel = 1,
                     DangerLevel = 0,

@@ -6,64 +6,42 @@ using UnityEngine;
 public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
 {
     [Test]
-    public void EnemyGroupSpawnRule_PicksOnlyEnemiesWithExactGalaxyLevel()
+    public void EnemyGroupSpawnRule_UsesExactGalaxyLevelEntryAndPreservesConfiguredEnemyLevels()
     {
-        EnemyGroupSpawnRuleConfig rule =
-            ScriptableObject.CreateInstance<EnemyGroupSpawnRuleConfig>();
+        var rule = ScriptableObject.CreateInstance<EnemyGroupSpawnRuleConfig>();
+        EnemyConfig enemyLevel3 = CreateEnemyConfigWithLevel(3);
+        EnemyConfig enemyLevel4 = CreateEnemyConfigWithLevel(4);
+        try
+        {
+            EnemyGroupEntryConfig lowerLevelMember = CreateEnemyGroupEntry(enemyLevel3, 1, 2);
+            EnemyGroupEntryConfig higherLevelMember = CreateEnemyGroupEntry(enemyLevel4, 2, 3);
+            EnemyGroupSpawnOptionConfig configuredGroup = CreateEnemyGroupOption(
+                1, lowerLevelMember, higherLevelMember);
+            EnemyGroupSpawnLevelEntryConfig otherLevelEntry = CreateEnemyGroupLevelEntry(
+                3, CreateEnemyGroupOption(100, CreateEnemyGroupEntry(enemyLevel3, 9, 9)));
+            EnemyGroupSpawnLevelEntryConfig requestedLevelEntry = CreateEnemyGroupLevelEntry(
+                4, configuredGroup);
 
-        EnemyConfig enemyLevel3 =
-            CreateEnemyConfigWithLevel(3);
+            SetPrivateField(rule, "levelEntries", new[] { otherLevelEntry, requestedLevelEntry });
 
-        EnemyConfig enemyLevel4 =
-            CreateEnemyConfigWithLevel(4);
+            IReadOnlyList<EnemyGroupEntryConfig> pickedEnemies = rule.PickEnemiesForGalaxyLevel(4);
 
-        EnemyGroupEntryConfig wrongEntry =
-            CreateEnemyGroupEntry(
-                enemyLevel3,
-                1,
-                1);
-
-        EnemyGroupEntryConfig strictEntry =
-            CreateEnemyGroupEntry(
-                enemyLevel4,
-                1,
-                1);
-
-        EnemyGroupSpawnOptionConfig wrongGroup =
-            CreateEnemyGroupOption(
-                100,
-                wrongEntry);
-
-        EnemyGroupSpawnOptionConfig strictGroup =
-            CreateEnemyGroupOption(
-                1,
-                strictEntry);
-
-        EnemyGroupSpawnLevelEntryConfig levelEntry =
-            CreateEnemyGroupLevelEntry(
-                4,
-                wrongGroup,
-                strictGroup);
-
-        SetPrivateField(
-            rule,
-            "levelEntries",
-            new[]
-            {
-                levelEntry
-            });
-
-        IReadOnlyList<EnemyGroupEntryConfig> pickedEnemies =
-            rule.PickEnemiesForGalaxyLevel(4);
-
-        Assert.That(pickedEnemies, Is.Not.Null);
-        Assert.That(pickedEnemies.Count, Is.EqualTo(1));
-        Assert.That(pickedEnemies[0].EnemyConfig, Is.EqualTo(enemyLevel4));
-        Assert.That(pickedEnemies[0].EnemyConfig.Level, Is.EqualTo(4));
-
-        Object.DestroyImmediate(enemyLevel3);
-        Object.DestroyImmediate(enemyLevel4);
-        Object.DestroyImmediate(rule);
+            Assert.That(rule.GetEntryForGalaxyLevel(4), Is.SameAs(requestedLevelEntry));
+            Assert.That(pickedEnemies, Is.Not.Null);
+            Assert.That(pickedEnemies.Count, Is.EqualTo(2));
+            Assert.That(pickedEnemies[0], Is.SameAs(lowerLevelMember));
+            Assert.That(pickedEnemies[1], Is.SameAs(higherLevelMember));
+            Assert.That(pickedEnemies[0].EnemyConfig.Level, Is.EqualTo(3));
+            Assert.That(pickedEnemies[1].EnemyConfig.Level, Is.EqualTo(4));
+            Assert.That(rule.HasValidEnemiesForGalaxyLevel(4), Is.True);
+            Assert.That(configuredGroup.Enemies.Count, Is.EqualTo(2));
+        }
+        finally
+        {
+            Object.DestroyImmediate(enemyLevel3);
+            Object.DestroyImmediate(enemyLevel4);
+            Object.DestroyImmediate(rule);
+        }
     }
 
     [Test]
@@ -88,7 +66,7 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
 
         EnemyGroupSpawnLevelEntryConfig levelEntry =
             CreateEnemyGroupLevelEntry(
-                4,
+                3,
                 wrongGroup);
 
         SetPrivateField(
@@ -355,7 +333,10 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
         Assert.That(typeof(IEnemyFactionService).GetMethod("IsFrontierSystem"), Is.Not.Null);
 
         Assert.That(typeof(IInvasionService).GetMethod("GetActiveInvasionCount"), Is.Not.Null);
-        Assert.That(typeof(IInvasionService).GetMethod("CanStartInvasion"), Is.Not.Null);
+        Assert.That(typeof(IInvasionService).GetMethod("CanStartInvasion",
+            new[] { typeof(string) }), Is.Not.Null);
+        Assert.That(typeof(IInvasionService).GetMethod("CanStartInvasion",
+            new[] { typeof(string), typeof(int) }), Is.Not.Null);
 
         Assert.That(typeof(IInvasionService).GetMethod("MarkSystemThreat"), Is.Not.Null);
 
@@ -365,10 +346,28 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
         Assert.That(typeof(IEnemyFactionService).GetMethod("RegisterInvasion"), Is.Not.Null);
 
         Assert.That(typeof(IEnemySpawnService).GetMethod("TrySpawnSystemGuardGroup"), Is.Not.Null);
-        Assert.That(typeof(IEnemySpawnService).GetMethod("TrySpawnInvasionGroup"), Is.Not.Null);
+        Assert.That(typeof(IEnemySpawnService).GetMethod("TrySpawnInvasionGroup", new[]
+        {
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(string), typeof(EnemyGroupState).MakeByRefType()
+        }), Is.Not.Null);
+        Assert.That(typeof(IEnemySpawnService).GetMethod("TrySpawnInvasionGroup", new[]
+        {
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(string), typeof(string), typeof(EnemyGroupState).MakeByRefType()
+        }), Is.Not.Null);
         Assert.That(typeof(IEnemySpawnService).GetMethod("MarkEnemyGroupDestroyed"), Is.Not.Null);
 
-        Assert.That(typeof(IInvasionService).GetMethod("TryStartInvasion"), Is.Not.Null);
+        Assert.That(typeof(IInvasionService).GetMethod("TryStartInvasion", new[]
+        {
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(string), typeof(int), typeof(InvasionState).MakeByRefType()
+        }), Is.Not.Null);
+        Assert.That(typeof(IInvasionService).GetMethod("TryStartInvasion", new[]
+        {
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(string), typeof(int), typeof(int), typeof(InvasionState).MakeByRefType()
+        }), Is.Not.Null);
         Assert.That(typeof(IInvasionService).GetMethod("UpdateInvasions"), Is.Not.Null);
         Assert.That(typeof(IInvasionService).GetMethod("ResolveInvasion"), Is.Not.Null);
         Assert.That(typeof(IInvasionService).GetMethod("CancelInvasion"), Is.Not.Null);
@@ -1000,7 +999,7 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
     }
 
     [Test]
-    public void GalaxyRuntimeState_OfflineCatchUp_ResolvesExpiredActiveInvasion()
+    public void GalaxyRuntimeState_OfflineCatchUp_UpdatesTimingWithoutAutomaticCapture()
     {
         GalaxyRuntimeState galaxyState =
             new GalaxyRuntimeState();
@@ -1035,8 +1034,12 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
             galaxyState.ProcessOfflineWarCatchUp(5);
 
         Assert.That(changedCount, Is.GreaterThanOrEqualTo(1));
-        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
-        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(galaxyState.Invasions[0].LastUpdatedTick, Is.EqualTo(5));
+        Assert.That(galaxyState.Invasions[0].NextUpdateTick, Is.EqualTo(6));
+        Assert.That(galaxyState.EnemyFactions, Is.Empty,
+            "Offline time must not transfer ownership without restored combat state.");
     }
 
     [Test]
@@ -1114,14 +1117,20 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
                 ResolveAtTick = 3
             });
 
+        Assert.That(galaxyState.CanCaptureSystemWithoutHopelessCollapse("system_last"), Is.False);
+
         galaxyState.ProcessOfflineWarCatchUp(3);
 
-        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
-        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(galaxyState.CanCaptureSystemWithoutHopelessCollapse("system_last"), Is.False);
+        Assert.That(galaxyState.EnemyFactions, Is.Empty);
+        Assert.That(galaxyState.Invasions[0].LastUpdatedTick, Is.EqualTo(3));
+        Assert.That(galaxyState.Invasions[0].NextUpdateTick, Is.EqualTo(4));
     }
 
     [Test]
-    public void T08_MultiSystemInvasion_ResolvesDifferentTargetsWithoutStateOverwrite()
+    public void T08_MultiSystemInvasion_OfflineCatchUpPreservesIndependentActiveInvasions()
     {
         GalaxyRuntimeState galaxyState =
             new GalaxyRuntimeState();
@@ -1174,11 +1183,21 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
             galaxyState.ProcessOfflineWarCatchUp(5);
 
         Assert.That(changedCount, Is.GreaterThanOrEqualTo(2));
-        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
-        Assert.That(galaxyState.Invasions[1].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
-        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
-        Assert.That(galaxyState.Systems[1].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(galaxyState.Invasions[1].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(galaxyState.Systems[1].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
         Assert.That(galaxyState.Systems[2].SystemStatus, Is.EqualTo(StarSystemStatus.Stable));
+        Assert.That(galaxyState.Invasions[0].TargetSystemId, Is.EqualTo("system_alpha"));
+        Assert.That(galaxyState.Invasions[0].FactionId, Is.EqualTo("ai"));
+        Assert.That(galaxyState.Invasions[1].TargetSystemId, Is.EqualTo("system_beta"));
+        Assert.That(galaxyState.Invasions[1].FactionId, Is.EqualTo("infected"));
+        foreach (InvasionState invasion in galaxyState.Invasions)
+        {
+            Assert.That(invasion.LastUpdatedTick, Is.EqualTo(5));
+            Assert.That(invasion.NextUpdateTick, Is.EqualTo(6));
+        }
+        Assert.That(galaxyState.EnemyFactions, Is.Empty);
     }
 
     [Test]
@@ -1270,7 +1289,7 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
     }
 
     [Test]
-    public void T08_AntiHopelessness_LastRecoverableSystemStaysRecoveryReady()
+    public void T08_AntiHopelessness_OfflineInvasionRemainsActiveWithoutCaptureEvidence()
     {
         GalaxyRuntimeState galaxyState =
             new GalaxyRuntimeState();
@@ -1295,8 +1314,8 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
 
         galaxyState.ProcessOfflineWarCatchUp(10);
 
-        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
-        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(galaxyState.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(galaxyState.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
         Assert.That(galaxyState.CanCaptureSystemWithoutHopelessCollapse("system_last"), Is.False);
     }
 

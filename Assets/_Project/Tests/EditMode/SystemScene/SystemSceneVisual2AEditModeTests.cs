@@ -125,7 +125,6 @@ public sealed class SystemSceneVisual2AEditModeTests
 
         AssertObjectReference(root, "boundsRoot");
         AssertObjectReference(root, "markersRoot");
-        AssertObjectReference(root, "debugRoot");
 
         AssertObjectReference(root, "metaCanvas");
         AssertObjectReference(root, "systemMapHudRoot");

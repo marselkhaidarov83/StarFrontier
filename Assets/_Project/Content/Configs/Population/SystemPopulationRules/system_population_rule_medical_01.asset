@@ -22,10 +22,5 @@ MonoBehaviour:
   icon: {fileID: 0}
   allySpawnRules:
   - {fileID: 11400000, guid: d77212ae157ca44d8a3c7f57e2644034, type: 2}
-  enemyGroupSpawnRuleEntries:
-  - enemyGroupSpawnRule: {fileID: 11400000, guid: 93c1621b1cc9b4600bb324c1db023873, type: 2}
-    weight: 1
-  - enemyGroupSpawnRule: {fileID: 11400000, guid: bcf1c9904eefc4df4bfb784f169fe4c6, type: 2}
-    weight: 1
-  - enemyGroupSpawnRule: {fileID: 11400000, guid: b3cffafcfa21a48e59df05721bc90b66, type: 2}
-    weight: 1
+  invasionSpawnRuleSet: {fileID: 11400000, guid: 9c5e82de1d184b9cbd9e7234a133d272, type: 2}
+  enemyGroupSpawnRuleEntries: []

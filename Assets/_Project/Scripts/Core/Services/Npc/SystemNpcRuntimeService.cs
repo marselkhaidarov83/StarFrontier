@@ -31,6 +31,8 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         if (_npcByRuntimeId.ContainsKey(npc.RuntimeNpcId))
             return;
 
+        SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
+
         _npcs.Add(npc);
         _npcByRuntimeId[npc.RuntimeNpcId] = npc;
 
@@ -214,6 +216,8 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         {
             _npcs.RemoveAll(x => x.RuntimeNpcId == npc.RuntimeNpcId);
         }
+
+        SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
 
         _npcs.Add(npc);
         _npcByRuntimeId[npc.RuntimeNpcId] = npc;
@@ -551,6 +555,8 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         npc.LifeState = SystemNpcLifeState.Alive;
         npc.DestroyedAtTick = 0;
         npc.NextRespawnTick = 0;
+
+        SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
 
         npc.CurrentHull = npc.MaxHull;
         npc.CurrentShield = npc.MaxShield;

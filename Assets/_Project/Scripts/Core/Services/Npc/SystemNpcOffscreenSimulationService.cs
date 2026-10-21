@@ -66,6 +66,8 @@ public sealed class SystemNpcOffscreenSimulationService :
     private readonly IGameSessionService _gameSessionService;
     private readonly ISystemNpcRuntimeService _runtimeService;
     private readonly ISystemNpcBehaviorService _behaviorService;
+    // Registered after this service; resolve lazily when simulation starts.
+    private ISystemNpcMovementService _combatMovementService;
     private readonly IOrbitalMotionService _orbitalMotionService;
     private readonly SimpleEventBus _eventBus;
     private readonly Dictionary<string, int> _completionCursors = new();
@@ -122,6 +124,42 @@ public sealed class SystemNpcOffscreenSimulationService :
 
         if (hasActiveCombat)
         {
+            long combatMovementStartedAt = BeginPerfMeasure();
+
+            if (_combatMovementService == null)
+            {
+                _combatMovementService = Bootstrapper.Instance.ServiceRegistry
+                    .Get<ISystemNpcMovementService>();
+            }
+
+            // Analytic travel does not handle EngageEnemies. Use the existing route
+            // movement for every ship in this system instead of freezing the system.
+            // GalaxyNpcMovementService calls this when this system is selected for the frame.
+            if (forceUnlimitedCompletion)
+            {
+                _combatMovementService.RunInitialWarmupRoutes(starSystem, currentTick);
+            }
+            else
+            {
+                // The detailed mover accrues elapsed game time separately for each NPC.
+                _combatMovementService.Tick(starSystem, GameTimeState.SecondsPerDay, currentTick);
+            }
+
+            // Re-enter analytic travel from the new position after combat ends,
+            // rather than completing an old deadline left from before combat.
+            IReadOnlyList<SystemNpcRuntimeState> movedNpcs =
+                _runtimeService.GetAliveNpcsInSystem(starSystem.Id);
+            for (int i = 0; i < movedNpcs.Count; i++)
+            {
+                SystemNpcRuntimeState movedNpc = movedNpcs[i];
+                if (movedNpc != null && IsAnalyticMovementBehavior(movedNpc.CurrentBehavior))
+                {
+                    movedNpc.TravelStartTick = 0;
+                    movedNpc.TravelEndTick = 0;
+                }
+            }
+
+            double combatMovementMs = EndPerfMeasureMs(combatMovementStartedAt);
             double totalMs = EndPerfMeasureMs(totalStartedAt);
 
             LogOffscreenMovementDetailIfNeeded(
@@ -133,19 +171,20 @@ public sealed class SystemNpcOffscreenSimulationService :
                 activeCombatMs,
                 true,
                 null,
-                0d);
+                combatMovementMs);
 
             if (ShouldLogNpcMovementPerf(totalMs, npcCount))
             {
                 LogNpcMovementPerf(
                     totalMs,
                     npcCount,
-                    "[SystemNpcOffscreenSimulationService] Skipped active combat" +
+                    "[SystemNpcOffscreenSimulationService] Updated movement during active combat" +
                     " | SystemId=" + starSystem.Id +
                     " | System=" + starSystem.DisplayName +
                     " | Npcs=" + npcCount +
                     " | GetNpcsMs=" + getNpcsMs.ToString("F2") +
-                    " | HasActiveCombatMs=" + activeCombatMs.ToString("F2"));
+                    " | HasActiveCombatMs=" + activeCombatMs.ToString("F2") +
+                    " | CombatMovementMs=" + combatMovementMs.ToString("F2"));
             }
 
             return;
@@ -308,7 +347,7 @@ public sealed class SystemNpcOffscreenSimulationService :
         int npcCount,
         double getNpcsMs,
         double activeCombatMs,
-        bool skippedByActiveCombat,
+        bool usedDetailedCombatMovement,
         OffscreenMovementTickStats stats,
         double loopMs)
     {
@@ -340,7 +379,7 @@ public sealed class SystemNpcOffscreenSimulationService :
             " | System=" + systemName +
             " | TotalMs=" + totalMs.ToString("F2") +
             " | Npcs=" + npcCount +
-            " | SkippedByActiveCombat=" + skippedByActiveCombat +
+            " | UsedDetailedCombatMovement=" + usedDetailedCombatMovement +
             " | GetNpcsMs=" + getNpcsMs.ToString("F2") +
             " | HasActiveCombatMs=" + activeCombatMs.ToString("F2") +
             " | LoopMs=" + loopMs.ToString("F2") +
@@ -425,6 +464,23 @@ public sealed class SystemNpcOffscreenSimulationService :
      int currentTick,
      OffscreenMovementTickStats stats)
     {
+        if (!stats.RuntimeLimitsEnabled)
+        {
+            // Loading/warmup may prepare a route, but must not spend game time.
+            if (npc.HasActiveBehavior && IsAnalyticMovementBehavior(npc.CurrentBehavior) &&
+                npc.TravelEndTick <= 0)
+                InitializeAnalyticTravel(npc, currentTick, stats);
+            return;
+        }
+
+        if (!IsAnalyticMovementBehavior(npc.CurrentBehavior))
+        {
+            SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
+            return;
+        }
+
+        SystemNpcMovementTime2A.Accrue(npc, SystemNpcMovementTime2A.Now);
+
         switch (npc.CurrentBehavior)
         {
             case SystemNpcBehaviorType.PlanetToPlanetTravel:
@@ -455,10 +511,45 @@ public sealed class SystemNpcOffscreenSimulationService :
             InitializeAnalyticTravel(npc, currentTick, stats);
 
             stats.InitializeMs += EndPerfMeasureMs(initializeStartedAt);
-            return;
         }
 
-        if (currentTick < npc.TravelEndTick)
+        if (npc.TravelEndTick <= 0)
+            return;
+
+        float distancePerTick = Mathf.Max(0f, npc.Speed) * GetSpeedMultiplier();
+        float distanceRemaining = Vector3.Distance(npc.CurrentPosition, npc.TargetPosition);
+        float distanceToMove = (float)System.Math.Min(
+            distanceRemaining, npc.PendingMovementTicks * distancePerTick);
+        if (distanceToMove > 0f && distancePerTick > 0f)
+        {
+            Vector3 direction = (npc.TargetPosition - npc.CurrentPosition).normalized;
+            if (npc.IsOnPlanet || npc.IsWaitingForInitialRouteBuild)
+            {
+                npc.IsOnPlanet = false;
+                npc.CurrentPlanetId = null;
+                npc.IsWaitingForInitialRouteBuild = false;
+                npc.ReleaseFromPlanetAfterInitialRouteBuild = false;
+                npc.InitialRouteBuildPlanetId = null;
+                _eventBus.Publish(new SystemNpcTravelStateChangedEvent(
+                    npc.RuntimeNpcId, npc, npc.TravelState, npc.TargetSystemId));
+                stats.PublishedEvents++;
+            }
+            npc.CurrentPosition = Vector3.MoveTowards(
+                npc.CurrentPosition, npc.TargetPosition, distanceToMove);
+            npc.FacingDirection = direction;
+            npc.TickMovementDirection = direction;
+            npc.TickMovementDirectionTick = currentTick;
+            SystemNpcMovementTime2A.Consume(npc, distanceToMove / (double)distancePerTick);
+            float totalDistance = Vector3.Distance(npc.StartPosition, npc.TargetPosition);
+            npc.TravelProgress01 = totalDistance > 0f
+                ? Mathf.Clamp01(1f - Vector3.Distance(npc.CurrentPosition, npc.TargetPosition) / totalDistance)
+                : 1f;
+            _eventBus.Publish(new SystemNpcPositionChangedEvent(
+                npc.RuntimeNpcId, npc.CurrentSystemId, npc.CurrentPosition));
+            stats.PublishedEvents++;
+        }
+
+        if (Vector3.Distance(npc.CurrentPosition, npc.TargetPosition) > 0.001f)
             return;
 
         if (stats.RuntimeLimitsEnabled &&
@@ -490,6 +581,7 @@ public sealed class SystemNpcOffscreenSimulationService :
 
         long completeStartedAt = BeginPerfMeasure();
 
+        SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
         CompleteAnalyticTravel(npc, currentTick, stats);
 
         double completeMs =
@@ -616,9 +708,6 @@ public sealed class SystemNpcOffscreenSimulationService :
         float speedMultiplier =
             Mathf.Max(0.01f, GetSpeedMultiplier());
 
-        float slowdown =
-            Mathf.Max(0.01f, GetOffscreenNpcTravelSlowdown());
-
         float effectiveDistancePerTick =
             speed * speedMultiplier;
 
@@ -626,7 +715,7 @@ public sealed class SystemNpcOffscreenSimulationService :
             Mathf.Max(
                 1,
                 Mathf.CeilToInt(
-                    distance / effectiveDistancePerTick * slowdown));
+                    distance / effectiveDistancePerTick));
 
         npc.TravelStartTick = currentTick;
         npc.TravelEndTick = currentTick + durationTicks;

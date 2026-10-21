@@ -5,7 +5,8 @@ public enum SystemCameraMode2A
     FollowShip,
     FreeLook,
     ReturningToShip,
-    CenteringOnTarget
+    CenteringOnTarget,
+    FollowNpc
 }
 
 public sealed class SystemCameraController2A : CustomMonoBehaviour
@@ -24,6 +25,8 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     private IGameSessionService _gameSessionService;
     private IConfigService _configService;
     private ISystemTravelService _systemTravelService;
+    private ISystemNpcRuntimeService _npcRuntimeService;
+    private string _followedNpcId;
 
     private MapCameraController _mapCameraController;
 
@@ -300,6 +303,10 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
                     UpdateCenterOnTarget();
                     break;
 
+                case SystemCameraMode2A.FollowNpc:
+                    UpdateFollowNpc();
+                    break;
+
                 case SystemCameraMode2A.FreeLook:
                     ReclampCurrentPosition();
                     break;
@@ -320,7 +327,55 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             return;
 
         mode = SystemCameraMode2A.FreeLook;
+        _followedNpcId = null;
         _cameraVelocity = Vector3.zero;
+    }
+
+    // Follow the selected ship without changing zoom or the player's movement target.
+    public bool FocusOnNpc(string runtimeNpcId)
+    {
+        if (!_isInitialized || !_isSystemCameraActive || targetCamera == null)
+            return false;
+
+        if (_npcRuntimeService == null && Bootstrapper.Instance != null)
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out _npcRuntimeService);
+
+        _followedNpcId = runtimeNpcId;
+        if (!TryGetFollowedNpc(out _))
+        {
+            _followedNpcId = null;
+            return false;
+        }
+
+        mode = SystemCameraMode2A.FollowNpc;
+        _cameraVelocity = Vector3.zero;
+        _zoomVelocity = 0f;
+        ResolveMapCameraController();
+        _mapCameraController?.SyncTargetZoomWithCamera();
+        UpdateFollowNpc();
+        return true;
+    }
+
+    private bool TryGetFollowedNpc(out SystemNpcRuntimeState npc)
+    {
+        npc = null;
+        return _npcRuntimeService != null && !string.IsNullOrWhiteSpace(_followedNpcId) &&
+            _npcRuntimeService.TryGetNpc(_followedNpcId, out npc) && npc != null &&
+            npc.IsAlive && !npc.IsOnPlanet &&
+            !string.IsNullOrWhiteSpace(npc.CurrentSystemId) &&
+            npc.CurrentSystemId == _gameSessionService?.State?.Player?.CurrentSystemId;
+    }
+
+    private void UpdateFollowNpc()
+    {
+        if (!TryGetFollowedNpc(out SystemNpcRuntimeState npc))
+        {
+            EnterFreeLook();
+            return;
+        }
+
+        Vector3 position = npc.CurrentPosition;
+        MoveCameraTo(new Vector3(position.x, position.y, targetCamera.transform.position.z));
     }
 
     public void ReturnToShip()
@@ -334,6 +389,8 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             return;
         }
 
+        float preservedZoom = targetCamera.orthographicSize;
+
         if (!_isSystemCameraActive)
         {
             AppLog.Warning(DebugLogChannel.SystemMap,
@@ -342,24 +399,22 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
                 "Reactivating.");
 
             ActivateSystemCameraSafely();
+            ResolveMapCameraController();
+            if (_mapCameraController != null)
+                _mapCameraController.SetZoomImmediate(preservedZoom);
+            else
+                targetCamera.orthographicSize = preservedZoom;
         }
 
         ResolveMapCameraController();
 
+        _followedNpcId = null;
         mode = SystemCameraMode2A.ReturningToShip;
 
         _cameraVelocity = Vector3.zero;
         _zoomVelocity = 0f;
 
-        float targetZoom =
-            GetDefaultOrthographicSizeForCurrentSystem();
-
-        if (_mapCameraController != null)
-        {
-            _mapCameraController.SetTargetZoom(
-                targetZoom
-            );
-        }
+        _mapCameraController?.SyncTargetZoomWithCamera();
     }
 
     /// <summary>
@@ -418,6 +473,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
          * на момент нажатия и не будет следовать
          * за ней дальше.
          */
+        _followedNpcId = null;
         _centerOnTargetPosition =
             _systemTravelService
                 .GetCurrentDestinationPosition();
@@ -432,20 +488,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         _zoomVelocity =
             0f;
 
-        float targetZoom =
-            GetDefaultOrthographicSizeForCurrentSystem();
-
-        /*
-         * Не устанавливаем масштаб мгновенно.
-         * Запускаем тот же плавный переход,
-         * который используется ReturnToShip.
-         */
-        if (_mapCameraController != null)
-        {
-            _mapCameraController.SetTargetZoom(
-                targetZoom
-            );
-        }
+        _mapCameraController?.SyncTargetZoomWithCamera();
 
         return true;
     }
@@ -459,10 +502,8 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             SystemCameraMode2A.ReturningToShip)
         {
             /*
-             * Во время возврата к кораблю
-             * ручной масштаб прекращает возврат зума,
-             * но камера продолжает следовать
-             * за кораблём.
+             * При ручном зуме продолжаем следить за кораблём
+             * в обычном режиме слежения.
              */
             mode =
                 SystemCameraMode2A.FollowShip;
@@ -595,8 +636,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
     /// <summary>
     /// Плавно перемещает камеру к сохранённому
-    /// положению цели и одновременно возвращает
-    /// стандартный масштаб.
+    /// положению цели, сохраняя текущий масштаб.
     ///
     /// После завершения камера переходит
     /// в FreeLook и больше ни за чем не следует.
@@ -622,9 +662,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             );
 
         /*
-         * Ограничение пересчитывается каждый кадр,
-         * потому что во время перехода одновременно
-         * изменяется масштаб камеры.
+         * Ограничение пересчитывается для текущего масштаба камеры.
          */
         Vector3 clampedDesiredPosition =
             ClampCameraPosition(
@@ -640,43 +678,6 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         MoveCameraTo(
             smoothedPosition);
-
-        bool zoomReached;
-
-        if (_mapCameraController != null)
-        {
-            zoomReached =
-                _mapCameraController
-                    .IsZoomAtTarget(
-                        0.5f);
-        }
-        else
-        {
-            /*
-             * Запасной вариант, когда на камере
-             * отсутствует MapCameraController.
-             */
-            float targetZoom =
-                GetDefaultOrthographicSizeForCurrentSystem();
-
-            float smoothedZoom =
-                Mathf.SmoothDamp(
-                    targetCamera.orthographicSize,
-                    targetZoom,
-                    ref _zoomVelocity,
-                    cameraConfig.ReturnSmoothTime
-                );
-
-            targetCamera.orthographicSize =
-                ClampOrthographicSize(
-                    smoothedZoom);
-
-            zoomReached =
-                Mathf.Abs(
-                    targetCamera.orthographicSize -
-                    targetZoom
-                ) <= 0.5f;
-        }
 
         Vector3 actualCameraPosition =
             targetCamera.transform.position;
@@ -697,8 +698,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             remainingDistance <=
             CenterOnTargetPositionTolerance;
 
-        if (!positionReached ||
-            !zoomReached)
+        if (!positionReached)
         {
             return;
         }
@@ -748,51 +748,13 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         MoveCameraTo(smoothedPosition);
 
-        bool zoomReached;
-
-        if (_mapCameraController != null)
+        float remainingDistance = Vector2.Distance(
+            targetCamera.transform.position, clampedDesiredPosition);
+        if (remainingDistance <= CenterOnTargetPositionTolerance)
         {
-            /*
-             * MapCameraController является владельцем зума.
-             */
-            zoomReached =
-                _mapCameraController.IsZoomAtTarget(0.5f);
-        }
-        else
-        {
-            /*
-             * Запасной режим на случай отсутствия
-             * MapCameraController на объекте камеры.
-             */
-            float targetZoom =
-                GetDefaultOrthographicSizeForCurrentSystem();
-
-            float smoothedZoom =
-                Mathf.SmoothDamp(
-                    targetCamera.orthographicSize,
-                    targetZoom,
-                    ref _zoomVelocity,
-                    cameraConfig.ReturnSmoothTime
-                );
-
-            targetCamera.orthographicSize =
-                ClampOrthographicSize(smoothedZoom);
-
-            zoomReached =
-                Mathf.Abs(
-                    targetCamera.orthographicSize -
-                    targetZoom
-                ) <= 0.5f;
-        }
-
-        /*
-         * Позицию не проверяем, потому что корабль
-         * может продолжать движение.
-         */
-        if (zoomReached)
-        {
+            MoveCameraTo(clampedDesiredPosition);
             mode = SystemCameraMode2A.FollowShip;
-            _zoomVelocity = 0f;
+            _cameraVelocity = Vector3.zero;
         }
     }
 
@@ -993,6 +955,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         GalaxyEnteredEvent evt
     )
     {
+        _followedNpcId = null;
         _isSystemCameraActive = false;
 
         _cameraVelocity = Vector3.zero;
@@ -1003,6 +966,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         PlanetEnteredEvent evt
     )
     {
+        _followedNpcId = null;
         _isSystemCameraActive = false;
         mode = SystemCameraMode2A.FreeLook;
 

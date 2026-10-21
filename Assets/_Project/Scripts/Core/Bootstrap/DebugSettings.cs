@@ -22,6 +22,9 @@ public sealed class DebugSettings : MonoBehaviour
     [Tooltip("Начальное количество кредитов в тестовой новой игре.")]
     [Min(0)] public int mobileTestCredits = 999999;
 
+    [Tooltip("Начальное количество алмазов в тестовой новой игре.")]
+    [Min(0)] public int mobileTestDiamonds = 100;
+
     [Tooltip("Неуязвимость игрока при включённом Mobile Test Mode.")]
     public bool mobileTestGodMode = true;
 
@@ -33,6 +36,9 @@ public sealed class DebugSettings : MonoBehaviour
 
     [Tooltip("Корабль игрока для тестовой новой игры. Если не назначен, используется стартовый корабль из NewGameConfig.")]
     public AllyConfig mobileTestStarterShip;
+
+    [Tooltip("Запрещать посадку на планеты захваченных врагом систем в тестовой игре. В обычной игре запрет действует всегда. Вторжение в нашу систему не запрещает посадку.")]
+    public bool mobileTestBlockEnemyPlanetLanding = false;
 
     public bool IsGodModeEnabled => mobileTestMode && mobileTestGodMode;
 
@@ -52,11 +58,17 @@ public sealed class DebugSettings : MonoBehaviour
     [Tooltip("Отладочный интервал автоматического спавна NPC и врагов в секундах.")]
     [SerializeField, Min(0.1f)] private float debugAutomaticSpawnIntervalSeconds = 5f;
 
-    [Tooltip("Использовать отладочный уровень галактики вместо уровня из состояния игры.")]
-    [SerializeField] private bool overrideNpcGalaxyLevel;
+    [Tooltip("Использовать тестовый уровень только для союзников вместо уровня из состояния игры.")]
+    [SerializeField, InspectorName("Использовать тестовый уровень союзников")] private bool overrideNpcGalaxyLevel;
 
-    [Tooltip("Отладочный уровень галактики для правил спавна NPC и врагов.")]
-    [SerializeField, Range(1, 10)] private int debugNpcGalaxyLevel = 1;
+    [Tooltip("Тестовый уровень для спавна и респавна союзных NPC.")]
+    [SerializeField, Range(1, 10), InspectorName("Тестовый уровень союзников")] private int debugNpcGalaxyLevel = 1;
+
+    [Tooltip("Использовать отдельный тестовый уровень врагов, включая группы вторжений. Действует только при Mobile Test Mode.")]
+    [SerializeField, InspectorName("Использовать тестовый уровень врагов")] private bool overrideEnemyGalaxyLevel;
+
+    [Tooltip("Тестовый уровень для спавна, респавна врагов и подбора вторжений.")]
+    [SerializeField, Range(1, 10), InspectorName("Тестовый уровень врагов")] private int debugEnemyGalaxyLevel = 1;
 
     [Header("Debug / War")]
     [Tooltip("Останавливает автоматическое создание новых вторжений. Уже активные вторжения продолжают обновляться.")]
@@ -76,6 +88,8 @@ public sealed class DebugSettings : MonoBehaviour
     public bool StopAutomaticEnemySpawns => mobileTestMode && stopAutomaticEnemySpawns;
     public bool OverrideAutomaticSpawnInterval => mobileTestMode && overrideAutomaticSpawnInterval;
     public bool OverrideNpcGalaxyLevel => mobileTestMode && overrideNpcGalaxyLevel;
+    public bool OverrideEnemyGalaxyLevel => mobileTestMode && overrideEnemyGalaxyLevel;
+    public int DebugEnemyGalaxyLevel => Mathf.Clamp(debugEnemyGalaxyLevel, 1, 10);
 
     public bool StopAutomaticInvasions => mobileTestMode && stopAutomaticInvasions;
     public bool OverrideAutomaticInvasionSchedule => mobileTestMode && overrideAutomaticInvasionSchedule;

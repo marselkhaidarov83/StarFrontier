@@ -6,7 +6,9 @@ public interface ISystemNpcPopulationService
 
     void Tick(StarSystemConfig starSystem, float deltaTime);
 
-    void EnsureMinimumAlliesInSystem(StarSystemConfig starSystem);
+    void EnsureMinimumAlliesInSystem(
+        StarSystemConfig starSystem,
+        bool afterAlliedVictory = false);
 
     int ScheduleRespawn(SystemNpcRuntimeState npc, int destroyedAtTick);
 

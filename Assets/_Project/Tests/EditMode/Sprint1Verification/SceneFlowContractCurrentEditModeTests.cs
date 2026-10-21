@@ -1,10 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace StarFrontier.Tests.Sprint1
 {
@@ -23,14 +23,42 @@ namespace StarFrontier.Tests.Sprint1
                 failureMessage = error;
             };
 
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex(
-                "Scene load failed"));
+            IAppLogService previousLogService = AppLog.Service;
+            var log = new RecordingAppLogService();
+            try
+            {
+                AppLog.Configure(log);
+                AsyncOperation operation = service.LoadSceneAsync(string.Empty);
 
-            AsyncOperation operation = service.LoadSceneAsync(string.Empty);
+                Assert.That(operation, Is.Null);
+                Assert.That(service.HasActiveLoad, Is.False);
+                Assert.That(failedScene, Is.EqualTo(string.Empty));
+                Assert.That(failureMessage, Does.Contain("empty"));
+                Assert.That(log.Errors, Has.Count.EqualTo(1));
+                Assert.That(log.Errors[0], Does.StartWith("Scene load failed:"));
+                Assert.That(log.ErrorChannels, Is.EqualTo(new[] { DebugLogChannel.Loading }));
+            }
+            finally
+            {
+                AppLog.Configure(previousLogService);
+            }
+        }
 
-            Assert.That(operation, Is.Null);
-            Assert.That(failedScene, Is.EqualTo(string.Empty));
-            Assert.That(failureMessage, Does.Contain("empty"));
+        private sealed class RecordingAppLogService : IAppLogService
+        {
+            public readonly List<string> Errors = new();
+            public readonly List<DebugLogChannel> ErrorChannels = new();
+
+            public void Info(DebugLogChannel channel, string message) { }
+            public void Warning(DebugLogChannel channel, string message) { }
+
+            public void Error(DebugLogChannel channel, string message)
+            {
+                Errors.Add(message);
+                ErrorChannels.Add(channel);
+            }
+
+            public void Exception(DebugLogChannel channel, Exception exception) { }
         }
 
         [Test]

@@ -20,5 +20,6 @@ MonoBehaviour:
   StarterShipConfig: {fileID: 11400000, guid: b38c585c5d5da4b4bbdb9c161074da22, type: 2}
   StartShipPosition: {x: 0, y: -950, z: 0}
   StartCredit: 0
+  StartDiamonds: 10
   CurrentFuel: 0
   FuelCapacity: 0

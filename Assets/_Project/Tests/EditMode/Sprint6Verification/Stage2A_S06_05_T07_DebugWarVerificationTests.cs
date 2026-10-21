@@ -116,7 +116,7 @@ public sealed class Stage2A_S06_05_T07_DebugWarVerificationTests
     }
 
     [Test]
-    public void T07_OfflineWarCatchUp_ResolvesActiveInvasionAndCapturesTarget()
+    public void T07_OfflineWarCatchUp_DefersCaptureUntilNpcStateIsRestored()
     {
         GameRuntimeState state =
             CreateWarRuntimeState();
@@ -149,9 +149,9 @@ public sealed class Stage2A_S06_05_T07_DebugWarVerificationTests
                 "system_target");
 
         Assert.That(changedCount, Is.GreaterThan(0));
-        Assert.That(invasion.LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
-        Assert.That(invasion.CleanupAfterTick, Is.EqualTo(4));
-        Assert.That(targetSystem.SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
+        Assert.That(invasion.LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(invasion.CleanupAfterTick, Is.EqualTo(0));
+        Assert.That(targetSystem.SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
     }
 
     [Test]
@@ -194,7 +194,8 @@ public sealed class Stage2A_S06_05_T07_DebugWarVerificationTests
                 "system_last");
 
         Assert.That(changedCount, Is.GreaterThan(0));
-        Assert.That(targetSystem.SystemStatus, Is.EqualTo(StarSystemStatus.RecoveryReady));
+        Assert.That(targetSystem.SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(state.Galaxy.Invasions[0].IsActive(), Is.True);
     }
 
     [Test]

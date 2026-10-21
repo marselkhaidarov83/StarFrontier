@@ -59,7 +59,7 @@ public sealed class SystemHudConfig : BaseConfig
 
     [SerializeField]
     [Tooltip("Ширина и длина треугольника в единицах Canvas.")]
-    private Vector2 offscreenEnemyIndicatorSize = new Vector2(24f, 28f);
+    private Vector2 offscreenEnemyIndicatorSize = new Vector2(30f, 35f);
 
     [SerializeField, Min(0f)]
     [Tooltip("Отступ треугольников от безопасного края экрана в единицах Canvas.")]

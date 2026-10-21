@@ -38,6 +38,9 @@ public class NewGameFactory
             Credits = IsMobileTestMode
                 ? Mathf.Max(0, _configService.DebugSettings.mobileTestCredits)
                 : newGameConfig.StartCredit,
+            Diamonds = IsMobileTestMode
+                ? Mathf.Max(0, _configService.DebugSettings.mobileTestDiamonds)
+                : Mathf.Max(0, newGameConfig.StartDiamonds),
             CurrentSystemId = newGameConfig.StartSystem.Id,
             SystemMapShipPosition = newGameConfig.StartShipPosition,
             SystemMapShipDirection = GetStartShipDirection(newGameConfig),

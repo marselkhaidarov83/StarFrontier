@@ -14,7 +14,11 @@ public sealed class SystemPopulationRule : BaseConfig
     [SerializeField] private AllySpawnRuleConfig[] allySpawnRules =
         new AllySpawnRuleConfig[0];
 
-    [Header("Enemies")]
+    [Header("Invasion Rules")]
+    [SerializeField] private InvasionSpawnRuleSetConfig invasionSpawnRuleSet;
+    public InvasionSpawnRuleSetConfig InvasionSpawnRuleSet => invasionSpawnRuleSet;
+
+    [HideInInspector]
     [Tooltip("Параметр enemyGroupSpawnRuleEntries. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private SystemPopulationEnemyGroupRuleEntry[] enemyGroupSpawnRuleEntries =
         new SystemPopulationEnemyGroupRuleEntry[0];
@@ -24,8 +28,9 @@ public sealed class SystemPopulationRule : BaseConfig
     public EnemyGroupSpawnRuleConfig[] EnemyGroupSpawnRules =>
         BuildEnemyGroupSpawnRulesSnapshot();
 
+    // Compatibility accessors for older editor tools; production uses InvasionSpawnRuleSet directly.
     public SystemPopulationEnemyGroupRuleEntry[] EnemyGroupSpawnRuleEntries =>
-        enemyGroupSpawnRuleEntries;
+        invasionSpawnRuleSet != null ? invasionSpawnRuleSet.Entries : System.Array.Empty<SystemPopulationEnemyGroupRuleEntry>();
 
     public bool HasAnySpawnRule()
     {
@@ -54,16 +59,16 @@ public sealed class SystemPopulationRule : BaseConfig
 
     public bool HasAnyEnemyGroupSpawnRule()
     {
-        if (enemyGroupSpawnRuleEntries == null ||
-            enemyGroupSpawnRuleEntries.Length == 0)
+        if (EnemyGroupSpawnRuleEntries == null ||
+            EnemyGroupSpawnRuleEntries.Length == 0)
         {
             return false;
         }
 
-        for (int i = 0; i < enemyGroupSpawnRuleEntries.Length; i++)
+        for (int i = 0; i < EnemyGroupSpawnRuleEntries.Length; i++)
         {
             SystemPopulationEnemyGroupRuleEntry entry =
-                enemyGroupSpawnRuleEntries[i];
+                EnemyGroupSpawnRuleEntries[i];
 
             if (entry != null && entry.IsValid())
                 return true;
@@ -74,18 +79,18 @@ public sealed class SystemPopulationRule : BaseConfig
 
     private EnemyGroupSpawnRuleConfig[] BuildEnemyGroupSpawnRulesSnapshot()
     {
-        if (enemyGroupSpawnRuleEntries == null ||
-            enemyGroupSpawnRuleEntries.Length == 0)
+        if (EnemyGroupSpawnRuleEntries == null ||
+            EnemyGroupSpawnRuleEntries.Length == 0)
         {
             return EmptyEnemyGroupSpawnRules;
         }
 
         int count = 0;
 
-        for (int i = 0; i < enemyGroupSpawnRuleEntries.Length; i++)
+        for (int i = 0; i < EnemyGroupSpawnRuleEntries.Length; i++)
         {
-            if (enemyGroupSpawnRuleEntries[i] != null &&
-                enemyGroupSpawnRuleEntries[i].EnemyGroupSpawnRule != null)
+            if (EnemyGroupSpawnRuleEntries[i] != null &&
+                EnemyGroupSpawnRuleEntries[i].EnemyGroupSpawnRule != null)
             {
                 count++;
             }
@@ -99,13 +104,13 @@ public sealed class SystemPopulationRule : BaseConfig
 
         int index = 0;
 
-        for (int i = 0; i < enemyGroupSpawnRuleEntries.Length; i++)
+        for (int i = 0; i < EnemyGroupSpawnRuleEntries.Length; i++)
         {
-            if (enemyGroupSpawnRuleEntries[i] == null)
+            if (EnemyGroupSpawnRuleEntries[i] == null)
                 continue;
 
             EnemyGroupSpawnRuleConfig rule =
-                enemyGroupSpawnRuleEntries[i].EnemyGroupSpawnRule;
+                EnemyGroupSpawnRuleEntries[i].EnemyGroupSpawnRule;
 
             if (rule == null)
                 continue;

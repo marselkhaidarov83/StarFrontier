@@ -395,8 +395,8 @@ public sealed class InvasionSchedulerService :
         selectedRule = null;
 
         if (targetSystem == null ||
-            targetSystem.SystemPopulationRule == null ||
-            targetSystem.SystemPopulationRule.EnemyGroupSpawnRuleEntries == null)
+            targetSystem.InvasionSpawnRuleSet == null ||
+            targetSystem.InvasionSpawnRuleSet.Entries == null)
         {
             return false;
         }
@@ -412,7 +412,7 @@ public sealed class InvasionSchedulerService :
         int totalWeight = 0;
 
         SystemPopulationEnemyGroupRuleEntry[] entries =
-            targetSystem.SystemPopulationRule.EnemyGroupSpawnRuleEntries;
+            targetSystem.InvasionSpawnRuleSet.Entries;
 
         for (int i = 0; i < entries.Length; i++)
         {
@@ -515,9 +515,9 @@ public sealed class InvasionSchedulerService :
     private int GetCurrentGalaxyLevel()
     {
         if (Bootstrapper.Instance != null &&
-            Bootstrapper.Instance.OverrideNpcGalaxyLevel)
+            Bootstrapper.Instance.OverrideEnemyGalaxyLevel)
         {
-            return Bootstrapper.Instance.DebugNpcGalaxyLevel;
+            return Bootstrapper.Instance.DebugEnemyGalaxyLevel;
         }
 
         if (_gameSessionService == null ||
@@ -604,14 +604,14 @@ public sealed class InvasionSchedulerService :
         if (targetSystem == null)
             return false;
 
-        if (targetSystem.SystemPopulationRule == null ||
-            targetSystem.SystemPopulationRule.EnemyGroupSpawnRuleEntries == null)
+        if (targetSystem.InvasionSpawnRuleSet == null ||
+            targetSystem.InvasionSpawnRuleSet.Entries == null)
         {
             return false;
         }
 
         SystemPopulationEnemyGroupRuleEntry[] entries =
-            targetSystem.SystemPopulationRule.EnemyGroupSpawnRuleEntries;
+            targetSystem.InvasionSpawnRuleSet.Entries;
 
         if (entries.Length == 0)
             return false;

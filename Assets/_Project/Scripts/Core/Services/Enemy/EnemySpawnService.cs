@@ -28,17 +28,11 @@ public sealed class EnemySpawnService :
     }
 
     public bool TrySpawnSystemGuardGroup(
-    StarSystemConfig starSystem,
-    EnemyGroupSpawnRuleConfig rule,
-    out EnemyGroupState enemyGroupState)
+        StarSystemConfig starSystem, EnemyGroupSpawnRuleConfig rule, out EnemyGroupState enemyGroupState)
     {
-        return TrySpawnEnemyGroup(
-            starSystem,
-            starSystem,
-            rule,
-            string.Empty,
-            string.Empty,
-            out enemyGroupState);
+        // Legacy API: regular population must use EnemySpawnRuleSetConfig instead.
+        enemyGroupState = null;
+        return false;
     }
 
     public bool TrySpawnInvasionGroup(
@@ -90,7 +84,8 @@ public sealed class EnemySpawnService :
         if (targetSystem == null)
             return false;
 
-        if (rule == null)
+        if (rule == null || targetSystem.InvasionSpawnRuleSet == null ||
+            !targetSystem.InvasionSpawnRuleSet.ContainsRule(rule))
             return false;
 
         GalaxyRuntimeState galaxyState =
@@ -98,6 +93,14 @@ public sealed class EnemySpawnService :
 
         if (galaxyState == null)
             return false;
+
+        InvasionState invasion = galaxyState.Invasions.Find(item =>
+            item != null && item.InvasionId == invasionId && item.TargetSystemId == targetSystem.Id && item.IsActive());
+        if (string.IsNullOrWhiteSpace(invasionId) || invasion == null ||
+            galaxyState.EnemyGroups.Any(group => group != null && group.InvasionId == invasionId))
+            return false;
+
+        factionId = invasion.FactionId;
 
         int currentGalaxyLevel =
             GetCurrentGalaxyLevel();
@@ -361,13 +364,20 @@ public sealed class EnemySpawnService :
         if (targetSystem == null)
             return false;
 
-        if (rule == null)
+        if (rule == null || targetSystem.InvasionSpawnRuleSet == null ||
+            !targetSystem.InvasionSpawnRuleSet.ContainsRule(rule))
             return false;
 
         GalaxyRuntimeState galaxyState =
             GetGalaxyState();
 
         if (galaxyState == null)
+            return false;
+
+        InvasionState invasion = galaxyState.Invasions.Find(item =>
+            item != null && item.InvasionId == invasionId && item.TargetSystemId == targetSystem.Id && item.IsActive());
+        if (string.IsNullOrWhiteSpace(invasionId) || invasion == null ||
+            galaxyState.EnemyGroups.Any(group => group != null && group.InvasionId == invasionId))
             return false;
 
         int currentGalaxyLevel =
@@ -529,9 +539,9 @@ public sealed class EnemySpawnService :
     private int GetCurrentGalaxyLevel()
     {
         if (Bootstrapper.Instance != null &&
-            Bootstrapper.Instance.OverrideNpcGalaxyLevel)
+            Bootstrapper.Instance.OverrideEnemyGalaxyLevel)
         {
-            return Bootstrapper.Instance.DebugNpcGalaxyLevel;
+            return Bootstrapper.Instance.DebugEnemyGalaxyLevel;
         }
 
         if (_gameSessionService == null ||

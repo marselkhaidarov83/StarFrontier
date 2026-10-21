@@ -610,6 +610,9 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             string.Empty
         ));
 
+        if (PlanetLandingRules2A.IsBlocked(_gameSessionService.State, _configService.DebugSettings))
+            _eventBus.Publish(new PlanetLandingBlockedEvent2A(planetData.Id));
+
         LogCustom($"Planet destination selected: {planetData.Id}");
         LogCustom("State = " + State);
 
@@ -3038,8 +3041,21 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         StarSystemLink systemLink = State.Destination.SystemLink;
         TravelDestinationType destinationType = State.Destination.Type;
 
-        if (destinationType == TravelDestinationType.Planet)
+        bool wasPlanetDestination = destinationType == TravelDestinationType.Planet;
+        if (wasPlanetDestination &&
+            PlanetLandingRules2A.IsBlocked(_gameSessionService.State, _configService.DebugSettings))
+        {
+            // Finish the flight at the planet's position without entering the planet.
+            State.CurrentPlanetId = string.Empty;
+            _gameSessionService.State.Player.CurrentPlanetId = string.Empty;
+            _eventBus.Publish(new PlanetLandingBlockedEvent2A(planetId));
+            destinationType = TravelDestinationType.MapPoint;
+            planetId = string.Empty;
+        }
+        else if (wasPlanetDestination)
+        {
             State.CurrentPlanetId = planetId;
+        }
 
         // Arrival handlers may immediately hide the system and open a planet.
         // Publish the final position to player data and the ship view first.
@@ -3068,7 +3084,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         ClearRouteInitialSpeedLimit();
 
         _gameSessionService.State.Player.SystemMapShipPosition = State.GetCurrentPosition();
-        if (destinationType == TravelDestinationType.Planet ||
+        if (wasPlanetDestination ||
             destinationType == TravelDestinationType.SystemExit)
         {
             _eventBus.Publish(new SaveNeedEvent());

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: invasion_schedule_01
   description: 
   icon: {fileID: 0}
+  minimumCaptureDelayTicks: 5
   levelEntries:
   - galaxyLevel: 1
     maxActiveInvasions: 2

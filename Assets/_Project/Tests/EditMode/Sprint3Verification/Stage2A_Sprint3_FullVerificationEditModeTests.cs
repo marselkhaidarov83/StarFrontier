@@ -259,7 +259,7 @@ public sealed class Stage2A_Sprint3_FullVerificationEditModeTests
             "systemMapRoot", "mainCamera", "systemBackground",
             "sunNodesRoot", "planetNodesRoot", "systemExitsNodesRoot",
             "playerRoot", "enemiesRoot", "alliesRoot", "projectilesRoot", "vfxRoot",
-            "boundsRoot", "markersRoot", "debugRoot",
+            "boundsRoot", "markersRoot",
             "metaCanvas", "systemMapHudRoot", "planetRoot", "metaHudRoot"
         };
 

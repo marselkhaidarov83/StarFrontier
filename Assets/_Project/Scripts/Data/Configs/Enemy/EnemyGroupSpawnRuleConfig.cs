@@ -584,6 +584,18 @@ public sealed class EnemyGroupSpawnOptionConfig
         weight =
             Mathf.Max(1, weight);
 
+        if (enemies != null && enemies.Length > 0 && enemies[0] != null && enemies[0].EnemyConfig != null)
+        {
+            string enemyId = enemies[0].EnemyConfig.Id;
+            if (!string.IsNullOrWhiteSpace(enemyId))
+            {
+                faction = enemyId.StartsWith("enemy_ancients_", System.StringComparison.OrdinalIgnoreCase)
+                    ? EnemyFaction2A.Ancients
+                    : enemyId.StartsWith("enemy_infected_", System.StringComparison.OrdinalIgnoreCase)
+                        ? EnemyFaction2A.Infected : EnemyFaction2A.AI;
+            }
+        }
+
         if (enemies == null)
             enemies = new EnemyGroupEntryConfig[0];
 

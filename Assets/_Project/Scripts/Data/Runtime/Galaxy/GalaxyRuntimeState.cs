@@ -146,27 +146,18 @@ public class GalaxyRuntimeState
             if (!invasion.IsActive())
                 continue;
 
-            if (invasion.ResolveAtTick <= 0 ||
-                invasion.ResolveAtTick > targetQuantTick)
+            int previousLastUpdatedTick = invasion.LastUpdatedTick;
+            int previousNextUpdateTick = invasion.NextUpdateTick;
+
+            // NPCs and the player must be restored before a capture can be confirmed.
+            invasion.LastUpdatedTick = Math.Max(invasion.LastUpdatedTick, targetQuantTick);
+            invasion.NextUpdateTick = Math.Max(invasion.NextUpdateTick, targetQuantTick + 1);
+
+            if (previousLastUpdatedTick != invasion.LastUpdatedTick ||
+                previousNextUpdateTick != invasion.NextUpdateTick)
             {
-                invasion.LastUpdatedTick =
-                    Math.Max(
-                        invasion.LastUpdatedTick,
-                        targetQuantTick);
-
-                invasion.NextUpdateTick =
-                    Math.Max(
-                        invasion.NextUpdateTick,
-                        targetQuantTick + 1);
-
-                continue;
+                changedCount++;
             }
-
-            ResolveInvasionByOfflineCatchUp(
-                invasion,
-                targetQuantTick);
-
-            changedCount++;
         }
 
         changedCount += ProcessOfflineSystemWarDegradation(
@@ -176,42 +167,6 @@ public class GalaxyRuntimeState
             changedCount++;
 
         return changedCount;
-    }
-
-    private void ResolveInvasionByOfflineCatchUp(
-        InvasionState invasion,
-        int targetQuantTick)
-    {
-        invasion.LifecycleState =
-            InvasionLifecycleState.Resolved;
-
-        invasion.LastUpdatedTick =
-            targetQuantTick;
-
-        invasion.CleanupAfterTick =
-            targetQuantTick + 1;
-
-        StarSystemRuntimeState targetSystem =
-            FindSystemState(invasion.TargetSystemId);
-
-        if (targetSystem == null)
-            return;
-
-        bool captureAllowed =
-            CanCaptureSystemWithoutHopelessCollapse(
-                invasion.TargetSystemId);
-
-        if (captureAllowed)
-        {
-            targetSystem.MarkCaptured();
-            AddOwnedSystemToFaction(
-                invasion.FactionId,
-                invasion.TargetSystemId);
-        }
-        else
-        {
-            targetSystem.MarkRecoveryReady();
-        }
     }
 
     private int ProcessOfflineSystemWarDegradation(
@@ -246,20 +201,6 @@ public class GalaxyRuntimeState
                     targetQuantTick);
             }
 
-            if (system.SystemStatus == StarSystemStatus.Invasion &&
-                !hasActiveInvasion &&
-                targetQuantTick >= 3)
-            {
-                if (CanCaptureSystemWithoutHopelessCollapse(system.SystemId))
-                {
-                    system.MarkCaptured();
-                }
-                else
-                {
-                    system.MarkRecoveryReady();
-                }
-            }
-
             if (previousStatus != system.SystemStatus ||
                 previousStability != system.Stability)
             {
@@ -270,57 +211,4 @@ public class GalaxyRuntimeState
         return changedCount;
     }
 
-    private StarSystemRuntimeState FindSystemState(
-        string systemId)
-    {
-        if (string.IsNullOrWhiteSpace(systemId) ||
-            Systems == null)
-        {
-            return null;
-        }
-
-        return Systems.FirstOrDefault(
-            system =>
-                system != null &&
-                system.SystemId == systemId);
-    }
-
-    private void AddOwnedSystemToFaction(
-        string factionId,
-        string systemId)
-    {
-        if (string.IsNullOrWhiteSpace(factionId) ||
-            string.IsNullOrWhiteSpace(systemId))
-        {
-            return;
-        }
-
-        EnsureWarStateCollections();
-
-        EnemyFactionState faction =
-            EnemyFactions.FirstOrDefault(
-                item =>
-                    item != null &&
-                    item.FactionId == factionId);
-
-        if (faction == null)
-        {
-            faction =
-                new EnemyFactionState
-                {
-                    FactionId = factionId,
-                    DisplayName = factionId
-                };
-
-            EnemyFactions.Add(faction);
-        }
-
-        faction.EnsureWarTerritoryLists();
-
-        if (!faction.OwnedSystemIds.Contains(systemId))
-            faction.OwnedSystemIds.Add(systemId);
-
-        if (!faction.TerritorySystemIds.Contains(systemId))
-            faction.TerritorySystemIds.Add(systemId);
-    }
 }

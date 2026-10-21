@@ -37,14 +37,14 @@ public sealed class SystemNpcOfflineRelocationService :
         if (state?.Galaxy?.Systems == null)
             return;
 
-        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
+        HashSet<string> blockedSystemIds = BuildBlockedOfflineSystemIds(state);
         IReadOnlyList<SystemNpcRuntimeState> npcs = _npcRuntimeService.Npcs;
         for (int i = 0; i < npcs.Count; i++)
         {
             SystemNpcRuntimeState npc = npcs[i];
             if (npc == null || !npc.IsAlive || !npc.IsAlly || npc.AllyRole != AllyRole2A.Military ||
                 string.IsNullOrWhiteSpace(npc.CurrentSystemId) ||
-                capturedSystemIds.Contains(npc.CurrentSystemId))
+                blockedSystemIds.Contains(npc.CurrentSystemId))
             {
                 continue;
             }
@@ -75,11 +75,11 @@ public sealed class SystemNpcOfflineRelocationService :
         if (npcs == null || npcs.Count == 0)
             return false;
 
-        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
+        HashSet<string> blockedSystemIds = BuildBlockedOfflineSystemIds(state);
         List<StarSystemConfig> destinationCandidates =
             BuildOfflineDestinationCandidates(
                 state,
-                capturedSystemIds);
+                blockedSystemIds);
 
         if (destinationCandidates.Count == 0)
             return false;
@@ -95,7 +95,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
             if (!CanNpcTryOfflineRelocation(
                     npc,
-                    capturedSystemIds,
+                    blockedSystemIds,
                     travelScenarioByConfigId))
             {
                 continue;
@@ -158,7 +158,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
     private bool CanNpcTryOfflineRelocation(
         SystemNpcRuntimeState npc,
-        HashSet<string> capturedSystemIds)
+        HashSet<string> blockedSystemIds)
     {
         if (npc == null)
             return false;
@@ -172,7 +172,7 @@ public sealed class SystemNpcOfflineRelocationService :
         if (string.IsNullOrWhiteSpace(npc.CurrentSystemId))
             return false;
 
-        if (capturedSystemIds.Contains(npc.CurrentSystemId))
+        if (blockedSystemIds.Contains(npc.CurrentSystemId))
             return false;
 
         return AllyHasTravelToAnotherSystemScenario(npc.ConfigId);
@@ -223,7 +223,7 @@ public sealed class SystemNpcOfflineRelocationService :
     private bool TryPickDestinationSystem(
         SystemNpcRuntimeState npc,
         GameRuntimeState state,
-        HashSet<string> capturedSystemIds,
+        HashSet<string> blockedSystemIds,
         out StarSystemConfig destinationSystem)
     {
         destinationSystem = null;
@@ -248,7 +248,7 @@ public sealed class SystemNpcOfflineRelocationService :
             if (system.Id == npc.CurrentSystemId)
                 continue;
 
-            if (capturedSystemIds.Contains(system.Id))
+            if (blockedSystemIds.Contains(system.Id))
                 continue;
 
             if (!IsSystemOpen(system, state))
@@ -837,20 +837,20 @@ public sealed class SystemNpcOfflineRelocationService :
         if (npcs == null || npcs.Count == 0)
             return false;
 
-        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
+        HashSet<string> blockedSystemIds = BuildBlockedOfflineSystemIds(state);
         int movedCount = 0;
 
         for (int i = 0; i < npcs.Count; i++)
         {
             SystemNpcRuntimeState npc = npcs[i];
 
-            if (!CanNpcTryOfflineRelocation(npc, capturedSystemIds))
+            if (!CanNpcTryOfflineRelocation(npc, blockedSystemIds))
                 continue;
 
             if (!TryPickDestinationSystem(
                     npc,
                     state,
-                    capturedSystemIds,
+                    blockedSystemIds,
                     out StarSystemConfig destinationSystem))
                 continue;
 
@@ -1036,11 +1036,11 @@ public sealed class SystemNpcOfflineRelocationService :
 
         yield return null;
 
-        HashSet<string> capturedSystemIds = BuildCapturedSystemIds(state);
+        HashSet<string> blockedSystemIds = BuildBlockedOfflineSystemIds(state);
         List<StarSystemConfig> destinationCandidates =
             BuildOfflineDestinationCandidates(
                 state,
-                capturedSystemIds);
+                blockedSystemIds);
 
         int candidateCount =
             destinationCandidates != null
@@ -1071,7 +1071,7 @@ public sealed class SystemNpcOfflineRelocationService :
         int eligibleCount =
             CountOfflineRelocationEligibleNpcs(
                 npcs,
-                capturedSystemIds,
+                blockedSystemIds,
                 travelScenarioByConfigId);
 
         int targetEligibleCount =
@@ -1116,7 +1116,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
             if (!CanNpcTryOfflineRelocation(
                     npc,
-                    capturedSystemIds,
+                    blockedSystemIds,
                     travelScenarioByConfigId))
             {
                 continue;
@@ -1256,7 +1256,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
     private int CountOfflineRelocationEligibleNpcs(
         IReadOnlyList<SystemNpcRuntimeState> npcs,
-        HashSet<string> capturedSystemIds,
+        HashSet<string> blockedSystemIds,
         Dictionary<string, bool> travelScenarioByConfigId)
     {
         if (npcs == null || npcs.Count == 0)
@@ -1268,7 +1268,7 @@ public sealed class SystemNpcOfflineRelocationService :
         {
             if (CanNpcTryOfflineRelocation(
                     npcs[i],
-                    capturedSystemIds,
+                    blockedSystemIds,
                     travelScenarioByConfigId))
             {
                 count++;
@@ -1280,7 +1280,7 @@ public sealed class SystemNpcOfflineRelocationService :
 
     private bool CanNpcTryOfflineRelocation(
         SystemNpcRuntimeState npc,
-        HashSet<string> capturedSystemIds,
+        HashSet<string> blockedSystemIds,
         Dictionary<string, bool> travelScenarioByConfigId)
     {
         if (npc == null)
@@ -1295,7 +1295,7 @@ public sealed class SystemNpcOfflineRelocationService :
         if (string.IsNullOrWhiteSpace(npc.CurrentSystemId))
             return false;
 
-        if (capturedSystemIds.Contains(npc.CurrentSystemId))
+        if (blockedSystemIds.Contains(npc.CurrentSystemId))
             return false;
 
         string configId =
@@ -1315,26 +1315,41 @@ public sealed class SystemNpcOfflineRelocationService :
         return hasTravelScenario;
     }
 
-    private static HashSet<string> BuildCapturedSystemIds(GameRuntimeState state)
+    private HashSet<string> BuildBlockedOfflineSystemIds(GameRuntimeState state)
     {
-        var capturedSystemIds = new HashSet<string>();
+        var blockedSystemIds = new HashSet<string>();
         if (state?.Galaxy?.Systems == null)
-            return capturedSystemIds;
+            return blockedSystemIds;
 
         foreach (StarSystemRuntimeState system in state.Galaxy.Systems)
         {
             if (system != null && system.SystemStatus == StarSystemStatus.Captured &&
                 !string.IsNullOrWhiteSpace(system.SystemId))
             {
-                capturedSystemIds.Add(system.SystemId);
+                blockedSystemIds.Add(system.SystemId);
             }
         }
-        return capturedSystemIds;
+        // An ongoing invasion can still have allied ownership while hostile NPCs are present.
+        IReadOnlyList<SystemNpcRuntimeState> npcs = _npcRuntimeService.Npcs;
+        if (npcs != null)
+        {
+            for (int i = 0; i < npcs.Count; i++)
+            {
+                SystemNpcRuntimeState npc = npcs[i];
+                if (npc != null && npc.IsAlive && npc.IsHostileToPlayer &&
+                    !string.IsNullOrWhiteSpace(npc.CurrentSystemId))
+                {
+                    blockedSystemIds.Add(npc.CurrentSystemId);
+                }
+            }
+        }
+
+        return blockedSystemIds;
     }
 
     private List<StarSystemConfig> BuildOfflineDestinationCandidates(
         GameRuntimeState state,
-        HashSet<string> capturedSystemIds)
+        HashSet<string> blockedSystemIds)
     {
         List<StarSystemConfig> candidates =
             new List<StarSystemConfig>();
@@ -1356,7 +1371,7 @@ public sealed class SystemNpcOfflineRelocationService :
                 continue;
             }
 
-            if (capturedSystemIds.Contains(system.Id))
+            if (blockedSystemIds.Contains(system.Id))
                 continue;
 
             if (!IsSystemOpen(system, state))

@@ -148,6 +148,15 @@ public class Bootstrapper : CustomMonoBehaviour
             ? NpcPopulationDebugSettings.DebugNpcGalaxyLevel
             : 1;
 
+    public bool OverrideEnemyGalaxyLevel =>
+        NpcPopulationDebugSettings != null &&
+        NpcPopulationDebugSettings.OverrideEnemyGalaxyLevel;
+
+    public int DebugEnemyGalaxyLevel =>
+        NpcPopulationDebugSettings != null
+            ? NpcPopulationDebugSettings.DebugEnemyGalaxyLevel
+            : 1;
+
     private DebugSettings NpcPopulationDebugSettings
     {
         get

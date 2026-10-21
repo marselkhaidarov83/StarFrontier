@@ -38,6 +38,15 @@ public sealed class SystemExitNodeView2A :
     [SerializeField, Min(0f)] private float fuelBadgeGapFactor = 0.1f;
     [SerializeField, Min(0.05f)] private float fuelRefreshInterval = 0.2f;
 
+    [Header("War State Icon")]
+    [SerializeField] private SpriteRenderer warStateIcon;
+    [SerializeField] private Sprite warThreatSprite;
+    [SerializeField] private Sprite warInvasionSprite;
+    [SerializeField] private Color warIconThreatColor = new Color(1f, 0.82f, 0.18f, 1f);
+    [SerializeField] private Color warIconInvasionColor = new Color(1f, 0.08f, 0.04f, 1f);
+    [SerializeField, Min(0.1f)] private float warIconSizeFactor = 0.55f;
+    [SerializeField, Min(0f)] private float warIconGapFactor = 0.01f;
+
     [Header("Interaction")]
 
     [Tooltip(
@@ -183,6 +192,8 @@ public sealed class SystemExitNodeView2A :
 
         RefreshFuelBadge();
         RefreshFuelBadgeLayout();
+        RefreshWarStateIcon();
+        RefreshWarStateIconLayout();
 
         /*
          * Передаём ID системы назначения
@@ -390,15 +401,72 @@ public sealed class SystemExitNodeView2A :
 
     private void LateUpdate()
     {
-        if (_endpointConfig == null || fuelImage == null || fuelText == null)
+        if (_endpointConfig == null)
             return;
 
         if (Time.unscaledTime >= _nextFuelRefreshTime)
         {
             _nextFuelRefreshTime = Time.unscaledTime + Mathf.Max(0.05f, fuelRefreshInterval);
             RefreshFuelBadge();
+            RefreshWarStateIcon();
         }
         RefreshFuelBadgeLayout();
+        RefreshWarStateIconLayout();
+    }
+
+    private void RefreshWarStateIcon()
+    {
+        ResolveRuntimeDependencies();
+        StarSystemRuntimeState targetState = null;
+        var systems = _gameSessionService?.State?.Galaxy?.Systems;
+        if (systems != null && !string.IsNullOrWhiteSpace(_targetSystemId))
+        {
+            for (int i = 0; i < systems.Count; i++)
+            {
+                if (systems[i] != null && systems[i].SystemId == _targetSystemId)
+                {
+                    targetState = systems[i];
+                    break;
+                }
+            }
+        }
+
+        SystemWarStateIcon2A.Apply(
+            warStateIcon, targetState, warThreatSprite, warInvasionSprite,
+            warIconThreatColor, warIconInvasionColor);
+    }
+
+    private void RefreshWarStateIconLayout()
+    {
+        if (warStateIcon == null || !warStateIcon.gameObject.activeSelf ||
+            warStateIcon.sprite == null || systemExitImage == null || systemExitImage.sprite == null)
+            return;
+
+        Vector2 exitSize = systemExitImage.sprite.bounds.size;
+        float diameter = Mathf.Max(exitSize.x, exitSize.y);
+        float iconSize = diameter * Mathf.Max(0.1f, warIconSizeFactor);
+        // Place the icon beyond the exit, along the line from the sun to the exit.
+        Vector2 radial = (Vector2)transform.position - _sunCenter;
+        Vector2 direction = radial.sqrMagnitude > 0.0001f ? radial.normalized : Vector2.up;
+        Vector3 localDirection = transform.InverseTransformVector(new Vector3(direction.x, direction.y, 0f)).normalized;
+
+        Vector2 iconBounds = warStateIcon.sprite.bounds.size;
+        float iconLongestSide = Mathf.Max(iconBounds.x, iconBounds.y);
+        float iconScale = iconLongestSide > 0f ? iconSize / iconLongestSide : 0f;
+        float iconHalfExtent = (Mathf.Abs(localDirection.x) * iconBounds.x +
+            Mathf.Abs(localDirection.y) * iconBounds.y) * iconScale * 0.5f;
+        float distance = diameter * 0.5f + iconHalfExtent + diameter * Mathf.Max(0f, warIconGapFactor);
+        Vector3 localOffset = localDirection * distance;
+        warStateIcon.transform.localPosition = new Vector3(localOffset.x, localOffset.y, -0.01f);
+        warStateIcon.transform.rotation = Quaternion.identity;
+
+        Vector2 spriteSize = warStateIcon.sprite.bounds.size;
+        float longestSide = Mathf.Max(spriteSize.x, spriteSize.y);
+        if (longestSide > 0f)
+            warStateIcon.transform.localScale = new Vector3(iconSize / longestSide, iconSize / longestSide, 1f);
+
+        warStateIcon.sortingLayerID = systemExitImage.sortingLayerID;
+        warStateIcon.sortingOrder = systemExitImage.sortingOrder + 3;
     }
 
     private void RefreshFuelBadge()

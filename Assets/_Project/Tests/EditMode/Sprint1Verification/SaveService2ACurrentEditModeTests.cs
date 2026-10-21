@@ -13,6 +13,7 @@ namespace StarFrontier.Tests.Sprint1
         private SaveService2A _service;
         private TestGameSessionService _session;
         private SimpleEventBus _bus;
+        private IAppLogService _previousLogService;
 
         [SetUp]
         public void SetUp()
@@ -31,15 +32,48 @@ namespace StarFrontier.Tests.Sprint1
             _bootstrap.Registry.Register<ISystemEncounterSaveService>(new NullEncounterSaveService());
             _bootstrap.Registry.Register<ISystemNpcSimulationSaveService>(new NullNpcSaveService());
             _service = new SaveService2A();
+            _previousLogService = AppLog.Service;
+            AppLog.Configure(new TestUnityLogService());
         }
 
         [TearDown]
         public void TearDown()
         {
-            _service.DeleteSave();
-            _bus.Clear();
-            UnityEngine.Object.DestroyImmediate(_config);
-            _bootstrap.Dispose();
+            try
+            {
+                _service.DeleteSave();
+                _bus.Clear();
+                UnityEngine.Object.DestroyImmediate(_config);
+                _bootstrap.Dispose();
+            }
+            finally
+            {
+                AppLog.Configure(_previousLogService);
+            }
+        }
+
+        // LogAssert observes Unity logs; production logging is supplied explicitly for these tests.
+        private sealed class TestUnityLogService : IAppLogService
+        {
+            public void Info(DebugLogChannel channel, string message)
+            {
+                Debug.Log(message);
+            }
+
+            public void Warning(DebugLogChannel channel, string message)
+            {
+                Debug.LogWarning(message);
+            }
+
+            public void Error(DebugLogChannel channel, string message)
+            {
+                Debug.LogError(message);
+            }
+
+            public void Exception(DebugLogChannel channel, Exception exception)
+            {
+                Debug.LogException(exception);
+            }
         }
 
         [Test]

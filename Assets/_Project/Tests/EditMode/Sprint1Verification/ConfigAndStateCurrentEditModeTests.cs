@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace StarFrontier.Tests.Sprint1
 {
@@ -43,14 +42,44 @@ namespace StarFrontier.Tests.Sprint1
             ItemConfig first = Item("same");
             ItemConfig duplicate = Item("same");
             ItemConfig empty = Item(" ");
-            LogAssert.Expect(LogType.Warning,
-                "ConfigService: duplicate ItemConfig Id 'same' was skipped.");
-            LogAssert.Expect(LogType.Warning,
-                "ConfigService: ItemConfig with empty Id was skipped.");
+            IAppLogService previousLogService = AppLog.Service;
+            var log = new RecordingAppLogService();
 
-            ConfigService service = CreateService(new[] { first, duplicate, empty });
-            Assert.That(service.GetAllItems(), Has.Count.EqualTo(1));
-            Assert.That(service.GetItemConfigById("same"), Is.SameAs(first));
+            try
+            {
+                AppLog.Configure(log);
+                ConfigService service = CreateService(new[] { first, duplicate, empty });
+
+                Assert.That(service.GetAllItems(), Has.Count.EqualTo(1));
+                Assert.That(service.GetItemConfigById("same"), Is.SameAs(first));
+                Assert.That(log.Warnings, Is.EqualTo(new[]
+                {
+                    "ConfigService: duplicate ItemConfig Id 'same' was skipped.",
+                    "ConfigService: ItemConfig with empty Id was skipped."
+                }));
+                Assert.That(log.WarningChannels, Is.All.EqualTo(DebugLogChannel.Config));
+            }
+            finally
+            {
+                AppLog.Configure(previousLogService);
+            }
+        }
+
+        private sealed class RecordingAppLogService : IAppLogService
+        {
+            public readonly List<string> Warnings = new();
+            public readonly List<DebugLogChannel> WarningChannels = new();
+
+            public void Info(DebugLogChannel channel, string message) { }
+
+            public void Warning(DebugLogChannel channel, string message)
+            {
+                Warnings.Add(message);
+                WarningChannels.Add(channel);
+            }
+
+            public void Error(DebugLogChannel channel, string message) { }
+            public void Exception(DebugLogChannel channel, Exception exception) { }
         }
 
         [Test]

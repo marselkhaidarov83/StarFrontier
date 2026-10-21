@@ -1,3 +1,5 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -57,6 +59,12 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
 
     private void Awake()
     {
+        if (!DeveloperModeGate.IsEnabled)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         BuildUi();
     }
 
@@ -699,3 +707,19 @@ public sealed class SystemNpcStressSpawnDebugPanel2A : MonoBehaviour
         rectTransform.offsetMax = Vector2.zero;
     }
 }
+
+#else
+
+public sealed class SystemNpcStressSpawnDebugPanel2A : UnityEngine.MonoBehaviour
+{
+    private void Awake()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public static void EnsureCreated()
+    {
+    }
+}
+
+#endif

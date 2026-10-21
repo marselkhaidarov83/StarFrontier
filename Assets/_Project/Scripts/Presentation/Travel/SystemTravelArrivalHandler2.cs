@@ -11,11 +11,13 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
 
     private SimpleEventBus _eventBus;
     private IGameSessionService _gameSessionService;
+    private IConfigService _configService;
 
     private void Start()
     {
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
 
         if (_eventBus == null)
         {
@@ -64,6 +66,13 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
 
     private void HandlePlanetArrival(SystemTravelCompletedEvent evt)
     {
+        if (PlanetLandingRules2A.IsBlocked(_gameSessionService.State, _configService.DebugSettings))
+        {
+            _gameSessionService.State.Player.CurrentPlanetId = string.Empty;
+            _eventBus.Publish(new PlanetLandingBlockedEvent2A(evt.PlanetId));
+            return;
+        }
+
         AppLog.Info(DebugLogChannel.Travel, $"[SystemTravelArrivalHandler] Arrived at planet: {evt.PlanetId}");
 
         if (arrivalFlash != null)

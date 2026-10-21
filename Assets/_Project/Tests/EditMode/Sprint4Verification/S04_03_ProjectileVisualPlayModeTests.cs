@@ -60,6 +60,7 @@ public sealed class S04_03_ProjectileVisualPlayModeTests
         GalaxyNpcProjectileView secondView = controller.SpawnProjectile(createdAgain);
 
         Assert.That(secondView, Is.Not.Null);
+        Assert.That(secondView, Is.Not.SameAs(firstView));
         Assert.That(secondView.gameObject.activeSelf, Is.True);
         Assert.That(controller.ActiveProjectileCount, Is.EqualTo(1));
         Assert.That(secondView.ProjectileId, Is.EqualTo("projectile_test_02"));
@@ -96,6 +97,28 @@ public sealed class S04_03_ProjectileVisualPlayModeTests
         Assert.That(controller.ExplosionFxPoolCount, Is.EqualTo(1));
     }
 
+    [Test]
+    public void ProjectileVisual_FromOtherSystem_IsSkipped()
+    {
+        GalaxyNpcCombatVisualController controller = CreateController();
+        var created = new GalaxyNpcProjectileCreatedEvent(
+            "projectile_other_system", "other_system", string.Empty,
+            CombatTargetType.Npc, "enemy_test_01", "weapon_test",
+            Vector3.zero, new Vector3(4f, 0f, 0f), 12f);
+
+        Assert.That(controller.SpawnProjectile(created), Is.Null);
+        Assert.That(controller.ActiveProjectileCount, Is.EqualTo(0));
+    }
+
+    private sealed class TestGameSessionService : IGameSessionService
+    {
+        public GameRuntimeState State { get; private set; } = new GameRuntimeState();
+        public bool HasActiveSession => State != null;
+        public void StartNewSession(GameRuntimeState state) { State = state; }
+        public void LoadSession(GameRuntimeState state) { State = state; }
+        public void ClearSession() { State = null; }
+    }
+
     private GalaxyNpcCombatVisualController CreateController()
     {
         _root = new GameObject("Projectile Visual PlayMode Test Root");
@@ -123,6 +146,10 @@ public sealed class S04_03_ProjectileVisualPlayModeTests
         SetPrivateField(controller, "explosionFxPrefab", explosionFxPrefab);
         SetPrivateField(controller, "hitFxLifetimeSeconds", 0.05f);
         SetPrivateField(controller, "explosionFxLifetimeSeconds", 0.05f);
+
+        var session = new TestGameSessionService();
+        session.State.Player.CurrentSystemId = "system_test";
+        SetPrivateField(controller, "_gameSessionService", session);
 
         return controller;
     }

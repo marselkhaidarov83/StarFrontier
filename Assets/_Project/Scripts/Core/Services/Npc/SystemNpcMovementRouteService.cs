@@ -509,11 +509,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         {
             LogCustom("Enemy target = nearest ally");
 
-            return GetApproachPosition(
-                npc.CurrentPosition,
-                allyPosition,
-                ArrivalSafeDistance(),
-                stats);
+            return GetCombatApproachPosition(npc, allyPosition, stats);
         }
 
         stepStartedAt =
@@ -534,11 +530,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         {
             LogCustom("Enemy target = player");
 
-            return GetApproachPosition(
-                npc.CurrentPosition,
-                playerPosition,
-                ArrivalSafeDistance(),
-                stats);
+            return GetCombatApproachPosition(npc, playerPosition, stats);
         }
 
         stepStartedAt =
@@ -885,7 +877,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
                 currentPosition,
                 targetPosition);
 
-        if (distanceToTarget <= combatRange + arrivalTolerance)
+        if (Mathf.Abs(distanceToTarget - combatRange) <= arrivalTolerance)
         {
             if (stats != null)
             {
@@ -914,51 +906,12 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
 
     private float GetCombatApproachArrivalTolerance(SystemNpcRuntimeState npc)
     {
-        if (npc == null)
-            return ArrivalSafeDistance();
-
-        float turnRadiusPart =
-            Mathf.Max(0f, npc.TurnRadius) * 0.05f;
-
-        return Mathf.Clamp(
-            turnRadiusPart,
-            ArrivalSafeDistance(),
-            25f);
+        return NpcCombatDistance2A.GetArrivalTolerance(npc);
     }
 
     private float GetAllWeaponsCanShootRange(SystemNpcRuntimeState npc)
     {
-        if (npc == null ||
-            npc.Weapons == null ||
-            npc.Weapons.Count == 0)
-        {
-            return KeepDistanceRadius;
-        }
-
-        float minRange = float.MaxValue;
-
-        for (int i = 0; i < npc.Weapons.Count; i++)
-        {
-            SystemNpcWeaponRuntimeState weapon = npc.Weapons[i];
-
-            if (weapon == null ||
-                weapon.ShotDistance <= 0f)
-            {
-                continue;
-            }
-
-            minRange =
-                Mathf.Min(
-                    minRange,
-                    weapon.ShotDistance);
-        }
-
-        if (minRange == float.MaxValue)
-            return KeepDistanceRadius;
-
-        return Mathf.Max(
-            ArrivalSafeDistance(),
-            minRange * 0.9f);
+        return NpcCombatDistance2A.GetHoldDistance(npc);
     }
 
     private float ArrivalSafeDistance()

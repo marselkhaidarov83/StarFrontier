@@ -31,18 +31,21 @@ MonoBehaviour:
         minCount: 2
         maxCount: 3
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 146e2f4e8a3c44a24810666163c1b208, type: 2}
         minCount: 2
         maxCount: 3
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 4d96febeabd624e52b20e2a7b7eb61de, type: 2}
         minCount: 2
         maxCount: 3
         weight: 1
+      faction: 20
   - galaxyLevel: 2
     spawnIntervalSeconds: 165
     maxAliveGroupsFromThisRule: 1
@@ -57,6 +60,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 2
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 1ea1e20bd521d4e51b33369d3731c499, type: 2}
@@ -67,6 +71,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 2
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 1e0a73a36c56c4bc782e8f705456da23, type: 2}
@@ -77,6 +82,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 2
         weight: 1
+      faction: 20
   - galaxyLevel: 3
     spawnIntervalSeconds: 150
     maxAliveGroupsFromThisRule: 1
@@ -95,6 +101,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 2
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 07bff6792021848a0a31dda1ec0e9df9, type: 2}
@@ -109,6 +116,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 2
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: e4be142dd653a4ca383495dd72ae234d, type: 2}
@@ -123,6 +131,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 2
         weight: 1
+      faction: 20
   - galaxyLevel: 4
     spawnIntervalSeconds: 135
     maxAliveGroupsFromThisRule: 1
@@ -141,6 +150,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 3
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 483cc9adcb4ad4d9b9bb5be0bb5a2da1, type: 2}
@@ -155,6 +165,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 3
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 87706f73b898040ce8afe9de3023055b, type: 2}
@@ -169,6 +180,7 @@ MonoBehaviour:
         minCount: 1
         maxCount: 3
         weight: 1
+      faction: 20
   - galaxyLevel: 5
     spawnIntervalSeconds: 120
     maxAliveGroupsFromThisRule: 1
@@ -187,6 +199,7 @@ MonoBehaviour:
         minCount: 2
         maxCount: 3
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 1e0e02cd9d60f4b7b97ee75dbd6a98d7, type: 2}
@@ -201,6 +214,7 @@ MonoBehaviour:
         minCount: 2
         maxCount: 3
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 3762e704f5ba044f38c8a0f265f609bc, type: 2}
@@ -215,6 +229,7 @@ MonoBehaviour:
         minCount: 2
         maxCount: 3
         weight: 1
+      faction: 20
   - galaxyLevel: 6
     spawnIntervalSeconds: 105
     maxAliveGroupsFromThisRule: 1
@@ -233,6 +248,7 @@ MonoBehaviour:
         minCount: 2
         maxCount: 4
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: f7ac2e99c9963495ab18bc13b8d45c55, type: 2}
@@ -247,6 +263,7 @@ MonoBehaviour:
         minCount: 2
         maxCount: 4
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: ec1ee164e07424a088c379a0cc8987a7, type: 2}
@@ -261,6 +278,7 @@ MonoBehaviour:
         minCount: 2
         maxCount: 4
         weight: 1
+      faction: 20
   - galaxyLevel: 7
     spawnIntervalSeconds: 90
     maxAliveGroupsFromThisRule: 1
@@ -279,6 +297,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 5
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: e72e3f80581a94c13a0e828ac2ba928d, type: 2}
@@ -293,6 +312,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 5
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: c0ae46729dfbd40d18938f5fcb34b37e, type: 2}
@@ -307,6 +327,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 5
         weight: 1
+      faction: 20
   - galaxyLevel: 8
     spawnIntervalSeconds: 75
     maxAliveGroupsFromThisRule: 1
@@ -325,6 +346,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 5
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: a0526fa8004a9413da62cfe2b14c61e7, type: 2}
@@ -339,6 +361,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 5
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: df667d5f39b49411eab58703bdf45166, type: 2}
@@ -353,6 +376,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 5
         weight: 1
+      faction: 20
   - galaxyLevel: 9
     spawnIntervalSeconds: 60
     maxAliveGroupsFromThisRule: 1
@@ -371,6 +395,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 6
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: 440ea7d66cbca4dc9b3d88828ac9c963, type: 2}
@@ -385,6 +410,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 6
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: f1528c8e63c8f4d33bc1ef76e6de469c, type: 2}
@@ -399,6 +425,7 @@ MonoBehaviour:
         minCount: 3
         maxCount: 6
         weight: 1
+      faction: 20
   - galaxyLevel: 10
     spawnIntervalSeconds: 45
     maxAliveGroupsFromThisRule: 1
@@ -417,6 +444,7 @@ MonoBehaviour:
         minCount: 4
         maxCount: 6
         weight: 1
+      faction: 0
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: ed0f3fe6082dd488cb7fff12d08c2a4a, type: 2}
@@ -431,6 +459,7 @@ MonoBehaviour:
         minCount: 4
         maxCount: 6
         weight: 1
+      faction: 10
     - weight: 1
       enemies:
       - enemyConfig: {fileID: 11400000, guid: c2bd551ac4ee6485e9896755600d35d9, type: 2}
@@ -445,3 +474,4 @@ MonoBehaviour:
         minCount: 4
         maxCount: 6
         weight: 1
+      faction: 20

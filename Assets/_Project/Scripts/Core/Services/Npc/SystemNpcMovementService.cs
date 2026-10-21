@@ -1490,11 +1490,18 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                     unknownRouteTargetCount++;
             }
 
+            MilitaryNpcDiagnostics2A.Log("MOVEMENT_VISIT", npc, currentTick,
+                "Scope=" + scope + " | InitialWarmup=" + _isInitialWarmupRouteBuild);
+
             if (!CanMove(npc))
             {
+                if (!_isInitialWarmupRouteBuild)
+                    SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
                 blockedCount++;
 
                 string blockReason = GetMovementBlockReason(npc);
+                MilitaryNpcDiagnostics2A.Log("MOVEMENT_BLOCKED", npc, currentTick,
+                    "Reason=" + blockReason);
 
                 if (blockReason == "NotAlive")
                     blockedNotAliveCount++;
@@ -1523,11 +1530,28 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
             long npcStartedAt = BeginPerfMeasure();
 
+            float npcDeltaTime = deltaTime;
+            if (!_isInitialWarmupRouteBuild)
+            {
+                double pendingTicks = SystemNpcMovementTime2A.Accrue(
+                    npc, SystemNpcMovementTime2A.Now);
+                npcDeltaTime = (float)(pendingTicks * GameTimeState.SecondsPerDay);
+            }
+
             TickNpcMovement(
                 npc,
-                deltaTime,
+                npcDeltaTime,
                 currentTick,
                 npcPhaseStats);
+
+            if (MilitaryNpcDiagnostics2A.Enabled(npc))
+            {
+                _npcMovementRoutes.TryGetValue(npc.RuntimeNpcId, out NpcMovementRouteState diagnosticRoute);
+                MilitaryNpcDiagnostics2A.Log("MOVEMENT_AFTER", npc, currentTick,
+                    "RouteExists=" + (diagnosticRoute != null) +
+                    " | PathPoints=" + (diagnosticRoute != null && diagnosticRoute.Path != null ? diagnosticRoute.Path.Count : 0) +
+                    " | PathDistanceTravelled=" + (diagnosticRoute != null ? diagnosticRoute.DistanceTravelled : 0f));
+            }
 
             double npcMs = EndPerfMeasureMs(npcStartedAt);
 
@@ -2279,6 +2303,28 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         npc.CurrentPosition = newPosition;
         routeState.DistanceTravelled = nextDistance;
+
+        if (!_isInitialWarmupRouteBuild)
+        {
+            double pendingBefore = npc.PendingMovementTicks;
+            float distancePerTick = Mathf.Max(0f, npc.Speed) * GetSpeedMultiplier();
+            double usedTicks = distancePerTick > 0f
+                ? (nextDistance - previousDistance) / (double)distancePerTick
+                : 0d;
+            SystemNpcMovementTime2A.Consume(npc, usedTicks);
+
+            if (pendingBefore > 1d && Bootstrapper.Instance != null &&
+                Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.NpcMovement))
+            {
+                Bootstrapper.Instance.LogPerformance(DebugLogPerformanceArea.NpcMovement,
+                    "[NPC_MOVEMENT_CATCH_UP] Tick=" + currentTick +
+                    " | Npc=" + npc.RuntimeNpcId + " | SystemId=" + npc.CurrentSystemId +
+                    " | PendingTicksBefore=" + pendingBefore.ToString("F3") +
+                    " | UsedTicks=" + usedTicks.ToString("F3") +
+                    " | PendingTicksAfter=" + npc.PendingMovementTicks.ToString("F3") +
+                    " | PathDistance=" + (nextDistance - previousDistance).ToString("F3"));
+            }
+        }
 
         npc.TravelProgress01 =
             Mathf.Clamp01(
@@ -3338,6 +3384,13 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         int maxInitialRouteBuildsPerTick,
         int currentTick)
     {
+        MilitaryNpcDiagnostics2A.Log("ROUTE_BUILD_LIMIT", npc, currentTick,
+            "Decision=" + decision + " | WillBuild=" + routeBuildWillRun +
+            " | ShouldThrottle=" + shouldThrottleInitialRouteBuild +
+            " | BypassLimit=" + shouldBypassInitialRouteBuildLimit +
+            " | UsedBefore=" + initialRouteBuildsUsedBefore +
+            " | UsedAfter=" + initialRouteBuildsUsedAfter +
+            " | Limit=" + maxInitialRouteBuildsPerTick);
         if (npc == null ||
             Bootstrapper.Instance == null ||
             !Bootstrapper.Instance.IsPerformanceLogEnabled(
@@ -5732,19 +5785,9 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
             planetRadius);
     }
 
-    private float GetNpcCombatRouteArrivalDistanceThreshold(
-        SystemNpcRuntimeState npc)
+    private float GetNpcCombatRouteArrivalDistanceThreshold(SystemNpcRuntimeState npc)
     {
-        if (npc == null)
-            return ArrivalDistanceThreshold;
-
-        float turnRadiusPart =
-            Mathf.Max(0f, npc.TurnRadius) * 0.05f;
-
-        return Mathf.Clamp(
-            turnRadiusPart,
-            ArrivalDistanceThreshold,
-            25f);
+        return NpcCombatDistance2A.GetArrivalTolerance(npc);
     }
 
     private float GetPlanetWorldSize(PlanetConfig planet)
@@ -6387,6 +6430,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         int currentTick,
         NpcDetailedMovementPhaseStats phaseStats)
     {
+        if (npc != null && !_isInitialWarmupRouteBuild)
+            SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
         long completeStartedAt = phaseStats != null ? BeginPerfMeasure() : 0;
 
         if (npc == null)
@@ -7884,6 +7929,11 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         int currentTick,
         NpcMovementRouteState routeState)
     {
+        MilitaryNpcDiagnostics2A.Log("ROUTE_DECISION", npc, currentTick,
+            "Decision=" + decision + " | HasActiveRoute=" + hasActiveRoute +
+            " | HasReusableRoute=" + hasReusableRoute +
+            " | DistanceToDestination=" + distanceToFinalTarget +
+            " | ArrivalThreshold=" + arrivalThreshold);
         if (npc == null ||
             Bootstrapper.Instance == null ||
             !Bootstrapper.Instance.IsPerformanceLogEnabled(

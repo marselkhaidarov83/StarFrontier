@@ -3,51 +3,61 @@ ally_behaviour_military_L01_normal,1,Ally,Military,1,Normal,PatrolSystem,None,No
 ally_behaviour_military_L01_normal,2,Ally,Military,1,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L01_normal,3,Ally,Military,1,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L01_enemy_invasion,1,Ally,Military,1,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L01_enemy_invasion,2,Ally,Military,1,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L01_enemy_system_invasion,1,Ally,Military,1,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L02_normal,1,Ally,Military,2,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L02_normal,2,Ally,Military,2,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L02_normal,3,Ally,Military,2,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L02_enemy_invasion,1,Ally,Military,2,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L02_enemy_invasion,2,Ally,Military,2,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L02_enemy_system_invasion,1,Ally,Military,2,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L03_normal,1,Ally,Military,3,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L03_normal,2,Ally,Military,3,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L03_normal,3,Ally,Military,3,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L03_enemy_invasion,1,Ally,Military,3,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L03_enemy_invasion,2,Ally,Military,3,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L03_enemy_system_invasion,1,Ally,Military,3,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L04_normal,1,Ally,Military,4,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L04_normal,2,Ally,Military,4,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L04_normal,3,Ally,Military,4,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L04_enemy_invasion,1,Ally,Military,4,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L04_enemy_invasion,2,Ally,Military,4,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L04_enemy_system_invasion,1,Ally,Military,4,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L05_normal,1,Ally,Military,5,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L05_normal,2,Ally,Military,5,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L05_normal,3,Ally,Military,5,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L05_enemy_invasion,1,Ally,Military,5,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L05_enemy_invasion,2,Ally,Military,5,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L05_enemy_system_invasion,1,Ally,Military,5,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L06_normal,1,Ally,Military,6,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L06_normal,2,Ally,Military,6,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L06_normal,3,Ally,Military,6,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L06_enemy_invasion,1,Ally,Military,6,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L06_enemy_invasion,2,Ally,Military,6,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L06_enemy_system_invasion,1,Ally,Military,6,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L07_normal,1,Ally,Military,7,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L07_normal,2,Ally,Military,7,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L07_normal,3,Ally,Military,7,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L07_enemy_invasion,1,Ally,Military,7,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L07_enemy_invasion,2,Ally,Military,7,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L07_enemy_system_invasion,1,Ally,Military,7,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L08_normal,1,Ally,Military,8,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L08_normal,2,Ally,Military,8,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L08_normal,3,Ally,Military,8,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L08_enemy_invasion,1,Ally,Military,8,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L08_enemy_invasion,2,Ally,Military,8,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L08_enemy_system_invasion,1,Ally,Military,8,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L09_normal,1,Ally,Military,9,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L09_normal,2,Ally,Military,9,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L09_normal,3,Ally,Military,9,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L09_enemy_invasion,1,Ally,Military,9,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L09_enemy_invasion,2,Ally,Military,9,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L09_enemy_system_invasion,1,Ally,Military,9,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L10_normal,1,Ally,Military,10,Normal,PatrolSystem,None,None,None,45,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L10_normal,2,Ally,Military,10,Normal,PlanetToPlanetTravel,None,None,None,25,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L10_normal,3,Ally,Military,10,Normal,StayOnPlanetForDays,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L10_enemy_invasion,1,Ally,Military,10,EnemyInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_military_L10_enemy_invasion,2,Ally,Military,10,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_military_L10_enemy_system_invasion,1,Ally,Military,10,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,100,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_normal,1,Ally,Ranger,1,Normal,TravelToAnotherSystem,None,None,None,30,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_normal,2,Ally,Ranger,1,Normal,CollectDebris,None,None,None,20,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -61,6 +71,7 @@ ally_behaviour_ranger_L01_enemy_invasion,2,Ally,Ranger,1,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L01_enemy_invasion,3,Ally,Ranger,1,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_invasion,4,Ally,Ranger,1,EnemyInvasion,CollectDebris,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L01_enemy_invasion,5,Ally,Ranger,1,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L01_enemy_invasion,6,Ally,Ranger,1,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_system_invasion,1,Ally,Ranger,1,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,65,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_system_invasion,2,Ally,Ranger,1,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L01_enemy_system_invasion,3,Ally,Ranger,1,EnemySystemInvasion,CollectDebris,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -76,6 +87,7 @@ ally_behaviour_ranger_L02_enemy_invasion,2,Ally,Ranger,2,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L02_enemy_invasion,3,Ally,Ranger,2,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_invasion,4,Ally,Ranger,2,EnemyInvasion,CollectDebris,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L02_enemy_invasion,5,Ally,Ranger,2,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L02_enemy_invasion,6,Ally,Ranger,2,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_system_invasion,1,Ally,Ranger,2,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,65,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_system_invasion,2,Ally,Ranger,2,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L02_enemy_system_invasion,3,Ally,Ranger,2,EnemySystemInvasion,CollectDebris,None,None,None,15,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -91,6 +103,7 @@ ally_behaviour_ranger_L03_enemy_invasion,2,Ally,Ranger,3,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L03_enemy_invasion,3,Ally,Ranger,3,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_invasion,4,Ally,Ranger,3,EnemyInvasion,CollectDebris,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L03_enemy_invasion,5,Ally,Ranger,3,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L03_enemy_invasion,6,Ally,Ranger,3,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_system_invasion,1,Ally,Ranger,3,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,66,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_system_invasion,2,Ally,Ranger,3,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L03_enemy_system_invasion,3,Ally,Ranger,3,EnemySystemInvasion,CollectDebris,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -106,6 +119,7 @@ ally_behaviour_ranger_L04_enemy_invasion,2,Ally,Ranger,4,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L04_enemy_invasion,3,Ally,Ranger,4,EnemyInvasion,TravelToAnotherSystem,None,None,None,15,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_invasion,4,Ally,Ranger,4,EnemyInvasion,CollectDebris,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L04_enemy_invasion,5,Ally,Ranger,4,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L04_enemy_invasion,6,Ally,Ranger,4,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_system_invasion,1,Ally,Ranger,4,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,66,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_system_invasion,2,Ally,Ranger,4,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,20,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L04_enemy_system_invasion,3,Ally,Ranger,4,EnemySystemInvasion,CollectDebris,None,None,None,16,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -121,6 +135,7 @@ ally_behaviour_ranger_L05_enemy_invasion,2,Ally,Ranger,5,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L05_enemy_invasion,3,Ally,Ranger,5,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_invasion,4,Ally,Ranger,5,EnemyInvasion,CollectDebris,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L05_enemy_invasion,5,Ally,Ranger,5,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L05_enemy_invasion,6,Ally,Ranger,5,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_system_invasion,1,Ally,Ranger,5,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,67,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_system_invasion,2,Ally,Ranger,5,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L05_enemy_system_invasion,3,Ally,Ranger,5,EnemySystemInvasion,CollectDebris,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -136,6 +151,7 @@ ally_behaviour_ranger_L06_enemy_invasion,2,Ally,Ranger,6,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L06_enemy_invasion,3,Ally,Ranger,6,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_invasion,4,Ally,Ranger,6,EnemyInvasion,CollectDebris,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L06_enemy_invasion,5,Ally,Ranger,6,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L06_enemy_invasion,6,Ally,Ranger,6,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_system_invasion,1,Ally,Ranger,6,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,67,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_system_invasion,2,Ally,Ranger,6,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L06_enemy_system_invasion,3,Ally,Ranger,6,EnemySystemInvasion,CollectDebris,None,None,None,17,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -151,6 +167,7 @@ ally_behaviour_ranger_L07_enemy_invasion,2,Ally,Ranger,7,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L07_enemy_invasion,3,Ally,Ranger,7,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_invasion,4,Ally,Ranger,7,EnemyInvasion,CollectDebris,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L07_enemy_invasion,5,Ally,Ranger,7,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L07_enemy_invasion,6,Ally,Ranger,7,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_system_invasion,1,Ally,Ranger,7,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,68,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_system_invasion,2,Ally,Ranger,7,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L07_enemy_system_invasion,3,Ally,Ranger,7,EnemySystemInvasion,CollectDebris,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -166,6 +183,7 @@ ally_behaviour_ranger_L08_enemy_invasion,2,Ally,Ranger,8,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L08_enemy_invasion,3,Ally,Ranger,8,EnemyInvasion,TravelToAnotherSystem,None,None,None,14,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_invasion,4,Ally,Ranger,8,EnemyInvasion,CollectDebris,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L08_enemy_invasion,5,Ally,Ranger,8,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L08_enemy_invasion,6,Ally,Ranger,8,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_system_invasion,1,Ally,Ranger,8,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,68,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_system_invasion,2,Ally,Ranger,8,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,19,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L08_enemy_system_invasion,3,Ally,Ranger,8,EnemySystemInvasion,CollectDebris,None,None,None,18,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -181,6 +199,7 @@ ally_behaviour_ranger_L09_enemy_invasion,2,Ally,Ranger,9,EnemyInvasion,PlanetToP
 ally_behaviour_ranger_L09_enemy_invasion,3,Ally,Ranger,9,EnemyInvasion,TravelToAnotherSystem,None,None,None,13,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_invasion,4,Ally,Ranger,9,EnemyInvasion,CollectDebris,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L09_enemy_invasion,5,Ally,Ranger,9,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L09_enemy_invasion,6,Ally,Ranger,9,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_system_invasion,1,Ally,Ranger,9,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,69,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_system_invasion,2,Ally,Ranger,9,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,18,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L09_enemy_system_invasion,3,Ally,Ranger,9,EnemySystemInvasion,CollectDebris,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
@@ -196,6 +215,7 @@ ally_behaviour_ranger_L10_enemy_invasion,2,Ally,Ranger,10,EnemyInvasion,PlanetTo
 ally_behaviour_ranger_L10_enemy_invasion,3,Ally,Ranger,10,EnemyInvasion,TravelToAnotherSystem,None,None,None,13,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L10_enemy_invasion,4,Ally,Ranger,10,EnemyInvasion,CollectDebris,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.
 ally_behaviour_ranger_L10_enemy_invasion,5,Ally,Ranger,10,EnemyInvasion,AnnihilateOnPlanet,None,None,None,2,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
+ally_behaviour_ranger_L10_enemy_invasion,6,Ally,Ranger,10,EnemyInvasion,StayOnPlanetForDays,None,None,None,1,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L10_enemy_system_invasion,1,Ally,Ranger,10,EnemySystemInvasion,EngageEnemies,None,Enemy,Any,69,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L10_enemy_system_invasion,2,Ally,Ranger,10,EnemySystemInvasion,TravelToAnotherSystem,None,None,None,18,CurrentSystemNpcBehaviorType,Can be serialized into current behaviorWeights array.
 ally_behaviour_ranger_L10_enemy_system_invasion,3,Ally,Ranger,10,EnemySystemInvasion,CollectDebris,None,None,None,19,FutureEnumRequired,Requires SystemNpcBehaviorType/code expansion before Unity import.

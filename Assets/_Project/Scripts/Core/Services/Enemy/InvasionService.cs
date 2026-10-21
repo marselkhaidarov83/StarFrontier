@@ -8,6 +8,7 @@ public sealed class InvasionService :
     IInvasionService
 {
     private readonly IGameSessionService _gameSessionService;
+    private readonly IConfigService _configService;
     private readonly IEnemySpawnService _enemySpawnService;
     private readonly ISystemSecurityService _systemSecurityService;
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
@@ -20,6 +21,9 @@ public sealed class InvasionService :
         _gameSessionService =
             Bootstrapper.Instance.ServiceRegistry
                 .Get<IGameSessionService>();
+
+        _configService =
+            Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
 
         _enemySpawnService =
             Bootstrapper.Instance.ServiceRegistry
@@ -47,11 +51,55 @@ public sealed class InvasionService :
 
         _eventBus.Subscribe<SystemNpcDestroyedEvent>(
             OnSystemNpcDestroyed);
+
+        _eventBus.Subscribe<TravelFinishedEvent>(OnPlayerTravelFinished);
+    }
+
+    private bool CanCaptureTargetNow(string systemId)
+    {
+        if (!TryGetActiveInvasionForTarget(systemId, out InvasionState invasion))
+            return false;
+
+        int minimumTicks = _configService.InvasionScheduleConfig != null
+            ? _configService.InvasionScheduleConfig.MinimumCaptureDelayTicks
+            : 5;
+
+        if (!InvasionCaptureRules2A.HasMinimumDurationElapsed(
+                invasion.StartedAtTick, GetCurrentQuantTick(), minimumTicks))
+            return false;
+
+        return InvasionCaptureRules2A.CanCapture(
+            systemId,
+            _gameSessionService.State?.Player?.CurrentSystemId,
+            _npcRuntimeService?.Npcs);
+    }
+
+    private void OnPlayerTravelFinished(TravelFinishedEvent evt)
+    {
+        if (evt == null || !evt.Success || evt.FromSystemId == evt.ToSystemId)
+            return;
+
+        TryCaptureInvadedSystem(evt.FromSystemId);
+    }
+
+    private void TryCaptureInvadedSystem(string systemId)
+    {
+        if (!CanCaptureTargetNow(systemId))
+            return;
+
+        if (TryGetActiveInvasionForTarget(systemId, out InvasionState invasion))
+            ResolveInvasion(invasion.InvasionId, true);
     }
 
     private void OnSystemNpcDestroyed(
         SystemNpcDestroyedEvent evt)
     {
+        if (evt.NpcType == SystemNpcType.Ally)
+        {
+            TryCaptureInvadedSystem(evt.SystemId);
+            return;
+        }
+
         if (evt.NpcType != SystemNpcType.Enemy)
             return;
 
@@ -349,7 +397,8 @@ public sealed class InvasionService :
         if (targetSystem == null)
             return false;
 
-        if (invasionSpawnRule == null)
+        if (invasionSpawnRule == null || targetSystem.InvasionSpawnRuleSet == null ||
+            !targetSystem.InvasionSpawnRuleSet.ContainsRule(invasionSpawnRule))
             return false;
 
         if (string.IsNullOrWhiteSpace(sourceSystem.Id) ||
@@ -525,8 +574,24 @@ public sealed class InvasionService :
             invasionState.NextUpdateTick =
                 currentTick + 1;
 
-            if (invasionState.ResolveAtTick > 0 &&
-                currentTick >= invasionState.ResolveAtTick)
+            // Heartbeat also covers defenders never visited by the NPC scheduler.
+            if (_npcRuntimeService != null && _npcRuntimeService.Npcs != null)
+            {
+                foreach (SystemNpcRuntimeState defender in _npcRuntimeService.Npcs)
+                {
+                    if (defender != null && defender.IsAlive &&
+                        defender.CurrentSystemId == invasionState.TargetSystemId &&
+                        MilitaryNpcDiagnostics2A.Enabled(defender))
+                    {
+                        MilitaryNpcDiagnostics2A.Log("INVASION_DEFENDER", defender, currentTick,
+                            "InvasionId=" + invasionState.InvasionId +
+                            " | InvasionStartedAtTick=" + invasionState.StartedAtTick);
+                    }
+                }
+            }
+
+            // A timer cannot defeat defenders or remove the player from the system.
+            if (CanCaptureTargetNow(invasionState.TargetSystemId))
             {
                 ResolveInvasion(
                     invasionState.InvasionId,
@@ -566,15 +631,26 @@ public sealed class InvasionService :
             " | CapturedByEnemy=" + capturedByEnemy +
             BuildWarStateSnapshot(invasionState.TargetSystemId));
 
-        if (invasionState.LifecycleState ==
-            InvasionLifecycleState.CleanedUp)
+        if (!invasionState.IsActive())
         {
             LogWarStateDebug(
                 "RESOLVE_INVASION_FAILED" +
-                " | Reason=AlreadyCleanedUp" +
+                " | Reason=InvasionNotActive" +
                 " | InvasionId=" + invasionState.InvasionId +
                 BuildWarStateSnapshot(invasionState.TargetSystemId));
 
+            return false;
+        }
+
+        // Validate before resolving or changing ownership; a blocked capture remains active.
+        if (capturedByEnemy &&
+            (!CanCaptureTargetNow(invasionState.TargetSystemId) ||
+             !CanCaptureSystemWithoutHopelessCollapse(invasionState.TargetSystemId)))
+        {
+            LogWarStateDebug(
+                "RESOLVE_INVASION_CAPTURE_DEFERRED" +
+                " | InvasionId=" + invasionState.InvasionId +
+                " | TargetSystemId=" + invasionState.TargetSystemId);
             return false;
         }
 
@@ -936,9 +1012,9 @@ public sealed class InvasionService :
     private int GetCurrentGalaxyLevel()
     {
         if (Bootstrapper.Instance != null &&
-            Bootstrapper.Instance.OverrideNpcGalaxyLevel)
+            Bootstrapper.Instance.OverrideEnemyGalaxyLevel)
         {
-            return Bootstrapper.Instance.DebugNpcGalaxyLevel;
+            return Bootstrapper.Instance.DebugEnemyGalaxyLevel;
         }
 
         if (_gameSessionService == null ||

@@ -1,3 +1,5 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -142,3 +144,15 @@ public sealed class DebugHudController : MonoBehaviour
             : value;
     }
 }
+
+#else
+
+public sealed class DebugHudController : UnityEngine.MonoBehaviour
+{
+    private void Awake()
+    {
+        gameObject.SetActive(false);
+    }
+}
+
+#endif

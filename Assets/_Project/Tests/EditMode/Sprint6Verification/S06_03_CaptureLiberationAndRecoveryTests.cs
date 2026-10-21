@@ -58,7 +58,7 @@ public sealed class S06_03_CaptureLiberationAndRecoveryTests
     }
 
     [Test]
-    public void CompletedOfflineInvasion_CapturesTargetAndEstablishesOwnershipOnlyOnce()
+    public void ElapsedOfflineInvasion_DoesNotCaptureOrEstablishOwnershipWithoutCombatState()
     {
         var galaxy = new GalaxyRuntimeState();
         galaxy.Systems.Add(new StarSystemRuntimeState
@@ -85,14 +85,20 @@ public sealed class S06_03_CaptureLiberationAndRecoveryTests
         });
 
         galaxy.ProcessOfflineWarCatchUp(5);
-        Assert.That(galaxy.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Resolved));
-        Assert.That(galaxy.Systems[1].SystemStatus, Is.EqualTo(StarSystemStatus.Captured));
-        Assert.That(galaxy.EnemyFactions.Count, Is.EqualTo(1));
-        Assert.That(galaxy.EnemyFactions[0].OwnedSystemIds, Is.EquivalentTo(new[] { "target" }));
+        Assert.That(galaxy.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(galaxy.Systems[1].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(galaxy.EnemyFactions, Is.Empty,
+            "Elapsed offline time must not establish enemy ownership without restored combat state.");
+        Assert.That(galaxy.Invasions[0].LastUpdatedTick, Is.EqualTo(5));
+        Assert.That(galaxy.Invasions[0].NextUpdateTick, Is.EqualTo(6));
 
         galaxy.ProcessOfflineWarCatchUp(5);
-        Assert.That(galaxy.EnemyFactions.Count, Is.EqualTo(1));
-        Assert.That(galaxy.EnemyFactions[0].OwnedSystemIds, Is.EquivalentTo(new[] { "target" }));
+        Assert.That(galaxy.Invasions, Has.Count.EqualTo(1));
+        Assert.That(galaxy.Invasions[0].LifecycleState, Is.EqualTo(InvasionLifecycleState.Active));
+        Assert.That(galaxy.Systems[1].SystemStatus, Is.EqualTo(StarSystemStatus.Invasion));
+        Assert.That(galaxy.EnemyFactions, Is.Empty);
+        Assert.That(galaxy.Invasions[0].LastUpdatedTick, Is.EqualTo(5));
+        Assert.That(galaxy.Invasions[0].NextUpdateTick, Is.EqualTo(6));
     }
 
     [Test]

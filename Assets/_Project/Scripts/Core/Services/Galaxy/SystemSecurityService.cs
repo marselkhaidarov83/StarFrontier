@@ -216,6 +216,15 @@ public sealed class SystemSecurityService :
 
         RemoveEnemyOwnershipForSystem(systemId);
 
+        // Both liberation and repelling an invasion return control through this path.
+        if ((previousStatus == StarSystemStatus.Captured || previousStatus == StarSystemStatus.Invasion) &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out ISystemNpcPopulationService population) &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out IConfigService config))
+        {
+            population.EnsureMinimumAlliesInSystem(
+                config.GetStarSystemConfigById(systemId), afterAlliedVictory: true);
+        }
+
         LogSystemStatusDebug(
             "SYSTEM_STATUS_CHANGED" +
             " | Source=LiberateSystemByPlayer" +

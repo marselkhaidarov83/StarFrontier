@@ -306,6 +306,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             long npcStartedAt = BeginPerfMeasure();
 
+            MilitaryNpcDiagnostics2A.Log("BEHAVIOR_VISIT", npc, currentTick,
+                "DetailedSystem=" + isDetailedSystem + " | InitialWarmup=" + isInitialWarmup);
+
             SystemNpcBehaviorType behaviorBefore = npc.CurrentBehavior;
             AllyBehaviourScenario scenarioBefore = npc.CurrentBehaviorScenario;
 
@@ -313,6 +316,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 assignNewCount >= maxAssignNewPerTick)
             {
                 deferredAssignNewCount++;
+                MilitaryNpcDiagnostics2A.Log("BEHAVIOR_DEFERRED", npc, currentTick, "Reason=AssignNewLimit");
                 processedCount++;
 
                 double deferredMs =
@@ -343,6 +347,12 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 ResolveBehaviorScenario(
                     npc,
                     scenarioContext);
+
+            MilitaryNpcDiagnostics2A.Log("SCENARIO_RESOLVED", npc, currentTick,
+                "ResolvedScenario=" + resolvedScenario +
+                " | HasEnemies=" + scenarioContext.HasEnemies +
+                " | HasThreatStatus=" + scenarioContext.HasThreatStatus +
+                " | SystemStatus=" + scenarioContext.SystemStatus);
 
             double currentResolveScenarioMs =
                 EndPerfMeasureMs(resolveScenarioStartedAt);
@@ -388,6 +398,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 if (reassignCount >= maxReassignPerTick)
                 {
                     deferredReassignCount++;
+                    MilitaryNpcDiagnostics2A.Log("BEHAVIOR_DEFERRED", npc, currentTick, "Reason=ReassignLimit");
 
                     double deferredMs =
                         EndPerfMeasureMs(npcStartedAt);
@@ -441,6 +452,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             if (activeTickCount >= maxActiveBehaviorPerTick)
             {
                 deferredActiveBehaviorCount++;
+                MilitaryNpcDiagnostics2A.Log("BEHAVIOR_DEFERRED", npc, currentTick, "Reason=ActiveBehaviorLimit");
 
                 double deferredMs =
                     EndPerfMeasureMs(npcStartedAt);
@@ -467,6 +479,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             long activeBehaviorStartedAt = BeginPerfMeasure();
 
             TickActiveBehavior(npc, currentTick);
+            MilitaryNpcDiagnostics2A.Log("BEHAVIOR_AFTER", npc, currentTick);
 
             double currentActiveBehaviorMs =
                 EndPerfMeasureMs(activeBehaviorStartedAt);
@@ -1091,6 +1104,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     {
         if (behaviorScenario == null)
         {
+            MilitaryNpcDiagnostics2A.Log("PICK_UNAVAILABLE", npc, MilitaryNpcDiagnostics2A.CurrentTick,
+                "Reason=ScenarioAssetMissing");
             LogNpcAnnihilationPick(
                 "[NPC_ANNIHILATION_PICK]" +
                 " Result=False" +
@@ -1105,6 +1120,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         if (behaviorWeights == null || behaviorWeights.Count == 0)
         {
+            MilitaryNpcDiagnostics2A.Log("PICK_UNAVAILABLE", npc, MilitaryNpcDiagnostics2A.CurrentTick,
+                "Reason=ScenarioWeightsEmpty");
             LogNpcAnnihilationPick(
                 "[NPC_ANNIHILATION_PICK]" +
                 " Result=False" +
@@ -1114,6 +1131,11 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             return SystemNpcBehaviorType.None;
         }
+
+        if (MilitaryNpcDiagnostics2A.Enabled(npc))
+            MilitaryNpcDiagnostics2A.Log("PICK_SCENARIO", npc, MilitaryNpcDiagnostics2A.CurrentTick,
+                "ScenarioAsset=" + behaviorScenario.Id +
+                " | Weights=" + FormatBehaviorWeightsForDebug(behaviorWeights));
 
         List<SystemNpcBehaviorWeight> weights =
             behaviorWeights
@@ -1158,6 +1180,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         RemoveImpossibleNextBehaviors(weights, npc);
         RemoveRoleForbiddenBehaviors(weights, npc);
+        if (MilitaryNpcDiagnostics2A.Enabled(npc))
+            MilitaryNpcDiagnostics2A.Log("FILTER_ROLE_RESULT", npc, MilitaryNpcDiagnostics2A.CurrentTick,
+                "RemainingWeights=" + FormatBehaviorWeightsForDebug(weights) +
+                " | Result=" + (weights.Count == 0 ? "NoAllowedBehavior" : "HasAllowedBehavior"));
 
         bool hasAnnihilationAfterFilters =
             HasBehaviorWeight(
@@ -1387,8 +1413,18 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (weights == null || npc == null)
             return;
 
+        bool diagnose = MilitaryNpcDiagnostics2A.Enabled(npc);
+        string before = diagnose ? FormatBehaviorWeightsForDebug(weights) : string.Empty;
         RemoveTransitionMatrixForbiddenBehaviors(weights, npc);
+        if (diagnose)
+            MilitaryNpcDiagnostics2A.Log("FILTER_TRANSITION_MATRIX", npc, MilitaryNpcDiagnostics2A.CurrentTick,
+                "Before=" + before + " | After=" + FormatBehaviorWeightsForDebug(weights));
+        before = diagnose ? FormatBehaviorWeightsForDebug(weights) : string.Empty;
         RemoveUnavailableNextBehaviors(weights, npc);
+        if (diagnose)
+            MilitaryNpcDiagnostics2A.Log("FILTER_CURRENT_CONDITIONS", npc, MilitaryNpcDiagnostics2A.CurrentTick,
+                "Before=" + before + " | After=" + FormatBehaviorWeightsForDebug(weights) +
+                " | HasCombatTarget=" + HasCombatEngagementTarget(npc));
     }
 
     private void RemoveTransitionMatrixForbiddenBehaviors(
@@ -1531,6 +1567,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
 
         long totalStartedAt = BeginPerfMeasure();
+        MilitaryNpcDiagnostics2A.Log("APPLY_BEFORE", npc, currentTick,
+            "RequestedBehavior=" + nextBehavior);
 
         SystemNpcBehaviorType previousBehaviorBeforeApply =
             npc.PrevBehavior;
@@ -1569,6 +1607,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         long stateSetupStartedAt = BeginPerfMeasure();
 
+        SystemNpcBehaviorType previousMovementBehavior = npc.CurrentBehavior != SystemNpcBehaviorType.None
+            ? npc.CurrentBehavior : npc.PrevBehavior;
+        if (!SystemNpcMovementTime2A.IsMovingBehavior(previousMovementBehavior))
+            SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
         npc.CurrentBehavior = nextBehavior;
         npc.HasActiveBehavior = true;
         npc.BehaviorStartedTick = currentTick;
@@ -1656,6 +1698,8 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         double travelStateEventMs =
             EndPerfMeasureMs(travelStateEventStartedAt);
+        MilitaryNpcDiagnostics2A.Log("APPLY_AFTER", npc, currentTick,
+            "RequestedBehavior=" + nextBehavior);
 
         LogCustom(
             $"NPC: {npc.RuntimeNpcId}, Type: {npc.NpcType}, CurrentBehavior: {npc.CurrentBehavior}, TargetPlanet: {npc.TargetPlanetId}");

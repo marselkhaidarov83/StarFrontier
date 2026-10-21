@@ -24,7 +24,7 @@ MonoBehaviour:
   offscreenEnemyIndicatorColor: {r: 1, g: 0.33333334, b: 0.33333334, a: 1}
   offscreenPlayerIndicatorColor: {r: 1, g: 1, b: 1, a: 1}
   offscreenNpcIndicatorColor: {r: 0.5, g: 0.8, b: 1, a: 1}
-  offscreenEnemyIndicatorSize: {x: 24, y: 28}
+  offscreenEnemyIndicatorSize: {x: 30, y: 35}
   offscreenEnemyIndicatorEdgePadding: 16
   showInvasionWarning: 1
   invasionWarningDurationSeconds: 4.5

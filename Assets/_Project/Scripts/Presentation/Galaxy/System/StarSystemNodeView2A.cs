@@ -307,78 +307,11 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
         }
     }
 
-    private void ApplyWarStateIcon(
-    StarSystemRuntimeState runtimeState)
+    private void ApplyWarStateIcon(StarSystemRuntimeState runtimeState)
     {
-        if (warStateIcon == null)
-            return;
-
-        if (!HasVisibleWarState(runtimeState))
-        {
-            warStateIcon.gameObject.SetActive(false);
-            return;
-        }
-
-        Sprite iconSprite =
-            GetWarStateIconSprite(runtimeState);
-
-        if (iconSprite == null)
-        {
-            warStateIcon.gameObject.SetActive(false);
-            return;
-        }
-
-        warStateIcon.sprite = iconSprite;
-        warStateIcon.color = GetWarStateIconColor(runtimeState);
-        warStateIcon.gameObject.SetActive(true);
-    }
-
-    private bool HasVisibleWarState(
-     StarSystemRuntimeState runtimeState)
-    {
-        if (runtimeState == null)
-            return false;
-
-        return runtimeState.SystemStatus == StarSystemStatus.Threat ||
-               runtimeState.SystemStatus == StarSystemStatus.Invasion;
-    }
-
-    private Sprite GetWarStateIconSprite(
-      StarSystemRuntimeState runtimeState)
-    {
-        if (runtimeState == null)
-            return null;
-
-        switch (runtimeState.SystemStatus)
-        {
-            case StarSystemStatus.Threat:
-                return warThreatSprite;
-
-            case StarSystemStatus.Invasion:
-                return warInvasionSprite;
-
-            default:
-                return null;
-        }
-    }
-
-    private Color GetWarStateIconColor(
-    StarSystemRuntimeState runtimeState)
-    {
-        if (runtimeState == null)
-            return Color.white;
-
-        switch (runtimeState.SystemStatus)
-        {
-            case StarSystemStatus.Threat:
-                return warIconThreatColor;
-
-            case StarSystemStatus.Invasion:
-                return warIconInvasionColor;
-
-            default:
-                return Color.white;
-        }
+        SystemWarStateIcon2A.Apply(
+            warStateIcon, runtimeState, warThreatSprite, warInvasionSprite,
+            warIconThreatColor, warIconInvasionColor);
     }
 
     private Sprite GetEconomySprite()

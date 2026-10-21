@@ -186,54 +186,14 @@ public static class SystemPopulationRuleAssetGenerator
             "allySpawnRules",
             new[] { allyRule });
 
-        if (!profile.HasEnemies)
-        {
-            SetPrivateField(
-                asset,
-                "enemyGroupSpawnRuleEntries",
-                Array.Empty<SystemPopulationEnemyGroupRuleEntry>());
-
-            return warnings;
-        }
-
-        string[] enemyRuleKeys =
-            profile.EnemyGroupRuleKeys;
-
-        if (enemyRuleKeys == null || enemyRuleKeys.Length == 0)
-            enemyRuleKeys = BuildDefaultEnemyGroupRuleKeys();
-
-        SystemPopulationEnemyGroupRuleEntry[] enemyEntries =
-            new SystemPopulationEnemyGroupRuleEntry[enemyRuleKeys.Length];
-
-        for (int i = 0; i < enemyRuleKeys.Length; i++)
-        {
-            string enemyRuleKey =
-                enemyRuleKeys[i];
-
-            EnemyGroupSpawnRuleConfig enemyRule =
-                FindEnemyGroupSpawnRule(enemyRuleKey);
-
-            if (enemyRule == null)
-            {
-                warnings++;
-                AppLog.Warning(DebugLogChannel.EditorGenerators,
-                    $"SystemPopulationRule generator: missing EnemyGroupSpawnRuleConfig '{enemyRuleKey}' for {id}.");
-            }
-
-            SystemPopulationEnemyGroupRuleEntry enemyEntry =
-                new SystemPopulationEnemyGroupRuleEntry();
-
-            SetPrivateField(enemyEntry, "enemyGroupSpawnRule", enemyRule);
-            SetPrivateField(enemyEntry, "weight", 1);
-
-            enemyEntries[i] = enemyEntry;
-        }
-
-        SetPrivateField(
-            asset,
-            "enemyGroupSpawnRuleEntries",
-            enemyEntries);
-
+        SetPrivateField(asset, "enemyGroupSpawnRuleEntries", Array.Empty<SystemPopulationEnemyGroupRuleEntry>());
+        InvasionSpawnRuleSetConfig invasionRules = profile.HasEnemies
+            ? AssetDatabase.LoadAssetAtPath<InvasionSpawnRuleSetConfig>(
+                "Assets/_Project/Content/Configs/Population/invasionSpawnRules_01.asset")
+            : null;
+        SetPrivateField(asset, "invasionSpawnRuleSet", invasionRules);
+        if (profile.HasEnemies && invasionRules == null)
+            warnings++;
         return warnings;
     }
 

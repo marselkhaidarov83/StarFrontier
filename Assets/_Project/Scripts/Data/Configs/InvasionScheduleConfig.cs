@@ -6,6 +6,12 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/War/Invasion Schedule")]
 public sealed class InvasionScheduleConfig : BaseConfig
 {
+    [Header("Capture Rules")]
+    [Tooltip("Минимальное количество игровых тиков после начала вторжения до возможного захвата. Это тики игрового времени, не кадры. Остальные условия захвата также должны выполняться.")]
+    [SerializeField, Min(0)] private int minimumCaptureDelayTicks = 5;
+
+    public int MinimumCaptureDelayTicks => Mathf.Max(0, minimumCaptureDelayTicks);
+
     [Header("Level Rules")]
     [Tooltip("Настройки автоматических вторжений по уровню игры.")]
     [SerializeField] private InvasionScheduleLevelEntry[] levelEntries =
@@ -37,6 +43,8 @@ public sealed class InvasionScheduleConfig : BaseConfig
 #if UNITY_EDITOR
     private void OnValidate()
     {
+        minimumCaptureDelayTicks = Mathf.Max(0, minimumCaptureDelayTicks);
+
         if (levelEntries == null)
             levelEntries = new InvasionScheduleLevelEntry[0];
 

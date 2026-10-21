@@ -35,7 +35,7 @@ public sealed class GalaxyNpcSimulationScheduleService :
 
     private int _scheduleTickIndex;
     private int _fallbackCursor;
-    private int _lastSelectionQuantTick = int.MinValue;
+    private int _lastSelectionFrame = int.MinValue;
     private string _prioritySourceSystemId = string.Empty;
     private bool _initialWarmupComplete;
 
@@ -82,16 +82,40 @@ public sealed class GalaxyNpcSimulationScheduleService :
 
         EnsurePriorityIndex(currentSystemId, allSystems);
 
-        if (_lastSelectionQuantTick == quantTick)
+        if (_lastSelectionFrame == Time.frameCount)
             return _selectedOffscreenSystems;
 
         _selectedOffscreenSystems.Clear();
 
-        CollectScheduledOffscreenSystems(currentSystemId, allSystems);
+        // Advance the existing priority/cursor algorithm once per rendered frame.
+        // Empty priorities do not consume a frame without processing any system.
+        OffscreenNpcSimulationScheduleConfig scheduleConfig = GetScheduleConfig();
+        int attempts = scheduleConfig != null && scheduleConfig.Ticks != null
+            ? Mathf.Max(1, scheduleConfig.Ticks.Length)
+            : 1;
+        for (int i = 0; i < attempts && _selectedOffscreenSystems.Count == 0; i++)
+            CollectScheduledOffscreenSystems(currentSystemId, allSystems);
 
-        _lastSelectionQuantTick = quantTick;
+        if (_selectedOffscreenSystems.Count == 0)
+            CollectFallbackOffscreenSystems(currentSystemId, allSystems);
+
+        // Combat, behavior and movement must share this selection in the same frame.
+        _lastSelectionFrame = Time.frameCount;
+        LogFrameSelection(quantTick);
 
         return _selectedOffscreenSystems;
+    }
+
+    private void LogFrameSelection(int quantTick)
+    {
+        if (Bootstrapper.Instance == null || !Bootstrapper.Instance.IsPerformanceLogEnabled(
+                DebugLogPerformanceArea.GameTimeLoadAnalytics))
+            return;
+
+        Bootstrapper.Instance.LogPerformance(DebugLogPerformanceArea.GameTimeLoadAnalytics,
+            "[OFFSCREEN_NPC_FRAME_SCHEDULE] UnityFrame=" + Time.frameCount +
+            " | Tick=" + quantTick + " | ScheduleStep=" + _scheduleTickIndex +
+            " | Systems=" + string.Join(",", _selectedOffscreenSystems.ConvertAll(system => system.Id)));
     }
 
     public StarSystemConfig GetCurrentSystem()
@@ -165,7 +189,7 @@ public sealed class GalaxyNpcSimulationScheduleService :
 
         _scheduleTickIndex = 0;
         _fallbackCursor = 0;
-        _lastSelectionQuantTick = int.MinValue;
+        _lastSelectionFrame = int.MinValue;
         _prioritySourceSystemId = currentSystemId ?? string.Empty;
         _initialWarmupComplete = false;
 

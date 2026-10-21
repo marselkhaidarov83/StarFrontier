@@ -113,6 +113,7 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
 
         _eventBus.Subscribe<SystemTravelCompletedEvent>(
             OnTravelCompleted);
+        _eventBus.Subscribe<PlanetLandingBlockedEvent2A>(OnPlanetLandingBlocked);
 
         LogCustom(
             "SystemTravelCompletedEvent subscribed");
@@ -124,6 +125,7 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
         {
             _eventBus.Unsubscribe<SystemTravelCompletedEvent>(
                 OnTravelCompleted);
+            _eventBus.Unsubscribe<PlanetLandingBlockedEvent2A>(OnPlanetLandingBlocked);
         }
 
         if (_currentRoutine != null)
@@ -134,6 +136,11 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
             _currentRoutine =
                 null;
         }
+    }
+
+    private void OnPlanetLandingBlocked(PlanetLandingBlockedEvent2A evt)
+    {
+        ShowMessage(PlanetLandingRules2A.BlockedMessage);
     }
 
     private void OnTravelCompleted(

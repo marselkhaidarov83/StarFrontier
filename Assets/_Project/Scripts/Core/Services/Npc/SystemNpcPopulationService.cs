@@ -15,6 +15,10 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     private readonly IGameSessionService _gameSessionService;
     private readonly IConfigService _configService;
 
+    // Marker presence is saved with population timers, including when all NPCs die.
+    private const string AllyMinimumInitializedMarker = "ally_minimum_population_initialized";
+    private readonly HashSet<string> _allyMinimumInitializedSystems = new();
+
     private float randomPosition = 200f;
 
     private bool OverrideAutomaticSpawnInterval =>
@@ -84,7 +88,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (isEnemySystem)
         {
-            if (!StopAutomaticEnemySpawns)
+            if (!StopAutomaticEnemySpawns && CanSpawnEnemyPopulation(starSystem))
                 TickEnemySystemPopulation(starSystem, deltaTime);
 
             return;
@@ -96,14 +100,16 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (!StopAutomaticAllySpawns)
             TickAllies(starSystem, deltaTime);
 
-        if (!StopAutomaticEnemySpawns)
-            TickEnemyGroups(starSystem, deltaTime);
+
     }
 
     private void TickEnemySystemPopulation(
         StarSystemConfig starSystem,
         float deltaTime)
     {
+        if (!CanSpawnEnemyPopulation(starSystem))
+            return;
+
         if (starSystem == null)
             return;
 
@@ -144,7 +150,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         }
 
         int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
+            GetCurrentEnemyGalaxyLevel();
 
         if (!rule.HasValidEnemiesForGalaxyLevel(currentGalaxyLevel))
         {
@@ -256,6 +262,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         EnemySpawnRuleConfig rule,
         EnemyConfig enemyConfig)
     {
+        if (!CanSpawnEnemyPopulation(starSystem))
+            return;
+
         if (starSystem == null)
             return;
 
@@ -269,7 +278,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             Guid.NewGuid().ToString("N");
 
         int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
+            GetCurrentEnemyGalaxyLevel();
 
         Vector3 groupSpawnBasePosition =
             PickEnemyGroupSpawnBasePosition(starSystem);
@@ -370,6 +379,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem,
         EnemySpawnRuleConfig rule)
     {
+        if (!CanSpawnEnemyPopulation(starSystem))
+            return;
+
         if (starSystem == null)
             return;
 
@@ -380,7 +392,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             Guid.NewGuid().ToString("N");
 
         int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
+            GetCurrentEnemyGalaxyLevel();
 
         IReadOnlyList<EnemyGroupEntryConfig> enemies =
             rule.GetEnemiesForGalaxyLevel(currentGalaxyLevel);
@@ -445,6 +457,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
     public void ClearRuntimeState()
     {
         RuntimeState.Clear();
+        _allyMinimumInitializedSystems.Clear();
     }
 
     public void ProcessOfflinePopulation(
@@ -461,7 +474,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             return;
 
         int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
+            GetCurrentAllyGalaxyLevel();
 
         for (int systemIndex = 0;
              systemIndex < starSystems.Count;
@@ -470,7 +483,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             StarSystemConfig starSystem =
                 starSystems[systemIndex];
 
-            if (starSystem == null)
+            if (starSystem == null || IsEnemySystem(starSystem))
                 continue;
 
             SystemPopulationRule populationRule =
@@ -643,8 +656,10 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (populationRule.AllySpawnRules == null)
             return;
 
+        EnsureMinimumAlliesInSystem(starSystem);
+
         int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
+            GetCurrentAllyGalaxyLevel();
 
         foreach (AllySpawnRuleConfig rule in populationRule.AllySpawnRules)
         {
@@ -698,7 +713,8 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                     ", GalaxyLevel=" + currentGalaxyLevel +
                     ", Alive=" + aliveCount +
                     ", Min=" + entry.MinCount +
-                    ", Max=" + entry.MaxCount);
+                    ", Max=" + entry.MaxCount,
+                allowMinimumFill: false);
         }
     }
 
@@ -718,7 +734,8 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         Func<TConfig, string> buildRespawnTimerKey,
         Action<TConfig> createNpc,
         Action<string, string> logDecision,
-        Func<TEntry, TConfig, int, string> buildLogDetails)
+        Func<TEntry, TConfig, int, string> buildLogDetails,
+        bool allowMinimumFill = true)
         where TEntry : class
         where TConfig : class
     {
@@ -801,7 +818,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 continue;
             }
 
-            if (aliveCount < minCount)
+            if (allowMinimumFill && aliveCount < minCount)
             {
                 int missing =
                     minCount - aliveCount;
@@ -973,147 +990,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         return entries.Count - 1;
     }
 
-    private void TickEnemyGroups(
-        StarSystemConfig starSystem,
-        float deltaTime)
-    {
-        SystemPopulationRule populationRule =
-            GetCurrentPopulationRule(starSystem);
 
-        if (populationRule == null)
-            return;
 
-        if (populationRule.EnemyGroupSpawnRuleEntries == null)
-            return;
 
-        int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
-
-        List<SystemPopulationEnemyGroupRuleEntry> readyEntries =
-            new List<SystemPopulationEnemyGroupRuleEntry>();
-
-        for (int i = 0; i < populationRule.EnemyGroupSpawnRuleEntries.Length; i++)
-        {
-            SystemPopulationEnemyGroupRuleEntry entry =
-                populationRule.EnemyGroupSpawnRuleEntries[i];
-
-            if (entry == null || !entry.IsValid())
-                continue;
-
-            EnemyGroupSpawnRuleConfig rule =
-                entry.EnemyGroupSpawnRule;
-
-            if (rule == null)
-                continue;
-
-            if (!rule.HasValidEnemiesForGalaxyLevel(currentGalaxyLevel))
-                continue;
-
-            int aliveGroupCount =
-                _npcRuntimeService
-                    .GetAliveEnemyGroupsByRule(
-                        starSystem.Id,
-                        rule.Id)
-                    .Count;
-
-            if (aliveGroupCount >=
-                rule.GetMaxAliveGroupsForGalaxyLevel(currentGalaxyLevel))
-            {
-                continue;
-            }
-
-            SystemPopulationRuleTimerState timer =
-                RuntimeState.GetOrCreateTimer(
-                    starSystem.Id,
-                    rule.Id);
-
-            if (ConsumeDueRespawn(timer))
-            {
-                readyEntries.Add(entry);
-                continue;
-            }
-
-            if (timer.NextSpawnTick > 0)
-                continue;
-
-            timer.TimerSeconds += deltaTime;
-
-            if (timer.TimerSeconds <
-                rule.GetSpawnIntervalSeconds(currentGalaxyLevel))
-            {
-                continue;
-            }
-
-            readyEntries.Add(entry);
-        }
-
-        SystemPopulationEnemyGroupRuleEntry selectedEntry =
-            PickWeightedEnemyGroupRuleEntry(readyEntries);
-
-        if (selectedEntry == null)
-            return;
-
-        EnemyGroupSpawnRuleConfig selectedRule =
-            selectedEntry.EnemyGroupSpawnRule;
-
-        if (selectedRule == null)
-            return;
-
-        SystemPopulationRuleTimerState selectedTimer =
-            RuntimeState.GetOrCreateTimer(
-                starSystem.Id,
-                selectedRule.Id);
-
-        selectedTimer.TimerSeconds = 0f;
-
-        CreateEnemyGroup(
-            starSystem,
-            selectedRule);
-    }
-
-    private SystemPopulationEnemyGroupRuleEntry PickWeightedEnemyGroupRuleEntry(
-        List<SystemPopulationEnemyGroupRuleEntry> entries)
-    {
-        if (entries == null || entries.Count == 0)
-            return null;
-
-        int totalWeight = 0;
-
-        for (int i = 0; i < entries.Count; i++)
-        {
-            SystemPopulationEnemyGroupRuleEntry entry =
-                entries[i];
-
-            if (entry == null || !entry.IsValid())
-                continue;
-
-            totalWeight += Mathf.Max(1, entry.Weight);
-        }
-
-        if (totalWeight <= 0)
-            return null;
-
-        int roll =
-            UnityEngine.Random.Range(0, totalWeight);
-
-        int cumulative = 0;
-
-        for (int i = 0; i < entries.Count; i++)
-        {
-            SystemPopulationEnemyGroupRuleEntry entry =
-                entries[i];
-
-            if (entry == null || !entry.IsValid())
-                continue;
-
-            cumulative += Mathf.Max(1, entry.Weight);
-
-            if (roll < cumulative)
-                return entry;
-        }
-
-        return entries[entries.Count - 1];
-    }
 
     private int CountAliveAlliesForRule(
         string systemId,
@@ -1156,6 +1035,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         AllySpawnRuleConfig rule,
         AllyConfig allyConfig)
     {
+        if (starSystem == null || IsEnemySystem(starSystem))
+            return;
+
         if (starSystem == null)
             return;
 
@@ -1201,85 +1083,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             "Behavior: " + ally.CurrentBehavior);
     }
 
-    private void CreateEnemyGroup(
-    StarSystemConfig starSystem,
-    EnemyGroupSpawnRuleConfig rule)
-    {
-        if (starSystem == null)
-            return;
 
-        if (rule == null)
-            return;
-
-        string groupRuntimeId =
-            Guid.NewGuid().ToString("N");
-
-        int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
-
-        EnemyFaction2A? enemyFaction =
-            ResolveEnemyFactionForSystem(starSystem);
-
-        IReadOnlyList<EnemyGroupEntryConfig> enemies =
-            rule.PickEnemiesForGalaxyLevel(
-                currentGalaxyLevel,
-                enemyFaction);
-
-        if (enemies == null || enemies.Count == 0)
-            return;
-
-        Vector3 groupSpawnBasePosition =
-            PickEnemyGroupSpawnBasePosition(starSystem);
-
-        for (int entryIndex = 0; entryIndex < enemies.Count; entryIndex++)
-        {
-            EnemyGroupEntryConfig entry =
-                enemies[entryIndex];
-
-            if (entry == null || !entry.IsValid())
-                continue;
-
-            if (entry.EnemyConfig == null)
-                continue;
-
-            int count =
-                UnityEngine.Random.Range(
-                    entry.MinCount,
-                    entry.MaxCount + 1);
-
-            for (int i = 0; i < count; i++)
-            {
-                Vector3 position =
-                    BuildEnemySpawnPosition(
-                        starSystem,
-                        groupSpawnBasePosition);
-
-                SystemNpcRuntimeState enemy =
-                    SystemNpcRuntimeFactory.CreateEnemy(
-                        entry.EnemyConfig,
-                        starSystem.Id,
-                        starSystem.Id,
-                        position,
-                        rule.Id,
-                        groupRuntimeId);
-
-                ApplyInitialFacingToSun(enemy, starSystem);
-
-                enemy.CanChangeLocationOnRestore = false;
-
-                _npcRuntimeService.AddNpc(enemy);
-
-                AppLog.Info(DebugLogChannel.NpcMovement,
-                    "[SystemPopulationService] Enemy spawned. " +
-                    "System: " + starSystem.Id + ", " +
-                    "GroupRule: " + rule.Id + ", " +
-                    "Faction: " + (enemyFaction.HasValue ? enemyFaction.Value.ToString() : "Any") + ", " +
-                    "Config: " + entry.EnemyConfig.Id + ", " +
-                    "GroupRuntimeId: " + groupRuntimeId + ", " +
-                    "GalaxyLevel: " + currentGalaxyLevel);
-            }
-        }
-    }
 
     private void ApplyInitialFacingToSun(
     SystemNpcRuntimeState npc,
@@ -1335,123 +1139,12 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
     public bool DebugSpawnEnemyAttackGroupInCurrentSystem()
     {
-        StarSystemConfig starSystem =
-            GetCurrentPlayerStarSystem();
-
-        if (starSystem == null)
-        {
-            AppLog.Warning(DebugLogChannel.NpcMovement,
-                "[SystemPopulationService] Debug enemy spawn failed. " +
-                "Current player StarSystemConfig was not resolved.");
-
+        StarSystemConfig system = GetCurrentPlayerStarSystem();
+        EnemySpawnRuleConfig rule = ResolveEnemyPopulationRule(system);
+        if (rule == null || !rule.HasValidEnemiesForGalaxyLevel(GetCurrentEnemyGalaxyLevel()))
             return false;
-        }
 
-        SystemPopulationRule populationRule =
-            GetCurrentPopulationRule(starSystem);
-
-        if (populationRule == null)
-        {
-            AppLog.Warning(DebugLogChannel.NpcMovement,
-                "[SystemPopulationService] Debug enemy spawn failed. " +
-                "System has no SystemPopulationRule. System: " +
-                starSystem.Id);
-
-            return false;
-        }
-
-        if (populationRule.EnemyGroupSpawnRuleEntries == null ||
-            populationRule.EnemyGroupSpawnRuleEntries.Length == 0)
-        {
-            AppLog.Warning(DebugLogChannel.NpcMovement,
-                "[SystemPopulationService] Debug enemy spawn failed. " +
-                "SystemPopulationRule has no EnemyGroupSpawnRuleEntries. Rule: " +
-                populationRule.Id);
-
-            return false;
-        }
-
-        int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
-
-        List<SystemPopulationEnemyGroupRuleEntry> readyEntries =
-            new List<SystemPopulationEnemyGroupRuleEntry>();
-
-        for (int i = 0; i < populationRule.EnemyGroupSpawnRuleEntries.Length; i++)
-        {
-            SystemPopulationEnemyGroupRuleEntry entry =
-                populationRule.EnemyGroupSpawnRuleEntries[i];
-
-            if (entry == null || !entry.IsValid())
-                continue;
-
-            EnemyGroupSpawnRuleConfig rule =
-                entry.EnemyGroupSpawnRule;
-
-            if (rule == null)
-                continue;
-
-            if (!rule.HasValidEnemiesForGalaxyLevel(currentGalaxyLevel))
-                continue;
-
-            int aliveGroupCount =
-                _npcRuntimeService
-                    .GetAliveEnemyGroupsByRule(
-                        starSystem.Id,
-                        rule.Id)
-                    .Count;
-
-            if (aliveGroupCount >=
-                rule.GetMaxAliveGroupsForGalaxyLevel(currentGalaxyLevel))
-            {
-                continue;
-            }
-
-            readyEntries.Add(entry);
-        }
-
-        SystemPopulationEnemyGroupRuleEntry selectedEntry =
-            PickWeightedEnemyGroupRuleEntry(readyEntries);
-
-        if (selectedEntry == null ||
-            selectedEntry.EnemyGroupSpawnRule == null)
-        {
-            AppLog.Warning(DebugLogChannel.NpcMovement,
-                "[SystemPopulationService] Debug enemy spawn failed. " +
-                "No eligible enemy group rule for system: " +
-                starSystem.Id +
-                ", GalaxyLevel: " +
-                currentGalaxyLevel);
-
-            return false;
-        }
-
-        EnemyGroupSpawnRuleConfig selectedRule =
-            selectedEntry.EnemyGroupSpawnRule;
-
-        SystemPopulationRuleTimerState selectedTimer =
-            RuntimeState.GetOrCreateTimer(
-                starSystem.Id,
-                selectedRule.Id);
-
-        selectedTimer.TimerSeconds = 0f;
-        selectedTimer.NextSpawnTick = 0;
-
-        CreateEnemyGroup(
-            starSystem,
-            selectedRule);
-
-        AppLog.Info(DebugLogChannel.NpcMovement,
-            "[SystemPopulationService] Debug enemy attack group spawned. " +
-            "System: " +
-            starSystem.Id +
-            ", Rule: " +
-            selectedRule.Id +
-            ", RuleWeight: " +
-            selectedEntry.Weight +
-            ", GalaxyLevel: " +
-            currentGalaxyLevel);
-
+        CreateEnemySpawnRuleGroup(system, rule);
         return true;
     }
 
@@ -1461,7 +1154,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem =
             GetCurrentPlayerStarSystem();
 
-        if (starSystem == null)
+        if (starSystem == null || IsEnemySystem(starSystem))
         {
             AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug ally spawn failed. " +
@@ -1495,7 +1188,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         }
 
         int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
+            GetCurrentAllyGalaxyLevel();
 
         for (int ruleIndex = 0;
              ruleIndex < populationRule.AllySpawnRules.Length;
@@ -1877,6 +1570,21 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         return starSystem.SystemPopulationRule;
     }
 
+    private bool CanSpawnEnemyPopulation(StarSystemConfig system)
+    {
+        return system != null && IsEnemySystem(system) &&
+            _gameSessionService.State?.Galaxy != null &&
+            !_gameSessionService.State.Galaxy.HasActiveInvasionForTarget(system.Id);
+    }
+
+    private EnemySpawnRuleConfig ResolveEnemyPopulationRule(StarSystemConfig system)
+    {
+        if (!CanSpawnEnemyPopulation(system) || system.EnemySpawnRuleSet == null)
+            return null;
+        EnemyFaction2A? faction = ResolveEnemyFactionForSystem(system);
+        return faction.HasValue ? system.EnemySpawnRuleSet.GetRuleForFaction(faction.Value) : null;
+    }
+
     private bool IsEnemySystem(
         StarSystemConfig starSystem)
     {
@@ -1983,10 +1691,24 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             rule.GetSpawnIntervalSeconds(galaxyLevel));
     }
 
-    private int GetCurrentGalaxyLevel()
+    private int GetCurrentAllyGalaxyLevel()
     {
         if (OverrideNpcGalaxyLevel)
             return DebugNpcGalaxyLevel;
+
+        return GetCurrentGalaxyLevel();
+    }
+
+    private int GetCurrentEnemyGalaxyLevel()
+    {
+        if (Bootstrapper.Instance != null && Bootstrapper.Instance.OverrideEnemyGalaxyLevel)
+            return Bootstrapper.Instance.DebugEnemyGalaxyLevel;
+
+        return GetCurrentGalaxyLevel();
+    }
+
+    private int GetCurrentGalaxyLevel()
+    {
 
         if (_gameSessionService == null ||
             !_gameSessionService.HasActiveSession ||
@@ -2055,6 +1777,10 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (npc.IsAlly)
         {
+            StarSystemConfig allySystem = _configService.GetStarSystemConfigById(systemId);
+            if (allySystem == null || IsEnemySystem(allySystem))
+                return false;
+
             AllySpawnRuleConfig rule =
                 _configService.GetAllySpawnRuleConfigById(
                     npc.SpawnRuleId);
@@ -2067,7 +1793,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 _configService.GetAllyConfigById(npc.ConfigId));
 
             intervalSeconds = GetPopulationSpawnIntervalSeconds(
-                rule.GetSpawnIntervalSeconds(GetCurrentGalaxyLevel()));
+                rule.GetSpawnIntervalSeconds(GetCurrentAllyGalaxyLevel()));
 
             return true;
         }
@@ -2079,7 +1805,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             _configService.GetStarSystemConfigById(systemId);
 
         if (starSystem != null &&
-            IsEnemySystem(starSystem) &&
+            CanSpawnEnemyPopulation(starSystem) &&
             starSystem.EnemySpawnRuleSet != null)
         {
             EnemyFaction2A? faction =
@@ -2100,46 +1826,11 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
                     intervalSeconds = GetPopulationSpawnIntervalSeconds(
                         enemyPopulationRule.GetSpawnIntervalSeconds(
-                            GetCurrentGalaxyLevel()));
+                            GetCurrentEnemyGalaxyLevel()));
 
                     return true;
                 }
             }
-        }
-
-        SystemPopulationRule populationRule =
-            GetCurrentPopulationRule(starSystem);
-
-        if (populationRule == null ||
-            populationRule.EnemyGroupSpawnRuleEntries == null)
-        {
-            return false;
-        }
-
-        for (int i = 0;
-             i < populationRule.EnemyGroupSpawnRuleEntries.Length;
-             i++)
-        {
-            SystemPopulationEnemyGroupRuleEntry entry =
-                populationRule.EnemyGroupSpawnRuleEntries[i];
-
-            if (entry == null || !entry.IsValid())
-                continue;
-
-            EnemyGroupSpawnRuleConfig rule =
-                entry.EnemyGroupSpawnRule;
-
-            if (rule == null)
-                continue;
-
-            if (rule.Id != npc.SpawnRuleId)
-                continue;
-
-            timerRuleId = rule.Id;
-            intervalSeconds = GetPopulationSpawnIntervalSeconds(
-                rule.GetSpawnIntervalSeconds(GetCurrentGalaxyLevel()));
-
-            return true;
         }
 
         return false;
@@ -2181,134 +1872,108 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         return 1;
     }
 
-    public void EnsureMinimumAlliesInSystem(StarSystemConfig starSystem)
+    public void EnsureMinimumAlliesInSystem(
+        StarSystemConfig starSystem,
+        bool afterAlliedVictory = false)
     {
-        if (starSystem == null)
+        if (starSystem == null || StopAutomaticAllySpawns || IsEnemySystem(starSystem))
             return;
 
-        if (StopAutomaticAllySpawns)
+        SystemPopulationRule populationRule = GetCurrentPopulationRule(starSystem);
+        if (populationRule == null || populationRule.AllySpawnRules == null)
             return;
 
-        if (IsEnemySystem(starSystem))
+        if (!afterAlliedVictory)
+        {
+            if (_allyMinimumInitializedSystems.Contains(starSystem.Id))
+                return;
+
+            _allyMinimumInitializedSystems.Add(starSystem.Id);
+            if (RuntimeState.Timers.Any(timer => timer != null &&
+                    timer.SystemId == starSystem.Id && timer.RuleId == AllyMinimumInitializedMarker))
+                return;
+
+            // Existing timers migrate older saves without refilling casualties on load.
+            bool hasPopulationHistory = RuntimeState.Timers.Any(timer =>
+                timer != null && timer.SystemId == starSystem.Id);
+            bool hasNpcs = _npcRuntimeService.Npcs.Any(npc =>
+                npc != null && npc.CurrentSystemId == starSystem.Id);
+
+            RuntimeState.GetOrCreateTimer(starSystem.Id, AllyMinimumInitializedMarker);
+            if (hasPopulationHistory || hasNpcs)
+                return;
+        }
+        else
+        {
+            _allyMinimumInitializedSystems.Add(starSystem.Id);
+            RuntimeState.GetOrCreateTimer(starSystem.Id, AllyMinimumInitializedMarker);
+        }
+
+        GalaxyRuntimeState galaxy = _gameSessionService.State?.Galaxy;
+        if (galaxy == null || galaxy.HasActiveInvasionForTarget(starSystem.Id) ||
+            (galaxy.Systems != null && galaxy.Systems.Any(system => system != null &&
+                system.SystemId == starSystem.Id && system.SystemStatus == StarSystemStatus.Invasion)) ||
+            _npcRuntimeService.GetAliveEnemyGroupsInSystem(starSystem.Id).Count > 0)
             return;
 
-        if (GetCurrentPopulationRule(starSystem) == null)
-            return;
+        int level = GetCurrentAllyGalaxyLevel();
+        foreach (AllySpawnRuleConfig rule in populationRule.AllySpawnRules)
+        {
+            if (rule == null || !rule.HasValidAlliesForGalaxyLevel(level))
+                continue;
 
-        if (_npcRuntimeService.GetAliveEnemyGroupsInSystem(starSystem.Id).Count > 0)
-            return;
+            IReadOnlyList<AllyGroupEntryConfig> entries = rule.GetAlliesForGalaxyLevel(level);
+            if (entries == null)
+                continue;
 
-        TickAllies(
-            starSystem,
-            0.01f);
+            foreach (AllyGroupEntryConfig entry in entries)
+            {
+                if (entry == null || !entry.IsValid() || entry.AllyConfig == null)
+                    continue;
+
+                int alive = CountAliveAlliesForRule(starSystem.Id, rule, entry.AllyConfig);
+                int missing = Mathf.Max(0, Mathf.Min(entry.MinCount, entry.MaxCount) - alive);
+                if (missing == 0)
+                    continue;
+
+                // These explicit seeding events override casualty respawn delays.
+                SystemPopulationRuleTimerState respawnTimer = RuntimeState.GetOrCreateTimer(
+                    starSystem.Id, BuildAllyTimerKey(rule, entry.AllyConfig));
+                respawnTimer.NextSpawnTick = 0;
+                respawnTimer.TimerSeconds = 0f;
+
+                LogAllyPopulationDecision(starSystem,
+                    afterAlliedVictory ? "SPAWN_MINIMUM_ALLIED_VICTORY" : "SPAWN_MINIMUM_INITIAL",
+                    "PopulationRule=" + populationRule.Id + ", Rule=" + rule.Id +
+                    ", Config=" + entry.AllyConfig.Id + ", GalaxyLevel=" + level +
+                    ", Alive=" + alive + ", Min=" + entry.MinCount +
+                    ", Max=" + entry.MaxCount + ", Missing=" + missing);
+
+                for (int i = 0; i < missing; i++)
+                    CreateAlly(starSystem, rule, entry.AllyConfig);
+            }
+
+            RuntimeState.GetOrCreateTimer(starSystem.Id, rule.Id + "_interval").TimerSeconds = 0f;
+        }
     }
 
     public bool DebugSpawnEnemyInCurrentSystem()
     {
-        StarSystemConfig starSystem =
-            GetCurrentPlayerStarSystem();
-
-        if (starSystem == null)
-        {
-            AppLog.Warning(DebugLogChannel.NpcMovement,
-                "[SystemPopulationService] Debug enemy spawn failed. " +
-                "Current player StarSystemConfig was not resolved.");
-
+        StarSystemConfig system = GetCurrentPlayerStarSystem();
+        EnemySpawnRuleConfig rule = ResolveEnemyPopulationRule(system);
+        if (rule == null)
             return false;
-        }
-
-        SystemPopulationRule populationRule =
-            GetCurrentPopulationRule(starSystem);
-
-        if (populationRule == null ||
-            populationRule.EnemyGroupSpawnRuleEntries == null ||
-            populationRule.EnemyGroupSpawnRuleEntries.Length == 0)
-        {
-            AppLog.Warning(DebugLogChannel.NpcMovement,
-                "[SystemPopulationService] Debug enemy spawn failed. " +
-                "System has no enemy spawn rules. System: " +
-                starSystem.Id);
-
+        var entries = rule.GetEnemiesForGalaxyLevel(GetCurrentEnemyGalaxyLevel());
+        if (entries == null)
             return false;
-        }
-
-        int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
-
-        for (int ruleIndex = 0;
-             ruleIndex < populationRule.EnemyGroupSpawnRuleEntries.Length;
-             ruleIndex++)
+        foreach (EnemyGroupEntryConfig entry in entries)
         {
-            SystemPopulationEnemyGroupRuleEntry ruleEntry =
-                populationRule.EnemyGroupSpawnRuleEntries[ruleIndex];
-
-            if (ruleEntry == null || !ruleEntry.IsValid())
-                continue;
-
-            EnemyGroupSpawnRuleConfig rule =
-                ruleEntry.EnemyGroupSpawnRule;
-
-            if (rule == null)
-                continue;
-
-            IReadOnlyList<EnemyGroupEntryConfig> enemies =
-                rule.PickEnemiesForGalaxyLevel(currentGalaxyLevel);
-
-            if (enemies == null || enemies.Count == 0)
-                continue;
-
-            for (int enemyIndex = 0; enemyIndex < enemies.Count; enemyIndex++)
+            if (entry != null && entry.IsValid() && entry.EnemyConfig != null)
             {
-                EnemyGroupEntryConfig entry =
-                    enemies[enemyIndex];
-
-                if (entry == null ||
-                    !entry.IsValid() ||
-                    entry.EnemyConfig == null)
-                {
-                    continue;
-                }
-
-                string groupRuntimeId =
-                    Guid.NewGuid().ToString("N");
-
-                Vector3 position =
-                    BuildEnemySpawnPosition(starSystem);
-
-                SystemNpcRuntimeState enemy =
-                    SystemNpcRuntimeFactory.CreateEnemy(
-                        entry.EnemyConfig,
-                        starSystem.Id,
-                        starSystem.Id,
-                        position,
-                        rule.Id,
-                        groupRuntimeId);
-
-                ApplyInitialFacingToSun(enemy, starSystem);
-
-                enemy.CanChangeLocationOnRestore = false;
-
-                _npcRuntimeService.AddNpc(enemy);
-
-                AppLog.Info(DebugLogChannel.NpcMovement,
-                    "[SystemPopulationService] Debug single enemy spawned. " +
-                    "System: " + starSystem.Id +
-                    ", Rule: " + rule.Id +
-                    ", Config: " + entry.EnemyConfig.Id +
-                    ", GroupRuntimeId: " + groupRuntimeId +
-                    ", GalaxyLevel: " + currentGalaxyLevel);
-
+                CreateEnemyPopulationEnemy(system, rule, entry.EnemyConfig);
                 return true;
             }
         }
-
-        AppLog.Warning(DebugLogChannel.NpcMovement,
-            "[SystemPopulationService] Debug enemy spawn failed. " +
-            "No eligible enemy config for system: " +
-            starSystem.Id +
-            ", GalaxyLevel: " +
-            currentGalaxyLevel);
-
         return false;
     }
 
@@ -2326,7 +1991,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 "No eligible other system ally. Role: " +
                 role +
                 ", GalaxyLevel: " +
-                GetCurrentGalaxyLevel());
+                GetCurrentAllyGalaxyLevel());
 
             return false;
         }
@@ -2345,7 +2010,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             ", Role: " +
             role +
             ", GalaxyLevel: " +
-            GetCurrentGalaxyLevel());
+            GetCurrentAllyGalaxyLevel());
 
         return true;
     }
@@ -2374,7 +2039,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 : string.Empty;
 
         int currentGalaxyLevel =
-            GetCurrentGalaxyLevel();
+            GetCurrentAllyGalaxyLevel();
 
         List<(StarSystemConfig System, AllySpawnRuleConfig Rule, AllyConfig Ally)> candidates =
             new();
@@ -2384,7 +2049,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             StarSystemConfig system =
                 systems[systemIndex];
 
-            if (system == null)
+            if (system == null || IsEnemySystem(system))
                 continue;
 
             if (!string.IsNullOrWhiteSpace(currentSystemId) &&

@@ -44,7 +44,8 @@ public sealed class SystemOffscreenEnemyIndicatorsHud2A : MonoBehaviour, ISystem
         rect.offsetMax = Vector2.zero;
         rect.SetAsLastSibling();
         _graphic = overlay.GetComponent<SystemEnemyIndicatorGraphic2A>();
-        _graphic.raycastTarget = false;
+        _graphic.raycastTarget = true;
+        _graphic.IndicatorClicked += OnIndicatorClicked;
         _graphic.enabled = false;
         IsBound = true;
         // Bind at the normal lifecycle order, but project markers after camera movement.
@@ -57,6 +58,7 @@ public sealed class SystemOffscreenEnemyIndicatorsHud2A : MonoBehaviour, ISystem
         IsBound = false;
         if (_graphic != null)
         {
+            _graphic.IndicatorClicked -= OnIndicatorClicked;
             _graphic.enabled = false;
             Destroy(_graphic.gameObject);
         }
@@ -180,7 +182,8 @@ public sealed class SystemOffscreenEnemyIndicatorsHud2A : MonoBehaviour, ISystem
 
             Color tint = isHostile
                 ? config.OffscreenEnemyIndicatorColor : config.OffscreenNpcIndicatorColor;
-            AddOffscreenIndicator(npc.CurrentPosition, tint, worldCamera, uiCamera, screenBounds, edge);
+            AddOffscreenIndicator(npc.CurrentPosition, tint, worldCamera, uiCamera, screenBounds, edge,
+                npc.RuntimeNpcId);
         }
 
         // The player's marker remains available even when the camera is far from the ship.
@@ -193,7 +196,7 @@ public sealed class SystemOffscreenEnemyIndicatorsHud2A : MonoBehaviour, ISystem
     }
 
     private void AddOffscreenIndicator(Vector3 position, Color tint, Camera worldCamera,
-        Camera uiCamera, Rect screenBounds, Rect edge)
+        Camera uiCamera, Rect screenBounds, Rect edge, string runtimeNpcId = null)
     {
         position.z = 0f;
         Vector3 screen = worldCamera.WorldToScreenPoint(position);
@@ -216,7 +219,20 @@ public sealed class SystemOffscreenEnemyIndicatorsHud2A : MonoBehaviour, ISystem
         float yDistance = Mathf.Abs(direction.y) > 0.0001f
             ? halfSize.y / Mathf.Abs(direction.y) : float.PositiveInfinity;
         Vector2 center = edge.center + direction * Mathf.Min(xDistance, yDistance);
-        _graphic.AddIndicator(center, direction, tint);
+        _graphic.AddIndicator(center, direction, tint, runtimeNpcId);
+    }
+
+    private void OnIndicatorClicked(string runtimeNpcId)
+    {
+        if (!IsBound || !isActiveAndEnabled || _cameraController == null ||
+            !_cameraController.IsSystemCameraActive ||
+            !_npcs.TryGetNpc(runtimeNpcId, out SystemNpcRuntimeState npc) ||
+            npc == null || !npc.IsAlive || npc.IsOnPlanet ||
+            string.IsNullOrWhiteSpace(npc.CurrentSystemId) ||
+            !_player.IsPlayerAvailableInSystem(npc.CurrentSystemId))
+            return;
+
+        _cameraController.FocusOnNpc(npc.RuntimeNpcId);
     }
 
     private bool TryGetPanelScreenRect(RectTransform panel, Camera uiCamera, out Rect bounds)

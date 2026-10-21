@@ -64,9 +64,6 @@ public sealed class SystemSceneRoot2AEditModeTests
         Transform markersRoot =
             new GameObject("MarkersRoot").transform;
 
-        Transform debugRoot =
-            new GameObject("DebugRoot").transform;
-
         Canvas canvas =
             new GameObject("Canvas")
                 .AddComponent<Canvas>();
@@ -98,7 +95,6 @@ public sealed class SystemSceneRoot2AEditModeTests
 
         SetPrivateField(root, "boundsRoot", boundsRoot);
         SetPrivateField(root, "markersRoot", markersRoot);
-        SetPrivateField(root, "debugRoot", debugRoot);
 
         SetPrivateField(root, "metaCanvas", canvas);
         SetPrivateField(root, "systemMapHudRoot", systemMapHud);
@@ -120,7 +116,6 @@ public sealed class SystemSceneRoot2AEditModeTests
         Object.DestroyImmediate(vfxRoot.gameObject);
         Object.DestroyImmediate(boundsRoot.gameObject);
         Object.DestroyImmediate(markersRoot.gameObject);
-        Object.DestroyImmediate(debugRoot.gameObject);
         Object.DestroyImmediate(canvas.gameObject);
         Object.DestroyImmediate(systemMapHud.gameObject);
         Object.DestroyImmediate(planetRoot.gameObject);

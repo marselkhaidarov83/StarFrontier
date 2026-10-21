@@ -9,7 +9,7 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
     public double LastTotalMs { get; private set; }
 
     private const double PerfLogThresholdMs = 4.0;
-    private int _lastOffscreenMovementQuantTick = int.MinValue;
+    private int _lastOffscreenMovementFrame = int.MinValue;
 
     private readonly IGalaxyNpcSimulationScheduleService _simulationScheduleService;
     private readonly ISystemNpcMovementService _systemNpcMovementService;
@@ -42,7 +42,7 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
         int detailedSystems = 0;
         int offscreenSystems = 0;
         int scheduledOffscreenSystemsCount = 0;
-        bool offscreenSkippedSameTick = false;
+        bool offscreenSkippedSameFrame = false;
 
         StarSystemConfig currentSystem =
             _simulationScheduleService.GetCurrentSystem();
@@ -65,9 +65,9 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
                 ? currentSystem.Id
                 : string.Empty;
 
-        if (_lastOffscreenMovementQuantTick == quantTick)
+        if (_lastOffscreenMovementFrame == Time.frameCount)
         {
-            offscreenSkippedSameTick = true;
+            offscreenSkippedSameFrame = true;
         }
         else
         {
@@ -105,7 +105,7 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
                 }
             }
 
-            _lastOffscreenMovementQuantTick = quantTick;
+            _lastOffscreenMovementFrame = Time.frameCount;
         }
 
         double totalMs = EndPerfMeasureMs(totalStartedAt);
@@ -123,7 +123,7 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
             detailedSystems,
             scheduledOffscreenSystemsCount,
             offscreenSystems,
-            offscreenSkippedSameTick,
+            offscreenSkippedSameFrame,
             currentSystemId);
 
         LogNpcMovementPerf(
@@ -132,7 +132,7 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
             " | DetailedSystems=" + detailedSystems +
             " | ScheduledOffscreenSystems=" + scheduledOffscreenSystemsCount +
             " | OffscreenSystems=" + offscreenSystems +
-            " | OffscreenSkippedSameTick=" + offscreenSkippedSameTick +
+            " | OffscreenSkippedSameFrame=" + offscreenSkippedSameFrame +
             " | DetailedMs=" + detailedMs.ToString("F2") +
             " | OffscreenMs=" + offscreenMs.ToString("F2") +
             " | DeltaTime=" + deltaTime.ToString("F4") +
@@ -150,7 +150,7 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
         int detailedSystems,
         int scheduledOffscreenSystemsCount,
         int offscreenSystems,
-        bool offscreenSkippedSameTick,
+        bool offscreenSkippedSameFrame,
         string currentSystemId)
     {
         if (Bootstrapper.Instance == null ||
@@ -183,7 +183,7 @@ public sealed class GalaxyNpcMovementService : CustomService, IGalaxyNpcMovement
             " | DetailedSystems=" + detailedSystems +
             " | ScheduledOffscreenSystems=" + scheduledOffscreenSystemsCount +
             " | OffscreenSystems=" + offscreenSystems +
-            " | OffscreenSkippedSameTick=" + offscreenSkippedSameTick +
+            " | OffscreenSkippedSameFrame=" + offscreenSkippedSameFrame +
             " | CurrentSystemId=" + currentSystemId +
             " | PrioritySourceSystemId=" + _simulationScheduleService.PrioritySourceSystemId);
     }
