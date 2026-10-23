@@ -14,7 +14,7 @@ public static class MissionCapacityHelper
                 if (mission == null)
                     continue;
 
-                if (mission.Status == MissionStatus.Accepted || mission.Status == MissionStatus.ReadyToComplete)
+                if (MissionLifecycleRules.IsActive(mission.Status))
                     result++;
             }
 

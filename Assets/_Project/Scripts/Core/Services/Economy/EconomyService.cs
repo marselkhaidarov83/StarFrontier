@@ -118,11 +118,21 @@ public class EconomyService : CustomService, IEconomyService
         if (sellPrice <= 0)
             return false;
 
-        int ownedCount = _inventoryService.GetItemCount(itemId);
+        int ownedCount = _gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.GetTradeableQuantity(itemId);
         return ownedCount >= quantity;
     }
 
     public EconomyOperationResult BuyItem(string itemId, int quantity)
+    {
+        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.BuyItem, itemId, quantity))
+        {
+            var result = BuyItemCore(itemId, quantity);
+            observation.Complete(result.Success, result.ErrorCode.ToString(), (int)System.Math.Min(int.MaxValue, System.Math.Abs((long)result.ChangedCredits)));
+            return result;
+        }
+    }
+
+    private EconomyOperationResult BuyItemCore(string itemId, int quantity)
     {
         if (string.IsNullOrWhiteSpace(itemId))
             return EconomyOperationResult.Failed(EconomyErrorCode.InvalidItemId, itemId, quantity);
@@ -155,6 +165,16 @@ public class EconomyService : CustomService, IEconomyService
 
     public EconomyOperationResult SellItem(string itemId, int quantity)
     {
+        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.SellItem, itemId, quantity))
+        {
+            var result = SellItemCore(itemId, quantity);
+            observation.Complete(result.Success, result.ErrorCode.ToString(), (int)System.Math.Min(int.MaxValue, System.Math.Abs((long)result.ChangedCredits)));
+            return result;
+        }
+    }
+
+    private EconomyOperationResult SellItemCore(string itemId, int quantity)
+    {
         if (string.IsNullOrWhiteSpace(itemId))
             return EconomyOperationResult.Failed(EconomyErrorCode.InvalidItemId, itemId, quantity);
 
@@ -166,7 +186,7 @@ public class EconomyService : CustomService, IEconomyService
         if (sellPrice <= 0)
             return EconomyOperationResult.Failed(EconomyErrorCode.PriceNotFound, itemId, quantity);
 
-        int ownedCount = _inventoryService.GetItemCount(itemId);
+        int ownedCount = _gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.GetTradeableQuantity(itemId);
         if (ownedCount <= 0)
             return EconomyOperationResult.Failed(EconomyErrorCode.ItemNotOwned, itemId, quantity);
 

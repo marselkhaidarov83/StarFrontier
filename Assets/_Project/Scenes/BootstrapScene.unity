@@ -452,6 +452,7 @@ MonoBehaviour:
   newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
   invasionScheduleConfig: {fileID: 11400000, guid: 6dfe35b0aae854788b3a10665161c166, type: 2}
   debugLogConfig: {fileID: 11400000, guid: 9a599d852cc9340e5a75b4b8ac4a48be, type: 2}
+  playerAnalyticsConfig: {fileID: 11400000, guid: ee241b826f5543b0b74e0a3c6fce7613, type: 2}
   debugSettings: {fileID: 860668906}
   playerControlConfig: {fileID: 11400000, guid: 95e8e46b1c94b45d786dcc5063dd9447, type: 2}
   shipMovementConfig: {fileID: 11400000, guid: 236d385373c6d4e9791453bc1f51bc6d, type: 2}

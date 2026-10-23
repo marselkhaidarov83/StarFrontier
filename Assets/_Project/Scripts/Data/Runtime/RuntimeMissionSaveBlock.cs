@@ -10,6 +10,7 @@ public class RuntimeMissionSaveBlock
     public List<MissionInstanceData> AvailableMissions = new();
     public List<MissionInstanceData> ActiveMissions = new();
     public List<MissionInstanceData> CompletedMissions = new();
+    public List<MissionInstanceData> ArchivedMissions = new();
 
     public List<string> RewardGrantedMissionIds = new();
 }

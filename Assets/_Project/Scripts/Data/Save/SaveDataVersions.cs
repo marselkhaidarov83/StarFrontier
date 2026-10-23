@@ -45,6 +45,8 @@ public static class SaveDataVersions
     /// </summary>
     public const int SystemWarState = 6;
 
-    public const int Current = SystemWarState;
+    public const int MissionLifecycle = 7;
+    public const int MissionGameplay = 8;
+    public const int Current = MissionGameplay;
 
 }

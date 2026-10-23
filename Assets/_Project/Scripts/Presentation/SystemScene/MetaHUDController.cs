@@ -195,6 +195,7 @@ public class MetaHudController :
             FuelChangedEvent>(
                 OnFuelChanged);
 
+        simpleEventBus.Subscribe<CargoChangedEvent>(OnCargoChanged);
         simpleEventBus.Subscribe<
             CreditsChangedEvent>(
                 OnCreditsChanged);
@@ -233,6 +234,7 @@ public class MetaHudController :
             FuelChangedEvent>(
                 OnFuelChanged);
 
+        simpleEventBus.Unsubscribe<CargoChangedEvent>(OnCargoChanged);
         simpleEventBus.Unsubscribe<
             CreditsChangedEvent>(
                 OnCreditsChanged);
@@ -285,6 +287,8 @@ public class MetaHudController :
     {
         Refresh();
     }
+
+    private void OnCargoChanged(CargoChangedEvent evt) => Refresh();
 
     private void OnCreditsChanged(
         CreditsChangedEvent evt)
@@ -462,10 +466,7 @@ public class MetaHudController :
         RuntimeCargoInventory cargo =
             activeShip.Cargo;
 
-        int usedCargo =
-            cargo != null
-                ? cargo.GetUsedCapacity()
-                : 0;
+        int usedCargo = Bootstrapper.Instance.ServiceRegistry.Get<IInventoryService>().GetUsedCargo();
 
         int maxCargo =
             activeShip.CargoCapacity;

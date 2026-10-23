@@ -18,12 +18,11 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 26cb1e10f4eaa495bbe1c968d0dabcb4, type: 3}
   planetType: 0
   isInhabited: 1
-  systemId: 
   planetOrbit: {fileID: 11400000, guid: 90946a0e83dd44518a3024513df31c08, type: 2}
   missionPool: {fileID: 0}
   encounterProfile: {fileID: 0}
   marketProfile: {fileID: 0}
-  planetMissionConfig: {fileID: 0}
+  planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
   planetSprite: {fileID: 21300000, guid: 26cb1e10f4eaa495bbe1c968d0dabcb4, type: 3}
   backgroundSprite: {fileID: 0}
   visualSize: 60

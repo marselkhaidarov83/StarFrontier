@@ -14,6 +14,8 @@
   <Project Path="Sprint2Verification.csproj" />
   <Project Path="Audit.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Sprint8Missions.csproj" />
+  <Project Path="Sprint7Analytics.csproj" />
   <Project Path="Sprint45VerifiedWorking.csproj" />
   <Project Path="SystemScene.csproj" />
 </Solution>

@@ -383,19 +383,28 @@ public sealed class SaveValidationStage
         state.MissionBlock.AvailableMissions ??= new();
         state.MissionBlock.ActiveMissions ??= new();
         state.MissionBlock.CompletedMissions ??= new();
+        state.MissionBlock.ArchivedMissions ??= new();
         state.MissionBlock.RewardGrantedMissionIds ??= new();
 
         int removed =
             state.MissionBlock.AvailableMissions.RemoveAll(item => item == null) +
             state.MissionBlock.ActiveMissions.RemoveAll(item => item == null) +
             state.MissionBlock.CompletedMissions.RemoveAll(item => item == null) +
+            state.MissionBlock.ArchivedMissions.RemoveAll(item => item == null) +
             state.MissionBlock.OffersByPlanet_List.RemoveAll(item => item == null);
 
         if (removed > 0)
         {
-            result.Normalizations.Add(
-                "Removed null mission entries: " + removed + ".");
+            result.Normalizations.Add("Removed null mission entries: " + removed + ".");
         }
+        int completedBefore = state.MissionBlock.CompletedMissions.Count +
+            state.MissionBlock.ActiveMissions.FindAll(item => item.Status == MissionStatus.Completed).Count +
+            state.MissionBlock.AvailableMissions.FindAll(item => item.Status == MissionStatus.Completed).Count;
+        MissionLifecycleRules.Normalize(state.MissionBlock, state.Meta?.CurrentGameDay ?? 1);
+        if (completedBefore > 0)
+            AppLog.Info(DebugLogChannel.Mission,
+                "[MissionLifecycle] Completed records removed during validation | Count=" + completedBefore +
+                " | RewardIds=" + state.MissionBlock.RewardGrantedMissionIds.Count);
     }
 
     private static void NormalizeNpcCollections(

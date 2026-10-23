@@ -134,7 +134,7 @@ public class MarketScreenController : CustomMonoBehaviour
         if (cargoText != null)
         {
             RuntimeCargoInventory cargo = playerProfile.PlayerShipState.GetActiveShip().Cargo;
-            int used = cargo != null ? cargo.GetUsedCapacity() : 0;
+            int used = _inventoryService.GetUsedCargo();
             int max = playerProfile.PlayerShipState.GetActiveShip().CargoCapacity;
 
             cargoText.text = $"Cargo: {used} / {max}";
@@ -188,7 +188,8 @@ public class MarketScreenController : CustomMonoBehaviour
                 buyPrice,
                 sellPrice,
                 BuyOne,
-                SellOne
+                SellOne,
+                canSell
             );
         }
 

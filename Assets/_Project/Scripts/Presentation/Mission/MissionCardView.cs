@@ -118,6 +118,8 @@ using UnityEngine.UI;
             {
                 MissionStatus.Available => "AVAILABLE",
                 MissionStatus.Accepted => "ACCEPTED",
+                MissionStatus.InProgress => "IN PROGRESS",
+                MissionStatus.Cancelled => "CANCELLED",
                 MissionStatus.ReadyToComplete => "READY",
                 MissionStatus.Completed => "COMPLETED",
                 MissionStatus.Failed => "FAILED",
@@ -128,22 +130,17 @@ using UnityEngine.UI;
 
     private void ApplyVisualStateButtonDone(MissionInstanceData mission)
     {
-        IGameSessionService gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        switch (mission.MissionType)
-        {
-            case MissionType.Delivery:
-            case MissionType.Elimination:
-                doneButton.gameObject.SetActive(
-                    mission.TargetPlanetId == gameSessionService.State.Player.CurrentPlanetId &&
-                    mission.Status == MissionStatus.ReadyToComplete);
-                break;
-            case MissionType.Recon:
-                doneButton.gameObject.SetActive(
-                    mission.TargetPlanetId == gameSessionService.State.Player.CurrentPlanetId &&
-                    mission.TargetSystemId == gameSessionService.State.Player.CurrentSystemId &&
-                    mission.Status == MissionStatus.ReadyToComplete);
-                break;
-        }
+        if (doneButton == null) return;
+        var player = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State?.Player;
+        bool canTurnIn = mission != null && player != null &&
+            MissionLifecycleRules.IsPlayableType(mission.MissionType) &&
+            mission.Status == MissionStatus.ReadyToComplete && mission.IsReadyToTurnIn;
+        if (canTurnIn && mission.MissionType == MissionType.Delivery)
+            canTurnIn = mission.TargetPlanetId == player.CurrentPlanetId &&
+                mission.TargetSystemId == player.CurrentSystemId;
+        if (canTurnIn && mission.MissionType == MissionType.Recon)
+            canTurnIn = mission.SourcePlanetId == player.CurrentPlanetId && mission.SourceSystemId == player.CurrentSystemId;
+        doneButton.gameObject.SetActive(canTurnIn);
     }
 
         private void ApplyVisualState(MissionInstanceData mission)
@@ -175,6 +172,7 @@ using UnityEngine.UI;
                     backgroundImage.color = new Color(1f, 0.85f, 0.85f, 1f);
                     break;
 
+                case MissionStatus.Cancelled:
                 case MissionStatus.Expired:
                     backgroundImage.color = new Color(0.8f, 0.8f, 0.8f, 1f);
                     break;

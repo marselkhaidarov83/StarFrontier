@@ -17,6 +17,16 @@ public class RepairService : IRepairService
 
     public RepairResult RepairToFull()
     {
+        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.Repair, null, 0))
+        {
+            var result = RepairToFullCore();
+            observation.Complete(result.IsSuccess, result.resultType.ToString(), result.totalPrice);
+            return result;
+        }
+    }
+
+    private RepairResult RepairToFullCore()
+    {
         PlayerState playerProfile = _gameSessionService.State.Player;
         if (playerProfile == null)
         {

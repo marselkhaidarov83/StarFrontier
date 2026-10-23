@@ -1,4 +1,5 @@
 public interface IMissionTracker
-    {
-        void Dispose();
-    }
+{
+    void Dispose();
+    void ReevaluateAfterLoad();
+}

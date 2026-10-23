@@ -38,7 +38,8 @@ public class MarketItemRowView : MonoBehaviour
         int buyPrice,
         int sellPrice,
         System.Action<string> onBuyClicked,
-        System.Action<string> onSellClicked)
+        System.Action<string> onSellClicked,
+        bool? canSell = null)
     {
         _itemId = itemData.ItemConfig.Id;
         _onBuyClicked = onBuyClicked;
@@ -70,7 +71,7 @@ public class MarketItemRowView : MonoBehaviour
         {
             sellButton.onClick.RemoveAllListeners();
             sellButton.onClick.AddListener(OnSellClicked);
-            sellButton.interactable = ownedQuantity > 0;
+            sellButton.interactable = canSell ?? (ownedQuantity > 0);
         }
 
         FillIcon(itemData.ItemConfig.Icon);

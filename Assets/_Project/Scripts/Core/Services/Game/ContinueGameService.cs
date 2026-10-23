@@ -72,6 +72,8 @@ public class ContinueGameService : CustomService, IContinueGameService
                 total,
                 stage);
 
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ContinueGame, false, "NoSave");
+
             return false;
         }
 
@@ -98,6 +100,8 @@ public class ContinueGameService : CustomService, IContinueGameService
                 "ContinueGame.SaveNull",
                 total,
                 stage);
+
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ContinueGame, false, "LoadFailed");
 
             return false;
         }
@@ -140,6 +144,7 @@ public class ContinueGameService : CustomService, IContinueGameService
             0.65f);
 
         EnsureMinimumPopulationForLoadedCurrentSystem(save);
+        ReevaluateMissionsAfterWorldRestore();
 
         LogLoadingStep(
             "EnsureMinimumPopulation.After",
@@ -224,6 +229,8 @@ public class ContinueGameService : CustomService, IContinueGameService
                 total,
                 stage);
 
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ContinueGame, false, "NoSave");
+
             completed?.Invoke(false);
             yield break;
         }
@@ -259,6 +266,8 @@ public class ContinueGameService : CustomService, IContinueGameService
                 "ContinueGame.SaveNull",
                 total,
                 stage);
+
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ContinueGame, false, "LoadFailed");
 
             completed?.Invoke(false);
             yield break;
@@ -358,6 +367,7 @@ public class ContinueGameService : CustomService, IContinueGameService
         yield return null;
 
         EnsureMinimumPopulationForLoadedCurrentSystem(save);
+        ReevaluateMissionsAfterWorldRestore();
 
         LoadingSceneContext.RecordPopulationMs(
             stage.Elapsed.TotalMilliseconds);
@@ -404,6 +414,12 @@ public class ContinueGameService : CustomService, IContinueGameService
             stage);
 
         completed?.Invoke(true);
+    }
+
+    private void ReevaluateMissionsAfterWorldRestore()
+    {
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IMissionTracker>(out var tracker))
+            tracker.ReevaluateAfterLoad();
     }
 
     private static void LogLoadingStep(

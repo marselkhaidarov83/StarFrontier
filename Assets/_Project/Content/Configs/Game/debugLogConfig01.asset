@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 305e505661dee42c58da12e2624f7c3f, type: 3}
   m_Name: debugLogConfig01
   m_EditorClassIdentifier: Data::DebugLogConfig
-  logsEnabled: 0
+  testPlayerAnalytics: 1
+  logsEnabled: 1
   shipRouteLogs: 0
   includeShipRouteInternalLogs: 0
   npcRouteDecisionLogs: 0
@@ -20,11 +21,11 @@ MonoBehaviour:
   npcMovementLogs: 0
   enemyMovementLogs: 0
   movementTurnSpikeAngleDegrees: 60
-  combatLogs: 1
-  damageLogs: 1
+  combatLogs: 0
+  damageLogs: 0
   populationLogs: 0
   planetMovementLogs: 0
-  saveLogs: 0
+  saveLogs: 1
   timeLogs: 0
   uiLogs: 0
   loadingSceneDiagnosticsLogs: 0
@@ -38,7 +39,7 @@ MonoBehaviour:
   systemHudLogs: 0
   marketLogs: 0
   hangarLogs: 0
-  missionLogs: 0
+  missionLogs: 1
   economyLogs: 0
   navigationLogs: 0
   interactionLogs: 0
@@ -46,7 +47,7 @@ MonoBehaviour:
   travelLogs: 0
   planetUiLogs: 0
   stationUiLogs: 0
-  combatPresentationLogs: 1
+  combatPresentationLogs: 0
   debugToolsLogs: 0
   dataValidationLogs: 0
   eventBusLogs: 0

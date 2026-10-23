@@ -192,7 +192,7 @@ public class HangarScreenController : MonoBehaviour
             return 0;
         }
 
-        return activeShip.Cargo.GetUsedCapacity();
+        return Bootstrapper.Instance.ServiceRegistry.Get<IInventoryService>().GetUsedCargo();
     }
 
     private void ShowMessage(string message)

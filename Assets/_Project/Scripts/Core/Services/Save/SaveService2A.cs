@@ -54,6 +54,7 @@ public class SaveService2A : CustomService, ISaveService
 
     private float _autosaveTimer;
     private bool _enabledSave = true;
+    public bool IsSaveEnabled => _enabledSave;
 
     private readonly IConfigService _configService;
     private readonly SimpleEventBus _eventBus;
@@ -1988,7 +1989,7 @@ public class SaveService2A : CustomService, ISaveService
             }
 
             SaveIntegrityStatus integrityStatus =
-                _integrityStage.Verify(state);
+                _integrityStage.VerifySerializedJson(state, json);
 
             if (integrityStatus == SaveIntegrityStatus.Invalid)
             {

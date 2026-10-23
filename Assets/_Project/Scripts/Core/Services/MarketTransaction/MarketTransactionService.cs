@@ -3,15 +3,27 @@ public class MarketTransactionService : IMarketTransactionService
     private readonly IGameSessionService _gameSessionService;
     private readonly IConfigService _configService;
     private readonly IEconomyService _economyService;
+    private readonly IInventoryService _inventoryService;
 
     public MarketTransactionService()
     {
         _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
         _economyService = Bootstrapper.Instance.ServiceRegistry.Get<IEconomyService>();
+        _inventoryService = Bootstrapper.Instance.ServiceRegistry.Get<IInventoryService>();
     }
 
     public BuyItemResult BuyItem(string itemId, int quantity)
+    {
+        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.BuyItem, itemId, quantity))
+        {
+            var result = BuyItemCore(itemId, quantity);
+            observation.Complete(result.IsSuccess, result.resultType.ToString(), result.totalPrice);
+            return result;
+        }
+    }
+
+    private BuyItemResult BuyItemCore(string itemId, int quantity)
     {
         PlayerState playerProfile = _gameSessionService.State.Player;
         if (playerProfile == null)
@@ -91,7 +103,7 @@ public class MarketTransactionService : IMarketTransactionService
 
         int maxCargoCapacity = playerProfile.PlayerShipState.GetActiveShip().CargoCapacity;
 
-        if (!cargoInventory.CanAddItem(itemId, quantity, maxCargoCapacity))
+        if (!_inventoryService.CanAddItem(itemId, quantity))
         {
             return BuyItemResult.Create(
                 BuyItemResultType.NotEnoughCargoSpace,
@@ -147,6 +159,16 @@ public class MarketTransactionService : IMarketTransactionService
 
     public SellItemResult SellItem(string itemId, int quantity)
     {
+        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.SellItem, itemId, quantity))
+        {
+            var result = SellItemCore(itemId, quantity);
+            observation.Complete(result.IsSuccess, result.resultType.ToString(), result.totalPrice);
+            return result;
+        }
+    }
+
+    private SellItemResult SellItemCore(string itemId, int quantity)
+    {
         PlayerState playerProfile = _gameSessionService.State.Player;
         if (playerProfile == null)
         {
@@ -200,7 +222,7 @@ public class MarketTransactionService : IMarketTransactionService
                 0);
         }
 
-        int ownedQuantity = cargoInventory.GetQuantity(itemId);
+        int ownedQuantity = cargoInventory.GetTradeableQuantity(itemId);
 
         if (ownedQuantity <= 0)
         {

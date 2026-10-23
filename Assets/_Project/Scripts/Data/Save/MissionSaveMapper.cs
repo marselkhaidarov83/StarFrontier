@@ -21,7 +21,16 @@ using System.Collections.Generic;
                 TargetSystemId = mission.TargetSystemId,
                 Reward = mission.Reward,
                 Objective = mission.Objective,
-                IsReadyToTurnIn = mission.IsReadyToTurnIn
+                IsReadyToTurnIn = mission.IsReadyToTurnIn,
+                SourcePlanetId = mission.SourcePlanetId,
+                TargetPlanetId = mission.TargetPlanetId,
+                PirateGroupSpawnRuleId = mission.PirateGroupSpawnRuleId,
+                PirateGroupNpcId = mission.PirateGroupNpcId,
+                DurationDays = mission.DurationDays,
+                AcceptedAtDay = mission.AcceptedAtDay,
+                ExpiresAtDay = mission.ExpiresAtDay,
+                FinishedAtDay = mission.FinishedAtDay,
+                LastTransitionReason = mission.LastTransitionReason
             };
         }
 
@@ -44,7 +53,16 @@ using System.Collections.Generic;
                 TargetSystemId = saveData.TargetSystemId,
                 Reward = saveData.Reward,
                 Objective = saveData.Objective,
-                IsReadyToTurnIn = saveData.IsReadyToTurnIn
+                IsReadyToTurnIn = saveData.IsReadyToTurnIn,
+                SourcePlanetId = saveData.SourcePlanetId,
+                TargetPlanetId = saveData.TargetPlanetId,
+                PirateGroupSpawnRuleId = saveData.PirateGroupSpawnRuleId,
+                PirateGroupNpcId = saveData.PirateGroupNpcId,
+                DurationDays = saveData.DurationDays,
+                AcceptedAtDay = saveData.AcceptedAtDay,
+                ExpiresAtDay = saveData.ExpiresAtDay,
+                FinishedAtDay = saveData.FinishedAtDay,
+                LastTransitionReason = saveData.LastTransitionReason
             };
         }
 

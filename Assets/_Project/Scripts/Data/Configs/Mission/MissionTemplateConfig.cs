@@ -1,16 +1,25 @@
 using System;
 using UnityEngine;
 
+public enum MissionCreditRewardMode { Range = 0, Fixed = 1, FuelDistance = 2 }
+
 [CreateAssetMenu(fileName = "MissionTemplateConfig", menuName = "StarFrontier/Configs/Mission/Mission Template")]
 public class MissionTemplateConfig : BaseConfig
 {
     [Header("Mission Core")]
-    [SerializeField] private MissionType missionType;
+    [SerializeField] [HideInInspector] private MissionType missionType;
     [SerializeField] private string titlePattern;
     [SerializeField] [TextArea] private string descriptionPattern;
     [SerializeField] private MissionDifficultyBand difficultyBand;
 
+    [Header("Lifecycle")]
+    [Tooltip("Срок в игровых днях после принятия. 0 — без срока. Миссия истекает при достижении дня принятия + срока.")]
+    [SerializeField] [Min(0)] private int durationDays;
+    public int DurationDays => durationDays;
+
     [Header("Rewards")]
+    [SerializeField] private MissionCreditRewardMode creditRewardMode;
+    public MissionCreditRewardMode CreditRewardMode => creditRewardMode;
     [SerializeField] private int creditRewardMin;
     [SerializeField] private int creditRewardMax;
     [SerializeField] private int xpRewardMin;
@@ -19,21 +28,19 @@ public class MissionTemplateConfig : BaseConfig
     [SerializeField] private ItemConfig[] rewardItems;
 
     [Header("Generation Constraints")]
-    [SerializeField] [Range(1, 5)] private int minDangerLevel = 1;
-    [SerializeField] [Range(1, 5)] private int maxDangerLevel = 5;
+    [SerializeField] [Range(1, 5)] private int minDangerLevel;
+    [SerializeField] [Range(1, 5)] private int maxDangerLevel;
     [SerializeField] private MissionTag[] requiredMissionTags;
     [SerializeField] private int minCargoCapacity;
 
     [Header("Target Rules")]
     [SerializeField] private PlanetConfig sourcePlanet;
-    [SerializeField] private PlanetConfig targetPlanet;
-    [SerializeField] private StarSystemConfig targetSystem;
     [SerializeField] private EnemyConfig targetEnemy;
     [SerializeField] private int targetEnemyCountMin;
     [SerializeField] private int targetEnemyCountMax;
     [SerializeField] private PirateGroupSpawnRuleConfig pirateGroupSpawnRuleConfig;
 
-    public MissionType MissionType => missionType;
+    public virtual MissionType MissionType => missionType;
     public string TitlePattern => titlePattern;
     public string DescriptionPattern => descriptionPattern;
     public MissionDifficultyBand DifficultyBand => difficultyBand;
@@ -48,8 +55,6 @@ public class MissionTemplateConfig : BaseConfig
     public MissionTag[] RequiredMissionTags => requiredMissionTags;
     public int MinCargoCapacity => minCargoCapacity;
     public PlanetConfig SourcePlanet => sourcePlanet;
-    public PlanetConfig TargetPlanet => targetPlanet;
-    public StarSystemConfig TargetSystem => targetSystem;
     public EnemyConfig TargetEnemy => targetEnemy;
     public int TargetEnemyCountMin => targetEnemyCountMin;
     public int TargetEnemyCountMax => targetEnemyCountMax;

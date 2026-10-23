@@ -40,6 +40,7 @@ public class MissionScreenController : CustomMonoBehaviour
 
         simpleEventBus.Subscribe<GovernmentEnteredEvent>(OnGovernmentEntered);
         simpleEventBus.Subscribe<MissionAcceptedEvent>(OnMissionAccepted);
+        simpleEventBus.Subscribe<MissionStateChangedEvent>(OnMissionChanged);
     }
 
     private void UnsubscribeFromEvents()
@@ -49,12 +50,15 @@ public class MissionScreenController : CustomMonoBehaviour
 
         simpleEventBus.Unsubscribe<GovernmentEnteredEvent>(OnGovernmentEntered);
         simpleEventBus.Unsubscribe<MissionAcceptedEvent>(OnMissionAccepted);
+        simpleEventBus.Unsubscribe<MissionStateChangedEvent>(OnMissionChanged);
     }
 
     private void OnGovernmentEntered(GovernmentEnteredEvent evt)
     {
         RefreshMissionBoard();
     }
+
+    private void OnMissionChanged(MissionStateChangedEvent evt) => RefreshMissionBoard();
 
     private void OnMissionAccepted(MissionAcceptedEvent evt)
     {
@@ -68,7 +72,7 @@ public class MissionScreenController : CustomMonoBehaviour
         List<MissionInstanceData> allMissions = new();
         allMissions.AddRange(_missionService.GetAvailableMissions());
         allMissions.AddRange(_missionService.GetActiveMissions());
-        allMissions.AddRange(_missionService.GetCompletedMissions());
+        allMissions.AddRange(_missionService.GetArchivedMissions());
 
         foreach (MissionInstanceData mission in allMissions)
         {
@@ -110,7 +114,8 @@ public class MissionScreenController : CustomMonoBehaviour
 
     private void HandleMissionDone(MissionInstanceData mission)
     {
-        _missionService.CompleteMission(mission.MissionRuntimeId);
+        if (_missionService.CompleteMission(mission.MissionRuntimeId))
+            _selectedMission = null;
         simpleEventBus.Publish(new GovernmentEnteredEvent());
     }
 

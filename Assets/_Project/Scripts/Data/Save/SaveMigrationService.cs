@@ -59,6 +59,16 @@ public static class SaveMigrationService
             sourceVersion = SaveDataVersions.SystemWarState;
         }
 
+        if (sourceVersion < SaveDataVersions.MissionLifecycle)
+        {
+            MissionLifecycleRules.Normalize(state.MissionBlock, state.Meta.CurrentGameDay);
+            AppLog.Info(DebugLogChannel.Mission,
+                "[MissionLifecycle] Migrated legacy save | FromVersion=" + sourceVersion +
+                " | Completed=" + state.MissionBlock.CompletedMissions.Count +
+                " | Archived=" + state.MissionBlock.ArchivedMissions.Count);
+            changed = true;
+        }
+
         if (state.Meta.SaveDataVersion != SaveDataVersions.Current)
         {
             state.Meta.SaveDataVersion = SaveDataVersions.Current;

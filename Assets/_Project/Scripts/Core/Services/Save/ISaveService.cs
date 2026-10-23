@@ -1,5 +1,7 @@
 public interface ISaveService
 {
+    bool IsSaveEnabled { get; }
+
     bool HasSave();
 
     void Save();

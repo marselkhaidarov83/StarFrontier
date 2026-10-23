@@ -72,6 +72,11 @@ public enum DebugLogPerformanceArea
     menuName = "StarFrontier/Configs/Debug/Debug Log Config")]
 public sealed class DebugLogConfig : ScriptableObject
 {
+    [Header("Player Analytics")]
+    [Tooltip("Отправлять игровую аналитику в Test. Не зависит от выключателя логов. Изменение применяется после перезапуска игры. Editor, Development Build и Mobile Test Mode всегда используют Test.")]
+    [SerializeField] private bool testPlayerAnalytics = true;
+    public bool TestPlayerAnalytics => testPlayerAnalytics;
+
     [Header("Master")]
     [Tooltip("Главный выключатель всех служебных сообщений. Если он выключен, остальные переключатели сообщений не сработают.")]
     [SerializeField] private bool logsEnabled = true;

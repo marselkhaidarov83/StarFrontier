@@ -1,160 +1,57 @@
-using System.Collections.Generic;
-using UnityEngine;
+using System;
+using System.Linq;
 
-public class MissionTracker : CustomService, IMissionTracker
+public class MissionTracker : CustomService, IMissionTracker, ITickable
 {
     private readonly IMissionService _missionService;
+    private readonly IGameSessionService _session;
     private readonly SimpleEventBus _eventBus;
-    private readonly ISystemNpcRuntimeService _systemNpcRuntimeService;
-
     public string LastTrackerMessage { get; private set; }
 
     public MissionTracker()
     {
-        _debugStop = true;
-
-        _missionService = Bootstrapper.Instance.ServiceRegistry.Get<IMissionService>();
-        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _systemNpcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
-
+        var registry = Bootstrapper.Instance.ServiceRegistry;
+        _missionService = registry.Get<IMissionService>();
+        _session = registry.Get<IGameSessionService>();
+        _eventBus = registry.Get<SimpleEventBus>();
         _eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
-        _eventBus.Subscribe<SystemNpcDestroyedEvent>(OnSystemNpcDestroyedEvent);
-        _eventBus.Subscribe<MissionAcceptedEvent>(OnMissionAccepted);
-
-        LogCustom("initialized");
-        SetTrackerMessage("MissionTracker initialized.");
+        _eventBus.Subscribe<GameTimeQuantumAdvancedEvent>(OnDayAdvanced);
+        SetTrackerMessage("Initialized; pirate/elimination tracking disabled.");
     }
 
     public void Dispose()
     {
         _eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
-        _eventBus.Unsubscribe<SystemNpcDestroyedEvent>(OnSystemNpcDestroyedEvent);
-        _eventBus.Unsubscribe<MissionAcceptedEvent>(OnMissionAccepted);
-
-        SetTrackerMessage("MissionTracker disposed.");
+        _eventBus.Unsubscribe<GameTimeQuantumAdvancedEvent>(OnDayAdvanced);
     }
 
-    private void OnMissionAccepted(MissionAcceptedEvent eventData)
+    private void OnPlanetEntered(PlanetEnteredEvent evt) =>
+        _missionService.ReevaluateActiveMissions("PlanetEntered:" + evt.PlanetId);
+
+    private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
-        SetTrackerMessage($"Tracker noticed accepted mission: {eventData.MissionRuntimeId}");
+        _missionService.ReevaluateActiveMissions("SystemEntered:" + evt.SystemId);
     }
 
-    private void OnPlanetEntered(PlanetEnteredEvent eventData)
+    private void OnDayAdvanced(GameTimeQuantumAdvancedEvent evt) =>
+        _missionService.ReevaluateActiveMissions("DayAdvanced:" + evt.CurrentDay);
+
+    public void Tick(float deltaTime) => _missionService.ObserveReconTargets();
+
+    public void ReevaluateAfterLoad()
     {
-        var activeMissions = _missionService.GetActiveMissions();
-
-        AppLog.Info(DebugLogChannel.Mission,
-            typeof(MissionTracker),
-            "activeMissions.Count = " + activeMissions.Count);
-        foreach (MissionInstanceData mission in activeMissions)
-        {
-            if (mission == null || mission.Objective == null)
-                continue;
-
-            if (mission.MissionType != MissionType.Delivery)
-                continue;
-
-            AppLog.Info(DebugLogChannel.Mission,
-                typeof(MissionTracker),
-                "TargetPlanetId = " + mission.TargetPlanetId);
-            AppLog.Info(DebugLogChannel.Mission,
-                typeof(MissionTracker),
-                "PlanetId = " + eventData.PlanetId);
-            if (mission.TargetPlanetId == eventData.PlanetId)
-            {
-                mission.Status = MissionStatus.ReadyToComplete;
-                mission.IsReadyToTurnIn = true;
-                SetTrackerMessage($"Delivery ready on planet: {mission.Title}");
-            }
-        }
-    }
-
-    private void OnSystemEntered(StarSystemEnteredEvent eventData)
-    {
-        var activeMissions = _missionService.GetActiveMissions();
-
-        LogCustom("[MissionTracker] activeMissions.count = " + activeMissions.Count);
-        foreach (MissionInstanceData mission in activeMissions)
-        {
-            if (mission == null || mission.Objective == null)
-                continue;
-
-            AppLog.Info(DebugLogChannel.Mission,
-                typeof(MissionTracker),
-                "mission.MissionType = " + mission.MissionType);
-            // if (mission.MissionType == MissionType.Delivery)
-            // {
-            //     if (mission.TargetSystemId == eventData.EnteredSystemId)
-            //     {
-            //         mission.Status = MissionStatus.ReadyToComplete;
-            //         mission.IsReadyToTurnIn = true;
-            //         SetTrackerMessage($"Delivery ready to complete: {mission.Title}");
-            //     }
-            // }
-            // else
-            if (mission.MissionType == MissionType.Recon)
-            {
-                if (mission.TargetSystemId == eventData.SystemId)
-                {
-                    if (mission.Objective != null)
-                        mission.Objective.CurrentAmount = mission.Objective.RequiredAmount;
-
-                    _missionService.CompleteMission(mission.MissionRuntimeId);
-                    SetTrackerMessage($"Recon completed: {mission.Title}");
-                    return;
-                }
-            }
-        }
-    }
-
-    private void OnSystemNpcDestroyedEvent(SystemNpcDestroyedEvent eventData)
-    {
-        LogCustom("");
-        var activeMissions = _missionService.GetActiveMissions();
-
-        foreach (MissionInstanceData mission in activeMissions)
-        {
-            if (mission == null)
-                continue;
-
-            if (mission.MissionType != MissionType.Elimination)
-                continue;
-
-            bool enemyMatches = eventData.RuntimeNpcGroupId == mission.PirateGroupNpcId;
-            LogCustom("enemyMatches = " + enemyMatches);
-
-            if (!enemyMatches)
-            {
-                LogCustom($"Enemy ignored for mission {mission.Title}: expected {mission.Objective.TargetEnemyId}, got {eventData.RuntimeNpcId}");
-                continue;
-            }
-
-            IReadOnlyList<SystemNpcRuntimeState> npcs = 
-                _systemNpcRuntimeService.GetAliveNpcsByGroupId(mission.PirateGroupNpcId);
-
-            if (npcs.Count == 0)
-            {
-                // _missionService.CompleteMission(mission.MissionRuntimeId);
-                mission.Status = MissionStatus.ReadyToComplete;
-                mission.IsReadyToTurnIn = true;
-                SetTrackerMessage($"Elimination completed: {mission.Title}");
-                return;
-            }
-            else
-            {
-                mission.Status = MissionStatus.InProgress;
-            }
-
-            SetTrackerMessage(
-                $"Elimination progress: {mission.Title} [{mission.Objective.CurrentAmount}/{mission.Objective.RequiredAmount}]");
-        }
+        var state = _session.State;
+        if (state == null) return;
+        MissionLifecycleRules.Normalize(state.MissionBlock, state.Meta?.CurrentGameDay ?? 1);
+        _missionService.ReevaluateActiveMissions("AfterLoad");
+        SetTrackerMessage("Reevaluated mission conditions after world restore.");
     }
 
     private void SetTrackerMessage(string message)
     {
         LastTrackerMessage = message;
-        LogCustom($"MissionTracker: {message}");
+        AppLog.Info(DebugLogChannel.Mission, "[MissionTracker] " + message);
     }
 }

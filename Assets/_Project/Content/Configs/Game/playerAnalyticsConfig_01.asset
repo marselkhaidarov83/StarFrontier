@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad336ea16d7f446c84d359882754f18b, type: 3}
+  m_Name: playerAnalyticsConfig_01
+  m_EditorClassIdentifier:
+  collectionEnabled: 1
+  productionApiKey: 05fff0a3-9c17-4195-9c1d-67688704531b
+  testApiKey: 522b2b58-94c1-45dc-8db5-7824ab6aa454
+  balanceVersion: 2A-2026-10-23
+  maxQueuedReports: 1000
+  dispatchPeriodSeconds: 30
+  sessionTimeoutSeconds: 1800

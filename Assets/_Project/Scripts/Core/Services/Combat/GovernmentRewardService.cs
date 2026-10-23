@@ -65,13 +65,24 @@ public sealed class GovernmentRewardService : CustomService, IGovernmentRewardSe
         string currentSystemId,
         bool isCurrentPlanetInhabited)
     {
+        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.GovernmentReward, currentSystemId))
+        {
+            var result = ClaimRewardCore(currentSystemId, isCurrentPlanetInhabited, out string reason);
+            observation.Complete(result.Success, reason);
+            return result;
+        }
+    }
+
+    private GovernmentRewardResult ClaimRewardCore(string currentSystemId, bool isCurrentPlanetInhabited, out string analyticsReason)
+    {
+        analyticsReason = "None";
         ActiveSystemEncounter encounter = _encounterService.Current;
 
         if (encounter == null)
-            return GovernmentRewardResult.Failed("No active encounter.");
+            { analyticsReason = "NoActiveEncounter"; return GovernmentRewardResult.Failed("No active encounter."); }
 
         if (!CanClaimReward(currentSystemId, isCurrentPlanetInhabited))
-            return GovernmentRewardResult.Failed("Reward is not available.");
+            { analyticsReason = "RewardUnavailable"; return GovernmentRewardResult.Failed("Reward is not available."); }
 
         int credits = CalculateCredits(encounter.SystemId);
         int xp = CalculateXp(encounter.SystemId);
@@ -81,7 +92,7 @@ public sealed class GovernmentRewardService : CustomService, IGovernmentRewardSe
         bool resolved = _encounterService.TryResolvePendingReward();
 
         if (!resolved)
-            return GovernmentRewardResult.Failed("Encounter could not be resolved.");
+            { analyticsReason = "EncounterResolveFailed"; return GovernmentRewardResult.Failed("Encounter could not be resolved."); }
 
         _eventBus.Publish(new GovernmentRewardClaimedEvent(
             encounter.EncounterId,

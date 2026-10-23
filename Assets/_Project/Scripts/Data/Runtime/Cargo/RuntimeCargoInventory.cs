@@ -13,7 +13,7 @@ public class RuntimeCargoInventory //состояние всего инвент�
 
         for (int i = 0; i < entries.Count; i++)
         {
-            total += Math.Max(0, entries[i].Quantity);
+            if (entries[i] != null) total += Math.Max(0, entries[i].Quantity);
         }
 
         return total;
@@ -31,8 +31,15 @@ public class RuntimeCargoInventory //состояние всего инвент�
             return 0;
         }
 
-        RuntimeCargoEntryData entry = entries.FirstOrDefault(x => x.ItemId == itemId);
-        return entry == null ? 0 : Math.Max(0, entry.Quantity);
+        return (int)Math.Min(int.MaxValue, entries.Where(x => x != null && x.ItemId == itemId)
+            .Sum(x => (long)Math.Max(0, x.Quantity)));
+    }
+
+    public int GetTradeableQuantity(string itemId)
+    {
+        if (entries == null || string.IsNullOrWhiteSpace(itemId)) return 0;
+        return (int)Math.Min(int.MaxValue, entries.Where(x => x != null && x.ItemId == itemId && string.IsNullOrEmpty(x.MissionRuntimeId))
+            .Sum(x => (long)Math.Max(0, x.Quantity)));
     }
 
     public bool CanAddItem(string itemId, int quantityToAdd, int maxCapacity)
@@ -58,7 +65,7 @@ public class RuntimeCargoInventory //состояние всего инвент�
             return false;
         }
 
-        RuntimeCargoEntryData entry = entries.FirstOrDefault(x => x.ItemId == itemId);
+        RuntimeCargoEntryData entry = entries.FirstOrDefault(x => x != null && x.ItemId == itemId && string.IsNullOrEmpty(x.MissionRuntimeId));
 
         if (entry == null)
         {
@@ -85,7 +92,7 @@ public class RuntimeCargoInventory //состояние всего инвент�
             return false;
         }
 
-        return GetQuantity(itemId) >= quantityToRemove;
+        return GetTradeableQuantity(itemId) >= quantityToRemove;
     }
 
     public bool RemoveItem(string itemId, int quantityToRemove)
@@ -95,17 +102,17 @@ public class RuntimeCargoInventory //состояние всего инвент�
             return false;
         }
 
-        RuntimeCargoEntryData entry = entries.FirstOrDefault(x => x.ItemId == itemId);
-
-        if (entry == null)
+        int remaining = quantityToRemove;
+        foreach (var entry in entries)
         {
-            return false;
+            if (entry == null || entry.ItemId != itemId || !string.IsNullOrEmpty(entry.MissionRuntimeId)) continue;
+            int take = Math.Min(remaining, Math.Max(0, entry.Quantity));
+            entry.Quantity -= take;
+            remaining -= take;
+            if (remaining == 0) break;
         }
-
-        entry.Quantity -= quantityToRemove;
-
         CleanupInvalidEntries();
-        return true;
+        return remaining == 0;
     }
 
     public void Clear()

@@ -24,4 +24,11 @@ public class MissionInstanceData
         public string PirateGroupNpcId;
 
         public bool IsReadyToTurnIn;
+
+        // Zero means no deadline, including records from older saves.
+        public int DurationDays;
+        public int AcceptedAtDay;
+        public int ExpiresAtDay;
+        public int FinishedAtDay;
+        public string LastTransitionReason;
 }

@@ -14,6 +14,9 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private NewGameConfig newGameConfig;
     [SerializeField] private InvasionScheduleConfig invasionScheduleConfig;
     [SerializeField] private DebugLogConfig debugLogConfig;
+    [SerializeField] private PlayerAnalyticsConfig playerAnalyticsConfig;
+    private IPlayerAnalytics _playerAnalytics;
+    private PlayerAnalyticsEventBridge _playerAnalyticsBridge;
     [SerializeField] private DebugSettings debugSettings;
 
     [Header("System Gameplay")]
@@ -228,7 +231,25 @@ public class Bootstrapper : CustomMonoBehaviour
         InitializeServiceRegistry();
         InitializeStateMachine();
         InitializeServices();
+        InitializePlayerAnalytics();
         StartGameFlow();
+    }
+
+    private void InitializePlayerAnalytics()
+    {
+        if (playerAnalyticsConfig == null) return;
+        try
+        {
+            _playerAnalytics = PlayerAnalyticsUnityFactory.Create(playerAnalyticsConfig, debugLogConfig,
+                NpcPopulationDebugSettings, ServiceRegistry.Get<IGameSessionService>());
+            ServiceRegistry.Register<IPlayerAnalytics>(_playerAnalytics);
+            _playerAnalyticsBridge = new PlayerAnalyticsEventBridge(ServiceRegistry.Get<SimpleEventBus>(), _playerAnalytics);
+        }
+        catch (Exception)
+        {
+            // Analytics is optional; never expose an SDK key or stop game startup.
+            AppLog.Warning(DebugLogChannel.Bootstrap, "Player analytics unavailable; gameplay continues.");
+        }
     }
 
     private void InitializeServiceRegistry()
@@ -349,7 +370,7 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IContinueGameService, ContinueGameService>();
         RegisterService<INewGameService, NewGameService>();
         RegisterService<IMissionService, MissionService>();
-        RegisterService<IMissionTracker, MissionTracker>();
+        var missionTracker = RegisterService<IMissionTracker, MissionTracker>();
         RegisterService<IPlanetGovernmentMissionService, PlanetGovernmentMissionService>();
 
         _tickService =
@@ -361,6 +382,7 @@ public class Bootstrapper : CustomMonoBehaviour
         _tickService.Register(_gameTimeService, TickOrder.GameTime);
         _tickService.Register(_playerControlService, TickOrder.PlayerControl);
         _tickService.Register(_shipMovementService, TickOrder.ShipMovement);
+        _tickService.Register((ITickable)missionTracker, TickOrder.Targeting);
         _tickService.Register(_interactionService, TickOrder.Interaction);
 
         RegisterService<IGameTimePauseScopeService, GameTimePauseScopeService>();
@@ -452,6 +474,8 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void OnDestroy()
     {
+        _playerAnalyticsBridge?.Dispose();
+        _playerAnalytics?.Flush();
         StopExternalFrameProfilers();
     }
 
@@ -807,6 +831,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private void OnApplicationPause(
     bool pause)
     {
+        _playerAnalytics?.OnApplicationPause(pause);
         if (!pause)
             return;
 
@@ -816,6 +841,7 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void OnApplicationQuit()
     {
+        _playerAnalytics?.Flush();
         if (saveConfig != null && saveConfig.AutoSaveOnQuit)
             SaveCurrentGame("app_quit");
     }

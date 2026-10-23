@@ -60,6 +60,11 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 
     public void AcceptOffer()
     {
+        if (_planetConfig == null)
+        {
+            AppLog.Warning(DebugLogChannel.Mission, "[MissionLifecycle] AcceptOffer rejected | MissingPlanet");
+            return;
+        }
         LogCustom("[PlanetGovernmentMissionPresenter] _planetConfig = " + _planetConfig);
         LogCustom("[PlanetGovernmentMissionPresenter] _planetConfig.Id = " + _planetConfig.Id);
         bool accepted = _governmentMissionService.AcceptGovernmentOffer(_planetConfig.Id);
@@ -67,11 +72,9 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
         if (governmentOfferStateText != null)
             governmentOfferStateText.text = accepted ? "Mission accepted." : "Mission accept failed.";
 
-        if (_eventBus != null)
-        {
-            LogCustom("[PlanetGovernmentMissionPresenter] AcceptOffer.accepted = published");
-            _eventBus.Publish(new MissionAcceptedEvent());
-        }
+        if (accepted)
+            CheckOffer();
+
     }
 
     private void RefreshUi(PlanetOfferedMissionData offer)

@@ -106,6 +106,28 @@ public class MissionTemplateConfigValidator : IConfigValidator<MissionTemplateCo
             }
         }
 
+        if (config.CreditRewardMode == MissionCreditRewardMode.Fixed && config.RewardCredits < 0)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Fixed reward must be nonnegative.", config));
+        if (config is DeliveryMissionTemplateConfig delivery)
+        {
+            if (delivery.CargoOptions == null || delivery.CargoOptions.Count == 0 || delivery.MinimumQuantity <= 0 || delivery.MaximumQuantity < delivery.MinimumQuantity)
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Delivery requires a cargo pool and valid quantity limits.", config));
+            if (config.CreditRewardMode != MissionCreditRewardMode.FuelDistance || delivery.FuelRewardDeflator <= 0 ||
+                float.IsNaN(delivery.FuelRewardDeflator) || float.IsInfinity(delivery.FuelRewardDeflator))
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Delivery requires FuelDistance reward mode and positive fuel deflator.", config));
+            if (string.IsNullOrWhiteSpace(config.DescriptionPattern) || !config.DescriptionPattern.Contains("{cargoVolume}") || !config.DescriptionPattern.Contains("{amount}"))
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Delivery text must include {amount} and {cargoVolume}.", config));
+        }
+        if (config is ReconMissionTemplateConfig recon &&
+            (recon.DistanceWeights == null || recon.DistanceWeights.Count == 0 || recon.ScanDistance <= 0 ||
+             float.IsNaN(recon.ScanDistance) || float.IsInfinity(recon.ScanDistance) ||
+             recon.MinimumEnemyCount <= 0 || recon.MaximumEnemyCount < recon.MinimumEnemyCount ||
+             recon.EnemyReservePercent < 0 || recon.EnemyReservePercent > 100))
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Recon requires valid distance, enemy count and reserve settings.", config));
+        if (config is ReconMissionTemplateConfig &&
+            (string.IsNullOrWhiteSpace(config.DescriptionPattern) ||
+             !config.DescriptionPattern.Contains("{enemyCount}") || !config.DescriptionPattern.Contains("{scanDistance}")))
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Recon text must include {enemyCount} and {scanDistance}.", config));
         return issues;
     }
 }

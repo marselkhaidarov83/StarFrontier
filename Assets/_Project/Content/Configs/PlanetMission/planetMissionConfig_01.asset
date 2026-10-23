@@ -19,5 +19,3 @@ MonoBehaviour:
   planetId: 
   possibleMissionOffers:
   - {fileID: 11400000, guid: 81c599359afce49c7bb3bc69e5f43d75, type: 2}
-  - {fileID: 11400000, guid: 3852a8d850c7e463c8308e59d728c2cc, type: 2}
-  - {fileID: 11400000, guid: e175f76b8c64b44b7ae224f99c48e186, type: 2}

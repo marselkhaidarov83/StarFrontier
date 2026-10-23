@@ -33,6 +33,8 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
 
         if (result != null)
             _offerStateService.SetOffer(result);
+        else
+            _offerStateService.ClearOffer(planetConfig.Id);
 
         return result;
     }
@@ -44,15 +46,23 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
         if (offer == null || offer.OfferedMission == null)
             return false;
 
-        _missionService.SetAvailableMissions(new System.Collections.Generic.List<MissionInstanceData>
+        if (!MissionLifecycleRules.IsPlayableType(offer.OfferedMission.MissionType))
         {
-            offer.OfferedMission
-        });
+            _offerStateService.ClearOffer(planetId);
+            AppLog.Warning(DebugLogChannel.Mission, "[MissionLifecycle] Government offer disabled | Planet=" + planetId);
+            return false;
+        }
+        var available = new System.Collections.Generic.List<MissionInstanceData>(_missionService.GetAvailableMissions());
+        if (!available.Exists(m => m != null && m.MissionRuntimeId == offer.OfferedMission.MissionRuntimeId))
+            available.Add(offer.OfferedMission);
+        _missionService.SetAvailableMissions(available);
 
         bool accepted = _missionService.AcceptMission(offer.OfferedMission.MissionRuntimeId);
 
         if (accepted)
             _offerStateService.ClearOffer(planetId);
+        AppLog.Info(DebugLogChannel.Mission,
+            "[MissionLifecycle] Government accept | Planet=" + planetId + " | Accepted=" + accepted);
 
         return accepted;
     }
