@@ -20,3 +20,4 @@ MonoBehaviour:
   secondsPerGameTick: 1
   minutesPerGameTick: 15
   galaxyMapRoutePointSpacing: 0.1
+  MissionGameplay: {fileID: 11400000, guid: d240ea1427a04a49b9361ee36880b198, type: 2}

@@ -11,10 +11,10 @@ public static class MissionLifecycleRules
                type == MissionType.RouteSearch;
     }
 
-    // Other planned types acquire their actual objective handlers in S08-02.
+    // Five planned types have objective handlers; legacy Elimination remains disabled.
     public static bool IsPlayableType(MissionType type)
     {
-        return type == MissionType.Delivery || type == MissionType.Recon;
+        return IsPlannedType(type);
     }
 
     public static bool IsActive(MissionStatus status)
@@ -115,6 +115,12 @@ public static class MissionLifecycleRules
         missions.RemoveAll(m => m == null || string.IsNullOrWhiteSpace(m.MissionRuntimeId) || !seen.Add(m.MissionRuntimeId));
         foreach (var mission in missions)
         {
+            if (mission.Objective != null)
+            {
+                mission.Objective.BattleKilledEnemyIds ??= new List<string>();
+                mission.Objective.RouteSurveySystemIds ??= new List<string>();
+                mission.Objective.RouteExpectedLevel = MissionBattleRules.RouteLevel(mission.Objective.RouteExpectedLevel);
+            }
             mission.DurationDays = Math.Max(0, mission.DurationDays);
             mission.AcceptedAtDay = Math.Max(0, mission.AcceptedAtDay);
             mission.ExpiresAtDay = Math.Max(0, mission.ExpiresAtDay);

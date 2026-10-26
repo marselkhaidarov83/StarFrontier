@@ -526,6 +526,11 @@ public sealed class InvasionService :
             ", Target: " + targetSystem.Id +
             ", Rule: " + invasionSpawnRule.Id);
 
+        var missionSystem = galaxyState.Systems?.Find(s => s != null && s.SystemId == targetSystem.Id);
+        if (missionSystem != null && missionSystem.InvasionGeneration < int.MaxValue)
+            missionSystem.InvasionGeneration++;
+        _eventBus.Publish(new SystemInvasionStartedMissionEvent(targetSystem.Id));
+
         PublishWarNews(
             WarNewsEventKind.InvasionStarted,
             targetSystem.Id,

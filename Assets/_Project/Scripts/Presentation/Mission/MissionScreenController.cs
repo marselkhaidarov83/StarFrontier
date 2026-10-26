@@ -73,6 +73,9 @@ public class MissionScreenController : CustomMonoBehaviour
         allMissions.AddRange(_missionService.GetAvailableMissions());
         allMissions.AddRange(_missionService.GetActiveMissions());
         allMissions.AddRange(_missionService.GetArchivedMissions());
+        allMissions.RemoveAll(mission => !MissionListVisibilityRules.ShouldShow(mission));
+        if (_selectedMission != null && !allMissions.Exists(mission => mission.MissionRuntimeId == _selectedMission.MissionRuntimeId))
+            _selectedMission = null;
 
         foreach (MissionInstanceData mission in allMissions)
         {
@@ -158,6 +161,9 @@ public class MissionScreenController : CustomMonoBehaviour
             MissionType.Delivery => deliveryIcon,
             MissionType.Elimination => eliminationIcon,
             MissionType.Recon => reconIcon,
+            MissionType.Defense => eliminationIcon,
+            MissionType.Liberation => eliminationIcon,
+            MissionType.RouteSearch => reconIcon,
             _ => null
         };
     }

@@ -103,6 +103,10 @@ using UnityEngine.UI;
                 MissionType.Delivery => $"Progress: {(mission.IsReadyToTurnIn ? "Ready to turn in" : "In progress")}",
                 MissionType.Elimination => $"Progress: {mission.Objective.CurrentAmount}/{mission.Objective.RequiredAmount}",
                 MissionType.Recon => $"Progress: {mission.Objective.CurrentAmount}/{mission.Objective.RequiredAmount}",
+                MissionType.Defense => $"Личные убийства: {mission.Objective.CurrentAmount}. {(mission.Objective.BattleWon ? "Победа" : "Бой продолжается")}",
+                MissionType.Liberation => $"Личные убийства: {mission.Objective.CurrentAmount}. {(mission.Objective.BattleWon ? "Победа" : "Бой продолжается")}",
+                MissionType.RouteSearch => $"Обходной путь: {(mission.Objective.RouteIndirectSurveyed ? "изучен" : "не изучен")}" +
+                    (mission.Objective.RouteIsUpgrade ? $"; прямой: {(mission.Objective.RouteDirectSurveyed ? "изучен" : "не изучен")}" : ""),
                 _ => "Progress: -"
             };
         }
@@ -138,8 +142,10 @@ using UnityEngine.UI;
         if (canTurnIn && mission.MissionType == MissionType.Delivery)
             canTurnIn = mission.TargetPlanetId == player.CurrentPlanetId &&
                 mission.TargetSystemId == player.CurrentSystemId;
-        if (canTurnIn && mission.MissionType == MissionType.Recon)
+        if (canTurnIn && (mission.MissionType == MissionType.Recon || mission.MissionType == MissionType.RouteSearch))
             canTurnIn = mission.SourcePlanetId == player.CurrentPlanetId && mission.SourceSystemId == player.CurrentSystemId;
+        if (canTurnIn && MissionBattleRules.IsBattle(mission.MissionType))
+            canTurnIn = mission.TargetSystemId == player.CurrentSystemId && !string.IsNullOrWhiteSpace(player.CurrentPlanetId);
         doneButton.gameObject.SetActive(canTurnIn);
     }
 

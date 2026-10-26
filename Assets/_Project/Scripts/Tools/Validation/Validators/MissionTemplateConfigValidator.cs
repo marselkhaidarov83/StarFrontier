@@ -128,6 +128,8 @@ public class MissionTemplateConfigValidator : IConfigValidator<MissionTemplateCo
             (string.IsNullOrWhiteSpace(config.DescriptionPattern) ||
              !config.DescriptionPattern.Contains("{enemyCount}") || !config.DescriptionPattern.Contains("{scanDistance}")))
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "Recon text must include {enemyCount} and {scanDistance}.", config));
+        if (config is RouteMissionTemplateConfig && config.CreditRewardMode != MissionCreditRewardMode.Fixed)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Route missions require a fixed credit reward.", config));
         return issues;
     }
 }

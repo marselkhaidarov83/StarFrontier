@@ -79,6 +79,9 @@ public sealed class SaveValidationStage
         NormalizeMissionCollections(state, result);
         NormalizeNpcCollections(state, result);
         NormalizeWarCollections(state, result);
+        if (state.Galaxy?.Routes != null)
+            foreach (var route in state.Galaxy.Routes)
+                if (route != null) route.DevelopmentLevel = MissionBattleRules.RouteLevel(route.DevelopmentLevel);
 
         return result;
     }

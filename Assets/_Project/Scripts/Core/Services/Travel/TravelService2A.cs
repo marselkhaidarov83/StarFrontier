@@ -482,10 +482,9 @@ public sealed class TravelService2A :
         if (routeConfig == null)
             return DefaultFuelCostPerJump;
 
-        if (routeConfig.ParsecDistance <= 0)
-            return DefaultFuelCostPerJump;
-
-        return routeConfig.ParsecDistance;
+        int level = _gameSessionService.State?.Galaxy?.Routes?
+            .FirstOrDefault(r => r != null && r.RouteId == routeConfig.Id)?.DevelopmentLevel ?? 1;
+        return routeConfig.GetFuelCost(level);
     }
 
     private StarSystemConfig FindSystemConfig(

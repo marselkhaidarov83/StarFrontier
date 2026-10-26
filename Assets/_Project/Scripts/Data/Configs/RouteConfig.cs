@@ -31,6 +31,18 @@ public class RouteConfig : BaseConfig
     [Tooltip("Параметр ParsecDistance. Используется связанными игровыми системами этого конфига.")]
     public int ParsecDistance;
 
+    [Header("Топливо по уровням развития (1–5)")]
+    [SerializeField] private System.Collections.Generic.List<int> fuelByDevelopmentLevel = new();
+    public System.Collections.Generic.IReadOnlyList<int> FuelByDevelopmentLevel => fuelByDevelopmentLevel;
+
+    public int GetFuelCost(int level)
+    {
+        int index = System.Math.Max(1, System.Math.Min(5, level)) - 1;
+        if (fuelByDevelopmentLevel != null && fuelByDevelopmentLevel.Count == 5)
+            return System.Math.Max(1, fuelByDevelopmentLevel[index]);
+        return System.Math.Max(1, ParsecDistance - index);
+    }
+
     [Header("Точки входа и выхода")]
 
     [SerializeField]

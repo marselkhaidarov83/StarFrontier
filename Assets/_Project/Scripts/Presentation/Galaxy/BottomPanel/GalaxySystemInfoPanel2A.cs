@@ -346,10 +346,8 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
         if (routeConfig == null)
             return 0;
 
-        if (routeConfig.ParsecDistance <= 0)
-            return 1;
-
-        return routeConfig.ParsecDistance;
+        return Bootstrapper.Instance.ServiceRegistry.Get<ITravelService>()
+            .GetTravelCost(fromSystemId, toSystemId);
     }
 
     private StarSystemConfig FindSystemConfig(string systemId)

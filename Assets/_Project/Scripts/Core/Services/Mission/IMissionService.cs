@@ -14,6 +14,10 @@ public interface IMissionService
     bool ExpireMission(string missionRuntimeId);
     void ReevaluateActiveMissions(string reason);
     void ObserveReconTargets();
+    void ObserveBattleParticipation(string systemId);
+    void RecordBattleKill(string npcId, string systemId);
+    void ResolveBattle(string encounterId, string systemId, bool victory);
+    void ObserveMissionTravel(TravelFinishedEvent travel);
     MissionInstanceData GetMissionById(string missionRuntimeId);
     void ClearAll();
 }

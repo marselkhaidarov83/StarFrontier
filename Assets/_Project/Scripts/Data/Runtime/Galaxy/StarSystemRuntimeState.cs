@@ -5,6 +5,8 @@ public class StarSystemRuntimeState
 {
     public string SystemId;
 
+    public int InvasionGeneration;
+
     public bool IsDiscovered;
     public bool IsVisited;
 

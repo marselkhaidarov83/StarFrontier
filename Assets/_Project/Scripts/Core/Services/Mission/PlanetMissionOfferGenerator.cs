@@ -114,6 +114,22 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
                 " | ScanDistance=" + objective.ReconScanDistance);
             rewardCredits = template.CreditRewardMode == MissionCreditRewardMode.Fixed ? template.RewardCredits : Roll(template.CreditRewardMin, template.CreditRewardMax);
         }
+        else if (template is RouteMissionTemplateConfig routeTemplate && template.MissionType == MissionType.RouteSearch &&
+                 template.CreditRewardMode == MissionCreditRewardMode.Fixed)
+        {
+            var candidates = RouteMissionRules.BuildCandidates(_session.State.Galaxy, _config.GetAllStarSystems(), source.Id,
+                routeTemplate.ImproveExistingRoute, r => _routes.IsRouteUnlocked(r.Id), RouteSystemAvailable)
+                .Where(r => _session.State.MissionBlock?.ActiveMissions?.Any(m => m?.MissionType == MissionType.RouteSearch && m.Objective?.RouteId == r.Id) != true).ToList();
+            if (candidates.Count == 0) return null;
+            var route = candidates[Math.Min(candidates.Count - 1, (int)(UnityEngine.Random.value * candidates.Count))];
+            targetSystem = route.GetOtherSystem(source.Id);
+            var state = _session.State.Galaxy.Routes.Find(r => r != null && r.RouteId == route.Id);
+            objective.RouteId = route.Id;
+            objective.RouteIsUpgrade = routeTemplate.ImproveExistingRoute;
+            objective.RouteExpectedLevel = MissionBattleRules.RouteLevel(state.DevelopmentLevel);
+            objective.RequiredAmount = routeTemplate.ImproveExistingRoute ? 2 : 1;
+            rewardCredits = template.RewardCredits;
+        }
         else
         {
             Log("TemplateSkipped | Id=" + template.Id + " | Reason=SpecializedTemplateRequired");
@@ -149,6 +165,14 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
         Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>()
             .GetAliveNpcsInSystemByType(systemId, SystemNpcType.Enemy).Count(n => n.IsAvailableForCombat());
 
+    private bool RouteSystemAvailable(string id)
+    {
+        var galaxy = _session.State?.Galaxy;
+        if (galaxy?.Systems?.Any(s => s != null && s.SystemId == id && s.IsDiscovered) != true) return false;
+        var sector = _config.GetAllSectors().FirstOrDefault(s => s != null && s.Systems != null && s.Systems.Any(c => c != null && c.Id == id));
+        return sector != null && (galaxy.Sectors?.Find(s => s != null && s.SectorId == sector.Id)?.IsUnlocked ?? sector.IsUnlocked);
+    }
+
     private bool ExistingOfferStillValid(StarSystemConfig source, MissionInstanceData old)
     {
         if (old.MissionType == MissionType.Delivery)
@@ -157,6 +181,10 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
         if (old.MissionType == MissionType.Recon)
             return old.Objective?.ReconScanDistance > 0 && old.Objective.RequiredAmount > 0 &&
                 ReconMissionTargetSelector.IsEnemy(_session.State.Galaxy, old.TargetSystemId);
+        if (old.MissionType == MissionType.RouteSearch && old.Objective != null)
+            return RouteMissionRules.BuildCandidates(_session.State.Galaxy, _config.GetAllStarSystems(), source.Id,
+                old.Objective.RouteIsUpgrade, r => _routes.IsRouteUnlocked(r.Id), RouteSystemAvailable)
+                .Any(r => r.Id == old.Objective.RouteId && MissionBattleRules.RouteLevel(_session.State.Galaxy.Routes.Find(s => s.RouteId == r.Id).DevelopmentLevel) == old.Objective.RouteExpectedLevel);
         return false;
     }
 

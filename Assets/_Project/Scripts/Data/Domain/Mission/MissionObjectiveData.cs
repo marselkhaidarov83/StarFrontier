@@ -21,6 +21,19 @@ using System.Collections.Generic;
         public bool ReconIsInsideTarget;
         public string ReconLastAlliedSystemId;
 
+        public string BattleEncounterId;
+        public int BattleInvasionGeneration;
+        public int BattleRewardDeflator;
+        public bool BattleWon;
+        public List<string> BattleKilledEnemyIds = new();
+
+        public string RouteId;
+        public bool RouteIsUpgrade;
+        public int RouteExpectedLevel;
+        public bool RouteDirectSurveyed;
+        public bool RouteIndirectSurveyed;
+        public List<string> RouteSurveySystemIds = new();
+
         public bool IsMissionCargoGranted;
         public bool IsMissionCargoDelivered;
     }

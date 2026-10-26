@@ -167,6 +167,11 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         if (result.AppliedDamage <= 0)
             return default;
 
+        // Start participation while the victim is still included in the alive count.
+        if (npc.IsEnemy && (killedByPlayer || damagedByPlayer) &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<IMissionService>(out var battleMissions))
+            battleMissions.ObserveBattleParticipation(npc.CurrentSystemId);
+
         npc.ApplyDamageResult(
             result.CurrentShield,
             result.CurrentHull);
@@ -249,10 +254,18 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
         npc.DestroyedAtTick = GetCurrentQuantTick();
         npc.NextRespawnTick = ScheduleRespawn(npc);
 
-        if (_encounterService != null)
+        if (npc.IsEnemy && killedByPlayer && Bootstrapper.Instance.ServiceRegistry.TryGet<IMissionService>(out var missions))
+            missions.RecordBattleKill(npc.RuntimeNpcId + ":" + npc.DestroyedAtTick, npc.CurrentSystemId);
+
+        if (_encounterService?.Current?.SystemId == npc.CurrentSystemId)
         {
             if (npc.IsEnemy)
+            {
                 _encounterService.RegisterEnemyDestroyed(killedByPlayer);
+                if (_encounterService.Current?.EnemiesAlive == 0 &&
+                    Bootstrapper.Instance.ServiceRegistry.TryGet<IMissionService>(out var battleMissions))
+                    battleMissions.ResolveBattle(_encounterService.Current.EncounterId, npc.CurrentSystemId, true);
+            }
             else if (npc.IsAlly)
                 _encounterService.RegisterAllyDestroyed();
         }

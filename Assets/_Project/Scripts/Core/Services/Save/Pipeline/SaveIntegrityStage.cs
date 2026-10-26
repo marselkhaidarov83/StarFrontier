@@ -50,7 +50,7 @@ public sealed class SaveIntegrityStage
     {
         var status = Verify(state);
         if (status != SaveIntegrityStatus.Invalid || state?.Meta == null ||
-            state.Meta.SaveDataVersion >= SaveDataVersions.MissionGameplay || string.IsNullOrWhiteSpace(json))
+            state.Meta.SaveDataVersion >= SaveDataVersions.MissionBattleAndRoutes || string.IsNullOrWhiteSpace(json))
             return status;
 
         string expected = state.Meta.IntegrityChecksum;

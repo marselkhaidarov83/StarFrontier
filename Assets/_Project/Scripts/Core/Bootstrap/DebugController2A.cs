@@ -40,6 +40,53 @@ public sealed class DebugController2A : CustomMonoBehaviour
             ? Bootstrapper.Instance.ServiceRegistry
             : null;
 
+    [ContextMenu("STAR FRONTIER/Missions/Regenerate Offer On Current Planet")]
+    private void DebugRegeneratePlanetMission()
+    {
+        bool developerMode = DeveloperModeGate.IsEnabled;
+        AppLog.Info(DebugLogChannel.Mission, "[MissionReroll] Requested | IsPlaying=" + Application.isPlaying +
+            " | IsEditor=" + Application.isEditor + " | DeveloperMode=" + developerMode);
+        if (!DeveloperModeGate.CanRunExplicitCommand(Application.isPlaying, Application.isEditor, developerMode))
+        {
+            AppLog.Warning(DebugLogChannel.Mission, "[MissionReroll] Rejected | Reason=" +
+                (!Application.isPlaying ? "NotInPlayMode" : "DeveloperModeDisabledOutsideEditor"));
+            return;
+        }
+        var registry = ServiceRegistry;
+        if (registry == null || !registry.TryGet<IGameSessionService>(out var session) || session.State?.Player == null ||
+            !registry.TryGet<IConfigService>(out var config) ||
+            !registry.TryGet<IPlanetGovernmentMissionService>(out var government) ||
+            !registry.TryGet<SimpleEventBus>(out var events))
+        {
+            AppLog.Warning(DebugLogChannel.Mission, "[MissionReroll] Rejected | Reason=SessionOrServicesUnavailable");
+            return;
+        }
+        var player = session.State.Player;
+        if (string.IsNullOrWhiteSpace(player.CurrentPlanetId))
+        {
+            AppLog.Warning(DebugLogChannel.Mission, "[MissionReroll] Rejected | Reason=PlayerNotLanded | System=" + player.CurrentSystemId);
+            return;
+        }
+        try
+        {
+            if (!government.TryRegenerateGovernmentOffer(config.GetStarSystemConfigById(player.CurrentSystemId),
+                config.GetPlanetConfigById(player.CurrentPlanetId), out var offer))
+            {
+                AppLog.Warning(DebugLogChannel.Mission, "[MissionReroll] Cannot regenerate: check the planet mission config, an already accepted mission from this planet and the active mission limit.");
+                return;
+            }
+            AppLog.Info(DebugLogChannel.Mission, "[MissionReroll] RefreshRequested | Planet=" + player.CurrentPlanetId +
+                " | NewId=" + offer?.OfferedMission?.MissionRuntimeId + " | Type=" + offer?.OfferedMission?.MissionType +
+                " | Title=" + (offer?.OfferedMission?.Title ?? "NoEligibleMission"));
+            // Existing presenters refresh the government offer and mission cards on this event.
+            events.Publish(new GovernmentEnteredEvent());
+        }
+        catch (System.Exception exception)
+        {
+            AppLog.Error(DebugLogChannel.Mission, "[MissionReroll] Failed | " + exception.Message);
+        }
+    }
+
     [ContextMenu("STAR FRONTIER/War/Force Invasion")]
     private void DebugForceInvasion()
     {

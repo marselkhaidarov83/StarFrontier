@@ -93,7 +93,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             "_" +
             shooter.GroupRuntimeId +
             "_" +
-            shooter.RuntimeNpcId;
+            shooter.RuntimeNpcId + "_" + System.Guid.NewGuid().ToString("N");
 
         _encounterService.StartEncounter(
             encounterId,

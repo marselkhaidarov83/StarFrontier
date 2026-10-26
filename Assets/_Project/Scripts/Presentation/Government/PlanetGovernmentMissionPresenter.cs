@@ -79,6 +79,9 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 
     private void RefreshUi(PlanetOfferedMissionData offer)
     {
+        AppLog.Info(DebugLogChannel.Mission, "[MissionReroll] Displayed | Planet=" + _planetConfig?.Id +
+            " | Id=" + offer?.OfferedMission?.MissionRuntimeId + " | Type=" + offer?.OfferedMission?.MissionType +
+            " | Title=" + (offer?.OfferedMission?.Title ?? "NoOffer"));
         if (governmentPlanetTitleText != null)
             governmentPlanetTitleText.text = $"Government: {_planetConfig.Id}";
 

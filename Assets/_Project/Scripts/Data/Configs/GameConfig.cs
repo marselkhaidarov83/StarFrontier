@@ -5,6 +5,9 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Game/Game Config")]
 public class GameConfig : BaseConfig
 {
+    [Header("Миссии")]
+    public MissionGameplayConfig MissionGameplay;
+
     [Header("Версия")]
     [Tooltip(
         "Версия игры или этапа разработки. " +

@@ -17,7 +17,11 @@ public class MissionTracker : CustomService, IMissionTracker, ITickable
         _eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         _eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
         _eventBus.Subscribe<GameTimeQuantumAdvancedEvent>(OnDayAdvanced);
-        SetTrackerMessage("Initialized; pirate/elimination tracking disabled.");
+        _eventBus.Subscribe<TravelFinishedEvent>(OnTravelFinished);
+        _eventBus.Subscribe<SystemEncounterVictoryPendingRewardEvent>(OnBattleVictory);
+        _eventBus.Subscribe<SystemEncounterDefeatedEvent>(OnBattleDefeat);
+        _eventBus.Subscribe<SystemInvasionStartedMissionEvent>(OnInvasionStarted);
+        SetTrackerMessage("Initialized; five mission types enabled.");
     }
 
     public void Dispose()
@@ -25,6 +29,10 @@ public class MissionTracker : CustomService, IMissionTracker, ITickable
         _eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         _eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
         _eventBus.Unsubscribe<GameTimeQuantumAdvancedEvent>(OnDayAdvanced);
+        _eventBus.Unsubscribe<TravelFinishedEvent>(OnTravelFinished);
+        _eventBus.Unsubscribe<SystemEncounterVictoryPendingRewardEvent>(OnBattleVictory);
+        _eventBus.Unsubscribe<SystemEncounterDefeatedEvent>(OnBattleDefeat);
+        _eventBus.Unsubscribe<SystemInvasionStartedMissionEvent>(OnInvasionStarted);
     }
 
     private void OnPlanetEntered(PlanetEnteredEvent evt) =>
@@ -37,6 +45,11 @@ public class MissionTracker : CustomService, IMissionTracker, ITickable
 
     private void OnDayAdvanced(GameTimeQuantumAdvancedEvent evt) =>
         _missionService.ReevaluateActiveMissions("DayAdvanced:" + evt.CurrentDay);
+
+    private void OnTravelFinished(TravelFinishedEvent evt) => _missionService.ObserveMissionTravel(evt);
+    private void OnBattleVictory(SystemEncounterVictoryPendingRewardEvent evt) => _missionService.ResolveBattle(evt.EncounterId, evt.SystemId, true);
+    private void OnBattleDefeat(SystemEncounterDefeatedEvent evt) => _missionService.ResolveBattle(evt.EncounterId, evt.SystemId, false);
+    private void OnInvasionStarted(SystemInvasionStartedMissionEvent evt) => _missionService.ReevaluateActiveMissions("InvasionStarted:" + evt.SystemId);
 
     public void Tick(float deltaTime) => _missionService.ObserveReconTargets();
 

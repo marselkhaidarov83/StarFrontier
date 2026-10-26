@@ -8,6 +8,11 @@ public static class DeveloperModeGate
         }
     }
 
+    // Explicit Editor context-menu commands do not depend on whether the debug HUD is shown.
+    // Runtime UI keeps using IsEnabled; outside the Editor the developer gate still applies.
+    public static bool CanRunExplicitCommand(bool isPlaying, bool isEditor, bool developerModeEnabled) =>
+        isPlaying && (isEditor || developerModeEnabled);
+
     public static bool IsEnabledForSettings(DebugSettings debugSettings)
     {
         if (debugSettings == null || !debugSettings.mobileTestMode)

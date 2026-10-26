@@ -24,3 +24,9 @@ MonoBehaviour:
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: ea0023da14e4348eea3bc55dae1a00b1, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 8207c0002bfef4cd99f087153d82ccb9, type: 2}
   galaxyMapCurveStrength: -0.1
+  fuelByDevelopmentLevel:
+  - 27
+  - 26
+  - 25
+  - 24
+  - 23

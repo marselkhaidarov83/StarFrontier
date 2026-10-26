@@ -151,9 +151,22 @@ public sealed class S08_02_MissionGameplayEditModeTests
         Assert.That(choices[0].System, Is.SameAs(target));
         Assert.That(choices[0].FuelCost, Is.EqualTo(4));
         Assert.That(DeliveryMissionTargetSelector.CalculateCredits(choices[0].FuelCost, 10f), Is.EqualTo(40));
+        // The direct route alone still reaches the allied inhabited destination.
+        var directOnly = DeliveryMissionTargetSelector.BuildCandidates(galaxy,
+            new[] { source, intermediate, target, enemy }, source.Id,
+            route => route.Id == "direct", Cost);
+        Assert.That(directOnly.Count, Is.EqualTo(1));
+        Assert.That(directOnly[0].System, Is.SameAs(target));
+        Assert.That(directOnly[0].Planet, Is.SameAs(planet));
+        Assert.That(directOnly[0].FuelCost, Is.EqualTo(7));
+
+        // Only the first leg is available: no inhabited destination is reachable.
         Assert.That(DeliveryMissionTargetSelector.BuildCandidates(galaxy,
             new[] { source, intermediate, target, enemy }, source.Id,
-            route => route.Id == "direct", Cost), Is.Empty);
+            route => route.Id == "first", Cost), Is.Empty);
+        Assert.That(DeliveryMissionTargetSelector.BuildCandidates(galaxy,
+            new[] { source, intermediate, target, enemy }, source.Id,
+            route => false, Cost), Is.Empty);
     }
 
     [Test]

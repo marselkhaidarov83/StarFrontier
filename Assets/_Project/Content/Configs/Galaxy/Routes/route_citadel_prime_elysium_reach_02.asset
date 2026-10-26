@@ -23,3 +23,9 @@ MonoBehaviour:
   ParsecDistance: 43
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: c1c26a393fbdd4b94a28720feacc0547, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 2dfe336893ee5411aa81270392a95aaf, type: 2}
+  fuelByDevelopmentLevel:
+  - 43
+  - 42
+  - 41
+  - 40
+  - 39

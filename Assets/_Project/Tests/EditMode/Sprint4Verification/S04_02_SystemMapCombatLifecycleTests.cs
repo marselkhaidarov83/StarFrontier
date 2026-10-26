@@ -185,9 +185,48 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
             damage: 9999,
             fromPlayer: true);
 
-        TestGovernmentRewardPayoutService payoutService =
-            new TestGovernmentRewardPayoutService();
+        Assert.AreEqual(SystemEncounterState.VictoryPendingReward, _encounterService.Current.State);
 
+        // Government rewards now use the saved mission ledger and the actual player wallet.
+        var state = new GameRuntimeState
+        {
+            Player = new PlayerState(),
+            Galaxy = new GalaxyRuntimeState(),
+            MissionBlock = new RuntimeMissionSaveBlock()
+        };
+        state.Player.CurrentSystemId = "system_test";
+        state.Player.CurrentPlanetId = "planet_test";
+        state.Player.Credits = 1000;
+        state.Player.Experience = 0;
+        state.Galaxy.Systems.Add(new StarSystemRuntimeState { SystemId = "system_test", InvasionGeneration = 0 });
+        var mission = new MissionInstanceData
+        {
+            MissionRuntimeId = "mission_reward_once", MissionType = MissionType.Defense,
+            Status = MissionStatus.ReadyToComplete, IsReadyToTurnIn = true,
+            SourceSystemId = "system_test", TargetSystemId = "system_test",
+            Reward = new MissionRewardData { Credits = 100, Xp = 0 },
+            Objective = new MissionObjectiveData { RequiredAmount = 1, CurrentAmount = 1,
+                BattleEncounterId = "encounter_test", BattleWon = true, BattleInvasionGeneration = 0, BattleRewardDeflator = 100 }
+        };
+        state.MissionBlock.ActiveMissions.Add(mission);
+        _registry.Register(RewardDependencyProxy.Make<IGameSessionService>((method, args) =>
+            method.Name == "get_State" ? state : RewardDependencyProxy.DefaultValue(method)));
+        bool saving = true;
+        _registry.Register(RewardDependencyProxy.Make<ISaveService>((method, args) =>
+        {
+            if (method.Name == "EnableSave") { saving = (bool)args[0]; return null; }
+            return method.Name == "get_IsSaveEnabled" ? saving : RewardDependencyProxy.DefaultValue(method);
+        }));
+        _registry.Register(RewardDependencyProxy.Make<IConfigService>());
+        _registry.Register(RewardDependencyProxy.Make<IRouteService>());
+        _registry.Register(RewardDependencyProxy.Make<ITravelService>());
+        _registry.Register(RewardDependencyProxy.Make<ISystemNpcRuntimeService>());
+        _registry.Register<IInventoryService>(new InventoryService());
+        _registry.Register<IRewardService>(new RewardService());
+        _registry.Register<IMissionService>(new MissionService());
+
+        // Keep a legacy payout observer to detect an accidental duplicate payment path.
+        var payoutService = new TestGovernmentRewardPayoutService();
         _registry.Register<IGovernmentRewardPayoutService>(payoutService);
 
         GovernmentRewardService rewardService =
@@ -206,9 +245,16 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
         Assert.IsTrue(firstClaim.Success);
         Assert.IsFalse(secondClaim.Success);
 
-        Assert.AreEqual(
-            1,
-            payoutService.GrantCallCount);
+        Assert.AreEqual(100, firstClaim.Credits);
+        Assert.AreEqual(0, firstClaim.Xp);
+        Assert.AreEqual(0, secondClaim.Credits);
+        Assert.AreEqual(1100, state.Player.Credits);
+        Assert.AreEqual(0, state.Player.Experience);
+        Assert.AreEqual(1, state.MissionBlock.RewardGrantedMissionIds.Count);
+        Assert.Contains(mission.MissionRuntimeId, state.MissionBlock.RewardGrantedMissionIds);
+        Assert.IsEmpty(state.MissionBlock.ActiveMissions);
+        Assert.AreEqual(0, payoutService.GrantCallCount);
+        Assert.IsTrue(saving);
 
         Assert.AreEqual(
             SystemEncounterState.Resolved,
@@ -422,6 +468,24 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
             CurrentHull = hull;
             CurrentShield = shield;
         }
+    }
+
+    // Public/unsealed so DispatchProxy can derive a dependency stub in the Editor.
+    public class RewardDependencyProxy : DispatchProxy
+    {
+        public System.Func<MethodInfo, object[], object> Handler;
+        protected override object Invoke(MethodInfo method, object[] args) =>
+            Handler == null ? DefaultValue(method) : Handler(method, args);
+
+        public static T Make<T>(System.Func<MethodInfo, object[], object> handler = null) where T : class
+        {
+            var proxy = Create<T, RewardDependencyProxy>();
+            ((RewardDependencyProxy)(object)proxy).Handler = handler;
+            return proxy;
+        }
+
+        public static object DefaultValue(MethodInfo method) => method.ReturnType == typeof(void) ? null :
+            method.ReturnType.IsValueType ? System.Activator.CreateInstance(method.ReturnType) : null;
     }
 
     private sealed class TestGovernmentRewardPayoutService :

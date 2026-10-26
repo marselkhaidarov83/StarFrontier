@@ -16,8 +16,7 @@ public class RouteService : CustomService, IRouteService
 
     private void GalaxyRuntimeStateUpdate()
     {
-        if (_galaxyRuntimeState == null && Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State != null)
-            _galaxyRuntimeState = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State.Galaxy;
+        _galaxyRuntimeState = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State?.Galaxy;
     }
 
     public bool IsRouteUnlocked(string routeId)
