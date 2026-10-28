@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -88,6 +89,9 @@ public sealed class SystemSecurityService :
 
         systemState.SetSystemStatus(newStatus);
 
+        if (previousStatus != StarSystemStatus.Captured && systemState.SystemStatus == StarSystemStatus.Captured)
+            PublishCaptured(systemId);
+
         LogSystemStatusDebug(
             "SYSTEM_STATUS_CHANGED" +
             " | Source=SetSystemStatus" +
@@ -130,6 +134,9 @@ public sealed class SystemSecurityService :
             systemState.SystemStatus;
 
         systemState.MarkCaptured();
+
+        if (previousStatus != StarSystemStatus.Captured)
+            PublishCaptured(systemId);
 
         LogSystemStatusDebug(
             "SYSTEM_STATUS_CHANGED" +
@@ -174,6 +181,13 @@ public sealed class SystemSecurityService :
         return gameState.Galaxy.Systems.FirstOrDefault(
             system => system != null &&
                       system.SystemId == systemId);
+    }
+
+    private void PublishCaptured(string systemId)
+    {
+        try { _eventBus?.Publish(new SystemCapturedMissionEvent(systemId)); }
+        catch (Exception exception)
+        { AppLog.Error(DebugLogChannel.Mission, "[MissionDelivery] Capture observer failed | " + exception.Message); }
     }
 
     public bool TrySetSystemStableByNpcAutonomy(string systemId)

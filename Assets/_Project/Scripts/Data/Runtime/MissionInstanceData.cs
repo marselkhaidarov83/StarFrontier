@@ -8,6 +8,7 @@ public class MissionInstanceData
 
         public string Title;
         public string Description;
+        public MissionOutcomeTexts OutcomeTexts;
 
         public MissionStatus Status;
         public MissionType MissionType;

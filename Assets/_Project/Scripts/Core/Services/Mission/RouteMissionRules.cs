@@ -61,6 +61,11 @@ public static class RouteMissionRules
     // Reverse trips and failed jumps never contribute; each survey can be performed in either order.
     public static void ObserveHop(MissionObjectiveData objective, string source, string target, string from, string to)
     {
+        if (objective.RouteIsUpgrade && objective.RouteDirectSurveyed &&
+            !objective.RouteIndirectSurveyed && to == source)
+            objective.RouteReturnedAfterDirectSurvey = true;
+        if (objective.RouteIsUpgrade && objective.RouteDirectSurveyed && from == source)
+            objective.RouteReturnedAfterDirectSurvey = true;
         objective.RouteSurveySystemIds ??= new List<string>();
         var path = objective.RouteSurveySystemIds;
         if (from == source) { path.Clear(); path.Add(source); }

@@ -62,19 +62,29 @@ public partial class MissionService
             m.TargetSystemId == systemId && m.Objective?.BattleEncounterId == encounter.EncounterId);
         if (mission == null)
         {
+            // At capacity, wait for a personal kill before adding the exceptional fourth mission.
+            if (string.IsNullOrWhiteSpace(npcId) && !MissionCapacityHelper.CanAcceptMoreMissions(this)) return;
             string id = "mission_battle_" + encounter.EncounterId;
             if (GetMissionById(id) != null || Block.RewardGrantedMissionIds.Contains(id)) return;
             var settings = _config.GameConfig?.MissionGameplay;
             if (settings == null) { AppLog.Error(DebugLogChannel.Mission, "[MissionBattle] Missing MissionGameplayConfig"); return; }
             int deflator = Math.Max(0, liberation ? settings.LiberationKillRewardDeflator : settings.DefenseKillRewardDeflator);
+            string systemName = _config.GetStarSystemConfigById(systemId)?.DisplayName ?? systemId;
+            string titlePattern = liberation ? settings.LiberationTitlePattern : settings.DefenseTitlePattern;
+            string descriptionPattern = liberation ? settings.LiberationDescriptionPattern : settings.DefenseDescriptionPattern;
+            MissionOutcomeTexts outcomePatterns = liberation ? settings.LiberationOutcomeTexts : settings.DefenseOutcomeTexts;
             mission = new MissionInstanceData
             {
                 MissionRuntimeId = id, TemplateId = liberation ? "automatic_liberation" : "automatic_defense",
                 MissionType = liberation ? MissionType.Liberation : MissionType.Defense,
                 Status = MissionStatus.InProgress, TargetSystemId = systemId, SourceSystemId = systemId,
                 AcceptedAtDay = CurrentDay,
-                Title = (liberation ? "Освобождение: " : "Защита: ") + _config.GetStarSystemConfigById(systemId)?.DisplayName,
-                Description = "Победите в бою, уничтожив хотя бы одного врага лично. Награда за все личные убийства выдаётся на любой планете этой системы до следующего вторжения. Отлёт до победы — провал.",
+                Title = string.IsNullOrWhiteSpace(titlePattern) ? (liberation ? "Освобождение: " : "Защита: ") + systemName :
+                    titlePattern.Replace("{targetSystem}", systemName),
+                Description = string.IsNullOrWhiteSpace(descriptionPattern) ?
+                    "Победите в бою, уничтожив хотя бы одного врага лично. Награда за все личные убийства выдаётся на любой планете этой системы до следующего вторжения. Отлёт до победы — провал." :
+                    descriptionPattern.Replace("{targetSystem}", systemName),
+                OutcomeTexts = outcomePatterns?.Format(pattern => (pattern ?? string.Empty).Replace("{targetSystem}", systemName)),
                 Reward = new MissionRewardData(),
                 Objective = new MissionObjectiveData { TargetSystemId = systemId, RequiredAmount = 1,
                     BattleEncounterId = encounter.EncounterId, BattleInvasionGeneration = InvasionGeneration(systemId), BattleRewardDeflator = deflator }
@@ -178,5 +188,87 @@ public partial class MissionService
             PublishMissionChanged(mission);
         }
         ReevaluateActiveMissions("TravelFinished");
+    }
+
+    // Debug UI fixture: creates a claimable battle reward without changing combat or system ownership.
+    public bool TryCreateDebugReadyBattleMission(MissionType type, int personalKills,
+        out MissionInstanceData mission, out string reason)
+    {
+        mission = null;
+        reason = "None";
+        if (!MissionBattleRules.IsBattle(type)) { reason = "NotBattleMission"; return false; }
+        if (personalKills < 1) { reason = "NoPersonalKills"; return false; }
+
+        var player = _gameSessionService.State?.Player;
+        var block = Block;
+        if (player == null || block == null || string.IsNullOrWhiteSpace(player.CurrentSystemId) ||
+            string.IsNullOrWhiteSpace(player.CurrentPlanetId))
+        { reason = "PlayerNotLanded"; return false; }
+
+        string systemId = player.CurrentSystemId;
+        string planetId = player.CurrentPlanetId;
+        var system = _config.GetStarSystemConfigById(systemId);
+        var planet = _config.GetPlanetConfigById(planetId);
+        if (system == null || planet?.IsInhabited != true ||
+            system.PlanetRefs?.Any(p => p != null && p.Id == planetId) != true)
+        { reason = "CurrentPlanetNotInhabitedOrInvalid"; return false; }
+        var settings = _config.GameConfig?.MissionGameplay;
+        if (settings == null) { reason = "MissingMissionGameplayConfig"; return false; }
+        bool liberation = type == MissionType.Liberation;
+        int deflator = Math.Max(0, liberation
+            ? settings.LiberationKillRewardDeflator : settings.DefenseKillRewardDeflator);
+        string systemName = string.IsNullOrWhiteSpace(system.DisplayName) ? systemId : system.DisplayName;
+        string titlePattern = liberation ? settings.LiberationTitlePattern : settings.DefenseTitlePattern;
+        string descriptionPattern = liberation ? settings.LiberationDescriptionPattern : settings.DefenseDescriptionPattern;
+        MissionOutcomeTexts outcomePatterns = liberation
+            ? settings.LiberationOutcomeTexts : settings.DefenseOutcomeTexts;
+        string id = "mission_debug_battle_" + Guid.NewGuid().ToString("N");
+        var enemyIds = new List<string>(personalKills);
+        for (int i = 0; i < personalKills; i++) enemyIds.Add(id + "_enemy_" + (i + 1));
+        var created = new MissionInstanceData
+        {
+            MissionRuntimeId = id,
+            TemplateId = liberation ? "automatic_liberation" : "automatic_defense",
+            MissionType = type,
+            Status = MissionStatus.ReadyToComplete,
+            IsReadyToTurnIn = true,
+            SourcePlanetId = planetId,
+            SourceSystemId = systemId,
+            TargetSystemId = systemId,
+            AcceptedAtDay = CurrentDay,
+            LastTransitionReason = "DebugBattleWon",
+            Title = string.IsNullOrWhiteSpace(titlePattern)
+                ? (liberation ? "Освобождение: " : "Защита: ") + systemName
+                : titlePattern.Replace("{targetSystem}", systemName),
+            Description = string.IsNullOrWhiteSpace(descriptionPattern)
+                ? "Награда за личный вклад в победу готова."
+                : descriptionPattern.Replace("{targetSystem}", systemName),
+            OutcomeTexts = outcomePatterns?.Format(pattern =>
+                (pattern ?? string.Empty).Replace("{targetSystem}", systemName)),
+            Reward = new MissionRewardData
+            {
+                Credits = MissionBattleRules.Credits(personalKills, deflator),
+                Xp = 0
+            },
+            Objective = new MissionObjectiveData
+            {
+                TargetSystemId = systemId,
+                RequiredAmount = 1,
+                CurrentAmount = personalKills,
+                BattleEncounterId = "debug_" + id,
+                BattleInvasionGeneration = InvasionGeneration(systemId),
+                BattleRewardDeflator = deflator,
+                BattleWon = true,
+                BattleKilledEnemyIds = enemyIds
+            }
+        };
+
+        Mutate("DebugBattleReward", () => block.ActiveMissions.Add(created));
+        mission = created;
+        Log("DebugBattleRewardCreated", created,
+            "PersonalKills=" + personalKills + " | Credits=" + created.Reward.Credits);
+        PublishAccepted(created);
+        PublishMissionChanged(created);
+        return true;
     }
 }

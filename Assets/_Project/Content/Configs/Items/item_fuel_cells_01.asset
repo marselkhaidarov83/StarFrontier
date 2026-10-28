@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: item_fuel_cells_01
   m_EditorClassIdentifier: Data::ItemConfig
   id: item_fuel_cells_01
-  displayName: Fuel
+  displayName: Топливо
   description: Compact energy cells used for transport and station operations
   icon: {fileID: 21300000, guid: f0f64dec243b445beb2e82810e57d89e, type: 3}
   itemCategory: 1

@@ -10,6 +10,8 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
     private SystemEncounterService _encounterService;
     private SystemEnemyService _enemyService;
     private TestPlayerCombatTargetService _playerTargetService;
+    private StarSystemConfig _rewardSystem;
+    private PlanetConfig _rewardPlanet;
 
     [SetUp]
     public void SetUp()
@@ -46,6 +48,11 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
     public void TearDown()
     {
         Bootstrapper.Instance = null;
+
+        if (_rewardSystem != null)
+            Object.DestroyImmediate(_rewardSystem);
+        if (_rewardPlanet != null)
+            Object.DestroyImmediate(_rewardPlanet);
 
         if (_bootstrapRoot != null)
             Object.DestroyImmediate(_bootstrapRoot);
@@ -217,7 +224,22 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
             if (method.Name == "EnableSave") { saving = (bool)args[0]; return null; }
             return method.Name == "get_IsSaveEnabled" ? saving : RewardDependencyProxy.DefaultValue(method);
         }));
-        _registry.Register(RewardDependencyProxy.Make<IConfigService>());
+        _rewardPlanet = ScriptableObject.CreateInstance<PlanetConfig>();
+        _rewardSystem = ScriptableObject.CreateInstance<StarSystemConfig>();
+        const BindingFlags fields = BindingFlags.Instance | BindingFlags.NonPublic;
+        typeof(BaseConfig).GetField("id", fields).SetValue(_rewardPlanet, "planet_test");
+        typeof(BaseConfig).GetField("id", fields).SetValue(_rewardSystem, "system_test");
+        typeof(PlanetConfig).GetField("isInhabited", fields).SetValue(_rewardPlanet, true);
+        typeof(StarSystemConfig).GetField("planetRefs", fields).SetValue(_rewardSystem,
+            new[] { _rewardPlanet });
+        _registry.Register(RewardDependencyProxy.Make<IConfigService>((method, args) =>
+        {
+            if (method.Name == "GetStarSystemConfigById")
+                return (string)args[0] == "system_test" ? _rewardSystem : null;
+            if (method.Name == "GetPlanetConfigById")
+                return (string)args[0] == "planet_test" ? _rewardPlanet : null;
+            return RewardDependencyProxy.DefaultValue(method);
+        }));
         _registry.Register(RewardDependencyProxy.Make<IRouteService>());
         _registry.Register(RewardDependencyProxy.Make<ITravelService>());
         _registry.Register(RewardDependencyProxy.Make<ISystemNpcRuntimeService>());

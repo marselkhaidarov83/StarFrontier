@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 {
@@ -7,97 +8,251 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
     [SerializeField] private TMP_Text governmentOfferTitleText;
     [SerializeField] private TMP_Text governmentOfferDescriptionText;
     [SerializeField] private TMP_Text governmentOfferStateText;
+    [SerializeField] private GovernmentMissionVisualCatalog visualCatalog;
 
     private IPlanetGovernmentMissionService _governmentMissionService;
+    private IMissionService _missionService;
     private StarSystemConfig _systemConfig;
     private PlanetConfig _planetConfig;
     private IConfigService _configService;
     private SimpleEventBus _eventBus;
+    private bool _isSubscribed;
+    private Image _heroImage;
+    private Image _heroOverlayImage;
+    private RectTransform _heroFrame;
+    private MissionScreenController _missionScreen;
+    private Sprite _currentSprite;
+    private float _lastLayoutWidth = -1f;
+    // Slightly underlap the HUD artwork so the illustration meets its lower trim.
+    private const float TopHudHeight = 194f;
 
     public void Initialize()
     {
-        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _governmentMissionService = Bootstrapper.Instance.ServiceRegistry.Get<IPlanetGovernmentMissionService>();
-
-        SubscribeToEvents();            
+        IServiceRegistry services = Bootstrapper.Instance.ServiceRegistry;
+        _eventBus = services.Get<SimpleEventBus>();
+        _configService = services.Get<IConfigService>();
+        _governmentMissionService = services.Get<IPlanetGovernmentMissionService>();
+        _missionService = services.Get<IMissionService>();
+        // Planet action buttons are siblings in this Canvas and must remain above the illustration.
+        transform.SetAsFirstSibling();
+        CreateHeroImage();
+        _missionScreen = GetComponent<MissionScreenController>();
+        Transform oldOfferPanel = transform.Find("MissionPanel");
+        if (oldOfferPanel != null) oldOfferPanel.gameObject.SetActive(false);
+        SubscribeToEvents();
     }
 
-    private void OnDestroy()
+    private void OnEnable() => SubscribeToEvents();
+
+    private void OnDisable() => UnsubscribeFromEvents();
+
+    private void OnDestroy() => UnsubscribeFromEvents();
+
+    private void UnsubscribeFromEvents()
     {
-        UnsubscribeFromEvents();
+        if (_eventBus == null || !_isSubscribed) return;
+        _eventBus.Unsubscribe<GovernmentEnteredEvent>(OnGovernmentEntered);
+        _eventBus.Unsubscribe<MissionAcceptedEvent>(OnMissionAccepted);
+        _eventBus.Unsubscribe<MissionStateChangedEvent>(OnMissionChanged);
+        _isSubscribed = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (_heroFrame == null || _currentSprite == null) return;
+        float width = ((RectTransform)transform).rect.width;
+        if (Mathf.Abs(width - _lastLayoutWidth) > 0.5f)
+            UpdateHeroLayout();
     }
 
     private void SubscribeToEvents()
     {
-        if (_eventBus == null)
-            return;
-
+        if (_eventBus == null || _isSubscribed || !isActiveAndEnabled) return;
         _eventBus.Subscribe<GovernmentEnteredEvent>(OnGovernmentEntered);
+        _eventBus.Subscribe<MissionAcceptedEvent>(OnMissionAccepted);
+        _eventBus.Subscribe<MissionStateChangedEvent>(OnMissionChanged);
+        _isSubscribed = true;
     }
-
-    private void UnsubscribeFromEvents()
-    {
-        if (_eventBus == null)
-            return;
-
-        _eventBus.Unsubscribe<GovernmentEnteredEvent>(OnGovernmentEntered);
-    } 
 
     private void OnGovernmentEntered(GovernmentEnteredEvent evt)
     {
+        if (this == null || !isActiveAndEnabled) return;
         _systemConfig = _configService.GetCurrentSystemConfig();
         _planetConfig = _configService.GetCurrentPlanetConfig();
+        CheckOffer();
+    }
 
-        CheckOffer(); 
+    private void OnMissionAccepted(MissionAcceptedEvent evt) => RefreshCurrentPlanet();
+    private void OnMissionChanged(MissionStateChangedEvent evt) => RefreshCurrentPlanet();
+
+    private void RefreshCurrentPlanet()
+    {
+        if (this == null || !isActiveAndEnabled) return;
+        _systemConfig = _configService.GetCurrentSystemConfig();
+        _planetConfig = _configService.GetCurrentPlanetConfig();
+        CheckOffer();
     }
 
     public void CheckOffer()
     {
-        PlanetOfferedMissionData offer = _governmentMissionService.GetOrCreateGovernmentOffer(_systemConfig, _planetConfig);
+        if (_planetConfig == null || _systemConfig == null) return;
+        PlanetOfferedMissionData offer =
+            _governmentMissionService.GetOrCreateGovernmentOffer(_systemConfig, _planetConfig);
         RefreshUi(offer);
     }
 
     public void AcceptOffer()
     {
-        if (_planetConfig == null)
-        {
-            AppLog.Warning(DebugLogChannel.Mission, "[MissionLifecycle] AcceptOffer rejected | MissingPlanet");
-            return;
-        }
-        LogCustom("[PlanetGovernmentMissionPresenter] _planetConfig = " + _planetConfig);
-        LogCustom("[PlanetGovernmentMissionPresenter] _planetConfig.Id = " + _planetConfig.Id);
+        if (_planetConfig == null) return;
         bool accepted = _governmentMissionService.AcceptGovernmentOffer(_planetConfig.Id);
-        LogCustom("[PlanetGovernmentMissionPresenter] AcceptOffer.accepted = " + accepted);
-        if (governmentOfferStateText != null)
-            governmentOfferStateText.text = accepted ? "Mission accepted." : "Mission accept failed.";
-
-        if (accepted)
-            CheckOffer();
-
+        AppLog.Info(DebugLogChannel.Mission, typeof(PlanetGovernmentMissionPresenter),
+            "Offer " + (accepted ? "accepted" : "rejected") + " | Planet=" + _planetConfig.Id);
+        if (accepted) CheckOffer();
     }
 
     private void RefreshUi(PlanetOfferedMissionData offer)
     {
-        AppLog.Info(DebugLogChannel.Mission, "[MissionReroll] Displayed | Planet=" + _planetConfig?.Id +
-            " | Id=" + offer?.OfferedMission?.MissionRuntimeId + " | Type=" + offer?.OfferedMission?.MissionType +
-            " | Title=" + (offer?.OfferedMission?.Title ?? "NoOffer"));
         if (governmentPlanetTitleText != null)
-            governmentPlanetTitleText.text = $"Government: {_planetConfig.Id}";
+            governmentPlanetTitleText.text = _planetConfig?.DisplayName ?? string.Empty;
 
-        if (offer?.OfferedMission == null)
+        MissionInstanceData featured = offer?.OfferedMission;
+        if (featured == null && _missionService != null && _planetConfig != null)
         {
-            if (governmentOfferTitleText != null)
-                governmentOfferTitleText.text = "No offer";
-            if (governmentOfferDescriptionText != null)
-                governmentOfferDescriptionText.text = string.Empty;
-            if (governmentOfferStateText != null)
-                governmentOfferStateText.text = "No mission available now.";
+            foreach (MissionInstanceData mission in _missionService.GetActiveMissions())
+            {
+                if (mission != null && mission.SourcePlanetId == _planetConfig.Id &&
+                    MissionLifecycleRules.IsActive(mission.Status))
+                {
+                    // Show the most recently added mission from this planet.
+                    featured = mission;
+                }
+            }
+        }
+
+        // Automatic defense and liberation rewards can be claimed on any
+        // inhabited planet of their system, even though no planet issued them.
+        if (featured == null && _missionService != null && _planetConfig?.IsInhabited == true)
+        {
+            foreach (MissionInstanceData mission in _missionService.GetActiveMissions())
+            {
+                if (mission != null && MissionBattleRules.IsBattle(mission.MissionType) &&
+                    mission.Status == MissionStatus.ReadyToComplete &&
+                    mission.TargetSystemId == _systemConfig?.Id)
+                {
+                    featured = mission;
+                    break;
+                }
+            }
+        }
+
+        if (_heroImage != null)
+        {
+            Sprite sprite = visualCatalog != null
+                ? visualCatalog.Get(_planetConfig.PlanetType, featured)
+                : null;
+            _heroImage.sprite = sprite;
+            _heroImage.enabled = sprite != null;
+            _currentSprite = sprite;
+            UpdateHeroLayout();
+        }
+
+        if (_heroOverlayImage != null)
+        {
+            Sprite overlay = visualCatalog != null
+                ? visualCatalog.GetOverlay(_planetConfig.PlanetType, featured)
+                : null;
+            _heroOverlayImage.sprite = overlay;
+            _heroOverlayImage.enabled = overlay != null;
+        }
+
+        if (governmentOfferTitleText != null)
+            governmentOfferTitleText.text = offer?.OfferedMission?.Title ?? string.Empty;
+        if (governmentOfferDescriptionText != null)
+            governmentOfferDescriptionText.text = offer?.OfferedMission == null
+                ? string.Empty
+                : MissionUiText.Description(offer.OfferedMission, _configService);
+        if (governmentOfferStateText != null)
+            governmentOfferStateText.text = string.Empty;
+
+        AppLog.Info(DebugLogChannel.Mission, typeof(PlanetGovernmentMissionPresenter),
+            "Government visual | Planet=" + _planetConfig?.Id +
+            " | Mission=" + (featured?.MissionRuntimeId ?? "neutral"));
+    }
+
+    private void CreateHeroImage()
+    {
+        Transform existing = transform.Find("GovernmentMissionHero");
+        if (existing != null)
+        {
+            _heroFrame = existing as RectTransform;
+            Transform existingPicture = existing.Find("MissionIllustration");
+            _heroImage = existingPicture != null
+                ? existingPicture.GetComponent<Image>()
+                : existing.GetComponentInChildren<Image>(true);
+            CreateHeroOverlay();
             return;
         }
 
-        if (governmentOfferTitleText != null) governmentOfferTitleText.text = offer.OfferedMission.Title;
-        if (governmentOfferDescriptionText != null) governmentOfferDescriptionText.text = offer.OfferedMission.Description;
-        if (governmentOfferStateText != null) governmentOfferStateText.text = $"Offered mission from {_planetConfig.Id}";
+        GameObject frame = new GameObject("GovernmentMissionHero",
+            typeof(RectTransform), typeof(RectMask2D));
+        RectTransform frameRect = frame.GetComponent<RectTransform>();
+        _heroFrame = frameRect;
+        frameRect.SetParent(transform, false);
+        frameRect.anchorMin = new Vector2(0f, 1f);
+        frameRect.anchorMax = Vector2.one;
+        frameRect.pivot = new Vector2(0.5f, 1f);
+        frameRect.anchoredPosition = new Vector2(0f, -TopHudHeight);
+        frameRect.sizeDelta = Vector2.zero;
+        frameRect.SetAsFirstSibling();
+
+        GameObject picture = new GameObject("MissionIllustration",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        RectTransform imageRect = picture.GetComponent<RectTransform>();
+        imageRect.SetParent(frameRect, false);
+        imageRect.anchorMin = Vector2.zero;
+        imageRect.anchorMax = Vector2.one;
+        imageRect.anchoredPosition = Vector2.zero;
+        imageRect.sizeDelta = Vector2.zero;
+        _heroImage = picture.GetComponent<Image>();
+        _heroImage.raycastTarget = false;
+        _heroImage.preserveAspect = true;
+        CreateHeroOverlay();
+    }
+
+    private void CreateHeroOverlay()
+    {
+        if (_heroFrame == null) return;
+        Transform existing = _heroFrame.Find("MissionTabletopOverlay");
+        if (existing != null)
+        {
+            _heroOverlayImage = existing.GetComponent<Image>();
+            return;
+        }
+
+        GameObject overlay = new GameObject("MissionTabletopOverlay",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        RectTransform overlayRect = overlay.GetComponent<RectTransform>();
+        overlayRect.SetParent(_heroFrame, false);
+        overlayRect.anchorMin = Vector2.zero;
+        overlayRect.anchorMax = Vector2.one;
+        overlayRect.anchoredPosition = Vector2.zero;
+        overlayRect.sizeDelta = Vector2.zero;
+        _heroOverlayImage = overlay.GetComponent<Image>();
+        _heroOverlayImage.raycastTarget = false;
+        _heroOverlayImage.preserveAspect = true;
+        _heroOverlayImage.enabled = false;
+    }
+
+    private void UpdateHeroLayout()
+    {
+        if (_heroFrame == null || _currentSprite == null) return;
+        float width = ((RectTransform)transform).rect.width;
+        if (width <= 0f) return;
+        _lastLayoutWidth = width;
+        float aspect = _currentSprite.rect.width / _currentSprite.rect.height;
+        float height = width / aspect;
+        _heroFrame.sizeDelta = new Vector2(0f, height);
+        if (_missionScreen != null)
+            _missionScreen.SetListTopInset(TopHudHeight + height);
     }
 }

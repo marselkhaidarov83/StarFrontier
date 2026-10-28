@@ -4,16 +4,20 @@ using UnityEngine.UI;
 public class SystemMapHUDController : CustomMonoBehaviour
 {
     [Header("Screen Roots")]
-    [SerializeField] private GameObject systemMapHUDRoot;    
+    [SerializeField] private GameObject systemMapHUDRoot;
+    [SerializeField] private GameObject systemMapRightBottomHUDRoot;
 
     [Header("Objects")]
     [SerializeField] private Button openGalaxyButton;
     [SerializeField] private Button openSystemObjectsButton;
+    [SerializeField] private Sprite missionButtonSprite;
 
     private SimpleEventBus eventBus;
     private IGameStateMachine gameStateMachine;
     private IConfigService configService;
     private IGameSessionService gameSessionService;
+
+    private SystemMissionPanel2A _missionPanel;
 
     public void Initialize()
     {
@@ -23,7 +27,15 @@ public class SystemMapHUDController : CustomMonoBehaviour
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         SubscribeToEvents();
         BindButtons();
+        if (openGalaxyButton != null)
+        {
+            _missionPanel = GetComponent<SystemMissionPanel2A>();
+            if (_missionPanel == null)
+                _missionPanel = gameObject.AddComponent<SystemMissionPanel2A>();
+            _missionPanel.Initialize(openGalaxyButton, missionButtonSprite);
+        }
         RefreshSunButtonIcon();
+        SetSystemHudVisible(false);
 
         if (IsDebug())
             AppLog.Info(DebugLogChannel.SystemHud,
@@ -71,8 +83,8 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
     private void OnGalaxyEntered(GalaxyEnteredEvent evt)
     {
-        if (systemMapHUDRoot != null)
-            systemMapHUDRoot.SetActive(false);
+        _missionPanel?.Close();
+        SetSystemHudVisible(false);
 
         if (IsDebug())
             AppLog.Info(DebugLogChannel.SystemHud,
@@ -83,8 +95,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
     private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
         RefreshSunButtonIcon(evt.SystemId);
-        if (systemMapHUDRoot != null)
-            systemMapHUDRoot.SetActive(true);
+        SetSystemHudVisible(true);
 
         if (IsDebug())
             AppLog.Info(DebugLogChannel.SystemHud,
@@ -95,20 +106,28 @@ public class SystemMapHUDController : CustomMonoBehaviour
     private void OnExitMapChanged(ExitMapChangedEvent evt)
     {
         RefreshSunButtonIcon();
-        if (systemMapHUDRoot != null)
-            systemMapHUDRoot.SetActive(true);
+        SetSystemHudVisible(true);
     }
 
 
     private void OnPlanetEntered(PlanetEnteredEvent evt)
     {
-        if (systemMapHUDRoot != null)
-            systemMapHUDRoot.SetActive(false);
+        _missionPanel?.Close();
+        SetSystemHudVisible(false);
 
         if (IsDebug())
             AppLog.Info(DebugLogChannel.SystemHud,
                 typeof(SystemMapHUDController),
                 "planet entered");
+    }
+
+    private void SetSystemHudVisible(bool visible)
+    {
+        if (systemMapHUDRoot != null)
+            systemMapHUDRoot.SetActive(visible);
+
+        if (systemMapRightBottomHUDRoot != null)
+            systemMapRightBottomHUDRoot.SetActive(visible);
     }
 
     private void BindButtons()

@@ -8,6 +8,7 @@ public class MissionSaveData
 
         public string Title;
         public string Description;
+        public MissionOutcomeTexts OutcomeTexts;
 
         public MissionType MissionType;
         public MissionStatus Status;

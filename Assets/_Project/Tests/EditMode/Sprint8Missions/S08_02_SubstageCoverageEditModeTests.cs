@@ -115,17 +115,30 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         _state.Player.CurrentSystemId = "B"; _state.Player.CurrentPlanetId = "";
         _missions.ReevaluateActiveMissions("SystemEntered");
         Assert.That(mission.Objective.CurrentAmount, Is.Zero);
+        Assert.That(mission.Objective.ReconIsInsideTarget, Is.True);
+        Assert.That(mission.Status, Is.EqualTo(MissionStatus.InProgress));
         var near = Enemy("near", 10); var far = Enemy("far", 41);
         var dead = Enemy("dead", 5); dead.IsAlive = false; dead.LifeState = SystemNpcLifeState.Destroyed;
         var landed = Enemy("landed", 5); landed.IsOnPlanet = true;
         _missions.ObserveReconTargets(); _missions.ObserveReconTargets();
         Assert.That(mission.Objective.CurrentAmount, Is.EqualTo(1));
         Assert.That(mission.Objective.ReconObservedEnemyIds, Is.EquivalentTo(new[] { near.RuntimeNpcId }));
+        _state.Player.CurrentSystemId = "A";
+        _missions.ReevaluateActiveMissions("LeftReconSystemBeforeCompletion");
+        Assert.That(mission.Objective.ReconIsInsideTarget, Is.False);
+        Assert.That(mission.Status, Is.EqualTo(MissionStatus.InProgress));
+        _state.Player.CurrentSystemId = "B";
+        _missions.ReevaluateActiveMissions("ReturnedToReconSystem");
+        Assert.That(mission.Objective.ReconIsInsideTarget, Is.True);
         far.CurrentPosition = new Vector3(40, 0, 0);
         _missions.ObserveReconTargets();
         Assert.That(mission.Objective.CurrentAmount, Is.EqualTo(2));
+        Assert.That(mission.Status, Is.EqualTo(MissionStatus.ReadyToComplete));
         Assert.That(_missions.CompleteMission(mission.MissionRuntimeId), Is.False);
         _state.Player.CurrentSystemId = "A"; _state.Player.CurrentPlanetId = "another_planet";
+        _missions.ReevaluateActiveMissions("LeftReconSystem");
+        Assert.That(mission.Objective.ReconIsInsideTarget, Is.False);
+        Assert.That(mission.Status, Is.EqualTo(MissionStatus.ReadyToComplete));
         Assert.That(_missions.CompleteMission(mission.MissionRuntimeId), Is.False);
         _state.Player.CurrentPlanetId = "planet_A";
         Assert.That(_missions.CompleteMission(mission.MissionRuntimeId), Is.True);
@@ -284,18 +297,115 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         Assert.That(_missions.GetAvailableMissions(), Is.Empty);
     }
 
-    [TestCase(true)] [TestCase(false)]
-    public void Reroll_RejectsAcceptedMissionOrCapacityLimitWithoutChangingAnything(bool acceptedHere)
+    [Test]
+    public void Reroll_RejectsAcceptedMissionFromCurrentPlanetWithoutChangingAnything()
     {
         int calls = 0; var service = RerollService(() => { calls++; return Offer("new", "planet_A"); });
         var old = Offer("old", "planet_A"); _state.MissionBlock.OffersByPlanet["planet_A"] = old;
         _state.MissionBlock.ActiveMissions.Add(new MissionInstanceData { MissionRuntimeId = "active", Status = MissionStatus.InProgress,
-            SourcePlanetId = acceptedHere ? "planet_A" : "planet_B" });
-        if (!acceptedHere) Bootstrapper.Instance.MaxAcceptedMissionCount = 1;
+            SourcePlanetId = "planet_A" });
         Assert.That(service.TryRegenerateGovernmentOffer(_systems[0], _testPlanets[0], out _), Is.False);
         Assert.That(calls, Is.Zero);
         Assert.That(_state.MissionBlock.OffersByPlanet["planet_A"], Is.SameAs(old));
         Assert.That(_missions.GetActiveMissions().Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Reroll_CanRepeatedlyGenerateAndDisplayDebugOfferAtActiveMissionLimit()
+    {
+        int generated = 0;
+        var service = RerollService(() => Offer("debug_" + ++generated, "planet_A"));
+        Bootstrapper.Instance.MaxAcceptedMissionCount = 3;
+        for (int i = 0; i < 3; i++)
+            _state.MissionBlock.ActiveMissions.Add(new MissionInstanceData
+            {
+                MissionRuntimeId = "active_" + i, Status = MissionStatus.InProgress,
+                SourcePlanetId = "other_" + i
+            });
+        Assert.That(MissionCapacityHelper.CanAcceptMoreMissions(_missions), Is.False);
+        var ordinary = Offer("ordinary", "planet_A");
+        _state.MissionBlock.OffersByPlanet["planet_A"] = ordinary;
+        Assert.That(service.GetOrCreateGovernmentOffer(_systems[0], _testPlanets[0]), Is.Null);
+
+        for (int i = 1; i <= 4; i++)
+        {
+            Assert.That(service.TryRegenerateGovernmentOffer(_systems[0], _testPlanets[0], out var fresh), Is.True);
+            Assert.That(fresh.OfferedMission.MissionRuntimeId, Is.EqualTo("debug_" + i));
+            Assert.That(fresh.IsDebugGenerated, Is.True);
+            Assert.That(service.GetOrCreateGovernmentOffer(_systems[0], _testPlanets[0]), Is.SameAs(fresh));
+        }
+        Assert.That(_missions.GetActiveMissions().Count, Is.EqualTo(3));
+    }
+
+    [TestCase(InvasionLifecycleState.Preparing)]
+    [TestCase(InvasionLifecycleState.Active)]
+    public void InvasionInSourceSystem_RemovesUnacceptedOfferAndBlocksNewGeneration(
+        InvasionLifecycleState lifecycle)
+    {
+        int calls = 0;
+        var service = RerollService(() => { calls++; return Offer("new", "planet_A"); });
+        var invasion = new InvasionState
+        {
+            InvasionId = "invasion_A", TargetSystemId = "A", LifecycleState = lifecycle
+        };
+        _state.Galaxy.Invasions.Add(invasion);
+        var old = Offer("old", "planet_A");
+        var other = Offer("other", "planet_B");
+        _state.MissionBlock.OffersByPlanet["planet_A"] = old;
+        _state.MissionBlock.OffersByPlanet["planet_B"] = other;
+        _state.MissionBlock.OffersByPlanet_List.AddRange(new[] { old, other });
+        _missions.SetAvailableMissions(new List<MissionInstanceData> { old.OfferedMission, other.OfferedMission });
+
+        _bus.Publish(new SystemInvasionStartedMissionEvent("A"));
+        Assert.That(_state.MissionBlock.OffersByPlanet.ContainsKey("planet_A"), Is.False);
+        Assert.That(_state.MissionBlock.OffersByPlanet["planet_B"], Is.SameAs(other));
+        Assert.That(_state.MissionBlock.OffersByPlanet_List, Is.EqualTo(new[] { other }));
+        Assert.That(_missions.GetAvailableMissions().Select(m => m.MissionRuntimeId), Is.EqualTo(new[] { "other" }));
+        Assert.That(service.GetOrCreateGovernmentOffer(_systems[0], _testPlanets[0]), Is.Null);
+        Assert.That(service.TryRegenerateGovernmentOffer(_systems[0], _testPlanets[0], out _), Is.False);
+        Assert.That(service.AcceptGovernmentOffer("planet_A"), Is.False);
+        Assert.That(calls, Is.Zero);
+
+        invasion.LifecycleState = InvasionLifecycleState.Resolved;
+        Assert.That(service.TryRegenerateGovernmentOffer(_systems[0], _testPlanets[0], out var fresh), Is.True);
+        Assert.That(fresh.OfferedMission.MissionRuntimeId, Is.EqualTo("new"));
+        Assert.That(calls, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void OpeningGovernmentDuringInvasion_CleansOfferWhenStartEventWasMissed()
+    {
+        var service = RerollService(() => throw new Exception("Must not generate during invasion"));
+        var old = Offer("old", "planet_A");
+        _state.MissionBlock.OffersByPlanet["planet_A"] = old;
+        _state.MissionBlock.OffersByPlanet_List.Add(old);
+        _missions.SetAvailableMissions(new List<MissionInstanceData> { old.OfferedMission });
+        _state.Galaxy.Invasions.Add(new InvasionState
+        {
+            InvasionId = "invasion_A", TargetSystemId = "A", LifecycleState = InvasionLifecycleState.Active
+        });
+        Assert.That(service.GetOrCreateGovernmentOffer(_systems[0], _testPlanets[0]), Is.Null);
+        Assert.That(_state.MissionBlock.OffersByPlanet, Is.Empty);
+        Assert.That(_state.MissionBlock.OffersByPlanet_List, Is.Empty);
+        Assert.That(_missions.GetAvailableMissions(), Is.Empty);
+    }
+
+    [Test]
+    public void OfferGenerator_DoesNotCreateAnyMissionInInvadedSourceSystem()
+    {
+        var template = Config<RouteMissionTemplateConfig>("route_template");
+        SetBaseTemplate(template, 150); MissionPool(template);
+        var invasion = new InvasionState
+        {
+            InvasionId = "invasion_A", TargetSystemId = "A", LifecycleState = InvasionLifecycleState.Active
+        };
+        _state.Galaxy.Invasions.Add(invasion);
+        var generator = new PlanetMissionOfferGenerator();
+        Assert.That(generator.TryGenerateOffer(_systems[0], _testPlanets[0], _missions.GetActiveMissions(), null), Is.Null);
+        Assert.That(generator.TryGenerateOfferOfType(_systems[0], _testPlanets[0], _missions.GetActiveMissions(),
+            MissionType.RouteSearch, false), Is.Null);
+        invasion.LifecycleState = InvasionLifecycleState.Resolved;
+        Assert.That(generator.TryGenerateOffer(_systems[0], _testPlanets[0], _missions.GetActiveMissions(), null), Is.Not.Null);
     }
 
     [Test]
@@ -454,6 +564,7 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         return new PlanetGovernmentMissionService();
     }
     private static PlanetOfferedMissionData Offer(string id, string planet) => new PlanetOfferedMissionData { PlanetId = planet,
-        OfferedMission = new MissionInstanceData { MissionRuntimeId = id, SourcePlanetId = planet, MissionType = MissionType.Delivery,
+        OfferedMission = new MissionInstanceData { MissionRuntimeId = id, SourcePlanetId = planet,
+            SourceSystemId = planet == "planet_A" ? "A" : "B", MissionType = MissionType.Delivery,
             Status = MissionStatus.Available, Objective = new MissionObjectiveData { RequiredAmount = 1 }, Reward = new MissionRewardData() } };
 }

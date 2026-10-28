@@ -1596,6 +1596,8 @@ public class SaveService2A : CustomService, ISaveService
                 return null;
             }
 
+            MissionRestoreChangeDetector.RecordBeforeLoadValidation(state, _configService);
+
             bool wasMigrated =
                 _migrationStage.Run(state);
 
@@ -2007,6 +2009,8 @@ public class SaveService2A : CustomService, ISaveService
                     "[SaveService] Legacy save has no integrity checksum: " +
                     path);
             }
+
+            MissionRestoreChangeDetector.RecordBeforeLoadValidation(state, _configService);
 
             bool wasMigrated =
                 _migrationStage.Run(state);

@@ -53,6 +53,20 @@ public sealed class S08_02_RouteSurveyRuleTests
     }
 
     [Test]
+    public void UpgradeSurveyRequiresReturnBeforeIndirectTrip()
+    {
+        var objective = new MissionObjectiveData { RouteIsUpgrade = true };
+        RouteMissionRules.ObserveHop(objective, "A", "B", "A", "B");
+        Assert.That(objective.RouteDirectSurveyed, Is.True);
+        Assert.That(objective.RouteReturnedAfterDirectSurvey, Is.False);
+        RouteMissionRules.ObserveHop(objective, "A", "B", "B", "A");
+        Assert.That(objective.RouteReturnedAfterDirectSurvey, Is.True);
+        RouteMissionRules.ObserveHop(objective, "A", "B", "A", "C");
+        RouteMissionRules.ObserveHop(objective, "A", "B", "C", "B");
+        Assert.That(objective.RouteIndirectSurveyed, Is.True);
+    }
+
+    [Test]
     public void BattleRewardLedger_OnlyExpiresOnLaterInvasionGeneration()
     {
         var objective = new MissionObjectiveData { BattleWon = true, BattleInvasionGeneration = 7 };
@@ -143,6 +157,7 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
             if (m.Name == "GetAliveNpcsInSystemByType")
                 return _testNpcs.Where(n => n.IsAlive && n.CurrentSystemId == (string)a[0] && n.NpcType == (SystemNpcType)a[1]).ToList();
             if (m.Name == "GetAliveNpcsInSystem") return _testNpcs.Where(n => n.IsAlive && n.CurrentSystemId == (string)a[0]).ToList();
+            if (m.Name == "GetAliveEnemyGroupsInSystem") return new List<SystemNpcRuntimeState>();
             return Default(m);
         }));
         _registry.Register(S08MissionTestProxy.Make<IPlayerCombatTargetService>((m, a) => m.Name switch
@@ -186,10 +201,18 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         var mission = _missions.GetActiveMissions().Single();
         Assert.That(mission.Objective.CurrentAmount, Is.EqualTo(1));
         Assert.That(mission.Objective.BattleWon, Is.True);
+        Assert.That(mission.Status, Is.EqualTo(MissionStatus.ReadyToComplete));
         Assert.That(_worldVictories, Is.EqualTo(1));
         if (liberation) Assert.That(_state.Galaxy.Systems[0].SystemStatus, Is.EqualTo(StarSystemStatus.Stable));
-        _state.Player.CurrentPlanetId = "any_planet"; _missions.ReevaluateActiveMissions("Landing");
         var government = new GovernmentRewardService();
+        Assert.That(government.CanClaimReward("A", false), Is.False);
+        _state.Player.CurrentSystemId = "B";
+        _missions.ReevaluateActiveMissions("LeftVictorySystem");
+        Assert.That(mission.Status, Is.EqualTo(MissionStatus.ReadyToComplete));
+        Assert.That(government.ClaimReward("A", true).Success, Is.False);
+        _state.Player.CurrentSystemId = "A";
+        _state.Player.CurrentPlanetId = "planet_A";
+        _missions.ReevaluateActiveMissions("Landing");
         var firstClaim = government.ClaimReward("A", true);
         Assert.That(firstClaim.Success, Is.True);
         Assert.That(firstClaim.Credits, Is.EqualTo(liberation ? 175 : 125));
@@ -199,6 +222,68 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         Assert.That(_state.MissionBlock.RewardGrantedMissionIds.Count, Is.EqualTo(1));
         Assert.That(_encounter.Current.State, Is.EqualTo(SystemEncounterState.Resolved));
         Assert.That(_saving, Is.True);
+    }
+
+    [TestCase(false)] [TestCase(true)]
+    public void BattleRewardIsCreatedEvenWhenThreeMissionsAreActive(bool liberation)
+    {
+        for (int i = 0; i < 3; i++)
+            _state.MissionBlock.ActiveMissions.Add(new MissionInstanceData
+            {
+                MissionRuntimeId = "active_" + i,
+                MissionType = MissionType.Recon,
+                Status = MissionStatus.InProgress,
+                SourceSystemId = "B",
+                TargetSystemId = "C",
+                Objective = new MissionObjectiveData { RequiredAmount = 2 }
+            });
+        Assert.That(MissionCapacityHelper.CanAcceptMoreMissions(_missions), Is.False);
+
+        StartBattle(liberation);
+        _missions.ObserveBattleParticipation("A");
+        Assert.That(_missions.GetActiveMissions().Count, Is.EqualTo(3));
+        _missions.RecordBattleKill("enemy1:10", "A");
+
+        var battle = _missions.GetActiveMissions().Single(m => MissionBattleRules.IsBattle(m.MissionType));
+        Assert.That(_missions.GetActiveMissions().Count, Is.EqualTo(4));
+        Assert.That(battle.Objective.CurrentAmount, Is.EqualTo(1));
+        Assert.That(battle.MissionType, Is.EqualTo(liberation ? MissionType.Liberation : MissionType.Defense));
+    }
+
+    [TestCase(MissionType.Defense)] [TestCase(MissionType.Liberation)]
+    public void DebugBattleRewardBypassesVoluntaryMissionLimit(MissionType type)
+    {
+        for (int i = 0; i < 3; i++)
+            _state.MissionBlock.ActiveMissions.Add(new MissionInstanceData
+            {
+                MissionRuntimeId = "active_" + i,
+                MissionType = MissionType.Recon,
+                Status = MissionStatus.InProgress,
+                SourceSystemId = "B",
+                TargetSystemId = "C",
+                Objective = new MissionObjectiveData { RequiredAmount = 2 }
+            });
+        _state.Player.CurrentPlanetId = "planet_A";
+
+        Assert.That(_missions.TryCreateDebugReadyBattleMission(type, 1, out var battle, out string reason),
+            Is.True, reason);
+        Assert.That(battle.Status, Is.EqualTo(MissionStatus.ReadyToComplete));
+        Assert.That(_missions.GetActiveMissions().Count, Is.EqualTo(4));
+    }
+
+    [TestCase(MissionType.Defense)] [TestCase(MissionType.Liberation)]
+    public void CapturedSourceFailsClaimableBattleReward(MissionType type)
+    {
+        _state.Player.CurrentPlanetId = "planet_A";
+        Assert.That(_missions.TryCreateDebugReadyBattleMission(type, 1, out var battle, out string reason),
+            Is.True, reason);
+        _state.Galaxy.Systems[0].SystemStatus = StarSystemStatus.Captured;
+
+        _missions.ReevaluateActiveMissions("SourceCaptured");
+
+        Assert.That(_missions.GetActiveMissions(), Is.Empty);
+        Assert.That(battle.Status, Is.EqualTo(MissionStatus.Failed));
+        Assert.That(battle.LastTransitionReason, Is.EqualTo("SystemCaptured"));
     }
 
     [Test]
@@ -257,7 +342,9 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         _missions.ReevaluateActiveMissions("OtherInvasion");
         Assert.That(_missions.GetActiveMissions().Single().Objective.BattleWon, Is.True);
         _state.Player.CurrentSystemId = "A"; _state.Player.CurrentPlanetId = "another_planet";
-        Assert.That(new GovernmentRewardService().CanClaimReward("A", false), Is.True);
+        Assert.That(new GovernmentRewardService().CanClaimReward("A", false), Is.False);
+        _state.Player.CurrentPlanetId = "planet_A";
+        Assert.That(new GovernmentRewardService().CanClaimReward("A", true), Is.True);
         _state.Galaxy.Systems[0].InvasionGeneration++;
         _bus.Publish(new SystemInvasionStartedMissionEvent("A"));
         Assert.That(new GovernmentRewardService().CanClaimReward("A", true), Is.False);

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: item_electronics_01
   m_EditorClassIdentifier: Data::ItemConfig
   id: item_electronics_01
-  displayName: item_electronics_01
+  displayName: Электроника
   description: Commercial electronic equipment and circuitry
   icon: {fileID: 21300000, guid: 5f85e81a253304094bc92ff67d010359, type: 3}
   itemCategory: 3

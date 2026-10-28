@@ -29,10 +29,14 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
         if (planetConfig.PlanetMissionConfig == null)
             return null;
 
-        if (!MissionCapacityHelper.CanAcceptMoreMissions(_missionService))
-            return null;
-
         PlanetOfferedMissionData existingOffer = _offerStateService.GetOffer(planetConfig.Id);
+        if (_session.State?.Galaxy?.HasActiveInvasionForTarget(starSystem?.Id) == true)
+        {
+            _missionService.RemoveUnacceptedOffersInSystem(starSystem.Id);
+            return null;
+        }
+        if (!MissionCapacityHelper.CanAcceptMoreMissions(_missionService))
+            return existingOffer?.IsDebugGenerated == true ? existingOffer : null;
 
         PlanetOfferedMissionData result = _offerGenerator.TryGenerateOffer(
             starSystem,
@@ -50,6 +54,14 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
 
     // Replaces only the unaccepted offer at the planet where the player is currently landed.
     public bool TryRegenerateGovernmentOffer(StarSystemConfig system, PlanetConfig planet, out PlanetOfferedMissionData offer)
+        => TryRegenerateGovernmentOfferInternal(system, planet, null, null, out offer);
+
+    public bool TryRegenerateGovernmentOfferOfType(StarSystemConfig system, PlanetConfig planet,
+        MissionType missionType, bool? routeIsUpgrade, out PlanetOfferedMissionData offer)
+        => TryRegenerateGovernmentOfferInternal(system, planet, missionType, routeIsUpgrade, out offer);
+
+    private bool TryRegenerateGovernmentOfferInternal(StarSystemConfig system, PlanetConfig planet,
+        MissionType? requiredType, bool? routeIsUpgrade, out PlanetOfferedMissionData offer)
     {
         offer = null;
         var state = _session.State;
@@ -61,13 +73,16 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
             return RejectRegeneration("PlanetOrSystemMismatch", system, planet);
         if (planet.PlanetMissionConfig == null)
             return RejectRegeneration("PlanetMissionConfigMissing", system, planet);
+        if (state.Galaxy?.HasActiveInvasionForTarget(system.Id) == true)
+        {
+            _missionService.RemoveUnacceptedOffersInSystem(system.Id);
+            return RejectRegeneration("ActiveInvasionInSourceSystem", system, planet);
+        }
         var active = _missionService.GetActiveMissions();
         foreach (var mission in active)
             if (mission != null && MissionLifecycleRules.IsActive(mission.Status) && mission.SourcePlanetId == planet.Id)
                 return RejectRegeneration("AcceptedMissionFromThisPlanet:" + mission.MissionRuntimeId, system, planet);
-        if (!MissionCapacityHelper.CanAcceptMoreMissions(_missionService))
-            return RejectRegeneration("ActiveMissionLimitReached", system, planet);
-
+        // Explicit debug rerolls can prepare an offer even when normal acceptance is full.
         state.MissionBlock ??= new RuntimeMissionSaveBlock();
         MissionLifecycleRules.EnsureCollections(state.MissionBlock);
         // Ignore the cached offer and obey the current enabled templates, weights, cargo and target rules.
@@ -76,7 +91,20 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
         AppLog.Info(DebugLogChannel.Mission, "[MissionReroll] GenerateRequested | Planet=" + planet.Id +
             " | OldId=" + oldOffer?.OfferedMission?.MissionRuntimeId + " | OldType=" + oldOffer?.OfferedMission?.MissionType +
             " | OldTitle=" + oldOffer?.OfferedMission?.Title);
-        var generated = _offerGenerator.TryGenerateOffer(system, planet, active, null);
+        PlanetOfferedMissionData generated;
+        if (requiredType.HasValue)
+        {
+            if (_offerGenerator is not PlanetMissionOfferGenerator generator)
+                return RejectRegeneration("TypedGeneratorUnavailable", system, planet);
+            generated = generator.TryGenerateOfferOfType(system, planet, active,
+                requiredType.Value, routeIsUpgrade);
+            if (generated == null)
+                return RejectRegeneration("NoEligibleMissionOfRequestedType:" + requiredType.Value +
+                    (routeIsUpgrade.HasValue ? ":Upgrade=" + routeIsUpgrade.Value : string.Empty), system, planet);
+        }
+        else
+            generated = _offerGenerator.TryGenerateOffer(system, planet, active, null);
+        if (generated != null) generated.IsDebugGenerated = true;
         var oldAvailable = new List<MissionInstanceData>(_missionService.GetAvailableMissions());
         var retained = new List<MissionInstanceData>(oldAvailable);
         retained.RemoveAll(m => m != null && m.SourcePlanetId == planet.Id && m.Status == MissionStatus.Available);
@@ -129,6 +157,11 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
 
         if (offer == null || offer.OfferedMission == null)
             return false;
+        if (_session.State?.Galaxy?.HasActiveInvasionForTarget(offer.OfferedMission.SourceSystemId) == true)
+        {
+            _missionService.RemoveUnacceptedOffersInSystem(offer.OfferedMission.SourceSystemId);
+            return false;
+        }
 
         if (!MissionLifecycleRules.IsPlayableType(offer.OfferedMission.MissionType))
         {

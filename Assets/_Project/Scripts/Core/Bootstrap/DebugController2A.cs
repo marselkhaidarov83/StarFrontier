@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-public sealed class DebugController2A : CustomMonoBehaviour
+public sealed partial class DebugController2A : CustomMonoBehaviour
 {
     private const int ForcedInvasionResolveAfterTicks = 3;
 
@@ -41,7 +41,21 @@ public sealed class DebugController2A : CustomMonoBehaviour
             : null;
 
     [ContextMenu("STAR FRONTIER/Missions/Regenerate Offer On Current Planet")]
-    private void DebugRegeneratePlanetMission()
+    private void DebugRegeneratePlanetMission() => DebugRegeneratePlanetMission(null, null);
+
+    [ContextMenu("STAR FRONTIER/Missions/Generate Delivery On Current Planet")]
+    private void DebugGenerateDeliveryMission() => DebugRegeneratePlanetMission(MissionType.Delivery, null);
+
+    [ContextMenu("STAR FRONTIER/Missions/Generate Recon On Current Planet")]
+    private void DebugGenerateReconMission() => DebugRegeneratePlanetMission(MissionType.Recon, null);
+
+    [ContextMenu("STAR FRONTIER/Missions/Generate New Route On Current Planet")]
+    private void DebugGenerateNewRouteMission() => DebugRegeneratePlanetMission(MissionType.RouteSearch, false);
+
+    [ContextMenu("STAR FRONTIER/Missions/Generate Route Upgrade On Current Planet")]
+    private void DebugGenerateRouteUpgradeMission() => DebugRegeneratePlanetMission(MissionType.RouteSearch, true);
+
+    private void DebugRegeneratePlanetMission(MissionType? requiredType, bool? routeIsUpgrade)
     {
         bool developerMode = DeveloperModeGate.IsEnabled;
         AppLog.Info(DebugLogChannel.Mission, "[MissionReroll] Requested | IsPlaying=" + Application.isPlaying +
@@ -69,10 +83,19 @@ public sealed class DebugController2A : CustomMonoBehaviour
         }
         try
         {
-            if (!government.TryRegenerateGovernmentOffer(config.GetStarSystemConfigById(player.CurrentSystemId),
-                config.GetPlanetConfigById(player.CurrentPlanetId), out var offer))
+            StarSystemConfig system = config.GetStarSystemConfigById(player.CurrentSystemId);
+            PlanetConfig planet = config.GetPlanetConfigById(player.CurrentPlanetId);
+            PlanetOfferedMissionData offer = null;
+            bool regenerated = requiredType.HasValue
+                ? government is PlanetGovernmentMissionService typedGovernment &&
+                  typedGovernment.TryRegenerateGovernmentOfferOfType(system, planet,
+                      requiredType.Value, routeIsUpgrade, out offer)
+                : government.TryRegenerateGovernmentOffer(system, planet, out offer);
+            if (!regenerated)
             {
-                AppLog.Warning(DebugLogChannel.Mission, "[MissionReroll] Cannot regenerate: check the planet mission config, an already accepted mission from this planet and the active mission limit.");
+                AppLog.Warning(DebugLogChannel.Mission, "[MissionReroll] Cannot regenerate | RequestedType=" +
+                    requiredType + " | RouteUpgrade=" + routeIsUpgrade +
+                    " | Check active invasion, planet templates, eligible targets and accepted mission from this planet.");
                 return;
             }
             AppLog.Info(DebugLogChannel.Mission, "[MissionReroll] RefreshRequested | Planet=" + player.CurrentPlanetId +

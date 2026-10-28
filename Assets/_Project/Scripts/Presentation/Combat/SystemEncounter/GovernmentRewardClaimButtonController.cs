@@ -68,13 +68,10 @@ public sealed class GovernmentRewardClaimButtonController : CustomMonoBehaviour
                 "canClaim = " + canClaim);
         }
 
+        // Battle rewards are claimed through the ready mission card. Hide the
+        // old separate payout panel so it does not cover the full-width list.
         if (root != null)
-            root.SetActive(canClaim);
-
-        if (missionBlock != null)
-            missionBlock.SetActive(!canClaim);
-        if (missionBlock2 != null)
-            missionBlock2.SetActive(!canClaim);
+            root.SetActive(false);
 
         if (claimButton != null)
             claimButton.interactable = canClaim;

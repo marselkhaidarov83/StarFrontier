@@ -5,4 +5,5 @@ public class PlanetOfferedMissionData
 {
     public string PlanetId;
     public MissionInstanceData OfferedMission;
+    public bool IsDebugGenerated;
 }

@@ -23,8 +23,23 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
 
     public PlanetOfferedMissionData TryGenerateOffer(StarSystemConfig system, PlanetConfig planet,
         IReadOnlyList<MissionInstanceData> playerMissions, PlanetOfferedMissionData existingOffer)
+        => TryGenerateOfferInternal(system, planet, playerMissions, existingOffer, null, null);
+
+    // Debug-only selection still uses the normal template and destination rules.
+    public PlanetOfferedMissionData TryGenerateOfferOfType(StarSystemConfig system, PlanetConfig planet,
+        IReadOnlyList<MissionInstanceData> playerMissions, MissionType missionType, bool? routeIsUpgrade)
+        => TryGenerateOfferInternal(system, planet, playerMissions, null, missionType, routeIsUpgrade);
+
+    private PlanetOfferedMissionData TryGenerateOfferInternal(StarSystemConfig system, PlanetConfig planet,
+        IReadOnlyList<MissionInstanceData> playerMissions, PlanetOfferedMissionData existingOffer,
+        MissionType? requiredType, bool? routeIsUpgrade)
     {
         if (system == null || planet?.PlanetMissionConfig?.PossibleMissionOffers == null || _session.State == null) return null;
+        if (_session.State.Galaxy?.HasActiveInvasionForTarget(system.Id) == true)
+        {
+            Log("OfferSkipped | Planet=" + planet.Id + " | Reason=ActiveInvasionInSourceSystem");
+            return null;
+        }
         if (playerMissions?.Any(m => m != null && MissionLifecycleRules.IsActive(m.Status) && m.SourcePlanetId == planet.Id) == true) return null;
         var old = existingOffer?.OfferedMission;
         if (old != null && old.Status == MissionStatus.Available && !string.IsNullOrWhiteSpace(old.MissionRuntimeId) &&
@@ -34,7 +49,12 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
         foreach (var entry in planet.PlanetMissionConfig.PossibleMissionOffers)
         {
             if (entry == null || !entry.IsEnabled || entry.Weight <= 0) continue;
-            var mission = BuildMission(system, planet, entry.MissionTemplateConfig);
+            MissionTemplateConfig template = entry.MissionTemplateConfig;
+            if (template == null || (requiredType.HasValue && template.MissionType != requiredType.Value)) continue;
+            if (routeIsUpgrade.HasValue &&
+                (template is not RouteMissionTemplateConfig routeTemplate ||
+                 routeTemplate.ImproveExistingRoute != routeIsUpgrade.Value)) continue;
+            var mission = BuildMission(system, planet, template);
             if (mission != null) candidates.Add(new KeyValuePair<PlanetMissionOfferEntryConfig, MissionInstanceData>(entry, mission));
         }
         if (candidates.Count == 0)
@@ -87,15 +107,29 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
         else if (template is ReconMissionTemplateConfig recon && template.MissionType == MissionType.Recon)
         {
             if (recon.ScanDistance <= 0) return null;
-            var candidates = ReconMissionTargetSelector.BuildCandidates(_session.State.Galaxy, _config.GetAllStarSystems(), source.Id,
-                route => !recon.RequireUnlockedRoutes || _routes.IsRouteUnlocked(route.Id))
-                .Where(c => ReconMissionSurveyRules.PickRequired(CountAvailableEnemies(c.SystemId), recon, 0) > 0).ToList();
+            var reachable = ReconMissionTargetSelector.BuildCandidates(_session.State.Galaxy,
+                _config.GetAllStarSystems(), source.Id,
+                route => !recon.RequireUnlockedRoutes || _routes.IsRouteUnlocked(route.Id));
+            var assessed = reachable.Select(c => new
+            {
+                Candidate = c,
+                AvailableEnemies = CountAvailableEnemies(c.SystemId)
+            }).ToList();
+            var candidates = assessed
+                .Where(item => ReconMissionSurveyRules.PickRequired(item.AvailableEnemies, recon, 0) > 0)
+                .Select(item => item.Candidate).ToList();
+            Log("ReconEligibility | Template=" + template.Id + " | ReachableCaptured=" + reachable.Count +
+                " | WithEnoughEnemies=" + candidates.Count + " | EnemyCounts=" +
+                string.Join(";", assessed.Select(item => item.Candidate.SystemId + ":" + item.AvailableEnemies)));
             Log("ReconCandidateBands | Template=" + template.Id + " | Bands=" + string.Join(";", candidates.GroupBy(c => c.EnemyJumps)
                 .OrderBy(g => g.Key).Select(g => g.Key + ":systems=" + g.Count() + ",weight=" + recon.GetDistanceWeight(g.Key))));
             var chosen = ReconMissionTargetSelector.Pick(candidates, recon, UnityEngine.Random.value, UnityEngine.Random.value);
             if (chosen == null)
             {
-                Log("TemplateSkipped | Id=" + template.Id + " | Reason=NoEligibleEnemySystemWithEnoughEnemies");
+                string reason = reachable.Count == 0 ? "NoReachableCapturedSystem" :
+                    candidates.Count == 0 ? "NoReachableCapturedSystemWithEnoughEnemies" :
+                    "NoPositiveDistanceWeight";
+                Log("TemplateSkipped | Id=" + template.Id + " | Reason=" + reason);
                 return null;
             }
             targetSystem = _config.GetStarSystemConfigById(chosen.SystemId);
@@ -117,10 +151,31 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
         else if (template is RouteMissionTemplateConfig routeTemplate && template.MissionType == MissionType.RouteSearch &&
                  template.CreditRewardMode == MissionCreditRewardMode.Fixed)
         {
+            var allRoutes = RouteMissionRules.AllRoutes(_config.GetAllStarSystems());
             var candidates = RouteMissionRules.BuildCandidates(_session.State.Galaxy, _config.GetAllStarSystems(), source.Id,
                 routeTemplate.ImproveExistingRoute, r => _routes.IsRouteUnlocked(r.Id), RouteSystemAvailable)
                 .Where(r => _session.State.MissionBlock?.ActiveMissions?.Any(m => m?.MissionType == MissionType.RouteSearch && m.Objective?.RouteId == r.Id) != true).ToList();
-            if (candidates.Count == 0) return null;
+            if (candidates.Count == 0)
+            {
+                var adjacent = allRoutes.Where(r => r.ContainsSystem(source.Id)).Select(r =>
+                {
+                    var target = r.GetOtherSystem(source.Id);
+                    var state = _session.State.Galaxy.Routes?.Find(item => item != null && item.RouteId == r.Id);
+                    bool indirect = target != null && RouteMissionRules.HasIndirectPath(allRoutes,
+                        source.Id, target.Id, item => _routes.IsRouteUnlocked(item.Id), RouteSystemAvailable);
+                    return r.Id + ":unlocked=" + _routes.IsRouteUnlocked(r.Id) +
+                           ",indirect=" + indirect +
+                           ",targetAvailable=" + (target != null && RouteSystemAvailable(target.Id)) +
+                           ",level=" + (state == null ? "missing" : state.DevelopmentLevel.ToString()) +
+                           ",alreadyAssigned=" +
+                           (_session.State.MissionBlock?.ActiveMissions?.Any(m => m?.MissionType == MissionType.RouteSearch &&
+                               m.Objective?.RouteId == r.Id) == true);
+                });
+                Log("RouteEligibility | Template=" + template.Id + " | Upgrade=" +
+                    routeTemplate.ImproveExistingRoute + " | SourceAvailable=" + RouteSystemAvailable(source.Id) +
+                    " | Adjacent=" + string.Join(";", adjacent));
+                return null;
+            }
             var route = candidates[Math.Min(candidates.Count - 1, (int)(UnityEngine.Random.value * candidates.Count))];
             targetSystem = route.GetOtherSystem(source.Id);
             var state = _session.State.Galaxy.Routes.Find(r => r != null && r.RouteId == route.Id);
@@ -152,6 +207,8 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
         };
         mission.Title = Format(template.TitlePattern, source, planet, targetSystem, targetPlanet, cargoItem, objective);
         mission.Description = Format(template.DescriptionPattern, source, planet, targetSystem, targetPlanet, cargoItem, objective);
+        mission.OutcomeTexts = template.OutcomeTexts?.Format(pattern =>
+            Format(pattern, source, planet, targetSystem, targetPlanet, cargoItem, objective));
         if (string.IsNullOrWhiteSpace(mission.Title) || string.IsNullOrWhiteSpace(mission.Description))
         { Log("TemplateSkipped | Id=" + template.Id + " | Reason=MissingTextPatterns"); return null; }
         return mission;

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: item_tech_components_01
   m_EditorClassIdentifier: Data::ItemConfig
   id: item_tech_components_01
-  displayName: Tech Components
+  displayName: Технические компоненты
   description: Advanced components used in high-tech manufacturing and maintenance
   icon: {fileID: 21300000, guid: f53c99628d51c470a83e61c9f58d9af0, type: 3}
   itemCategory: 8

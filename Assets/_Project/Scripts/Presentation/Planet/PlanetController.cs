@@ -150,6 +150,8 @@ public class PlanetController : CustomMonoBehaviour
         }
     }
 
+    public void TakeOffFromPlanet() => OnOpenSystemClicked();
+
     private void OnOpenHangarClicked()
     {
         if (planetRoot != null)

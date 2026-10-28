@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,8 +24,6 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
     private ITravelService _travelService;
     private IGameSessionService _gameSessionService;
     private IGameStateMachine _gameStateMachine;
-
-    private Coroutine _currentRoutine;
 
     private void Start()
     {
@@ -126,15 +123,6 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
             _eventBus.Unsubscribe<SystemTravelCompletedEvent>(
                 OnTravelCompleted);
             _eventBus.Unsubscribe<PlanetLandingBlockedEvent2A>(OnPlanetLandingBlocked);
-        }
-
-        if (_currentRoutine != null)
-        {
-            StopCoroutine(
-                _currentRoutine);
-
-            _currentRoutine =
-                null;
         }
     }
 
@@ -259,19 +247,20 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
     /// - при повторной проверке перед перелётом.
     /// </summary>
     public void ShowTravelFailReason(
-        TravelFailReason failReason)
+        TravelFailReason failReason,
+        MonoBehaviour runner = null)
     {
         switch (failReason)
         {
             case TravelFailReason.NotEnoughFuel:
                 ShowMessage(
-                    "Для прыжка недостаточно топлива");
+                    "Для прыжка недостаточно топлива", runner);
                 break;
 
             case TravelFailReason.SystemsAreNotNeighbors:
                 ShowMessage(
                     "Перелёт в выбранную систему " +
-                    "из текущей невозможен");
+                    "из текущей невозможен", runner);
                 break;
 
             default:
@@ -284,75 +273,17 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
     /// объект ошибки на SystemScene.
     /// </summary>
     public void ShowMessage(
-        string text)
+        string text,
+        MonoBehaviour runner = null)
     {
-        if (string.IsNullOrWhiteSpace(
-                text))
-        {
-            return;
-        }
-
-        if (_currentRoutine != null)
-        {
-            StopCoroutine(
-                _currentRoutine);
-
-            _currentRoutine =
-                null;
-        }
-
-        _currentRoutine =
-            StartCoroutine(
-                ShowMessageRoutine(
-                    text));
-    }
-
-    private IEnumerator ShowMessageRoutine(
-        string text)
-    {
-        if (errorText != null)
-        {
-            errorText.text =
-                text;
-        }
-
-        if (errorImage != null)
-        {
-            errorImage
-                .gameObject
-                .SetActive(true);
-        }
-        else if (errorText != null)
-        {
-            /*
-             * Резервный вариант:
-             * если фон не назначен,
-             * показываем хотя бы объект текста.
-             */
-            errorText
-                .gameObject
-                .SetActive(true);
-        }
-
-        yield return new WaitForSeconds(
-            Mathf.Max(
-                0.01f,
-                showDuration));
-
-        if (errorImage != null)
-        {
-            errorImage
-                .gameObject
-                .SetActive(false);
-        }
-        else if (errorText != null)
-        {
-            errorText
-                .gameObject
-                .SetActive(false);
-        }
-
-        _currentRoutine =
-            null;
+        if (string.IsNullOrWhiteSpace(text)) return;
+        GameObject messageObject = errorImage != null ? errorImage.gameObject :
+            errorText != null ? errorText.gameObject : null;
+        if (messageObject == null) return;
+        if (errorText != null) errorText.text = text;
+        TimedErrorImage2A timer = messageObject.GetComponent<TimedErrorImage2A>();
+        if (timer == null) timer = messageObject.AddComponent<TimedErrorImage2A>();
+        timer.ShowFor(showDuration);
+        messageObject.SetActive(true);
     }
 }

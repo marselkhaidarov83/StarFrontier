@@ -220,6 +220,9 @@ public partial class MissionService : CustomService, IMissionService
         var mission = Find(Block?.ActiveMissions, id);
         reason = "MissionNotFound";
         if (mission == null) return Reject("Complete", mission, reason);
+        if (TryFailCapturedSource(mission, out reason)) return false;
+        if (mission.MissionType == MissionType.Delivery && TryFailInvalidDelivery(mission, out reason))
+            return false;
         if (MissionLifecycleRules.IsExpired(mission, CurrentDay))
         {
             ExpireMission(id);
@@ -232,10 +235,31 @@ public partial class MissionService : CustomService, IMissionService
             reason = "ConditionsNotMet";
             return Reject("Complete", mission, reason);
         }
+        if (mission.MissionType == MissionType.Recon &&
+            (mission.SourceSystemId != _gameSessionService.State.Player?.CurrentSystemId ||
+             mission.SourcePlanetId != _gameSessionService.State.Player?.CurrentPlanetId))
+        {
+            reason = "NotAtIssuingPlanet";
+            return Reject("Complete", mission, reason);
+        }
         if (_gameSessionService.State.Player == null)
         {
             reason = "MissingPlayer";
             return Reject("Complete", mission, reason);
+        }
+        if (MissionBattleRules.IsBattle(mission.MissionType))
+        {
+            PlayerState player = _gameSessionService.State.Player;
+            StarSystemConfig system = _config.GetStarSystemConfigById(mission.TargetSystemId);
+            PlanetConfig planet = string.IsNullOrWhiteSpace(player.CurrentPlanetId)
+                ? null : _config.GetPlanetConfigById(player.CurrentPlanetId);
+            if (player.CurrentSystemId != mission.TargetSystemId ||
+                planet?.IsInhabited != true ||
+                system?.PlanetRefs?.Any(p => p != null && p.Id == player.CurrentPlanetId) != true)
+            {
+                reason = "NotAtInhabitedRewardPlanet";
+                return Reject("Complete", mission, reason);
+            }
         }
         if (MissionBattleRules.IsBattle(mission.MissionType) && !ReevaluateGameplayMission(mission))
         { reason = "BattleRewardExpired"; return false; }
@@ -333,6 +357,38 @@ public partial class MissionService : CustomService, IMissionService
         return true;
     }
 
+    private bool TryFailCapturedSource(MissionInstanceData mission, out string reason)
+    {
+        reason = "None";
+        if (mission == null || !MissionLifecycleRules.IsActive(mission.Status) ||
+            (mission.MissionType == MissionType.Liberation && mission.Objective?.BattleWon != true) ||
+            string.IsNullOrWhiteSpace(mission.SourceSystemId) ||
+            !ReconMissionTargetSelector.IsEnemy(_gameSessionService.State?.Galaxy, mission.SourceSystemId))
+            return false;
+
+        reason = "SystemCaptured";
+        FinishWithoutReward(mission.MissionRuntimeId, MissionStatus.Failed, reason);
+        return true;
+    }
+
+    private bool TryFailInvalidDelivery(MissionInstanceData mission, out string reason)
+    {
+        reason = "None";
+        if (mission?.MissionType != MissionType.Delivery || !MissionLifecycleRules.IsActive(mission.Status))
+            return false;
+
+        if (ReconMissionTargetSelector.IsEnemy(_gameSessionService.State?.Galaxy, mission.TargetSystemId))
+            reason = "SystemCaptured";
+        else if (mission.Objective?.IsMissionCargoGranted == true &&
+                 !MissionCargoOperations.HasCargo(_gameSessionService.State, mission, false))
+            reason = "MissionCargoLost";
+        else
+            return false;
+
+        FinishWithoutReward(mission.MissionRuntimeId, MissionStatus.Failed, reason);
+        return true;
+    }
+
     public void ReevaluateActiveMissions(string reason)
     {
         var block = Block;
@@ -340,6 +396,9 @@ public partial class MissionService : CustomService, IMissionService
         foreach (var mission in block.ActiveMissions.ToArray())
         {
             if (mission == null) continue;
+            if (TryFailCapturedSource(mission, out _)) continue;
+            if (mission.MissionType == MissionType.Delivery && TryFailInvalidDelivery(mission, out _))
+                continue;
             if (!MissionLifecycleRules.IsPlayableType(mission.MissionType))
             {
                 FinishWithoutReward(mission.MissionRuntimeId, MissionStatus.Cancelled, "MissionTypeDisabled");
@@ -352,11 +411,16 @@ public partial class MissionService : CustomService, IMissionService
             }
             if (!MissionLifecycleRules.IsActive(mission.Status)) continue;
             if (!ReevaluateGameplayMission(mission)) continue;
-            if (mission.MissionType == MissionType.Delivery && mission.Objective?.IsMissionCargoGranted == true &&
-                !MissionCargoOperations.HasCargo(_gameSessionService.State, mission, false))
+            if (mission.MissionType == MissionType.RouteSearch &&
+                mission.Objective?.RouteIsUpgrade == true &&
+                mission.Objective.RouteDirectSurveyed &&
+                !mission.Objective.RouteIndirectSurveyed &&
+                !mission.Objective.RouteReturnedAfterDirectSurvey &&
+                mission.SourceSystemId == _gameSessionService.State.Player?.CurrentSystemId)
             {
-                FinishWithoutReward(mission.MissionRuntimeId, MissionStatus.Failed, "MissionCargoLost");
-                continue;
+                Mutate("RouteReturnedAfterDirectSurvey", () =>
+                    mission.Objective.RouteReturnedAfterDirectSurvey = true);
+                PublishMissionChanged(mission);
             }
             if (mission.MissionType == MissionType.Recon && mission.Objective != null)
             {
@@ -431,19 +495,17 @@ public partial class MissionService : CustomService, IMissionService
         {
             case MissionType.Delivery:
                 return objective.IsMissionCargoGranted && !objective.IsMissionCargoDelivered &&
+                    !ReconMissionTargetSelector.IsEnemy(_gameSessionService.State.Galaxy, mission.TargetSystemId) &&
                     MissionCargoOperations.HasCargo(_gameSessionService.State, mission, true) &&
                     !string.IsNullOrWhiteSpace(mission.TargetPlanetId) &&
                     mission.TargetPlanetId == player.CurrentPlanetId &&
                     mission.TargetSystemId == player.CurrentSystemId;
             case MissionType.Recon:
-                return objective.CurrentAmount >= objective.RequiredAmount &&
-                    !string.IsNullOrWhiteSpace(mission.SourcePlanetId) &&
-                    mission.SourcePlanetId == player.CurrentPlanetId && mission.SourceSystemId == player.CurrentSystemId;
+                return objective.CurrentAmount >= objective.RequiredAmount;
             case MissionType.Defense:
             case MissionType.Liberation:
                 return objective.BattleWon && objective.CurrentAmount > 0 &&
-                    !MissionBattleRules.RewardExpired(objective, InvasionGeneration(mission.TargetSystemId)) &&
-                    mission.TargetSystemId == player.CurrentSystemId && !string.IsNullOrWhiteSpace(player.CurrentPlanetId);
+                    !MissionBattleRules.RewardExpired(objective, InvasionGeneration(mission.TargetSystemId));
             case MissionType.RouteSearch:
                 return objective.RouteIndirectSurveyed && (!objective.RouteIsUpgrade || objective.RouteDirectSurveyed) &&
                     RouteMissionIsValid(mission) && mission.SourcePlanetId == player.CurrentPlanetId &&
@@ -458,6 +520,33 @@ public partial class MissionService : CustomService, IMissionService
 
     private static MissionInstanceData Find(List<MissionInstanceData> missions, string id) =>
         string.IsNullOrWhiteSpace(id) ? null : missions?.FirstOrDefault(m => m != null && m.MissionRuntimeId == id);
+
+    public void RemoveUnacceptedOffersInSystem(string systemId)
+    {
+        if (string.IsNullOrWhiteSpace(systemId)) return;
+        var block = Block;
+        if (block == null) return;
+        bool IsUnaccepted(MissionInstanceData mission) => mission != null &&
+            mission.Status == MissionStatus.Available && mission.SourceSystemId == systemId;
+        bool IsOfferInSystem(PlanetOfferedMissionData offer) =>
+            IsUnaccepted(offer?.OfferedMission);
+        if (!block.AvailableMissions.Any(IsUnaccepted) &&
+            !block.OffersByPlanet.Values.Any(IsOfferInSystem) &&
+            !block.OffersByPlanet_List.Any(IsOfferInSystem)) return;
+
+        Mutate("RemoveOffersForInvasion", () =>
+        {
+            block.AvailableMissions.RemoveAll(mission => IsUnaccepted(mission));
+            foreach (string planetId in block.OffersByPlanet
+                .Where(pair => IsOfferInSystem(pair.Value)).Select(pair => pair.Key).ToArray())
+                block.OffersByPlanet.Remove(planetId);
+            block.OffersByPlanet_List.RemoveAll(offer => IsOfferInSystem(offer));
+        });
+        Log("OffersRemovedForInvasion", null, "System=" + systemId);
+        try { _eventBus.Publish(new MissionStateChangedEvent()); }
+        catch (Exception exception)
+        { AppLog.Error(DebugLogChannel.Mission, "[MissionLifecycle] UI observer failed | " + exception.Message); }
+    }
 
     public void ClearAll()
     {

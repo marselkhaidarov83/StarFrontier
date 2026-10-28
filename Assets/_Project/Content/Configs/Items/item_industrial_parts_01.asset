@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: item_industrial_parts_01
   m_EditorClassIdentifier: Data::ItemConfig
   id: item_industrial_parts_01
-  displayName: Industrial Parts
+  displayName: Промышленные детали
   description: Machinery parts and mechanical components for production systems
   icon: {fileID: 21300000, guid: c9b59589d28774ca596eb80a1b83c015, type: 3}
   itemCategory: 6

@@ -3,9 +3,13 @@ using System.Linq;
 
 public class MissionTracker : CustomService, IMissionTracker, ITickable
 {
+    public static GameRuntimeState LastRestoredState { get; private set; }
+    public static int RestoreRevision { get; private set; }
+    public static string LastRestoreChangeMessage { get; private set; }
     private readonly IMissionService _missionService;
     private readonly IGameSessionService _session;
     private readonly SimpleEventBus _eventBus;
+    private bool _reevaluating;
     public string LastTrackerMessage { get; private set; }
 
     public MissionTracker()
@@ -21,6 +25,8 @@ public class MissionTracker : CustomService, IMissionTracker, ITickable
         _eventBus.Subscribe<SystemEncounterVictoryPendingRewardEvent>(OnBattleVictory);
         _eventBus.Subscribe<SystemEncounterDefeatedEvent>(OnBattleDefeat);
         _eventBus.Subscribe<SystemInvasionStartedMissionEvent>(OnInvasionStarted);
+        _eventBus.Subscribe<SystemCapturedMissionEvent>(OnSystemCaptured);
+        _eventBus.Subscribe<CargoChangedEvent>(OnCargoChanged);
         SetTrackerMessage("Initialized; five mission types enabled.");
     }
 
@@ -33,6 +39,8 @@ public class MissionTracker : CustomService, IMissionTracker, ITickable
         _eventBus.Unsubscribe<SystemEncounterVictoryPendingRewardEvent>(OnBattleVictory);
         _eventBus.Unsubscribe<SystemEncounterDefeatedEvent>(OnBattleDefeat);
         _eventBus.Unsubscribe<SystemInvasionStartedMissionEvent>(OnInvasionStarted);
+        _eventBus.Unsubscribe<SystemCapturedMissionEvent>(OnSystemCaptured);
+        _eventBus.Unsubscribe<CargoChangedEvent>(OnCargoChanged);
     }
 
     private void OnPlanetEntered(PlanetEnteredEvent evt) =>
@@ -49,7 +57,22 @@ public class MissionTracker : CustomService, IMissionTracker, ITickable
     private void OnTravelFinished(TravelFinishedEvent evt) => _missionService.ObserveMissionTravel(evt);
     private void OnBattleVictory(SystemEncounterVictoryPendingRewardEvent evt) => _missionService.ResolveBattle(evt.EncounterId, evt.SystemId, true);
     private void OnBattleDefeat(SystemEncounterDefeatedEvent evt) => _missionService.ResolveBattle(evt.EncounterId, evt.SystemId, false);
-    private void OnInvasionStarted(SystemInvasionStartedMissionEvent evt) => _missionService.ReevaluateActiveMissions("InvasionStarted:" + evt.SystemId);
+    private void OnInvasionStarted(SystemInvasionStartedMissionEvent evt)
+    {
+        _missionService.RemoveUnacceptedOffersInSystem(evt.SystemId);
+        _missionService.ReevaluateActiveMissions("InvasionStarted:" + evt.SystemId);
+    }
+
+    private void OnSystemCaptured(SystemCapturedMissionEvent evt) => ReevaluateFromEvent("SystemCaptured:" + evt.SystemId);
+    private void OnCargoChanged(CargoChangedEvent evt) => ReevaluateFromEvent("CargoChanged");
+
+    private void ReevaluateFromEvent(string reason)
+    {
+        if (_reevaluating) return;
+        _reevaluating = true;
+        try { _missionService.ReevaluateActiveMissions(reason); }
+        finally { _reevaluating = false; }
+    }
 
     public void Tick(float deltaTime) => _missionService.ObserveReconTargets();
 
@@ -57,8 +80,18 @@ public class MissionTracker : CustomService, IMissionTracker, ITickable
     {
         var state = _session.State;
         if (state == null) return;
+        IConfigService config = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        var before = MissionRestoreChangeDetector.TakeBeforeRestore(state, config);
         MissionLifecycleRules.Normalize(state.MissionBlock, state.Meta?.CurrentGameDay ?? 1);
+        foreach (string systemId in state.Galaxy?.Invasions?
+            .Where(invasion => invasion?.IsActive() == true)
+            .Select(invasion => invasion.TargetSystemId).Distinct() ?? Enumerable.Empty<string>())
+            _missionService.RemoveUnacceptedOffersInSystem(systemId);
         _missionService.ReevaluateActiveMissions("AfterLoad");
+        var after = MissionRestoreChangeDetector.Capture(state.MissionBlock, config);
+        LastRestoreChangeMessage = MissionRestoreChangeDetector.DescribeFirstChange(before, after);
+        LastRestoredState = state;
+        RestoreRevision++;
         SetTrackerMessage("Reevaluated mission conditions after world restore.");
     }
 

@@ -13,6 +13,7 @@ public interface IMissionService
     bool CancelMission(string missionRuntimeId);
     bool ExpireMission(string missionRuntimeId);
     void ReevaluateActiveMissions(string reason);
+    void RemoveUnacceptedOffersInSystem(string systemId);
     void ObserveReconTargets();
     void ObserveBattleParticipation(string systemId);
     void RecordBattleKill(string npcId, string systemId);

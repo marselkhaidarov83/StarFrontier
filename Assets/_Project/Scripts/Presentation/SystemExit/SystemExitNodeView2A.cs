@@ -70,6 +70,11 @@ public sealed class SystemExitNodeView2A :
     private string _targetSystemId =
         string.Empty;
 
+    public string TargetSystemId => _targetSystemId;
+
+    // Reuse the same fuel checks and local route construction as a player tap.
+    public void SelectForMission() => OnPointerClick(null);
+
     private SimpleEventBus _simpleEventBus;
     private ITravelService _travelService;
     private ISystemTravelService _systemTravelService;

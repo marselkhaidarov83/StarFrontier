@@ -31,6 +31,7 @@ using System.Collections.Generic;
         public bool RouteIsUpgrade;
         public int RouteExpectedLevel;
         public bool RouteDirectSurveyed;
+        public bool RouteReturnedAfterDirectSurvey;
         public bool RouteIndirectSurveyed;
         public List<string> RouteSurveySystemIds = new();
 

@@ -3,185 +3,298 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-    public class MissionCardView : MonoBehaviour
+public class MissionCardView : MonoBehaviour
+{
+    [Header("Base")]
+    [SerializeField] private Image backgroundImage;
+    [SerializeField] private Image missionTypeIcon;
+    [SerializeField] private TMP_Text titleText;
+    [SerializeField] private TMP_Text shortDescriptionText;
+    [SerializeField] private TMP_Text statusText;
+    [SerializeField] private TMP_Text rewardText;
+    [SerializeField] private TMP_Text progressText;
+    [SerializeField] private TMP_Text stateBadgeText;
+    [SerializeField] private GameObject selectedFrame;
+    [SerializeField] private Button selectButton;
+    [SerializeField] private Button doneButton;
+
+    private MissionInstanceData _missionData;
+    private Action<MissionInstanceData> _onSelected;
+    private Action<MissionInstanceData> _onAccept;
+    private Action<MissionInstanceData> _onDone;
+    private Action<MissionInstanceData> _onFly;
+    private Image _topTrim;
+    private Image _leftTrim;
+    private Outline _cardOutline;
+    private float _lastBodyWidth = -1f;
+
+    private void LateUpdate()
     {
-        [Header("Base")]
-        [SerializeField] private Image backgroundImage;
-        [SerializeField] private Image missionTypeIcon;
-        [SerializeField] private TMP_Text titleText;
-        [SerializeField] private TMP_Text shortDescriptionText;
-        [SerializeField] private TMP_Text statusText;
-        [SerializeField] private TMP_Text rewardText;
-        [SerializeField] private TMP_Text progressText;
-        [SerializeField] private TMP_Text stateBadgeText;
-        [SerializeField] private GameObject selectedFrame;
-        [SerializeField] private Button selectButton;
-        [SerializeField] private Button doneButton;
+        float width = ((RectTransform)transform).rect.width;
+        if (width > 0f && Mathf.Abs(width - _lastBodyWidth) > 0.5f)
+            LayoutMissionBody(width);
+    }
 
-        private MissionInstanceData _missionData;
-        private Action<MissionInstanceData> _onSelected;
-        private Action<MissionInstanceData> _onDone;
+    public void Bind(MissionInstanceData missionData, Sprite missionIcon, IConfigService config,
+        Action<MissionInstanceData> onSelected, Action<MissionInstanceData> onAccept,
+        Action<MissionInstanceData> onDone, bool isSelected,
+        Action<MissionInstanceData> onFly = null)
+    {
+        _missionData = missionData;
+        _onSelected = onSelected;
+        _onAccept = onAccept;
+        _onDone = onDone;
+        _onFly = onFly;
+        ApplyMobileLayout();
 
-        public void Bind(
-            MissionInstanceData missionData,
-            Sprite missionIcon,
-            Action<MissionInstanceData> onSelected,
-            Action<MissionInstanceData> onDone,
-            bool isSelected)
+        if (missionTypeIcon != null)
         {
-            _missionData = missionData;
-            _onSelected = onSelected;
-            _onDone = onDone;
+            missionTypeIcon.sprite = missionIcon;
+            missionTypeIcon.enabled = missionIcon != null;
+        }
+        if (titleText != null) titleText.text = MissionUiText.Title(missionData, config);
+        if (shortDescriptionText != null)
+        {
+            string description = MissionUiText.Description(missionData, config);
+            int day = CurrentMissionDay();
+            string deadline = MissionUiText.Deadline(missionData, day);
+            shortDescriptionText.text = description +
+                (string.IsNullOrWhiteSpace(deadline) ? string.Empty : "\n" + deadline);
+        }
+        if (rewardText != null) rewardText.text = MissionUiText.Reward(missionData);
+        PlayerState player = Bootstrapper.Instance?.ServiceRegistry?.Get<IGameSessionService>()?.State?.Player;
+        bool rewardHere = CanTurnInHere(missionData, player, config);
+        if (progressText != null)
+            progressText.text = rewardHere
+                ? MissionUiText.RewardStepOnPlanet(missionData, config)
+                : MissionUiText.NextStep(missionData, config, player);
+        LayoutMissionBody(((RectTransform)transform).rect.width);
+        if (statusText != null) statusText.gameObject.SetActive(false);
 
-            if (missionTypeIcon != null)
+        bool offered = missionData != null && missionData.Status == MissionStatus.Available;
+        bool ready = missionData != null && missionData.Status == MissionStatus.ReadyToComplete;
+        bool inProgress = missionData != null &&
+            (missionData.Status == MissionStatus.Accepted || missionData.Status == MissionStatus.InProgress);
+        bool canFly = inProgress && (missionData.MissionType == MissionType.Delivery ||
+            missionData.MissionType == MissionType.Recon ||
+            missionData.MissionType == MissionType.RouteSearch);
+        if (stateBadgeText != null) stateBadgeText.gameObject.SetActive(false);
+        if (selectedFrame != null) selectedFrame.SetActive(isSelected);
+        if (backgroundImage != null)
+        {
+            backgroundImage.enabled = true;
+            backgroundImage.color = ready
+                ? new Color(0.15f, 0.24f, 0.31f, 1f)
+                : new Color(0.09f, 0.19f, 0.29f, 1f);
+        }
+        Color accent = ready
+            ? new Color(0.95f, 0.68f, 0.23f, 1f)
+            : new Color(0.13f, 0.65f, 0.92f, 1f);
+        if (_cardOutline != null) _cardOutline.effectColor = accent;
+        if (_topTrim != null) _topTrim.color = accent;
+        if (_leftTrim != null) _leftTrim.color = accent;
+
+        if (doneButton != null)
+        {
+            doneButton.gameObject.SetActive(offered || ready || inProgress);
+            doneButton.interactable = offered || canFly || rewardHere;
+            TMP_Text buttonText = doneButton.GetComponentInChildren<TMP_Text>(true);
+            if (buttonText != null)
             {
-                missionTypeIcon.sprite = missionIcon;
-                missionTypeIcon.enabled = missionIcon != null;
+                buttonText.text = offered ? "Принять миссию" :
+                    ready ? "Забрать награду" : canFly ? "Лететь" : "Выполняется";
+                buttonText.fontSize = 24f;
+                buttonText.fontStyle = FontStyles.Normal;
+                buttonText.color = Color.white;
+                buttonText.alignment = TextAlignmentOptions.Center;
             }
-
-            if (titleText != null)
-                titleText.text = missionData != null ? missionData.Title : "Unknown Mission";
-
-            if (shortDescriptionText != null)
-                shortDescriptionText.text = missionData != null ? missionData.Description : string.Empty;
-
-            if (statusText != null)
-                statusText.text = missionData != null ? $"Status: {missionData.Status}" : "Status: Unknown";
-
-            if (rewardText != null)
+            StyleActionButton(ready, inProgress && !canFly);
+            doneButton.onClick.RemoveAllListeners();
+            if (offered || ready || canFly) doneButton.onClick.AddListener(() =>
             {
-                if (missionData != null && missionData.Reward != null)
-                    rewardText.text = $"Reward: {missionData.Reward.Credits} cr / {missionData.Reward.Xp} xp";
-                else
-                    rewardText.text = "Reward: -";
-            }
+                if (offered) _onAccept?.Invoke(_missionData);
+                else if (ready) _onDone?.Invoke(_missionData);
+                else _onFly?.Invoke(_missionData);
+            });
+        }
+        if (selectButton != null)
+        {
+            selectButton.onClick.RemoveAllListeners();
+            selectButton.onClick.AddListener(() => _onSelected?.Invoke(_missionData));
+        }
+    }
 
-            if (progressText != null)
-                progressText.text = BuildProgressText(missionData);
+    public static bool CanTurnInHere(MissionInstanceData mission, PlayerState player,
+        IConfigService config)
+    {
+        if (mission == null || player == null || mission.Status != MissionStatus.ReadyToComplete)
+            return false;
+        if (mission.MissionType == MissionType.Delivery)
+            return mission.TargetSystemId == player.CurrentSystemId &&
+                   mission.TargetPlanetId == player.CurrentPlanetId;
+        if (mission.MissionType == MissionType.Recon || mission.MissionType == MissionType.RouteSearch)
+            return mission.SourceSystemId == player.CurrentSystemId &&
+                   mission.SourcePlanetId == player.CurrentPlanetId;
+        if (MissionBattleRules.IsBattle(mission.MissionType))
+            return mission.TargetSystemId == player.CurrentSystemId &&
+                   config?.GetPlanetConfigById(player.CurrentPlanetId)?.IsInhabited == true;
+        return false;
+    }
 
-            if (stateBadgeText != null)
-                stateBadgeText.text = BuildBadgeText(missionData);
-
-            if (selectedFrame != null)
-                selectedFrame.SetActive(isSelected);
-
-            ApplyVisualState(missionData);
-            ApplyVisualStateButtonDone(missionData);
-
-            if (doneButton != null)
-            {
-                doneButton.onClick.RemoveAllListeners();
-                doneButton.onClick.AddListener(HandleDone);
-            }
-
-            if (selectButton != null)
-            {
-                selectButton.onClick.RemoveAllListeners();
-                selectButton.onClick.AddListener(HandleSelected);
-            }
+    private void ApplyMobileLayout()
+    {
+        EnsureCardFrame();
+        LayoutElement layout = GetComponent<LayoutElement>();
+        if (layout != null) layout.preferredHeight = 280f;
+        LayoutText(titleText, 18f, 64f, 100f, 0.98f);
+        if (titleText != null)
+        {
+            titleText.fontSize = 34f;
+            titleText.alignment = TextAlignmentOptions.Left;
+        }
+        foreach (TMP_Text bodyText in new[] { shortDescriptionText, rewardText, progressText })
+        {
+            if (bodyText == null) continue;
+            bodyText.fontSize = 25f;
+            bodyText.textWrappingMode = TextWrappingModes.Normal;
         }
 
-        private void HandleSelected()
+        if (stateBadgeText != null)
         {
-            _onSelected?.Invoke(_missionData);
+            RectTransform rect = stateBadgeText.rectTransform;
+            rect.anchorMin = new Vector2(1f, 0f);
+            rect.anchorMax = new Vector2(1f, 0f);
+            rect.pivot = new Vector2(1f, 0f);
+            rect.anchoredPosition = new Vector2(-22f, 20f);
+            rect.sizeDelta = new Vector2(260f, 66f);
+            stateBadgeText.alignment = TextAlignmentOptions.Center;
+            stateBadgeText.textWrappingMode = TextWrappingModes.Normal;
+            stateBadgeText.fontSize = 23f;
         }
 
-        private void HandleDone()
+        if (doneButton != null)
         {
-            _onDone?.Invoke(_missionData);
+            RectTransform rect = doneButton.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1f, 0f);
+            rect.anchorMax = new Vector2(1f, 0f);
+            rect.pivot = new Vector2(1f, 0f);
+            rect.anchoredPosition = new Vector2(-22f, 20f);
+            rect.sizeDelta = new Vector2(260f, 66f);
         }
-
-        private string BuildProgressText(MissionInstanceData mission)
+        if (missionTypeIcon != null)
         {
-            if (mission == null || mission.Objective == null)
-            {
-                return "Progress: -";
-            }
-
-            return mission.MissionType switch
-            {
-                MissionType.Delivery => $"Progress: {(mission.IsReadyToTurnIn ? "Ready to turn in" : "In progress")}",
-                MissionType.Elimination => $"Progress: {mission.Objective.CurrentAmount}/{mission.Objective.RequiredAmount}",
-                MissionType.Recon => $"Progress: {mission.Objective.CurrentAmount}/{mission.Objective.RequiredAmount}",
-                MissionType.Defense => $"Личные убийства: {mission.Objective.CurrentAmount}. {(mission.Objective.BattleWon ? "Победа" : "Бой продолжается")}",
-                MissionType.Liberation => $"Личные убийства: {mission.Objective.CurrentAmount}. {(mission.Objective.BattleWon ? "Победа" : "Бой продолжается")}",
-                MissionType.RouteSearch => $"Обходной путь: {(mission.Objective.RouteIndirectSurveyed ? "изучен" : "не изучен")}" +
-                    (mission.Objective.RouteIsUpgrade ? $"; прямой: {(mission.Objective.RouteDirectSurveyed ? "изучен" : "не изучен")}" : ""),
-                _ => "Progress: -"
-            };
+            RectTransform rect = missionTypeIcon.rectTransform;
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = new Vector2(24f, -18f);
+            rect.sizeDelta = new Vector2(64f, 64f);
         }
+    }
 
-        private string BuildBadgeText(MissionInstanceData mission)
-        {
-            if (mission == null)
-            {
-                return "UNKNOWN";
-            }
+    private void LayoutMissionBody(float width)
+    {
+        if (width <= 0f || shortDescriptionText == null || rewardText == null || progressText == null)
+            return;
+        _lastBodyWidth = width;
+        float descriptionHeight = PreferredHeight(shortDescriptionText, width * 0.96f - 28f);
+        float rewardHeight = PreferredHeight(rewardText, width * 0.72f - 28f);
+        float stepHeight = PreferredHeight(progressText, width * 0.72f - 28f);
+        const float descriptionTop = 94f;
+        float rewardTop = descriptionTop + descriptionHeight + 6f;
+        float stepTop = rewardTop + rewardHeight + 5f;
+        LayoutText(shortDescriptionText, descriptionTop, descriptionHeight, 28f, 0.96f);
+        LayoutText(rewardText, rewardTop, rewardHeight, 28f, 0.72f);
+        LayoutText(progressText, stepTop, stepHeight, 28f, 0.72f);
+        LayoutElement layout = GetComponent<LayoutElement>();
+        if (layout != null) layout.preferredHeight = Mathf.Max(280f, stepTop + stepHeight + 18f);
+    }
 
-            return mission.Status switch
-            {
-                MissionStatus.Available => "AVAILABLE",
-                MissionStatus.Accepted => "ACCEPTED",
-                MissionStatus.InProgress => "IN PROGRESS",
-                MissionStatus.Cancelled => "CANCELLED",
-                MissionStatus.ReadyToComplete => "READY",
-                MissionStatus.Completed => "COMPLETED",
-                MissionStatus.Failed => "FAILED",
-                MissionStatus.Expired => "EXPIRED",
-                _ => "UNKNOWN"
-            };
-        }
+    private static float PreferredHeight(TMP_Text text, float width) =>
+        Mathf.Max(40f, text.GetPreferredValues(text.text, Mathf.Max(100f, width), Mathf.Infinity).y + 8f);
 
-    private void ApplyVisualStateButtonDone(MissionInstanceData mission)
+    private static void LayoutText(TMP_Text text, float top, float height, float left, float widthFraction)
+    {
+        if (text == null) return;
+        RectTransform rect = text.rectTransform;
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(widthFraction, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.anchoredPosition = new Vector2(left, -top);
+        rect.sizeDelta = new Vector2(-left, height);
+        text.textWrappingMode = TextWrappingModes.Normal;
+        text.overflowMode = TextOverflowModes.Ellipsis;
+        text.alignment = TextAlignmentOptions.TopLeft;
+    }
+
+    private void EnsureCardFrame()
+    {
+        if (backgroundImage == null) return;
+        _cardOutline = backgroundImage.GetComponent<Outline>();
+        if (_cardOutline == null) _cardOutline = backgroundImage.gameObject.AddComponent<Outline>();
+        _cardOutline.effectDistance = new Vector2(2f, 2f);
+        _cardOutline.useGraphicAlpha = false;
+        _topTrim = CreateTrim("MissionCardTopTrim", new Vector2(0f, 1f),
+            new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -2f), new Vector2(-4f, 4f));
+        _leftTrim = CreateTrim("MissionCardLeftTrim", Vector2.zero,
+            new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(2f, 0f), new Vector2(5f, -4f));
+    }
+
+    private Image CreateTrim(string name, Vector2 min, Vector2 max, Vector2 pivot,
+        Vector2 position, Vector2 size)
+    {
+        Transform existing = transform.Find(name);
+        if (existing != null) return existing.GetComponent<Image>();
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        RectTransform rect = go.GetComponent<RectTransform>();
+        rect.SetParent(transform, false);
+        rect.anchorMin = min;
+        rect.anchorMax = max;
+        rect.pivot = pivot;
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+        rect.SetAsFirstSibling();
+        Image image = go.GetComponent<Image>();
+        image.raycastTarget = false;
+        return image;
+    }
+
+    private void StyleActionButton(bool ready, bool inProgress)
     {
         if (doneButton == null) return;
-        var player = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State?.Player;
-        bool canTurnIn = mission != null && player != null &&
-            MissionLifecycleRules.IsPlayableType(mission.MissionType) &&
-            mission.Status == MissionStatus.ReadyToComplete && mission.IsReadyToTurnIn;
-        if (canTurnIn && mission.MissionType == MissionType.Delivery)
-            canTurnIn = mission.TargetPlanetId == player.CurrentPlanetId &&
-                mission.TargetSystemId == player.CurrentSystemId;
-        if (canTurnIn && (mission.MissionType == MissionType.Recon || mission.MissionType == MissionType.RouteSearch))
-            canTurnIn = mission.SourcePlanetId == player.CurrentPlanetId && mission.SourceSystemId == player.CurrentSystemId;
-        if (canTurnIn && MissionBattleRules.IsBattle(mission.MissionType))
-            canTurnIn = mission.TargetSystemId == player.CurrentSystemId && !string.IsNullOrWhiteSpace(player.CurrentPlanetId);
-        doneButton.gameObject.SetActive(canTurnIn);
-    }
-
-        private void ApplyVisualState(MissionInstanceData mission)
+        Image image = doneButton.GetComponent<Image>();
+        if (image != null)
         {
-            if (backgroundImage == null || mission == null)
-            {
-                return;
-            }
-
-            switch (mission.Status)
-            {
-                case MissionStatus.Available:
-                    backgroundImage.color = new Color(1f, 1f, 1f, 1f);
-                    break;
-
-                case MissionStatus.Accepted:
-                    backgroundImage.color = new Color(0.9f, 0.95f, 1f, 1f);
-                    break;
-
-                case MissionStatus.ReadyToComplete:
-                    backgroundImage.color = new Color(1f, 0.95f, 0.8f, 1f);
-                    break;
-
-                case MissionStatus.Completed:
-                    backgroundImage.color = new Color(0.85f, 1f, 0.85f, 1f);
-                    break;
-
-                case MissionStatus.Failed:
-                    backgroundImage.color = new Color(1f, 0.85f, 0.85f, 1f);
-                    break;
-
-                case MissionStatus.Cancelled:
-                case MissionStatus.Expired:
-                    backgroundImage.color = new Color(0.8f, 0.8f, 0.8f, 1f);
-                    break;
-            }
+            image.sprite = null;
+            image.type = Image.Type.Simple;
+            image.color = ready
+                ? new Color(0.48f, 0.31f, 0.08f, 1f)
+                : inProgress ? new Color(0.23f, 0.29f, 0.35f, 1f)
+                : new Color(0.05f, 0.35f, 0.58f, 1f);
+            Outline outline = image.GetComponent<Outline>();
+            if (outline == null) outline = image.gameObject.AddComponent<Outline>();
+            outline.effectColor = ready
+                ? new Color(1f, 0.73f, 0.25f, 1f)
+                : inProgress ? new Color(0.49f, 0.56f, 0.63f, 1f)
+                : new Color(0.25f, 0.79f, 1f, 1f);
+            outline.effectDistance = new Vector2(2f, 2f);
+            outline.useGraphicAlpha = false;
         }
+        ColorBlock colors = doneButton.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1.18f, 1.18f, 1.18f, 1f);
+        colors.pressedColor = new Color(0.7f, 0.85f, 0.95f, 1f);
+        colors.disabledColor = inProgress ? Color.white :
+            new Color(0.52f, 0.58f, 0.63f, 0.8f);
+        doneButton.colors = colors;
     }
+
+    private static int CurrentMissionDay()
+    {
+        IServiceRegistry services = Bootstrapper.Instance?.ServiceRegistry;
+        if (services == null) return 1;
+        if (services.TryGet<IGameTimeService>(out IGameTimeService time))
+            return Math.Max(1, time.CurrentQuantTick);
+        return Math.Max(1, services.Get<IGameSessionService>()?.State?.Meta?.CurrentGameDay ?? 1);
+    }
+}

@@ -3,6 +3,7 @@
     "references": [
         "Core",
         "Data",
+        "Presentation",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

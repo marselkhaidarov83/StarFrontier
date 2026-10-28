@@ -10,6 +10,7 @@ public class MissionTemplateConfig : BaseConfig
     [SerializeField] [HideInInspector] private MissionType missionType;
     [SerializeField] private string titlePattern;
     [SerializeField] [TextArea] private string descriptionPattern;
+    [SerializeField] private MissionOutcomeTexts outcomeTexts;
     [SerializeField] private MissionDifficultyBand difficultyBand;
 
     [Header("Lifecycle")]
@@ -43,6 +44,7 @@ public class MissionTemplateConfig : BaseConfig
     public virtual MissionType MissionType => missionType;
     public string TitlePattern => titlePattern;
     public string DescriptionPattern => descriptionPattern;
+    public MissionOutcomeTexts OutcomeTexts => outcomeTexts;
     public MissionDifficultyBand DifficultyBand => difficultyBand;
     public int CreditRewardMin => creditRewardMin;
     public int CreditRewardMax => creditRewardMax;
