@@ -36,7 +36,8 @@ public enum DebugLogChannel
     DataValidation,
     EventBus,
     Config,
-    EditorGenerators
+    EditorGenerators,
+    Loot
 }
 
 public enum NpcMovementLoadAnalyticsDetailLevel
@@ -108,6 +109,9 @@ public sealed class DebugLogConfig : ScriptableObject
     [Header("Gameplay")]
     [Tooltip("Включает сообщения о боевых действиях. Используется боевыми системами и отладочными обработчиками.")]
     [SerializeField] private bool combatLogs;
+
+    [Tooltip("Включает сообщения о создании, выборе и уничтожении космического лута.")]
+    [SerializeField] private bool lootLogs;
 
     [Tooltip("Включает сообщения об уроне. Используется при проверке выбора цели, попаданий и расчёта прочности.")]
     [SerializeField] private bool damageLogs;
@@ -453,6 +457,9 @@ Mathf.Max(0f, visualUpdateSpikeThresholdMs);
 
             case DebugLogChannel.Combat:
                 return combatLogs;
+
+            case DebugLogChannel.Loot:
+                return lootLogs;
 
             case DebugLogChannel.Damage:
                 return damageLogs;

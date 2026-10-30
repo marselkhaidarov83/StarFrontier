@@ -28,10 +28,13 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private SystemHudConfig systemHudConfig;
     [SerializeField] private SystemVisualConfig systemVisualConfig;
     [SerializeField] private CombatFxVisualConfig combatFxVisualConfig;
+    [SerializeField] private SpaceLootCombatConfig spaceLootCombatConfig;
     [SerializeField] private CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig;
     [SerializeField] private NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig;
     [SerializeField] private OffscreenNpcSimulationScheduleConfig offscreenNpcSimulationScheduleConfig;
     [SerializeField] private CurrentSystemNpcSimulationConfig currentSystemNpcSimulationConfig;
+    [SerializeField, Min(0f)] private float spaceLootPlayerSafeRadius = 300f;
+    [SerializeField, Min(0f)] private float spaceLootEjectionDistance = 100f;
 
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
@@ -57,6 +60,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private IGameStateMachine _gameStateMachine;
     private ISaveService _saveService;
     private IGameTimeService _gameTimeService;
+    private SystemSpaceLootService _spaceLootService;
     private IPlayerControlService _playerControlService;
     private IShipMovementService _shipMovementService;
     private IInteractionService2A _interactionService;
@@ -97,6 +101,9 @@ public class Bootstrapper : CustomMonoBehaviour
     offscreenNpcSimulationScheduleConfig;
     public CurrentSystemNpcSimulationConfig CurrentSystemNpcSimulationConfig =>
     currentSystemNpcSimulationConfig;
+    public float SpaceLootPlayerSafeRadius => Mathf.Max(0f, spaceLootPlayerSafeRadius);
+    public SpaceLootCombatConfig SpaceLootCombatConfig => spaceLootCombatConfig;
+    public float SpaceLootEjectionDistance => Mathf.Max(0f, spaceLootEjectionDistance);
 
     public bool StopAutomaticAllySpawns =>
       NpcPopulationDebugSettings != null &&
@@ -340,6 +347,8 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IGovernmentRewardService, GovernmentRewardService>();
         RegisterService<IDamageService2A, DamageService2A>();
         RegisterService<ISystemNpcRuntimeService, SystemNpcRuntimeService>();
+        RegisterService<SystemSpaceLootService, SystemSpaceLootService>();
+        _spaceLootService = ServiceRegistry.Get<SystemSpaceLootService>();
         RegisterService<ISystemSecurityService, SystemSecurityService>();
         RegisterService<IEnemyFactionService, EnemyFactionService>();
         RegisterService<IEnemySpawnService, EnemySpawnService>();
@@ -441,6 +450,8 @@ public class Bootstrapper : CustomMonoBehaviour
                 Time.realtimeSinceStartupAsDouble;
 
             _tickService?.Tick(Time.deltaTime);
+            // Ejection is a short visual flight and continues while game time is paused.
+            _spaceLootService?.TickEjection(Time.unscaledDeltaTime);
 
             tickMs =
                 (Time.realtimeSinceStartupAsDouble - phaseStartedAt) * 1000.0;

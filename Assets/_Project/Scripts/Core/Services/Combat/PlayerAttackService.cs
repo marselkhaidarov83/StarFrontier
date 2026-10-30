@@ -6,6 +6,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
     private readonly IGameSessionService _gameSessionService;
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
     private readonly ISystemNpcCombatService _combatService;
+    private readonly SystemSpaceLootService _spaceLootService;
     private readonly ISystemTravelService _travelService;
     private readonly SimpleEventBus _eventBus;
 
@@ -31,6 +32,9 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         _combatService =
             Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcCombatService>();
 
+        _spaceLootService =
+            Bootstrapper.Instance.ServiceRegistry.Get<SystemSpaceLootService>();
+
         _travelService =
             Bootstrapper.Instance.ServiceRegistry.Get<ISystemTravelService>();
 
@@ -39,6 +43,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
 
         _eventBus.Subscribe<GameTickStartedEvent>(OnGameTickStarted);
         _eventBus.Subscribe<SystemNpcDestroyedEvent>(OnNpcDestroyed);
+        _eventBus.Subscribe<SpaceLootDestroyedEvent>(OnLootDestroyed);
         _eventBus.Subscribe<SystemEncounterResolvedEvent>(OnEncounterResolved);
         _eventBus.Subscribe<SystemEncounterDefeatedEvent>(OnEncounterDefeated);
         _eventBus.Subscribe<PlayerDestroyedEvent>(OnPlayerDestroyed);
@@ -52,6 +57,11 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
     private void OnNpcDestroyed(SystemNpcDestroyedEvent evt)
     {
         ClearNpcTarget(evt.RuntimeNpcId);
+    }
+
+    private void OnLootDestroyed(SpaceLootDestroyedEvent evt)
+    {
+        ClearNpcTarget(evt.LootId);
     }
 
     private void OnEncounterResolved(SystemEncounterResolvedEvent evt)
@@ -123,15 +133,35 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         PublishAssignmentsChanged();
     }
 
+    public void SetLootTarget(string lootId)
+    {
+        if (!IsValidLootTarget(lootId))
+            return;
+
+        CurrentTargetNpcId = lootId;
+        PublishAssignmentsChanged();
+        AppLog.Info(DebugLogChannel.Loot,
+            "[LOOT_TARGET_SELECTED] LootId=" + lootId);
+    }
+
+    public void AssignNextWeaponSlotToLoot(string lootId)
+    {
+        if (!IsValidLootTarget(lootId))
+            return;
+
+        AssignNextWeaponSlotToTarget(lootId);
+    }
+
     public void AssignNextWeaponSlotToTarget(string targetNpcId)
     {
-        if (!IsValidHostileTarget(targetNpcId))
+        if (!IsValidHostileTarget(targetNpcId) && !IsValidLootTarget(targetNpcId))
             return;
 
         ShipRuntimeData activeShip = GetActiveShip();
 
         CurrentTargetNpcId = targetNpcId;
-        _travelService?.SetNpcDestination(targetNpcId);
+        if (!IsValidLootTarget(targetNpcId))
+            _travelService?.SetNpcDestination(targetNpcId);
 
         if (activeShip == null ||
             activeShip.EquippedWeaponIds == null ||
@@ -156,7 +186,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         int weaponSlotIndex,
         string targetNpcId)
     {
-        if (!IsValidHostileTarget(targetNpcId))
+        if (!IsValidHostileTarget(targetNpcId) && !IsValidLootTarget(targetNpcId))
             return;
 
         ShipRuntimeData activeShip = GetActiveShip();
@@ -169,8 +199,14 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
             return;
         }
 
+        if (IsValidLootTarget(targetNpcId) &&
+            Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>()
+                .GetWeaponConfigById(activeShip.EquippedWeaponIds[weaponSlotIndex])?.ShotType == WeaponShotType2A.Wave)
+            return;
+
         CurrentTargetNpcId = targetNpcId;
-        _travelService?.SetNpcDestination(targetNpcId);
+        if (!IsValidLootTarget(targetNpcId))
+            _travelService?.SetNpcDestination(targetNpcId);
         _weaponTargetNpcIdsBySlot[weaponSlotIndex] = targetNpcId;
 
         PublishAssignmentsChanged();
@@ -299,7 +335,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
                 continue;
             }
 
-            if (!IsValidHostileTarget(targetNpcId))
+            if (!IsValidHostileTarget(targetNpcId) && !IsValidLootTarget(targetNpcId))
             {
                 _weaponTargetNpcIdsBySlot.Remove(slotIndex);
                 PublishAssignmentsChanged();
@@ -319,11 +355,11 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
                     continue;
             }
 
-            bool fired =
-                _combatService.TryCreatePlayerProjectile(
-                    targetNpcId,
-                    weaponConfigId,
-                    quantTick);
+            bool fired = IsValidLootTarget(targetNpcId)
+                ? _combatService.TryCreatePlayerLootProjectile(
+                    targetNpcId, weaponConfigId, quantTick)
+                : _combatService.TryCreatePlayerProjectile(
+                    targetNpcId, weaponConfigId, quantTick);
 
             if (!fired)
                 continue;
@@ -351,7 +387,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         {
             if (pair.Key < 0 ||
                 pair.Key >= weaponCount ||
-                !IsValidHostileTarget(pair.Value))
+                (!IsValidHostileTarget(pair.Value) && !IsValidLootTarget(pair.Value)))
             {
                 if (invalidSlots == null)
                     invalidSlots = new List<int>();
@@ -363,7 +399,8 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         bool changed = false;
 
         if (!string.IsNullOrWhiteSpace(CurrentTargetNpcId) &&
-            !IsValidHostileTarget(CurrentTargetNpcId))
+            !IsValidHostileTarget(CurrentTargetNpcId) &&
+            !IsValidLootTarget(CurrentTargetNpcId))
         {
             CurrentTargetNpcId = null;
             changed = true;
@@ -386,6 +423,9 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         if (string.IsNullOrWhiteSpace(targetNpcId))
             return false;
 
+        if (IsValidLootTarget(targetNpcId))
+            return true;
+
         if (!_npcRuntimeService.TryGetNpc(
                 targetNpcId,
                 out SystemNpcRuntimeState npc))
@@ -396,6 +436,23 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         return npc.IsAlive &&
                npc.IsHostileToPlayer &&
                !npc.IsOnPlanet;
+    }
+
+    private bool IsValidLootTarget(string lootId)
+    {
+        if (string.IsNullOrWhiteSpace(lootId) || _spaceLootService == null ||
+            _gameSessionService?.State?.Player == null)
+            return false;
+
+        string systemId = _gameSessionService.State.Player.CurrentSystemId;
+        if (_gameSessionService.State.Player.IsOnPlanet())
+            return false;
+
+        foreach (SpaceLootRuntimeState drop in _spaceLootService.Loot)
+            if (drop != null && drop.LootId == lootId && drop.SystemId == systemId)
+                return true;
+
+        return false;
     }
 
     private ShipRuntimeData GetActiveShip()

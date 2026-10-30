@@ -8,5 +8,6 @@ public enum ItemCategory
     ConsumerGoods,
     Industrial,
     Luxury,
-    Technology
+    Technology,
+    Currency
 }

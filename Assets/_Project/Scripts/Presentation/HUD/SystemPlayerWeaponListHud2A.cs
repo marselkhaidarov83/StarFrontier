@@ -50,6 +50,7 @@ public sealed class SystemPlayerWeaponListHud2A :
     private IGameSessionService _gameSessionService;
     private IConfigService _configService;
     private ISystemNpcRuntimeService _npcRuntimeService;
+    private SystemSpaceLootService _spaceLootService;
     private IPlayerCombatTargetService _playerTargetService;
     private IPlayerAttackService _playerAttackService;
     private IGameTimeService _gameTimeService;
@@ -57,6 +58,7 @@ public sealed class SystemPlayerWeaponListHud2A :
 
     private float _nextRefreshTime;
     private bool _isBound;
+    private bool _cargoPanelSuppressed;
 
     public bool IsBound => _isBound;
 
@@ -160,6 +162,7 @@ public sealed class SystemPlayerWeaponListHud2A :
         _gameSessionService = context.Get<IGameSessionService>();
         _configService = context.Get<IConfigService>();
         _npcRuntimeService = context.Get<ISystemNpcRuntimeService>();
+        _spaceLootService = context.Get<SystemSpaceLootService>();
         _playerTargetService = context.Get<IPlayerCombatTargetService>();
         _playerAttackService = context.Get<IPlayerAttackService>();
         _gameTimeService = context.Get<IGameTimeService>();
@@ -237,8 +240,10 @@ public sealed class SystemPlayerWeaponListHud2A :
         }
 
         bool hasNearbyHostile = HasNearbyHostile();
+        bool hasSelectedLoot = _playerAttackService != null &&
+            TryGetLoot(_playerAttackService.CurrentTargetNpcId, out _);
 
-        if (!hasNearbyHostile && !showEmptyPanel)
+        if (!hasNearbyHostile && !hasSelectedLoot && !showEmptyPanel)
         {
             _weaponSlotByVisualLine.Clear();
             currentWeaponLineCount = 0;
@@ -334,13 +339,26 @@ public sealed class SystemPlayerWeaponListHud2A :
                 selectedTargetNpcId,
                 out SystemNpcRuntimeState target))
         {
-            return string.Empty;
+            if (!TryGetLoot(selectedTargetNpcId, out SpaceLootRuntimeState loot))
+                return string.Empty;
+            return ResolveLootName(loot);
         }
 
         if (!target.IsAlive)
             return string.Empty;
 
         return GetDisplayName(target);
+    }
+
+    private string ResolveLootName(SpaceLootRuntimeState loot)
+    {
+        if (loot.Kind == SpaceLootKind.Equipment)
+            return _configService.GetWeaponConfigById(loot.EquipmentConfigId)?.DisplayName ?? "Оборудование";
+        if (loot.Kind == SpaceLootKind.Credits)
+            return "Кредиты";
+        if (loot.Kind == SpaceLootKind.Diamonds)
+            return "Алмазы";
+        return _configService.GetItemConfigById(loot.ItemConfigId)?.DisplayName ?? "Товар";
     }
 
     private void RebuildRows(ShipRuntimeData activeShip)
@@ -355,13 +373,17 @@ public sealed class SystemPlayerWeaponListHud2A :
 
         foreach (var pair in groupedSlots)
         {
-            if (!_npcRuntimeService.TryGetNpc(pair.Key, out SystemNpcRuntimeState target))
+            bool isNpc = _npcRuntimeService.TryGetNpc(pair.Key,
+                out SystemNpcRuntimeState target);
+            SpaceLootRuntimeState loot = null;
+            bool isLoot = !isNpc && TryGetLoot(pair.Key, out loot);
+            if (!isNpc && !isLoot)
                 continue;
 
             AppendTargetHeaderLine(
                 ref text,
-                target.RuntimeNpcId,
-                "Враг " + GetDisplayName(target));
+                pair.Key,
+                isNpc ? "Враг " + GetDisplayName(target) : ResolveLootName(loot));
 
             List<int> slots = pair.Value;
             slots.Sort();
@@ -374,7 +396,9 @@ public sealed class SystemPlayerWeaponListHud2A :
                     continue;
 
                 string weaponConfigId = activeShip.EquippedWeaponIds[slotIndex];
-                string color = CanWeaponReachTarget(weaponConfigId, target)
+                string color = (isNpc
+                    ? CanWeaponReachTarget(weaponConfigId, target)
+                    : CanWeaponReachLoot(weaponConfigId, loot))
                     ? "#61FF7A"
                     : "#FF4A4A";
 
@@ -495,6 +519,14 @@ public sealed class SystemPlayerWeaponListHud2A :
             " (" +
             ResolveWeaponDamage(weaponConfigId) +
             ")";
+
+        if (_configService.GetWeaponConfigById(weaponConfigId)?.ShotType == WeaponShotType2A.Wave &&
+            TryGetLoot(_playerAttackService.CurrentTargetNpcId, out _) &&
+            !_playerAttackService.WeaponTargetNpcIdsBySlot.ContainsKey(slotIndex))
+        {
+            text += "<color=#888888>" + EscapeRichText(label) + " — недоступно для лута</color>";
+            return;
+        }
 
         text +=
             "<link=\"weapon:" +
@@ -828,6 +860,39 @@ public sealed class SystemPlayerWeaponListHud2A :
         return distance <= weaponStats.Range;
     }
 
+    private bool CanWeaponReachLoot(string weaponConfigId, SpaceLootRuntimeState loot)
+    {
+        if (loot == null || _playerTargetService == null)
+            return false;
+
+        WeaponConfig weaponConfig = _configService.GetWeaponConfigById(weaponConfigId);
+        if (weaponConfig == null)
+            return false;
+
+        WeaponRuntimeStats stats = weaponConfig.RollRuntimeStats(
+            BuildPlayerWeaponRollSeed(loot.LootId, weaponConfigId,
+                GetNextPlayerAttackPreviewTick()));
+        return Vector3.Distance(ToFlat(_playerTargetService.GetPlayerPosition()),
+            ToFlat(loot.Position)) <= stats.Range;
+    }
+
+    private bool TryGetLoot(string lootId, out SpaceLootRuntimeState loot)
+    {
+        loot = null;
+        if (_spaceLootService == null || string.IsNullOrWhiteSpace(lootId))
+            return false;
+
+        foreach (SpaceLootRuntimeState candidate in _spaceLootService.Loot)
+        {
+            if (candidate == null || candidate.LootId != lootId ||
+                candidate.SystemId != _gameSessionService?.State?.Player?.CurrentSystemId)
+                continue;
+            loot = candidate;
+            return true;
+        }
+        return false;
+    }
+
     private int GetNextPlayerAttackPreviewTick()
     {
         if (_gameTimeService == null)
@@ -939,8 +1004,17 @@ public sealed class SystemPlayerWeaponListHud2A :
             new Vector2(panelRect.sizeDelta.x, Mathf.Max(1f, height));
     }
 
+    public void SetCargoPanelSuppressed(bool suppressed)
+    {
+        _cargoPanelSuppressed = suppressed;
+        _nextRefreshTime = 0f;
+        if (suppressed) SetPanelVisible(false);
+        else if (_isBound) RefreshState();
+    }
+
     private void SetPanelVisible(bool visible)
     {
+        visible &= !_cargoPanelSuppressed;
         if (panelRoot != null && panelRoot.activeSelf != visible)
             panelRoot.SetActive(visible);
     }

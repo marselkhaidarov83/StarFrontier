@@ -61,6 +61,7 @@ public sealed class SystemPlayerThreatListHud2A :
     private float _nextRefreshTime;
     private float _nextDebugLogTime;
     private bool _isBound;
+    private bool _cargoPanelSuppressed;
     private int _debugCheckedNpcCount;
     private int _debugRejectedNpcCount;
     private int _debugHostileNpcCount;
@@ -579,8 +580,17 @@ public sealed class SystemPlayerThreatListHud2A :
             new Vector2(panelRect.sizeDelta.x, targetHeight);
     }
 
+    public void SetCargoPanelSuppressed(bool suppressed)
+    {
+        _cargoPanelSuppressed = suppressed;
+        _nextRefreshTime = 0f;
+        if (suppressed) SetPanelVisible(false);
+        else if (_isBound) RefreshThreats();
+    }
+
     private void SetPanelVisible(bool visible)
     {
+        visible &= !_cargoPanelSuppressed;
         if (panelRoot != null && panelRoot.activeSelf != visible)
             panelRoot.SetActive(visible);
     }

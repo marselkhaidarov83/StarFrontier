@@ -45,6 +45,7 @@ public sealed class ShipClickCancelMovement2A :
     private ISystemTravelService _systemTravelService;
     private IShipMovementService _shipMovementService;
     private IPlayerAttackService _playerAttackService;
+    private SystemPlayerCargoPanel2A _cargoPanel;
 
     private Coroutine _feedbackRoutine;
     private Vector3 _feedbackBaseScale = Vector3.one;
@@ -134,6 +135,10 @@ public sealed class ShipClickCancelMovement2A :
         }
 
         PlayFeedback();
+        if (_cargoPanel == null)
+            _cargoPanel = GetComponent<SystemPlayerCargoPanel2A>() ??
+                gameObject.AddComponent<SystemPlayerCargoPanel2A>();
+        _cargoPanel.Toggle();
     }
 
     private void ResolveSceneReferences()

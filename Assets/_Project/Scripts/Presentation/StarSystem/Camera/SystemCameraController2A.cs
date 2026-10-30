@@ -6,7 +6,8 @@ public enum SystemCameraMode2A
     FreeLook,
     ReturningToShip,
     CenteringOnTarget,
-    FollowNpc
+    FollowNpc,
+    FollowLoot
 }
 
 public sealed class SystemCameraController2A : CustomMonoBehaviour
@@ -26,7 +27,9 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     private IConfigService _configService;
     private ISystemTravelService _systemTravelService;
     private ISystemNpcRuntimeService _npcRuntimeService;
+    private SystemSpaceLootService _spaceLootService;
     private string _followedNpcId;
+    private string _followedLootId;
 
     private MapCameraController _mapCameraController;
 
@@ -307,6 +310,10 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
                     UpdateFollowNpc();
                     break;
 
+                case SystemCameraMode2A.FollowLoot:
+                    UpdateFollowLoot();
+                    break;
+
                 case SystemCameraMode2A.FreeLook:
                     ReclampCurrentPosition();
                     break;
@@ -328,6 +335,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
 
         mode = SystemCameraMode2A.FreeLook;
         _followedNpcId = null;
+        _followedLootId = null;
         _cameraVelocity = Vector3.zero;
     }
 
@@ -341,6 +349,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             Bootstrapper.Instance.ServiceRegistry.TryGet(out _npcRuntimeService);
 
         _followedNpcId = runtimeNpcId;
+        _followedLootId = null;
         if (!TryGetFollowedNpc(out _))
         {
             _followedNpcId = null;
@@ -354,6 +363,62 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         _mapCameraController?.SyncTargetZoomWithCamera();
         UpdateFollowNpc();
         return true;
+    }
+
+    public bool FocusOnLoot(string lootId)
+    {
+        if (!_isInitialized || !_isSystemCameraActive || targetCamera == null)
+            return false;
+
+        if (_spaceLootService == null && Bootstrapper.Instance != null)
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out _spaceLootService);
+
+        _followedLootId = lootId;
+        if (!TryGetFollowedLoot(out _))
+        {
+            _followedLootId = null;
+            return false;
+        }
+
+        _followedNpcId = null;
+        mode = SystemCameraMode2A.FollowLoot;
+        _cameraVelocity = Vector3.zero;
+        _zoomVelocity = 0f;
+        ResolveMapCameraController();
+        _mapCameraController?.SyncTargetZoomWithCamera();
+        UpdateFollowLoot();
+        return true;
+    }
+
+    private bool TryGetFollowedLoot(out SpaceLootRuntimeState loot)
+    {
+        loot = null;
+        if (_spaceLootService == null || string.IsNullOrWhiteSpace(_followedLootId))
+            return false;
+
+        foreach (SpaceLootRuntimeState candidate in _spaceLootService.Loot)
+        {
+            if (candidate == null || candidate.LootId != _followedLootId ||
+                candidate.SystemId != _gameSessionService?.State?.Player?.CurrentSystemId)
+                continue;
+
+            loot = candidate;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void UpdateFollowLoot()
+    {
+        if (!TryGetFollowedLoot(out SpaceLootRuntimeState loot))
+        {
+            EnterFreeLook();
+            return;
+        }
+
+        MoveCameraTo(new Vector3(loot.Position.x, loot.Position.y,
+            targetCamera.transform.position.z));
     }
 
     private bool TryGetFollowedNpc(out SystemNpcRuntimeState npc)
@@ -409,6 +474,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         ResolveMapCameraController();
 
         _followedNpcId = null;
+        _followedLootId = null;
         mode = SystemCameraMode2A.ReturningToShip;
 
         _cameraVelocity = Vector3.zero;
@@ -474,6 +540,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
          * за ней дальше.
          */
         _followedNpcId = null;
+        _followedLootId = null;
         _centerOnTargetPosition =
             _systemTravelService
                 .GetCurrentDestinationPosition();
@@ -956,6 +1023,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     )
     {
         _followedNpcId = null;
+        _followedLootId = null;
         _isSystemCameraActive = false;
 
         _cameraVelocity = Vector3.zero;
@@ -967,6 +1035,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     )
     {
         _followedNpcId = null;
+        _followedLootId = null;
         _isSystemCameraActive = false;
         mode = SystemCameraMode2A.FreeLook;
 

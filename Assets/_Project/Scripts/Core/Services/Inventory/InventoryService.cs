@@ -20,7 +20,7 @@ public class InventoryService : IInventoryService
         Ship?.Cargo?.entries ?? (IReadOnlyList<RuntimeCargoEntryData>)Array.Empty<RuntimeCargoEntryData>();
     public int GetItemCount(string itemId) => Ship?.Cargo?.GetQuantity(itemId) ?? 0;
     public int GetMaxCargo() => Ship?.CargoCapacity ?? 0;
-    public int GetFreeCargo() => Math.Max(0, GetMaxCargo() - GetUsedCargo());
+    public int GetFreeCargo() => GetMaxCargo() - GetUsedCargo();
 
     public int GetUsedCargo()
     {
@@ -32,6 +32,14 @@ public class InventoryService : IInventoryService
             if (item == null || item.CargoSize <= 0) return int.MaxValue;
             total += (long)item.CargoSize * entry.Quantity;
         }
+        if (Ship?.CargoEquipment != null)
+            foreach (SystemNpcWeaponRuntimeState equipment in Ship.CargoEquipment)
+            {
+                if (equipment == null) continue;
+                WeaponConfig config = configService.GetWeaponConfigById(equipment.WeaponConfigId);
+                total += equipment.RolledStats.CargoSize > 0
+                    ? equipment.RolledStats.CargoSize : config != null ? config.CargoSize : 0;
+            }
         return (int)Math.Min(int.MaxValue, total);
     }
 
@@ -46,6 +54,16 @@ public class InventoryService : IInventoryService
     public bool AddItem(string itemId, int quantity)
     {
         if (!CanAddItem(itemId, quantity) || !Ship.Cargo.AddItem(itemId, quantity, GetMaxCargo())) return false;
+        PublishCargoChanged();
+        return true;
+    }
+
+    public bool AddLootItem(string itemId, int quantity)
+    {
+        if (Ship?.Cargo == null || quantity <= 0 ||
+            configService.GetItemConfigById(itemId) == null ||
+            !Ship.Cargo.AddLootItem(itemId, quantity))
+            return false;
         PublishCargoChanged();
         return true;
     }

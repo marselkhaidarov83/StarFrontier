@@ -16,6 +16,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     private readonly IPlayerCombatTargetService _playerTargetService;
     private readonly SimpleEventBus _eventBus;
     private readonly ISystemEncounterService _encounterService;
+    private readonly SystemSpaceLootService _spaceLootService;
     private IShipMovementService _shipMovementService;
 
     private readonly List<GalaxyNpcProjectileRuntimeState> _activeProjectiles = new();
@@ -54,6 +55,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         _playerTargetService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerCombatTargetService>();
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _encounterService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
+        _spaceLootService = Bootstrapper.Instance.ServiceRegistry.Get<SystemSpaceLootService>();
         Bootstrapper.Instance.ServiceRegistry.TryGet(out _shipMovementService);
 
         _eventBus.Subscribe<GameDayChangedEvent>(OnGameDayChanged);
@@ -786,6 +788,15 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             return true;
         }
 
+        if (projectile.TargetType == CombatTargetType.Loot &&
+            TryGetLoot(projectile.TargetNpcId, out SpaceLootRuntimeState drop) &&
+            drop.SystemId == projectile.SystemId)
+        {
+            position = drop.Position;
+            position.z = 0f;
+            return true;
+        }
+
         return false;
     }
 
@@ -841,6 +852,17 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             else if (projectile.TargetType == CombatTargetType.Npc)
             {
                 ResolveNpcProjectile(projectile, ref hitPosition, ref didHit);
+            }
+            else if (projectile.TargetType == CombatTargetType.Loot &&
+                     TryGetLoot(projectile.TargetNpcId, out SpaceLootRuntimeState drop) &&
+                     drop.SystemId == projectile.SystemId)
+            {
+                hitPosition = drop.Position;
+                didHit = _spaceLootService.ApplyDamage(drop.LootId, projectile.Damage);
+                if (didHit)
+                    AppLog.Info(DebugLogChannel.Loot,
+                        "[LOOT_SHOT_HIT] Mode=Projectile | LootId=" + drop.LootId +
+                        " | SystemId=" + drop.SystemId);
             }
         }
 
@@ -1125,6 +1147,65 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             best.CurrentPosition);
     }
 
+    public bool TryCreatePlayerLootProjectile(
+        string lootId,
+        string weaponConfigId,
+        int quantTick)
+    {
+        if (string.IsNullOrWhiteSpace(lootId) ||
+            string.IsNullOrWhiteSpace(weaponConfigId) ||
+            !TryGetLoot(lootId, out SpaceLootRuntimeState loot) ||
+            !_playerTargetService.IsPlayerAvailableInSystem(loot.SystemId))
+            return false;
+
+        WeaponConfig config = _configService.GetWeaponConfigById(weaponConfigId);
+        if (config == null)
+            return false;
+
+        WeaponRuntimeStats stats = config.RollRuntimeStats(
+            BuildWeaponRollSeed("player", lootId, weaponConfigId, quantTick.ToString()));
+        Vector3 playerPosition = _playerTargetService.GetPlayerPosition();
+        if (Vector3.Distance(playerPosition, loot.Position) > stats.Range)
+            return false;
+
+        if (stats.ShotType == WeaponShotType2A.Wave)
+            return false;
+
+        if (stats.ShotType == WeaponShotType2A.Beam)
+            return TryCreateBeam(loot.SystemId, CombatShooterType.Player,
+                string.Empty, CombatTargetType.Loot, lootId, weaponConfigId,
+                playerPosition, loot.Position, stats, quantTick);
+
+        if (IsTimedEnergyProjectile(stats.ShotType))
+            return TryCreateTimedEnergyProjectiles(loot.SystemId,
+                CombatShooterType.Player, string.Empty, CombatTargetType.Loot,
+                lootId, weaponConfigId, playerPosition, loot.Position,
+                config, stats, quantTick);
+
+        return TryCreateSingleProjectile(loot.SystemId,
+            CombatShooterType.Player, string.Empty, CombatTargetType.Loot,
+            lootId, weaponConfigId, playerPosition, loot.Position,
+            stats, quantTick);
+    }
+
+    private bool TryGetLoot(string lootId, out SpaceLootRuntimeState loot)
+    {
+        loot = null;
+        if (string.IsNullOrWhiteSpace(lootId) || _spaceLootService == null)
+            return false;
+
+        IReadOnlyList<SpaceLootRuntimeState> drops = _spaceLootService.Loot;
+        for (int i = 0; i < drops.Count; i++)
+        {
+            if (drops[i] != null && drops[i].LootId == lootId)
+            {
+                loot = drops[i];
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool TryCreatePlayerProjectile(
         string targetNpcId,
         string weaponConfigId,
@@ -1391,6 +1472,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     WeaponRuntimeStats weaponStats,
     int quantTick)
     {
+        if (targetType == CombatTargetType.Loot)
+            return false;
+
         centerPosition.z = 0f;
 
         if (!_waveShotCreateCountByTick.TryGetValue(
@@ -2684,7 +2768,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         CombatBeamRuntimeState2A beam,
         int damage)
     {
-        if (damage <= 0)
+        if (damage <= 0 && beam.TargetType != CombatTargetType.Loot)
             return;
 
         if (beam.TargetType == CombatTargetType.Player)
@@ -2699,6 +2783,16 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 beam.TargetPosition,
                 beam.StartPosition);
 
+            return;
+        }
+
+        if (beam.TargetType == CombatTargetType.Loot)
+        {
+            if (TryGetLoot(beam.TargetNpcId, out SpaceLootRuntimeState drop) &&
+                drop.SystemId == beam.SystemId && _spaceLootService.ApplyDamage(drop.LootId, damage))
+                AppLog.Info(DebugLogChannel.Loot,
+                    "[LOOT_SHOT_HIT] Mode=Beam | LootId=" + drop.LootId +
+                    " | SystemId=" + drop.SystemId);
             return;
         }
 
@@ -2802,6 +2896,15 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 return false;
 
             position = target.CurrentPosition;
+            position.z = 0f;
+            return true;
+        }
+
+        if (beam.TargetType == CombatTargetType.Loot &&
+            TryGetLoot(beam.TargetNpcId, out SpaceLootRuntimeState drop) &&
+            drop.SystemId == beam.SystemId)
+        {
+            position = drop.Position;
             position.z = 0f;
             return true;
         }

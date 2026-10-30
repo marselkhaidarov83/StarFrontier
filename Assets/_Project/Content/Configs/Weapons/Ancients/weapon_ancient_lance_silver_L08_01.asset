@@ -25,7 +25,7 @@ MonoBehaviour:
     \u0441\u043D\u0430\u0440\u044F\u0434. IMG: no bitmap projectile required for
     Beam runtime; fallback icon only, transparent background, no text, no watermark,
     mobile-friendly, stylized sci-fi."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 8
   equipmentTier: 2
   cargoSize: 12

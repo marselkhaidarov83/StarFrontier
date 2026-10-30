@@ -204,6 +204,7 @@ GameObject:
   - component: {fileID: 10713377}
   - component: {fileID: 10713378}
   - component: {fileID: 10713379}
+  - component: {fileID: 10713380}
   m_Layer: 8
   m_Name: SystemMapRoot
   m_TagString: Untagged
@@ -247,6 +248,25 @@ Transform:
   - {fileID: 2052807986}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &10713380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10713350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5eb56043326482d890a7d83c9cbbec7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Presentation::SystemSpaceLootViewController
+  iconWorldSize: 28
+  creditsIcon: {fileID: 21300000, guid: 6cc963e829f10402a9198777136ddd7c, type: 3}
+  diamondsIcon: {fileID: 21300000, guid: 108e1315a6c554c11be611bf55719185, type: 3}
+  collectionMarkerIcon: {fileID: 21300000, guid: f4a6c9e1c850414f9d4d447f3c6fce81, type: 3}
+  collectionBeamMaterial: {fileID: 2100000, guid: b82aafe145864c50b462b77656d0a34f, type: 2}
+  selectedTargetMarkerPrefab: {fileID: 2615460552967337954, guid: 93ca3744c4bb84c6c8525496b19830ee, type: 3}
+  refreshIntervalSeconds: 0.05
 --- !u!114 &10713353
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -7,6 +7,14 @@ public class ItemConfigValidator : IConfigValidator<ItemConfig>
     {
         var issues = new List<ValidationIssue>();
 
+        if (config.ItemCategory == ItemCategory.Currency)
+        {
+            if (config.BasePrice != 0 || config.CargoSize != 0)
+                issues.Add(new ValidationIssue(ValidationSeverity.Error,
+                    "Wallet currency must have zero price and cargo size.", config));
+            return issues;
+        }
+
         if (config.BasePrice <= 0)
         {
             issues.Add(new ValidationIssue(

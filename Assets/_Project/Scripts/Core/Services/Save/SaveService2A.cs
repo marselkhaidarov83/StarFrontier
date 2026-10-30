@@ -1451,44 +1451,30 @@ public class SaveService2A : CustomService, ISaveService
 
     private void AddNpcPartWorkItems(SystemNpcSimulationSaveData npcSaveData)
     {
-        if (npcSaveData == null ||
-            npcSaveData.PopulationEntries == null ||
-            npcSaveData.PopulationEntries.Count == 0)
-        {
-            _partWorkItems.Add(new SavePartWorkItem
-            {
-                Name = "npc_000",
-                FileName = "npc_000.json",
-                Kind = "npc",
-                Index = 0,
-                Payload = new SaveNpcPartData()
-            });
+        int populationCount = npcSaveData?.PopulationEntries != null
+            ? npcSaveData.PopulationEntries.Count
+            : 0;
+        int lootCount = npcSaveData?.SpaceLoot != null
+            ? npcSaveData.SpaceLoot.Count
+            : 0;
+        int maxEntries = _saveConfig.NormalizedMaxNpcSnapshotEntriesPerPart;
+        int partCount = Mathf.Max(1, Mathf.CeilToInt(
+            Mathf.Max(populationCount, lootCount) / (float)maxEntries));
 
-            return;
-        }
-
-        int maxEntries =
-            _saveConfig.NormalizedMaxNpcSnapshotEntriesPerPart;
-
-        int partIndex = 0;
-
-        for (int startIndex = 0;
-             startIndex < npcSaveData.PopulationEntries.Count;
-             startIndex += maxEntries)
+        for (int partIndex = 0; partIndex < partCount; partIndex++)
         {
             var part = new SaveNpcPartData();
+            int startIndex = partIndex * maxEntries;
+            int populationEnd = Mathf.Min(startIndex + maxEntries, populationCount);
+            int lootEnd = Mathf.Min(startIndex + maxEntries, lootCount);
 
-            int endIndex =
-                Mathf.Min(
-                    startIndex + maxEntries,
-                    npcSaveData.PopulationEntries.Count);
-
-            for (int index = startIndex; index < endIndex; index++)
+            for (int index = startIndex; index < populationEnd; index++)
                 part.PopulationEntries.Add(npcSaveData.PopulationEntries[index]);
 
-            string fileName =
-                "npc_" + partIndex.ToString("D3") + ".json";
+            for (int index = startIndex; index < lootEnd; index++)
+                part.SpaceLoot.Add(npcSaveData.SpaceLoot[index]);
 
+            string fileName = "npc_" + partIndex.ToString("D3") + ".json";
             _partWorkItems.Add(new SavePartWorkItem
             {
                 Name = Path.GetFileNameWithoutExtension(fileName),
@@ -1497,8 +1483,6 @@ public class SaveService2A : CustomService, ISaveService
                 Index = partIndex,
                 Payload = part
             });
-
-            partIndex++;
         }
     }
 
@@ -1737,11 +1721,18 @@ public class SaveService2A : CustomService, ISaveService
                     SaveNpcPartData data =
                         JsonUtility.FromJson<SaveNpcPartData>(json);
 
-                    if (data != null &&
-                        data.PopulationEntries != null)
+                    if (data != null)
                     {
-                        state.SystemNpcSimulation.PopulationEntries.AddRange(
-                            data.PopulationEntries);
+                        if (data.PopulationEntries != null)
+                            state.SystemNpcSimulation.PopulationEntries.AddRange(
+                                data.PopulationEntries);
+
+                        if (data.SpaceLoot != null)
+                        {
+                            state.SystemNpcSimulation.SpaceLoot ??= new List<SpaceLootRuntimeState>();
+                            state.SystemNpcSimulation.SpaceLoot.AddRange(
+                                data.SpaceLoot);
+                        }
                     }
 
                     break;

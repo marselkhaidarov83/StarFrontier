@@ -50,6 +50,7 @@ MonoBehaviour:
   - scenario: 20
     behaviorConfig: {fileID: 11400000, guid: c4b421f35b8f04448acf97b4d3494ca7, type: 2}
   avoidEnemyOwnedTravelDestinations: 0
+  grabber: {fileID: 11400000, guid: 468ab29eaf9d40df9a76d9a8c33e8031, type: 2}
   weaponGroups:
   - {fileID: 11400000, guid: 930b0a5b1b0904299bcd3b7860c0330a, type: 2}
   - {fileID: 11400000, guid: ffc1a5868d0d64f51930b8d5c496b2c3, type: 2}
@@ -59,3 +60,4 @@ MonoBehaviour:
   mapSprite: {fileID: 21300000, guid: 70ed7b4962dd946808183622b927400f, type: 3}
   combatSprite: {fileID: 21300000, guid: 70ed7b4962dd946808183622b927400f, type: 3}
   visualSize: 33
+  lootTable: {fileID: 11400000, guid: c7772be5e8f94d3d9438962206d2d7f7, type: 2}

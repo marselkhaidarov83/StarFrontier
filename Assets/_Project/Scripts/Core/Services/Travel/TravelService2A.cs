@@ -120,6 +120,10 @@ public sealed class TravelService2A :
                 fromSystemId,
                 toSystemId));
 
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded())
+            return CreateAndPublishFailedResult(TravelFailReason.CargoOverloaded,
+                fromSystemId, toSystemId);
+
         TravelFailReason failReason =
             GetTravelFailReason(
                 fromSystemId,
@@ -267,6 +271,7 @@ public sealed class TravelService2A :
     public void TryTravelToPlanet(
         string planetId)
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         if (PlanetLandingRules2A.IsBlocked(_gameSessionService.State, _configService.DebugSettings))
         {
             _eventBus.Publish(new PlanetLandingBlockedEvent2A(planetId));
@@ -292,6 +297,8 @@ public sealed class TravelService2A :
         string fromSystemId,
         string toSystemId)
     {
+        if (PlayerCargoOverload2A.IsOverloaded())
+            return TravelFailReason.CargoOverloaded;
         if (string.IsNullOrWhiteSpace(
                 fromSystemId))
         {

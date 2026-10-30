@@ -104,6 +104,45 @@ public sealed class SystemNpcRuntimeState
     [Header("Weapons")]
     public List<SystemNpcWeaponRuntimeState> Weapons = new();
 
+    [Header("Loot inventory (regenerated from config on load)")]
+    public int CargoCapacity;
+    public List<NpcCargoBatchRuntimeState> CargoBatches = new();
+    public List<SystemNpcWeaponRuntimeState> CargoEquipment = new();
+    public List<int> ProcessedLootRuleIndexes = new();
+    public bool DeathLootProcessed;
+
+    [Header("Ranger loot collection")]
+    public string LootTargetId;
+    public int LastLootPullTick = -1;
+
+    public int FreeCargoCapacity
+    {
+        get
+        {
+            int used = 0;
+            if (CargoBatches != null)
+                foreach (NpcCargoBatchRuntimeState batch in CargoBatches)
+                    if (batch != null)
+                        used += Math.Max(0, batch.Quantity);
+            return Math.Max(0, CargoCapacity - used);
+        }
+    }
+
+    public void ResetLootForNewFlight()
+    {
+        ProcessedLootRuleIndexes ??= new List<int>();
+        ProcessedLootRuleIndexes.Clear();
+        DeathLootProcessed = false;
+
+        if (CargoBatches == null)
+            return;
+
+        int number = 1;
+        foreach (NpcCargoBatchRuntimeState batch in CargoBatches)
+            if (batch != null && batch.Quantity > 0)
+                batch.BatchNumber = number++;
+    }
+
     public bool IsEnemy => NpcType == SystemNpcType.Enemy;
     public bool IsAlly => NpcType == SystemNpcType.Ally;
     public bool IsPirate => NpcType == SystemNpcType.Pirate;

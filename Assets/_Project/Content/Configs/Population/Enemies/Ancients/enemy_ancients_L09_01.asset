@@ -53,3 +53,6 @@ MonoBehaviour:
   dangerTier: 5
   combatSprite: {fileID: 21300000, guid: bea2a369c36b246499959d7db61b77b2, type: 3}
   visualSize: 35
+  lootTable: {fileID: 11400000, guid: 065a075ab4e14584a5a8271b3795631a, type: 2}
+  lootSpecies: 10
+  baseCargoCapacity: 0

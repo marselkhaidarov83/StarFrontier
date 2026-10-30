@@ -93,6 +93,12 @@ public sealed class PlayerControlService2A : IPlayerControlService
     {
         ValidateDeltaTime(deltaTime);
 
+        if (PlayerCargoOverload2A.IsOverloaded())
+        {
+            _rawMoveInput = Vector2.zero;
+            _processedMoveInput = Vector2.zero;
+        }
+
         _localTimeSeconds += deltaTime;
 
         PlayerControlRuntimeState controlState =

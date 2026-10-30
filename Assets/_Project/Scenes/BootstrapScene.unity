@@ -462,10 +462,13 @@ MonoBehaviour:
   systemHudConfig: {fileID: 11400000, guid: 28d7a2f86e70c457ab50c89e22dc7c73, type: 2}
   systemVisualConfig: {fileID: 11400000, guid: 0d8b1a6dc71c44bcdab3fda74bcd01d9, type: 2}
   combatFxVisualConfig: {fileID: 11400000, guid: 5335864e44ee244729fd857790c1023e, type: 2}
+  spaceLootCombatConfig: {fileID: 11400000, guid: e6a5c3104f8e45f1b86a239bd423a7f0, type: 2}
   combatDamagePopupVisualConfig: {fileID: 11400000, guid: efa8c304b4fb84af39c05a2791fb7715, type: 2}
   npcBehaviourTransitionMatrixConfig: {fileID: 11400000, guid: f0fba1b681522430e84c74a61bcbdd99, type: 2}
   offscreenNpcSimulationScheduleConfig: {fileID: 11400000, guid: 5f7f970f8ec1540b68afd1a05ee7b20b, type: 2}
   currentSystemNpcSimulationConfig: {fileID: 11400000, guid: 7482e3a5eabda470c95d1b8b54d678fb, type: 2}
+  spaceLootPlayerSafeRadius: 300
+  spaceLootEjectionDistance: 100
   galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
   enemies:
   - {fileID: 11400000, guid: 78172c88849d445a38e39ed596230ceb, type: 2}
@@ -888,6 +891,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c18106c37564547fcaa292fec4fe5866, type: 2}
   - {fileID: 11400000, guid: 428d2c88302a6432292246d686d3aa33, type: 2}
   - {fileID: 11400000, guid: d75f4106697cd44e2856cdf8c0ed902a, type: 2}
+  - {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+  - {fileID: 11400000, guid: 3063dcced7034833af292d09018423bd, type: 2}
+  - {fileID: 11400000, guid: d9c6bc150ad94926939b8bbaeb8e4768, type: 2}
+  - {fileID: 11400000, guid: 1b1d4311dcb146a19604805501d723bd, type: 2}
+  - {fileID: 11400000, guid: db116ffdb5564ec8ac80158911e62cfa, type: 2}
   MaxAcceptedMissionCount: 3
 --- !u!4 &860668904
 Transform:

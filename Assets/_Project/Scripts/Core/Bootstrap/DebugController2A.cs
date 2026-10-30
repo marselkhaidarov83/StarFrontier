@@ -40,6 +40,109 @@ public sealed partial class DebugController2A : CustomMonoBehaviour
             ? Bootstrapper.Instance.ServiceRegistry
             : null;
 
+    [ContextMenu("STAR FRONTIER/Loot/Удалить захват с корабля игрока")]
+    private void DebugRemovePlayerGrabber() => DebugSetPlayerGrabber(false);
+
+    [ContextMenu("STAR FRONTIER/Loot/Добавить захват на корабль игрока")]
+    private void DebugAddPlayerGrabber() => DebugSetPlayerGrabber(true);
+
+    private enum DebugCargoOperation
+    {
+        Clear, AddAstralite, RemoveAstralite, AddEnemyEquipment,
+        AddNpcEquipment, AddEveryAstralite, AddCommodity
+    }
+
+    [ContextMenu("STAR FRONTIER/Loot/Очистить трюм игрока")]
+    private void DebugClearPlayerCargo() => DebugChangePlayerCargo(DebugCargoOperation.Clear);
+
+    [ContextMenu("STAR FRONTIER/Loot/Добавить в трюм 5 астралита")]
+    private void DebugAddPlayerAstralite() => DebugChangePlayerCargo(DebugCargoOperation.AddAstralite);
+
+    [ContextMenu("STAR FRONTIER/Loot/Убрать из трюма 5 астралита")]
+    private void DebugRemovePlayerAstralite() => DebugChangePlayerCargo(DebugCargoOperation.RemoveAstralite);
+
+    [ContextMenu("STAR FRONTIER/Loot/Добавить в трюм оборудование каждого врага")]
+    private void DebugAddEnemyEquipment() => DebugChangePlayerCargo(DebugCargoOperation.AddEnemyEquipment);
+
+    [ContextMenu("STAR FRONTIER/Loot/Добавить в трюм оборудование НПС")]
+    private void DebugAddNpcEquipment() => DebugChangePlayerCargo(DebugCargoOperation.AddNpcEquipment);
+
+    [ContextMenu("STAR FRONTIER/Loot/Добавить в трюм астралит каждого врага")]
+    private void DebugAddEveryAstralite() => DebugChangePlayerCargo(DebugCargoOperation.AddEveryAstralite);
+
+    [ContextMenu("STAR FRONTIER/Loot/Добавить в трюм товар")]
+    private void DebugAddCommodity() => DebugChangePlayerCargo(DebugCargoOperation.AddCommodity);
+
+    private void DebugChangePlayerCargo(DebugCargoOperation operation)
+    {
+        if (!DeveloperModeGate.CanRunExplicitCommand(Application.isPlaying,
+                Application.isEditor, DeveloperModeGate.IsEnabled))
+        {
+            AppLog.Warning(DebugLogChannel.Loot,
+                "[DEBUG_PLAYER_CARGO_REJECTED] Play Mode / developer mode required.");
+            return;
+        }
+        var registry = ServiceRegistry;
+        if (registry == null || !registry.TryGet<SystemSpaceLootService>(out var loot))
+        {
+            AppLog.Warning(DebugLogChannel.Loot,
+                "[DEBUG_PLAYER_CARGO_REJECTED] Loot service unavailable.");
+            return;
+        }
+        string error;
+        bool success;
+        switch (operation)
+        {
+            case DebugCargoOperation.Clear:
+                success = loot.TryDebugClearPlayerCargo(out error);
+                break;
+            case DebugCargoOperation.AddAstralite:
+                success = loot.TryDebugAddAstralite(out error);
+                break;
+            case DebugCargoOperation.RemoveAstralite:
+                success = loot.TryDebugRemoveAstralite(out error);
+                break;
+            case DebugCargoOperation.AddEnemyEquipment:
+                success = loot.TryDebugAddEnemyEquipment(out error);
+                break;
+            case DebugCargoOperation.AddNpcEquipment:
+                success = loot.TryDebugAddNpcEquipment(out error);
+                break;
+            case DebugCargoOperation.AddEveryAstralite:
+                success = loot.TryDebugAddEveryAstralite(out error);
+                break;
+            case DebugCargoOperation.AddCommodity:
+                success = loot.TryDebugAddCommodity(out error);
+                break;
+            default:
+                return;
+        }
+        if (!success)
+            AppLog.Warning(DebugLogChannel.Loot,
+                "[DEBUG_PLAYER_CARGO_REJECTED] Operation=" + operation + " | Reason=" + error);
+    }
+
+    private void DebugSetPlayerGrabber(bool enabled)
+    {
+        if (!DeveloperModeGate.CanRunExplicitCommand(Application.isPlaying,
+                Application.isEditor, DeveloperModeGate.IsEnabled))
+        {
+            AppLog.Warning(DebugLogChannel.Loot,
+                "[DEBUG_PLAYER_GRABBER_REJECTED] Play Mode / developer mode required.");
+            return;
+        }
+        var registry = ServiceRegistry;
+        if (registry == null || !registry.TryGet<SystemSpaceLootService>(out var loot))
+        {
+            AppLog.Warning(DebugLogChannel.Loot,
+                "[DEBUG_PLAYER_GRABBER_REJECTED] Loot service unavailable.");
+            return;
+        }
+        if (!loot.TrySetPlayerGrabberEnabled(enabled, out string error))
+            AppLog.Warning(DebugLogChannel.Loot,
+                "[DEBUG_PLAYER_GRABBER_REJECTED] Enabled=" + enabled + " | Reason=" + error);
+    }
+
     [ContextMenu("STAR FRONTIER/Missions/Regenerate Offer On Current Planet")]
     private void DebugRegeneratePlanetMission() => DebugRegeneratePlanetMission(null, null);
 

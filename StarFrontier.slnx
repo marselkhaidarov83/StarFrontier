@@ -1,8 +1,8 @@
 ﻿<Solution>
   <Project Path="Data.csproj" />
   <Project Path="Core.csproj" />
-  <Project Path="Editor.csproj" />
   <Project Path="Presentation.csproj" />
+  <Project Path="Editor.csproj" />
   <Project Path="Sprint3Verification.csproj" />
   <Project Path="Tools.csproj" />
   <Project Path="Sprint4Verification.csproj" />

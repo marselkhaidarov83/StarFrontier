@@ -24,6 +24,9 @@ public static class EnemyConfigAssetGenerator
     private const string OutputRoot =
         "Assets/_Project/Content/Configs/Population/Enemies";
 
+    private const string LootTableRoot =
+        "Assets/_Project/Content/Configs/Population/Enemies/LootTables";
+
     private const string NamePoolRoot =
         "Assets/_Project/Content/Configs/Population/EnemyNames";
 
@@ -43,6 +46,7 @@ public static class EnemyConfigAssetGenerator
     {
         EnsureFolder(OutputRoot);
         EnsureFolder(NamePoolRoot);
+        EnsureFolder(LootTableRoot);
 
         Dictionary<WeaponGroupEnemyFaction, EnemyNamePoolConfig> namePools =
             CreateOrUpdateNamePools();
@@ -243,6 +247,27 @@ public static class EnemyConfigAssetGenerator
                 }
             }
 
+            if (config.LootTable == null)
+            {
+                errors++;
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: loot table is not assigned at {path}");
+            }
+            else
+            {
+                foreach (string issue in config.LootTable.GetValidationErrors())
+                {
+                    errors++;
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        $"EnemyConfig loot table validation: {issue} at {path}");
+                }
+                if (config.LootTable.GetInitialCargoQuantity() > config.BaseCargoCapacity)
+                {
+                    errors++;
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        $"EnemyConfig loot table validation: cargo exceeds capacity at {path}");
+                }
+            }
+
             if (config.WeaponGroupCount == 0)
             {
                 errors++;
@@ -314,6 +339,80 @@ public static class EnemyConfigAssetGenerator
             "OK");
     }
 
+    private static NpcLootTableConfig GetOrCreateLootTable(string npcConfigId)
+    {
+        string path = $"{LootTableRoot}/{npcConfigId}_loot.asset";
+        NpcLootTableConfig table = AssetDatabase.LoadAssetAtPath<NpcLootTableConfig>(path);
+        if (table == null)
+        {
+            table = ScriptableObject.CreateInstance<NpcLootTableConfig>();
+            AssetDatabase.CreateAsset(table, path);
+            SerializedObject serializedTable = new SerializedObject(table);
+            SetString(serializedTable, "id", npcConfigId + "_loot");
+            SetString(serializedTable, "displayName", npcConfigId + " loot");
+            serializedTable.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(table);
+        }
+        EnsureDeathDiamonds(table);
+        return table;
+    }
+
+    private static void EnsureDeathDiamonds(NpcLootTableConfig table)
+    {
+        ItemConfig diamonds = AssetDatabase.LoadAssetAtPath<ItemConfig>(
+            "Assets/_Project/Content/Configs/Items/item_diamonds_01.asset");
+        if (diamonds == null)
+        {
+            AppLog.Warning(DebugLogChannel.EditorGenerators,
+                "Enemy loot generator: diamonds item is missing.");
+            return;
+        }
+
+        NpcLootTriggerRule deathRule = null;
+        if (table.Rules != null)
+            foreach (NpcLootTriggerRule rule in table.Rules)
+                if (rule != null && rule.IsDeath)
+                {
+                    deathRule = rule;
+                    break;
+                }
+
+        if (deathRule == null)
+        {
+            deathRule = new NpcLootTriggerRule { IsDeath = true };
+            var rules = new List<NpcLootTriggerRule>(table.Rules ?? Array.Empty<NpcLootTriggerRule>());
+            rules.Add(deathRule);
+            table.Rules = rules.ToArray();
+        }
+
+        var generated = new List<NpcLootGeneratedEntry>(
+            deathRule.Generated ?? Array.Empty<NpcLootGeneratedEntry>());
+        foreach (NpcLootGeneratedEntry entry in generated)
+            if (entry != null && entry.Kind == NpcLootGeneratedKind.Diamonds)
+                return;
+
+        generated.Add(new NpcLootGeneratedEntry
+        {
+            Kind = NpcLootGeneratedKind.Diamonds,
+            Item = diamonds,
+            MinAmount = 1,
+            MaxAmount = 2,
+            ChancePercent = 50f
+        });
+        deathRule.Generated = generated.ToArray();
+        EditorUtility.SetDirty(table);
+    }
+
+    private static EnemyFaction2A GetLootSpecies(WeaponGroupEnemyFaction faction)
+    {
+        switch (faction)
+        {
+            case WeaponGroupEnemyFaction.Ancients: return EnemyFaction2A.Ancients;
+            case WeaponGroupEnemyFaction.Infected: return EnemyFaction2A.Infected;
+            default: return EnemyFaction2A.AI;
+        }
+    }
+
     private static int WriteEnemyConfig(
         EnemyConfig asset,
         string id,
@@ -345,6 +444,9 @@ public static class EnemyConfigAssetGenerator
         SetInt(serializedObject, "baseSpeedMin", stats.SpeedMin);
         SetInt(serializedObject, "baseSpeedMax", stats.SpeedMax);
         SetInt(serializedObject, "level", level);
+        SetEnum(serializedObject, "lootSpecies", GetLootSpecies(faction));
+        if (asset.LootTable == null)
+            SetObject(serializedObject, "lootTable", GetOrCreateLootTable(id));
         // SetEnum(serializedObject, "archetype", BuildArchetype(faction));
         SetObject(serializedObject, "combatSprite", combatSprite);
         SetObject(serializedObject, "namePool", namePool);

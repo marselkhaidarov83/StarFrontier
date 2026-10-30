@@ -81,6 +81,7 @@ public static class SystemNpcRuntimeFactory
         };
 
         AddRandomEnemyWeaponGroup(npc, config);
+        InitializeLootInventory(npc, config.LootTable, config.BaseCargoCapacity);
 
         return npc;
     }
@@ -224,6 +225,7 @@ public static class SystemNpcRuntimeFactory
         };
 
         AddRandomAllyWeaponGroup(npc, config);
+        InitializeLootInventory(npc, config.LootTable, config.BaseCargoCapacity);
 
         return npc;
     }
@@ -350,6 +352,10 @@ public static class SystemNpcRuntimeFactory
         npc.Weapons.Add(
             new SystemNpcWeaponRuntimeState
             {
+                InstanceId = Guid.NewGuid().ToString("N"),
+                RolledStats = weaponStats,
+                DurabilityPercent = 100,
+                SlotIndex = npc.Weapons.Count,
                 WeaponConfigId = weaponConfig.Id,
                 LastShotTick = -1,
                 NextAllowedShotTick = 0,
@@ -358,6 +364,42 @@ public static class SystemNpcRuntimeFactory
             });
 
         return true;
+    }
+
+    private static void InitializeLootInventory(
+        SystemNpcRuntimeState npc,
+        NpcLootTableConfig table,
+        int cargoCapacity)
+    {
+        npc.CargoCapacity = Math.Max(0, cargoCapacity);
+        if (table == null)
+            return;
+
+        int batchNumber = 1;
+        NpcLootCargoDefinition[] definitions = table.InitialCargo;
+        if (definitions != null)
+        {
+            foreach (NpcLootCargoDefinition definition in definitions)
+            {
+                if (definition == null || definition.Item == null || definition.Quantity <= 0)
+                    continue;
+
+                if (definition.Quantity > npc.FreeCargoCapacity)
+                    continue;
+
+                npc.CargoBatches.Add(new NpcCargoBatchRuntimeState
+                {
+                    BatchId = Guid.NewGuid().ToString("N"),
+                    ItemConfigId = definition.Item.Id,
+                    Quantity = definition.Quantity,
+                    BatchNumber = batchNumber++
+                });
+            }
+        }
+
+        foreach (SystemNpcWeaponRuntimeState weapon in npc.Weapons)
+            if (weapon != null)
+                weapon.DurabilityPercent = table.InitialEquipmentDurabilityPercent;
     }
 
     private static bool HasWeapon(

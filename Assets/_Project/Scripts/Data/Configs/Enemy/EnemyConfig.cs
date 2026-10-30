@@ -74,6 +74,11 @@ public class EnemyConfig : BaseConfig
     private NpcBehaviourScenarioEntry[] behaviorScenarios =
         new NpcBehaviourScenarioEntry[0];
 
+    [Header("Cargo and Loot")]
+    [SerializeField, Min(0)] private int baseCargoCapacity;
+    [SerializeField] private EnemyFaction2A lootSpecies = EnemyFaction2A.AI;
+    [SerializeField] private NpcLootTableConfig lootTable;
+
     [Header("Weapon Groups")]
     [SerializeField]
     [Tooltip("Группы оружия, из которых выбирается оснащение реального корабля.")]
@@ -138,6 +143,9 @@ public class EnemyConfig : BaseConfig
     public int BaseSpeed => baseSpeedMin;
 
     public int Level => level;
+    public int BaseCargoCapacity => baseCargoCapacity;
+    public EnemyFaction2A LootSpecies => lootSpecies;
+    public NpcLootTableConfig LootTable => lootTable;
     // public EnemyArchetype AiArchetype => archetype;
     public EnemyNamePoolConfig NamePool => namePool;
 
@@ -405,6 +413,7 @@ public class EnemyConfig : BaseConfig
         baseSpeedMax = Mathf.Max(baseSpeedMin, baseSpeedMax);
 
         level = Mathf.Clamp(level, 1, 10);
+        baseCargoCapacity = Mathf.Max(0, baseCargoCapacity);
 
         creditRewardMin = Mathf.Max(0, creditRewardMin);
         creditRewardMax = Mathf.Max(creditRewardMin, creditRewardMax);

@@ -8,5 +8,6 @@
         NotEnoughFuel = 4,
         TravelBlocked = 5,
         UnknownError = 6,
-        TargetSystemIsCurrent = 7
+        TargetSystemIsCurrent = 7,
+        CargoOverloaded = 8
     }

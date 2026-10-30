@@ -21,6 +21,7 @@ public static class SystemNpcMovementTime2A
             behavior == SystemNpcBehaviorType.TravelToAnotherSystem ||
             behavior == SystemNpcBehaviorType.TravelToEnemySystem ||
             behavior == SystemNpcBehaviorType.PatrolSystem ||
+            behavior == SystemNpcBehaviorType.CollectDebris ||
             behavior == SystemNpcBehaviorType.EngageEnemies;
     }
 

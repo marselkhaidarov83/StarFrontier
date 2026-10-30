@@ -151,6 +151,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     private readonly IOrbitalMotionService _orbitalMotionService;
     private IPlayerCombatTargetService _playerCombatTargetService;
     private readonly ISystemSecurityService _systemSecurityService;
+    private readonly SystemSpaceLootService _spaceLootService;
 
     private readonly System.Random _offscreenNpcProcessingRandom = new();
     private readonly HashSet<string> _systemsWithProcessedBehaviorWarmup = new();
@@ -166,6 +167,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         _routeService = Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _systemSecurityService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
+        _spaceLootService = Bootstrapper.Instance.ServiceRegistry.Get<SystemSpaceLootService>();
         // _playerCombatTargetService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerCombatTargetService>();
 
         LogCustom("[NPC-MILITARY-BEHAVIOR] Service debug disabled by default.");
@@ -736,10 +738,14 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (npc == null)
             return;
 
+        if (!string.IsNullOrWhiteSpace(npc.LootTargetId))
+            _spaceLootService.ReleasePull(npc.LootTargetId, npc.RuntimeNpcId);
+
         npc.HasActiveBehavior = false;
         npc.PrevBehavior = npc.CurrentBehavior;
         npc.CurrentBehavior = SystemNpcBehaviorType.None;
         npc.BehaviorTargetRuntimeNpcId = null;
+        npc.LootTargetId = null;
         npc.DaysToStayOnPlanet = 0;
         npc.DaysStayedOnPlanet = 0;
     }
@@ -758,6 +764,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             case SystemNpcBehaviorType.EngageEnemies:
                 TickEngageEnemies(npc, currentTick);
+                break;
+
+            case SystemNpcBehaviorType.CollectDebris:
+                TickCollectDebris(npc, currentTick);
                 break;
 
             default:
@@ -869,6 +879,167 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.TravelState = SystemNpcTravelState.EngagingEnemy;
         npc.CombatState = SystemNpcCombatState.HasTarget;
         npc.IsFighting = true;
+    }
+
+    private void TickCollectDebris(SystemNpcRuntimeState npc, int currentTick)
+    {
+        if (npc == null || !npc.IsAlive || !npc.IsAlly ||
+            npc.AllyRole != AllyRole2A.Ranger)
+            return;
+
+        AllyConfig allyConfig = _configService.GetAllyConfigById(npc.ConfigId);
+        GrabberConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
+        SpaceLootRuntimeState loot = FindCollectibleLoot(npc.LootTargetId);
+        if (grabber == null || grabber.Range <= 0f ||
+            grabber.PullSpeedPerTick <= 0f || loot == null ||
+            !RangerLootCollectionRules2A.CanCollect(npc, loot,
+                _spaceLootService.GetLootMass(loot), grabber.Strength,
+                RangerLootCollectionRules2A.GetFreeCargoMass(npc, _configService)))
+        {
+            AppLog.Info(DebugLogChannel.Loot,
+                "[RANGER_LOOT_CANCEL] Npc=" + npc.RuntimeNpcId +
+                " | Loot=" + npc.LootTargetId + " | Tick=" + currentTick);
+            CompleteBehavior(npc, currentTick);
+            return;
+        }
+
+        if (npc.IsOnPlanet)
+            return;
+
+        float distance = Vector3.Distance(npc.CurrentPosition, loot.Position);
+        if (distance > grabber.Range)
+        {
+            npc.TravelState = SystemNpcTravelState.Patrolling;
+            npc.TargetPosition = GetLootApproachPoint(npc.CurrentPosition,
+                loot.Position, grabber.Range);
+            return;
+        }
+
+        npc.TravelState = SystemNpcTravelState.Idle;
+        npc.TargetPosition = Vector3.zero;
+        npc.CurrentMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementTargetPosition = npc.CurrentPosition;
+        npc.TickMovementDirection = Vector3.zero;
+
+        if (npc.LastLootPullTick == currentTick)
+            return;
+
+        npc.LastLootPullTick = currentTick;
+        if (!_spaceLootService.TryPullTowardNpc(loot.LootId, npc,
+                grabber.PullSpeedPerTick, out bool arrived))
+        {
+            CompleteBehavior(npc, currentTick);
+            return;
+        }
+
+        if (!arrived)
+            return;
+
+        bool collected = _spaceLootService.TryCollectForNpc(loot.LootId,
+            npc, out string error);
+        AppLog.Info(DebugLogChannel.Loot,
+            "[RANGER_LOOT_PICKUP] Npc=" + npc.RuntimeNpcId +
+            " | Loot=" + loot.LootId + " | Success=" + collected +
+            " | Reason=" + error + " | Tick=" + currentTick);
+        CompleteBehavior(npc, currentTick);
+    }
+
+    private void SetupCollectDebris(SystemNpcRuntimeState npc)
+    {
+        AllyConfig allyConfig = npc != null && npc.IsAlly
+            ? _configService.GetAllyConfigById(npc.ConfigId) : null;
+        GrabberConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
+        if (npc == null || npc.AllyRole != AllyRole2A.Ranger || grabber == null ||
+            grabber.Range <= 0f || grabber.PullSpeedPerTick <= 0f)
+        {
+            FallBackFromLootCollection(npc, "NoRangerGrabber");
+            return;
+        }
+
+        SpaceLootRuntimeState nearest = null;
+        float nearestDistanceSqr = float.MaxValue;
+        int freeCargo = RangerLootCollectionRules2A.GetFreeCargoMass(npc, _configService);
+        foreach (SpaceLootRuntimeState candidate in _spaceLootService.Loot)
+        {
+            if (candidate == null ||
+                !RangerLootCollectionRules2A.CanCollect(npc, candidate,
+                    _spaceLootService.GetLootMass(candidate), grabber.Strength,
+                    freeCargo))
+                continue;
+
+            float distanceSqr = (candidate.Position - npc.CurrentPosition).sqrMagnitude;
+            if (distanceSqr >= nearestDistanceSqr)
+                continue;
+            nearest = candidate;
+            nearestDistanceSqr = distanceSqr;
+        }
+
+        if (nearest == null)
+        {
+            FallBackFromLootCollection(npc, "NoEligibleLoot");
+            return;
+        }
+
+        npc.LootTargetId = nearest.LootId;
+        npc.TargetPlanetId = null;
+        npc.TargetSystemId = null;
+        npc.StartPosition = npc.CurrentPosition;
+        npc.TargetPosition = GetLootApproachPoint(npc.CurrentPosition,
+            nearest.Position, grabber.Range);
+        npc.CurrentMovementTargetPosition = npc.TargetPosition;
+        npc.TickMovementTargetPosition = npc.TargetPosition;
+        npc.TickMovementDirectionTick = -1;
+        npc.TickMovementArrived = false;
+        npc.TravelProgress01 = 0f;
+        npc.TravelState = npc.IsOnPlanet ||
+                          nearestDistanceSqr > grabber.Range * grabber.Range
+            ? SystemNpcTravelState.Patrolling : SystemNpcTravelState.Idle;
+
+        if (npc.IsOnPlanet && npc.TravelState == SystemNpcTravelState.Patrolling)
+        {
+            npc.IsWaitingForInitialRouteBuild = true;
+            npc.ReleaseFromPlanetAfterInitialRouteBuild = true;
+            npc.InitialRouteBuildPlanetId = npc.CurrentPlanetId;
+        }
+
+        AppLog.Info(DebugLogChannel.Loot,
+            "[RANGER_LOOT_TARGET] Npc=" + npc.RuntimeNpcId +
+            " | Loot=" + nearest.LootId + " | System=" + npc.CurrentSystemId);
+    }
+
+    private void FallBackFromLootCollection(SystemNpcRuntimeState npc, string reason)
+    {
+        if (npc == null)
+            return;
+        AppLog.Info(DebugLogChannel.Loot,
+            "[RANGER_LOOT_SKIP] Npc=" + npc.RuntimeNpcId +
+            " | Reason=" + reason);
+        npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
+        npc.LootTargetId = null;
+        SetupPatrolSystem(npc);
+    }
+
+    private SpaceLootRuntimeState FindCollectibleLoot(string lootId)
+    {
+        if (string.IsNullOrWhiteSpace(lootId))
+            return null;
+        foreach (SpaceLootRuntimeState candidate in _spaceLootService.Loot)
+            if (candidate != null && candidate.LootId == lootId)
+                return candidate;
+        return null;
+    }
+
+    private static Vector3 GetLootApproachPoint(Vector3 shipPosition,
+        Vector3 lootPosition, float grabberRange)
+    {
+        Vector3 direction = shipPosition - lootPosition;
+        direction.z = 0f;
+        if (direction.sqrMagnitude < 0.001f)
+            return shipPosition;
+        float stopDistance = Mathf.Max(0f, grabberRange - 5f);
+        Vector3 target = lootPosition + direction.normalized * stopDistance;
+        target.z = shipPosition.z;
+        return target;
     }
 
     //Определяем, что Npc делает дальше
@@ -1651,6 +1822,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 SetupPatrolSystem(npc);
                 break;
 
+            case SystemNpcBehaviorType.CollectDebris:
+                SetupCollectDebris(npc);
+                break;
+
             default:
                 npc.HasActiveBehavior = false;
                 break;
@@ -1866,6 +2041,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         npc.TravelState = SystemNpcTravelState.OnPlanet;
         npc.IsOnPlanet = true;
+        npc.ResetLootForNewFlight();
 
         npc.DaysToStayOnPlanet = UnityEngine.Random.Range(MinStayDays, MaxStayDays + 1);
         npc.DaysStayedOnPlanet = 0;
@@ -2968,5 +3144,57 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             " | Processed=" + processedCount +
             " | Skipped=" + skippedCount +
             analytics.BuildLogFields());
+    }
+}
+
+public static class RangerLootCollectionRules2A
+{
+    public static bool CanCollect(SystemNpcRuntimeState npc,
+        SpaceLootRuntimeState loot, int lootMass, int grabberStrength,
+        int freeCargoMass)
+    {
+        return npc != null && npc.IsAlive && npc.IsAlly &&
+            npc.AllyRole == AllyRole2A.Ranger && loot != null &&
+            loot.SystemId == npc.CurrentSystemId && loot.Quantity > 0 &&
+            (string.IsNullOrEmpty(loot.PullCollectorId) ||
+             loot.PullCollectorId == npc.RuntimeNpcId) &&
+            loot.CurrentHealth > 0 && lootMass >= 0 &&
+            lootMass <= grabberStrength && lootMass <= freeCargoMass;
+    }
+
+    public static int GetFreeCargoMass(SystemNpcRuntimeState npc,
+        IConfigService configService)
+    {
+        if (npc == null || configService == null)
+            return 0;
+
+        long used = 0;
+        if (npc.CargoBatches != null)
+            foreach (NpcCargoBatchRuntimeState batch in npc.CargoBatches)
+            {
+                if (batch == null || batch.Quantity <= 0)
+                    continue;
+                ItemConfig item = configService.GetItemConfigById(batch.ItemConfigId);
+                if (item == null)
+                    return 0;
+                used += (long)Mathf.Max(0, item.CargoSize) * batch.Quantity;
+            }
+
+        if (npc.CargoEquipment != null)
+            foreach (SystemNpcWeaponRuntimeState equipment in npc.CargoEquipment)
+            {
+                if (equipment == null)
+                    continue;
+                WeaponConfig config = configService.GetWeaponConfigById(
+                    equipment.WeaponConfigId);
+                if (config == null)
+                    return 0;
+                int mass = equipment.RolledStats.CargoSize > 0
+                    ? equipment.RolledStats.CargoSize : config.CargoSize;
+                used += Mathf.Max(0, mass);
+            }
+
+        return (int)Math.Max(0L,
+            Math.Min((long)npc.CargoCapacity - used, int.MaxValue));
     }
 }

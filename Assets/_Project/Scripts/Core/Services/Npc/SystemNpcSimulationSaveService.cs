@@ -74,6 +74,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
         }
 
         CopyPopulationTimers(saveData);
+        CaptureSpaceLoot(saveData);
 
         int snapshotNpcCount =
             CountSnapshotNpcs(saveData.PopulationEntries);
@@ -97,6 +98,7 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
     {
         _npcRuntimeService.ClearAll();
         _populationService.ClearRuntimeState();
+        RestoreSpaceLoot(saveData);
 
         if (saveData == null)
         {
@@ -212,6 +214,27 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             " | SkippedMissingPlanet=" + skippedMissingPlanet +
             " | SkippedMissingConfig=" + skippedMissingConfig +
             " | Timers=" + (saveData.PopulationTimers != null ? saveData.PopulationTimers.Count : 0));
+    }
+
+    private static void CaptureSpaceLoot(SystemNpcSimulationSaveData saveData)
+    {
+        if (saveData == null)
+            return;
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<SystemSpaceLootService>(
+                out SystemSpaceLootService lootService))
+        {
+            saveData.SpaceLoot = lootService.Capture();
+        }
+    }
+
+    private static void RestoreSpaceLoot(SystemNpcSimulationSaveData saveData)
+    {
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<SystemSpaceLootService>(
+                out SystemSpaceLootService lootService))
+        {
+            lootService.Restore(saveData != null ? saveData.SpaceLoot : null);
+        }
     }
 
     private void AddNpcToSnapshotAggregate(
@@ -746,6 +769,9 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
         var session = new SystemNpcSimulationCaptureSession();
 
         CopyPopulationTimers(session.SaveData);
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<SystemSpaceLootService>(
+                out SystemSpaceLootService lootService))
+            session.SpaceLootSnapshot = new List<SpaceLootRuntimeState>(lootService.Loot);
 
         return session;
     }
@@ -788,7 +814,38 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
                 startedAt);
         }
 
+        if (session.EntriesBuildComplete && !session.SpaceLootScanComplete)
+            ContinueSpaceLootCapture(session, normalizedBudgetMs,
+                normalizedMaxItems, startedAt);
+
         return session.IsComplete;
+    }
+
+    private static void ContinueSpaceLootCapture(
+        SystemNpcSimulationCaptureSession session,
+        float budgetMs,
+        int maxItems,
+        long startedAt)
+    {
+        if (session.SpaceLootSnapshot == null)
+        {
+            session.SpaceLootScanComplete = true;
+            return;
+        }
+
+        IReadOnlyList<SpaceLootRuntimeState> drops = session.SpaceLootSnapshot;
+        int copied = 0;
+        while (session.NextSpaceLootIndex < drops.Count && copied < maxItems &&
+               ElapsedMs(startedAt) < budgetMs)
+        {
+            SpaceLootRuntimeState drop = drops[session.NextSpaceLootIndex++];
+            if (drop != null)
+                session.SaveData.SpaceLoot.Add(drop.Copy());
+            copied++;
+        }
+
+        if (session.NextSpaceLootIndex >= drops.Count)
+            session.SpaceLootScanComplete = true;
     }
 
     private void ContinueRuntimeNpcScan(

@@ -590,6 +590,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void SetPlanetDestination(PlanetConfig planetData)
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         if (planetData == null)
         {
             AppLog.Warning(DebugLogChannel.Travel,
@@ -621,6 +622,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void SetStationDestination(StationConfig stationData)
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         if (stationData == null)
         {
             AppLog.Warning(DebugLogChannel.Travel,
@@ -650,6 +652,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public bool StartPlanetTakeoff()
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return false;
         ShipMovementConfig config = _configService.ShipMovementConfig;
         if (config == null)
             return false;
@@ -691,6 +694,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void SetMapPointDestination(Vector3 mapPosition)
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         if (IsMapPointInsideSunForbiddenDestinationRadius(mapPosition))
         {
             RejectForbiddenMapPointDestination(
@@ -787,6 +791,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void SetNpcDestination(string runtimeNpcId)
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         if (!TryGetNpcDestinationPosition(runtimeNpcId, out Vector3 npcPosition))
         {
             AppLog.Warning(DebugLogChannel.Travel,
@@ -843,6 +848,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void SetSystemExitDestination(StarSystemLink link)
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         if (link == null)
         {
             AppLog.Warning(DebugLogChannel.Travel,
@@ -879,6 +885,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void SetSystemExitDestination(RouteExitMapChangedEvent evt)
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         if (evt == null)
         {
             AppLog.Error(DebugLogChannel.Travel,
@@ -918,6 +925,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void StartTravel()
     {
+        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         _planetTakeoffDistancePerTick = 0f;
         double startedAt =
             Time.realtimeSinceStartupAsDouble;
@@ -2734,6 +2742,12 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void Tick(float deltaTime, int quantTick)
     {
+        if (PlayerCargoOverload2A.IsOverloaded())
+        {
+            CancelTravel();
+            _shipMovementService?.StopImmediately();
+            return;
+        }
         if (State.Status != SystemTravelStatus.Flying)
             return;
 

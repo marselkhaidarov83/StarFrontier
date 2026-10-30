@@ -146,6 +146,11 @@ public sealed class ShipMovementService2A : IShipMovementService
 
     public void Tick(float deltaTime)
     {
+        if (PlayerCargoOverload2A.IsOverloaded())
+        {
+            StopImmediately();
+            return;
+        }
         long totalStartedAt = BeginPerfMeasure();
 
         ValidateDeltaTime(deltaTime);

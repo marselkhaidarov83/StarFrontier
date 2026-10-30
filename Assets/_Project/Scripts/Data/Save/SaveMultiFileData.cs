@@ -56,6 +56,7 @@ public sealed class SaveEncounterPartData
 public sealed class SaveNpcPartData
 {
     public List<SystemNpcPopulationSnapshotEntrySaveData> PopulationEntries = new();
+    public List<SpaceLootRuntimeState> SpaceLoot = new();
 }
 
 [Serializable]

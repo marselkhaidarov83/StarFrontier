@@ -27,6 +27,9 @@ public static class AllyConfigAssetGenerator
     private const string OutputRoot =
         "Assets/_Project/Content/Configs/Population/Ally";
 
+    private const string LootTableRoot =
+        "Assets/_Project/Content/Configs/Population/Ally/LootTables";
+
     private const string NamePoolRoot =
         "Assets/_Project/Content/Configs/Population/AllyNames";
 
@@ -51,6 +54,7 @@ public static class AllyConfigAssetGenerator
     {
         EnsureFolder(OutputRoot);
         EnsureFolder(NamePoolRoot);
+        EnsureFolder(LootTableRoot);
 
         Dictionary<AllyRole2A, AllyNamePoolConfig> namePools =
             CreateOrUpdateNamePools();
@@ -242,6 +246,27 @@ public static class AllyConfigAssetGenerator
                 }
             }
 
+            if (config.LootTable == null)
+            {
+                errors++;
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: loot table is not assigned at {path}");
+            }
+            else
+            {
+                foreach (string issue in config.LootTable.GetValidationErrors())
+                {
+                    errors++;
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        $"AllyConfig loot table validation: {issue} at {path}");
+                }
+                if (config.LootTable.GetInitialCargoQuantity() > config.BaseCargoCapacityMax)
+                {
+                    errors++;
+                    AppLog.Error(DebugLogChannel.EditorGenerators,
+                        $"AllyConfig loot table validation: cargo exceeds capacity at {path}");
+                }
+            }
+
             if (config.WeaponGroupCount == 0 &&
                 !IsRangerLevelZero(config.Role, config.Level))
             {
@@ -323,6 +348,23 @@ public static class AllyConfigAssetGenerator
             "OK");
     }
 
+    private static NpcLootTableConfig GetOrCreateLootTable(string npcConfigId)
+    {
+        string path = $"{LootTableRoot}/{npcConfigId}_loot.asset";
+        NpcLootTableConfig table = AssetDatabase.LoadAssetAtPath<NpcLootTableConfig>(path);
+        if (table == null)
+        {
+            table = ScriptableObject.CreateInstance<NpcLootTableConfig>();
+            AssetDatabase.CreateAsset(table, path);
+            SerializedObject serializedTable = new SerializedObject(table);
+            SetString(serializedTable, "id", npcConfigId + "_loot");
+            SetString(serializedTable, "displayName", npcConfigId + " loot");
+            serializedTable.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(table);
+        }
+        return table;
+    }
+
     private static void WriteAllyConfig(
         AllyConfig asset,
         string id,
@@ -362,6 +404,12 @@ public static class AllyConfigAssetGenerator
         SetInt(serializedObject, "moduleSlotCount", stats.ModuleSlotCount);
         SetInt(serializedObject, "level", level);
         SetEnum(serializedObject, "role", (int)role);
+        if (asset.LootTable == null)
+            SetObject(serializedObject, "lootTable", GetOrCreateLootTable(id));
+        if (role == AllyRole2A.Ranger)
+            SetObject(serializedObject, "grabber",
+                AssetDatabase.LoadAssetAtPath<GrabberConfig>(
+                    "Assets/_Project/Content/Configs/Game/grabber_standard_01.asset"));
         SetBool(
             serializedObject,
             "avoidEnemyOwnedTravelDestinations",

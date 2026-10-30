@@ -22,10 +22,11 @@ MonoBehaviour:
   enemyMovementLogs: 0
   movementTurnSpikeAngleDegrees: 60
   combatLogs: 0
+  lootLogs: 1
   damageLogs: 0
   populationLogs: 0
   planetMovementLogs: 0
-  saveLogs: 1
+  saveLogs: 0
   timeLogs: 0
   uiLogs: 0
   loadingSceneDiagnosticsLogs: 0

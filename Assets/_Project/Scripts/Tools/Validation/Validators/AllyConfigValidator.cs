@@ -38,6 +38,21 @@ public class AllyConfigValidator : IConfigValidator<AllyConfig>
         if (config.CombatSprite == null)
             issues.Add(new ValidationIssue(ValidationSeverity.Warning, "CombatSprite is not assigned.", config));
 
+        if (config.Role == AllyRole2A.Ranger && config.Grabber == null)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Ranger requires a GrabberConfig.", config));
+        if (config.Grabber != null &&
+            (config.Grabber.Strength <= 0 || config.Grabber.Range <= 0f ||
+             config.Grabber.PullSpeedPerTick <= 0f))
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Grabber strength, range and pull speed must be positive.", config));
+
+        if (config.LootTable != null)
+        {
+            foreach (string error in config.LootTable.GetValidationErrors())
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, error, config.LootTable));
+            if (config.LootTable.GetInitialCargoQuantity() > config.BaseCargoCapacityMin)
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Initial NPC cargo exceeds BaseCargoCapacityMin used by the runtime factory.", config));
+        }
+
         return issues;
     }
 }

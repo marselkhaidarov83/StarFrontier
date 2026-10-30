@@ -851,6 +851,7 @@ public sealed class SystemNpcOffscreenSimulationService :
         npc.IsOnPlanet = true;
         npc.TravelState = SystemNpcTravelState.OnPlanet;
         npc.TravelProgress01 = 1f;
+        npc.ResetLootForNewFlight();
     }
 
     private void CompleteSystemTravel(SystemNpcRuntimeState npc)

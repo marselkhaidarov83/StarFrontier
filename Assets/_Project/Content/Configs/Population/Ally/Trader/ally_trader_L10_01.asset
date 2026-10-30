@@ -57,3 +57,4 @@ MonoBehaviour:
   mapSprite: {fileID: 21300000, guid: c923e837abc234aad907f7a1ff442cc3, type: 3}
   combatSprite: {fileID: 21300000, guid: c923e837abc234aad907f7a1ff442cc3, type: 3}
   visualSize: 36
+  lootTable: {fileID: 11400000, guid: c4d1d85597e94fe69e8719716afc3023, type: 2}

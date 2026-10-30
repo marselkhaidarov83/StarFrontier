@@ -121,6 +121,13 @@ public sealed class AllyConfig : BaseConfig
     [Tooltip("Если включено, этот союзный NPC не выбирает для межсистемного перелёта системы, принадлежащие врагам.")]
     private bool avoidEnemyOwnedTravelDestinations;
 
+    [Header("Loot")]
+    [SerializeField] private NpcLootTableConfig lootTable;
+
+    [Header("Loot capture")]
+    [SerializeField] private GrabberConfig grabber;
+
+
     [Header("Weapon Groups")]
     [SerializeField]
     [Tooltip("Группы оружия, из которых выбирается оснащение реального корабля.")]
@@ -171,6 +178,8 @@ public sealed class AllyConfig : BaseConfig
 
     public int Level => level;
     public AllyRole2A Role => role;
+    public NpcLootTableConfig LootTable => lootTable;
+    public GrabberConfig Grabber => grabber;
     public AllyNamePoolConfig NamePool => namePool;
 
     public IReadOnlyList<AllyBehaviourScenarioEntry> BehaviorScenarios =>

@@ -9,6 +9,7 @@ public interface IInventoryService
     int GetFreeCargo();
     bool CanAddItem(string itemId, int quantity);
     bool AddItem(string itemId, int quantity);
+    bool AddLootItem(string itemId, int quantity);
     bool RemoveItem(string itemId, int quantity);
     void Clear();
 }

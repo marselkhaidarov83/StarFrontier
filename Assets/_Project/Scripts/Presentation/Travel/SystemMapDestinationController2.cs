@@ -122,6 +122,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             _simpleEventBus.Subscribe<StationSelectedEvent>(OnStationSelected);
             _simpleEventBus.Subscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
             _simpleEventBus.Subscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
+            _simpleEventBus.Subscribe<TargetChangedEvent2A>(OnTargetChanged);
         }
     }
 
@@ -137,7 +138,20 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
             _simpleEventBus.Unsubscribe<StationSelectedEvent>(OnStationSelected);
             _simpleEventBus.Unsubscribe<SystemTravelCancelledEvent>(OnTravelCancelled);
             _simpleEventBus.Unsubscribe<SystemTravelCompletedEvent>(OnTravelCompleted);
+            _simpleEventBus.Unsubscribe<TargetChangedEvent2A>(OnTargetChanged);
         }
+    }
+
+    private void OnTargetChanged(TargetChangedEvent2A evt)
+    {
+        if (evt == null || !evt.HasTarget || evt.TargetType != SystemGameplayTargetType.Loot)
+            return;
+        // Hide the previous destination without clearing the newly selected loot target.
+        _selectedPlanetView = null;
+        _selectedPlanetData = null;
+        markerController?.HideAll();
+        AppLog.Info(DebugLogChannel.Loot,
+            "[LOOT_SELECTION_CLEARED_DESTINATION_MARKER] Id=" + evt.TargetId);
     }
 
     private void OnTravelCancelled(SystemTravelCancelledEvent evt)

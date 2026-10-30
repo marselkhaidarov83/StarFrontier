@@ -122,6 +122,7 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
         _eventBus.Subscribe<GalaxyNpcProjectileCreatedEvent>(OnProjectileCreated);
         _eventBus.Subscribe<GalaxyNpcProjectileImpactEvent>(OnProjectileImpact);
         _eventBus.Subscribe<SystemNpcDestroyedEvent>(OnNpcDestroyed);
+        _eventBus.Subscribe<SpaceLootDestroyedEvent>(OnLootDestroyed);
         _eventBus.Subscribe<CombatBeamStartedEvent2A>(OnBeamStarted);
         _eventBus.Subscribe<CombatBeamEndedEvent2A>(OnBeamEnded);
         _eventBus.Subscribe<CombatWaveStartedEvent2A>(OnWaveStarted);
@@ -139,6 +140,7 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
         _eventBus.Unsubscribe<GalaxyNpcProjectileCreatedEvent>(OnProjectileCreated);
         _eventBus.Unsubscribe<GalaxyNpcProjectileImpactEvent>(OnProjectileImpact);
         _eventBus.Unsubscribe<SystemNpcDestroyedEvent>(OnNpcDestroyed);
+        _eventBus.Unsubscribe<SpaceLootDestroyedEvent>(OnLootDestroyed);
         _eventBus.Unsubscribe<CombatBeamStartedEvent2A>(OnBeamStarted);
         _eventBus.Unsubscribe<CombatBeamEndedEvent2A>(OnBeamEnded);
         _eventBus.Unsubscribe<CombatWaveStartedEvent2A>(OnWaveStarted);
@@ -217,6 +219,18 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
             evt.NpcType);
 
         SpawnExplosionFx(evt.Position, fxColor);
+    }
+
+    private void OnLootDestroyed(SpaceLootDestroyedEvent evt)
+    {
+        if (!CanShowSystemEffect(evt.SystemId, "Explosion", evt.LootId))
+            return;
+
+        CombatFxVisualConfig config = ResolveCombatFxVisualConfig();
+        Color color = config != null
+            ? config.ResolveNpcColor(evt.SourceNpcType, evt.SourceNpcConfigId)
+            : Color.white;
+        SpawnExplosionFx(evt.Position, color);
     }
 
     public GalaxyNpcProjectileView SpawnProjectile(GalaxyNpcProjectileCreatedEvent evt)

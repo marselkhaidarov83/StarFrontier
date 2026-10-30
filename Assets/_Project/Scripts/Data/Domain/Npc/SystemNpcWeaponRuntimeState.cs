@@ -3,7 +3,16 @@ using System;
 [Serializable]
 public sealed class SystemNpcWeaponRuntimeState
 {
+    // Instance identity survives transfer into a space-loot object.
+    public string InstanceId;
+    public WeaponRuntimeStats RolledStats;
+    public int DurabilityPercent = 100;
+    public int SlotIndex = -1;
     public string WeaponConfigId;
+    // Preserve the first loot source through cargo, saves, and repeated ejection.
+    public bool HasLootOrigin;
+    public SystemNpcType LootOriginNpcType;
+    public string LootOriginNpcConfigId;
 
     public int LastShotTick = -1;
     public int NextAllowedShotTick = 0;

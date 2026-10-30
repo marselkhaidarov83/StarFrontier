@@ -129,6 +129,9 @@ public class NewGameService : CustomService, INewGameService
             save.Player.PlayerShipState.OwnedShips.Count);
 
         _gameSessionService.StartNewSession(save);
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<SystemSpaceLootService>(
+                out SystemSpaceLootService spaceLootService))
+            spaceLootService.Clear();
 
         LogLoadingStep(
             "StartNewSession.After",

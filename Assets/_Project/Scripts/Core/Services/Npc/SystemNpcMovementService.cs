@@ -6625,6 +6625,15 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
                 npc.IsOnPlanet = true;
                 npc.TravelState = SystemNpcTravelState.OnPlanet;
                 npc.CurrentPlanetId = npc.TargetPlanetId;
+                if (npc.IsAlly && npc.AllyRole == AllyRole2A.Ranger)
+                {
+                    npc.CargoBatches?.Clear();
+                    npc.CargoEquipment?.Clear();
+                    AppLog.Info(DebugLogChannel.Loot,
+                        "[RANGER_LOOT_UNLOAD] Npc=" + npc.RuntimeNpcId +
+                        " | Planet=" + npc.CurrentPlanetId);
+                }
+                npc.ResetLootForNewFlight();
                 break;
 
             case SystemNpcTravelState.TravelingToAnotherSystem:

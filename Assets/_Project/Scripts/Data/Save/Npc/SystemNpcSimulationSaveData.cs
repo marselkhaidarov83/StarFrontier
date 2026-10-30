@@ -11,6 +11,9 @@ public sealed class SystemNpcSimulationSaveData
     public List<SystemNpcSaveData> Npcs = new();
 
     public List<SystemPopulationRuleTimerState> PopulationTimers = new();
+
+    // Persistent drops are independent of compact NPC population snapshots.
+    public List<SpaceLootRuntimeState> SpaceLoot = new();
 }
 
 [Serializable]

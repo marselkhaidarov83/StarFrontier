@@ -950,8 +950,9 @@ public static class WeaponConfigAssetGenerator
 
         if (string.IsNullOrWhiteSpace(value))
         {
-            property.objectReferenceValue =
-                null;
+            Sprite fallback = FindWeaponLootIcon(rowId);
+            if (fallback != null && property.objectReferenceValue == null)
+                property.objectReferenceValue = fallback;
 
             return;
         }
@@ -961,6 +962,12 @@ public static class WeaponConfigAssetGenerator
 
         if (sprite == null)
         {
+            Sprite fallback = FindWeaponLootIcon(rowId);
+            if (fallback != null && property.objectReferenceValue == null)
+            {
+                property.objectReferenceValue = fallback;
+                return;
+            }
             warnings.Add(
                 RowPrefix(rowId) +
                 "Sprite not found for icon value: " +
@@ -972,6 +979,19 @@ public static class WeaponConfigAssetGenerator
 
         property.objectReferenceValue =
             sprite;
+    }
+
+    private static Sprite FindWeaponLootIcon(string weaponId)
+    {
+        bool missileFamily = !string.IsNullOrEmpty(weaponId) &&
+            (weaponId.IndexOf("missile", StringComparison.OrdinalIgnoreCase) >= 0 ||
+             weaponId.IndexOf("swarm", StringComparison.OrdinalIgnoreCase) >= 0 ||
+             weaponId.IndexOf("orb", StringComparison.OrdinalIgnoreCase) >= 0);
+
+        string path = missileFamily
+            ? "Assets/Art/Weapons/WeaponsIcons/icon_weapon_missile_light_01.png"
+            : "Assets/Art/Weapons/WeaponsIcons/icon_weapon_laser_pulse_01.png";
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 
     private static void SetGameObjectReference(

@@ -22,7 +22,7 @@ MonoBehaviour:
     PNG 512\xD7512, transparent background, centered projectile/VFX sprite, pivot
     center, no text, no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down
     readable silhouette."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 10
   equipmentTier: 2
   cargoSize: 13

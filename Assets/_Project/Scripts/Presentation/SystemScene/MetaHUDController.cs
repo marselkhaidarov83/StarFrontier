@@ -199,6 +199,7 @@ public class MetaHudController :
         simpleEventBus.Subscribe<
             CreditsChangedEvent>(
                 OnCreditsChanged);
+        simpleEventBus.Subscribe<DiamondsChangedEvent>(OnDiamondsChanged);
 
         simpleEventBus.Subscribe<
             GameSavedEvent>(
@@ -238,6 +239,7 @@ public class MetaHudController :
         simpleEventBus.Unsubscribe<
             CreditsChangedEvent>(
                 OnCreditsChanged);
+        simpleEventBus.Unsubscribe<DiamondsChangedEvent>(OnDiamondsChanged);
 
         simpleEventBus.Unsubscribe<
             GameSavedEvent>(
@@ -292,6 +294,11 @@ public class MetaHudController :
 
     private void OnCreditsChanged(
         CreditsChangedEvent evt)
+    {
+        Refresh();
+    }
+
+    private void OnDiamondsChanged(DiamondsChangedEvent evt)
     {
         Refresh();
     }

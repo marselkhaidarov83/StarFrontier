@@ -10,5 +10,6 @@ public enum SystemGameplayTargetType
     Enemy = 40,
     Ally = 50,
     Resource = 60,
+    Loot = 70,
     Unknown = 999
 }

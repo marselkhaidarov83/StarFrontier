@@ -18,9 +18,12 @@ public sealed class SystemNpcSimulationCaptureSession
     public bool EntriesBuildComplete;
     public List<SystemNpcPopulationCaptureAggregateData> AggregateList;
     public int NextAggregateIndex;
+    public int NextSpaceLootIndex;
+    public bool SpaceLootScanComplete;
+    public List<SpaceLootRuntimeState> SpaceLootSnapshot;
 
     public bool IsComplete =>
-        RuntimeScanComplete && EntriesBuildComplete;
+        RuntimeScanComplete && EntriesBuildComplete && SpaceLootScanComplete;
 }
 
 public sealed class SystemNpcPopulationCaptureAggregateData

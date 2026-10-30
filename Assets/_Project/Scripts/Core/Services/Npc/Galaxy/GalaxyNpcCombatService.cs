@@ -10,6 +10,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
 
     private readonly IGalaxyNpcSimulationScheduleService _simulationScheduleService;
     private readonly ISystemNpcCombatService _systemNpcCombatService;
+    private readonly SystemSpaceLootService _spaceLootService;
 
     public double LastCurrentSystemMs { get; private set; }
     public double LastOffscreenMs { get; private set; }
@@ -24,6 +25,9 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
 
         _systemNpcCombatService =
             Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcCombatService>();
+
+        _spaceLootService =
+            Bootstrapper.Instance.ServiceRegistry.Get<SystemSpaceLootService>();
     }
 
     public void TickQuant(int quantTick)
@@ -33,6 +37,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
 
     public void Tick(float deltaTime, int quantTick)
     {
+        _spaceLootService.TickCollection(deltaTime);
         _systemNpcCombatService.TickProjectiles(deltaTime);
 
         TickCombatSystems(quantTick);
@@ -68,6 +73,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
             _systemNpcCombatService.Tick(
                 currentSystem,
                 quantTick);
+            _spaceLootService.CleanupSystem(currentSystem.Id, quantTick);
 
             _lastCurrentSystemQuantTick = quantTick;
             currentSystemMs =
@@ -109,6 +115,7 @@ public sealed class GalaxyNpcCombatService : CustomService, IGalaxyNpcCombatServ
                 _systemNpcCombatService.Tick(
                     offscreenSystem,
                     quantTick);
+                _spaceLootService.CleanupSystem(offscreenSystem.Id, quantTick);
 
                 offscreenMs +=
                     EndPerfMeasureMs(offscreenStartedAt);

@@ -7,7 +7,9 @@ public interface IPlayerAttackService
     IReadOnlyDictionary<int, string> WeaponTargetNpcIdsBySlot { get; }
 
     void SetTarget(string targetNpcId);
+    void SetLootTarget(string lootId);
     void AssignNextWeaponSlotToTarget(string targetNpcId);
+    void AssignNextWeaponSlotToLoot(string lootId);
     void AssignWeaponSlotToTarget(int weaponSlotIndex, string targetNpcId);
     void ClearWeaponSlotTarget(int weaponSlotIndex);
     void ClearSelectedTargetIfNoAssignedWeapons();

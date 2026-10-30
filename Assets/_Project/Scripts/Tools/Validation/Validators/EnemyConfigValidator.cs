@@ -79,6 +79,19 @@ public class EnemyConfigValidator : IConfigValidator<EnemyConfig>
             config));
         }
 
+        if (config.BaseCargoCapacity < 0)
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseCargoCapacity must be >= 0.", config));
+        if (config.LootTable != null)
+        {
+            foreach (string error in config.LootTable.GetValidationErrors())
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, error, config.LootTable));
+            if (config.LootTable.GetInitialCargoQuantity() > config.BaseCargoCapacity)
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Initial NPC cargo exceeds BaseCargoCapacity.", config));
+            if (config.LootTable.AstraliteCatalog != null &&
+                config.LootTable.AstraliteCatalog.GetItem(config.LootSpecies) == null)
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Astralite catalog has no item for this enemy species.", config));
+        }
+
         return issues;
     }
 }

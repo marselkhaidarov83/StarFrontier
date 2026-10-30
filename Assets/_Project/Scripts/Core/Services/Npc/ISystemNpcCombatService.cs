@@ -13,6 +13,11 @@ public interface ISystemNpcCombatService
         string weaponConfigId,
         int quantTick);
 
+    bool TryCreatePlayerLootProjectile(
+        string lootId,
+        string weaponConfigId,
+        int quantTick);
+
     bool TryGetProjectile(
         string projectileId,
         out GalaxyNpcProjectileRuntimeState projectile);

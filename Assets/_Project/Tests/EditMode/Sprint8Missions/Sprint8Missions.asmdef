@@ -4,6 +4,9 @@
         "Core",
         "Data",
         "Presentation",
+        "Tools",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
