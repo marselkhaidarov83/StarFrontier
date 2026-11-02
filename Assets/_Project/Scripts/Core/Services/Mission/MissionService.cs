@@ -325,6 +325,82 @@ public partial class MissionService : CustomService, IMissionService
         }
     }
 
+    // Explicit developer command. It records one synthetic objective event, while the
+    // ordinary completion rules still decide whether a reward can be claimed.
+    public bool TryDebugAdvanceMission(string id, out string reason)
+    {
+        var mission = Find(Block?.ActiveMissions, id);
+        reason = "MissionNotActive";
+        if (mission?.Objective == null || mission.Reward == null ||
+            !MissionLifecycleRules.IsActive(mission.Status)) return false;
+        if (!MissionLifecycleRules.IsPlayableType(mission.MissionType))
+        { reason = "MissionTypeDisabled"; return false; }
+        if (mission.Objective.RequiredAmount <= 0)
+        { reason = "InvalidObjective"; return false; }
+        if (MissionLifecycleRules.IsExpired(mission, CurrentDay))
+        { reason = "DeadlineReached"; return false; }
+
+        var objective = mission.Objective;
+        reason = "None";
+        switch (mission.MissionType)
+        {
+            case MissionType.Delivery:
+                if (!MissionCargoOperations.HasCargo(_gameSessionService.State, mission, false))
+                { reason = "MissionCargoMissing"; return false; }
+                if (objective.CurrentAmount >= objective.RequiredAmount)
+                { reason = "ObjectiveAlreadyAdvanced"; return false; }
+                Mutate("DebugDeliveryProgress", () => objective.CurrentAmount++);
+                break;
+            case MissionType.Recon:
+                if (objective.CurrentAmount >= objective.RequiredAmount)
+                { reason = "ObjectiveAlreadyAdvanced"; return false; }
+                Mutate("DebugReconProgress", () =>
+                {
+                    objective.ReconObservedEnemyIds ??= new List<string>();
+                    objective.ReconObservedEnemyIds.Add("debug_recon_" + Guid.NewGuid().ToString("N"));
+                    objective.CurrentAmount++;
+                });
+                break;
+            case MissionType.Defense:
+            case MissionType.Liberation:
+                if (objective.BattleWon)
+                { reason = "BattleAlreadyWon"; return false; }
+                Mutate("DebugBattleProgress", () =>
+                {
+                    objective.BattleKilledEnemyIds ??= new List<string>();
+                    objective.BattleKilledEnemyIds.Add("debug_enemy_" + Guid.NewGuid().ToString("N"));
+                    objective.CurrentAmount = objective.BattleKilledEnemyIds.Count;
+                    mission.Reward.Credits = MissionBattleRules.Credits(objective.CurrentAmount,
+                        objective.BattleRewardDeflator);
+                });
+                break;
+            case MissionType.RouteSearch:
+                if (objective.RouteIsUpgrade && !objective.RouteDirectSurveyed)
+                    Mutate("DebugRouteDirectSurvey", () =>
+                    {
+                        objective.RouteDirectSurveyed = true;
+                        objective.RouteReturnedAfterDirectSurvey = true;
+                        objective.CurrentAmount = 1;
+                    });
+                else if (!objective.RouteIndirectSurveyed)
+                    Mutate("DebugRouteIndirectSurvey", () =>
+                    {
+                        objective.RouteIndirectSurveyed = true;
+                        objective.CurrentAmount = objective.RequiredAmount;
+                    });
+                else { reason = "ObjectiveAlreadyAdvanced"; return false; }
+                break;
+            default:
+                reason = "MissionTypeDisabled";
+                return false;
+        }
+        Log("DebugObjectiveAdvanced", mission, "Progress=" + objective.CurrentAmount + "/" +
+            objective.RequiredAmount + " | WorldStateUnchanged=true");
+        PublishMissionChanged(mission);
+        ReevaluateActiveMissions("DebugObjectiveAdvanced");
+        return true;
+    }
+
     public bool CancelMission(string missionRuntimeId) =>
         FinishWithoutReward(missionRuntimeId, MissionStatus.Cancelled, "CancelledByPlayer");
 

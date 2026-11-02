@@ -122,14 +122,19 @@ public sealed partial class DebugController2A
     [ContextMenu("STAR FRONTIER/Mission/Accept Current Planet Offer")]
     private void DebugAcceptCurrentPlanetOffer()
     {
+        if (!DeveloperModeGate.CanRunExplicitCommand(Application.isPlaying, Application.isEditor,
+                DeveloperModeGate.IsEnabled)) return;
         if (ServiceRegistry == null) return;
         IConfigService config = ServiceRegistry.Get<IConfigService>();
         PlanetConfig planet = config.GetCurrentPlanetConfig();
         if (planet == null) return;
-        bool accepted = ServiceRegistry.Get<IPlanetGovernmentMissionService>()
-            .AcceptGovernmentOffer(planet.Id);
+        var government = ServiceRegistry.Get<IPlanetGovernmentMissionService>();
+        var offer = government.GetOrCreateGovernmentOffer(config.GetCurrentSystemConfig(), planet);
+        bool accepted = government.AcceptGovernmentOffer(planet.Id);
+        if (accepted) debugMissionRuntimeId = offer?.OfferedMission?.MissionRuntimeId;
         AppLog.Info(DebugLogChannel.Mission, typeof(DebugController2A),
-            "[MissionDebug] Accept planet offer | Planet=" + planet.Id + " | Success=" + accepted);
+            "[MissionDebug] Accept planet offer | Planet=" + planet.Id + " | Id=" +
+            debugMissionRuntimeId + " | Success=" + accepted);
     }
 
     [ContextMenu("STAR FRONTIER/Mission/Reevaluate Active Missions")]
@@ -140,20 +145,17 @@ public sealed partial class DebugController2A
         DebugPrintActiveMissions();
     }
 
-    [ContextMenu("STAR FRONTIER/Mission/Preview Ready To Claim")]
-    private void DebugPreviewMissionReady()
+    [ContextMenu("STAR FRONTIER/Mission/Advance Selected Mission One Step")]
+    private void DebugAdvanceSelectedMission()
     {
         MissionInstanceData mission = ResolveDebugMission();
         if (mission == null) return;
-        mission.Status = MissionStatus.ReadyToComplete;
-        mission.IsReadyToTurnIn = true;
-        ServiceRegistry.Get<SimpleEventBus>().Publish(new MissionStateChangedEvent
-        {
-            MissionRuntimeId = mission.MissionRuntimeId
-        });
+        if (ServiceRegistry.Get<IMissionService>() is not MissionService service) return;
+        bool advanced = service.TryDebugAdvanceMission(mission.MissionRuntimeId, out string reason);
         AppLog.Info(DebugLogChannel.Mission, typeof(DebugController2A),
-            "[MissionDebug] UI preview ready; gameplay objectives were not advanced | Id=" +
-            mission.MissionRuntimeId);
+            "[MissionDebug] Advance | Type=" + mission.MissionType + " | Id=" +
+            mission.MissionRuntimeId + " | Success=" + advanced + " | Reason=" + reason +
+            " | Status=" + mission.Status);
     }
 
     [ContextMenu("STAR FRONTIER/Mission/Fail Selected Mission")]
@@ -178,6 +180,14 @@ public sealed partial class DebugController2A
 
     private MissionInstanceData ResolveDebugMission()
     {
+        if (!DeveloperModeGate.CanRunExplicitCommand(Application.isPlaying, Application.isEditor,
+                DeveloperModeGate.IsEnabled))
+        {
+            AppLog.Warning(DebugLogChannel.Mission, typeof(DebugController2A),
+                "[MissionDebug] Command rejected | Reason=" +
+                (!Application.isPlaying ? "NotInPlayMode" : "DeveloperModeDisabledOutsideEditor"));
+            return null;
+        }
         if (ServiceRegistry == null) return null;
         IMissionService missions = ServiceRegistry.Get<IMissionService>();
         if (!string.IsNullOrWhiteSpace(debugMissionRuntimeId))

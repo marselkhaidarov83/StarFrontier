@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: debugLogConfig01
   m_EditorClassIdentifier: Data::DebugLogConfig
   testPlayerAnalytics: 1
-  firstSessionTraceLogs: 0
+  firstSessionTraceLogs: 1
   logsEnabled: 1
   shipRouteLogs: 0
   includeShipRouteInternalLogs: 0
