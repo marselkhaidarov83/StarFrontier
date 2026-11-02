@@ -83,6 +83,9 @@ public sealed class TargetService2A :
         if (failReason !=
             TargetSelectionFailReason2A.None)
         {
+            if (wasSelectedByPlayer)
+                PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.TargetSelection, false,
+                    failReason.ToString(), targetId);
             return false;
         }
 
@@ -99,6 +102,9 @@ public sealed class TargetService2A :
                 TargetSelectionFailReason2A
                     .InvalidWorldPosition;
 
+            if (wasSelectedByPlayer)
+                PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.TargetSelection, false,
+                    failReason.ToString(), targetId);
             return false;
         }
 
@@ -127,6 +133,9 @@ public sealed class TargetService2A :
         failReason =
             TargetSelectionFailReason2A.None;
 
+        if (wasSelectedByPlayer)
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.TargetSelection, true,
+                contentId: targetId);
         return true;
     }
 

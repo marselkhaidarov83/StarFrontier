@@ -78,6 +78,9 @@ public sealed class DebugLogConfig : ScriptableObject
     [SerializeField] private bool testPlayerAnalytics = true;
     public bool TestPlayerAnalytics => testPlayerAnalytics;
 
+    [Tooltip("Выводить этапы и причины остановки первой сессии в Console. Работает только при включённом главном выключателе логов.")]
+    [SerializeField] private bool firstSessionTraceLogs;
+
     [Header("Master")]
     [Tooltip("Главный выключатель всех служебных сообщений. Если он выключен, остальные переключатели сообщений не сработают.")]
     [SerializeField] private bool logsEnabled = true;
@@ -329,6 +332,8 @@ public sealed class DebugLogConfig : ScriptableObject
     [SerializeField] private bool npcPlanetApproachQueueCoordinateLogs;
 
     public bool LogsEnabled => logsEnabled;
+
+    public bool FirstSessionTraceLogs => logsEnabled && firstSessionTraceLogs;
 
     public bool IncludeShipRouteInternalLogs =>
         logsEnabled && includeShipRouteInternalLogs;

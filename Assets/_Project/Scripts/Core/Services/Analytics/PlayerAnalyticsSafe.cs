@@ -21,9 +21,10 @@ public static class PlayerAnalyticsSafe
         catch { return new PlayerAnalyticsOperation(null, action, null, 0); }
     }
 
-    public static void Track(PlayerAnalyticsAction action, bool success, string reason = "None", string contentId = null)
+    public static void Track(PlayerAnalyticsAction action, bool success, string reason = "None",
+        string contentId = null, int quantity = 0)
     {
-        try { Get()?.Track(action, success, reason, contentId: contentId); } catch { }
+        try { Get()?.Track(action, success, reason, contentId: contentId, quantity: quantity); } catch { }
     }
 }
 

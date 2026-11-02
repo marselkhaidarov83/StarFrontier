@@ -486,6 +486,7 @@ public class Bootstrapper : CustomMonoBehaviour
     private void OnDestroy()
     {
         _playerAnalyticsBridge?.Dispose();
+        _playerAnalytics?.FinishSession();
         _playerAnalytics?.Flush();
         StopExternalFrameProfilers();
     }
@@ -852,6 +853,7 @@ public class Bootstrapper : CustomMonoBehaviour
 
     private void OnApplicationQuit()
     {
+        _playerAnalytics?.FinishSession();
         _playerAnalytics?.Flush();
         if (saveConfig != null && saveConfig.AutoSaveOnQuit)
             SaveCurrentGame("app_quit");

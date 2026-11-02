@@ -19,7 +19,9 @@ public static class PlayerAnalyticsUnityFactory
             SessionTimeoutSeconds = config.sessionTimeoutSeconds
         };
         return new PlayerAnalyticsService(options, new AppMetricaPlayerAnalyticsTransport(),
-            new UnityPlayerAnalyticsPreferences(), () => Capture(session));
+            new UnityPlayerAnalyticsPreferences(), () => Capture(session),
+            debugLog: debugAsset != null && debugAsset.FirstSessionTraceLogs
+                ? new System.Action<string>(message => Debug.Log(message)) : null);
     }
 
     private static string BuildNumber()

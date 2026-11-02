@@ -100,13 +100,18 @@ public class HangarService : IHangarService
             "CanEquipWeapon " + result.Error);
 
         if (!result.Success)
+        {
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ShipUpgrade, false,
+                result.Error.ToString(), weaponId);
             return result;
+        }
 
         activeShip.EquippedWeaponIds.Add(weaponId);
 
         _eventBus.Publish(new ShipEquipmentChangedEvent(activeShip.ShipId));
 
         SaveAfterSuccessfulHangarOperation("EquipWeapon");
+        PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ShipUpgrade, true, contentId: weaponId);
         return HangarOperationResult.Ok();
     }
 
@@ -144,7 +149,11 @@ public class HangarService : IHangarService
             moduleId);
 
         if (!result.Success)
+        {
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ShipUpgrade, false,
+                result.Error.ToString(), moduleId);
             return result;
+        }
 
         activeShip.EquippedModuleIds.Add(moduleId);
 
@@ -152,6 +161,7 @@ public class HangarService : IHangarService
         _eventBus.Publish(new ShipStatsChangedEvent(activeShip.ShipId));
 
         SaveAfterSuccessfulHangarOperation("EquipModule");
+        PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ShipUpgrade, true, contentId: moduleId);
         return HangarOperationResult.Ok();
     }
 

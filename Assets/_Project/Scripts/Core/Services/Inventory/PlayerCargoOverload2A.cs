@@ -14,6 +14,7 @@ public static class PlayerCargoOverload2A
         if (Bootstrapper.Instance.ServiceRegistry.TryGet<SimpleEventBus>(out var events))
             events.Publish(new SpaceLootFeedbackEvent2A("Трюм переполнен. Полет невозможен"));
         AppLog.Info(DebugLogChannel.Loot, "[LOOT_OVERLOAD_ROUTE_REJECTED]");
+        PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.CargoOverload, false, "CargoOverloaded");
         return true;
     }
 }

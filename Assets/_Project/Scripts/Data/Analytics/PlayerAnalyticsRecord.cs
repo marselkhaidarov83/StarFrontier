@@ -4,7 +4,9 @@ public enum PlayerAnalyticsAction
 {
     SessionStarted, NewGame, ContinueGame, Travel, Interaction, BuyItem, SellItem,
     Refuel, Repair, MissionAccept, MissionComplete, MissionFail, MissionReward,
-    CombatStarted, CombatVictory, CombatDefeat, PlayerDestroyed, GovernmentReward
+    CombatStarted, CombatVictory, CombatDefeat, PlayerDestroyed, GovernmentReward,
+    FirstLaunch, LootCollect, ShipUpgrade, TargetSelection, CargoOverload,
+    FirstSessionStage, FirstSessionReport
 }
 
 // Deliberately flat and closed: never serialize PlayerState, messages, names or SDK identifiers.
@@ -39,6 +41,19 @@ public sealed class PlayerAnalyticsRecord
     public int fuel_after;
     public int quantity;
     public int cost;
+    public bool is_first_session;
+    public string first_session_stage;
+    public int first_session_stage_index;
+    public int first_session_elapsed_seconds;
+    public int first_session_step_seconds;
+    public string first_session_stage_path;
+    public string first_session_stage_gaps;
+    public string last_first_session_stage;
+    public string first_session_last_attempt;
+    public string first_session_last_failure_reason;
+    public int first_session_failure_count;
+
+    public PlayerAnalyticsRecord Copy() => (PlayerAnalyticsRecord)MemberwiseClone();
 }
 
 public sealed class PlayerAnalyticsSnapshot
@@ -86,6 +101,7 @@ public interface IPlayerAnalyticsPreferences
 {
     string InstallationId { get; }
     bool CollectionEnabled { get; set; }
+    bool FirstSessionPending { get; set; }
 }
 
 public interface IPlayerAnalytics
@@ -99,5 +115,6 @@ public interface IPlayerAnalytics
         PlayerAnalyticsSnapshot before = null, string contentId = null, int quantity = 0, int cost = 0);
     void SetCollectionEnabled(bool enabled);
     void OnApplicationPause(bool paused);
+    void FinishSession();
     void Flush();
 }

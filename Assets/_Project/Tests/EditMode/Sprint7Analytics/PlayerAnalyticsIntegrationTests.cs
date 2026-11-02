@@ -21,6 +21,7 @@ public sealed class PlayerAnalyticsIntegrationTests
     {
         public string InstallationId => "33333333-3333-4333-8333-333333333333";
         public bool CollectionEnabled { get; set; } = true;
+        public bool FirstSessionPending { get; set; } = true;
     }
     private sealed class Transport : IPlayerAnalyticsTransport
     {
@@ -159,10 +160,15 @@ public sealed class PlayerAnalyticsIntegrationTests
         {
             var serialized = new SerializedObject(config);
             serialized.FindProperty("testPlayerAnalytics").boolValue = true;
+            serialized.FindProperty("firstSessionTraceLogs").boolValue = true;
             serialized.FindProperty("logsEnabled").boolValue = false;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             Assert.That(config.TestPlayerAnalytics, Is.True);
+            Assert.That(config.FirstSessionTraceLogs, Is.False);
             Assert.That(PlayerAnalyticsOptions.UseTest(false, false, false, config.TestPlayerAnalytics), Is.True);
+            serialized.FindProperty("logsEnabled").boolValue = true;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            Assert.That(config.FirstSessionTraceLogs, Is.True);
         }
         finally { UnityEngine.Object.DestroyImmediate(config); }
     }

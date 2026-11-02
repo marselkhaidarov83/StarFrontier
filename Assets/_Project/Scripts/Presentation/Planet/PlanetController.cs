@@ -125,7 +125,10 @@ public class PlanetController : CustomMonoBehaviour
     private void OnOpenSystemClicked()
     {
         if (string.IsNullOrWhiteSpace(gameSessionService.State.Player.CurrentPlanetId))
+        {
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.FirstLaunch, false, "CurrentPlanetMissing");
             return;
+        }
 
         Vector2 planetPosition = _orbitalMotionService.GetPlanetCurrentPosition(
                 _configService.GetCurrentPlanetConfig().PlanetOrbit);
@@ -139,12 +142,14 @@ public class PlanetController : CustomMonoBehaviour
 
         if (_systemTravelService.StartPlanetTakeoff())
         {
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.FirstLaunch, true);
             // In Play mode time already advances. In Pause mode run exactly one step.
             if (_gameTimeService.IsPaused)
                 _gameTimeService.StepOneDay();
         }
         else
         {
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.FirstLaunch, false, "TakeoffRouteUnavailable");
             AppLog.Warning(DebugLogChannel.Travel, typeof(PlanetController),
                 "Could not build the planet takeoff route. Check ShipMovementConfig and the destination.");
         }

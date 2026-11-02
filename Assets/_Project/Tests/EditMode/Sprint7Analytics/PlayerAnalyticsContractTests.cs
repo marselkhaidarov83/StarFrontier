@@ -11,6 +11,7 @@ public sealed class PlayerAnalyticsContractTests
     {
         public string InstallationId { get; set; } = "33333333-3333-4333-8333-333333333333";
         public bool CollectionEnabled { get; set; } = true;
+        public bool FirstSessionPending { get; set; } = true;
     }
     private sealed class Transport : IPlayerAnalyticsTransport
     {
@@ -139,7 +140,7 @@ public sealed class PlayerAnalyticsContractTests
         var fields = typeof(PlayerAnalyticsRecord).GetFields().Select(f => f.Name).ToArray();
         foreach (string forbidden in new[] { "PlayerName", "PlayerId", "device_id", "advertising_id", "message", "email", "save" })
             Assert.That(fields, Does.Not.Contain(forbidden));
-        Assert.That(fields.Length, Is.EqualTo(28), "Schema expansion requires explicit review.");
+        Assert.That(fields.Length, Is.EqualTo(39), "Schema expansion requires explicit review.");
     }
     [Test] public void FreeTextEmailUrlAndOversizedParameters_AreRejected()
     {
@@ -213,5 +214,65 @@ public sealed class PlayerAnalyticsContractTests
         Assert.That(t.Events.Last().environment, Is.EqualTo("test"));
         Assert.That(t.Events.Last().balance_version, Is.EqualTo("balance-01"));
         Assert.That(t.Events.Last().app_version, Is.EqualTo("0.2.7"));
+    }
+
+    [Test] public void FirstSessionReport_OrdersUniqueStagesAndKeepsFailureContext()
+    {
+        DateTime time = new DateTime(2026, 10, 30, 12, 0, 0, DateTimeKind.Utc);
+        var transport = new Transport();
+        var service = Create(transport, clock: () => time);
+        time = time.AddSeconds(5);
+        service.Track(PlayerAnalyticsAction.FirstLaunch, true);
+        service.Track(PlayerAnalyticsAction.FirstLaunch, true);
+        time = time.AddSeconds(7);
+        service.Track(PlayerAnalyticsAction.Travel, false, "CargoOverloaded");
+        time = time.AddSeconds(11);
+        service.Track(PlayerAnalyticsAction.Travel, true);
+        time = time.AddSeconds(3);
+        service.FinishSession();
+        service.FinishSession();
+
+        var stages = transport.Events.Where(e => e.action == "sf_first_session_stage").ToArray();
+        Assert.That(stages.Length, Is.EqualTo(2));
+        Assert.That(stages[0].first_session_stage, Is.EqualTo("launch"));
+        Assert.That(stages[0].first_session_step_seconds, Is.EqualTo(5));
+        Assert.That(stages[1].first_session_stage, Is.EqualTo("travel"));
+        Assert.That(stages[1].first_session_stage_index, Is.EqualTo(2));
+        Assert.That(stages[1].first_session_step_seconds, Is.EqualTo(18));
+        var report = transport.Events.Single(e => e.action == "sf_first_session_report");
+        Assert.That(report.first_session_stage_path, Is.EqualTo("launch>travel"));
+        Assert.That(report.first_session_stage_gaps, Is.EqualTo("5,18"));
+        Assert.That(report.last_first_session_stage, Is.EqualTo("travel"));
+        Assert.That(report.first_session_elapsed_seconds, Is.EqualTo(26));
+        Assert.That(report.first_session_last_attempt, Is.EqualTo("sf_travel_result"));
+        Assert.That(report.first_session_last_failure_reason, Is.EqualTo("CargoOverloaded"));
+        Assert.That(report.first_session_failure_count, Is.EqualTo(1));
+    }
+
+    [Test] public void FirstSessionWithNoProgress_ReportsLastFailedAttempt()
+    {
+        var transport = new Transport();
+        var service = Create(transport);
+        service.Track(PlayerAnalyticsAction.TargetSelection, false, "TargetUnavailable");
+        service.FinishSession();
+        var report = transport.Events.Single(e => e.action == "sf_first_session_report");
+        Assert.That(report.last_first_session_stage, Is.EqualTo("none"));
+        Assert.That(report.first_session_last_attempt, Is.EqualTo("sf_target_selection"));
+        Assert.That(report.first_session_last_failure_reason, Is.EqualTo("TargetUnavailable"));
+        Assert.That(report.first_session_failure_count, Is.EqualTo(1));
+    }
+
+    [Test] public void LaterSession_DoesNotRepeatFirstSessionStages()
+    {
+        var preferences = new Preferences();
+        var first = new Transport();
+        Create(first, preferences).FinishSession();
+        var second = new Transport();
+        var later = Create(second, preferences);
+        later.Track(PlayerAnalyticsAction.FirstLaunch, true);
+        later.FinishSession();
+        Assert.That(preferences.FirstSessionPending, Is.False);
+        Assert.That(second.Events.Any(e => e.action == "sf_first_session_stage" ||
+                                           e.action == "sf_first_session_report"), Is.False);
     }
 }

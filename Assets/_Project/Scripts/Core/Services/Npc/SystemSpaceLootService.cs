@@ -197,6 +197,8 @@ public sealed class SystemSpaceLootService : CustomService
         if (loot == null || player == null || loot.SystemId != player.CurrentSystemId)
         {
             error = "Трофей недоступен";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                "LootUnavailable", lootId);
             return false;
         }
         if (_playerCollectionMarks.Remove(lootId))
@@ -209,18 +211,24 @@ public sealed class SystemSpaceLootService : CustomService
         if (grabber == null)
         {
             error = "На корабле не установлен захват. Сбор невозможен";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                "GrabberUnavailable", lootId);
             return false;
         }
         if (grabber.Strength <= 0 || grabber.Range <= 0f ||
             grabber.PullSpeedPerTick <= 0f)
         {
             error = "Захват не работает";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                "GrabberDisabled", lootId);
             return false;
         }
         if (!string.IsNullOrEmpty(loot.PullCollectorId) &&
             loot.PullCollectorId != "player")
         {
             error = "Трофей уже собирают";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                "LootClaimedByOther", lootId);
             return false;
         }
         int mass = GetLootMass(loot);
@@ -231,6 +239,8 @@ public sealed class SystemSpaceLootService : CustomService
                 : _configService.GetItemConfigById(loot.ItemConfigId)?.DisplayName;
             error = string.IsNullOrWhiteSpace(name)
                 ? "Трофей\nслишком тяжёлый" : "Трофей «" + name.Trim() + "»\nслишком тяжёлый";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                "GrabberTooWeak", lootId);
             return false;
         }
         _playerCollectionMarks.Add(lootId);
@@ -516,6 +526,8 @@ public sealed class SystemSpaceLootService : CustomService
             (loot.PullCollectorId != null && loot.PullCollectorId != "player"))
         {
             error = "Трофей недоступен";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                "LootUnavailable", lootId);
             return false;
         }
         GrabberConfig grabber = PlayerGrabber();
@@ -524,24 +536,53 @@ public sealed class SystemSpaceLootService : CustomService
             Vector3.Distance(loot.Position, player.SystemMapShipPosition) > grabber.Range)
         {
             error = "Захват не достаёт до трофея";
+            string reason = grabber == null || grabber.Range <= 0f || grabber.PullSpeedPerTick <= 0f
+                ? "GrabberUnavailable"
+                : GetLootMass(loot) > grabber.Strength ? "GrabberTooWeak" : "GrabberOutOfRange";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                reason, lootId);
             return false;
         }
         if (loot.Kind == SpaceLootKind.Credits)
         {
-            if (player.Credits > int.MaxValue - loot.Quantity) { error = "Кошелёк полон"; return false; }
+            if (player.Credits > int.MaxValue - loot.Quantity)
+            {
+                error = "Кошелёк полон";
+                PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                    "CreditsOverflow", lootId);
+                return false;
+            }
             Bootstrapper.Instance.ServiceRegistry.Get<IEconomyService>().AddCredits(loot.Quantity);
         }
         else if (loot.Kind == SpaceLootKind.Diamonds)
         {
-            if (player.Diamonds > int.MaxValue - loot.Quantity) { error = "Кошелёк полон"; return false; }
+            if (player.Diamonds > int.MaxValue - loot.Quantity)
+            {
+                error = "Кошелёк полон";
+                PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                    "DiamondsOverflow", lootId);
+                return false;
+            }
             player.Diamonds += loot.Quantity;
             _eventBus.Publish(new DiamondsChangedEvent(player.Diamonds));
         }
         else if (loot.Kind == SpaceLootKind.Equipment)
         {
-            if (loot.Equipment == null) { error = "Оборудование повреждено"; return false; }
+            if (loot.Equipment == null)
+            {
+                error = "Оборудование повреждено";
+                PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                    "EquipmentMissing", lootId);
+                return false;
+            }
             ShipRuntimeData ship = player.GetActiveShip();
-            if (ship == null) { error = "Трюм недоступен"; return false; }
+            if (ship == null)
+            {
+                error = "Трюм недоступен";
+                PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                    "CargoUnavailable", lootId);
+                return false;
+            }
             ship.CargoEquipment ??= new List<SystemNpcWeaponRuntimeState>();
             ship.CargoEquipment.Add(loot.Equipment);
             _eventBus.Publish(new CargoChangedEvent(_inventoryService.GetUsedCargo()));
@@ -549,6 +590,8 @@ public sealed class SystemSpaceLootService : CustomService
         else if (!_inventoryService.AddLootItem(loot.ItemConfigId, loot.Quantity))
         {
             error = "Не удалось поместить трофей в трюм";
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, false,
+                "CargoRejected", lootId);
             return false;
         }
         Remove(lootId);
@@ -558,6 +601,8 @@ public sealed class SystemSpaceLootService : CustomService
             _shipMovementService.StopImmediately();
         }
         AppLog.Info(DebugLogChannel.Loot, "[LOOT_COLLECTED_PLAYER] Id=" + lootId);
+        PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.LootCollect, true,
+            contentId: lootId, quantity: loot.Quantity);
         return true;
     }
 
