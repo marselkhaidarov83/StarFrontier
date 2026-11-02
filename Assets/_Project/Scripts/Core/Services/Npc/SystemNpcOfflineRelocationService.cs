@@ -7,7 +7,6 @@ public sealed class SystemNpcOfflineRelocationService :
     CustomService,
     ISystemNpcOfflineRelocationService
 {
-    private const double MaxOfflineHours = 12d;
     private const float MinMapSpawnRadiusFromSun = 120f;
 
     private readonly IConfigService _configService;
@@ -136,24 +135,8 @@ public sealed class SystemNpcOfflineRelocationService :
 
     private double CalculateOfflineHours(GameRuntimeMetaState meta)
     {
-        if (meta == null || meta.LastSaveUtc <= 0)
-            return 0d;
-
-        long nowTicks =
-            DateTime.UtcNow.Ticks;
-
-        if (nowTicks <= meta.LastSaveUtc)
-            return 0d;
-
-        double offlineHours =
-            new TimeSpan(nowTicks - meta.LastSaveUtc).TotalHours;
-
-        if (offlineHours <= 0d)
-            return 0d;
-
-        return Math.Min(
-            MaxOfflineHours,
-            offlineHours);
+        return meta == null ? 0d :
+            OfflineProgressWindow.ElapsedSeconds(meta.LastSaveUtc, DateTime.UtcNow.Ticks) / 3600d;
     }
 
     private bool CanNpcTryOfflineRelocation(

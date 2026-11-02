@@ -306,6 +306,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 combatDamagePopupVisualConfig,
                 npcBehaviourTransitionMatrixConfig));
 
+        RegisterService<IStationService, StationService>();
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
         RegisterService<ITargetService2A, TargetService2A>();

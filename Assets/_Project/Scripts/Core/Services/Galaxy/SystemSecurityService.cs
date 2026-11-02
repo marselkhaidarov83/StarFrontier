@@ -88,6 +88,7 @@ public sealed class SystemSecurityService :
             systemState.SystemStatus;
 
         systemState.SetSystemStatus(newStatus);
+        NotifyStationChanged(systemId);
 
         if (previousStatus != StarSystemStatus.Captured && systemState.SystemStatus == StarSystemStatus.Captured)
             PublishCaptured(systemId);
@@ -134,6 +135,7 @@ public sealed class SystemSecurityService :
             systemState.SystemStatus;
 
         systemState.MarkCaptured();
+        NotifyStationChanged(systemId);
 
         if (previousStatus != StarSystemStatus.Captured)
             PublishCaptured(systemId);
@@ -183,6 +185,13 @@ public sealed class SystemSecurityService :
                       system.SystemId == systemId);
     }
 
+    private static void NotifyStationChanged(string systemId)
+    {
+        if (Bootstrapper.Instance != null && Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<IStationService>(out var stations))
+            stations.ReconcileSystem(systemId);
+    }
+
     private void PublishCaptured(string systemId)
     {
         try { _eventBus?.Publish(new SystemCapturedMissionEvent(systemId)); }
@@ -227,6 +236,7 @@ public sealed class SystemSecurityService :
             systemState.SystemStatus;
 
         systemState.MarkLiberatedByPlayer();
+        NotifyStationChanged(systemId);
 
         RemoveEnemyOwnershipForSystem(systemId);
 
@@ -338,12 +348,16 @@ public sealed class SystemSecurityService :
             return false;
         }
 
+        if (systemState.Station?.Recovery != null)
+            return false;
+
         SystemInfrastructureDamageState previousDamageState =
             systemState.InfrastructureDamageState;
 
         systemState.ApplyInfrastructureDamageFromWar(
             damageAmount,
             forceDestroyed);
+        NotifyStationChanged(systemId);
 
         LogCustom(
             "[SystemSecurityService] Infrastructure damage updated. " +

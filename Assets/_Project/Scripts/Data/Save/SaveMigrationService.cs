@@ -69,6 +69,10 @@ public static class SaveMigrationService
             changed = true;
         }
 
+        if (state.Galaxy?.Systems != null)
+            foreach (var system in state.Galaxy.Systems)
+                changed |= StationLifecycleRules.Normalize(system);
+
         if (state.Meta.SaveDataVersion != SaveDataVersions.Current)
         {
             state.Meta.SaveDataVersion = SaveDataVersions.Current;

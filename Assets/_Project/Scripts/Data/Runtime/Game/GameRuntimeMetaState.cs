@@ -29,6 +29,9 @@ public class GameRuntimeMetaState
 
     public long LastSaveUtc;
 
+    // Independent watermark; NPC offline relocation may update LastSaveUtc before the next save.
+    public long StationOfflineProcessedUtc;
+
     public string LastSaveReason = "new_game";
 
     /// <summary>

@@ -5,6 +5,7 @@
   <Project Path="Editor.csproj" />
   <Project Path="Sprint3Verification.csproj" />
   <Project Path="Tools.csproj" />
+  <Project Path="Sprint7Stations.csproj" />
   <Project Path="Sprint4Verification.csproj" />
   <Project Path="Sprint1Verification.csproj" />
   <Project Path="Sprint5Verification.csproj" />

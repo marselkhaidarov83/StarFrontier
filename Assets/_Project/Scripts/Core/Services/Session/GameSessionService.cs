@@ -15,6 +15,7 @@ public class GameSessionService : IGameSessionService
     public void StartNewSession(GameRuntimeState state)
     {
         State = state;
+        InitializeStations(newGame: true);
         InitializeMissionSession();
         ForcePauseOnSessionOpen();
         InitializeSystemTravelService();
@@ -24,10 +25,18 @@ public class GameSessionService : IGameSessionService
     public void LoadSession(GameRuntimeState state)
     {
         State = state;
+        InitializeStations(newGame: false);
         InitializeMissionSession();
         ForcePauseOnSessionOpen();
         InitializeSystemTravelService();
         PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ContinueGame, true);
+    }
+
+    private void InitializeStations(bool newGame)
+    {
+        if (Bootstrapper.Instance != null && Bootstrapper.Instance.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<IStationService>(out var stations))
+            stations.InitializeSession(newGame);
     }
 
     private void InitializeMissionSession()

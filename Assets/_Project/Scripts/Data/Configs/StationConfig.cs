@@ -8,6 +8,54 @@ public class StationConfig : BaseConfig
     [Tooltip("Параметр stationTypeConfig. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private StationTypeConfig stationTypeConfig;
 
+    [Header("Station Lifecycle")]
+    [Tooltip("Уровень конкретной станции в НОВОЙ игре. 0 — сначала построить первый уровень. Сохранения не перезаписываются.")]
+    [SerializeField, Range(0, 10)] private int initialLevel;
+    [Tooltip("Окно строительства/восстановления открывается при расстоянии МЕНЬШЕ этого значения.")]
+    [SerializeField, Min(0.01f)] private float operationInteractionDistance = 300f;
+    [Tooltip("Варианты оплаты первого уровня. У каждого варианта своё время, включая мгновенный.")]
+    [SerializeField] private StationPaymentOption[] constructionPaymentOptions = System.Array.Empty<StationPaymentOption>();
+    [SerializeField] private StationUpgradeSettings[] upgradeSettings = System.Array.Empty<StationUpgradeSettings>();
+    [Tooltip("Восстановление оплачивается отдельно. Те же способы оплаты, но собственные цены и время.")]
+    [SerializeField] private StationPaymentOption[] recoveryPaymentOptions = System.Array.Empty<StationPaymentOption>();
+
+    public int InitialLevel => Mathf.Clamp(initialLevel, 0, 10);
+    public float OperationInteractionDistance => float.IsNaN(operationInteractionDistance) ||
+        float.IsInfinity(operationInteractionDistance) || operationInteractionDistance <= 0f
+        ? 300f : operationInteractionDistance;
+
+    public bool TryCreateOperation(StationOperationKind kind, int currentLevel, string optionId,
+        out StationOperationRuntimeState snapshot)
+    {
+        snapshot = null;
+        if (currentLevel < 0 || currentLevel > 10 || string.IsNullOrWhiteSpace(optionId)) return false;
+        int target = kind == StationOperationKind.Recovery ? currentLevel : currentLevel + 1;
+        StationPaymentOption[] options = null;
+        if (kind == StationOperationKind.Construction && currentLevel == 0) options = constructionPaymentOptions;
+        else if (kind == StationOperationKind.Recovery) options = recoveryPaymentOptions;
+        else if (kind == StationOperationKind.Upgrade && currentLevel > 0 && currentLevel < 10)
+        {
+            bool targetFound = false;
+            if (upgradeSettings != null)
+                foreach (var settings in upgradeSettings)
+                    if (settings != null && settings.TargetLevel == target)
+                    {
+                        if (targetFound) return false; // Ambiguous target-level configuration, even with null options.
+                        targetFound = true;
+                        options = settings.PaymentOptions;
+                    }
+        }
+        if (options == null) return false;
+        StationPaymentOption selected = null;
+        var ids = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
+        foreach (var option in options)
+        {
+            if (option == null || string.IsNullOrWhiteSpace(option.Id) || !ids.Add(option.Id)) return false;
+            if (option.Id == optionId) selected = option;
+        }
+        return selected != null && selected.TryCreateSnapshot(kind, target, out snapshot);
+    }
+
     [Header("State")]
     [Tooltip("Переключатель isMainStation. Включает или выключает соответствующее правило или отображение.")]
     [SerializeField] private bool isMainStation = true;

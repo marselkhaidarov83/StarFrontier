@@ -48,6 +48,7 @@ public static class SaveDataVersions
     public const int MissionLifecycle = 7;
     public const int MissionGameplay = 8;
     public const int MissionBattleAndRoutes = 9;
-    public const int Current = MissionBattleAndRoutes;
+    public const int StationLifecycle = 10;
+    public const int Current = StationLifecycle;
 
 }

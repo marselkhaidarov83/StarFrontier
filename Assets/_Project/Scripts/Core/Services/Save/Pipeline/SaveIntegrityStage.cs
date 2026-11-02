@@ -50,7 +50,7 @@ public sealed class SaveIntegrityStage
     {
         var status = Verify(state);
         if (status != SaveIntegrityStatus.Invalid || state?.Meta == null ||
-            state.Meta.SaveDataVersion >= SaveDataVersions.MissionBattleAndRoutes || string.IsNullOrWhiteSpace(json))
+            state.Meta.SaveDataVersion >= SaveDataVersions.StationLifecycle || string.IsNullOrWhiteSpace(json))
             return status;
 
         string expected = state.Meta.IntegrityChecksum;
@@ -83,7 +83,12 @@ public sealed class SaveIntegrityStage
         canonical = canonical.Remove(index, field.Length).Insert(index, "\"IntegrityChecksum\":\"\"");
         bool valid = FixedTimeEquals(expected, ComputeChecksum(canonical));
         if (valid)
-            AppLog.Info(DebugLogChannel.Mission, "[MissionLifecycle] Legacy JSON integrity verified before migration.");
+        {
+            if (state.Meta.SaveDataVersion == SaveDataVersions.MissionBattleAndRoutes)
+                AppLog.Info(DebugLogChannel.StationLifecycle, "[StationLifecycle] Legacy v9 JSON integrity verified before migration.");
+            else
+                AppLog.Info(DebugLogChannel.Mission, "[MissionLifecycle] Legacy JSON integrity verified before migration.");
+        }
         return valid ? SaveIntegrityStatus.Valid : SaveIntegrityStatus.Invalid;
     }
 

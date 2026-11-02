@@ -26,6 +26,7 @@ public static class GalaxyRuntimeStateFactory
         if (config == null || config.Sectors == null)
             return state;
 
+        var systemIds = new HashSet<string>(System.StringComparer.Ordinal);
         var orderedSectors = new List<SectorConfig>();
         foreach (SectorConfig sector in config.Sectors)
         {
@@ -57,6 +58,11 @@ public static class GalaxyRuntimeStateFactory
                 if (systemConfig == null)
                     continue;
 
+                if (string.IsNullOrWhiteSpace(systemConfig.Id) || !systemIds.Add(systemConfig.Id))
+                    throw new System.InvalidOperationException("Duplicate or empty system ID in new galaxy: " + systemConfig.Id);
+                if (systemConfig.Station != null && string.IsNullOrWhiteSpace(systemConfig.Station.Id))
+                    throw new System.InvalidOperationException("Station ID is empty: " + systemConfig.Id);
+
                 bool isEnemyAtStart =
                     mobileTestMode
                         ? sectorIndex >= System.Math.Max(0, alliedSectorCount)
@@ -65,6 +71,8 @@ public static class GalaxyRuntimeStateFactory
                 StarSystemRuntimeState systemState = new StarSystemRuntimeState
                 {
                     SystemId = systemConfig.Id,
+                    StationStateVersion = StationLifecycleRules.SchemaVersion,
+                    Station = StationLifecycleRules.Create(systemConfig.Station),
                     IsDiscovered = systemConfig.IsStartSystem ||
                         (mobileTestMode ? sectorState.IsUnlocked : !systemConfig.IsHiddenAtStart),
                     IsVisited = systemConfig.IsStartSystem,
@@ -76,6 +84,7 @@ public static class GalaxyRuntimeStateFactory
                         : StarSystemStatus.Stable
                 };
 
+                StationLifecycleRules.Normalize(systemState);
                 state.Systems.Add(systemState);
 
                 if (isEnemyAtStart)

@@ -41,6 +41,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private readonly IGalaxyNpcBehaviorService _galaxyNpcBehaviorService;
     private readonly IInvasionSchedulerService _invasionSchedulerService;
     private readonly ISaveService _saveService;
+    private readonly IStationService _stationService;
 
     private bool _currentTickStarted;
     private bool _pauseAfterCurrentTick;
@@ -68,6 +69,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _systemEnemyService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyService>();
         _systemEnemyMovementService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyMovementService>();
         _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
+        Bootstrapper.Instance.ServiceRegistry.TryGet(out _stationService);
         Bootstrapper.Instance.ServiceRegistry.TryGet(out _invasionSchedulerService);
 
         ApplyGameTimeConfig();
@@ -679,6 +681,9 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         if (_invasionSchedulerService != null)
             _invasionSchedulerService.Tick(deltaTime, State.CurrentQuantTick);
         double galaxyPopulationMs = EndPerfMeasureMs(galaxyPopulationStartedAt);
+
+        // Process station operations after combat/war transitions, including when the system scene is closed.
+        _stationService?.AdvanceTime(deltaTime);
 
         long galaxyNpcBehaviorStartedAt = BeginPerfMeasure();
         _galaxyNpcBehaviorService.Tick(State.CurrentQuantTick);

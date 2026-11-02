@@ -112,6 +112,7 @@ public class ContinueGameService : CustomService, IContinueGameService
 
         _gameSessionService.LoadSession(save);
         ProcessOfflineWarCatchUp(save);
+        ProcessOfflineStations(save);
 
         LogLoadingStep(
             "LoadSession.After",
@@ -289,6 +290,7 @@ public class ContinueGameService : CustomService, IContinueGameService
 
         _gameSessionService.LoadSession(save);
         ProcessOfflineWarCatchUp(save);
+        ProcessOfflineStations(save);
 
         if (_npcSimulationSaveService != null)
         {
@@ -414,6 +416,13 @@ public class ContinueGameService : CustomService, IContinueGameService
             stage);
 
         completed?.Invoke(true);
+    }
+
+    private void ProcessOfflineStations(GameRuntimeState save)
+    {
+        // Must precede NPC relocation, which consumes/rewrites Meta.LastSaveUtc.
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationService>(out var stations))
+            stations.ProcessOffline(save, DateTime.UtcNow.Ticks);
     }
 
     private void ReevaluateMissionsAfterWorldRestore()

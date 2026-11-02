@@ -46,6 +46,21 @@ public sealed class SimpleEventBus
         }
     }
 
+    /// <summary>For committed state notifications: a failed observer must not block the remaining observers.</summary>
+    public void PublishSafely<T>(T eventData, Action<Exception> onError)
+    {
+        if (!_handlers.TryGetValue(typeof(T), out var handler)) return;
+        foreach (Delegate subscriber in handler.GetInvocationList())
+        {
+            try { ((Action<T>)subscriber).Invoke(eventData); }
+            catch (Exception exception)
+            {
+                try { onError?.Invoke(exception); }
+                catch { /* Diagnostics must not prevent delivery to the next observer. */ }
+            }
+        }
+    }
+
     public void PublishProfiled<T>(
         T eventData,
         double slowSubscriberThresholdMs,

@@ -18,6 +18,9 @@ public sealed class S02_HiddenSystemDiscoveryContract_RED_Test
 
         try
         {
+            SetConfigId(galaxy, "galaxy_hidden_discovery");
+            SetConfigId(sector, "sector_hidden_discovery");
+            SetConfigId(hidden, "system_hidden_discovery");
             SetPrivate(hidden, "isHiddenAtStart", true);
             SetPrivate(hidden, "isStartSystem", false);
             SetPrivate(sector, "systems", new[] { hidden });
@@ -46,6 +49,7 @@ public sealed class S02_HiddenSystemDiscoveryContract_RED_Test
         var assets = new List<Object>();
         var galaxy = ScriptableObject.CreateInstance<GalaxyConfig>();
         assets.Add(galaxy);
+        SetConfigId(galaxy, "galaxy_test_discovery");
         try
         {
             // Reverse input order to check that sector Order determines the first N sectors.
@@ -57,8 +61,9 @@ public sealed class S02_HiddenSystemDiscoveryContract_RED_Test
                 assets.Add(sector);
                 assets.Add(hidden);
                 assets.Add(visible);
-                typeof(BaseConfig).GetField("id", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .SetValue(sector, "sector_" + order);
+                SetConfigId(sector, "sector_" + order);
+                SetConfigId(hidden, "system_hidden_" + order);
+                SetConfigId(visible, "system_visible_" + order);
                 SetPrivate(sector, "order", order);
                 SetPrivate(hidden, "isHiddenAtStart", true);
                 SetPrivate(visible, "isHiddenAtStart", false);
@@ -86,6 +91,13 @@ public sealed class S02_HiddenSystemDiscoveryContract_RED_Test
             foreach (Object asset in assets)
                 Object.DestroyImmediate(asset);
         }
+    }
+
+    private static void SetConfigId(BaseConfig target, string id)
+    {
+        var field = typeof(BaseConfig).GetField("id", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.That(field, Is.Not.Null, "Missing BaseConfig.id");
+        field.SetValue(target, id);
     }
 
     private static void SetPrivate(object target, string name, object value)

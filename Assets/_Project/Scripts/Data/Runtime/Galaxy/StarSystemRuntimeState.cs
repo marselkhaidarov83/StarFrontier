@@ -5,6 +5,10 @@ public class StarSystemRuntimeState
 {
     public string SystemId;
 
+    // Version distinguishes legacy saves from an intentional level 0 or an intentionally empty slot.
+    public int StationStateVersion;
+    public StationRuntimeState Station;
+
     public int InvasionGeneration;
 
     public bool IsDiscovered;
@@ -29,6 +33,7 @@ public class StarSystemRuntimeState
     public void SetSystemStatus(StarSystemStatus newStatus)
     {
         SystemStatus = newStatus;
+        StationLifecycleRules.ApplySystemStatus(Station, newStatus);
     }
 
     public void MarkThreat()
@@ -68,6 +73,9 @@ public class StarSystemRuntimeState
     int damageAmount,
     bool forceDestroyed)
     {
+        // Recovery cannot be attacked. Capture cancels recovery BEFORE applying its infrastructure damage.
+        if (Station?.Recovery != null) return;
+
         int normalizedDamage =
             Math.Max(
                 0,
@@ -84,6 +92,7 @@ public class StarSystemRuntimeState
             InfrastructureDamage = 100;
             InfrastructureDamageState =
                 SystemInfrastructureDamageState.Destroyed;
+            StationLifecycleRules.Destroy(Station);
 
             return;
         }

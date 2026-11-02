@@ -37,7 +37,8 @@ public enum DebugLogChannel
     EventBus,
     Config,
     EditorGenerators,
-    Loot
+    Loot,
+    StationLifecycle
 }
 
 public enum NpcMovementLoadAnalyticsDetailLevel
@@ -80,6 +81,11 @@ public sealed class DebugLogConfig : ScriptableObject
 
     [Tooltip("Выводить этапы и причины остановки первой сессии в Console. Работает только при включённом главном выключателе логов.")]
     [SerializeField] private bool firstSessionTraceLogs;
+
+    [Header("Station Lifecycle")]
+    [Tooltip("Состояния, операции, миграция и офлайн станций. Отключается также главным выключателем логов.")]
+    [SerializeField] private bool stationLifecycleLogs;
+    public bool StationLifecycleLogs => logsEnabled && stationLifecycleLogs;
 
     [Header("Master")]
     [Tooltip("Главный выключатель всех служебных сообщений. Если он выключен, остальные переключатели сообщений не сработают.")]
@@ -465,6 +471,9 @@ Mathf.Max(0f, visualUpdateSpikeThresholdMs);
 
             case DebugLogChannel.Loot:
                 return lootLogs;
+
+            case DebugLogChannel.StationLifecycle:
+                return stationLifecycleLogs;
 
             case DebugLogChannel.Damage:
                 return damageLogs;
