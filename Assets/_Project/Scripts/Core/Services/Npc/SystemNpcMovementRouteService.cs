@@ -18,6 +18,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
     private readonly IGameSessionService _gameSessionService;
     private IPlayerCombatTargetService _playerCombatTargetService;
+    private readonly IStationCombatService2A _stationCombat;
 
     private const float KeepDistanceRadius = 100f;
     private const float PlanetKeepDistanceRadius = 200f;
@@ -35,6 +36,7 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _npcRuntimeService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemNpcRuntimeService>();
         _playerCombatTargetService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerCombatTargetService>();
+        _stationCombat = Bootstrapper.Instance.ServiceRegistry.Get<IStationCombatService2A>();
 
         LogCustom("[NPC-ROUTE-DEBUG] Service debug enabled.");
     }
@@ -491,6 +493,11 @@ public sealed class SystemNpcMovementRouteService : CustomService, ISystemNpcMov
         SystemNpcRuntimeState npc,
         SystemNpcMovementTargetResolveStats stats)
     {
+        if (StationAttackRules2A.IsAttack(npc.CurrentBehavior))
+        {
+            var target = _stationCombat?.FindTarget(npc) ?? GalaxyCombatTarget.None();
+            return target.IsValid ? GetCombatApproachPosition(npc, target.Position, stats) : npc.CurrentPosition;
+        }
         long stepStartedAt =
             stats != null
                 ? BeginPerfMeasure()

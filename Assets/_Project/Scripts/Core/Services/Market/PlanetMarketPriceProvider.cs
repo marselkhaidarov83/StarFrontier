@@ -51,15 +51,14 @@ using System.Linq;
         {
             entry = null;
 
-            PlanetConfig currentPlanet = 
-                    configService.GetPlanetConfigById(gameSessionService.State.Player.CurrentPlanetId);
-            // PlanetConfig currentPlanet = _currentPlanetProvider.GetCurrentPlanet();
-            
-            if (currentPlanet == null || currentPlanet.MarketProfile == null)
-                return false;
-
-            entry = currentPlanet.MarketProfile.Items
-                .FirstOrDefault(x => x != null && x.ItemConfig.Id == itemId && x.IsAvailable);
+            var player = gameSessionService.State?.Player;
+            if (player == null) return false;
+            MarketProfileConfig market;
+            if (!string.IsNullOrEmpty(player.CurrentStationId))
+                market = StationLocationRules.Market(gameSessionService.State, configService.GetStarSystemConfigById(player.CurrentSystemId));
+            else market = configService.GetPlanetConfigById(player.CurrentPlanetId)?.MarketProfile;
+            if (market?.Items == null) return false;
+            entry = market.Items.FirstOrDefault(x => x != null && x.ItemConfig != null && x.ItemConfig.Id == itemId && x.IsAvailable);
 
             return entry != null;
         }

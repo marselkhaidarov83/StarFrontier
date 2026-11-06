@@ -84,6 +84,7 @@ public static class GalaxyRuntimeStateFactory
                         : StarSystemStatus.Stable
                 };
 
+                if (isEnemyAtStart) StationLifecycleRules.Destroy(systemState.Station);
                 StationLifecycleRules.Normalize(systemState);
                 state.Systems.Add(systemState);
 

@@ -87,6 +87,7 @@ public sealed class SystemSecurityService :
         StarSystemStatus previousStatus =
             systemState.SystemStatus;
 
+        if (newStatus == StarSystemStatus.Captured && !CanCapture(systemState)) return false;
         systemState.SetSystemStatus(newStatus);
         NotifyStationChanged(systemId);
 
@@ -134,6 +135,7 @@ public sealed class SystemSecurityService :
         StarSystemStatus previousStatus =
             systemState.SystemStatus;
 
+        if (!CanCapture(systemState)) return false;
         systemState.MarkCaptured();
         NotifyStationChanged(systemId);
 
@@ -163,6 +165,9 @@ public sealed class SystemSecurityService :
 
         return true;
     }
+
+    private bool CanCapture(StarSystemRuntimeState system) => StationInfrastructureRules.CanCapture(system,
+        _npcRuntimeService.GetAliveNpcsInSystem(system.SystemId).Any(n => n.IsAlly && n.AllyRole == AllyRole2A.Military));
 
     private StarSystemRuntimeState FindSystemState(
         string systemId)

@@ -10,6 +10,7 @@ public enum SystemNpcBehaviorType
     TravelToAnotherSystem = 22,
     PatrolSystem = 23,
     TravelToEnemySystem = 24,
+    TravelWithinSector = 25,
 
     CollectDebris = 30,
     AttackMeteorite = 31,

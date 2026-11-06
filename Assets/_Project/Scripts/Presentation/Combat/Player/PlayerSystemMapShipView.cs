@@ -77,6 +77,9 @@ public sealed class PlayerSystemMapShipView :
                 return;
             }
 
+            bool docked = !string.IsNullOrEmpty(_gameSessionService.State.Player.CurrentStationId);
+            if (spriteRenderer != null) spriteRenderer.enabled = !docked;
+            if (shipCollider != null) shipCollider.enabled = !docked;
             phaseStartedAt =
                 Time.realtimeSinceStartupAsDouble;
 

@@ -59,7 +59,7 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
         if (profile.CurrentSystemId != systemId)
             return false;
 
-        if (profile.IsOnPlanet())
+        if (profile.IsOnPlanet() || !string.IsNullOrEmpty(profile.CurrentStationId))
             return false;
 
         ShipRuntimeData activeShip = GetActiveShip();

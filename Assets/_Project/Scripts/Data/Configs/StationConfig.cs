@@ -8,6 +8,10 @@ public class StationConfig : BaseConfig
     [Tooltip("Параметр stationTypeConfig. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private StationTypeConfig stationTypeConfig;
 
+    [Header("Level Effects and Repair")]
+    [SerializeField] private StationLevelEffectsConfig levelEffects;
+    public StationLevelEffectsConfig LevelEffects => levelEffects;
+
     [Header("Station Lifecycle")]
     [Tooltip("Уровень конкретной станции в НОВОЙ игре. 0 — сначала построить первый уровень. Сохранения не перезаписываются.")]
     [SerializeField, Range(0, 10)] private int initialLevel;
@@ -17,12 +21,33 @@ public class StationConfig : BaseConfig
     [SerializeField] private StationPaymentOption[] constructionPaymentOptions = System.Array.Empty<StationPaymentOption>();
     [SerializeField] private StationUpgradeSettings[] upgradeSettings = System.Array.Empty<StationUpgradeSettings>();
     [Tooltip("Восстановление оплачивается отдельно. Те же способы оплаты, но собственные цены и время.")]
-    [SerializeField] private StationPaymentOption[] recoveryPaymentOptions = System.Array.Empty<StationPaymentOption>();
+    [SerializeField, HideInInspector] private StationPaymentOption[] recoveryPaymentOptions = System.Array.Empty<StationPaymentOption>();
 
     public int InitialLevel => Mathf.Clamp(initialLevel, 0, 10);
     public float OperationInteractionDistance => float.IsNaN(operationInteractionDistance) ||
         float.IsInfinity(operationInteractionDistance) || operationInteractionDistance <= 0f
         ? 300f : operationInteractionDistance;
+
+    public StationPaymentOption[] GetPaymentOptions(StationOperationKind kind, int level)
+    {
+        if (kind == StationOperationKind.Construction) return constructionPaymentOptions ?? System.Array.Empty<StationPaymentOption>();
+        if (kind == StationOperationKind.Upgrade)
+        {
+            if (upgradeSettings != null)
+                foreach (var entry in upgradeSettings)
+                    if (entry != null && entry.TargetLevel == level + 1) return entry.PaymentOptions ?? System.Array.Empty<StationPaymentOption>();
+            return System.Array.Empty<StationPaymentOption>();
+        }
+        var settings = levelEffects?.GetLevel(Mathf.Max(1, level));
+        StationInstantPaymentOption[] instant = kind == StationOperationKind.Repair
+            ? settings?.RepairPaymentOptions : settings?.RecoveryPaymentOptions;
+        if (instant == null) return kind == StationOperationKind.Recovery
+            ? recoveryPaymentOptions ?? System.Array.Empty<StationPaymentOption>() : System.Array.Empty<StationPaymentOption>();
+        var result = new StationPaymentOption[instant.Length];
+        for (int i = 0; i < result.Length; i++)
+            if (instant[i] != null) result[i] = new StationPaymentOption { Id = instant[i].Id, Costs = instant[i].Costs, DurationSeconds = 0 };
+        return result;
+    }
 
     public bool TryCreateOperation(StationOperationKind kind, int currentLevel, string optionId,
         out StationOperationRuntimeState snapshot)
@@ -32,7 +57,22 @@ public class StationConfig : BaseConfig
         int target = kind == StationOperationKind.Recovery ? currentLevel : currentLevel + 1;
         StationPaymentOption[] options = null;
         if (kind == StationOperationKind.Construction && currentLevel == 0) options = constructionPaymentOptions;
-        else if (kind == StationOperationKind.Recovery) options = recoveryPaymentOptions;
+        else if (kind == StationOperationKind.Recovery)
+        {
+            var instant = levelEffects?.GetLevel(Mathf.Max(1, currentLevel))?.RecoveryPaymentOptions;
+            if (instant != null)
+            {
+                StationInstantPaymentOption choice = null;
+                var names = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
+                foreach (var entry in instant)
+                {
+                    if (entry == null || string.IsNullOrWhiteSpace(entry.Id) || !names.Add(entry.Id)) return false;
+                    if (entry.Id == optionId) choice = entry;
+                }
+                return choice != null && choice.TryCreateSnapshot(kind, currentLevel, out snapshot);
+            }
+            options = recoveryPaymentOptions; // Only compatibility with older content.
+        }
         else if (kind == StationOperationKind.Upgrade && currentLevel > 0 && currentLevel < 10)
         {
             bool targetFound = false;

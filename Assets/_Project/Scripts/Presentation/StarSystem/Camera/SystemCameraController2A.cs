@@ -973,6 +973,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
             return;
         }
 
+        _eventBus.Subscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         _eventBus.Subscribe<GalaxyEnteredEvent>(
             OnGalaxyEntered
         );
@@ -996,6 +997,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         if (_eventBus == null)
             return;
 
+        _eventBus.Unsubscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         _eventBus.Unsubscribe<GalaxyEnteredEvent>(
             OnGalaxyEntered
         );
@@ -1009,6 +1011,18 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         );
 
         _isSubscribedToEvents = false;
+    }
+
+    private void OnStationVisitChanged(StationVisitChangedEvent evt)
+    {
+        if (evt.Inside)
+        {
+            _followedNpcId = null; _followedLootId = null;
+            _isSystemCameraActive = false; mode = SystemCameraMode2A.FreeLook;
+            _cameraVelocity = Vector3.zero; _zoomVelocity = 0f;
+        }
+        else if (string.IsNullOrEmpty(_gameSessionService?.State?.Player?.CurrentPlanetId))
+            ActivateSystemCameraSafely();
     }
 
     private void OnSystemEntered(

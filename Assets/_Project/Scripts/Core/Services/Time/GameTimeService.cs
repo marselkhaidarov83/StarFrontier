@@ -495,6 +495,9 @@ public sealed class GameTimeService : CustomService, IGameTimeService
 
         _eventBus.Publish(new GameTimeQuantumAdvancedEvent(State.CurrentQuantTick));
         _eventBus.Publish(new GameDayChangedEvent(State.CurrentQuantTick - 1, State.CurrentQuantTick));
+        // Repair after all tick combat/war/day transitions, once per completed game tick.
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationInfrastructureService>(out var infrastructure))
+            infrastructure.CompleteTick(State.CurrentQuantTick);
 
         LogGameTimeDebug(
             "[TickDebug] GameTickCompleted | Tick=" +
@@ -683,7 +686,10 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         double galaxyPopulationMs = EndPerfMeasureMs(galaxyPopulationStartedAt);
 
         // Process station operations after combat/war transitions, including when the system scene is closed.
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IResearchService>(out var research)) research.AdvanceTime(deltaTime);
         _stationService?.AdvanceTime(deltaTime);
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationVisitService>(out var visit)) visit.Tick();
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationInfrastructureService>(out var infrastructure)) infrastructure.AdvanceTime(deltaTime);
 
         long galaxyNpcBehaviorStartedAt = BeginPerfMeasure();
         _galaxyNpcBehaviorService.Tick(State.CurrentQuantTick);

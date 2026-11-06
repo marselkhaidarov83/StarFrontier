@@ -30,6 +30,7 @@ MonoBehaviour:
   defaultMarketProfile: {fileID: 0}
   defaultMissionPool: {fileID: 0}
   defaultEncounterProfile: {fileID: 0}
+  missionIllustration: {fileID: 21300000, guid: 0866461d6108415a9c1b7e9d97cc722d, type: 3}
   stationSprite: {fileID: 21300000, guid: c4e12f37ab66e4edbbad38d3e0dce578, type: 3}
   destroyedSprite: {fileID: 0}
   shadowSprite: {fileID: 0}

@@ -147,6 +147,18 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             PlanetConfig planet =
                 PickRestoredNpcPlanet(starSystem);
 
+            if (planet == null && entry.SpawnRuleId != null && entry.SpawnRuleId.StartsWith("station-military|", StringComparison.Ordinal))
+            {
+                var ally = _configService.GetAllyConfigById(entry.ConfigId);
+                if (ally != null && ally.Role == AllyRole2A.Military)
+                    for (int n = 0; n < entry.Count; n++)
+                    {
+                        var restored = SystemNpcRuntimeFactory.CreateAlly(ally, starSystem.Id, starSystem.Id,
+                            string.Empty, Vector3.zero, entry.SpawnRuleId);
+                        _npcRuntimeService.AddNpc(restored); restoredNpcs++; restoredAllies++;
+                    }
+                continue;
+            }
             if (planet == null)
             {
                 skippedMissingPlanet += Mathf.Max(1, entry.Count);
@@ -190,14 +202,9 @@ public sealed class SystemNpcSimulationSaveService : CustomService, ISystemNpcSi
             }
         }
 
-        // Resolve after registration: the relocation service is registered after this service.
-        if (Bootstrapper.Instance.ServiceRegistry.TryGet<ISystemNpcOfflineRelocationService>(
-                out ISystemNpcOfflineRelocationService relocationService) &&
-            Bootstrapper.Instance.ServiceRegistry.TryGet<IGameSessionService>(
-                out IGameSessionService sessionService))
-        {
-            relocationService.InitializeMilitaryStartLocations(sessionService.State);
-        }
+        // SaveService invokes Restore before GameSessionService.LoadSession.
+        // Relocation requires the newly loaded galaxy, so ContinueGameService
+        // performs it only after session binding and the final NPC restore.
 
         AppLog.Info(
             DebugLogChannel.Save,

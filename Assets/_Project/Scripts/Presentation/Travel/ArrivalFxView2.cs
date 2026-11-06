@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public sealed class ArrivalFxView2 : CustomMonoBehaviour
 {
@@ -20,52 +19,77 @@ public sealed class ArrivalFxView2 : CustomMonoBehaviour
 
     public void Play(Vector3 position)
     {
+        StopAnimation();
         transform.position = position;
-
+        ResetVisual();
         gameObject.SetActive(true);
 
-        if (_animationCoroutine != null)
-            StopCoroutine(_animationCoroutine);
+        // SetActive on a child cannot activate a hidden system-map parent.
+        // Do not reopen the map just to display a transient arrival effect.
+        if (!isActiveAndEnabled)
+        {
+            gameObject.SetActive(false);
+            AppLog.Info(DebugLogChannel.Travel, typeof(ArrivalFxView2),
+                "Arrival FX skipped | Object=" + name + " | Reason=InactiveHierarchyOrComponent");
+            return;
+        }
+        if (duration <= 0f)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
 
         _animationCoroutine = StartCoroutine(PlayRoutine());
     }
 
-    private IEnumerator PlayRoutine()
+    private void OnDisable()
     {
-        gameObject.SetActive(true);
+        StopAnimation();
+        ResetVisual();
+        // A parent may hide the map during landing. Keep the stopped flash hidden
+        // when the map is shown again, until the next explicit Play request.
+        if (gameObject.activeSelf) gameObject.SetActive(false);
+    }
 
-        float elapsed = 0f;
+    private void StopAnimation()
+    {
+        if (_animationCoroutine == null) return;
+        StopCoroutine(_animationCoroutine);
+        _animationCoroutine = null;
+    }
 
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-
-            float t = Mathf.Clamp01(elapsed / duration);
-            float scale = Mathf.Lerp(startScale, endScale, t);
-            float alpha = 1f - t;
-
-            transform.localScale = new Vector3(scale, scale, 1f);
-
-            if (image != null)
-            {
-                Color color = image.color;
-                color.a = alpha;
-                image.color = color;
-            }
-
-            yield return null;
-        }
-
-        gameObject.SetActive(false);
+    private void ResetVisual()
+    {
         transform.localScale = Vector3.one;
-
         if (image != null)
         {
             Color color = image.color;
             color.a = 1f;
             image.color = color;
         }
+    }
 
+    private IEnumerator PlayRoutine()
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float scale = Mathf.Lerp(startScale, endScale, t);
+            transform.localScale = new Vector3(scale, scale, 1f);
+            if (image != null)
+            {
+                Color color = image.color;
+                color.a = 1f - t;
+                image.color = color;
+            }
+            yield return null;
+        }
+
+        // Clear the handle before deactivation invokes OnDisable.
         _animationCoroutine = null;
+        ResetVisual();
+        gameObject.SetActive(false);
     }
 }

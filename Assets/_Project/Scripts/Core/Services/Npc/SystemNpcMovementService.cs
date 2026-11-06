@@ -4777,6 +4777,7 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         if (npc == null)
             return SystemShipRouteTargetKind2A.MapPoint;
 
+        if (StationAttackRules2A.IsAttack(npc.CurrentBehavior)) return SystemShipRouteTargetKind2A.Station;
         if (npc.TravelState == SystemNpcTravelState.EngagingEnemy ||
             !string.IsNullOrWhiteSpace(npc.CurrentTargetRuntimeNpcId))
         {
@@ -6430,6 +6431,19 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         int currentTick,
         NpcDetailedMovementPhaseStats phaseStats)
     {
+        if (npc != null && StationAttackRules2A.IsAttack(npc.CurrentBehavior) && npc.TravelState == SystemNpcTravelState.EngagingEnemy)
+        {
+            // Arrival at weapon distance is not completion of the station attack.
+            if (!_isInitialWarmupRouteBuild) SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
+            ClearNpcMovementRoute(npc.RuntimeNpcId);
+            npc.CurrentPosition = npc.TargetPosition; npc.TravelProgress01 = 1f;
+            npc.CurrentMovementTargetPosition = npc.CurrentPosition;
+            npc.TickMovementTargetPosition = npc.CurrentPosition;
+            npc.TickMovementDirection = Vector3.zero; npc.TickMovementDirectionTick = currentTick;
+            npc.TickMovementArrived = true;
+            _eventBus.Publish(new SystemNpcPositionChangedEvent(npc.RuntimeNpcId, npc.CurrentSystemId, npc.CurrentPosition));
+            return;
+        }
         if (npc != null && !_isInitialWarmupRouteBuild)
             SystemNpcMovementTime2A.Reset(npc, SystemNpcMovementTime2A.Now);
         long completeStartedAt = phaseStats != null ? BeginPerfMeasure() : 0;
@@ -6787,6 +6801,13 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         if (!string.IsNullOrWhiteSpace(npc.TargetSystemId))
         {
+            if (!CanNpcTravelToSystem(npc, _configService.GetStarSystemConfigById(npc.TargetSystemId)))
+            {
+                npc.TargetSystemId = null;
+                npc.TravelState = SystemNpcTravelState.Idle;
+                npc.HasActiveBehavior = false;
+                return;
+            }
             string arrivedSystemId = npc.TargetSystemId;
 
             npc.CurrentSystemId = arrivedSystemId;
@@ -9648,6 +9669,10 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
         {
             return false;
         }
+
+        if (StationMilitaryRules.IsStationMilitary(npc) &&
+            !StationMilitaryRules.CanTravel(npc, targetSystem.Id, _configService.GetAllSectors(),
+                Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State?.Galaxy)) return false;
 
         if (npc == null || !npc.IsAlly)
             return true;

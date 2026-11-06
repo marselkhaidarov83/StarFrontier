@@ -17,6 +17,7 @@ public class MissionScreenController : CustomMonoBehaviour
     private IMissionService _missionService;
     private IPlanetGovernmentMissionService _governmentMissionService;
     private IConfigService _configService;
+    private IGameSessionService _session;
     private SimpleEventBus _eventBus;
     private readonly List<MissionCardView> _spawnedCards = new();
     private TMP_Text _emptyText;
@@ -33,6 +34,7 @@ public class MissionScreenController : CustomMonoBehaviour
         _missionService = services.Get<IMissionService>();
         _governmentMissionService = services.Get<IPlanetGovernmentMissionService>();
         _configService = services.Get<IConfigService>();
+        _session = services.Get<IGameSessionService>();
         ApplyFullWidthLayout();
         _eventBus.Subscribe<GovernmentEnteredEvent>(OnGovernmentEntered);
         _eventBus.Subscribe<MissionAcceptedEvent>(OnMissionAccepted);
@@ -62,7 +64,8 @@ public class MissionScreenController : CustomMonoBehaviour
         StarSystemConfig system = _configService.GetCurrentSystemConfig();
         if (_missionScroll == null) ApplyFullWidthLayout();
         GameObject listPanel = _missionScroll != null ? _missionScroll.gameObject : missionListContent.gameObject;
-        bool showList = planet?.IsInhabited == true;
+        bool insideStation = StationLocationRules.IsInside(_session?.State, system);
+        bool showList = insideStation || planet?.IsInhabited == true;
         listPanel.SetActive(showList);
         if (!showList)
         {
@@ -72,7 +75,7 @@ public class MissionScreenController : CustomMonoBehaviour
                 "Planet mission list hidden | Planet=" + planet?.Id + " | Reason=Uninhabited");
             return;
         }
-        if (system != null)
+        if (!insideStation && system != null)
         {
             MissionInstanceData offer = _governmentMissionService
                 .GetOrCreateGovernmentOffer(system, planet)?.OfferedMission;
@@ -109,7 +112,7 @@ public class MissionScreenController : CustomMonoBehaviour
         ShowEmptyState(visible.Count == 0);
         AppLog.Info(DebugLogChannel.Mission, typeof(MissionScreenController),
             "Planet mission list refreshed | Planet=" + planet?.Id +
-            " | Visible=" + visible.Count);
+            " | Station=" + (insideStation ? system.Station.Id : "") + " | Visible=" + visible.Count);
     }
 
     private void HandleMissionSelected(MissionInstanceData mission)
@@ -216,7 +219,7 @@ public class MissionScreenController : CustomMonoBehaviour
         {
             background.sprite = null;
             background.type = Image.Type.Simple;
-            background.color = new Color(0.07f, 0.15f, 0.23f, 1f);
+            background.color = MissionPanelStyle2A.Workspace;
         }
         scroll.horizontal = false;
         scroll.vertical = true;

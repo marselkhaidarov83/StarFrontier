@@ -68,6 +68,10 @@ public sealed class InvasionService :
                 invasion.StartedAtTick, GetCurrentQuantTick(), minimumTicks))
             return false;
 
+        var system = _gameSessionService.State?.Galaxy?.Systems?.Find(x => x != null && x.SystemId == systemId);
+        bool military = _npcRuntimeService.Npcs.Any(n => n != null && n.IsAlive && n.IsAlly &&
+            n.AllyRole == AllyRole2A.Military && n.CurrentSystemId == systemId);
+        if (!StationInfrastructureRules.CanCapture(system, military)) return false;
         return InvasionCaptureRules2A.CanCapture(
             systemId,
             _gameSessionService.State?.Player?.CurrentSystemId,
@@ -594,6 +598,8 @@ public sealed class InvasionService :
                     }
                 }
             }
+
+            // Station damage is applied by actual NPC weapon hits, not by the invasion clock.
 
             // A timer cannot defeat defenders or remove the player from the system.
             if (CanCaptureTargetNow(invasionState.TargetSystemId))

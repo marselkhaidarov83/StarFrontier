@@ -15,6 +15,7 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
     private StarSystemConfig _systemConfig;
     private PlanetConfig _planetConfig;
     private IConfigService _configService;
+    private IGameSessionService _session;
     private SimpleEventBus _eventBus;
     private bool _isSubscribed;
     private Image _heroImage;
@@ -22,6 +23,7 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
     private RectTransform _heroFrame;
     private MissionScreenController _missionScreen;
     private Sprite _currentSprite;
+    public Sprite CurrentLocationIllustration => _currentSprite;
     private float _lastLayoutWidth = -1f;
     // Slightly underlap the HUD artwork so the illustration meets its lower trim.
     private const float TopHudHeight = 194f;
@@ -31,6 +33,7 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
         IServiceRegistry services = Bootstrapper.Instance.ServiceRegistry;
         _eventBus = services.Get<SimpleEventBus>();
         _configService = services.Get<IConfigService>();
+        _session = services.Get<IGameSessionService>();
         _governmentMissionService = services.Get<IPlanetGovernmentMissionService>();
         _missionService = services.Get<IMissionService>();
         // Planet action buttons are siblings in this Canvas and must remain above the illustration.
@@ -95,10 +98,44 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 
     public void CheckOffer()
     {
+        if (StationLocationRules.IsInside(_session?.State, _systemConfig))
+        {
+            if (governmentPlanetTitleText != null) governmentPlanetTitleText.text = _systemConfig.Station.DisplayName;
+            if (governmentOfferTitleText != null) governmentOfferTitleText.text = string.Empty;
+            if (governmentOfferDescriptionText != null) governmentOfferDescriptionText.text = string.Empty;
+            if (governmentOfferStateText != null) governmentOfferStateText.text = string.Empty;
+            RefreshStationIllustration(_systemConfig.Station);
+            AppLog.Info(DebugLogChannel.StationInterface, typeof(PlanetGovernmentMissionPresenter),
+                "Station government | Owned missions only | Station=" + _systemConfig.Station.Id);
+            return;
+        }
         if (_planetConfig == null || _systemConfig == null) return;
+        if (_heroFrame != null) _heroFrame.gameObject.SetActive(true);
         PlanetOfferedMissionData offer =
             _governmentMissionService.GetOrCreateGovernmentOffer(_systemConfig, _planetConfig);
         RefreshUi(offer);
+    }
+
+    private void RefreshStationIllustration(StationConfig station)
+    {
+        Sprite sprite = station?.StationTypeConfig?.MissionIllustration;
+        _currentSprite = sprite;
+        if (_heroImage != null)
+        {
+            _heroImage.sprite = sprite;
+            _heroImage.enabled = sprite != null;
+        }
+        // A station has one fixed illustration; never retain a planet mission overlay.
+        if (_heroOverlayImage != null)
+        {
+            _heroOverlayImage.sprite = null;
+            _heroOverlayImage.enabled = false;
+        }
+        if (_heroFrame != null) _heroFrame.gameObject.SetActive(sprite != null);
+        if (sprite != null) UpdateHeroLayout();
+        else _missionScreen?.SetListTopInset(TopHudHeight);
+        AppLog.Info(DebugLogChannel.StationInterface, typeof(PlanetGovernmentMissionPresenter),
+            "Station mission illustration | Station=" + station?.Id + " | Sprite=" + sprite?.name);
     }
 
     public void AcceptOffer()

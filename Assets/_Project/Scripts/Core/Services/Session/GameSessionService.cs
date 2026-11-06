@@ -15,10 +15,12 @@ public class GameSessionService : IGameSessionService
     public void StartNewSession(GameRuntimeState state)
     {
         State = state;
+        if (State?.Player != null) State.Player.CurrentStationId = string.Empty;
         InitializeStations(newGame: true);
         InitializeMissionSession();
         ForcePauseOnSessionOpen();
         InitializeSystemTravelService();
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationVisitService>(out var visit)) visit.InitializeSession();
         PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.NewGame, true);
     }
 
@@ -29,6 +31,7 @@ public class GameSessionService : IGameSessionService
         InitializeMissionSession();
         ForcePauseOnSessionOpen();
         InitializeSystemTravelService();
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationVisitService>(out var visit)) visit.InitializeSession();
         PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ContinueGame, true);
     }
 
@@ -37,6 +40,11 @@ public class GameSessionService : IGameSessionService
         if (Bootstrapper.Instance != null && Bootstrapper.Instance.ServiceRegistry != null &&
             Bootstrapper.Instance.ServiceRegistry.TryGet<IStationService>(out var stations))
             stations.InitializeSession(newGame);
+        if (Bootstrapper.Instance != null && Bootstrapper.Instance.ServiceRegistry != null)
+        {
+            if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationInfrastructureService>(out var infrastructure)) infrastructure.InitializeSession();
+            if (Bootstrapper.Instance.ServiceRegistry.TryGet<IResearchService>(out var research)) research.InitializeSession();
+        }
     }
 
     private void InitializeMissionSession()

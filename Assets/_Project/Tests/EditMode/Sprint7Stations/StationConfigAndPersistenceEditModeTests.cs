@@ -175,7 +175,7 @@ public sealed class StationConfigAndPersistenceEditModeTests
         state.Meta.SaveDataVersion = SaveDataVersions.MissionBattleAndRoutes;
         state.Galaxy.Systems.Add(new StarSystemRuntimeState { SystemId = "legacy_system" });
         Assert.That(SaveMigrationService.Migrate(state), Is.True);
-        Assert.That(state.Meta.SaveDataVersion, Is.EqualTo(SaveDataVersions.StationLifecycle));
+        Assert.That(state.Meta.SaveDataVersion, Is.EqualTo(SaveDataVersions.Current));
         Assert.That(state.Galaxy.Systems[0].Station, Is.Null);
         Assert.That(state.Galaxy.Systems[0].StationStateVersion, Is.Zero);
     }

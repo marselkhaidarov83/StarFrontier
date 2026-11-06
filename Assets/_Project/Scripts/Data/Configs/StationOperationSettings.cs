@@ -5,7 +5,7 @@ using UnityEngine;
 public sealed class StationPaymentCost
 {
     public StationPaymentResource Resource;
-    [Tooltip("Для астралитов укажите конкретный ItemConfig. Для кредитов и алмазов ссылка не нужна.")]
+    [Tooltip("Астралиты всех видов оплачиваются из общего количества. Ссылка необязательна и сохранена для совместимости старых настроек.")]
     public ItemConfig Item;
     [Min(1)] public int Amount = 1;
 }
@@ -36,8 +36,6 @@ public sealed class StationPaymentOption
             if (cost == null || cost.Amount <= 0 ||
                 !Enum.IsDefined(typeof(StationPaymentResource), cost.Resource)) return false;
             string itemId = cost.Resource == StationPaymentResource.Astralites ? cost.Item?.Id : string.Empty;
-            if (cost.Resource == StationPaymentResource.Astralites && string.IsNullOrWhiteSpace(itemId))
-                return false;
             if (!keys.Add(cost.Resource + ":" + itemId)) return false;
             credits |= cost.Resource == StationPaymentResource.Credits;
             astralites |= cost.Resource == StationPaymentResource.Astralites;

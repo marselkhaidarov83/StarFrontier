@@ -112,12 +112,15 @@ public class ContinueGameService : CustomService, IContinueGameService
 
         _gameSessionService.LoadSession(save);
         ProcessOfflineWarCatchUp(save);
-        ProcessOfflineStations(save);
 
         LogLoadingStep(
             "LoadSession.After",
             total,
             stage);
+
+        FinalizeMilitaryStartLocations(save);
+
+        ProcessOfflineStations(save);
 
         if (_npcOfflineRelocationService != null)
         {
@@ -290,7 +293,6 @@ public class ContinueGameService : CustomService, IContinueGameService
 
         _gameSessionService.LoadSession(save);
         ProcessOfflineWarCatchUp(save);
-        ProcessOfflineStations(save);
 
         if (_npcSimulationSaveService != null)
         {
@@ -327,6 +329,10 @@ public class ContinueGameService : CustomService, IContinueGameService
             sessionStage.Elapsed.TotalMilliseconds.ToString("F2"),
             total,
             stage);
+
+        FinalizeMilitaryStartLocations(save);
+
+        ProcessOfflineStations(save);
 
         if (_npcOfflineRelocationService != null)
         {
@@ -423,6 +429,17 @@ public class ContinueGameService : CustomService, IContinueGameService
         // Must precede NPC relocation, which consumes/rewrites Meta.LastSaveUtc.
         if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationService>(out var stations))
             stations.ProcessOffline(save, DateTime.UtcNow.Ticks);
+    }
+
+    private void FinalizeMilitaryStartLocations(GameRuntimeState save)
+    {
+        if (save == null || !ReferenceEquals(_gameSessionService.State, save))
+            throw new InvalidOperationException("Military restore requires the loaded session to be bound.");
+        _npcOfflineRelocationService?.InitializeMilitaryStartLocations(save);
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationInfrastructureService>(out var infrastructure))
+            infrastructure.RelocateStationMilitary();
+        AppLog.Info(DebugLogChannel.Save,
+            "[StationMilitaryRestore] Locations initialized after session binding and NPC restoration.");
     }
 
     private void ReevaluateMissionsAfterWorldRestore()

@@ -41,6 +41,7 @@ public sealed class SystemNpcOfflineRelocationService :
         for (int i = 0; i < npcs.Count; i++)
         {
             SystemNpcRuntimeState npc = npcs[i];
+            if (StationMilitaryRules.IsStationMilitary(npc)) continue;
             if (npc == null || !npc.IsAlive || !npc.IsAlly || npc.AllyRole != AllyRole2A.Military ||
                 string.IsNullOrWhiteSpace(npc.CurrentSystemId) ||
                 blockedSystemIds.Contains(npc.CurrentSystemId))

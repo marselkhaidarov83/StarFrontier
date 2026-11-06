@@ -297,6 +297,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
 
     public void Tick(int quantTick)
     {
+        if (!string.IsNullOrEmpty(_gameSessionService.State?.Player?.CurrentStationId)) return;
         if (_prevTick == quantTick)
             return;
 

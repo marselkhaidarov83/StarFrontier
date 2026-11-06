@@ -5,7 +5,10 @@ using System.Linq;
 [Serializable]
 public class GalaxyRuntimeState
 {
+    public ResearchRuntimeState Research = new ResearchRuntimeState();
     public int GalaxyDay;
+    public int StationLastRepairTick;
+    public double StationOfflineRepairSeconds;
     public string CurrentSystemId;
 
     public List<SectorRuntimeState> Sectors = new();

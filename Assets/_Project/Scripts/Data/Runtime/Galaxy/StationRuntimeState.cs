@@ -1,7 +1,7 @@
 using System;
 
-public enum StationOperationKind { None = 0, Construction = 1, Upgrade = 2, Recovery = 3 }
-public enum StationOperationPauseReason { None = 0, Destroyed = 1, UnderAttack = 2 }
+public enum StationOperationKind { None = 0, Construction = 1, Upgrade = 2, Recovery = 3, Repair = 4 }
+public enum StationOperationPauseReason { None = 0, Destroyed = 1, UnderAttack = 2, Damaged = 3 }
 public enum StationPaymentResource { Credits = 0, Astralites = 1, Diamonds = 2 }
 
 [Serializable]
@@ -49,6 +49,13 @@ public sealed class StationRuntimeState
     public bool IsDestroyed;
     public bool ConfigMissing;
     public long Revision;
+    // Legacy fractional repair credit: read for old saves, no longer accumulated by tick repair.
+    public double RepairDamageCredit;
+    // Absolute health is authoritative after migration. InfrastructureDamage is a UI percentage cache.
+    public int HealthVersion;
+    public int HealthLevel;
+    public int MaxHealth;
+    public int Health;
 
     // Construction/upgrade survives destruction and recovery cancellation.
     public StationOperationRuntimeState Development;
@@ -57,7 +64,7 @@ public sealed class StationRuntimeState
 
     public bool IsOperational => IsEnabled && Level > 0 && !IsDestroyed;
     public bool CanDock => IsOperational && Recovery == null;
-    public bool CanBeAttacked => IsEnabled && !IsDestroyed && Recovery == null;
+    public bool CanBeAttacked => IsOperational && Recovery == null;
 
     public StationRuntimeState Copy()
     {

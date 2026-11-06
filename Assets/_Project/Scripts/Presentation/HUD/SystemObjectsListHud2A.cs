@@ -49,6 +49,8 @@ public sealed class SystemObjectsListHud2A :
     private IRefuelService _refuelService;
     private bool _isBound;
     private bool _displayedSystemCaptured;
+    private string _displayedStationTime = string.Empty;
+    private float _nextStationTimeRefresh;
 
     public bool IsBound => _isBound;
 
@@ -71,9 +73,23 @@ public sealed class SystemObjectsListHud2A :
 
     private void Update()
     {
+        if (!_isBound || panelRoot == null || !panelRoot.activeSelf) return;
+        if (_displayedSystemCaptured != IsCurrentSystemCaptured()) { RefreshRows(); return; }
+        if (Time.unscaledTime < _nextStationTimeRefresh) return;
+        _nextStationTimeRefresh = Time.unscaledTime + .15f;
+        if (_displayedStationTime != GetCurrentStationTime()) RefreshRows();
+    }
+    private string GetCurrentStationTime()
+    {
+        string systemId = _gameSessionService?.State?.Player?.CurrentSystemId;
+        var station = _gameSessionService?.State?.Galaxy?.Systems?.Find(x => x != null && x.SystemId == systemId)?.Station;
+        return StationPanelStyle2A.DevelopmentRemainingTime(station);
+    }
+
+    private void OnStationStateChanged(StationStateChangedEvent evt)
+    {
         if (_isBound && panelRoot != null && panelRoot.activeSelf &&
-            _displayedSystemCaptured != IsCurrentSystemCaptured())
-            RefreshRows();
+            evt.SystemId == _gameSessionService?.State?.Player?.CurrentSystemId) RefreshRows();
     }
 
     private bool IsCurrentSystemCaptured()
@@ -113,6 +129,7 @@ public sealed class SystemObjectsListHud2A :
         _eventBus.Subscribe<SystemObjectsPanelCloseRequestedEvent2A>(
             OnPanelCloseRequested);
 
+        _eventBus.Subscribe<StationStateChangedEvent>(OnStationStateChanged);
         _isBound = true;
         HidePanel();
     }
@@ -126,6 +143,7 @@ public sealed class SystemObjectsListHud2A :
 
             _eventBus.Unsubscribe<SystemObjectsPanelCloseRequestedEvent2A>(
                 OnPanelCloseRequested);
+            _eventBus.Unsubscribe<StationStateChangedEvent>(OnStationStateChanged);
         }
 
         if (headerClickRelay != null)
@@ -224,6 +242,7 @@ public sealed class SystemObjectsListHud2A :
     {
         StarSystemConfig system = GetCurrentSystem();
         _displayedSystemCaptured = IsCurrentSystemCaptured();
+        _displayedStationTime = GetCurrentStationTime();
 
         _planets.Clear();
         _stations.Clear();
@@ -320,10 +339,17 @@ public sealed class SystemObjectsListHud2A :
         int index = _stations.Count;
         _stations.Add(station);
 
+        var runtime = _gameSessionService?.State?.Galaxy?.Systems?.Find(x => x != null && x.SystemId == system.Id)?.Station;
+        bool awaiting = runtime != null ? StationPanelStyle2A.IsAwaitingConstruction(runtime) :
+            station.InitialLevel == 0 && !station.IsDestroyed;
+        string remaining = StationPanelStyle2A.DevelopmentRemainingTime(runtime);
+        string suffix = !string.IsNullOrEmpty(remaining) ? " (" + remaining + ")" :
+            station.IsActive ? string.Empty : " - не построена";
         AppendGroup("Станция");
         AppendLink(
             StationPrefix + index,
-            station.DisplayName + (station.IsActive ? string.Empty : " - не построена"));
+            station.DisplayName + suffix,
+            awaiting || StationPanelStyle2A.IsConstructionRunning(runtime) ? StationPanelStyle2A.AwaitingConstructionTextColor : "#FFFFFF");
 
         return 2;
     }

@@ -152,6 +152,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     private IPlayerCombatTargetService _playerCombatTargetService;
     private readonly ISystemSecurityService _systemSecurityService;
     private readonly SystemSpaceLootService _spaceLootService;
+    private readonly IStationCombatService2A _stationCombat;
 
     private readonly System.Random _offscreenNpcProcessingRandom = new();
     private readonly HashSet<string> _systemsWithProcessedBehaviorWarmup = new();
@@ -168,6 +169,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _systemSecurityService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
         _spaceLootService = Bootstrapper.Instance.ServiceRegistry.Get<SystemSpaceLootService>();
+        _stationCombat = Bootstrapper.Instance.ServiceRegistry.Get<IStationCombatService2A>();
         // _playerCombatTargetService = Bootstrapper.Instance.ServiceRegistry.Get<IPlayerCombatTargetService>();
 
         LogCustom("[NPC-MILITARY-BEHAVIOR] Service debug disabled by default.");
@@ -574,6 +576,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         if (npc.CurrentBehaviorScenario == resolvedScenario)
             return false;
+        if (npc.IsAlly && npc.AllyRole == AllyRole2A.Ranger && npc.HasActiveBehavior) return false;
 
         return true;
     }
@@ -587,6 +590,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         if (!hasEnemiesInSystem)
             return false;
+        if (npc.IsAlly && npc.AllyRole == AllyRole2A.Ranger) return false;
 
         if (!CanNpcReactToThreats(npc))
             return false;
@@ -650,6 +654,13 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         long applyStartedAt = BeginPerfMeasure();
 
         ApplyBehavior(npc, nextBehavior, currentTick);
+
+        if (npc.IsEnemy)
+            AppLog.Info(DebugLogChannel.Combat,
+                "[ENEMY_BEHAVIOR_SELECTED] Npc=" + npc.RuntimeNpcId +
+                " | System=" + npc.CurrentSystemId + " | Scenario=" + resolvedScenario +
+                " | PreviousBehavior=" + behaviorBefore + " | RequestedBehavior=" + nextBehavior +
+                " | FinalBehavior=" + npc.CurrentBehavior + " | Tick=" + currentTick);
 
         double applyMs = EndPerfMeasureMs(applyStartedAt);
         double totalMs = EndPerfMeasureMs(totalStartedAt);
@@ -768,6 +779,13 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             case SystemNpcBehaviorType.CollectDebris:
                 TickCollectDebris(npc, currentTick);
+                break;
+            case SystemNpcBehaviorType.AttackMilitaryStation:
+            case SystemNpcBehaviorType.AttackRangerBaseStation:
+            case SystemNpcBehaviorType.AttackTradeStation:
+            case SystemNpcBehaviorType.AttackScienceStation:
+            case SystemNpcBehaviorType.AttackMedicalStation:
+                TickStationAttack(npc, currentTick);
                 break;
 
             default:
@@ -1236,7 +1254,13 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return AllyBehaviourScenario.Normal;
 
         if (npc.IsEnemy)
-            return AllyBehaviourScenario.EnemySystemInvasion;
+        {
+            // The scenario describes whose system is being attacked, not the NPC side.
+            // Captured systems belong to enemies; all other threatened systems are allied.
+            return context.HasSystemStatus && context.SystemStatus == StarSystemStatus.Captured
+                ? AllyBehaviourScenario.EnemySystemInvasion
+                : AllyBehaviourScenario.EnemyInvasion;
+        }
 
         if (npc.IsAlly)
             return AllyBehaviourScenario.EnemyInvasion;
@@ -1308,10 +1332,11 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 "ScenarioAsset=" + behaviorScenario.Id +
                 " | Weights=" + FormatBehaviorWeightsForDebug(behaviorWeights));
 
-        List<SystemNpcBehaviorWeight> weights =
-            behaviorWeights
-                .Where(weight => weight != null && weight.Weight > 0)
-                .ToList();
+        List<SystemNpcBehaviorWeight> weights = behaviorWeights
+            .Where(weight => weight != null && weight.Weight > 0 &&
+                (weight.BehaviorType != SystemNpcBehaviorType.TravelWithinSector || StationMilitaryRules.IsStationMilitary(npc)))
+            .Select(weight => weight.BehaviorType == SystemNpcBehaviorType.TravelWithinSector
+                ? weight.WithType(SystemNpcBehaviorType.TravelToAnotherSystem) : weight).ToList();
 
         bool hadAnnihilationBeforeFilters =
             HasBehaviorWeight(
@@ -1356,6 +1381,17 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 "RemainingWeights=" + FormatBehaviorWeightsForDebug(weights) +
                 " | Result=" + (weights.Count == 0 ? "NoAllowedBehavior" : "HasAllowedBehavior"));
 
+        // Add the sector movement option only if a route to an allowed system exists.
+        var currentSystemForStation = StationMilitaryRules.IsStationMilitary(npc)
+            ? _configService.GetStarSystemConfigById(npc.CurrentSystemId) : null;
+        if (currentSystemForStation?.Routes != null &&
+            currentSystemForStation.Routes.Any(route => route != null &&
+                route.GetOtherSystem(npc.CurrentSystemId) != null &&
+                StationMilitaryRules.CanTravel(npc, route.GetOtherSystem(npc.CurrentSystemId).Id,
+                    _configService.GetAllSectors(), Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State?.Galaxy)) &&
+            !weights.Any(w => w.BehaviorType == SystemNpcBehaviorType.TravelToAnotherSystem))
+            weights.Add(new SystemNpcBehaviorWeight().WithType(SystemNpcBehaviorType.TravelToAnotherSystem));
+
         bool hasAnnihilationAfterFilters =
             HasBehaviorWeight(
                 weights,
@@ -1397,6 +1433,25 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 " | HadAnnihilationBeforeFilters=" + hadAnnihilationBeforeFilters);
 
             return SystemNpcBehaviorType.None;
+        }
+
+        if (npc.IsAlly && npc.AllyRole == AllyRole2A.Ranger &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<IStationInfrastructureService>(out var infrastructure))
+        {
+            float probability = infrastructure.GetRangerAttackProbability(npc.CurrentSystemId, out bool configured);
+            bool attackAllowed = CanUseBehaviorInCurrentConditions(npc, SystemNpcBehaviorType.EngageEnemies) &&
+                (_configService.NpcBehaviourTransitionMatrixConfig == null ||
+                 _configService.NpcBehaviourTransitionMatrixConfig.IsNextBehaviorAllowed(npc.PrevBehavior, SystemNpcBehaviorType.EngageEnemies));
+            if (configured && attackAllowed)
+            {
+                if (UnityEngine.Random.value < probability)
+                {
+                    AppLog.Info(DebugLogChannel.StationEffects, "[StationEffects] Ranger chose EngageEnemies | Npc=" + npc.RuntimeNpcId + " | Probability=" + probability);
+                    return SystemNpcBehaviorType.EngageEnemies;
+                }
+                weights.RemoveAll(w => w.BehaviorType == SystemNpcBehaviorType.EngageEnemies);
+                if (weights.Count == 0) return SystemNpcBehaviorType.None;
+            }
         }
 
         int totalWeight = 0;
@@ -1647,10 +1702,11 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                 return false;
 
             case SystemNpcBehaviorType.AttackMilitaryStation:
-                return HasAliveStation(npc, StationType.Military);
-
             case SystemNpcBehaviorType.AttackRangerBaseStation:
-                return HasAliveStation(npc, StationType.RangerBase);
+            case SystemNpcBehaviorType.AttackTradeStation:
+            case SystemNpcBehaviorType.AttackScienceStation:
+            case SystemNpcBehaviorType.AttackMedicalStation:
+                return _stationCombat != null && _stationCombat.FindTarget(npc, behaviorType).IsValid;
 
             default:
                 return true;
@@ -1684,30 +1740,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
                !string.IsNullOrWhiteSpace(npc.CurrentPlanetId);
     }
 
-    private bool HasAliveStation(
-        SystemNpcRuntimeState npc,
-        StationType stationType)
-    {
-        if (npc == null ||
-            _configService == null ||
-            string.IsNullOrWhiteSpace(npc.CurrentSystemId))
-        {
-            return false;
-        }
-
-        StarSystemConfig starSystem =
-            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
-
-        StationConfig station = starSystem != null
-            ? starSystem.Station
-            : null;
-
-        return station != null &&
-               station.IsActive &&
-               !station.IsDestroyed &&
-               station.StationType == stationType;
-    }
-
     private bool HasAliveAlly(
         SystemNpcRuntimeState npc,
         AllyRole2A allyRole)
@@ -1737,6 +1769,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         if (npc == null)
             return;
 
+        if (nextBehavior == SystemNpcBehaviorType.TravelWithinSector) nextBehavior = SystemNpcBehaviorType.TravelToAnotherSystem;
         long totalStartedAt = BeginPerfMeasure();
         MilitaryNpcDiagnostics2A.Log("APPLY_BEFORE", npc, currentTick,
             "RequestedBehavior=" + nextBehavior);
@@ -1824,6 +1857,13 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
             case SystemNpcBehaviorType.CollectDebris:
                 SetupCollectDebris(npc);
+                break;
+            case SystemNpcBehaviorType.AttackMilitaryStation:
+            case SystemNpcBehaviorType.AttackRangerBaseStation:
+            case SystemNpcBehaviorType.AttackTradeStation:
+            case SystemNpcBehaviorType.AttackScienceStation:
+            case SystemNpcBehaviorType.AttackMedicalStation:
+                SetupStationAttack(npc);
                 break;
 
             default:
@@ -2322,6 +2362,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return false;
         }
 
+        if (StationMilitaryRules.IsStationMilitary(npc) &&
+            !StationMilitaryRules.CanTravel(npc, targetSystem.Id, _configService.GetAllSectors(),
+                Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State?.Galaxy)) return false;
+
         bool enemyOwned =
             IsEnemyOwnedSystem(targetSystem.Id);
 
@@ -2399,6 +2443,32 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             " | SystemId=" + npc.CurrentSystemId +
             " | PlanetId=" + npc.CurrentPlanetId +
             " | TravelState=" + npc.TravelState);
+    }
+
+    private void SetupStationAttack(SystemNpcRuntimeState npc)
+    {
+        if (npc == null) return;
+        SyncNpcPositionWithCurrentPlanet(npc, true);
+        ClearMovementTargets(npc); npc.IsOnPlanet = false; npc.CurrentPlanetId = null;
+        var target = _stationCombat?.FindTarget(npc) ?? GalaxyCombatTarget.None();
+        if (!target.IsValid) { ClearBehavior(npc); return; }
+        npc.TargetPosition = target.Position;
+        npc.TravelState = SystemNpcTravelState.EngagingEnemy;
+        npc.CombatState = SystemNpcCombatState.HasTarget; npc.IsFighting = true;
+        AppLog.Info(DebugLogChannel.Combat, "[STATION_TARGET_SELECTED] Npc=" + npc.RuntimeNpcId +
+            " | System=" + npc.CurrentSystemId + " | Station=" + target.TargetNpcId + " | Behavior=" + npc.CurrentBehavior);
+    }
+    private void TickStationAttack(SystemNpcRuntimeState npc, int currentTick)
+    {
+        var target = _stationCombat?.FindTarget(npc) ?? GalaxyCombatTarget.None();
+        if (!target.IsValid)
+        {
+            AppLog.Info(DebugLogChannel.Combat, "[STATION_TARGET_LOST] Npc=" + npc.RuntimeNpcId + " | System=" + npc.CurrentSystemId);
+            ClearMovementTargets(npc); npc.TravelState = SystemNpcTravelState.Idle;
+            CompleteBehavior(npc, currentTick); return;
+        }
+        npc.TargetPosition = target.Position; npc.TravelState = SystemNpcTravelState.EngagingEnemy;
+        npc.IsFighting = true;
     }
 
     private void SetupEngageEnemies(SystemNpcRuntimeState npc)

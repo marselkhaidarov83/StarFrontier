@@ -4,6 +4,7 @@ using System;
 public class StarSystemRuntimeState
 {
     public string SystemId;
+    [NonSerialized] public Func<bool> HasLivingMilitary;
 
     // Version distinguishes legacy saves from an intentional level 0 or an intentionally empty slot.
     public int StationStateVersion;
@@ -32,6 +33,8 @@ public class StarSystemRuntimeState
 
     public void SetSystemStatus(StarSystemStatus newStatus)
     {
+        if (newStatus == StarSystemStatus.Captured &&
+            !StationInfrastructureRules.CanCapture(this, HasLivingMilitary?.Invoke() == true)) return;
         SystemStatus = newStatus;
         StationLifecycleRules.ApplySystemStatus(Station, newStatus);
     }
@@ -48,6 +51,8 @@ public class StarSystemRuntimeState
 
     public void MarkCaptured()
     {
+        if (!StationInfrastructureRules.CanCapture(this, HasLivingMilitary?.Invoke() == true)) return;
+        if (SystemStatus == StarSystemStatus.Captured) return;
         SetSystemStatus(StarSystemStatus.Captured);
 
         HasPendingRecoveryHook = false;
@@ -76,11 +81,26 @@ public class StarSystemRuntimeState
         // Recovery cannot be attacked. Capture cancels recovery BEFORE applying its infrastructure damage.
         if (Station?.Recovery != null) return;
 
+        if (Station != null)
+        {
+            if (Station.Level <= 0 && !forceDestroyed) return;
+            StationInfrastructureRules.EnsureHealth(this);
+            if (Station.IsDestroyed) return;
+            int damage = Math.Max(0, damageAmount);
+            if (damage > 0 || forceDestroyed) Station.Revision++;
+            Station.Health = forceDestroyed ? 0 : (int)Math.Max(0L, (long)Station.Health - damage);
+            if (Station.Health == 0) StationLifecycleRules.Destroy(Station);
+            StationInfrastructureRules.UpdateDamage(this);
+            StationLifecycleRules.RefreshDevelopmentPause(this);
+            return;
+        }
+
         int normalizedDamage =
             Math.Max(
                 0,
                 damageAmount);
 
+        if (normalizedDamage > 0 && Station != null) Station.Revision++;
         InfrastructureDamage =
             Math.Min(
                 100,

@@ -1054,6 +1054,13 @@ public sealed class GalaxyNpcCombatVisualController : CustomMonoBehaviour
                 return;
         }
 
+        if (evt.TargetType == CombatTargetType.Station)
+        {
+            var registry = Bootstrapper.Instance != null ? Bootstrapper.Instance.ServiceRegistry : null;
+            if (registry == null || !registry.TryGet<IGameSessionService>(out var session)) return;
+            var system = session.State?.Galaxy?.Systems?.Find(x => x?.Station?.ConfigId == evt.TargetNpcId);
+            if (system == null || !CanShowSystemEffect(system.SystemId, "StationDamagePopup", evt.TargetNpcId)) return;
+        }
         SpawnDamagePopup(evt);
     }
 

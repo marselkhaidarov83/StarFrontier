@@ -82,7 +82,7 @@ public sealed class StationLifecycleRulesEditModeTests
     }
 
     [Test]
-    public void OrdinaryInfrastructureDamage_DoesNotPauseOrWeakenStation()
+    public void OrdinaryInfrastructureDamage_PausesUpgradeWithoutDisablingStation()
     {
         var system = SystemAt(3);
         StationLifecycleRules.BeginPaidOperation(system.Station,
@@ -92,8 +92,8 @@ public sealed class StationLifecycleRulesEditModeTests
         Assert.That(system.InfrastructureDamageState, Is.EqualTo(SystemInfrastructureDamageState.Damaged));
         Assert.That(system.Station.IsOperational, Is.True);
         Assert.That(system.Station.Level, Is.EqualTo(3));
-        Assert.That(system.Station.Development.ElapsedSeconds, Is.EqualTo(10));
-        Assert.That(system.Station.Development.PauseReason, Is.EqualTo(StationOperationPauseReason.None));
+        Assert.That(system.Station.Development.ElapsedSeconds, Is.Zero);
+        Assert.That(system.Station.Development.PauseReason, Is.EqualTo(StationOperationPauseReason.Damaged));
     }
 
     [TestCase(StationOperationKind.Construction, 0)]
@@ -314,5 +314,42 @@ public sealed class StationLifecycleRulesEditModeTests
         StationLifecycleRules.BeginPaidOperation(system.Station,
             Operation(StationOperationKind.Recovery, 2, 10));
         return system;
+    }
+
+    [Test] public void InstantUpgrade_CannotFinishWhileEnemiesArePresent()
+    {
+        var system = SystemAt(2);
+        StationLifecycleRules.BeginPaidOperation(system.Station, Operation(StationOperationKind.Upgrade, 3, 0));
+        StationLifecycleRules.Advance(system, 0, hasEnemies: true);
+        Assert.That(system.Station.Level, Is.EqualTo(2));
+        Assert.That(system.Station.Development.PauseReason, Is.EqualTo(StationOperationPauseReason.UnderAttack));
+        StationLifecycleRules.Normalize(system);
+        Assert.That(system.Station.Development.PauseReason, Is.EqualTo(StationOperationPauseReason.UnderAttack));
+        StationLifecycleRules.Advance(system, 0, hasEnemies: false);
+        Assert.That(system.Station.Level, Is.EqualTo(3)); Assert.That(system.Station.Development, Is.Null);
+    }
+
+    [Test] public void EmptySerializerOperations_DoNotIncrementStationRevision()
+    {
+        var system = SystemAt(2); StationLifecycleRules.Normalize(system);
+        long revision = system.Station.Revision;
+        system.Station.Development = new StationOperationRuntimeState();
+        system.Station.Recovery = new StationOperationRuntimeState();
+        StationLifecycleRules.Normalize(system);
+        Assert.That(system.Station.Development, Is.Null); Assert.That(system.Station.Recovery, Is.Null);
+        Assert.That(system.Station.Revision, Is.EqualTo(revision));
+        Assert.That(StationLifecycleRules.Normalize(system), Is.False);
+    }
+    [Test] public void RealClockNormalization_StillIncrementsRevisionOnlyOnce()
+    {
+        var system = SystemAt(2); StationLifecycleRules.Normalize(system);
+        system.Station.Development = Operation(StationOperationKind.Upgrade, 3, 60);
+        system.Station.Development.ElapsedSeconds = 70;
+        long revision = system.Station.Revision;
+        StationLifecycleRules.Normalize(system);
+        Assert.That(system.Station.Development.ElapsedSeconds, Is.EqualTo(60));
+        Assert.That(system.Station.Revision, Is.GreaterThan(revision));
+        revision = system.Station.Revision; StationLifecycleRules.Normalize(system);
+        Assert.That(system.Station.Revision, Is.EqualTo(revision));
     }
 }

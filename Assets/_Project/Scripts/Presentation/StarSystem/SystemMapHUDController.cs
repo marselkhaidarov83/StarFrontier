@@ -18,6 +18,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
     private IGameSessionService gameSessionService;
 
     private SystemMissionPanel2A _missionPanel;
+    private SystemStationPanel2A _stationPanel;
 
     public void Initialize()
     {
@@ -34,6 +35,8 @@ public class SystemMapHUDController : CustomMonoBehaviour
                 _missionPanel = gameObject.AddComponent<SystemMissionPanel2A>();
             _missionPanel.Initialize(openGalaxyButton, missionButtonSprite);
         }
+        _stationPanel = GetComponent<SystemStationPanel2A>() ?? gameObject.AddComponent<SystemStationPanel2A>();
+        _stationPanel.Initialize();
         RefreshSunButtonIcon();
         SetSystemHudVisible(false);
 
@@ -56,6 +59,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
         eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        eventBus.Subscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -72,6 +76,7 @@ public class SystemMapHUDController : CustomMonoBehaviour
 
         eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        eventBus.Unsubscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -109,6 +114,15 @@ public class SystemMapHUDController : CustomMonoBehaviour
         SetSystemHudVisible(true);
     }
 
+
+    private void OnStationVisitChanged(StationVisitChangedEvent evt)
+    {
+        var player = gameSessionService.State?.Player;
+        bool visible = !evt.Inside && player != null && player.CurrentSystemId == evt.SystemId &&
+            string.IsNullOrEmpty(player.CurrentPlanetId);
+        if (evt.Inside) _missionPanel?.Close();
+        SetSystemHudVisible(visible);
+    }
 
     private void OnPlanetEntered(PlanetEnteredEvent evt)
     {

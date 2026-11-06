@@ -37,3 +37,174 @@ MonoBehaviour:
   orbitAngleDegrees: 220
   overrideLocalOffset: 1
   localOffsetOverride: {x: 48.13, y: -728.41}
+  levelEffects: {fileID: 11400000, guid: 715b66670a2c50a4ad6ed76d24bd6d26, type: 2}
+  constructionPaymentOptions:
+  - Id: credits_astralites
+    Costs:
+    - Resource: 0
+      Item: {fileID: 0}
+      Amount: 1000
+    - Resource: 1
+      Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+      Amount: 5
+    DurationSeconds: 15
+  - Id: diamonds
+    Costs:
+    - Resource: 2
+      Item: {fileID: 0}
+      Amount: 50
+    DurationSeconds: 15
+  upgradeSettings:
+  - TargetLevel: 2
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 2000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 10
+      DurationSeconds: 30
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 100
+      DurationSeconds: 30
+  - TargetLevel: 3
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 3000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 15
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 150
+      DurationSeconds: 10
+  - TargetLevel: 4
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 4000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 20
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 200
+      DurationSeconds: 10
+  - TargetLevel: 5
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 5000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 25
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 250
+      DurationSeconds: 10
+  - TargetLevel: 6
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 6000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 30
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 300
+      DurationSeconds: 10
+  - TargetLevel: 7
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 7000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 35
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 350
+      DurationSeconds: 10
+  - TargetLevel: 8
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 8000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 40
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 400
+      DurationSeconds: 10
+  - TargetLevel: 9
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 9000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 45
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 450
+      DurationSeconds: 10
+  - TargetLevel: 10
+    PaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 10000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 50
+      DurationSeconds: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 500
+      DurationSeconds: 10

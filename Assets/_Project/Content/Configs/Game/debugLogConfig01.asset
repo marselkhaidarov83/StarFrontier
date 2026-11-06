@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 305e505661dee42c58da12e2624f7c3f, type: 3}
   m_Name: debugLogConfig01
   m_EditorClassIdentifier: Data::DebugLogConfig
-  testPlayerAnalytics: 1
+  testPlayerAnalytics: 0
   firstSessionTraceLogs: 0
-  stationLifecycleLogs: 0
-  logsEnabled: 0
+  stationLifecycleLogs: 1
+  logsEnabled: 1
   shipRouteLogs: 0
   includeShipRouteInternalLogs: 0
   npcRouteDecisionLogs: 0
@@ -23,12 +23,12 @@ MonoBehaviour:
   npcMovementLogs: 0
   enemyMovementLogs: 0
   movementTurnSpikeAngleDegrees: 60
-  combatLogs: 0
-  lootLogs: 1
-  damageLogs: 0
-  populationLogs: 0
+  combatLogs: 1
+  lootLogs: 0
+  damageLogs: 1
+  populationLogs: 1
   planetMovementLogs: 0
-  saveLogs: 0
+  saveLogs: 1
   timeLogs: 0
   uiLogs: 0
   loadingSceneDiagnosticsLogs: 0
@@ -36,7 +36,7 @@ MonoBehaviour:
   bootstrapLogs: 0
   mainMenuLogs: 0
   settingsLogs: 0
-  loadingLogs: 0
+  loadingLogs: 1
   galaxyMapLogs: 0
   systemMapLogs: 0
   systemHudLogs: 0
@@ -94,3 +94,6 @@ MonoBehaviour:
   enemyTurnSpikeLogs: 0
   npcMilitaryMovementVerboseLogs: 1
   npcPlanetApproachQueueCoordinateLogs: 0
+  stationEffectsLogs: 1
+  researchLogs: 0
+  stationInterfaceLogs: 0

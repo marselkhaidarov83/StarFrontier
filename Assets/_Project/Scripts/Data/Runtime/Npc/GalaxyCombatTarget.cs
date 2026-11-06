@@ -42,6 +42,9 @@ public readonly struct GalaxyCombatTarget
         );
     }
 
+    // TargetNpcId is the generic target key for existing weapon/FX payloads; Station carries the station config ID.
+    public static GalaxyCombatTarget Station(string stationId, Vector3 position) =>
+        new GalaxyCombatTarget(CombatTargetType.Station, stationId, position, true);
     public static GalaxyCombatTarget Npc(string npcId, Vector3 position)
     {
         return new GalaxyCombatTarget(

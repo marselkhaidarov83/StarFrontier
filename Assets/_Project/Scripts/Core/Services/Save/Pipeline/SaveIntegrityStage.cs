@@ -50,7 +50,7 @@ public sealed class SaveIntegrityStage
     {
         var status = Verify(state);
         if (status != SaveIntegrityStatus.Invalid || state?.Meta == null ||
-            state.Meta.SaveDataVersion >= SaveDataVersions.StationLifecycle || string.IsNullOrWhiteSpace(json))
+            state.Meta.SaveDataVersion >= SaveDataVersions.StationEffectsAndResearch || string.IsNullOrWhiteSpace(json))
             return status;
 
         string expected = state.Meta.IntegrityChecksum;

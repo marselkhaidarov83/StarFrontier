@@ -76,6 +76,9 @@ public class MetaSceneController : CustomMonoBehaviour
         {
             eventBus.Publish(new StarSystemEnteredEvent(currentSystemId));
             LogCustom("enter to system : " + currentSystemId);
+            if (!string.IsNullOrEmpty(gameSessionService.State.Player.CurrentStationId) &&
+                Bootstrapper.Instance.ServiceRegistry.TryGet<IStationVisitService>(out var visits))
+                visits.InitializeSession();
         }
         // else
         // {

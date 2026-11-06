@@ -36,6 +36,9 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField, Min(0f)] private float spaceLootPlayerSafeRadius = 300f;
     [SerializeField, Min(0f)] private float spaceLootEjectionDistance = 100f;
 
+    [Header("Research")]
+    [SerializeField] private ResearchTreeConfig researchTree;
+
     [Header("Data")]
     [SerializeField] private GalaxyConfig galaxyConfig;
     [SerializeField] private List<EnemyConfig> enemies;
@@ -306,6 +309,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 combatDamagePopupVisualConfig,
                 npcBehaviourTransitionMatrixConfig));
 
+        RegisterService<IStationPaymentGateway>(new StationResourcePaymentGateway(ServiceRegistry.Get<IGameSessionService>()));
         RegisterService<IStationService, StationService>();
         RegisterService<IShipStatsService, ShipStatsService>();
         RegisterService<ISystemGameplayStateService, SystemGameplayStateService>();
@@ -356,6 +360,15 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<IInvasionService, InvasionService>();
         RegisterService<IInvasionSchedulerService, InvasionSchedulerService>();
         RegisterService<ISystemNpcPopulationService, SystemNpcPopulationService>();
+        RegisterService<IStationCombatService2A, StationCombatService2A>();
+        RegisterService<IStationInfrastructureService, StationInfrastructureService>();
+        RegisterService<IResearchService>(new ResearchService(researchTree,
+            ServiceRegistry.Get<IGameSessionService>(), ServiceRegistry.Get<IConfigService>(),
+            ServiceRegistry.Get<IStationInfrastructureService>(), ServiceRegistry.Get<IStationPaymentGateway>(),
+            ServiceRegistry.Get<SimpleEventBus>()));
+        RegisterService<IStationCardService, StationCardService>();
+        RegisterService<IStationVisitService, StationVisitService>();
+        RegisterService<IStationFacilityService, StationFacilityService>();
         RegisterService<IGalaxyPopulationService, GalaxyPopulationService>();
         RegisterService<IGalaxyNpcSimulationScheduleService, GalaxyNpcSimulationScheduleService>();
         RegisterService<ISystemNpcBehaviorService, SystemNpcBehaviorService>();

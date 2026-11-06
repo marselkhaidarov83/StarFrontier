@@ -85,11 +85,11 @@ public class MissionCardView : MonoBehaviour
             backgroundImage.enabled = true;
             backgroundImage.color = ready
                 ? new Color(0.15f, 0.24f, 0.31f, 1f)
-                : new Color(0.09f, 0.19f, 0.29f, 1f);
+                : MissionPanelStyle2A.CardBackground;
         }
         Color accent = ready
             ? new Color(0.95f, 0.68f, 0.23f, 1f)
-            : new Color(0.13f, 0.65f, 0.92f, 1f);
+            : MissionPanelStyle2A.CardAccent;
         if (_cardOutline != null) _cardOutline.effectColor = accent;
         if (_topTrim != null) _topTrim.color = accent;
         if (_leftTrim != null) _leftTrim.color = accent;
@@ -269,14 +269,14 @@ public class MissionCardView : MonoBehaviour
             image.type = Image.Type.Simple;
             image.color = ready
                 ? new Color(0.48f, 0.31f, 0.08f, 1f)
-                : inProgress ? new Color(0.23f, 0.29f, 0.35f, 1f)
-                : new Color(0.05f, 0.35f, 0.58f, 1f);
+                : inProgress ? MissionPanelStyle2A.DisabledBackground
+                : MissionPanelStyle2A.ActionBackground;
             Outline outline = image.GetComponent<Outline>();
             if (outline == null) outline = image.gameObject.AddComponent<Outline>();
             outline.effectColor = ready
                 ? new Color(1f, 0.73f, 0.25f, 1f)
-                : inProgress ? new Color(0.49f, 0.56f, 0.63f, 1f)
-                : new Color(0.25f, 0.79f, 1f, 1f);
+                : inProgress ? MissionPanelStyle2A.DisabledAccent
+                : MissionPanelStyle2A.ActionAccent;
             outline.effectDistance = new Vector2(2f, 2f);
             outline.useGraphicAlpha = false;
         }

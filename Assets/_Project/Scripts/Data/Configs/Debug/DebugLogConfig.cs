@@ -38,7 +38,10 @@ public enum DebugLogChannel
     Config,
     EditorGenerators,
     Loot,
-    StationLifecycle
+    StationLifecycle,
+    StationEffects,
+    Research,
+    StationInterface
 }
 
 public enum NpcMovementLoadAnalyticsDetailLevel
@@ -337,6 +340,12 @@ public sealed class DebugLogConfig : ScriptableObject
     [Tooltip("Включает сообщения о координатах очереди подхода к планете. Используется при проверке движения к планетам.")]
     [SerializeField] private bool npcPlanetApproachQueueCoordinateLogs;
 
+    [Header("Station Effects / Research")]
+    [SerializeField] private bool stationEffectsLogs;
+    [SerializeField] private bool researchLogs;
+    [Header("Station Interface")]
+    [SerializeField] private bool stationInterfaceLogs;
+
     public bool LogsEnabled => logsEnabled;
 
     public bool FirstSessionTraceLogs => logsEnabled && firstSessionTraceLogs;
@@ -471,6 +480,10 @@ Mathf.Max(0f, visualUpdateSpikeThresholdMs);
 
             case DebugLogChannel.Loot:
                 return lootLogs;
+
+            case DebugLogChannel.StationEffects: return stationEffectsLogs;
+            case DebugLogChannel.Research: return researchLogs;
+            case DebugLogChannel.StationInterface: return stationInterfaceLogs;
 
             case DebugLogChannel.StationLifecycle:
                 return stationLifecycleLogs;

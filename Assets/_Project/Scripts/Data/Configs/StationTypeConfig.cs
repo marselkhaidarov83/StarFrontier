@@ -32,6 +32,10 @@ public class StationTypeConfig : BaseConfig
     [Tooltip("Количество для параметра defaultEncounterProfile. Используется соответствующей системой при генерации или расчёте.")]
     [SerializeField] private ScriptableObject defaultEncounterProfile;
 
+    [Header("Mission Screen")]
+    [Tooltip("Иллюстрация окна миссий при посадке на станцию этого типа. Формат и расположение как у планет.")]
+    [SerializeField] private Sprite missionIllustration;
+
     [Header("Default Visuals")]
     [Tooltip("Спрайт для поля stationSprite. Используется визуальной частью игры при отображении объекта.")]
     [SerializeField] private Sprite stationSprite;
@@ -58,6 +62,7 @@ public class StationTypeConfig : BaseConfig
     public ScriptableObject DefaultMissionPool => defaultMissionPool;
     public ScriptableObject DefaultEncounterProfile => defaultEncounterProfile;
 
+    public Sprite MissionIllustration => missionIllustration;
     public Sprite StationSprite => stationSprite;
     public Sprite DestroyedSprite => destroyedSprite;
     public Sprite ShadowSprite => shadowSprite;

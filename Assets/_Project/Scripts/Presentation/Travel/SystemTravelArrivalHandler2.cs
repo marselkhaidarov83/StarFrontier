@@ -96,7 +96,11 @@ public sealed class SystemTravelArrivalHandler2 : CustomMonoBehaviour
         if (arrivalFlash != null)
             arrivalFlash.Play(evt.FinalPosition);
 
-        // Пока ничего не открываем. Корабль просто стоит у станции.
+        string systemId = _gameSessionService.State?.Player?.CurrentSystemId;
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationVisitService>(out var visit) &&
+            visit.TryEnter(systemId, out _)) return;
+        var station = _configService.GetStarSystemConfigById(systemId)?.Station;
+        if (station != null) _eventBus.Publish(new StationCardRequestedEvent(station));
     }
 
     private void HandleMapPointArrival(SystemTravelCompletedEvent evt)

@@ -250,13 +250,15 @@ public sealed class StationServiceEditModeTests
     }
 
     [Test]
-    public void ActiveInvasion_PreventsOfflineRecoveryProgress()
+    public void LegacyTimedRecovery_ActiveInvasionPreventsOfflineProgress()
     {
         var system = AddSystem("sys", 2, 100000);
         Set(_configs["sys"].Station, "isDestroyed", true);
         var service = Service(new PaymentStub());
         service.InitializeSession(true);
-        Assert.That(Start(service, system, StationOperationKind.Recovery, "pay", out _), Is.True);
+        Assert.That(StationLifecycleRules.BeginPaidOperation(system.Station, new StationOperationRuntimeState {
+            OperationId = "legacy-paid", Kind = StationOperationKind.Recovery, TargetLevel = system.Station.Level,
+            DurationSeconds = 100000, PaymentOptionId = "pay" }), Is.True);
         service.AdvanceTime(5);
         system.MarkInvasion();
         long from = new DateTime(2026, 11, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;

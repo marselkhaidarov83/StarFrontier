@@ -556,6 +556,7 @@ public class SystemMapController2 : CustomMonoBehaviour
 
         eventBus.Subscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        eventBus.Subscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Subscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -572,6 +573,7 @@ public class SystemMapController2 : CustomMonoBehaviour
 
         eventBus.Unsubscribe<GalaxyEnteredEvent>(OnGalaxyEntered);
         eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
+        eventBus.Unsubscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Unsubscribe<ExitMapChangedEvent>(OnExitMapChanged);
 
@@ -611,6 +613,14 @@ public class SystemMapController2 : CustomMonoBehaviour
             systemMapRoot.SetActive(true);
     }
 
+
+    private void OnStationVisitChanged(StationVisitChangedEvent evt)
+    {
+        var player = gameSessionService.State?.Player;
+        bool visible = !evt.Inside && player != null && player.CurrentSystemId == evt.SystemId &&
+            string.IsNullOrEmpty(player.CurrentPlanetId);
+        if (systemMapRoot != null) systemMapRoot.SetActive(visible);
+    }
 
     private void OnPlanetEntered(PlanetEnteredEvent evt)
     {

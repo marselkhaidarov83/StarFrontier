@@ -195,6 +195,7 @@ public class MetaHudController :
             FuelChangedEvent>(
                 OnFuelChanged);
 
+        simpleEventBus.Subscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         simpleEventBus.Subscribe<CargoChangedEvent>(OnCargoChanged);
         simpleEventBus.Subscribe<
             CreditsChangedEvent>(
@@ -235,6 +236,7 @@ public class MetaHudController :
             FuelChangedEvent>(
                 OnFuelChanged);
 
+        simpleEventBus.Unsubscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         simpleEventBus.Unsubscribe<CargoChangedEvent>(OnCargoChanged);
         simpleEventBus.Unsubscribe<
             CreditsChangedEvent>(
@@ -282,6 +284,11 @@ public class MetaHudController :
         PlanetEnteredEvent evt)
     {
         Refresh();
+    }
+
+    private void OnStationVisitChanged(StationVisitChangedEvent evt)
+    {
+        RefreshLocation(gameSessionService?.State?.Player);
     }
 
     private void OnFuelChanged(
@@ -522,6 +529,14 @@ public class MetaHudController :
             return;
         }
 
+        if (!string.IsNullOrWhiteSpace(player.CurrentStationId))
+        {
+            SetTextSafe(systemText, "Станция: " +
+                GetStationDisplayName(player.CurrentSystemId, player.CurrentStationId) +
+                " (" + starSystemName + ")");
+            return;
+        }
+
         if (!string.IsNullOrWhiteSpace(
                 player.CurrentSystemId))
         {
@@ -598,6 +613,13 @@ public class MetaHudController :
         }
 
         return systemId;
+    }
+
+    private string GetStationDisplayName(string systemId, string stationId)
+    {
+        var station = configService?.GetStarSystemConfigById(systemId)?.Station;
+        return station != null && station.Id == stationId &&
+            !string.IsNullOrWhiteSpace(station.DisplayName) ? station.DisplayName : stationId;
     }
 
     private string GetPlanetDisplayName(

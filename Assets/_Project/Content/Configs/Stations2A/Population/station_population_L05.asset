@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f6d0cf26d58490cb27aa5c62e550f0, type: 3}
+  m_Name: station_population_L05
+  m_EditorClassIdentifier: Data::SystemPopulationRule
+  id: station_population_L05
+  displayName: "station_population_L05"
+  description: "Preliminary S07 settings; final balance S09-10"
+  icon: {fileID: 0}
+  allySpawnRules:
+  - {fileID: 11400000, guid: 73aa9bfb111d56a5a58365c949efb3d7, type: 2}
+  invasionSpawnRuleSet: {fileID: 0}
+  enemyGroupSpawnRuleEntries: []

@@ -22,7 +22,7 @@ public static class SystemNpcMovementTime2A
             behavior == SystemNpcBehaviorType.TravelToEnemySystem ||
             behavior == SystemNpcBehaviorType.PatrolSystem ||
             behavior == SystemNpcBehaviorType.CollectDebris ||
-            behavior == SystemNpcBehaviorType.EngageEnemies;
+            behavior == SystemNpcBehaviorType.EngageEnemies || StationAttackRules2A.IsAttack(behavior);
     }
 
     public static void Reset(SystemNpcRuntimeState npc, double now)

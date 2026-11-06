@@ -25,7 +25,7 @@ public sealed class SystemStatusService : ISystemStatusService
     public void SetStatus(string systemId, StarSystemStatus newStatus)
     {
         var state = GetSystemState(systemId);
-        state.SystemStatus = newStatus;
+        state.SetSystemStatus(newStatus);
 
         if (newStatus == StarSystemStatus.Captured)
         {

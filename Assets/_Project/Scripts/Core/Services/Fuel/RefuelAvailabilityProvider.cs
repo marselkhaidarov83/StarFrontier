@@ -11,7 +11,11 @@ public class PlanetRefuelAvailabilityProvider : IRefuelAvailabilityProvider
 
     public bool IsRefuelAvailable()
     {
-        var planet = configService.GetPlanetConfigById(gameSessionService.State.Player.CurrentPlanetId);
+        var state = gameSessionService.State;
+        if (state?.Player == null) return false;
+        if (!string.IsNullOrEmpty(state.Player.CurrentStationId))
+            return StationLocationRules.IsInside(state, configService.GetStarSystemConfigById(state.Player.CurrentSystemId));
+        var planet = configService.GetPlanetConfigById(state.Player.CurrentPlanetId);
 
         if (planet == null)
             return false;

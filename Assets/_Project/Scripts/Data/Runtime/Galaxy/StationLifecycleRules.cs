@@ -24,6 +24,7 @@ public static class StationLifecycleRules
         if (station == null || station.Recovery != null) return;
         bool changed = !station.IsDestroyed;
         station.IsDestroyed = true;
+        station.Health = 0;
         if (station.Development != null && station.Development.PauseReason != StationOperationPauseReason.Destroyed)
         {
             station.Development.PauseReason = StationOperationPauseReason.Destroyed;
@@ -48,6 +49,26 @@ public static class StationLifecycleRules
         station.Revision++;
     }
 
+    public static bool HasDamage(StationRuntimeState station) => station != null &&
+        station.HealthVersion > 0 && station.Health < station.MaxHealth;
+
+    // Unknown enemy context during save normalization preserves an already recorded attack pause.
+    // The application layer always supplies live NPC presence before advancing time.
+    public static void RefreshDevelopmentPause(StarSystemRuntimeState system, bool? hasEnemies = null)
+    {
+        var station = system?.Station;
+        var operation = station?.Development;
+        if (operation == null) return;
+        var expected = station.IsDestroyed ? StationOperationPauseReason.Destroyed : StationOperationPauseReason.None;
+        if (!station.IsDestroyed && (operation.Kind == StationOperationKind.Upgrade || operation.Kind == StationOperationKind.Construction))
+            expected = hasEnemies == true || (hasEnemies == null && operation.PauseReason == StationOperationPauseReason.UnderAttack)
+                ? StationOperationPauseReason.UnderAttack : operation.Kind == StationOperationKind.Upgrade && HasDamage(station)
+                    ? StationOperationPauseReason.Damaged : StationOperationPauseReason.None;
+        if (operation.PauseReason == expected) return;
+        operation.PauseReason = expected;
+        station.Revision++;
+    }
+
     public static bool CanBegin(StationRuntimeState station, StationOperationKind kind, out string reason)
     {
         reason = string.Empty;
@@ -66,6 +87,7 @@ public static class StationLifecycleRules
         else if (kind == StationOperationKind.Construction && station.Level != 0) reason = "AlreadyBuilt";
         else if (kind == StationOperationKind.Upgrade && station.Level == 0) reason = "NotBuilt";
         else if (station.Level >= MaxLevel) reason = "MaximumLevel";
+        else if (kind == StationOperationKind.Upgrade && HasDamage(station)) reason = "StationDamaged";
         return reason.Length == 0;
     }
 
@@ -86,26 +108,28 @@ public static class StationLifecycleRules
         return true;
     }
 
-    public static void Advance(StarSystemRuntimeState system, double seconds)
+    public static void Advance(StarSystemRuntimeState system, double seconds, Func<int, int> maxHealth = null, bool hasEnemies = false)
     {
         var station = system?.Station;
         if (station == null || !station.IsEnabled || !IsFinite(seconds) || seconds < 0) return;
+        StationInfrastructureRules.EnsureHealth(system);
         ApplySystemStatus(station, system.SystemStatus);
         double remaining = seconds;
         if (station.Recovery != null)
         {
             var recovery = station.Recovery;
-            if (recovery.PauseReason != StationOperationPauseReason.None) return;
+            if (recovery.PauseReason != StationOperationPauseReason.None && recovery.DurationSeconds > 0) return;
             double previousElapsed = recovery.ElapsedSeconds;
             remaining = AdvanceOperation(recovery, remaining, out bool completed);
             if (completed || previousElapsed != recovery.ElapsedSeconds) station.Revision++;
             if (!completed) return;
             station.Recovery = null;
             station.IsDestroyed = false;
-            system.InfrastructureDamage = 0;
-            system.InfrastructureDamageState = SystemInfrastructureDamageState.Intact;
+            station.RepairDamageCredit = 0;
+            StationInfrastructureRules.RepairFully(system);
             if (station.Development != null) station.Development.PauseReason = StationOperationPauseReason.None;
         }
+        RefreshDevelopmentPause(system, hasEnemies);
         if (station.IsDestroyed) return;
         var development = station.Development;
         if (development == null || development.PauseReason != StationOperationPauseReason.None) return;
@@ -115,6 +139,8 @@ public static class StationLifecycleRules
         if (!done) return;
         station.Level = development.TargetLevel;
         station.Development = null;
+        StationInfrastructureRules.EnsureHealth(system, maxHealth?.Invoke(station.Level) ?? 0);
+        if (development.Kind == StationOperationKind.Construction) StationInfrastructureRules.RepairFully(system);
     }
 
     private static double AdvanceOperation(StationOperationRuntimeState operation, double seconds, out bool completed)
@@ -148,6 +174,9 @@ public static class StationLifecycleRules
         return changed;
     }
 
+    public static bool HasRecoveryOperation(StationRuntimeState station) =>
+        station?.Recovery != null && !IsSerializedEmptyOperation(station.Recovery);
+
     private static bool IsSerializedEmptyOperation(StationOperationRuntimeState operation) =>
         operation != null && operation.Kind == StationOperationKind.None &&
         string.IsNullOrEmpty(operation.OperationId) && string.IsNullOrEmpty(operation.PaymentOptionId) &&
@@ -163,19 +192,14 @@ public static class StationLifecycleRules
         long previousRevision = station.Revision;
         int previousDamage = system.InfrastructureDamage;
         var previousDamageState = system.InfrastructureDamageState;
-        bool changed = removedPlaceholders;
+        // Clearing serializer-created null placeholders is not a gameplay state change.
+        bool changed = false;
         int level = Math.Max(0, Math.Min(MaxLevel, station.Level));
         if (level != station.Level) { station.Level = level; changed = true; }
         if (system.StationStateVersion < SchemaVersion)
         { system.StationStateVersion = SchemaVersion; changed = true; }
         changed |= NormalizeOperation(station.Development);
         changed |= NormalizeOperation(station.Recovery);
-        if (station.Development != null)
-        {
-            var expected = station.IsDestroyed ? StationOperationPauseReason.Destroyed : StationOperationPauseReason.None;
-            if (station.Development.PauseReason != expected)
-            { station.Development.PauseReason = expected; changed = true; }
-        }
         if (changed) station.Revision++;
         ApplySystemStatus(station, system.SystemStatus);
         if (station.IsDestroyed)
@@ -184,8 +208,10 @@ public static class StationLifecycleRules
             system.InfrastructureDamageState = SystemInfrastructureDamageState.Destroyed;
             if (station.Development != null) station.Development.PauseReason = StationOperationPauseReason.Destroyed;
         }
-        else if (system.HasDestroyedInfrastructure()) Destroy(station);
-        return changed || previousRevision != station.Revision || previousDamage != system.InfrastructureDamage ||
+        else if (station.HealthVersion == 0 && system.HasDestroyedInfrastructure()) Destroy(station);
+        changed |= StationInfrastructureRules.EnsureHealth(system);
+        RefreshDevelopmentPause(system);
+        return removedPlaceholders || changed || previousRevision != station.Revision || previousDamage != system.InfrastructureDamage ||
             previousDamageState != system.InfrastructureDamageState;
     }
 
@@ -204,7 +230,10 @@ public static class StationLifecycleRules
 
     public static IEnumerable<string> GetValidationErrors(GalaxyRuntimeState galaxy)
     {
-        if (galaxy?.Systems == null) yield break;
+        if (galaxy == null) yield break;
+        if (galaxy.StationLastRepairTick < 0 || !IsFinite(galaxy.StationOfflineRepairSeconds) || galaxy.StationOfflineRepairSeconds < 0)
+            yield return "Invalid station repair tick clock.";
+        if (galaxy.Systems == null) yield break;
         var ids = new HashSet<string>(StringComparer.Ordinal);
         foreach (var system in galaxy.Systems)
         {
@@ -215,6 +244,12 @@ public static class StationLifecycleRules
             if (system.StationStateVersion > SchemaVersion) yield return "Unsupported station schema: " + system.SystemId;
             var station = system.Station;
             if (station == null) continue;
+            if (station.HealthVersion > 1 || station.HealthVersion < 0 ||
+                (station.HealthVersion == 1 && (station.MaxHealth <= 0 || station.Health < 0 || station.Health > station.MaxHealth ||
+                (!station.IsDestroyed && station.Health == 0))))
+                yield return "Invalid station health: " + system.SystemId;
+            if (!IsFinite(station.RepairDamageCredit) || station.RepairDamageCredit < 0 || station.RepairDamageCredit >= 1)
+                yield return "Invalid station repair credit: " + system.SystemId;
             if (string.IsNullOrWhiteSpace(station.ConfigId)) yield return "Station config ID is empty: " + system.SystemId;
             if (!Enum.IsDefined(typeof(StationType), station.StationType)) yield return "Unknown station type: " + system.SystemId;
             if (HasInvalidClockOrIdentity(station.Development) || HasInvalidClockOrIdentity(station.Recovery))

@@ -44,6 +44,9 @@ public sealed class SystemNpcBehaviorWeight
     public int Weight =>
         weight;
 
+    public SystemNpcBehaviorWeight WithType(SystemNpcBehaviorType type)
+    { var copy = (SystemNpcBehaviorWeight)MemberwiseClone(); copy.behaviorType = type; return copy; }
+
     public bool HasStationTarget =>
         targetStationType != NpcBehaviourTargetStationType.None;
 

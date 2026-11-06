@@ -31,6 +31,7 @@ public class PlayerState
     public string CurrentSystemId;
 
     public string CurrentPlanetId;
+    public string CurrentStationId;
 
     public bool IsOnPlanet()
     {

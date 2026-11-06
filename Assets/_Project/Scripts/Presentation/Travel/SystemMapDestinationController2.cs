@@ -27,6 +27,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
     private IOrbitalMotionService _orbitalMotionService;
     private IGameTimeService _gameTimeService;
     private ITargetService2A _targetService;
+    private IGameSessionService _gameSessionService;
 
     private PlanetSelectableView2 _selectedPlanetView;
     private PlanetConfig _selectedPlanetData;
@@ -40,6 +41,7 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _gameTimeService = Bootstrapper.Instance.ServiceRegistry.Get<IGameTimeService>();
         _targetService = Bootstrapper.Instance.ServiceRegistry.Get<ITargetService2A>();
+        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
 
         if (_simpleEventBus == null)
             AppLog.Error(DebugLogChannel.Travel,
@@ -161,6 +163,15 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
 
     private void OnTravelCompleted(SystemTravelCompletedEvent evt)
     {
+        string systemId = _gameSessionService?.State?.Player?.CurrentSystemId;
+        var station = _gameSessionService?.State?.Galaxy?.Systems?.Find(x => x != null && x.SystemId == systemId)?.Station;
+        if (evt.DestinationType == TravelDestinationType.Station && station?.Level == 0)
+        {
+            // An unbuilt station cannot dock: finish only the route preview and keep its selection.
+            _selectedPlanetView = null; _selectedPlanetData = null;
+            markerController?.HideAll();
+            return;
+        }
         ClearPlanetSelectionAndMarker();
     }
 
@@ -224,6 +235,8 @@ public sealed class SystemMapDestinationController2 : CustomMonoBehaviour
         _selectedPlanetData = null;
 
         StationConfig stationData = evt.Station;
+        if (Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>().State?.Player?.CurrentStationId == stationData.Id)
+            return;
 
         _systemTravelService.SetStationDestination(
             stationData);

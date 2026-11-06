@@ -28,6 +28,7 @@ public sealed class CombatWaveRuntimeState2A
     public float CurrentRadius;
 
     public bool PlayerDamaged;
+    public bool StationDamaged;
     public bool IsResolved;
 
     public readonly HashSet<string> DamagedNpcIds = new();

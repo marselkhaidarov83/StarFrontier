@@ -60,11 +60,76 @@ public class PlanetController : CustomMonoBehaviour
     private IOrbitalMotionService _orbitalMotionService;
     private IGameTimeService _gameTimeService;
     private IConfigService _configService;
+    private IStationVisitService _stationVisits;
+    private Color _planetBackgroundColor = Color.white;
     // private ITravelService _travelService;
     // private GalaxyGraphModel _galaxyGraph;
 
     // private bool _isInitialized;
     // private bool _isSubscribed;
+
+    private GameObject _researchBlock;
+    private StationResearchPanelController _researchPanel;
+    private Button _researchButton;
+    private void CreateResearchPanel()
+    {
+        if (_researchPanel != null || planetRoot == null) return;
+        var services = Bootstrapper.Instance.ServiceRegistry;
+        _researchBlock = new GameObject("StationResearchBlock", typeof(RectTransform));
+        _researchBlock.layer = planetRoot.layer; _researchBlock.SetActive(false);
+        StationResearchPanelView2A.AttachToLocation(_researchBlock.GetComponent<RectTransform>(), planetRoot.transform,
+            governmentBlock != null ? governmentBlock.transform : null, backgroundImage != null ? backgroundImage.transform : null);
+        _researchPanel = _researchBlock.AddComponent<StationResearchPanelController>();
+        var canvas = planetRoot.GetComponentInParent<Canvas>(true);
+        var template = governmentBlock != null ? governmentBlock.GetComponentInChildren<TMPro.TMP_Text>(true) : null;
+        if (template == null && canvas != null) template = canvas.GetComponentInChildren<TMPro.TMP_Text>(true);
+        _researchPanel.Initialize(template, services.Get<IResearchService>(), gameSessionService,
+            services.Get<IStationCardService>(), services.Get<IStationInfrastructureService>(), configService,
+            _gameTimeService, eventBus);
+        var rect = ResearchPanelUi2A.Rect(planetRoot.transform, "OpenResearchButton");
+        var background = rect.gameObject.AddComponent<Image>();
+        background.color = Color.clear;
+        var icon = ResearchPanelUi2A.Rect(rect, "Atom").gameObject.AddComponent<ResearchButtonIcon2A>();
+        ResearchPanelUi2A.Stretch(icon.rectTransform); icon.color = MissionPanelStyle2A.ActionAccent; icon.raycastTarget = false; icon.FilledBackground = true;
+        _researchButton = rect.gameObject.AddComponent<Button>(); _researchButton.targetGraphic = icon;
+        _researchButton.onClick.AddListener(() => OpenStationResearch()); _researchButton.gameObject.SetActive(false);
+        ResearchPanelUi2A.Place(rect, 16, 210, 104, 104);
+    }
+    public bool OpenStationResearch()
+    {
+        if (_researchBlock != null)
+            StationResearchPanelView2A.AttachToLocation(_researchBlock.GetComponent<RectTransform>(), planetRoot.transform,
+                governmentBlock != null ? governmentBlock.transform : null, backgroundImage != null ? backgroundImage.transform : null);
+        if (_researchPanel == null || !_researchPanel.TryOpen()) return false;
+        if (governmentBlock != null) governmentBlock.SetActive(false);
+        if (marketBlock != null) marketBlock.SetActive(false);
+        if (hangarBlock != null) hangarBlock.SetActive(false);
+        if (fuelBlock != null) fuelBlock.SetActive(false);
+        return true;
+    }
+    private void HideResearch() { if (_researchBlock != null) _researchBlock.SetActive(false); }
+    private void RefreshResearchAvailability()
+    {
+        if (_researchButton == null) return;
+        var player = gameSessionService.State?.Player;
+        var system = player != null ? configService.GetStarSystemConfigById(player.CurrentSystemId) : null;
+        _researchButton.gameObject.SetActive(system?.Station != null &&
+            StationLocationRules.IsInside(gameSessionService.State, system));
+        _researchButton.transform.SetAsLastSibling();
+    }
+    private void LateUpdate()
+    {
+        if (_researchButton == null || !_researchButton.gameObject.activeInHierarchy || openSystemButton == null || planetRoot == null) return;
+        var root = planetRoot.transform as RectTransform;
+        var source = openSystemButton.transform as RectTransform;
+        if (root == null || source == null) return;
+        var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, source);
+        // Mirror only the research entry. The serialized takeoff button stays in its original right-hand position.
+        float margin = Mathf.Max(10, root.rect.xMax - bounds.max.x);
+        float top = Mathf.Max(0, root.rect.yMax - bounds.max.y);
+        ResearchPanelUi2A.Place(_researchButton.GetComponent<RectTransform>(), margin, top,
+            Mathf.Clamp(bounds.size.x, 56, 160), Mathf.Clamp(bounds.size.y, 56, 160));
+    }
 
     public void Initialize()
     {
@@ -76,6 +141,9 @@ public class PlanetController : CustomMonoBehaviour
         _orbitalMotionService = Bootstrapper.Instance.ServiceRegistry.Get<IOrbitalMotionService>();
         _gameTimeService = Bootstrapper.Instance.ServiceRegistry.Get<IGameTimeService>();
 
+        _stationVisits = Bootstrapper.Instance.ServiceRegistry.Get<IStationVisitService>();
+        if (backgroundImage != null) _planetBackgroundColor = backgroundImage.color;
+        CreateResearchPanel();
         BindButtons();
         SubscribeToEvents();
     }
@@ -124,6 +192,13 @@ public class PlanetController : CustomMonoBehaviour
 
     private void OnOpenSystemClicked()
     {
+        if (!string.IsNullOrEmpty(gameSessionService.State.Player.CurrentStationId))
+        {
+            bool success = _stationVisits.TryTakeOff(out string reason);
+            AppLog.Info(DebugLogChannel.StationInterface, typeof(PlanetController),
+                "Station takeoff | Success=" + success + " | Reason=" + reason);
+            return;
+        }
         if (string.IsNullOrWhiteSpace(gameSessionService.State.Player.CurrentPlanetId))
         {
             PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.FirstLaunch, false, "CurrentPlanetMissing");
@@ -159,6 +234,7 @@ public class PlanetController : CustomMonoBehaviour
 
     private void OnOpenHangarClicked()
     {
+        HideResearch();
         if (planetRoot != null)
             planetRoot.SetActive(true);
         if (governmentBlock != null)
@@ -180,6 +256,7 @@ public class PlanetController : CustomMonoBehaviour
 
     private void OnOpenMarketClicked()
     {
+        HideResearch();
         if (planetRoot != null)
             planetRoot.SetActive(true);
         if (governmentBlock != null)
@@ -211,6 +288,7 @@ public class PlanetController : CustomMonoBehaviour
 
     private void OnRefuelClicked()
     {
+        HideResearch();
         if (planetRoot != null)
             planetRoot.SetActive(true);
         if (governmentBlock != null)
@@ -240,6 +318,7 @@ public class PlanetController : CustomMonoBehaviour
 
         RefreshBackground();
         RefreshActionAvailability();
+        RefreshResearchAvailability();
         PlanetGovernmentEntered();
 
         if (IsDebug())
@@ -324,12 +403,14 @@ public class PlanetController : CustomMonoBehaviour
                 break;
         }
 
+        backgroundImage.color = _planetBackgroundColor;
         backgroundImage.sprite = targetBackground;
         backgroundImage.preserveAspect = false;
     }
 
     private void PlanetGovernmentEntered()
     {
+        HideResearch();
         if (IsDebug())
             AppLog.Info(DebugLogChannel.PlanetUi,
                 typeof(PlanetController),
@@ -383,8 +464,34 @@ public class PlanetController : CustomMonoBehaviour
             LogCustom("PlanetGovernmentEntered() ended");
     }
 
+    private void OnStationVisitChanged(StationVisitChangedEvent evt)
+    {
+        if (!evt.Inside)
+        {
+            if (planetRoot != null && string.IsNullOrEmpty(gameSessionService.State?.Player?.CurrentPlanetId))
+                planetRoot.SetActive(false);
+            return;
+        }
+        // Reuse the real planet services/menu in a separate station landing window.
+        if (backgroundImage != null)
+        {
+            backgroundImage.sprite = null;
+            backgroundImage.color = new Color(0.025f, 0.045f, 0.09f, 1f);
+            backgroundImage.preserveAspect = false;
+        }
+        SetButtonActiveIfAlive(openMarketButton, true);
+        SetButtonActiveIfAlive(openGovernmentButton, true);
+        SetButtonActiveIfAlive(openHangarButton, true);
+        SetButtonActiveIfAlive(refuelButton, true);
+        PlanetGovernmentEntered();
+        RefreshResearchAvailability();
+        AppLog.Info(DebugLogChannel.StationInterface, typeof(PlanetController),
+            "Station interior opened | Station=" + evt.StationId);
+    }
+
     private void OnSystemEntered(StarSystemEnteredEvent evt)
     {
+        HideResearch();
         if (planetRoot != null)
             planetRoot.SetActive(false);
 
@@ -397,6 +504,7 @@ public class PlanetController : CustomMonoBehaviour
         if (eventBus == null)
             return;
 
+        eventBus.Subscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         eventBus.Subscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Subscribe<StarSystemEnteredEvent>(OnSystemEntered);
     }
@@ -406,6 +514,7 @@ public class PlanetController : CustomMonoBehaviour
         if (eventBus == null)
             return;
 
+        eventBus.Unsubscribe<StationVisitChangedEvent>(OnStationVisitChanged);
         eventBus.Unsubscribe<PlanetEnteredEvent>(OnPlanetEntered);
         eventBus.Unsubscribe<StarSystemEnteredEvent>(OnSystemEntered);
     }

@@ -228,6 +228,7 @@ public sealed class SystemPlayerCargoPanel2A : MonoBehaviour
         _plusButton = NewButton("More", _panel.transform, "+", Vector2.zero, new Vector2(44f, 36f));
         _plusButton.onClick.AddListener(() => ChangeQuantity(1));
         _dropButton = NewButton("Drop", _panel.transform, "Выбросить", Vector2.zero, new Vector2(220f, 36f));
+        _dropButton.GetComponent<Image>().color = StationPanelStyle2A.PrimaryButtonColor;
         _dropButton.onClick.AddListener(DropSelected);
         _events?.Subscribe<CargoChangedEvent>(OnCargoChanged);
         _events?.Subscribe<PlayerDestroyedEvent>(OnPlayerDestroyed);

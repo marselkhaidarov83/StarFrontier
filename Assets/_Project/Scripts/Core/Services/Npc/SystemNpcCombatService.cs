@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatService
+public sealed partial class SystemNpcCombatService : CustomService, ISystemNpcCombatService
 {
     private const float TickBasedProjectileSpeed = 0f;
     private const double NpcPerfLogThresholdMs = 4.0;
@@ -56,6 +56,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         _encounterService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEncounterService>();
         _spaceLootService = Bootstrapper.Instance.ServiceRegistry.Get<SystemSpaceLootService>();
+        _stationCombat = Bootstrapper.Instance.ServiceRegistry.Get<IStationCombatService2A>();
         Bootstrapper.Instance.ServiceRegistry.TryGet(out _shipMovementService);
 
         _eventBus.Subscribe<GameDayChangedEvent>(OnGameDayChanged);
@@ -289,7 +290,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (npc.IsOnPlanet)
             return false;
 
-        if (npc.CurrentBehavior != SystemNpcBehaviorType.EngageEnemies &&
+        if (npc.CurrentBehavior != SystemNpcBehaviorType.EngageEnemies && !StationAttackRules2A.IsAttack(npc.CurrentBehavior) &&
             npc.TravelState != SystemNpcTravelState.EngagingEnemy)
             return false;
 
@@ -312,7 +313,7 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (shooter == null)
             return;
 
-        if (shooter.CurrentBehavior != SystemNpcBehaviorType.EngageEnemies &&
+        if (shooter.CurrentBehavior != SystemNpcBehaviorType.EngageEnemies && !StationAttackRules2A.IsAttack(shooter.CurrentBehavior) &&
             shooter.TravelState != SystemNpcTravelState.EngagingEnemy)
         {
             shooter.CombatState = SystemNpcCombatState.None;
@@ -367,7 +368,12 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         double weaponsMs = EndPerfMeasureMs(weaponsStartedAt);
 
         if (firedAnyWeapon)
+        {
             shooter.CombatState = SystemNpcCombatState.Attacking;
+            if (target.TargetType == CombatTargetType.Station)
+                AppLog.Info(DebugLogChannel.Combat, "[STATION_WEAPON_FIRED] Npc=" + shooter.RuntimeNpcId +
+                    " | System=" + shooter.CurrentSystemId + " | Station=" + target.TargetNpcId + " | Weapons=" + firedCount);
+        }
 
         double totalMs = EndPerfMeasureMs(startedAt);
 
@@ -759,6 +765,9 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
     {
         position = projectile.LastKnownTargetPosition;
 
+        if (projectile.TargetType == CombatTargetType.Station)
+            return _stationCombat != null && _stationCombat.TryGetPosition(projectile.SystemId, projectile.TargetNpcId, out position);
+
         if (projectile.TargetType == CombatTargetType.Player)
         {
             if (!_playerTargetService.IsPlayerAvailableInSystem(projectile.SystemId))
@@ -852,6 +861,16 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
             else if (projectile.TargetType == CombatTargetType.Npc)
             {
                 ResolveNpcProjectile(projectile, ref hitPosition, ref didHit);
+            }
+            else if (projectile.TargetType == CombatTargetType.Station)
+            {
+                if (_stationCombat != null && _stationCombat.TryGetPosition(projectile.SystemId, projectile.TargetNpcId, out var stationPosition))
+                {
+                    hitPosition = stationPosition;
+                    didHit = ApplyStationWeaponDamage(projectile.SystemId, projectile.TargetNpcId, projectile.Damage,
+                        projectile.ShooterType, projectile.ShooterNpcId, projectile.WeaponConfigId, "Projectile", projectile.ProjectileId,
+                        projectile.StartPosition, hitPosition) > 0;
+                }
             }
             else if (projectile.TargetType == CombatTargetType.Loot &&
                      TryGetLoot(projectile.TargetNpcId, out SpaceLootRuntimeState drop) &&
@@ -1036,6 +1055,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
 
     private GalaxyCombatTarget FindTarget(SystemNpcRuntimeState shooter)
     {
+        if (StationAttackRules2A.IsAttack(shooter.CurrentBehavior))
+            return _stationCombat?.FindTarget(shooter) ?? GalaxyCombatTarget.None();
         if (shooter.IsEnemy)
         {
             GalaxyCombatTarget allyTarget = FindNearestNpcTarget(
@@ -1676,6 +1697,11 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
                 "WaveId=" + wave.WaveId +
                 " | Damage=" + wave.Damage);
             return;
+        }
+
+        if (wave.TargetType == CombatTargetType.Station)
+        {
+            ApplyStationWaveDamage(wave); return;
         }
 
         if (wave.TargetType == CombatTargetType.Player)
@@ -2771,6 +2797,11 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         if (damage <= 0 && beam.TargetType != CombatTargetType.Loot)
             return;
 
+        if (beam.TargetType == CombatTargetType.Station)
+        {
+            ApplyStationWeaponDamage(beam.SystemId, beam.TargetNpcId, damage, beam.ShooterType, beam.ShooterNpcId,
+                beam.WeaponConfigId, "Beam", beam.BeamId, beam.StartPosition, beam.TargetPosition); return;
+        }
         if (beam.TargetType == CombatTargetType.Player)
         {
             CombatDamageResult2A damageResult =
@@ -2869,6 +2900,8 @@ public sealed class SystemNpcCombatService : CustomService, ISystemNpcCombatServ
         out Vector3 position)
     {
         position = beam.TargetPosition;
+        if (beam.TargetType == CombatTargetType.Station)
+            return _stationCombat != null && _stationCombat.TryGetPosition(beam.SystemId, beam.TargetNpcId, out position);
 
         if (beam.TargetType == CombatTargetType.Player)
         {

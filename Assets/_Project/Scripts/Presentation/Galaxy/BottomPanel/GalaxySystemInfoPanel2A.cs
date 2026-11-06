@@ -69,6 +69,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
         _eventBus.Subscribe<GalaxyMapSystemSelectedEvent>(OnGalaxyMapSystemSelected);
         _eventBus.Subscribe<GalaxyMapSelectionClearedEvent>(OnGalaxyMapSelectionCleared);
+        _eventBus.Subscribe<StationStateChangedEvent>(OnStationStateChanged);
     }
 
     private void UnsubscribeFromEvents()
@@ -78,6 +79,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
 
         _eventBus.Unsubscribe<GalaxyMapSystemSelectedEvent>(OnGalaxyMapSystemSelected);
         _eventBus.Unsubscribe<GalaxyMapSelectionClearedEvent>(OnGalaxyMapSelectionCleared);
+        _eventBus.Unsubscribe<StationStateChangedEvent>(OnStationStateChanged);
     }
 
     private void SetupFlyButton()
@@ -133,7 +135,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             : new List<string>();
 
         SetPlanetsText(targetSystemConfig);
-        SetBaseText(targetSystemConfig);
+        SetBaseText(targetSystemConfig, targetSystemState);
         SetStatusText(targetSystemConfig, targetSystemState, currentSystemId);
         SetTargetSystemText(targetSystemConfig, targetSystemState, travelFailReason);
         SetRouteSystemCountText(_currentPath);
@@ -188,31 +190,33 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             planetsText.text = "Планеты: " + planetCount;
     }
 
-    private void SetBaseText(StarSystemConfig targetSystemConfig)
+    private void OnStationStateChanged(StationStateChangedEvent evt)
     {
+        if (string.IsNullOrEmpty(_targetSystemId) || evt.SystemId != _targetSystemId) return;
+        SetBaseText(FindSystemConfig(_targetSystemId), FindSystemRuntimeState(_targetSystemId));
+    }
+
+    private void SetBaseText(StarSystemConfig targetSystemConfig, StarSystemRuntimeState targetSystemState = null)
+    {
+        if (baseText == null) return;
+        baseText.color = Color.white;
         if (targetSystemConfig == null)
         {
-            baseText.text = "База:";
+            baseText.text = "Станция:";
             return;
         }
-
-        string text = "База: нет данных";
-
-        if (targetSystemConfig != null &&
-            targetSystemConfig.PlanetRefs != null &&
-            targetSystemConfig.PlanetRefs.Length > 0)
+        var station = targetSystemConfig.Station;
+        if (station == null || !station.IsActive)
         {
-            bool hasInhabitedPlanet = targetSystemConfig.PlanetRefs.Any(
-                planet => planet != null && planet.IsInhabited
-            );
-
-            text = hasInhabitedPlanet
-                ? "База: можно построить"
-                : "База: нет подходящей планеты";
+            baseText.text = "Станция: нет";
+            baseText.color = Color.gray;
+            return;
         }
-
-        if (baseText != null)
-            baseText.text = text;
+        int level = targetSystemState?.Station?.Level ?? station.InitialLevel;
+        baseText.text = "Станция: " + StationInterfaceRules.TypeName(station.StationType);
+        baseText.color = level > 0 ? Color.white : Color.gray;
+        AppLog.Info(DebugLogChannel.GalaxyMap, typeof(GalaxySystemInfoPanel2A),
+            "Station info | System=" + targetSystemConfig.Id + " | Station=" + station.Id + " | Level=" + level);
     }
 
     private void SetStatusText(

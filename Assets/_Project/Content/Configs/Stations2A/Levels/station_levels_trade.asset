@@ -1,0 +1,619 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24c3217044dd59d0865a0adf6535f6ee, type: 3}
+  m_Name: station_levels_trade
+  m_EditorClassIdentifier: Data::StationLevelEffectsConfig
+  id: station_levels_trade
+  displayName: "station_levels_trade"
+  description: "Preliminary S07 settings; final balance S09-10"
+  icon: {fileID: 0}
+  Levels:
+  - Level: 1
+    MaxHealth: 400
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 1
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 200
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 1
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 10
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 500
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 2
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 25
+    RequiredGalaxyLevel: 1
+  - Level: 2
+    MaxHealth: 450
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 2
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 400
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 2
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 20
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 1000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 4
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 50
+    RequiredGalaxyLevel: 2
+  - Level: 3
+    MaxHealth: 500
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 3
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 600
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 3
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 30
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 1500
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 6
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 75
+    RequiredGalaxyLevel: 3
+  - Level: 4
+    MaxHealth: 550
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 4
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 800
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 4
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 40
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 2000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 8
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 100
+    RequiredGalaxyLevel: 4
+  - Level: 5
+    MaxHealth: 600
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 5
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 1000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 5
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 50
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 2500
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 125
+    RequiredGalaxyLevel: 5
+  - Level: 6
+    MaxHealth: 650
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 6
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 1200
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 6
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 60
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 3000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 12
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 150
+    RequiredGalaxyLevel: 6
+  - Level: 7
+    MaxHealth: 700
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 7
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 1400
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 7
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 70
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 3500
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 14
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 175
+    RequiredGalaxyLevel: 7
+  - Level: 8
+    MaxHealth: 750
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 8
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 1600
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 8
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 80
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 4000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 16
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 200
+    RequiredGalaxyLevel: 8
+  - Level: 9
+    MaxHealth: 800
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 9
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 1800
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 9
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 90
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 4500
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 18
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 225
+    RequiredGalaxyLevel: 9
+  - Level: 10
+    MaxHealth: 850
+    Population: {fileID: 0}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 10
+    UnopposedInvasionDamagePerTick: 10
+    EfficiencyByDamage:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    RepairPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 2000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 10
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 100
+    RecoveryPaymentOptions:
+    - Id: credits_astralites
+      Costs:
+      - Resource: 0
+        Item: {fileID: 0}
+        Amount: 5000
+      - Resource: 1
+        Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+        Amount: 20
+    - Id: diamonds
+      Costs:
+      - Resource: 2
+        Item: {fileID: 0}
+        Amount: 250
+    RequiredGalaxyLevel: 10
