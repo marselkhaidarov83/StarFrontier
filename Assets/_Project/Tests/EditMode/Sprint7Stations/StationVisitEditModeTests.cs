@@ -532,4 +532,58 @@ public sealed class StationVisitEditModeTests
         Assert.Throws<global::System.InvalidOperationException>(() => _stations.TryGetStation("sys", out _));
         Assert.That(System.Station.Recovery, Is.SameAs(invalid)); Assert.That(invalid.DurationSeconds, Is.EqualTo(10));
     }
+    [TestCase(false)] [TestCase(true)]
+    public void DebugRecovery_RestoresSameLevelAndPaidProgress_AndSavesOnlyOnce(bool legacyRecovery)
+    {
+        System.Station.Development = new StationOperationRuntimeState {
+            OperationId = "paid", Kind = StationOperationKind.Upgrade, TargetLevel = 3,
+            DurationSeconds = 30, ElapsedSeconds = 4,
+            PaidCosts = new[] { new StationPaymentCostSnapshot { Resource = StationPaymentResource.Diamonds, Amount = 10 } } };
+        Assert.That(StationDebugCommands2A.TryDestroyCurrent(_session, _stations, _events, out _), Is.True);
+        if (legacyRecovery) System.Station.Recovery = new StationOperationRuntimeState {
+            OperationId = "legacy-recovery", Kind = StationOperationKind.Recovery, TargetLevel = 2,
+            DurationSeconds = 60, ElapsedSeconds = 7 };
+        int changes = 0, saves = 0;
+        _events.Subscribe<StationStateChangedEvent>(_ => changes++);
+        _events.Subscribe<SaveNeedEvent>(_ => saves++);
+        int diamonds = _session.State.Player.Diamonds;
+        Assert.That(StationDebugCommands2A.TryRestoreCurrent(_session, _stations, _events, false, out string reason), Is.True, reason);
+        Assert.That(System.Station.Level, Is.EqualTo(2));
+        Assert.That(System.Station.IsDestroyed, Is.False);
+        Assert.That(System.Station.Health, Is.EqualTo(450));
+        Assert.That(System.Station.Recovery, Is.Null);
+        Assert.That(System.Station.Development.OperationId, Is.EqualTo("paid"));
+        Assert.That(System.Station.Development.ElapsedSeconds, Is.EqualTo(4));
+        Assert.That(System.Station.Development.PaidCosts[0].Amount, Is.EqualTo(10));
+        Assert.That(System.Station.Development.PauseReason, Is.EqualTo(StationOperationPauseReason.None));
+        Assert.That(_session.State.Player.Diamonds, Is.EqualTo(diamonds));
+        Assert.That(changes, Is.EqualTo(1)); Assert.That(saves, Is.EqualTo(1));
+        string before = JsonUtility.ToJson(_session.State);
+        Assert.That(StationDebugCommands2A.TryRestoreCurrent(_session, _stations, _events, false, out reason), Is.False);
+        Assert.That(reason, Is.EqualTo("StationNotDestroyed"));
+        Assert.That(JsonUtility.ToJson(_session.State), Is.EqualTo(before));
+        Assert.That(changes, Is.EqualTo(1)); Assert.That(saves, Is.EqualTo(1));
+    }
+
+    [TestCase("captured", "SystemCaptured")]
+    [TestCase("invasion", "StationUnderAttack")]
+    [TestCase("enemies", "StationUnderAttack")]
+    [TestCase("unbuilt", "StationNotBuilt")]
+    [TestCase("disabled", "StationUnavailable")]
+    [TestCase("missing", "StationUnavailable")]
+    public void DebugRecovery_RejectionDoesNotChangeWorldOrRequestSave(string condition, string expected)
+    {
+        System.ApplyInfrastructureDamageFromWar(1, true);
+        if (condition == "captured") System.SystemStatus = StarSystemStatus.Captured;
+        if (condition == "invasion") System.SystemStatus = StarSystemStatus.Invasion;
+        if (condition == "unbuilt") System.Station.Level = 0;
+        if (condition == "disabled") System.Station.IsEnabled = false;
+        if (condition == "missing") System.Station.ConfigMissing = true;
+        int saves = 0; _events.Subscribe<SaveNeedEvent>(_ => saves++);
+        string before = JsonUtility.ToJson(_session.State);
+        Assert.That(StationDebugCommands2A.TryRestoreCurrent(_session, _stations, _events, condition == "enemies", out string reason), Is.False);
+        Assert.That(reason, Is.EqualTo(expected));
+        Assert.That(JsonUtility.ToJson(_session.State), Is.EqualTo(before)); Assert.That(saves, Is.Zero);
+    }
+
 }

@@ -257,4 +257,54 @@ public sealed class StationMilitaryRestoreEditModeTests
         }
         finally { GameTimeState.SecondsPerDay = oldTick; }
     }
+    [Test]
+    public void ScienceEffect_RepeatedInitializationQueriesAndReload_DoNotStackAndReflectDamage()
+    {
+        var infrastructure = RepairFixture(out var session, out _, out var system);
+        var config = _repairConfig.GetStarSystemConfigById("repair");
+        Set(config.Station.StationTypeConfig, "stationType", StationType.Science);
+        system.Station.StationType = StationType.Science;
+        config.Station.LevelEffects.Levels[0].ScienceRate = 9;
+        var stations = new StationService(session, _repairConfig.GetStarSystemConfigById, new SimpleEventBus());
+        StationInfrastructureRules.RepairFully(system);
+        for (int i = 0; i < 3; i++)
+        {
+            stations.InitializeSession(false); infrastructure.InitializeSession();
+            Assert.That(infrastructure.GetScienceRate(), Is.EqualTo(9));
+            session.LoadSession(JsonUtility.FromJson<GameRuntimeState>(JsonUtility.ToJson(session.State)));
+            SaveMigrationService.Migrate(session.State);
+        }
+        system = session.State.Galaxy.Systems[0];
+        system.ApplyInfrastructureDamageFromWar(150, false); stations.ReconcileSystem("repair");
+        Assert.That(infrastructure.GetScienceRate(), Is.EqualTo(6).Within(.00001));
+        system.ApplyInfrastructureDamageFromWar(1, true); stations.ReconcileSystem("repair");
+        Assert.That(infrastructure.GetScienceRate(), Is.Zero);
+        session.State.Player.CurrentSystemId = "repair";
+        Assert.That(StationDebugCommands2A.TryRestoreCurrent(session, stations, new SimpleEventBus(), false, out _), Is.True);
+        Assert.That(infrastructure.GetScienceRate(), Is.EqualTo(9));
+    }
+
+    [Test]
+    public void TickRepair_ReentrantObserverAndNewServiceAfterReload_CannotApplySameTickTwice()
+    {
+        var infrastructure = RepairFixture(out var session, out var npcs, out var system);
+        var events = new SimpleEventBus();
+        var stations = new StationService(session, _repairConfig.GetStarSystemConfigById, events);
+        stations.InitializeSession(false);
+        infrastructure = new StationInfrastructureService(session, _repairConfig, npcs, null, stations, events);
+        int notifications = 0;
+        events.Subscribe<StationStateChangedEvent>(_ => { notifications++; infrastructure.CompleteTick(1); });
+        infrastructure.CompleteTick(1);
+        Assert.That(system.Station.Health, Is.EqualTo(357)); Assert.That(notifications, Is.EqualTo(1));
+        session.LoadSession(JsonUtility.FromJson<GameRuntimeState>(JsonUtility.ToJson(session.State)));
+        SaveMigrationService.Migrate(session.State);
+        var restoredStations = new StationService(session, _repairConfig.GetStarSystemConfigById, new SimpleEventBus());
+        restoredStations.InitializeSession(false);
+        var restoredInfrastructure = new StationInfrastructureService(session, _repairConfig, npcs, null, restoredStations, new SimpleEventBus());
+        restoredInfrastructure.InitializeSession(); restoredInfrastructure.CompleteTick(1);
+        Assert.That(session.State.Galaxy.Systems[0].Station.Health, Is.EqualTo(357));
+        restoredInfrastructure.CompleteTick(2);
+        Assert.That(session.State.Galaxy.Systems[0].Station.Health, Is.EqualTo(364));
+    }
+
 }

@@ -322,6 +322,77 @@ public sealed class StationServiceEditModeTests
         Assert.That(system.Station.Development.ElapsedSeconds, Is.Zero);
     }
 
+    [Test]
+    public void InfrastructureLifecycle_ReloadAtEveryStage_PreservesHealthLevelWalletAndUpgrade()
+    {
+        var system = AddSystem("sys", 0, 10);
+        _session.State.Player.CurrentSystemId = "sys";
+        _session.State.Player.Diamonds = 100;
+        var service = Service(new StationResourcePaymentGateway(_session));
+        service.InitializeSession(true);
+        Assert.That(Start(service, system, StationOperationKind.Construction, "pay", out _), Is.True);
+        service.AdvanceTime(4);
+        ReloadStations(ref service, ref system);
+        Assert.That(system.Station.Development.ElapsedSeconds, Is.EqualTo(4));
+        service.AdvanceTime(6);
+        ReloadStations(ref service, ref system);
+        Assert.That(system.Station.Level, Is.EqualTo(1));
+        Assert.That(system.Station.Health, Is.EqualTo(400));
+        Assert.That(Start(service, system, StationOperationKind.Upgrade, "pay", out _), Is.True);
+        service.AdvanceTime(3);
+        Assert.That(StationDebugCommands2A.TryDamage100Current(_session, service, _events, out _), Is.True);
+        ReloadStations(ref service, ref system);
+        Assert.That(system.Station.Health, Is.EqualTo(300));
+        service.AdvanceTime(100);
+        Assert.That(system.Station.Development.ElapsedSeconds, Is.EqualTo(3));
+        Assert.That(StationDebugCommands2A.TryDestroyCurrent(_session, service, _events, out _), Is.True);
+        ReloadStations(ref service, ref system);
+        Assert.That(system.Station.IsDestroyed, Is.True);
+        Assert.That(system.Station.Health, Is.Zero);
+        Assert.That(StationDebugCommands2A.TryRestoreCurrent(_session, service, _events, false, out _), Is.True);
+        ReloadStations(ref service, ref system);
+        Assert.That(system.Station.Level, Is.EqualTo(1));
+        Assert.That(system.Station.Health, Is.EqualTo(400));
+        Assert.That(system.Station.Development.ElapsedSeconds, Is.EqualTo(3));
+        service.AdvanceTime(7);
+        ReloadStations(ref service, ref system);
+        Assert.That(system.Station.Level, Is.EqualTo(2));
+        Assert.That(system.Station.Health, Is.EqualTo(450));
+        Assert.That(system.Station.Development, Is.Null);
+        service.AdvanceTime(100);
+        Assert.That(system.Station.Level, Is.EqualTo(2));
+        Assert.That(_session.State.Player.Diamonds, Is.EqualTo(86), "Only construction and upgrade charge 7 each");
+    }
+
+    [TestCase(false)] [TestCase(true)]
+    public void LegacyMigration_BindsExistingStationAndDamageOnce_ThenPreservesReload(bool destroyed)
+    {
+        var system = AddSystem("sys", 0, 10);
+        system.InfrastructureDamage = destroyed ? 100 : 25;
+        system.InfrastructureDamageState = destroyed ? SystemInfrastructureDamageState.Destroyed : SystemInfrastructureDamageState.Damaged;
+        _session.State.Meta.SaveDataVersion = SaveDataVersions.MissionBattleAndRoutes;
+        SaveMigrationService.Migrate(_session.State);
+        var service = Service(); service.InitializeSession(false);
+        Assert.That(system.Station.Level, Is.EqualTo(1));
+        Assert.That(system.Station.Health, Is.EqualTo(destroyed ? 0 : 300));
+        Assert.That(system.Station.IsDestroyed, Is.EqualTo(destroyed));
+        ReloadStations(ref service, ref system);
+        string once = JsonUtility.ToJson(_session.State);
+        SaveMigrationService.Migrate(_session.State); service.InitializeSession(false);
+        Assert.That(JsonUtility.ToJson(_session.State), Is.EqualTo(once));
+        Assert.That(system.Station.Level, Is.EqualTo(1));
+        Assert.That(system.Station.Health, Is.EqualTo(destroyed ? 0 : 300));
+    }
+
+    private void ReloadStations(ref StationService service, ref StarSystemRuntimeState system)
+    {
+        _session.LoadSession(JsonUtility.FromJson<GameRuntimeState>(JsonUtility.ToJson(_session.State)));
+        SaveMigrationService.Migrate(_session.State);
+        service = Service(new StationResourcePaymentGateway(_session));
+        service.InitializeSession(false);
+        system = _session.State.Galaxy.Systems[0];
+    }
+
     private bool Start(StationService service, StarSystemRuntimeState system,
         StationOperationKind kind, string option, out string reason)
     {
