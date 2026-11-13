@@ -395,6 +395,12 @@ public sealed class GalaxyRoutePreviewBinder2A :
             case TravelFailReason.SystemsAreNotNeighbors:
                 return "Между системами нет доступного маршрута";
 
+            case TravelFailReason.EngineNotInstalled:
+                return ShipLoadoutRules.EngineNotInstalledMessage;
+
+            case TravelFailReason.FuelTankNotInstalled:
+                return ShipLoadoutRules.FuelTankNotInstalledMessage;
+
             case TravelFailReason.NotEnoughFuel:
                 return "Недостаточно топлива";
 

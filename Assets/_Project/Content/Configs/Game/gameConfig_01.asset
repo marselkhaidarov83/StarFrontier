@@ -21,3 +21,4 @@ MonoBehaviour:
   minutesPerGameTick: 15
   galaxyMapRoutePointSpacing: 0.1
   MissionGameplay: {fileID: 11400000, guid: d240ea1427a04a49b9361ee36880b198, type: 2}
+  MarketEconomy: {fileID: 11400000, guid: e51eba8c5601492d8f2af3ec4d7889ac, type: 2}

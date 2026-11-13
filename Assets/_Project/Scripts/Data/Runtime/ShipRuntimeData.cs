@@ -9,6 +9,15 @@ public class ShipRuntimeData
     // Debug commands affect this runtime ship only; loading restores its configured grabber.
     [NonSerialized] public bool DebugGrabberRemoved;
 
+    // Null in legacy saves: the existing ship still represents its installed hull.
+    public HullEquipmentRuntimeState InstalledHull;
+    public bool HasModularLoadout;
+    // Retained for migrating loadouts saved before components had individual condition.
+    public List<string> InstalledComponentIds = new();
+    public List<SystemNpcWeaponRuntimeState> InstalledComponents = new();
+    public List<SystemNpcWeaponRuntimeState> InstalledWeapons = new();
+    // Legacy save data. Hulls can no longer be put in the hold.
+    public List<HullEquipmentRuntimeState> CargoHulls = new();
     public int CurrentHull;
     public int HullCapacity;
     public int CurrentShield;

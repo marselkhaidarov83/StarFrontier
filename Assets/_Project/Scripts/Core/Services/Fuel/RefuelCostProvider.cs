@@ -1,14 +1,9 @@
+using System;
+
 public class RefuelCostProvider : IRefuelCostProvider
-    {
-        private readonly int _costPerFuelUnit = 25;
-
-        public RefuelCostProvider(int costPerFuelUnit)
-        {
-            _costPerFuelUnit = costPerFuelUnit;
-        }
-
-        public int GetCostPerFuelUnit()
-        {
-            return _costPerFuelUnit;
-        }
-    }
+{
+    private readonly Func<int> _cost;
+    public RefuelCostProvider(int costPerFuelUnit) : this(() => costPerFuelUnit) { }
+    public RefuelCostProvider(Func<int> cost) { _cost = cost; }
+    public int GetCostPerFuelUnit() => _cost();
+}

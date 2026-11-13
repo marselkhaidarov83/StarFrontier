@@ -1168,10 +1168,14 @@ public sealed partial class SystemNpcCombatService : CustomService, ISystemNpcCo
             best.CurrentPosition);
     }
 
+    public bool TryCreatePlayerLootProjectile(string lootId, string weaponConfigId, int quantTick) =>
+        TryCreatePlayerLootProjectile(lootId, weaponConfigId, quantTick, null);
+
     public bool TryCreatePlayerLootProjectile(
         string lootId,
         string weaponConfigId,
-        int quantTick)
+        int quantTick,
+        SystemNpcWeaponRuntimeState installedWeapon)
     {
         if (string.IsNullOrWhiteSpace(lootId) ||
             string.IsNullOrWhiteSpace(weaponConfigId) ||
@@ -1183,7 +1187,7 @@ public sealed partial class SystemNpcCombatService : CustomService, ISystemNpcCo
         if (config == null)
             return false;
 
-        WeaponRuntimeStats stats = config.RollRuntimeStats(
+        WeaponRuntimeStats stats = installedWeapon?.RolledStats ?? config.RollRuntimeStats(
             BuildWeaponRollSeed("player", lootId, weaponConfigId, quantTick.ToString()));
         Vector3 playerPosition = _playerTargetService.GetPlayerPosition();
         if (Vector3.Distance(playerPosition, loot.Position) > stats.Range)
@@ -1227,10 +1231,14 @@ public sealed partial class SystemNpcCombatService : CustomService, ISystemNpcCo
         return false;
     }
 
+    public bool TryCreatePlayerProjectile(string targetNpcId, string weaponConfigId, int quantTick) =>
+        TryCreatePlayerProjectile(targetNpcId, weaponConfigId, quantTick, null);
+
     public bool TryCreatePlayerProjectile(
         string targetNpcId,
         string weaponConfigId,
-        int quantTick)
+        int quantTick,
+        SystemNpcWeaponRuntimeState installedWeapon)
     {
         if (string.IsNullOrWhiteSpace(targetNpcId))
             return false;
@@ -1262,7 +1270,7 @@ public sealed partial class SystemNpcCombatService : CustomService, ISystemNpcCo
             return false;
         }
 
-        WeaponRuntimeStats weaponStats = weaponConfig.RollRuntimeStats(
+        WeaponRuntimeStats weaponStats = installedWeapon?.RolledStats ?? weaponConfig.RollRuntimeStats(
             BuildWeaponRollSeed(
                 "player",
                 target.RuntimeNpcId,

@@ -50,6 +50,13 @@ public static class SaveDataVersions
     public const int MissionBattleAndRoutes = 9;
     public const int StationLifecycle = 10;
     public const int StationEffectsAndResearch = 11;
-    public const int Current = StationEffectsAndResearch;
+    public const int PlanetMarketEconomy = 12;
+    public const int MarketPrioritySchedule = 13;
+    public const int MarketPersonalStorage = 14;
+    public const int MarketHullEquipment = 15;
+    public const int ModularShipLoadout = 16;
+    public const int EquipmentDurability = 17;
+    public const int EquipmentTankFuel = 18;
+    public const int Current = EquipmentTankFuel;
 
 }

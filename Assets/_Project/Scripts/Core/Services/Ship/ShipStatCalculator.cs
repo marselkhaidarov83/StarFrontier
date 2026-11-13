@@ -1,12 +1,23 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ShipStatCalculator
 {
     private readonly IConfigService _configService;
 
-    public ShipStatCalculator()
+    public ShipStatCalculator(IConfigService configService)
     {
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        _configService = configService;
+    }
+
+    public static float GetEngineSpeed(ShipRuntimeData ship, IConfigService config)
+    {
+        if (ship == null) return 0f;
+        if (!ship.HasModularLoadout)
+            return Mathf.Max(0f, config.GetAllyConfigById(ship.AllyConfigId)?.DefaultEngine?.Speed ?? 0f);
+
+        var engine = config.GetItemConfigById(ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.Engine)) as ShipComponentConfig;
+        return engine != null && engine.Slot == ShipComponentSlot.Engine ? Mathf.Max(0f, engine.Speed) : 0f;
     }
 
     public ShipStats Calculate(AllyConfig shipData, List<string> equippedModuleIds)
@@ -19,7 +30,7 @@ public class ShipStatCalculator
             MaxHull = shipData.BaseHull,
             MaxShield = shipData.BaseShield,
             MaxEnergy = shipData.BaseEnergy,
-            Speed = shipData.BaseSpeed,
+            Speed = Mathf.Max(0f, shipData.DefaultEngine?.Speed ?? 0f),
             CargoCapacity = shipData.BaseCargoCapacity
         };
 
@@ -61,10 +72,6 @@ public class ShipStatCalculator
                 stats.MaxEnergy = ApplyIntModifier(stats.MaxEnergy, moduleData);
                 break;
 
-            case ModuleStatType.Speed:
-                stats.Speed = ApplyFloatModifier(stats.Speed, moduleData);
-                break;
-
             case ModuleStatType.Cargo:
                 stats.CargoCapacity = ApplyIntModifier(stats.CargoCapacity, moduleData);
                 break;
@@ -75,13 +82,6 @@ public class ShipStatCalculator
     {
         var value = baseValue + moduleData.FlatBonus;
         value += (int)(value * moduleData.PercentBonus);
-        return value;
-    }
-
-    private float ApplyFloatModifier(float baseValue, ModuleConfig moduleData)
-    {
-        var value = baseValue + moduleData.FlatBonus;
-        value += value * moduleData.PercentBonus;
         return value;
     }
 }

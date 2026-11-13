@@ -55,4 +55,4 @@ MonoBehaviour:
   visualSize: 32
   lootTable: {fileID: 11400000, guid: c062b8aff87e4f23bf77e42fc8aea24a, type: 2}
   lootSpecies: 10
-  baseCargoCapacity: 0
+  baseCargoCapacity: 110

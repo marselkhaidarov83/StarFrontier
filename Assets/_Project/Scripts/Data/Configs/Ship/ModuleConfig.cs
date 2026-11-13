@@ -35,6 +35,8 @@ public class ModuleConfig : BaseConfig
     [SerializeField] private int flatBonus;
     [Tooltip("Параметр percentBonus. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private float percentBonus;
+    [SerializeField, Min(1), Tooltip("Занимает места в трюме за один модуль.")]
+    private int cargoSize = 1;
 
     [Header("Active Module")]
     [Tooltip("Параметр cooldown. Используется связанными игровыми системами этого конфига.")]
@@ -53,6 +55,7 @@ public class ModuleConfig : BaseConfig
     public ModuleStatType StatType => statType;
     public int FlatBonus => flatBonus;
     public float PercentBonus => percentBonus;
+    public int CargoSize => Mathf.Max(1, cargoSize);
     public float Cooldown => cooldown;
     public int EnergyCost => energyCost;
     public StatModifierData[] StatModifiers => statModifiers;

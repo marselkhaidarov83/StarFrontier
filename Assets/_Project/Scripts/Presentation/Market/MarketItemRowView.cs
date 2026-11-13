@@ -39,7 +39,7 @@ public class MarketItemRowView : MonoBehaviour
         int sellPrice,
         System.Action<string> onBuyClicked,
         System.Action<string> onSellClicked,
-        bool? canSell = null)
+        bool? canSell = null, bool canBuy = true)
     {
         _itemId = itemData.ItemConfig.Id;
         _onBuyClicked = onBuyClicked;
@@ -49,7 +49,7 @@ public class MarketItemRowView : MonoBehaviour
             itemNameText.text = itemData.ItemConfig.DisplayName;
 
         if (basePriceText != null)
-            basePriceText.text = $"Base: {itemData.ItemConfig.BasePrice}";
+            basePriceText.text = $"Base: {(itemData.BasePrice > 0 ? itemData.BasePrice : itemData.ItemConfig.BasePrice)}";
 
         if (buyPriceText != null)
             buyPriceText.text = $"Buy: {buyPrice}";
@@ -59,10 +59,11 @@ public class MarketItemRowView : MonoBehaviour
 
         if (ownedQuantityText != null)
             // ownedQuantityText.text = $"Owned: {ownedQuantity}";
-            ownedQuantityText.text = ownedQuantity.ToString();
+            ownedQuantityText.text = "Груз: " + ownedQuantity + " | Рынок: " + itemData.Quantity;
 
         if (buyButton != null)
         {
+            buyButton.interactable = canBuy;
             buyButton.onClick.RemoveAllListeners();
             buyButton.onClick.AddListener(OnBuyClicked);
         }
@@ -75,6 +76,22 @@ public class MarketItemRowView : MonoBehaviour
         }
 
         FillIcon(itemData.ItemConfig.Icon);
+    }
+
+    public void BindEquipment(SystemNpcWeaponRuntimeState equipment, WeaponConfig config, int price, bool buying,
+        System.Action<string> action)
+    {
+        _itemId = equipment.InstanceId;
+        if (itemNameText != null) itemNameText.text = (config != null ? config.DisplayName : equipment.WeaponConfigId) + " · " + equipment.CurrentDurability + " / " + equipment.MaximumDurability;
+        if (basePriceText != null) basePriceText.text = "Оборудование";
+        if (buyPriceText != null) buyPriceText.text = buying ? "Купить: " + price : "";
+        if (sellPriceText != null) sellPriceText.text = buying ? "" : "Продать: " + price;
+        if (ownedQuantityText != null) ownedQuantityText.text = buying ? "На рынке" : "В грузовом отсеке";
+        _onBuyClicked = buying ? action : null;
+        _onSellClicked = buying ? null : action;
+        if (buyButton != null) { buyButton.onClick.RemoveAllListeners(); buyButton.onClick.AddListener(OnBuyClicked); buyButton.interactable = buying && price > 0; }
+        if (sellButton != null) { sellButton.onClick.RemoveAllListeners(); sellButton.onClick.AddListener(OnSellClicked); sellButton.interactable = !buying && price > 0; }
+        FillIcon(config != null ? config.Icon : null);
     }
 
     private void FillIcon(Sprite iconSprite)
@@ -94,11 +111,15 @@ public class MarketItemRowView : MonoBehaviour
         
     private void OnBuyClicked()
     {
+        if (buyButton != null) buyButton.interactable = false;
+        if (sellButton != null) sellButton.interactable = false;
         _onBuyClicked?.Invoke(_itemId);
     }
 
     private void OnSellClicked()
     {
+        if (buyButton != null) buyButton.interactable = false;
+        if (sellButton != null) sellButton.interactable = false;
         _onSellClicked?.Invoke(_itemId);
     }
 }

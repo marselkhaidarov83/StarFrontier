@@ -627,8 +627,8 @@ public sealed class CombatMarkerVisibilityScaler2A : MonoBehaviour
             if (weaponConfig == null)
                 continue;
 
-            if (weaponConfig.RangeMax > maxRange)
-                maxRange = weaponConfig.RangeMax;
+            float range = ShipLoadoutRules.Weapon(activeShip, i)?.RolledStats.Range ?? weaponConfig.RangeMax;
+            maxRange = Mathf.Max(maxRange, range);
         }
 
         if (maxRange <= 0f)

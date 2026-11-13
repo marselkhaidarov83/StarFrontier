@@ -1,5 +1,5 @@
 using System;
-public sealed class StationFacilityService : IStationFacilityService
+public sealed class StationFacilityService : IStationFacilityService, IPartialStationFacilityService
 {
     private readonly IGameSessionService _session;
     private readonly Func<string, StarSystemConfig> _resolve;
@@ -26,9 +26,6 @@ public sealed class StationFacilityService : IStationFacilityService
     private void Changed(string action)
     {
         var p = _session.State.Player;
-        _events?.PublishSafely(new CreditsChangedEvent(p.Credits), _ => { });
-        _events?.PublishSafely(new CargoChangedEvent(_inventory.GetUsedCargo()), _ => { });
-        _events?.PublishSafely(new SaveNeedEvent("station_" + action), _ => { });
         AppLog.Info(DebugLogChannel.StationInterface, "[StationInterface] SERVICE | Action=" + action + " | Station=" + p.CurrentStationId);
     }
     public bool TryRefuel(out string reason)
@@ -41,19 +38,32 @@ public sealed class StationFacilityService : IStationFacilityService
     public bool TryRepairHull(out string reason)
     {
         if (!Begin(out reason)) return false;
-        try { var result = _repair.RepairToFull(); reason = result.IsSuccess ? string.Empty : result.resultType.ToString(); if (result.IsSuccess) Changed("hull_repaired"); return result.IsSuccess; }
+        try { var result = _repair.RepairToFull(); reason = result.IsSuccess ? string.Empty : result.resultType.ToString(); if (result.IsSuccess) Changed("committed"); return result.IsSuccess; }
+        finally { _busy = false; }
+    }
+    public bool TryRepairHull(int hullUnits, out string reason)
+    {
+        if (!Begin(out reason)) return false;
+        try
+        {
+            if (!(_repair is IPartialRepairService partial)) { reason = "PartialRepairUnavailable"; return false; }
+            var result = partial.Repair(hullUnits);
+            reason = result.IsSuccess ? string.Empty : result.resultType.ToString();
+            if (result.IsSuccess) Changed("partial_repair");
+            return result.IsSuccess;
+        }
         finally { _busy = false; }
     }
     public bool TryBuy(string itemId, int quantity, out string reason)
     {
         if (!Begin(out reason)) return false;
-        try { var result = _market.BuyItem(itemId, quantity); reason = result.IsSuccess ? string.Empty : result.resultType.ToString(); if (result.IsSuccess) Changed("bought"); return result.IsSuccess; }
+        try { var result = _market.BuyItem(itemId, quantity); reason = result.IsSuccess ? string.Empty : result.resultType.ToString(); if (result.IsSuccess) Changed("committed"); return result.IsSuccess; }
         finally { _busy = false; }
     }
     public bool TrySell(string itemId, int quantity, out string reason)
     {
         if (!Begin(out reason)) return false;
-        try { var result = _market.SellItem(itemId, quantity); reason = result.IsSuccess ? string.Empty : result.resultType.ToString(); if (result.IsSuccess) Changed("sold"); return result.IsSuccess; }
+        try { var result = _market.SellItem(itemId, quantity); reason = result.IsSuccess ? string.Empty : result.resultType.ToString(); if (result.IsSuccess) Changed("committed"); return result.IsSuccess; }
         finally { _busy = false; }
     }
 }

@@ -1,234 +1,43 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
-
+using System.Linq;
 
 public class EconomyService : CustomService, IEconomyService
 {
-    private readonly SimpleEventBus eventBus;
-    private readonly IConfigService _configService;
-    private readonly IGameSessionService _gameSessionService;
-    private readonly IInventoryService _inventoryService;
-    private IItemPriceProvider _itemPriceProvider;
-
-    public EconomyService()
+    private readonly SimpleEventBus _events;
+    private readonly IGameSessionService _session;
+    private readonly IPlanetMarketService _market;
+    public EconomyService() : this(Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>(),
+        Bootstrapper.Instance.ServiceRegistry.Get<IPlanetMarketService>(), Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>()) { }
+    public EconomyService(IGameSessionService session, IPlanetMarketService market, SimpleEventBus events)
+    { _session = session; _market = market; _events = events; }
+    public int GetBuyPrice(string itemId) => _market.GetPrice(itemId, true);
+    public int GetSellPrice(string itemId) => _market.GetPrice(itemId, false);
+    public List<MarketItemData> GetMarketItemsForCurrentSystem() => _market.GetItems().Select(x => new MarketItemData(
+        x.ItemConfig.Id, x.ItemConfig.DisplayName, x.ItemConfig.BasePrice, GetBuyPrice(x.ItemConfig.Id), GetSellPrice(x.ItemConfig.Id), x.ItemConfig)).ToList();
+    public int GetCredits() => _session.State?.Player?.Credits ?? 0;
+    public bool CanBuy(string itemId, int quantity) => _market.CanTrade(itemId, quantity, true);
+    public bool CanSell(string itemId, int quantity) => _market.CanTrade(itemId, quantity, false);
+    public EconomyOperationResult BuyItem(string itemId, int quantity) => Trade(itemId, quantity, true);
+    public EconomyOperationResult SellItem(string itemId, int quantity) => Trade(itemId, quantity, false);
+    private EconomyOperationResult Trade(string itemId, int quantity, bool buy)
     {
-        eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        _inventoryService = Bootstrapper.Instance.ServiceRegistry.Get<IInventoryService>();
-        _itemPriceProvider = new PlanetMarketPriceProvider();
-    }
-
-    public int GetBuyPrice(string itemId)
-    {
-        if (!_itemPriceProvider.TryGetBuyPrice(itemId, out int price))
-            price = 999;
-
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Economy,
-                typeof(EconomyService),
-                "GetBuyPrice = " + price);
-
-        return price;
-    }
-
-    public int GetSellPrice(string itemId)
-    {
-        if (!_itemPriceProvider.TryGetSellPrice(itemId, out int price))
-            price = 0;
-
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Economy,
-                typeof(EconomyService),
-                "GetBuyPrice = " + price);
-
-        return price;
-    }
-
-    public List<MarketItemData> GetMarketItemsForCurrentSystem()
-    {
-        List<MarketItemData> result = new List<MarketItemData>();
-        IReadOnlyList<ItemConfig> allItems = _configService.GetAllItems();
-
-        AppLog.Info(DebugLogChannel.Economy, "EconomyService | allItems count: " + allItems.Count);
-
-        for (int i = 0; i < allItems.Count; i++)
+        using (var observation = PlayerAnalyticsSafe.Observe(buy ? PlayerAnalyticsAction.BuyItem : PlayerAnalyticsAction.SellItem, itemId, quantity))
         {
-            ItemConfig item = allItems[i];
-
-            if (item == null || string.IsNullOrWhiteSpace(item.Id))
-            {
-                continue;
-            }
-
-            int buyPrice = GetBuyPrice(item.Id);
-            int sellPrice = GetSellPrice(item.Id);
-
-            result.Add(new MarketItemData(
-                item.Id,
-                item.DisplayName,
-                item.BasePrice,
-                buyPrice,
-                sellPrice,
-                item
-            ));
-        }
-
-        return result;
-    }
-
-    public int GetCredits()
-    {
-        return _gameSessionService.State.Player.Credits;
-    }
-
-    public bool CanBuy(string itemId, int quantity)
-    {
-        if (string.IsNullOrWhiteSpace(itemId))
-            return false;
-
-        if (quantity <= 0)
-            return false;
-
-        int buyPrice = GetBuyPrice(itemId);
-        if (buyPrice <= 0)
-            return false;
-
-        int totalPrice = buyPrice * quantity;
-
-        if (_gameSessionService.State.Player.Credits < totalPrice)
-            return false;
-
-        if (!_inventoryService.CanAddItem(itemId, quantity))
-            return false;
-
-        return true;
-    }
-
-    public bool CanSell(string itemId, int quantity)
-    {
-        if (string.IsNullOrWhiteSpace(itemId))
-            return false;
-
-        if (quantity <= 0)
-            return false;
-
-        int sellPrice = GetSellPrice(itemId);
-        if (sellPrice <= 0)
-            return false;
-
-        int ownedCount = _gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.GetTradeableQuantity(itemId);
-        return ownedCount >= quantity;
-    }
-
-    public EconomyOperationResult BuyItem(string itemId, int quantity)
-    {
-        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.BuyItem, itemId, quantity))
-        {
-            var result = BuyItemCore(itemId, quantity);
-            observation.Complete(result.Success, result.ErrorCode.ToString(), (int)System.Math.Min(int.MaxValue, System.Math.Abs((long)result.ChangedCredits)));
+            var result = _market.Trade(itemId, quantity, buy);
+            observation.Complete(result.Success, result.ErrorCode.ToString(), (int)Math.Min(int.MaxValue, Math.Abs((long)result.ChangedCredits)));
             return result;
         }
     }
-
-    private EconomyOperationResult BuyItemCore(string itemId, int quantity)
-    {
-        if (string.IsNullOrWhiteSpace(itemId))
-            return EconomyOperationResult.Failed(EconomyErrorCode.InvalidItemId, itemId, quantity);
-
-        if (quantity <= 0)
-            return EconomyOperationResult.Failed(EconomyErrorCode.InvalidQuantity, itemId, quantity);
-
-        int price = GetBuyPrice(itemId);
-        if (price <= 0)
-            return EconomyOperationResult.Failed(EconomyErrorCode.PriceNotFound, itemId, quantity);
-
-        int totalPrice = price * quantity;
-
-        if (_gameSessionService.State.Player.Credits < totalPrice)
-            return EconomyOperationResult.Failed(EconomyErrorCode.NotEnoughCredits, itemId, quantity);
-
-        if (!_inventoryService.CanAddItem(itemId, quantity))
-            return EconomyOperationResult.Failed(EconomyErrorCode.NotEnoughCargoSpace, itemId, quantity);
-
-        bool addSucceeded = _inventoryService.AddItem(itemId, quantity);
-        if (!addSucceeded)
-            return EconomyOperationResult.Failed(EconomyErrorCode.NotEnoughCargoSpace, itemId, quantity);
-
-        _gameSessionService.State.Player.Credits -= totalPrice;
-        PublishCreditsChanged();
-
-        eventBus.Publish(new SaveNeedEvent());
-        return EconomyOperationResult.Completed(-totalPrice, itemId, quantity);
-    }
-
-    public EconomyOperationResult SellItem(string itemId, int quantity)
-    {
-        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.SellItem, itemId, quantity))
-        {
-            var result = SellItemCore(itemId, quantity);
-            observation.Complete(result.Success, result.ErrorCode.ToString(), (int)System.Math.Min(int.MaxValue, System.Math.Abs((long)result.ChangedCredits)));
-            return result;
-        }
-    }
-
-    private EconomyOperationResult SellItemCore(string itemId, int quantity)
-    {
-        if (string.IsNullOrWhiteSpace(itemId))
-            return EconomyOperationResult.Failed(EconomyErrorCode.InvalidItemId, itemId, quantity);
-
-        if (quantity <= 0)
-            return EconomyOperationResult.Failed(EconomyErrorCode.InvalidQuantity, itemId, quantity);
-
-        int sellPrice = GetSellPrice(itemId);
-        // if (!_itemPriceProvider.TryGetSellPrice(itemId, out int price))
-        if (sellPrice <= 0)
-            return EconomyOperationResult.Failed(EconomyErrorCode.PriceNotFound, itemId, quantity);
-
-        int ownedCount = _gameSessionService.State.Player.PlayerShipState.GetActiveShip().Cargo.GetTradeableQuantity(itemId);
-        if (ownedCount <= 0)
-            return EconomyOperationResult.Failed(EconomyErrorCode.ItemNotOwned, itemId, quantity);
-
-        if (ownedCount < quantity)
-            return EconomyOperationResult.Failed(EconomyErrorCode.NotEnoughItemsToSell, itemId, quantity);
-
-        bool removeSucceeded = _inventoryService.RemoveItem(itemId, quantity);
-        if (!removeSucceeded)
-            return EconomyOperationResult.Failed(EconomyErrorCode.NotEnoughItemsToSell, itemId, quantity);
-
-        int totalPrice = sellPrice * quantity;
-        _gameSessionService.State.Player.Credits += totalPrice;
-        PublishCreditsChanged();
-
-        eventBus.Publish(new SaveNeedEvent());
-        return EconomyOperationResult.Completed(totalPrice, itemId, quantity);
-    }
-
     public void AddCredits(int amount)
     {
-        if (amount <= 0)
-            return;
-
-        _gameSessionService.State.Player.Credits += amount;
-        PublishCreditsChanged();
+        if (amount <= 0 || _session.State?.Player == null || (long)GetCredits() + amount > int.MaxValue) return;
+        _session.State.Player.Credits += amount; Changed();
     }
-
     public bool SpendCredits(int amount)
     {
-        if (amount <= 0)
-            return false;
-
-        if (_gameSessionService.State.Player.Credits < amount)
-            return false;
-
-        _gameSessionService.State.Player.Credits -= amount;
-        PublishCreditsChanged();
-        return true;
+        if (amount <= 0 || GetCredits() < amount) return false;
+        _session.State.Player.Credits -= amount; Changed(); return true;
     }
-
-    private void PublishCreditsChanged()
-    {
-        eventBus.Publish(new CreditsChangedEvent(_gameSessionService.State.Player.Credits));
-    }
+    private void Changed() => _events?.PublishSafely(new CreditsChangedEvent(GetCredits()), _ => { });
 }

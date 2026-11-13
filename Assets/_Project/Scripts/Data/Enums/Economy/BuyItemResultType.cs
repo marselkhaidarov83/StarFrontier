@@ -7,5 +7,6 @@
         NotEnoughCredits = 4,
         NotEnoughCargoSpace = 5,
         MissingPlayerProfile = 6,
-        MissingCargoInventory = 7
+        MissingCargoInventory = 7,
+        NotEnoughStock = 8
     }

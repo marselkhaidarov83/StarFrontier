@@ -667,6 +667,12 @@ public sealed class InteractionService2A :
                 return
                     "Условия взаимодействия не выполнены";
 
+            case InteractionFailReason2A.EngineNotInstalled:
+                return ShipLoadoutRules.EngineNotInstalledMessage;
+
+            case InteractionFailReason2A.FuelTankNotInstalled:
+                return ShipLoadoutRules.FuelTankNotInstalledMessage;
+
             case InteractionFailReason2A
                 .InsufficientFuel:
                 return "Недостаточно топлива";

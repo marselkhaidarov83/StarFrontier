@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "tool": "built-in image_gen",
+  "status": "proposals; no screen bindings changed",
+  "outputs": [
+    {
+      "service": "refuel",
+      "version": 2,
+      "file": "solaria-refuel-v2-9x4.png",
+      "width": 1881,
+      "height": 836
+    },
+    {
+      "service": "repair",
+      "version": 3,
+      "file": "solaria-repair-v3-9x4.png",
+      "width": 1881,
+      "height": 836
+    },
+    {
+      "service": "market",
+      "version": 3,
+      "file": "solaria-market-v3-9x4.png",
+      "width": 1881,
+      "height": 836
+    }
+  ],
+  "prompts": "prompts-v3.json",
+  "changes": {
+    "refuel": "owner accepted v2; unchanged",
+    "repair": "flat male chest, broad shoulders and straight practical coveralls",
+    "market": "professional businesswoman in a modern store, navy jacket, clean counter and organized glass display shelving"
+  }
+}

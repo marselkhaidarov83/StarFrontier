@@ -133,6 +133,7 @@ public static class SystemNpcRuntimeFactory
             CurrentEnergy = config.BaseEnergy,
 
             Speed = Mathf.RoundToInt(config.BaseSpeed),
+            CargoCapacity = config.BaseCargoCapacity,
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
@@ -169,8 +170,7 @@ public static class SystemNpcRuntimeFactory
         int energy =
             UnityEngine.Random.Range(config.BaseEnergyMin, config.BaseEnergyMax + 1);
 
-        int speed =
-            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax + 1);
+        int speed = Mathf.RoundToInt(config.DefaultEngine?.Speed ?? 0f);
 
         string runtimeNpcId =
             Guid.NewGuid().ToString("N");
@@ -354,7 +354,8 @@ public static class SystemNpcRuntimeFactory
             {
                 InstanceId = Guid.NewGuid().ToString("N"),
                 RolledStats = weaponStats,
-                DurabilityPercent = 100,
+                CurrentDurability = weaponConfig.MaximumDurability,
+                MaximumDurability = weaponConfig.MaximumDurability,
                 SlotIndex = npc.Weapons.Count,
                 WeaponConfigId = weaponConfig.Id,
                 LastShotTick = -1,
@@ -399,7 +400,8 @@ public static class SystemNpcRuntimeFactory
 
         foreach (SystemNpcWeaponRuntimeState weapon in npc.Weapons)
             if (weapon != null)
-                weapon.DurabilityPercent = table.InitialEquipmentDurabilityPercent;
+                weapon.CurrentDurability = table.InitialEquipmentDurability < 0 ? weapon.MaximumDurability :
+                    Math.Min(weapon.MaximumDurability, table.InitialEquipmentDurability);
     }
 
     private static bool HasWeapon(

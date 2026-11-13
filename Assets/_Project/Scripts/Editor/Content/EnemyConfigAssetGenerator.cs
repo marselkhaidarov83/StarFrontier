@@ -443,6 +443,7 @@ public static class EnemyConfigAssetGenerator
         SetInt(serializedObject, "baseEnergyMax", stats.EnergyMax);
         SetInt(serializedObject, "baseSpeedMin", stats.SpeedMin);
         SetInt(serializedObject, "baseSpeedMax", stats.SpeedMax);
+        SetInt(serializedObject, "baseCargoCapacity", 60 + 10 * (Mathf.Clamp(level, 1, 10) - 1));
         SetInt(serializedObject, "level", level);
         SetEnum(serializedObject, "lootSpecies", GetLootSpecies(faction));
         if (asset.LootTable == null)

@@ -330,6 +330,9 @@ public class Bootstrapper : CustomMonoBehaviour
         RegisterService<ISystemEnemyService, SystemEnemyService>();
         RegisterService<ISystemAllyService, SystemAllyService>();
         RegisterService<ISystemEncounterSaveService, SystemEncounterSaveService>();
+        RegisterService<IPlanetMarketService>(new PlanetMarketService(
+            ServiceRegistry.Get<IGameSessionService>(), ServiceRegistry.Get<IConfigService>(),
+            ServiceRegistry.Get<IInventoryService>(), ServiceRegistry.Get<SimpleEventBus>()));
         RegisterService<IEconomyService, EconomyService>();
         RegisterService<IMarketTransactionService, MarketTransactionService>();
         RegisterService<IRefuelService, RefuelService>();

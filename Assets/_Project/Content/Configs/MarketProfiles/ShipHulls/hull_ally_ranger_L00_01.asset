@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: hull_ally_ranger_L00_01
+  m_EditorClassIdentifier: 
+  id: hull_ally_ranger_L00_01
+  displayName: "\u0420\u0435\u0439\u043D\u0434\u0436\u0435\u0440 \u0443\u0440. 0"
+  description: Сменный корпус корабля.
+  icon: {fileID: 21300000, guid: 03422772af242424aa6284c53fa5f828, type: 3}
+  Hull: {fileID: 11400000, guid: b38c585c5d5da4b4bbdb9c161074da22, type: 2}
+  MaximumHull: 75

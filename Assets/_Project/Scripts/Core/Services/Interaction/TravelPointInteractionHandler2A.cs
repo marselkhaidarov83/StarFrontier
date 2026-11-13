@@ -181,6 +181,12 @@ public sealed class TravelPointInteractionHandler2A :
                 InteractionFailReason2A.None;
         }
 
+        if (reason == TravelFailReason.EngineNotInstalled)
+            return InteractionFailReason2A.EngineNotInstalled;
+
+        if (reason == TravelFailReason.FuelTankNotInstalled)
+            return InteractionFailReason2A.FuelTankNotInstalled;
+
         if (reason ==
             TravelFailReason.NotEnoughFuel)
         {
@@ -199,6 +205,12 @@ public sealed class TravelPointInteractionHandler2A :
     {
         switch (reason)
         {
+            case InteractionFailReason2A.EngineNotInstalled:
+                return ShipLoadoutRules.EngineNotInstalledMessage;
+
+            case InteractionFailReason2A.FuelTankNotInstalled:
+                return ShipLoadoutRules.FuelTankNotInstalledMessage;
+
             case InteractionFailReason2A
                 .InsufficientFuel:
                 return

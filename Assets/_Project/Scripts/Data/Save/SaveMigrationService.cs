@@ -82,6 +82,9 @@ public static class SaveMigrationService
                     StationLifecycleRules.Destroy(system.Station);
         }
 
+        MarketPersistenceRules.Normalize(state);
+        if (sourceVersion < SaveDataVersions.PlanetMarketEconomy)
+            AppLog.Info(DebugLogChannel.Market, "[PlanetMarket] Legacy save collections initialized; existing stocks preserved.");
         if (state.Meta.SaveDataVersion != SaveDataVersions.Current)
         {
             state.Meta.SaveDataVersion = SaveDataVersions.Current;

@@ -616,6 +616,14 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
     {
         switch (reason)
         {
+            case TravelFailReason.EngineNotInstalled:
+                FindFirstObjectByType<GalaxyMapSystemBuilder>()?.ShowMessage(ShipLoadoutRules.EngineNotInstalledMessage);
+                break;
+
+            case TravelFailReason.FuelTankNotInstalled:
+                FindFirstObjectByType<GalaxyMapSystemBuilder>()?.ShowMessage(ShipLoadoutRules.FuelTankNotInstalledMessage);
+                break;
+
             case TravelFailReason.NotEnoughFuel:
                 LogCustom("[GalaxySystemInfoPanel2A] Недостаточно топлива для первого прыжка.");
                 break;

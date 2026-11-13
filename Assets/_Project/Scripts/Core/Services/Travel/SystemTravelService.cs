@@ -652,6 +652,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public bool StartPlanetTakeoff()
     {
+        if (ShipLoadoutRules.IsComponentMissing(_gameSessionService.State?.Player?.GetActiveShip(), ShipComponentSlot.Engine))
+            return false;
         if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return false;
         ShipMovementConfig config = _configService.ShipMovementConfig;
         if (config == null)
@@ -925,7 +927,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void StartTravel()
     {
-        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
+        if (GetCurrentShipTravelSpeed() <= 0f || PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
         _planetTakeoffDistancePerTick = 0f;
         double startedAt =
             Time.realtimeSinceStartupAsDouble;
@@ -1609,23 +1611,20 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             if (weaponConfig == null)
                 continue;
 
-            if (weaponConfig.RangeMin > 0f)
+            float? installedRange = ShipLoadoutRules.Weapon(activeShip, i)?.RolledStats.Range;
+            float minimum = installedRange ?? weaponConfig.RangeMin;
+            float maximum = installedRange ?? weaponConfig.RangeMax;
+            if (minimum > 0f)
             {
-                minWeaponRange =
-                    Mathf.Min(
-                        minWeaponRange,
-                        weaponConfig.RangeMin);
+                minWeaponRange = Mathf.Min(minWeaponRange, minimum);
 
                 hasWeaponRange =
                     true;
             }
 
-            if (weaponConfig.RangeMax > 0f)
+            if (maximum > 0f)
             {
-                maxWeaponRange =
-                    Mathf.Max(
-                        maxWeaponRange,
-                        weaponConfig.RangeMax);
+                maxWeaponRange = Mathf.Max(maxWeaponRange, maximum);
 
                 hasWeaponRange =
                     true;
@@ -1757,15 +1756,8 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             position.z);
     }
 
-    private float GetCurrentShipTravelSpeed()
-    {
-        var stats = _hangarService.GetActiveShipStats();
-
-        if (stats == null || stats.Speed <= 0)
-            return 1f;
-
-        return stats.Speed;
-    }
+    private float GetCurrentShipTravelSpeed() =>
+        ShipStatCalculator.GetEngineSpeed(_hangarService.GetActiveShipState(), _configService);
 
     private float GetCurrentEffectiveTravelSpeed()
     {

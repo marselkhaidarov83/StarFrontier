@@ -358,8 +358,10 @@ public sealed class SystemSpaceLootViewController : MonoBehaviour,
     {
         if (loot.Kind == SpaceLootKind.Equipment)
         {
-            WeaponConfig config = _configService.GetWeaponConfigById(loot.EquipmentConfigId);
-            name = config != null ? config.DisplayName : "Оборудование";
+            var component = loot.Equipment?.IsComponent == true ? _configService.GetItemConfigById(loot.EquipmentConfigId) : null;
+            var config = loot.Equipment?.IsComponent != true ? _configService.GetWeaponConfigById(loot.EquipmentConfigId) : null;
+            name = component != null ? component.DisplayName : config != null ? config.DisplayName : "Оборудование";
+            if (loot.Equipment != null) name += $" · {loot.Equipment.CurrentDurability} / {loot.Equipment.MaximumDurability}";
             unitCargoSize = loot.Equipment != null && loot.Equipment.RolledStats.CargoSize > 0
                 ? loot.Equipment.RolledStats.CargoSize
                 : config != null ? config.CargoSize : 0;
@@ -381,7 +383,9 @@ public sealed class SystemSpaceLootViewController : MonoBehaviour,
     private Sprite ResolveIcon(SpaceLootRuntimeState loot)
     {
         if (loot.Kind == SpaceLootKind.Equipment)
-            return _configService.GetWeaponConfigById(loot.EquipmentConfigId)?.Icon;
+            return loot.Equipment?.IsComponent == true
+                ? _configService.GetItemConfigById(loot.EquipmentConfigId)?.Icon
+                : _configService.GetWeaponConfigById(loot.EquipmentConfigId)?.Icon;
         if (loot.Kind == SpaceLootKind.Credits)
             return creditsIcon;
         if (loot.Kind == SpaceLootKind.Diamonds)

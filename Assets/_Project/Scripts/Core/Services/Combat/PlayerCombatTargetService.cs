@@ -249,6 +249,11 @@ public sealed class PlayerCombatTargetService : CustomService, IPlayerCombatTarg
             return Mathf.Max(0, activeShip?.CurrentShield ?? 0);
         }
 
+        if (activeShip.HasModularLoadout &&
+            Bootstrapper.Instance?.ServiceRegistry != null &&
+            Bootstrapper.Instance.ServiceRegistry.TryGet<IHangarService>(out var hangar))
+            return hangar.GetActiveShipStats()?.MaxShield ?? 0;
+
         AllyConfig activeShipConfig =
             _configService.GetAllyConfigById(
                 activeShip.AllyConfigId);

@@ -22,7 +22,7 @@ MonoBehaviour:
   planetOrbit: {fileID: 11400000, guid: 4056aa2842a4646c2b29e912544af514, type: 2}
   missionPool: {fileID: 0}
   encounterProfile: {fileID: 0}
-  marketProfile: {fileID: 0}
+  marketProfile: {fileID: 11400000, guid: 214732c6b762140bab1525d3f60689c9, type: 2}
   planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
   planetSprite: {fileID: 21300000, guid: 72334256b6d1a432bb1f81aec74eae29, type: 3}
   backgroundSprite: {fileID: 0}

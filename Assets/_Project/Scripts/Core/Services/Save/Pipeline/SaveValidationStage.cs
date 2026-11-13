@@ -82,6 +82,7 @@ public sealed class SaveValidationStage
         foreach (string error in StationLifecycleRules.GetValidationErrors(state.Galaxy))
             result.Errors.Add(error);
         foreach (string error in ResearchRules.StateErrors(state.Galaxy?.Research)) result.Errors.Add(error);
+        foreach (string error in MarketPersistenceRules.Errors(state)) result.Errors.Add(error);
         if (state.Galaxy?.Routes != null)
             foreach (var route in state.Galaxy.Routes)
                 if (route != null) route.DevelopmentLevel = MissionBattleRules.RouteLevel(route.DevelopmentLevel);

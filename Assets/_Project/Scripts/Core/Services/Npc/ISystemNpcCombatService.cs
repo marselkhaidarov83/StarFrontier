@@ -8,15 +8,21 @@ public interface ISystemNpcCombatService
 
     void ForceAttackOnce(string shooterNpcId, int quantTick);
 
+    bool TryCreatePlayerProjectile(string targetNpcId, string weaponConfigId, int quantTick);
+
     bool TryCreatePlayerProjectile(
         string targetNpcId,
         string weaponConfigId,
-        int quantTick);
+        int quantTick,
+        SystemNpcWeaponRuntimeState installedWeapon);
+
+    bool TryCreatePlayerLootProjectile(string lootId, string weaponConfigId, int quantTick);
 
     bool TryCreatePlayerLootProjectile(
         string lootId,
         string weaponConfigId,
-        int quantTick);
+        int quantTick,
+        SystemNpcWeaponRuntimeState installedWeapon);
 
     bool TryGetProjectile(
         string projectileId,

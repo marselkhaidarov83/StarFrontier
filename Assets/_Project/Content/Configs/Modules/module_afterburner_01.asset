@@ -23,6 +23,7 @@ MonoBehaviour:
   statType: 3
   flatBonus: 1
   percentBonus: 0.15
+  cargoSize: 3
   cooldown: 6
   energyCost: 15
   statModifiers:

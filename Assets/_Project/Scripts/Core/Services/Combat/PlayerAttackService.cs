@@ -47,6 +47,7 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         _eventBus.Subscribe<SystemEncounterResolvedEvent>(OnEncounterResolved);
         _eventBus.Subscribe<SystemEncounterDefeatedEvent>(OnEncounterDefeated);
         _eventBus.Subscribe<PlayerDestroyedEvent>(OnPlayerDestroyed);
+        _eventBus.Subscribe<ShipEquipmentChangedEvent>(OnEquipmentChanged);
     }
 
     private void OnGameTickStarted(GameTickStartedEvent evt)
@@ -70,6 +71,11 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
     }
 
     private void OnEncounterDefeated(SystemEncounterDefeatedEvent evt)
+    {
+        ClearAllCombatUiTargets();
+    }
+
+    private void OnEquipmentChanged(ShipEquipmentChangedEvent evt)
     {
         ClearAllCombatUiTargets();
     }
@@ -176,10 +182,14 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         int assignedSlotIndex =
             ClampSlotIndex(_nextAssignmentSlotIndex, weaponCount);
 
-        AssignWeaponSlotToTarget(assignedSlotIndex, targetNpcId);
-
-        _nextAssignmentSlotIndex =
-            (assignedSlotIndex + 1) % weaponCount;
+        for (int offset = 0; offset < weaponCount; offset++)
+        {
+            int index = (assignedSlotIndex + offset) % weaponCount;
+            if (string.IsNullOrEmpty(activeShip.EquippedWeaponIds[index])) continue;
+            AssignWeaponSlotToTarget(index, targetNpcId);
+            _nextAssignmentSlotIndex = (index + 1) % weaponCount;
+            break;
+        }
     }
 
     public void AssignWeaponSlotToTarget(
@@ -194,7 +204,8 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
         if (activeShip == null ||
             activeShip.EquippedWeaponIds == null ||
             weaponSlotIndex < 0 ||
-            weaponSlotIndex >= activeShip.EquippedWeaponIds.Count)
+            weaponSlotIndex >= activeShip.EquippedWeaponIds.Count ||
+            string.IsNullOrEmpty(activeShip.EquippedWeaponIds[weaponSlotIndex]))
         {
             return;
         }
@@ -356,11 +367,12 @@ public sealed class PlayerAttackService : CustomService, IPlayerAttackService
                     continue;
             }
 
+            var installed = ShipLoadoutRules.Weapon(activeShip, slotIndex);
             bool fired = IsValidLootTarget(targetNpcId)
                 ? _combatService.TryCreatePlayerLootProjectile(
-                    targetNpcId, weaponConfigId, quantTick)
+                    targetNpcId, weaponConfigId, quantTick, installed)
                 : _combatService.TryCreatePlayerProjectile(
-                    targetNpcId, weaponConfigId, quantTick);
+                    targetNpcId, weaponConfigId, quantTick, installed);
 
             if (!fired)
                 continue;

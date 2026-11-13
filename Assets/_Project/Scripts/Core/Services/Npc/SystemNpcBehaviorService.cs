@@ -3255,12 +3255,11 @@ public static class RangerLootCollectionRules2A
             {
                 if (equipment == null)
                     continue;
-                WeaponConfig config = configService.GetWeaponConfigById(
-                    equipment.WeaponConfigId);
-                if (config == null)
-                    return 0;
-                int mass = equipment.RolledStats.CargoSize > 0
-                    ? equipment.RolledStats.CargoSize : config.CargoSize;
+                int configuredSize = equipment.IsComponent
+                    ? configService.GetItemConfigById(equipment.ComponentConfigId)?.CargoSize ?? 0
+                    : configService.GetWeaponConfigById(equipment.WeaponConfigId)?.CargoSize ?? 0;
+                int mass = equipment.RolledStats.CargoSize > 0 ? equipment.RolledStats.CargoSize : configuredSize;
+                if (mass <= 0) return 0;
                 used += Mathf.Max(0, mass);
             }
 

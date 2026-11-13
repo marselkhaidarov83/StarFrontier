@@ -1114,6 +1114,14 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
     {
         switch (result)
         {
+            case TravelFailReason.EngineNotInstalled:
+                ShowMessage(ShipLoadoutRules.EngineNotInstalledMessage);
+                break;
+
+            case TravelFailReason.FuelTankNotInstalled:
+                ShowMessage(ShipLoadoutRules.FuelTankNotInstalledMessage);
+                break;
+
             case TravelFailReason.NotEnoughFuel:
                 ShowMessage(
                     "Для первого прыжка по маршруту " +

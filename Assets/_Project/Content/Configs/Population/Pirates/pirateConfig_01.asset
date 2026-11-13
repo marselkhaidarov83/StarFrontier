@@ -20,6 +20,7 @@ MonoBehaviour:
   baseShield: 10
   baseEnergy: 0
   baseSpeed: 45
+  baseCargoCapacity: 60
   archetype: 2
   weaponConfig: {fileID: 11400000, guid: 106ae8e8b101b4c4abbb1fb21e0a6779, type: 2}
   creditReward: 100

@@ -15,8 +15,8 @@ public class AllyConfigValidator : IConfigValidator<AllyConfig>
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseEnergy must be >= 0.", config));
         if (config.BaseEnergyRegen < 0f)
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseEnergyRegen must be >= 0.", config));
-        if (config.BaseSpeed <= 0f)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseSpeed must be > 0.", config));
+        if (config.DefaultEngine == null || !(config.DefaultEngine.Speed > 0f))
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "A default engine with positive speed is required.", config));
         if (config.BaseAccelerationMin <= 0f)
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseAccelerationMin must be > 0.", config));
         if (config.BaseAccelerationMax < config.BaseAccelerationMin)

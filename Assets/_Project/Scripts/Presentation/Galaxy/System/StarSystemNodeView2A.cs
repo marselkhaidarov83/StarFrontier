@@ -189,6 +189,7 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
                 fuelVisible = true;
                 break;
 
+            case TravelFailReason.FuelTankNotInstalled:
             case TravelFailReason.NotEnoughFuel:
                 systemSprite = GetEconomySprite();
                 systemColor = systemColorNormal;

@@ -20,8 +20,10 @@ public sealed class StationFacilityEditModeTests
     private sealed class Market : IMarketTransactionService
     {
         public int BuyCalls, SellCalls;
-        public BuyItemResult BuyItem(string id, int quantity) { BuyCalls++; return BuyItemResult.Create(BuyItemResultType.Success, id, quantity, 1, quantity); }
-        public SellItemResult SellItem(string id, int quantity) { SellCalls++; return SellItemResult.Create(SellItemResultType.Success, id, quantity, 1, quantity); }
+        private readonly SimpleEventBus _events;
+        public Market(SimpleEventBus events) { _events = events; }
+        public BuyItemResult BuyItem(string id, int quantity) { BuyCalls++; _events.PublishSafely(new SaveNeedEvent("market_trade"), _ => { }); return BuyItemResult.Create(BuyItemResultType.Success, id, quantity, 1, quantity); }
+        public SellItemResult SellItem(string id, int quantity) { SellCalls++; _events.PublishSafely(new SaveNeedEvent("market_trade"), _ => { }); return SellItemResult.Create(SellItemResultType.Success, id, quantity, 1, quantity); }
     }
     private sealed class Fuel : IRefuelService
     {
@@ -59,7 +61,7 @@ public sealed class StationFacilityEditModeTests
         var station = Asset<StationConfig>(); Set(station, "id", "station");
         _config = Asset<StarSystemConfig>(); Set(_config, "id", "sys"); Set(_config, "station", station);
         _session.State.Galaxy.Systems.Add(new StarSystemRuntimeState { SystemId = "sys", Station = new StationRuntimeState { ConfigId = "station", Level = 1 } });
-        _events = new SimpleEventBus(); _market = new Market();
+        _events = new SimpleEventBus(); _market = new Market(_events);
         _service = new StationFacilityService(_session, _ => _config, new Fuel(), new Repair(), _market, new Inventory(), _events);
     }
     [TearDown] public void Cleanup() { foreach (var a in _assets) UnityEngine.Object.DestroyImmediate(a); _assets.Clear(); }

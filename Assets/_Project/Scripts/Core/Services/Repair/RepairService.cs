@@ -1,94 +1,52 @@
+using System;
 
-public class RepairService : IRepairService
+public class RepairService : IPartialRepairService
 {
-    private readonly IGameSessionService _gameSessionService;
-
-    private const int RepairUnitPrice = 2;
-
-    public RepairService()
-    {
-        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-    }
-
-    public int GetRepairUnitPrice()
-    {
-        return RepairUnitPrice;
-    }
-
+    private readonly IGameSessionService _session;
+    private readonly Func<int> _unitPrice;
+    private readonly SimpleEventBus _events;
+    private bool _busy;
+    public RepairService() : this(Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>(),
+        () => Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>().GameConfig?.MarketEconomy?.HullRepairUnitPrice ?? 0,
+        Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>()) { }
+    public RepairService(IGameSessionService session, Func<int> unitPrice, SimpleEventBus events)
+    { _session = session; _unitPrice = unitPrice; _events = events; }
+    public int GetRepairUnitPrice() => _unitPrice();
     public RepairResult RepairToFull()
     {
-        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.Repair, null, 0))
+        var ship = _session.State?.Player?.GetActiveShip();
+        return Repair(Math.Max(0, (ship?.HullCapacity ?? 0) - (ship?.CurrentHull ?? 0)));
+    }
+    public RepairResult Repair(int hullUnits)
+    {
+        var player = _session.State?.Player;
+        var ship = player?.GetActiveShip();
+        RepairResult Result(RepairResultType type, int repaired = 0, int total = 0) =>
+            RepairResult.Create(type, repaired, total, ship?.CurrentHull ?? 0, ship?.HullCapacity ?? 0);
+        if (player == null || ship == null) return Result(RepairResultType.MissingPlayerProfile);
+        if (_busy || hullUnits < 0) return Result(RepairResultType.InvalidHullCapacity);
+        if (ship.HullCapacity <= 0) return Result(RepairResultType.InvalidHullCapacity);
+        if (ship.CurrentHull >= ship.HullCapacity) return Result(RepairResultType.HullAlreadyFull);
+        int unit = GetRepairUnitPrice();
+        if (unit <= 0) return Result(RepairResultType.InvalidRepairPrice);
+        int amount = Math.Min(hullUnits, ship.HullCapacity - ship.CurrentHull);
+        long total = (long)amount * unit;
+        if (amount <= 0 || total > int.MaxValue) return Result(RepairResultType.InvalidRepairPrice);
+        if (player.Credits < total) return Result(RepairResultType.NotEnoughCredits, 0, (int)total);
+        _busy = true;
+        try
         {
-            var result = RepairToFullCore();
-            observation.Complete(result.IsSuccess, result.resultType.ToString(), result.totalPrice);
+            player.Credits -= (int)total;
+            ship.CurrentHull += amount;
+            var result = Result(RepairResultType.Success, amount, (int)total);
+            _events?.PublishSafely(new ShipRepairedEvent(ship.ShipId), _ => { });
+            _events?.PublishSafely(new CreditsChangedEvent(player.Credits), _ => { });
+            _events?.PublishSafely(new SaveNeedEvent("hull_repaired"), _ => { });
+            AppLog.Info(DebugLogChannel.Economy, "[Repair] Hull=" + amount + " | Total=" + total);
+            using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.Repair, null, amount))
+                observation.Complete(true, result.resultType.ToString(), result.totalPrice);
             return result;
         }
-    }
-
-    private RepairResult RepairToFullCore()
-    {
-        PlayerState playerProfile = _gameSessionService.State.Player;
-        if (playerProfile == null)
-        {
-            return RepairResult.Create(
-                RepairResultType.MissingPlayerProfile,
-                0,
-                0,
-                0,
-                0);
-        }
-
-        if (playerProfile.PlayerShipState.GetActiveShip().HullCapacity <= 0)
-        {
-            return RepairResult.Create(
-                RepairResultType.InvalidHullCapacity,
-                0,
-                0,
-                playerProfile.PlayerShipState.GetActiveShip().CurrentHull,
-                playerProfile.PlayerShipState.GetActiveShip().HullCapacity);
-        }
-
-        // if (RepairUnitPrice <= 0)
-        // {
-        //     return RepairResult.Create(
-        //         RepairResultType.InvalidRepairPrice,
-        //         0,
-        //         0,
-        //         playerProfile.currentHull,
-        //         playerProfile.hullCapacity);
-        // }
-
-        if (playerProfile.PlayerShipState.GetActiveShip().CurrentHull >= playerProfile.PlayerShipState.GetActiveShip().HullCapacity)
-        {
-            return RepairResult.Create(
-                RepairResultType.HullAlreadyFull,
-                0,
-                0,
-                playerProfile.PlayerShipState.GetActiveShip().CurrentHull,
-                playerProfile.PlayerShipState.GetActiveShip().HullCapacity);
-        }
-
-        int missingHull = playerProfile.PlayerShipState.GetActiveShip().HullCapacity - playerProfile.PlayerShipState.GetActiveShip().CurrentHull;
-        int totalPrice = missingHull * RepairUnitPrice;
-
-        if (playerProfile.Credits < totalPrice)
-        {
-            return RepairResult.Create(
-                RepairResultType.NotEnoughCredits,
-                0,
-                totalPrice,
-                playerProfile.PlayerShipState.GetActiveShip().CurrentHull,
-                playerProfile.PlayerShipState.GetActiveShip().HullCapacity);
-        }
-
-        playerProfile.Credits -= totalPrice;
-        playerProfile.PlayerShipState.GetActiveShip().CurrentHull = playerProfile.PlayerShipState.GetActiveShip().HullCapacity;
-
-        return RepairResult.Create(
-            RepairResultType.Success,
-            missingHull,
-            totalPrice,
-            playerProfile.PlayerShipState.GetActiveShip().CurrentHull,
-            playerProfile.PlayerShipState.GetActiveShip().HullCapacity);
+        finally { _busy = false; }
     }
 }

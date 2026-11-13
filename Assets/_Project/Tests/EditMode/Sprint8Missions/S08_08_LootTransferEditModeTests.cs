@@ -38,14 +38,14 @@ public sealed class S08_08_LootTransferEditModeTests
             {
                 InstanceId = "weapon-01",
                 WeaponConfigId = "laser-01",
-                DurabilityPercent = 37
+                CurrentDurability = 37, MaximumDurability = 100
             }
         };
         SpaceLootRuntimeState copy = loot.Copy();
         Assert.That(copy.LootId, Is.EqualTo("loot-01"));
         Assert.That(copy.Position, Is.EqualTo(loot.Position));
         Assert.That(copy.Equipment.InstanceId, Is.EqualTo("weapon-01"));
-        Assert.That(copy.Equipment.DurabilityPercent, Is.EqualTo(37));
+        Assert.That(copy.Equipment.CurrentDurability, Is.EqualTo(37));
         Assert.That(copy.Equipment, Is.Not.SameAs(loot.Equipment));
     }
 }

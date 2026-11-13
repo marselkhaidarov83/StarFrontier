@@ -18,5 +18,9 @@ public enum InteractionFailReason2A
 
     CooldownActive = 8,
 
-    ServiceNotReady = 9
+    ServiceNotReady = 9,
+
+    FuelTankNotInstalled = 10,
+
+    EngineNotInstalled = 11
 }

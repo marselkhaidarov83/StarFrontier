@@ -2,7 +2,7 @@ using System;
 
 public class RefuelService : IRefuelService
 {
-    private const int FuelUnitPrice = 10;
+    private bool _refueling;
 
     private readonly IGameSessionService _gameSessionService;
     private readonly SimpleEventBus _eventBus;
@@ -25,7 +25,7 @@ public class RefuelService : IRefuelService
                 .Get<SimpleEventBus>(),
 
             new RefuelCostProvider(
-                FuelUnitPrice),
+                () => Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>().GameConfig?.MarketEconomy?.FuelUnitPrice ?? 0),
 
             new PlanetRefuelAvailabilityProvider())
     {
@@ -191,83 +191,85 @@ public class RefuelService : IRefuelService
 
     public RefuelResult Refuel(int fuelCount)
     {
-        using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.Refuel, null, fuelCount))
+        if (_refueling) return RefuelResult.Create(RefuelResultType.InvalidFuelCount, 0, 0, GetCurrentFuel(), GetFuelCapacity());
+        _refueling = true;
+        try
         {
-            RefuelValidation validation =
-                ValidateRefuel(fuelCount);
-
-            if (validation.ResultType !=
-                RefuelResultType.Success)
+            using (var observation = PlayerAnalyticsSafe.Observe(PlayerAnalyticsAction.Refuel, null, fuelCount))
             {
+                RefuelValidation validation =
+                    ValidateRefuel(fuelCount);
+
+                if (validation.ResultType !=
+                    RefuelResultType.Success)
+                {
+                    return CompleteRefuelObservation(observation, RefuelResult.Create(
+                        validation.ResultType,
+                        0,
+                        validation.TotalPrice,
+                        validation.CurrentFuel,
+                        validation.FuelCapacity));
+                }
+
+                if (!TryGetPlayer(
+                        out PlayerState player))
+                {
+                    return CompleteRefuelObservation(observation, RefuelResult.Create(
+                        RefuelResultType
+                            .MissingPlayerProfile,
+                        0,
+                        0,
+                        0,
+                        0));
+                }
+
+                var activeShip =
+                    player.PlayerShipState
+                        .GetActiveShip();
+
+                if (activeShip == null)
+                {
+                    return CompleteRefuelObservation(observation, RefuelResult.Create(
+                        RefuelResultType
+                            .MissingActiveShip,
+                        0,
+                        0,
+                        0,
+                        0));
+                }
+
+                /*
+                 * Все проверки завершены.
+                 * Теперь выполняется единое изменение State.
+                 */
+
+                player.Credits -=
+                    validation.TotalPrice;
+
+                activeShip.CurrentFuel +=
+                    fuelCount;
+
+                _eventBus.PublishSafely(new FuelChangedEvent(activeShip.CurrentFuel), _ => { });
+
+                _eventBus.PublishSafely(new CreditsChangedEvent(player.Credits), _ => { });
+
+                /*
+                 * Refuel является самостоятельной
+                 * завершённой транзакцией.
+                 */
+                _eventBus.PublishSafely(new SaveNeedEvent("refueled"), _ => { });
+                AppLog.Info(DebugLogChannel.Economy, "[Refuel] Units=" + fuelCount + " | Total=" + validation.TotalPrice);
+
                 return CompleteRefuelObservation(observation, RefuelResult.Create(
-                    validation.ResultType,
-                    0,
+                    RefuelResultType.Success,
+                    fuelCount,
                     validation.TotalPrice,
-                    validation.CurrentFuel,
-                    validation.FuelCapacity));
+                    activeShip.CurrentFuel,
+                    activeShip.FuelCapacity));
+
             }
-
-            if (!TryGetPlayer(
-                    out PlayerState player))
-            {
-                return CompleteRefuelObservation(observation, RefuelResult.Create(
-                    RefuelResultType
-                        .MissingPlayerProfile,
-                    0,
-                    0,
-                    0,
-                    0));
-            }
-
-            var activeShip =
-                player.PlayerShipState
-                    .GetActiveShip();
-
-            if (activeShip == null)
-            {
-                return CompleteRefuelObservation(observation, RefuelResult.Create(
-                    RefuelResultType
-                        .MissingActiveShip,
-                    0,
-                    0,
-                    0,
-                    0));
-            }
-
-            /*
-             * Все проверки завершены.
-             * Теперь выполняется единое изменение State.
-             */
-
-            player.Credits -=
-                validation.TotalPrice;
-
-            activeShip.CurrentFuel +=
-                fuelCount;
-
-            _eventBus.Publish(
-                new FuelChangedEvent(
-                    activeShip.CurrentFuel));
-
-            _eventBus.Publish(
-                new CreditsChangedEvent(
-                    player.Credits));
-
-            /*
-             * Refuel является самостоятельной
-             * завершённой транзакцией.
-             */
-            _eventBus.Publish(
-                new SaveNeedEvent());
-
-            return CompleteRefuelObservation(observation, RefuelResult.Create(
-                RefuelResultType.Success,
-                fuelCount,
-                validation.TotalPrice,
-                activeShip.CurrentFuel,
-                activeShip.FuelCapacity));
-
         }
+        finally { _refueling = false; }
     }
 
     private static RefuelResult CompleteRefuelObservation(PlayerAnalyticsOperation observation, RefuelResult result)

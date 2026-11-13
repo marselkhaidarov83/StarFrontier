@@ -42,6 +42,8 @@ public sealed class GameTimeService : CustomService, IGameTimeService
     private readonly IInvasionSchedulerService _invasionSchedulerService;
     private readonly ISaveService _saveService;
     private readonly IStationService _stationService;
+    private readonly IPlanetMarketService _marketService;
+    private readonly IGalaxyNpcSimulationScheduleService _marketSchedule;
 
     private bool _currentTickStarted;
     private bool _pauseAfterCurrentTick;
@@ -70,6 +72,8 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         _systemEnemyMovementService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemEnemyMovementService>();
         _saveService = Bootstrapper.Instance.ServiceRegistry.Get<ISaveService>();
         Bootstrapper.Instance.ServiceRegistry.TryGet(out _stationService);
+        Bootstrapper.Instance.ServiceRegistry.TryGet(out _marketService);
+        Bootstrapper.Instance.ServiceRegistry.TryGet(out _marketSchedule);
         Bootstrapper.Instance.ServiceRegistry.TryGet(out _invasionSchedulerService);
 
         ApplyGameTimeConfig();
@@ -686,6 +690,7 @@ public sealed class GameTimeService : CustomService, IGameTimeService
         double galaxyPopulationMs = EndPerfMeasureMs(galaxyPopulationStartedAt);
 
         // Process station operations after combat/war transitions, including when the system scene is closed.
+        _marketService?.AdvanceScheduledTime(deltaTime, State.CurrentQuantTick, _marketSchedule);
         if (Bootstrapper.Instance.ServiceRegistry.TryGet<IResearchService>(out var research)) research.AdvanceTime(deltaTime);
         _stationService?.AdvanceTime(deltaTime);
         if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationVisitService>(out var visit)) visit.Tick();

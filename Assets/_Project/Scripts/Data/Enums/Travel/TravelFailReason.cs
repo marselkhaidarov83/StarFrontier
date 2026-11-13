@@ -9,5 +9,7 @@
         TravelBlocked = 5,
         UnknownError = 6,
         TargetSystemIsCurrent = 7,
-        CargoOverloaded = 8
+        CargoOverloaded = 8,
+        FuelTankNotInstalled = 9,
+        EngineNotInstalled = 10
     }

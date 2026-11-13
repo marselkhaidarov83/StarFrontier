@@ -31,6 +31,9 @@ public class GameRuntimeMetaState
 
     // Independent watermark; NPC offline relocation may update LastSaveUtc before the next save.
     public long StationOfflineProcessedUtc;
+    public long MarketOfflineProcessedUtc;
+    // Shared economy clock; lagging priority-selected markets catch up against this saved time.
+    public double MarketSimulationSeconds;
 
     public string LastSaveReason = "new_game";
 

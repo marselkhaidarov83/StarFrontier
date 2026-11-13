@@ -52,7 +52,10 @@ public sealed class SpaceLootRuntimeState
             {
                 InstanceId = Equipment.InstanceId,
                 RolledStats = Equipment.RolledStats,
-                DurabilityPercent = Equipment.DurabilityPercent,
+                CurrentDurability = Equipment.CurrentDurability,
+                MaximumDurability = Equipment.MaximumDurability,
+                ComponentConfigId = Equipment.ComponentConfigId,
+                StoredFuel = Equipment.StoredFuel,
                 SlotIndex = Equipment.SlotIndex,
                 WeaponConfigId = Equipment.WeaponConfigId,
                 HasLootOrigin = Equipment.HasLootOrigin,

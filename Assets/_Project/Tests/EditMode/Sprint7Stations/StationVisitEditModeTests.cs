@@ -236,6 +236,36 @@ public sealed class StationVisitEditModeTests
         Assert.That(_visit.TryTakeOff(out _), Is.True);
         Assert.That(_time.IsPaused, Is.False);
     }
+    [Test] public void MissingEngine_BlocksTakeoffAndKeepsTheShipDockedUntilInstalled()
+    {
+        var ship = _session.State.Player.GetActiveShip();
+        ship.HasModularLoadout = true;
+        Assert.That(_visit.TryEnter("sys", out var reason), Is.True, reason);
+        int exits = 0;
+        int saves = 0;
+        _events.Subscribe<StationVisitChangedEvent>(evt => { if (!evt.Inside) exits++; });
+        _events.Subscribe<SaveNeedEvent>(evt => saves++);
+
+        Assert.That(_visit.TryTakeOff(out reason), Is.False);
+        Assert.That(reason, Is.EqualTo(StationVisitService.EngineNotInstalled));
+        _visit.Leave();
+        _events.Publish(new DestinationSelectedEvent(TravelDestinationType.MapPoint, Vector2.one, "", ""));
+        Assert.That(_travel.TakeoffCalls, Is.Zero);
+        Assert.That(_travel.CancelCalls, Is.Zero);
+        Assert.That(_session.State.Player.CurrentStationId, Is.EqualTo("station"));
+        Assert.That(_movement.IsEnabled, Is.False);
+        Assert.That(exits, Is.Zero);
+        Assert.That(saves, Is.Zero);
+
+        var engine = Asset<ShipComponentConfig>();
+        Set(engine, "id", "engine");
+        engine.Slot = ShipComponentSlot.Engine;
+        ship.InstalledComponents.Add(SystemNpcWeaponRuntimeState.NewComponent(engine, "engine-instance", (int)ShipComponentSlot.Engine));
+        Assert.That(_visit.TryTakeOff(out reason), Is.True, reason);
+        Assert.That(_travel.TakeoffCalls, Is.EqualTo(1));
+        Assert.That(exits, Is.EqualTo(1));
+    }
+
     [Test] public void BlockedTakeoff_DoesNotLeaveOrBuildRoute()
     {
         _visit.TryEnter("sys", out _); _departureBlocked = true;

@@ -1,3 +1,10 @@
+public enum HangarRepairScope
+{
+    Installed,
+    FullShip,
+    Inventory
+}
+
 public interface IHangarService
 {
     ShipRuntimeData GetActiveShipState();
@@ -12,5 +19,12 @@ public interface IHangarService
     HangarOperationResult EquipModule(string moduleId);
     HangarOperationResult UnequipModule(string moduleId);
 
-    HangarOperationResult RepairActiveShip();
+    bool TryChangeLoadout(int slot, string itemId, bool warehouse, out string reason);
+
+    bool TryRemoveAllEquipment(bool warehouse, out string reason);
+
+    bool TryDebugDamageSelection(int slot, string itemId, bool warehouse, out string reason);
+
+    long GetRepairPrice(HangarRepairScope scope, int slot, string itemId = null, bool warehouse = false);
+    bool TryRepair(HangarRepairScope scope, int slot, string itemId, bool warehouse, long quotedPrice, out string reason);
 }

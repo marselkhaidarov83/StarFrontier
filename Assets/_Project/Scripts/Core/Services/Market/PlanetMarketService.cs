@@ -1,0 +1,672 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+/// <summary>Only transaction authority for market goods and individual cargo equipment.</summary>
+public sealed partial class PlanetMarketService : IPlanetMarketService
+{
+    private readonly IGameSessionService _session;
+    private readonly IConfigService _config;
+    private readonly IInventoryService _inventory;
+    private readonly SimpleEventBus _events;
+    private bool _committing;
+    private bool _advancing;
+    private GameRuntimeState _boundState;
+    private List<MarketRuntimeData> _boundMarkets;
+    private IReadOnlyList<StarSystemConfig> _systems = Array.Empty<StarSystemConfig>();
+    private readonly Dictionary<(string System, string Location), MarketRuntimeData> _marketIndex = new Dictionary<(string, string), MarketRuntimeData>();
+    private readonly Dictionary<string, StarSystemRuntimeState> _systemIndex = new Dictionary<string, StarSystemRuntimeState>(StringComparer.Ordinal);
+    private readonly Dictionary<MarketRuntimeData, double> _equipmentDeadlines = new Dictionary<MarketRuntimeData, double>();
+    public int LastScheduledSystemCount { get; private set; }
+    public int LastProcessedMarketCount { get; private set; }
+    public int LastEquipmentUpdateCount { get; private set; }
+    private int _lastScheduleLogFrame = int.MinValue;
+    private MarketResearchEffect _completionWarEffect;
+    private bool _completingProtection;
+    private readonly List<MarketStateChangedEvent> _changedMarkets = new List<MarketStateChangedEvent>();
+    public PlanetMarketService(IGameSessionService session, IConfigService config, IInventoryService inventory, SimpleEventBus events)
+    {
+        _session = session; _config = config; _inventory = inventory; _events = events;
+        _events?.Subscribe<ResearchCompletedEvent>(OnResearchCompleted);
+    }
+    private GameRuntimeState State => _session.State;
+    private MarketEconomyBalanceConfig Balance => _config.GameConfig?.MarketEconomy;
+    private int GalaxyLevel
+    {
+        get
+        {
+            int count = 0;
+            var sectors = State?.Galaxy?.Sectors;
+            if (sectors != null)
+                for (int i = 0; i < sectors.Count; i++) if (sectors[i] != null && sectors[i].IsUnlocked) count++;
+            return Math.Max(1, count);
+        }
+    }
+    private int ResearchLevel(ResearchUpgrade upgrade) => State?.Galaxy?.Research?.GetLevel(upgrade) ?? 0;
+    private MarketResearchEffect WarEffect => _completingProtection ? _completionWarEffect : Balance?.GetEffect(ResearchLevel(Balance.WarProtectionResearch));
+    private float MinimumBuyout => Balance?.GetEffect(ResearchLevel(Balance.EquipmentBuyoutResearch))?.MinimumEquipmentBuyoutPercent ?? 0.1f;
+    private ShipRuntimeData Ship => State?.Player?.PlayerShipState?.GetActiveShip();
+
+    public void InitializeSession()
+    {
+        var state = State;
+        if (state == null) return;
+        state.Meta ??= new GameRuntimeMetaState();
+        state.Markets ??= new List<MarketRuntimeData>();
+        if (ReferenceEquals(_boundState, state) && ReferenceEquals(_boundMarkets, state.Markets)) return;
+        _boundState = state; _boundMarkets = state.Markets;
+        _marketIndex.Clear(); _systemIndex.Clear(); _equipmentDeadlines.Clear();
+        _systems = _config.GetAllStarSystems() ?? Array.Empty<StarSystemConfig>();
+        for (int i = 0; i < state.Markets.Count; i++)
+        {
+            var market = state.Markets[i];
+            if (market != null) _marketIndex[(market.SystemId ?? "", market.PlanetId ?? "")] = market;
+        }
+        if (state.Galaxy?.Systems != null)
+            for (int i = 0; i < state.Galaxy.Systems.Count; i++)
+            {
+                var system = state.Galaxy.Systems[i];
+                if (system != null && !string.IsNullOrEmpty(system.SystemId)) _systemIndex[system.SystemId] = system;
+            }
+        // Seed markets once, before their first deferred update. No world scan in the steady-state frame path.
+        for (int i = 0; i < _systems.Count; i++)
+        {
+            var system = _systems[i];
+            if (system == null) continue;
+            var planets = system.PlanetRefs;
+            if (planets != null)
+                for (int j = 0; j < planets.Length; j++)
+                    if (planets[j]?.MarketProfile != null) Bind(system.Id, planets[j].Id, planets[j].MarketProfile, true);
+            var stationProfile = StationProfile(system);
+            if (stationProfile != null && system.Station != null) Bind(system.Id, "station:" + system.Station.Id, stationProfile, true);
+        }
+    }
+    private static MarketProfileConfig StationProfile(StarSystemConfig system)
+    {
+        if (system.Station == null) return null;
+        if (system.Station.MarketProfile != null) return system.Station.MarketProfile;
+        var planets = system.PlanetRefs;
+        if (planets != null)
+            for (int i = 0; i < planets.Length; i++)
+                if (planets[i] != null && planets[i].IsInhabited && planets[i].MarketProfile != null) return planets[i].MarketProfile;
+        return null;
+    }
+    private bool UnderWar(string systemId) => _systemIndex.TryGetValue(systemId, out var state) && state.IsUnderWarPressure();
+    private MarketRuntimeData Bind(string systemId, string locationId, MarketProfileConfig profile, bool initialize = false)
+    {
+        if (State == null || profile == null) return null;
+        if (!ReferenceEquals(_boundState, State) || !ReferenceEquals(_boundMarkets, State.Markets)) InitializeSession();
+        var key = (systemId, locationId);
+        bool created = !_marketIndex.TryGetValue(key, out var market);
+        if (created)
+        {
+            market = new MarketRuntimeData { SystemId = systemId, PlanetId = locationId,
+                LastProcessedSimulationSeconds = State.Meta.MarketSimulationSeconds };
+            State.Markets.Add(market); _marketIndex.Add(key, market);
+        }
+        market.Items ??= new List<MarketRuntimeItemState>();
+        market.Equipment ??= new List<MarketEquipmentListing>();
+        market.EquipmentSpawns ??= new List<MarketEquipmentSpawnState>();
+        market.Receipts ??= new List<MarketTransactionReceipt>();
+        market.PersonalStorage ??= new RuntimeCargoInventory();
+        market.PersonalStorage.entries ??= new List<RuntimeCargoEntryData>();
+        market.PersonalEquipment ??= new List<SystemNpcWeaponRuntimeState>();
+        market.PersonalHulls ??= new List<HullEquipmentRuntimeState>();
+        market.Hulls ??= new List<MarketHullListing>();
+        var level = profile.GetLevel(GalaxyLevel);
+        int applied = level?.GalaxyLevel ?? 0;
+        bool changed = created || market.AppliedGalaxyLevel != applied || market.AppliedProfileId != profile.Id;
+        if (changed && market.EquipmentPendingSeconds > 0)
+        {
+            var oldSettings = profile.GetLevel(market.AppliedGalaxyLevel);
+            if (oldSettings != null) FlushEquipment(market, oldSettings);
+        }
+        if (initialize || changed)
+        {
+            if (SeedHullListings(market, level))
+                _equipmentDeadlines.Remove(market);
+            var entries = level?.Items ?? profile.Items;
+            if (entries != null)
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    var entry = entries[i];
+                    if (entry?.ItemConfig != null && Stock(market, entry.ItemConfig.Id) == null)
+                        market.Items.Add(new MarketRuntimeItemState { ItemId = entry.ItemConfig.Id, Quantity = Math.Max(0, entry.Quantity) });
+                }
+        }
+        if (changed)
+        {
+            market.AppliedGalaxyLevel = applied; market.AppliedProfileId = profile.Id; market.Revision++;
+            _equipmentDeadlines.Remove(market);
+            if (_advancing) _changedMarkets.Add(new MarketStateChangedEvent(market.SystemId, market.PlanetId));
+            Log("PROFILE", market, "GalaxyLevel=" + GalaxyLevel + " | SettingsLevel=" + applied);
+        }
+        return market;
+    }
+    private bool Current(out MarketRuntimeData market, out MarketProfileConfig profile)
+    {
+        market = null; profile = null;
+        var player = State?.Player;
+        if (player == null || string.IsNullOrEmpty(player.CurrentSystemId)) return false;
+        var system = _config.GetStarSystemConfigById(player.CurrentSystemId);
+        if (system == null) return false;
+        string location = player.CurrentPlanetId;
+        if (!string.IsNullOrEmpty(player.CurrentStationId))
+        {
+            profile = StationLocationRules.Market(State, system);
+            location = "station:" + player.CurrentStationId;
+        }
+        else profile = (system.PlanetRefs ?? Array.Empty<PlanetConfig>()).FirstOrDefault(p => p != null && p.Id == location)?.MarketProfile;
+        if (profile == null || string.IsNullOrEmpty(location)) return false;
+        market = Bind(system.Id, location, profile);
+        // A newly entered or previously deferred system must be current before quoting or trading.
+        if (market != null && !_advancing && !_committing)
+        {
+            _advancing = true;
+            try { CatchUp(market, profile, UnderWar(system.Id)); }
+            finally { _advancing = false; }
+        }
+        return market != null;
+    }
+    public MarketRuntimeData CurrentMarket => Current(out var market, out _) ? market : null;
+    private MarketItemEntry Entry(MarketProfileConfig profile, string id) =>
+        (profile.GetLevel(GalaxyLevel)?.Items ?? profile.Items)?.Find(x => x?.ItemConfig != null && x.ItemConfig.Id == id && x.IsAvailable);
+    private static MarketRuntimeItemState Stock(MarketRuntimeData market, string id) => market.Items.Find(x => x != null && x.ItemId == id);
+
+    public IReadOnlyList<MarketItemEntry> GetItems()
+    {
+        if (!Current(out var market, out var profile)) return Array.Empty<MarketItemEntry>();
+        return (profile.GetLevel(GalaxyLevel)?.Items ?? profile.Items ?? new List<MarketItemEntry>())
+            .Where(x => x?.ItemConfig != null && x.IsAvailable).Select(x => new MarketItemEntry {
+                ItemConfig = x.ItemConfig, Quantity = Stock(market, x.ItemConfig.Id)?.Quantity ?? 0,
+                StockChange = x.StockChange, MaximumStock = x.MaximumStock, BasePrice = x.BasePrice,
+                MaximumPrice = x.MaximumPrice, BuyMultiplier = x.BuyMultiplier, SellMultiplier = x.SellMultiplier, IsAvailable = true }).ToList();
+    }
+    public int GetPrice(string itemId, bool buy)
+    {
+        if (!Current(out var market, out var profile)) return 0;
+        var entry = Entry(profile, itemId);
+        if (entry == null) return 0;
+        // Preserve station and unconverted legacy content until an explicit level table is assigned.
+        if (profile.GetLevel(GalaxyLevel) == null)
+            return (int)Math.Min(int.MaxValue, Math.Max(0, Math.Round(entry.ItemConfig.BasePrice * (double)(buy ? entry.BuyMultiplier : entry.SellMultiplier))));
+        int stock = Stock(market, itemId)?.Quantity ?? 0;
+        // Sale quote includes the incoming unit. The reverse trade uses the same marginal price.
+        return MarketEconomyRules.Price(entry, buy ? stock : (int)Math.Min(int.MaxValue, (long)stock + 1));
+    }
+    public long GetTotalPrice(string itemId, int quantity, bool buy)
+    {
+        return quantity > 0 && Current(out var market, out var profile)
+            ? Quote(market, profile, itemId, quantity, buy) : 0;
+    }
+    private long Quote(MarketRuntimeData market, MarketProfileConfig profile, string id, int quantity, bool buy)
+    {
+        var entry = Entry(profile, id);
+        var stock = Stock(market, id);
+        if (entry == null || stock == null || quantity <= 0) return 0;
+        if (profile.GetLevel(GalaxyLevel) == null) return (long)GetPrice(id, buy) * quantity;
+        return MarketEconomyRules.TotalPrice(entry, stock.Quantity, quantity, buy);
+    }
+    public int GetMaximumTradeQuantity(string itemId, bool buy, bool warehouse = false)
+    {
+        if (_committing || Ship?.Cargo == null || !Current(out var market, out _)) return 0;
+        int high = buy ? Stock(market, itemId)?.Quantity ?? 0
+            : (warehouse ? market.PersonalStorage : Ship.Cargo).GetTradeableQuantity(itemId);
+        int low = 0;
+        // Monotonic checks include stock, credits, physical cargo size and integer limits.
+        // A binary search avoids a per-unit scan even for large stocks.
+        while (low < high)
+        {
+            int middle = low + (int)(((long)high - low + 1) / 2);
+            if (CanTrade(itemId, middle, buy, warehouse)) low = middle;
+            else high = middle - 1;
+        }
+        return low;
+    }
+    public bool CanTrade(string itemId, int quantity, bool buy, bool warehouse = false)
+    {
+        if (_committing || Ship?.Cargo == null || quantity <= 0 || !Current(out var market, out var profile)) return false;
+        if (!buy && Entry(profile, itemId)?.ItemConfig is ShipComponentConfig) return false;
+        int price = GetPrice(itemId, buy);
+        var stock = Stock(market, itemId);
+        long total = Quote(market, profile, itemId, quantity, buy);
+        if (price <= 0 || total > int.MaxValue || stock == null || Entry(profile, itemId) == null) return false;
+        return buy ? stock.Quantity >= quantity && State.Player.Credits >= total && (warehouse ? CanAddStorage(market, itemId, quantity) : _inventory.CanAddItem(itemId, quantity))
+            : (warehouse ? market.PersonalStorage : Ship.Cargo).GetTradeableQuantity(itemId) >= quantity && (long)State.Player.Credits + total <= int.MaxValue && (long)stock.Quantity + quantity <= int.MaxValue;
+    }
+    public EconomyOperationResult Trade(string itemId, int quantity, bool buy, string operationId = null, long expectedRevision = -1, bool warehouse = false)
+    {
+        if (string.IsNullOrWhiteSpace(itemId)) return Fail(EconomyErrorCode.InvalidItemId);
+        if (quantity <= 0) return Fail(EconomyErrorCode.InvalidQuantity);
+        if (_committing) return Fail(EconomyErrorCode.TransactionBusy);
+        if (!Current(out var market, out var profile)) return Fail(EconomyErrorCode.PriceNotFound);
+        operationId ??= Guid.NewGuid().ToString("N");
+        string intent = (buy ? "buy:" : "sell:") + itemId + ":" + quantity + (warehouse ? ":storage" : "");
+        var receiptMarket = State.Markets.Find(m => m?.Receipts?.Any(x => x != null && x.OperationId == operationId) == true);
+        if (receiptMarket != null && !ReferenceEquals(receiptMarket, market)) return Fail(EconomyErrorCode.OperationConflict);
+        var receipt = market.Receipts.Find(x => x != null && x.OperationId == operationId);
+        if (receipt != null)
+            return receipt.Intent == intent ? EconomyOperationResult.Completed(buy ? -receipt.TotalPrice : receipt.TotalPrice, itemId, quantity) : Fail(EconomyErrorCode.OperationConflict);
+        if (expectedRevision >= 0 && market.Revision != expectedRevision) return Fail(EconomyErrorCode.MarketChanged);
+        if (Ship?.Cargo == null) return Fail(EconomyErrorCode.ItemNotOwned);
+        var component = Entry(profile, itemId)?.ItemConfig as ShipComponentConfig;
+        if (!buy && component != null) return Fail(EconomyErrorCode.ItemNotOwned);
+        int price = GetPrice(itemId, buy);
+        var stock = Stock(market, itemId);
+        long total = Quote(market, profile, itemId, quantity, buy);
+        if (price <= 0 || stock == null || Entry(profile, itemId) == null) return Fail(EconomyErrorCode.PriceNotFound);
+        if (total > int.MaxValue || (!buy && ((long)State.Player.Credits + total > int.MaxValue || (long)stock.Quantity + quantity > int.MaxValue))) return Fail(EconomyErrorCode.ValueOverflow);
+        if (buy && stock.Quantity < quantity) return Fail(EconomyErrorCode.NotEnoughMarketStock);
+        if (buy && State.Player.Credits < total) return Fail(EconomyErrorCode.NotEnoughCredits);
+        if (buy && !(warehouse ? CanAddStorage(market, itemId, quantity) : _inventory.CanAddItem(itemId, quantity))) return Fail(EconomyErrorCode.NotEnoughCargoSpace);
+        if (!buy && (warehouse ? market.PersonalStorage : Ship.Cargo).GetTradeableQuantity(itemId) < quantity) return Fail(EconomyErrorCode.NotEnoughItemsToSell);
+        _committing = true;
+        try
+        {
+            var cargo = warehouse ? market.PersonalStorage : Ship.Cargo;
+            bool changed;
+            if (component != null)
+            {
+                Ship.CargoEquipment ??= new List<SystemNpcWeaponRuntimeState>();
+                var equipment = warehouse ? market.PersonalEquipment : Ship.CargoEquipment;
+                for (int i = 0; i < quantity; i++)
+                    equipment.Add(SystemNpcWeaponRuntimeState.NewComponent(component, Guid.NewGuid().ToString("N")));
+                changed = true;
+            }
+            else changed = buy ? (warehouse ? cargo.AddLootItem(itemId, quantity) : cargo.AddItem(itemId, quantity, Ship.CargoCapacity)) : cargo.RemoveItem(itemId, quantity);
+            if (!changed) return Fail(buy ? EconomyErrorCode.NotEnoughCargoSpace : EconomyErrorCode.NotEnoughItemsToSell);
+            State.Player.Credits += buy ? -(int)total : (int)total;
+            stock.Quantity += buy ? -quantity : quantity;
+            market.Revision++;
+            market.Receipts.Add(new MarketTransactionReceipt { OperationId = operationId, Intent = intent, TotalPrice = (int)total, Quantity = quantity });
+            Log("TRADE", market, intent + " | Total=" + total + " | Operation=" + operationId);
+            Notify("market_trade");
+            return EconomyOperationResult.Completed(buy ? -(int)total : (int)total, itemId, quantity);
+        }
+        finally { _committing = false; }
+        EconomyOperationResult Fail(EconomyErrorCode error)
+        {
+            Log("REJECTED", null, "Item=" + itemId + " | Quantity=" + quantity + " | Reason=" + error);
+            return EconomyOperationResult.Failed(error, itemId, quantity);
+        }
+    }
+
+    // Exact full-world catch-up for offline progress and deterministic integration checks.
+    public void AdvanceTime(double seconds)
+    {
+        if (!BeginAdvance(seconds)) return;
+        try
+        {
+            for (int i = 0; i < _systems.Count; i++) AdvanceSystem(_systems[i]);
+        }
+        finally { _advancing = false; }
+        PublishChanges();
+    }
+    // Online path shares the movement/combat/behavior selection; it never advances their cursor independently.
+    public void AdvanceScheduledTime(double seconds, int quantTick, IGalaxyNpcSimulationScheduleService schedule)
+    {
+        if (!BeginAdvance(seconds)) return;
+        try
+        {
+            var current = schedule != null ? schedule.GetCurrentSystem() : _config.GetStarSystemConfigById(State.Player?.CurrentSystemId);
+            AdvanceSystem(current);
+            var selected = schedule?.GetScheduledOffscreenSystems(quantTick);
+            if (selected != null)
+                for (int i = 0; i < selected.Count; i++)
+                {
+                    var system = selected[i];
+                    if (system != null && system.Id != current?.Id) AdvanceSystem(system);
+                }
+        }
+        finally { _advancing = false; }
+        PublishChanges();
+        if (Bootstrapper.Instance != null && Bootstrapper.Instance.IsDebugLogEnabled(DebugLogChannel.Market) &&
+            (_lastScheduleLogFrame == int.MinValue || Time.frameCount - _lastScheduleLogFrame >= 120))
+        {
+            _lastScheduleLogFrame = Time.frameCount;
+            Log("SCHEDULE", null, "Systems=" + LastScheduledSystemCount + " | Markets=" + LastProcessedMarketCount + " | EquipmentPasses=" + LastEquipmentUpdateCount);
+        }
+    }
+    private bool BeginAdvance(double seconds)
+    {
+        if (_committing || _advancing || seconds <= 0 || double.IsNaN(seconds) || double.IsInfinity(seconds) || State?.Galaxy == null) return false;
+        InitializeSession();
+        _advancing = true;
+        _changedMarkets.Clear();
+        LastScheduledSystemCount = 0; LastProcessedMarketCount = 0; LastEquipmentUpdateCount = 0;
+        State.Meta.MarketSimulationSeconds += seconds;
+        return true;
+    }
+    private void AdvanceSystem(StarSystemConfig system)
+    {
+        if (system == null) return;
+        LastScheduledSystemCount++;
+        bool war = UnderWar(system.Id);
+        var planets = system.PlanetRefs;
+        if (planets != null)
+            for (int i = 0; i < planets.Length; i++)
+            {
+                var planet = planets[i];
+                if (planet?.MarketProfile != null) CatchUp(Bind(system.Id, planet.Id, planet.MarketProfile), planet.MarketProfile, war);
+            }
+        var stationProfile = StationProfile(system);
+        if (stationProfile != null && system.Station != null)
+            CatchUp(Bind(system.Id, "station:" + system.Station.Id, stationProfile), stationProfile, war);
+    }
+    private void CatchUp(MarketRuntimeData market, MarketProfileConfig profile, bool war)
+    {
+        double now = State.Meta.MarketSimulationSeconds;
+        double elapsed = now - market.LastProcessedSimulationSeconds;
+        if (elapsed <= 0) return;
+        market.LastProcessedSimulationSeconds = now;
+        LastProcessedMarketCount++;
+        Advance(market, profile, elapsed, war);
+    }
+    private void OnResearchCompleted(ResearchCompletedEvent completed)
+    {
+        if (completed == null || Balance == null || completed.Upgrade != Balance.WarProtectionResearch || _advancing || _committing) return;
+        InitializeSession();
+        if (State?.Galaxy == null) return;
+        // This rare boundary settles deferred systems under the old protection level before the new effect applies.
+        _completionWarEffect = Balance.GetEffect(Math.Max(0, completed.Level - 1));
+        _completingProtection = true; _advancing = true; _changedMarkets.Clear();
+        try { for (int i = 0; i < _systems.Count; i++) AdvanceSystem(_systems[i]); }
+        finally { _advancing = false; _completingProtection = false; _completionWarEffect = null; }
+        PublishChanges();
+    }
+
+    private void PublishChanges()
+    {
+        if (_changedMarkets.Count == 0) return;
+        var notifications = _changedMarkets.ToArray();
+        _changedMarkets.Clear();
+        for (int i = 0; i < notifications.Length; i++)
+        {
+            bool duplicate = false;
+            for (int j = 0; j < i; j++)
+                if (notifications[i].SystemId == notifications[j].SystemId && notifications[i].PlanetId == notifications[j].PlanetId) { duplicate = true; break; }
+            if (!duplicate) _events?.PublishSafely(notifications[i], _ => { });
+        }
+    }
+    private void Advance(MarketRuntimeData market, MarketProfileConfig profile, double seconds, bool war)
+    {
+        var settings = profile.GetLevel(GalaxyLevel);
+        if (market == null || settings == null || settings.IntervalSeconds <= 0 || float.IsNaN(settings.IntervalSeconds) || float.IsInfinity(settings.IntervalSeconds)) return;
+        long revisionBefore = market.Revision;
+        double elapsed = market.IntervalRemainder + seconds;
+        double intervals = Math.Floor((elapsed + 1e-9) / settings.IntervalSeconds);
+        market.IntervalRemainder = Math.Max(0, elapsed - intervals * settings.IntervalSeconds);
+        if (intervals > 0)
+        {
+            foreach (var entry in settings.Items ?? new List<MarketItemEntry>())
+                if (entry?.ItemConfig != null)
+                {
+                    var stock = Stock(market, entry.ItemConfig.Id);
+                    if (stock != null) MarketEconomyRules.AdvanceStock(stock, entry, intervals, war, WarEffect);
+                }
+            market.Revision++;
+            Log("STOCK", market, "Intervals=" + intervals + " | War=" + war);
+        }
+        market.ElapsedSeconds += seconds;
+        market.EquipmentPendingSeconds += seconds;
+        if (!_equipmentDeadlines.TryGetValue(market, out double deadline))
+        {
+            deadline = NextEquipmentDeadline(market, settings);
+            _equipmentDeadlines[market] = deadline;
+        }
+        if (market.ElapsedSeconds + 1e-9 >= deadline)
+        {
+            FlushEquipment(market, settings);
+            _equipmentDeadlines[market] = NextEquipmentDeadline(market, settings);
+        }
+        if (market.Revision != revisionBefore)
+            _changedMarkets.Add(new MarketStateChangedEvent(market.SystemId, market.PlanetId));
+    }
+    public double ClaimOffline(long nowUtcTicks)
+    {
+        var meta = State?.Meta;
+        if (_committing || _advancing || meta == null || nowUtcTicks <= 0 || nowUtcTicks > DateTime.MaxValue.Ticks) return 0;
+        long from = Math.Max(meta.LastSaveUtc, meta.MarketOfflineProcessedUtc);
+        if (from <= 0 || nowUtcTicks <= from) return 0;
+        meta.MarketOfflineProcessedUtc = nowUtcTicks;
+        return (nowUtcTicks - from) / (double)TimeSpan.TicksPerSecond;
+    }
+    public void ProcessOffline(long nowUtcTicks)
+    {
+        double seconds = ClaimOffline(nowUtcTicks);
+        if (seconds <= 0) return;
+        AdvanceTime(seconds);
+        Log("OFFLINE", null, "Seconds=" + seconds);
+        _events?.PublishSafely(new SaveNeedEvent("market_offline_progress"), _ => { });
+    }
+
+    private static double NextEquipmentDeadline(MarketRuntimeData market, MarketGalaxyLevelSettings settings)
+    {
+        double next = double.PositiveInfinity;
+        double timerTime = market.ElapsedSeconds - market.EquipmentPendingSeconds;
+        if (settings.Equipment != null)
+            for (int i = 0; i < settings.Equipment.Count; i++)
+            {
+                var rule = settings.Equipment[i];
+                if (rule?.Weapon == null || !rule.Allied || rule.MaximumListings <= 0 || rule.SpawnIntervalSeconds <= 0 ||
+                    float.IsNaN(rule.SpawnIntervalSeconds) || float.IsInfinity(rule.SpawnIntervalSeconds) || rule.LifetimeSeconds <= 0 ||
+                    float.IsNaN(rule.LifetimeSeconds) || float.IsInfinity(rule.LifetimeSeconds)) continue;
+                double remainder = 0;
+                for (int j = 0; j < market.EquipmentSpawns.Count; j++)
+                    if (market.EquipmentSpawns[j]?.WeaponId == rule.Weapon.Id) { remainder = market.EquipmentSpawns[j].Remainder; break; }
+                next = Math.Min(next, timerTime + rule.SpawnIntervalSeconds - remainder);
+            }
+        for (int i = 0; i < market.Equipment.Count; i++)
+            if (market.Equipment[i]?.Equipment != null) next = Math.Min(next, market.Equipment[i].ExpiresAtSeconds);
+        return Math.Min(next, NextHullDeadline(market, settings));
+    }
+    private void FlushEquipment(MarketRuntimeData market, MarketGalaxyLevelSettings settings)
+    {
+        double pending = market.EquipmentPendingSeconds;
+        if (pending <= 0) return;
+        LastEquipmentUpdateCount++;
+        market.EquipmentPendingSeconds = 0;
+        market.ElapsedSeconds -= pending;
+        AdvanceEquipment(market, settings, pending);
+    }
+
+    private void AdvanceEquipment(MarketRuntimeData market, MarketGalaxyLevelSettings settings, double seconds)
+    {
+        double end = market.ElapsedSeconds + seconds;
+        int spawned = 0, expired = 0;
+        foreach (var rule in settings.Equipment ?? new List<MarketEquipmentRule>())
+        {
+            if (rule?.Weapon == null || rule.SpawnIntervalSeconds <= 0 || rule.LifetimeSeconds <= 0 || rule.MaximumListings <= 0 ||
+                float.IsNaN(rule.SpawnIntervalSeconds) || float.IsInfinity(rule.SpawnIntervalSeconds) ||
+                float.IsNaN(rule.LifetimeSeconds) || float.IsInfinity(rule.LifetimeSeconds)) continue;
+            var timer = market.EquipmentSpawns.Find(x => x != null && x.WeaponId == rule.Weapon.Id);
+            if (timer == null) { timer = new MarketEquipmentSpawnState { WeaponId = rule.Weapon.Id }; market.EquipmentSpawns.Add(timer); }
+            double next = market.ElapsedSeconds + rule.SpawnIntervalSeconds - timer.Remainder;
+            for (double time = next; time <= end + 1e-9; time += rule.SpawnIntervalSeconds)
+            {
+                timer.SpawnSequence++;
+                expired += market.Equipment.RemoveAll(x => x == null || x.Equipment == null ||
+                    (x.Equipment.WeaponConfigId == rule.Weapon.Id && x.ExpiresAtSeconds <= time));
+                if (!rule.Allied || market.Equipment.Count(x => x.Equipment.WeaponConfigId == rule.Weapon.Id) >= rule.MaximumListings) continue;
+                string instance = "market:" + market.SystemId + ":" + market.PlanetId + ":" + rule.Weapon.Id + ":" + timer.SpawnSequence;
+                var previousRandom = UnityEngine.Random.state;
+                WeaponRuntimeStats stats;
+                try { UnityEngine.Random.InitState(StableHash(instance)); stats = rule.Weapon.RollRuntimeStats(); }
+                finally { UnityEngine.Random.state = previousRandom; }
+                var equipment = new SystemNpcWeaponRuntimeState { InstanceId = instance,
+                    WeaponConfigId = rule.Weapon.Id, RolledStats = stats, SlotIndex = -1,
+                    CurrentDurability = rule.Weapon.MaximumDurability, MaximumDurability = rule.Weapon.MaximumDurability };
+                market.Equipment.Add(new MarketEquipmentListing { Equipment = equipment, NewPrice = rule.NewPrice,
+                    Allied = true, ExpiresAtSeconds = time + rule.LifetimeSeconds });
+                spawned++;
+                market.Revision++;
+            }
+            timer.Remainder = (timer.Remainder + seconds) % rule.SpawnIntervalSeconds;
+        }
+        expired += market.Equipment.RemoveAll(x => x == null || x.Equipment == null || x.ExpiresAtSeconds <= end);
+        if (expired > 0) market.Revision++;
+        AdvanceHulls(market, settings, seconds);
+        market.ElapsedSeconds = end;
+        if (spawned > 0 || expired > 0) Log("LISTINGS", market, "Spawned=" + spawned + " | Expired=" + expired);
+    }
+    private MarketEquipmentRule EquipmentRule(MarketProfileConfig profile, string weaponId) =>
+        profile.GetLevel(GalaxyLevel)?.Equipment?.Find(x => x?.Weapon != null && x.Weapon.Id == weaponId)
+        ?? Balance?.EquipmentCatalog?.Find(x => x?.Weapon != null && x.Weapon.Id == weaponId);
+    public int EquipmentPrice(SystemNpcWeaponRuntimeState equipment, bool buy)
+    {
+        if (equipment == null || !Current(out var market, out var profile)) return 0;
+        var listing = market.Equipment.Find(x => x?.Equipment?.InstanceId == equipment.InstanceId);
+        int basic = listing?.NewPrice ?? EquipmentBasePrice(profile, equipment);
+        // Buying used equipment never costs less than its current sale quote.
+        return MarketEconomyRules.EquipmentSellPrice(basic, equipment.CurrentDurability, equipment.MaximumDurability, MinimumBuyout);
+    }
+    private int EquipmentBasePrice(MarketProfileConfig profile, SystemNpcWeaponRuntimeState item) =>
+        item.IsComponent ? GetPrice(item.ComponentConfigId, true) : EquipmentRule(profile, item.WeaponConfigId)?.NewPrice ?? 0;
+
+    private bool HasEquipmentConfig(SystemNpcWeaponRuntimeState item) =>
+        item.IsComponent ? _config.GetItemConfigById(item.ComponentConfigId) is ShipComponentConfig
+            : _config.GetWeaponConfigById(item.WeaponConfigId) != null;
+
+    public bool TradeEquipment(string instanceId, bool buy, string operationId, long expectedRevision, out string reason, bool warehouse = false)
+    {
+        reason = "EquipmentUnavailable";
+        if (_committing || string.IsNullOrEmpty(instanceId) || string.IsNullOrEmpty(operationId) || Ship == null || !Current(out var market, out var profile)) return false;
+        string intent = (buy ? "equipment_buy:" : "equipment_sell:") + instanceId + (warehouse ? ":storage" : "");
+        var receiptMarket = State.Markets.Find(m => m?.Receipts?.Any(x => x != null && x.OperationId == operationId) == true);
+        if (receiptMarket != null && !ReferenceEquals(receiptMarket, market)) { reason = "OperationConflict"; return false; }
+        var receipt = market.Receipts.Find(x => x != null && x.OperationId == operationId);
+        if (receipt != null) { reason = receipt.Intent == intent ? string.Empty : "OperationConflict"; return receipt.Intent == intent; }
+        if (expectedRevision >= 0 && expectedRevision != market.Revision) { reason = "MarketChanged"; return false; }
+        Ship.CargoEquipment ??= new List<SystemNpcWeaponRuntimeState>();
+        var owned = warehouse ? market.PersonalEquipment : Ship.CargoEquipment;
+        var listing = market.Equipment.Find(x => x?.Equipment?.InstanceId == instanceId && x.ExpiresAtSeconds > market.ElapsedSeconds);
+        var equipment = buy ? listing?.Equipment : owned.Find(x => x != null && x.InstanceId == instanceId);
+        if (equipment == null || (buy && (!listing.Allied || owned.Any(x => x?.InstanceId == instanceId)))) return false;
+        var rule = equipment.IsComponent ? null : EquipmentRule(profile, equipment.WeaponConfigId);
+        int basePrice = buy ? listing.NewPrice : EquipmentBasePrice(profile, equipment);
+        int price = MarketEconomyRules.EquipmentSellPrice(basePrice, equipment.CurrentDurability, equipment.MaximumDurability, MinimumBuyout);
+        if (!HasEquipmentConfig(equipment) || price <= 0) return false;
+        if (buy && (State.Player.Credits < price || (!warehouse && !CanCarryEquipment(equipment))))
+        { reason = "NotEnoughCreditsOrCargo"; return false; }
+        if (!buy && ((long)State.Player.Credits + price > int.MaxValue || market.Equipment.Any(x => x?.Equipment?.InstanceId == instanceId))) return false;
+        _committing = true;
+        try
+        {
+            if (buy) { market.Equipment.Remove(listing); owned.Add(equipment); }
+            else
+            {
+                owned.Remove(equipment);
+                bool allied = equipment.IsComponent || (rule?.Allied == true &&
+                    (!equipment.HasLootOrigin || equipment.LootOriginNpcType == SystemNpcType.Ally));
+                if (allied) market.Equipment.Add(new MarketEquipmentListing { Equipment = equipment, Allied = true,
+                    NewPrice = basePrice, ExpiresAtSeconds = market.ElapsedSeconds + (rule?.LifetimeSeconds ?? 600f) });
+            }
+            equipment.SlotIndex = -1;
+            State.Player.Credits += buy ? -price : price;
+            market.Revision++;
+            _equipmentDeadlines.Remove(market);
+            market.Receipts.Add(new MarketTransactionReceipt { OperationId = operationId, Intent = intent, TotalPrice = price, Quantity = 1 });
+            reason = string.Empty;
+            Log("EQUIPMENT", market, intent + " | Total=" + price);
+            Notify("market_equipment");
+            return true;
+        }
+        finally { _committing = false; }
+    }
+    private bool CanAddStorage(MarketRuntimeData market, string id, int quantity) => quantity > 0 &&
+        _config.GetItemConfigById(id) != null && (long)market.PersonalStorage.GetTradeableQuantity(id) + quantity <= int.MaxValue;
+    private bool CanCarryEquipment(SystemNpcWeaponRuntimeState equipment)
+    {
+        int size = equipment.RolledStats.CargoSize > 0 ? equipment.RolledStats.CargoSize :
+            equipment.IsComponent ? _config.GetItemConfigById(equipment.ComponentConfigId)?.CargoSize ?? 1
+                : _config.GetWeaponConfigById(equipment.WeaponConfigId)?.CargoSize ?? 1;
+        return Ship != null && (long)_inventory.GetUsedCargo() + Math.Max(1, size) <= Ship.CargoCapacity;
+    }
+    public bool CanTradeEquipment(string id, bool buy, bool warehouse = false)
+    {
+        if (_committing || Ship == null || !Current(out var market, out var profile)) return false;
+        var owned = warehouse ? market.PersonalEquipment : Ship.CargoEquipment;
+        var listing = buy ? market.Equipment.Find(x => x?.Equipment?.InstanceId == id && x.Allied && x.ExpiresAtSeconds > market.ElapsedSeconds) : null;
+        var item = buy ? listing?.Equipment : owned?.Find(x => x?.InstanceId == id);
+        if (item == null || !HasEquipmentConfig(item)) return false;
+        int price = EquipmentPrice(item, buy);
+        if (price <= 0) return false;
+        return buy ? State.Player.Credits >= price && (warehouse || CanCarryEquipment(item))
+            : EquipmentBasePrice(profile, item) > 0 && (long)State.Player.Credits + price <= int.MaxValue;
+    }
+    public bool CanTransfer(string id, bool equipment, bool toWarehouse, int quantity)
+    {
+        if (_committing || Ship?.Cargo == null || quantity <= 0 || string.IsNullOrEmpty(id) || !Current(out var market, out _)) return false;
+        if (equipment)
+        {
+            var source = toWarehouse ? Ship.CargoEquipment : market.PersonalEquipment;
+            var target = toWarehouse ? market.PersonalEquipment : Ship.CargoEquipment;
+            var item = source?.Find(x => x?.InstanceId == id);
+            return quantity == 1 && item != null && target?.Any(x => x?.InstanceId == id) != true &&
+                (toWarehouse || CanCarryEquipment(item));
+        }
+        var goods = toWarehouse ? Ship.Cargo : market.PersonalStorage;
+        return goods.GetTradeableQuantity(id) >= quantity &&
+            (toWarehouse ? CanAddStorage(market, id, quantity) : _inventory.CanAddItem(id, quantity));
+    }
+    public bool Transfer(string id, bool equipment, bool toWarehouse, int quantity, string operationId, long expectedRevision, out string reason)
+    {
+        reason = "TransferUnavailable";
+        if (_committing || Ship?.Cargo == null || quantity <= 0 || string.IsNullOrEmpty(id) || string.IsNullOrEmpty(operationId) || !Current(out var market, out _)) return false;
+        string intent = "transfer:" + (equipment ? "equipment:" : "goods:") + id + ":" + quantity + (toWarehouse ? ":storage" : ":cargo");
+        var receiptMarket = State.Markets.Find(m => m?.Receipts?.Any(x => x?.OperationId == operationId) == true);
+        if (receiptMarket != null)
+        {
+            var receipt = receiptMarket.Receipts.Find(x => x?.OperationId == operationId);
+            bool same = ReferenceEquals(receiptMarket, market) && receipt.Intent == intent;
+            reason = same ? string.Empty : "OperationConflict"; return same;
+        }
+        if (expectedRevision >= 0 && expectedRevision != market.Revision) { reason = "MarketChanged"; return false; }
+        Ship.CargoEquipment ??= new List<SystemNpcWeaponRuntimeState>();
+        var sourceEquipment = toWarehouse ? Ship.CargoEquipment : market.PersonalEquipment;
+        var targetEquipment = toWarehouse ? market.PersonalEquipment : Ship.CargoEquipment;
+        var item = equipment ? sourceEquipment.Find(x => x?.InstanceId == id) : null;
+        var sourceGoods = toWarehouse ? Ship.Cargo : market.PersonalStorage;
+        var targetGoods = toWarehouse ? market.PersonalStorage : Ship.Cargo;
+        if (equipment)
+        {
+            if (quantity != 1 || item == null || targetEquipment.Any(x => x?.InstanceId == id)) return false;
+            if (!toWarehouse && !CanCarryEquipment(item)) { reason = "NotEnoughCargoSpace"; return false; }
+        }
+        else
+        {
+            if (sourceGoods.GetTradeableQuantity(id) < quantity) { reason = "NotEnoughItemsToSell"; return false; }
+            if (!(toWarehouse ? CanAddStorage(market, id, quantity) : _inventory.CanAddItem(id, quantity))) { reason = "NotEnoughCargoSpace"; return false; }
+        }
+        _committing = true;
+        try
+        {
+            if (equipment) { sourceEquipment.Remove(item); targetEquipment.Add(item); item.SlotIndex = -1; }
+            else
+            {
+                bool added = toWarehouse ? targetGoods.AddLootItem(id, quantity) : targetGoods.AddItem(id, quantity, Ship.CargoCapacity);
+                if (!added) { reason = "NotEnoughCargoSpace"; return false; }
+                if (!sourceGoods.RemoveItem(id, quantity)) { targetGoods.RemoveItem(id, quantity); return false; }
+            }
+            market.Revision++;
+            market.Receipts.Add(new MarketTransactionReceipt { OperationId = operationId, Intent = intent, TotalPrice = 0, Quantity = quantity });
+            reason = string.Empty; Log("TRANSFER", market, intent); Notify("personal_storage_transfer"); return true;
+        }
+        finally { _committing = false; }
+    }
+
+    private static int StableHash(string value)
+    {
+        unchecked { int hash = 17; foreach (char c in value) hash = hash * 31 + c; return hash; }
+    }
+    private void Notify(string reason)
+    {
+        // All state and the receipt are committed before any observer can request a save.
+        _events?.PublishSafely(new CreditsChangedEvent(State.Player.Credits), _ => { });
+        _events?.PublishSafely(new CargoChangedEvent(_inventory.GetUsedCargo()), _ => { });
+        _events?.PublishSafely(new SaveNeedEvent(reason), _ => { });
+    }
+    private static void Log(string action, MarketRuntimeData market, string detail) => AppLog.Info(DebugLogChannel.Market,
+        "[PlanetMarket] " + action + " | Planet=" + market?.PlanetId + " | " + detail);
+}

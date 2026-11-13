@@ -8,7 +8,8 @@ public enum ResearchUpgrade
     MilitaryDefence = 3, MilitaryProduction = 4, MilitaryCruisers = 5,
     TradeSupply = 6, TradeEconomy = 7, ScienceComputing = 8, ScienceQuantumLabs = 9,
     ScienceExploration = 10, MedicalRestoration = 11, MedicalBiotech = 12, MedicalPrevention = 13,
-    RangerTraining = 14, RangerPatrols = 15, RangerMastery = 16
+    RangerTraining = 14, RangerPatrols = 15, RangerMastery = 16,
+    EconomyWarProtection = 17, EquipmentBuyout = 18
 }
 [Serializable] public sealed class ResearchUpgradeLevel
 {

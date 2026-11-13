@@ -195,6 +195,8 @@ public class PlanetController : CustomMonoBehaviour
         if (!string.IsNullOrEmpty(gameSessionService.State.Player.CurrentStationId))
         {
             bool success = _stationVisits.TryTakeOff(out string reason);
+            if (!success && reason == StationVisitService.EngineNotInstalled)
+                ShowMissingEngine();
             AppLog.Info(DebugLogChannel.StationInterface, typeof(PlanetController),
                 "Station takeoff | Success=" + success + " | Reason=" + reason);
             return;
@@ -202,6 +204,13 @@ public class PlanetController : CustomMonoBehaviour
         if (string.IsNullOrWhiteSpace(gameSessionService.State.Player.CurrentPlanetId))
         {
             PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.FirstLaunch, false, "CurrentPlanetMissing");
+            return;
+        }
+
+        if (ShipLoadoutRules.IsComponentMissing(gameSessionService.State.Player.GetActiveShip(), ShipComponentSlot.Engine))
+        {
+            PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.FirstLaunch, false, StationVisitService.EngineNotInstalled);
+            ShowMissingEngine();
             return;
         }
 
@@ -232,6 +241,10 @@ public class PlanetController : CustomMonoBehaviour
 
     public void TakeOffFromPlanet() => OnOpenSystemClicked();
 
+    private void ShowMissingEngine() =>
+        FindFirstObjectByType<SystemTransitionController2>(FindObjectsInactive.Include)
+            ?.ShowMessage(ShipLoadoutRules.EngineNotInstalledMessage, this);
+
     private void OnOpenHangarClicked()
     {
         HideResearch();
@@ -252,6 +265,15 @@ public class PlanetController : CustomMonoBehaviour
             AppLog.Info(DebugLogChannel.PlanetUi,
                 typeof(PlanetController),
                 "Open Hangar clicked");
+    }
+
+    public bool OpenMarket()
+    {
+        var player = gameSessionService?.State?.Player;
+        if (player == null || marketBlock == null ||
+            (string.IsNullOrEmpty(player.CurrentPlanetId) && string.IsNullOrEmpty(player.CurrentStationId))) return false;
+        OnOpenMarketClicked();
+        return true;
     }
 
     private void OnOpenMarketClicked()

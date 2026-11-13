@@ -11,6 +11,7 @@ public sealed class StationService : IStationService
     private readonly IStationPaymentGateway _payments;
     private readonly IStationInfrastructureService _offlineInfrastructure;
     private readonly IResearchService _offlineResearch;
+    private readonly IPlanetMarketService _offlineMarket;
     private readonly Func<string, bool> _hasEnemies;
     private readonly Dictionary<string, StationRuntimeState> _published =
         new Dictionary<string, StationRuntimeState>(StringComparer.Ordinal);
@@ -26,13 +27,13 @@ public sealed class StationService : IStationService
 
     public StationService(IGameSessionService session, Func<string, StarSystemConfig> resolveSystem,
         SimpleEventBus events, IStationPaymentGateway payments = null,
-        IStationInfrastructureService infrastructure = null, IResearchService research = null, Func<string, bool> hasEnemies = null)
+        IStationInfrastructureService infrastructure = null, IResearchService research = null, Func<string, bool> hasEnemies = null, IPlanetMarketService market = null)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _resolveSystem = resolveSystem ?? throw new ArgumentNullException(nameof(resolveSystem));
         _events = events;
         _payments = payments;
-        _offlineInfrastructure = infrastructure; _offlineResearch = research; _hasEnemies = hasEnemies;
+        _offlineInfrastructure = infrastructure; _offlineResearch = research; _hasEnemies = hasEnemies; _offlineMarket = market;
     }
 
     public void InitializeSession(bool newGame)
@@ -163,12 +164,24 @@ public sealed class StationService : IStationService
     {
         if (state?.Meta == null || !ReferenceEquals(state, _session.State) ||
             nowUtcTicks <= 0 || nowUtcTicks > DateTime.MaxValue.Ticks) return;
+        IPlanetMarketService market = _offlineMarket;
+        if (market == null && Bootstrapper.Instance != null && Bootstrapper.Instance.ServiceRegistry != null)
+            Bootstrapper.Instance.ServiceRegistry.TryGet(out market);
+        double marketRemaining = market?.ClaimOffline(nowUtcTicks) ?? 0;
         long from = Math.Max(state.Meta.LastSaveUtc, state.Meta.StationOfflineProcessedUtc);
         double elapsed = OfflineProgressWindow.ElapsedSeconds(from, nowUtcTicks);
-        if (nowUtcTicks <= state.Meta.StationOfflineProcessedUtc) return;
+        if (nowUtcTicks <= state.Meta.StationOfflineProcessedUtc)
+        {
+            if (marketRemaining > 0) { market.AdvanceTime(marketRemaining); PublishSaveRequest("market_offline_progress"); }
+            return;
+        }
         // Set before dispatch: repeated calls and event re-entry cannot apply the same interval twice.
         state.Meta.StationOfflineProcessedUtc = nowUtcTicks;
-        if (elapsed <= 0d) return;
+        if (elapsed <= 0d)
+        {
+            if (marketRemaining > 0) { market.AdvanceTime(marketRemaining); PublishSaveRequest("market_offline_progress"); }
+            return;
+        }
         double processedSeconds = elapsed;
         var offlineResearchState = state.Galaxy?.Research;
         var offlineUpgrade = offlineResearchState?.ActiveUpgrade ?? ResearchUpgrade.None;
@@ -182,7 +195,8 @@ public sealed class StationService : IStationService
             if (infrastructure == null) Bootstrapper.Instance.ServiceRegistry.TryGet(out infrastructure);
             if (research == null) Bootstrapper.Instance.ServiceRegistry.TryGet(out research);
         }
-        // Use the same capped interval and watermark; no independent 12-hour budget per service.
+        // Stations/research keep their existing shared cap. Market advances the full wall-clock interval.
+        double marketSkip = Math.Max(0, elapsed - marketRemaining);
         while (elapsed > 0)
         {
             double step = Math.Min(elapsed, 30d);
@@ -193,12 +207,21 @@ public sealed class StationService : IStationService
                 if (op != null && op.PauseReason == StationOperationPauseReason.None && op.DurationSeconds > op.ElapsedSeconds)
                     step = Math.Min(step, op.DurationSeconds - op.ElapsedSeconds);
             }
+            var activeResearch = state.Galaxy?.Research?.Active;
+            double scienceRate = infrastructure?.GetScienceRate() ?? 0;
+            if (activeResearch != null && scienceRate > 0 && activeResearch.DurationSeconds > activeResearch.ElapsedSeconds)
+                step = Math.Min(step, (activeResearch.DurationSeconds - activeResearch.ElapsedSeconds) / scienceRate);
+            double skipped = Math.Min(marketSkip, step);
+            marketSkip -= skipped;
+            double marketStep = Math.Min(marketRemaining, step - skipped);
+            if (marketStep > 0) { market.AdvanceTime(marketStep); marketRemaining -= marketStep; }
             research?.AdvanceTime(step);
             AdvanceTime(step);
             infrastructure?.AdvanceTime(step);
             infrastructure?.AdvanceOfflineRepair(step);
             elapsed -= step;
         }
+        if (marketRemaining > 0) market?.AdvanceTime(marketRemaining);
         if (!string.IsNullOrEmpty(offlineOperation))
         {
             var restored = state.Galaxy.Research;

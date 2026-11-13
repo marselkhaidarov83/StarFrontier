@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cac9b8f4cc145809711d80e818db3af, type: 3}
+  m_Name: planetServiceVisuals_01
+  m_EditorClassIdentifier:
+  Planets:
+  - Type: 0
+    Refuel: {fileID: 21300000, guid: 7346e1518a5e42b5b643d785a338dbae, type: 3}
+    Repair: {fileID: 21300000, guid: b07a2909e8724587a0d06639d8694aab, type: 3}
+    Market: {fileID: 21300000, guid: 4d09f1311d03419ba2df7fc821b3cd85, type: 3}
+  - Type: 1
+    Refuel: {fileID: 21300000, guid: d010b33be0da44cebb4e81e772d6e838, type: 3}
+    Repair: {fileID: 21300000, guid: 57fce6e1585a47f686d36816f4683e5a, type: 3}
+    Market: {fileID: 21300000, guid: 0631ccf153a54b539a23a26ed77ba9f6, type: 3}
+  - Type: 2
+    Refuel: {fileID: 21300000, guid: d56e15c0cc384d6a8ce9212634fb711e, type: 3}
+    Repair: {fileID: 21300000, guid: 74f079d4393d4f89a352ab0d17b47d15, type: 3}
+    Market: {fileID: 21300000, guid: 641b8470510444a1b12b515d3388fb7a, type: 3}
+  - Type: 3
+    Refuel: {fileID: 21300000, guid: a75735f5d4aa44f8a4bc6e1036967938, type: 3}
+    Repair: {fileID: 21300000, guid: ad18446214b641f09d2208f38ed692fe, type: 3}
+    Market: {fileID: 21300000, guid: b2342a360c7440ce8810bb33c69d5c5c, type: 3}
+  - Type: 4
+    Refuel: {fileID: 21300000, guid: 1e856d6421044352abd4b013300f0eda, type: 3}
+    Repair: {fileID: 21300000, guid: b82153974cdb4cfcacf89ac2e90aa4f8, type: 3}
+    Market: {fileID: 21300000, guid: 804b68b4bb9341e3917b47f1b9bcd39e, type: 3}
+  Stations:
+  - Type: 0
+    Refuel: {fileID: 21300000, guid: e7e892a5efd14d3aa3140e1fbc35f20a, type: 3}
+    Repair: {fileID: 21300000, guid: b7491af7cbb04385b6a4775ac322abd3, type: 3}
+    Market: {fileID: 21300000, guid: 419429d9a76a440f84fa771ae455536b, type: 3}
+  - Type: 1
+    Refuel: {fileID: 21300000, guid: 8b1d76c9a2b74a26a9e391d40b49332d, type: 3}
+    Repair: {fileID: 21300000, guid: b6796229cafd4763b60b8f4e95fe51cd, type: 3}
+    Market: {fileID: 21300000, guid: 8e81860d125a4f44995f137dd4195a87, type: 3}
+  - Type: 2
+    Refuel: {fileID: 21300000, guid: 4118d831ea92479f98bd1311c1c02b99, type: 3}
+    Repair: {fileID: 21300000, guid: 5240d5364fbb42aa8e878ef7786017a4, type: 3}
+    Market: {fileID: 21300000, guid: 15323c3d4d584c2ea2a427e8c785fc22, type: 3}
+  - Type: 3
+    Refuel: {fileID: 21300000, guid: 61537e1ca26c4ce8a3e8b2b7ae590170, type: 3}
+    Repair: {fileID: 21300000, guid: 5af0198a39134251b20dd228e839616a, type: 3}
+    Market: {fileID: 21300000, guid: a2e0ad86249d4615803159fe800d294c, type: 3}
+  - Type: 4
+    Refuel: {fileID: 21300000, guid: d7b1e8b392e8411d97356838418ee70c, type: 3}
+    Repair: {fileID: 21300000, guid: 822ccc8f4eff4be7b6a4a85f5e5a6c6c, type: 3}
+    Market: {fileID: 21300000, guid: b54c273cf17a4256b982f41f36b3bd86, type: 3}

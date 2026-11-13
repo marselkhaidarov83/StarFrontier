@@ -164,7 +164,8 @@ public static class NpcLootProcessor
                         InstanceId = Guid.NewGuid().ToString("N"),
                         WeaponConfigId = config.Id,
                         RolledStats = stats,
-                        DurabilityPercent = 100,
+                        CurrentDurability = config.MaximumDurability,
+                        MaximumDurability = config.MaximumDurability,
                         ShotDistance = stats.Range
                     };
                     SpaceLootRuntimeState drop = NewDrop(npc, SpaceLootKind.Equipment,

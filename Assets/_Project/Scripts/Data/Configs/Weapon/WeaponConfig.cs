@@ -13,7 +13,7 @@ public class WeaponConfig : BaseConfig
     [SerializeField] private WeaponEquipmentTier equipmentTier = WeaponEquipmentTier.Base;
 
     [Header("Cargo")]
-    [Tooltip("Параметр cargoSize. Используется связанными игровыми системами этого конфига.")]
+    [Tooltip("Занимает места в трюме за один экземпляр оружия.")]
     [SerializeField][Min(1)] private int cargoSize = 1;
 
     [Header("Base Stats / Randomized Runtime Ranges")]
@@ -68,6 +68,8 @@ public class WeaponConfig : BaseConfig
     public int Level => level;
     public WeaponEquipmentTier EquipmentTier => equipmentTier;
 
+    [SerializeField, Min(1)] private int maximumDurability = 100;
+    public int MaximumDurability => maximumDurability > 0 ? maximumDurability : 100;
     public int CargoSize => cargoSize;
 
     public int BaseDamageMin => baseDamageMin;

@@ -61,7 +61,7 @@ public sealed class NpcLootTableConfig : BaseConfig
     public NpcLootCargoDefinition[] InitialCargo = Array.Empty<NpcLootCargoDefinition>();
 
     [Header("Equipment instance defaults")]
-    [SerializeField, Range(0, 100)] private int initialEquipmentDurabilityPercent = 100;
+    [SerializeField, Min(-1)] private int initialEquipmentDurability = -1;
 
     [Header("Loot rules")]
     public NpcLootTriggerRule[] Rules = Array.Empty<NpcLootTriggerRule>();
@@ -69,7 +69,7 @@ public sealed class NpcLootTableConfig : BaseConfig
     [Header("Shared Astralite mapping by enemy species")]
     public EnemyAstraliteCatalogConfig AstraliteCatalog;
 
-    public int InitialEquipmentDurabilityPercent => initialEquipmentDurabilityPercent;
+    public int InitialEquipmentDurability => initialEquipmentDurability;
 
     public int GetInitialCargoQuantity()
     {
@@ -84,8 +84,8 @@ public sealed class NpcLootTableConfig : BaseConfig
     public List<string> GetValidationErrors()
     {
         var errors = new List<string>();
-        if (initialEquipmentDurabilityPercent < 0 || initialEquipmentDurabilityPercent > 100)
-            errors.Add("Equipment durability must be 0–100%.");
+        if (initialEquipmentDurability < -1)
+            errors.Add("Initial equipment durability must be -1 (full) or a non-negative unit count.");
 
         if (InitialCargo != null)
         {

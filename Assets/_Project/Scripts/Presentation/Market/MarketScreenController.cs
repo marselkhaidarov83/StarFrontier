@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -5,357 +6,270 @@ using UnityEngine.UI;
 
 public class MarketScreenController : CustomMonoBehaviour
 {
-    [Header("Root")]
+    // Existing scene bindings remain valid; the legacy list is retired by the shared view.
     [SerializeField] private GameObject marketScreenRoot;
-
-    [Header("Header")]
     [SerializeField] private TMP_Text cargoText;
-
-    [Header("List")]
     [SerializeField] private Transform itemsContent;
     [SerializeField] private MarketItemRowView marketItemRowPrefab;
-
-    [Header("Buttons")]
     [SerializeField] private Button backButton;
-
-    private SimpleEventBus simpleEventBus;
-    private IEconomyService _economyService;
-    private IMarketTransactionService _marketTransactionService;
-    private IGameSessionService _gameSessionService;
-    private IConfigService _configService;
-    private IInventoryService _inventoryService;
-
-    private ICurrentMarketItemsProvider _marketItemsProvider;
-    // private IItemPriceProvider _itemPriceProvider;
-
-    private readonly List<MarketItemRowView> _spawnedRows = new List<MarketItemRowView>();
-
+    [SerializeField] private MarketVisualCatalog2A marketVisuals;
+    [SerializeField] private PlanetServiceVisualCatalog2A serviceVisuals;
+    private IPlanetMarketService _market;
+    private int _purchaseQuantity = 1, _saleQuantity = 1, _purchaseMaximum, _saleMaximum;
+    private IGameSessionService _session;
+    private IConfigService _config;
+    private SimpleEventBus _events;
+    private MarketPanelView2A _view;
+    private bool _initialized, _subscribed, _busy, _dirty, _warehouse;
+    private MarketKindFilter2A _kind = MarketKindFilter2A.All;
+    private string _category = "all", _leftKey, _rightKey, _location;
+    private GameRuntimeState _boundState;
+    private MarketRuntimeData _boundMarket;
+    private long _revision;
+    private readonly List<MarketCardData2A> _offers = new List<MarketCardData2A>(), _owned = new List<MarketCardData2A>();
+    private readonly List<MarketCardData2A> _left = new List<MarketCardData2A>(), _right = new List<MarketCardData2A>();
+    private readonly List<KeyValuePair<string, string>> _categories = new List<KeyValuePair<string, string>>();
+    private readonly List<WeaponType> _alliedWeaponTypes = new List<WeaponType>();
+    private readonly HashSet<string> _seen = new HashSet<string>();
+    private bool Visible => _initialized && isActiveAndEnabled && _view != null && _view.IsReady;
     public void Initialize()
     {
-        simpleEventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _economyService = Bootstrapper.Instance.ServiceRegistry.Get<IEconomyService>();
-        _marketTransactionService = Bootstrapper.Instance.ServiceRegistry.Get<IMarketTransactionService>();
-        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _inventoryService = Bootstrapper.Instance.ServiceRegistry.Get<IInventoryService>();
-
-        _marketItemsProvider = new CurrentMarketItemsProvider();
-
-        SubscribeToEvents();
-
-        LogCustom("initialized");
+        if (_initialized) return;
+        var registry = Bootstrapper.Instance.ServiceRegistry;
+        _market = registry.Get<IPlanetMarketService>(); _session = registry.Get<IGameSessionService>();
+        _config = registry.Get<IConfigService>(); _events = registry.Get<SimpleEventBus>();
+        MarketScreenRules2A.CollectAlliedWeaponTypes(_config.GameConfig?.MarketEconomy?.EquipmentCatalog, _alliedWeaponTypes);
+        TMP_Text template = cargoText != null ? cargoText : GetComponentInChildren<TMP_Text>(true);
+        if (template == null && marketItemRowPrefab != null) template = marketItemRowPrefab.GetComponentInChildren<TMP_Text>(true);
+        if (template == null && transform.parent != null) template = transform.parent.GetComponentInChildren<TMP_Text>(true);
+        _view = GetComponent<MarketPanelView2A>() ?? gameObject.AddComponent<MarketPanelView2A>();
+        _view.Build(template, kind => { _kind = kind; _category = "all"; Refresh(); _view.ResetCategoryScroll(); _view.ResetScrolls(); },
+            category => { _category = category; Refresh(); _view.ResetScrolls(); }, warehouse => { _warehouse = warehouse; _saleQuantity = 1; _rightKey = null; Refresh(); _view.ResetScrolls(); },
+            key => { if (_leftKey != key) _purchaseQuantity = 1; _leftKey = key; Refresh(); }, key => { if (_rightKey != key) _saleQuantity = 1; _rightKey = key; Refresh(); },
+            () => Execute(true), () => Execute(false), Transfer, ChangePurchaseQuantity, MaxPurchaseQuantity, ChangeSaleQuantity, MaxSaleQuantity, MinPurchaseQuantity, MinSaleQuantity);
+        _initialized = true; Subscribe(); RequestRefresh();
     }
-
-    private void OnDestroy()
+    private void OnEnable() { if (_initialized) { Subscribe(); RequestRefresh(); } }
+    private void OnDisable() { Unsubscribe(); _boundState = null; _boundMarket = null; }
+    private void OnDestroy() { _initialized = false; Unsubscribe(); }
+    private void Subscribe()
     {
-        UnsubscribeFromEvents();
+        if (_subscribed || !Visible || _events == null) return;
+        _events.Subscribe<MarketEnteredEvent>(Entered); _events.Subscribe<MarketStateChangedEvent>(Changed);
+        _events.Subscribe<CargoChangedEvent>(CargoChanged); _events.Subscribe<CreditsChangedEvent>(CreditsChanged);
+        _events.Subscribe<ActiveShipChangedEvent>(ShipChanged); _subscribed = true;
     }
-
-    private void SubscribeToEvents()
+    private void Unsubscribe()
     {
-        if (simpleEventBus == null)
-            return;
-
-        simpleEventBus.Subscribe<MarketEnteredEvent>(OnMarketEntered);
-        simpleEventBus.Subscribe<CargoChangedEvent>(OnCargoChanged);
+        if (!_subscribed || _events == null) return;
+        _events.Unsubscribe<MarketEnteredEvent>(Entered); _events.Unsubscribe<MarketStateChangedEvent>(Changed);
+        _events.Unsubscribe<CargoChangedEvent>(CargoChanged); _events.Unsubscribe<CreditsChangedEvent>(CreditsChanged);
+        _events.Unsubscribe<ActiveShipChangedEvent>(ShipChanged); _subscribed = false;
     }
-
-    private void UnsubscribeFromEvents()
+    private void Entered(MarketEnteredEvent evt) => RequestRefresh();
+    private void CargoChanged(CargoChangedEvent evt) => RequestRefresh();
+    private void CreditsChanged(CreditsChangedEvent evt) => RequestRefresh();
+    private void ShipChanged(ActiveShipChangedEvent evt) => RequestRefresh();
+    private void Changed(MarketStateChangedEvent evt)
     {
-        if (simpleEventBus == null)
-            return;
-
-        simpleEventBus.Unsubscribe<MarketEnteredEvent>(OnMarketEntered);
-        simpleEventBus.Unsubscribe<CargoChangedEvent>(OnCargoChanged);
+        if (_boundMarket != null && evt.SystemId == _boundMarket.SystemId && evt.PlanetId == _boundMarket.PlanetId) RequestRefresh();
     }
-
-    private void OnMarketEntered(MarketEnteredEvent evt)
-    {
-        Refresh();
-    }
-
-    private void OnCargoChanged(CargoChangedEvent evt)
-    {
-        RefreshHeader();
-    }
-
-    // private void Awake()
-    // {
-    //     Refresh();
-
-    //     if (IsDebug())
-    //         AppLog.Info(DebugLogChannel.Market,
-    //             typeof(MarketScreenController),
-    //             "awaked");
-    // }
-
+    private void RequestRefresh() { if (!_busy && Visible) _dirty = true; }
+    private void LateUpdate() { if (_dirty && Visible && !_busy) Refresh(); }
     public void Refresh()
     {
-        RefreshHeader();
-        RebuildItemList();
-
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                "refreshed");
+        if (!Visible || _busy) return;
+        _dirty = false;
+        var state = _session.State; var player = state?.Player;
+        string location = player == null ? "" : player.CurrentSystemId + "|" + player.CurrentPlanetId + "|" + player.CurrentStationId;
+        if (_location != location || !ReferenceEquals(_boundState, state))
+        { _purchaseQuantity = _saleQuantity = 1; _leftKey = _rightKey = null; _warehouse = false; _location = location; }
+        _boundState = state; _boundMarket = _market.CurrentMarket;
+        bool station = !string.IsNullOrEmpty(player?.CurrentStationId);
+        var stationConfig = PlanetServiceVisualCatalog2A.GetDockedStation(player, _config);
+        var planet = !station ? _config.GetPlanetConfigById(player?.CurrentPlanetId) : null;
+        var illustration = marketVisuals != null ? marketVisuals.Get(planet, stationConfig) : planet?.BackgroundSprite;
+        _view.SetHeader(serviceVisuals != null
+            ? serviceVisuals.Get(planet, PlanetServiceKind2A.Market, illustration, stationConfig)
+            : illustration);
+        BuildOffers(); BuildOwned(); BuildCategories();
+        _left.Clear(); _right.Clear();
+        foreach (var item in _offers) if (item.Matches(_kind, _category)) _left.Add(item);
+        foreach (var item in _owned) if (item.Matches(_kind, _category)) _right.Add(item);
+        if (Find(_left, _leftKey) == null) _leftKey = null;
+        if (Find(_right, _rightKey) == null) _rightKey = null;
+        _view.SetFilters(_kind, _categories, _category, _warehouse, station);
+        _view.SetCards(_left, _right, _leftKey, _rightKey);
+        var buy = Find(_left, _leftKey); var sell = Find(_right, _rightKey);
+        _purchaseMaximum = buy == null ? 0 : buy.Equipment ? 1 : _market.GetMaximumTradeQuantity(buy.Id, true, _warehouse);
+        // The right selector serves both sale and storage transfer; it must not depend on market demand or wallet headroom.
+        _saleMaximum = sell == null ? 0 : sell.Equipment ? 1 : Math.Max(0, sell.TradeableQuantity >= 0 ? sell.TradeableQuantity : sell.Quantity);
+        _purchaseQuantity = buy != null && buy.Equipment ? 1 : ClampQuantity(_purchaseQuantity, _purchaseMaximum);
+        _saleQuantity = sell != null && sell.Equipment ? 1 : ClampQuantity(_saleQuantity, _saleMaximum);
+        long totalPrice = buy == null ? 0 : buy.Equipment ? buy.Price : _market.GetTotalPrice(buy.Id, _purchaseQuantity, true);
+        long salePrice = sell == null ? 0 : sell.Equipment ? sell.Price : _market.GetTotalPrice(sell.Id, _saleQuantity, false);
+        bool canBuy = buy != null && buy.Quantity > 0 && (buy.Hull ? _market.CanTradeHull(buy.Id, true, _warehouse) : buy.Equipment ? _market.CanTradeEquipment(buy.Id, true, _warehouse) : _market.CanTrade(buy.Id, _purchaseQuantity, true, _warehouse));
+        bool canSell = sell != null && (sell.Hull ? _market.CanTradeHull(sell.Id, false, _warehouse) : sell.Equipment ? _market.CanTradeEquipment(sell.Id, false, _warehouse) : _market.CanTrade(sell.Id, _saleQuantity, false, _warehouse));
+        bool canTransfer = sell != null && !sell.Hull && !sell.Locked &&
+            _market.CanTransfer(sell.Id, sell.Equipment, !_warehouse, sell.Equipment ? 1 : _saleQuantity);
+        string buyInfo = buy == null ? "Выбери товар на рынке" : "";
+        string sellInfo = sell == null ? "Выбери предмет" : sell.Locked ? "Миссионный груз" : "";
+        _view.SetPurchase(buy != null && !buy.Equipment, _purchaseQuantity, _purchaseMaximum, totalPrice);
+        _view.SetSale(sell != null && !sell.Equipment, _saleQuantity, _saleMaximum, salePrice);
+        _view.SetActions(buyInfo, sellInfo, canBuy, canSell, canTransfer);
+        _revision = _boundMarket?.Revision ?? -1;
+    }
+    private void BuildOffers()
+    {
+        _offers.Clear(); if (_boundMarket == null) return;
+        foreach (var entry in _market.GetItems())
+            if (entry?.ItemConfig != null && entry.ItemConfig.ItemCategory != ItemCategory.Fuel) _offers.Add(Goods(entry.ItemConfig, entry.Quantity, true));
+        foreach (var listing in _boundMarket.Equipment)
+            if (listing?.Equipment != null && listing.Allied && listing.ExpiresAtSeconds > _boundMarket.ElapsedSeconds)
+                _offers.Add(Equipment(listing.Equipment, true));
+        foreach (var listing in _boundMarket.Hulls)
+            if (listing?.Hull != null && listing.ExpiresAtSeconds > _boundMarket.ElapsedSeconds) _offers.Add(Hull(listing.Hull, true));
+    }
+    private void BuildOwned()
+    {
+        _owned.Clear(); if (_boundMarket == null) return;
+        var ship = _session.State?.Player?.GetActiveShip();
+        var cargo = _warehouse ? _boundMarket.PersonalStorage : ship?.Cargo;
+        var equipment = _warehouse ? _boundMarket.PersonalEquipment : ship?.CargoEquipment;
+        _seen.Clear();
+        if (cargo?.entries != null)
+            foreach (var entry in cargo.entries)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.ItemId) || !_seen.Add(entry.ItemId)) continue;
+                int quantity = cargo.GetQuantity(entry.ItemId); var config = _config.GetItemConfigById(entry.ItemId);
+                if (quantity > 0 && config != null && config.ItemCategory != ItemCategory.Fuel && config is not ShipComponentConfig)
+                {
+                    var card = Goods(config, quantity, false);
+                    card.TradeableQuantity = cargo.GetTradeableQuantity(entry.ItemId);
+                    _owned.Add(card);
+                }
+            }
+        var hulls = _warehouse ? _boundMarket.PersonalHulls : ship?.CargoHulls;
+        if (hulls != null)
+            foreach (var hull in hulls) if (hull != null) _owned.Add(Hull(hull, false));
+        if (equipment != null) foreach (var item in equipment) if (item != null) _owned.Add(Equipment(item, false));
+    }
+    private MarketCardData2A Goods(ItemConfig config, int quantity, bool buy) => new MarketCardData2A {
+        Key = "goods:" + config.Id, Id = config.Id, Title = config.DisplayName, Icon = config.Icon, Quantity = quantity, Component = config is ShipComponentConfig,
+        Price = _market.GetPrice(config.Id, buy), CargoSize = config.CargoSize, CategoryKey = "goods:" + config.ItemCategory,
+        CategoryTitle = MarketScreenRules2A.GoodsName(config.ItemCategory),
+        CurrentDurability = config is ShipComponentConfig part ? part.MaximumDurability : 0,
+        MaximumDurability = config is ShipComponentConfig module ? module.MaximumDurability : 0 };
+    private MarketCardData2A Equipment(SystemNpcWeaponRuntimeState item, bool buy)
+    {
+        if (item.IsComponent)
+        {
+            var component = _config.GetItemConfigById(item.ComponentConfigId) as ShipComponentConfig;
+            return new MarketCardData2A { Key = "module:" + item.InstanceId, Id = item.InstanceId,
+                Title = component != null ? component.DisplayName : item.ComponentConfigId, Icon = component?.Icon,
+                Component = true, Equipment = true, Quantity = 1, Price = _market.EquipmentPrice(item, buy),
+                CargoSize = item.RolledStats.CargoSize, CurrentDurability = item.CurrentDurability,
+                MaximumDurability = item.MaximumDurability, CategoryKey = "goods:" + ItemCategory.ShipEquipment, CategoryTitle = "Модули" };
+        }
+        var config = _config.GetWeaponConfigById(item.WeaponConfigId);
+        WeaponType type = config != null ? config.WeaponType : item.RolledStats.WeaponType;
+        Sprite icon = config != null ? config.Icon : null;
+        if (icon == null && marketVisuals != null) icon = type == WeaponType.Missile ? marketVisuals.MissileIcon : marketVisuals.EquipmentIcon;
+        return new MarketCardData2A { Key = "equipment:" + item.InstanceId, Id = item.InstanceId,
+            Title = config != null ? config.DisplayName : item.WeaponConfigId, Equipment = true, Icon = icon, Quantity = 1,
+            Price = _market.EquipmentPrice(item, buy), CargoSize = item.RolledStats.CargoSize > 0 ? item.RolledStats.CargoSize : config?.CargoSize ?? 1,
+            Range = item.RolledStats.Range, Damage = item.RolledStats.Damage, ShotCount = item.RolledStats.ShotCount,
+            CurrentDurability = item.CurrentDurability, MaximumDurability = item.MaximumDurability, CategoryKey = "equipment:" + type, CategoryTitle = MarketScreenRules2A.EquipmentName(type) };
+    }
+    private MarketCardData2A Hull(HullEquipmentRuntimeState item, bool buy)
+    {
+        var config = _market.GetHullConfig(item.ConfigId);
+        return new MarketCardData2A { Key = "hull:" + item.InstanceId, Id = item.InstanceId, Equipment = true, Hull = true,
+            Title = config != null ? config.DisplayName : item.ConfigId, Icon = config?.Icon, Quantity = 1,
+            Price = _market.HullPrice(item, buy),
+            CurrentDurability = item.CurrentDurability, MaximumDurability = item.MaximumDurability,
+            Damage = item.MaximumDurability, CategoryKey = "equipment:hull", CategoryTitle = "Корпус" };
+    }
+    private void BuildCategories()
+    {
+        MarketScreenRules2A.BuildCategories(_kind, _offers, _owned, _categories, _seen, _alliedWeaponTypes);
+        bool found = false;
+        foreach (var pair in _categories) if (pair.Key == _category) { found = true; break; }
+        if (!found) _category = "all";
     }
 
-    private void RefreshHeader()
+    private static MarketCardData2A Find(List<MarketCardData2A> items, string key) => key == null ? null : items.Find(x => x.Key == key);
+    private bool HasCurrentContext() => ReferenceEquals(_boundState, _session.State) && ReferenceEquals(_boundMarket, _market.CurrentMarket);
+    private static int ClampQuantity(long quantity, int maximum) => maximum <= 0 ? 0 : (int)Math.Max(1, Math.Min(maximum, quantity));
+    private void ChangePurchaseQuantity(int delta)
     {
-        if (_gameSessionService == null)
-        {
-            if (IsDebug())
-                AppLog.Error(DebugLogChannel.Market, "MarketScreenController | _gameSessionService is null");
-            return;
-        }
-
-        if (_gameSessionService.State == null)
-        {
-            if (IsDebug())
-                AppLog.Info(DebugLogChannel.Market, "MarketScreenController | _gameSessionService.CurrentSave is null");
-            return;
-        }
-
-        if (_gameSessionService.State.Player == null)
-        {
-            if (IsDebug())
-                AppLog.Info(DebugLogChannel.Market, "MarketScreenController | _gameSessionService.CurrentSave.PlayerProfile is null");
-            return;
-        }
-
-        PlayerState playerProfile = _gameSessionService.State.Player;
-        // if (playerProfile == null)
-        // {
-        //     if (cargoText != null) cargoText.text =
-        //             $"Cargo: {_gameSessionService.CurrentSave.PlayerProfile.CurrentShipRuntimeData.CargoCapacity} / {_gameSessionService.CurrentSave.PlayerProfile.CurrentShipRuntimeData.CargoCapacity}";
-        //     return;
-        // }
-
-        if (cargoText != null)
-        {
-            RuntimeCargoInventory cargo = playerProfile.PlayerShipState.GetActiveShip().Cargo;
-            int used = _inventoryService.GetUsedCargo();
-            int max = playerProfile.PlayerShipState.GetActiveShip().CargoCapacity;
-
-            cargoText.text = $"Cargo: {used} / {max}";
-        }
-
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                "header refreshed");
-    }
-
-    private void RebuildItemList()
-    {
-        ClearSpawnedRows();
-
-        if (_marketItemsProvider == null)
-        {
-            if (IsDebug())
-                AppLog.Error(DebugLogChannel.Market,
-                    typeof(MarketScreenController),
-                    "MarketItemsProvider is null.");
-            return;
-        }
-        IReadOnlyList<MarketItemEntry> items = _marketItemsProvider.GetAvailableItems();
-
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                "Items.Count = " + items.Count);
-        foreach (var item in items)
-        {
-            var row = Instantiate(marketItemRowPrefab, itemsContent);
-            _spawnedRows.Add(row);
-
-            string itemId = item.ItemConfig.Id;
-            string itemName = item.ItemConfig.DisplayName;
-
-            // _itemPriceProvider.TryGetBuyPrice(itemId, out int buyPrice);
-            // _itemPriceProvider.TryGetSellPrice(itemId, out int sellPrice);
-
-            int buyPrice = _economyService.GetBuyPrice(itemId);
-            int sellPrice = _economyService.GetSellPrice(itemId);
-
-            int ownedCount = _inventoryService.GetItemCount(itemId);
-            bool canBuy = _economyService.CanBuy(itemId, 1);
-            bool canSell = _economyService.CanSell(itemId, 1);
-
-            row.Bind(
-                item,
-                ownedCount,
-                buyPrice,
-                sellPrice,
-                BuyOne,
-                SellOne,
-                canSell
-            );
-        }
-
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                "rows builded");
-    }
-
-    private void BuyOne(string itemId)
-    {
-        if (_economyService == null)
-        {
-            if (IsDebug())
-                AppLog.Error(DebugLogChannel.Market,
-                    typeof(MarketScreenController),
-                    "EconomyService is null.");
-            return;
-        }
-
-        EconomyOperationResult result = _economyService.BuyItem(itemId, 1);
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                "buy operation result = " + result.Success +
-                    " " + result.ErrorCode);
-
+        if (_busy || Find(_left, _leftKey)?.Equipment != false) return;
+        _purchaseQuantity = ClampQuantity((long)_purchaseQuantity + delta, _purchaseMaximum);
         Refresh();
     }
-
-    private void SellOne(string itemId)
+    private void MaxPurchaseQuantity()
     {
-        if (_economyService == null)
-        {
-            if (IsDebug())
-                AppLog.Error(DebugLogChannel.Market,
-                    typeof(MarketScreenController),
-                    "EconomyService is null.");
-            return;
-        }
-
-        EconomyOperationResult result = _economyService.SellItem(itemId, 1);
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                "buy operation result = " + result.Success +
-                    " " + result.ErrorCode);
-
+        if (_busy || Find(_left, _leftKey)?.Equipment != false) return;
+        _purchaseQuantity = _purchaseMaximum; Refresh();
+    }
+    private void ChangeSaleQuantity(int delta)
+    {
+        if (_busy || Find(_right, _rightKey)?.Equipment != false) return;
+        _saleQuantity = ClampQuantity((long)_saleQuantity + delta, _saleMaximum);
         Refresh();
     }
-
-    // private void RebuildItemList()
-    // {
-    //     ClearSpawnedRows();
-
-    //     if (_economyService == null)
-    //     {
-    //         if (IsDebug())
-    //             AppLog.Info(DebugLogChannel.Market,
-    //                 typeof(MarketScreenController),
-    //                 "economyService is null");
-    //         return;
-    //     }
-
-    //     if (itemsContent == null)
-    //     {
-    //         if (IsDebug())
-    //             AppLog.Info(DebugLogChannel.Market,
-    //                 typeof(MarketScreenController),
-    //                 "itemsContent is null");
-    //         return;
-    //     }
-
-    //     if (marketItemRowPrefab == null)
-    //     {
-    //         if (IsDebug())
-    //             AppLog.Info(DebugLogChannel.Market,
-    //                 typeof(MarketScreenController),
-    //                 "marketItemRowPrefab is null");
-    //         return;
-    //     }
-
-    //     List<MarketItemData> marketItems = _economyService.GetMarketItemsForCurrentSystem();
-    //     PlayerProfileData playerProfile = _gameSessionService.CurrentSave.PlayerProfile;
-    //     CargoInventory cargo = playerProfile != null ? playerProfile.CurrentShipRuntimeData.Cargo : null;
-
-    //     if (IsDebug())
-    //         AppLog.Info(DebugLogChannel.Market,
-    //             typeof(MarketScreenController),
-    //             "marketItems.Count = " + marketItems.Count);
-    //     for (int i = 0; i < marketItems.Count; i++)
-    //     {
-    //         MarketItemData itemData = marketItems[i];
-    //         if (itemData == null)
-    //             continue;
-
-    //         MarketItemRowView row = Instantiate(marketItemRowPrefab, itemsContent);
-
-    //         int ownedQuantity = cargo != null ? cargo.GetQuantity(itemData.itemId) : 0;
-
-    //         row.Bind(
-    //             itemData,
-    //             ownedQuantity,
-    //             OnBuyClicked,
-    //             OnSellClicked);
-
-    //         _spawnedRows.Add(row);
-    //     }
-
-    //     if (IsDebug())
-    //         AppLog.Info(DebugLogChannel.Market,
-    //             typeof(MarketScreenController),
-    //             "rows builded");
-    // }
-
-    private void ClearSpawnedRows()
+    private void MaxSaleQuantity()
     {
-        for (int i = 0; i < _spawnedRows.Count; i++)
-            if (_spawnedRows[i] != null)
-                Destroy(_spawnedRows[i].gameObject);
-
-        _spawnedRows.Clear();
-
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                "rows cleared");
+        if (_busy || Find(_right, _rightKey)?.Equipment != false) return;
+        _saleQuantity = _saleMaximum; Refresh();
     }
-
-    private void OnBuyClicked(string itemId)
+    private void MinPurchaseQuantity()
     {
-        if (_marketTransactionService == null)
-        {
-            if (IsDebug())
-                AppLog.Error(DebugLogChannel.Market,
-                    typeof(MarketScreenController),
-                    "MarketTransactionService is null.");
-            return;
-        }
-
-        BuyItemResult result = _marketTransactionService.BuyItem(itemId, 1);
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                $"Buy result: {result.resultType} | item={result.itemId} | total={result.totalPrice}");
-
-        Refresh();
+        if (_busy || Find(_left, _leftKey)?.Equipment != false) return;
+        _purchaseQuantity = ClampQuantity(1, _purchaseMaximum); Refresh();
     }
-
-    private void OnSellClicked(string itemId)
+    private void MinSaleQuantity()
     {
-        if (_marketTransactionService == null)
+        if (_busy || Find(_right, _rightKey)?.Equipment != false) return;
+        _saleQuantity = ClampQuantity(1, _saleMaximum); Refresh();
+    }
+    private void Execute(bool buy)
+    {
+        if (_busy || !Visible) return;
+        var selected = Find(buy ? _left : _right, buy ? _leftKey : _rightKey); if (selected == null) return;
+        if (!HasCurrentContext()) { Refresh(); return; }
+        _busy = true;
+        try
         {
-            if (IsDebug())
-                AppLog.Error(DebugLogChannel.Market,
-                    typeof(MarketScreenController),
-                    "MarketTransactionService is null.");
-            return;
+            string operation = Guid.NewGuid().ToString("N"); string reason;
+            bool success;
+            int quantity = selected.Equipment ? 1 : buy ? _purchaseQuantity : _saleQuantity;
+            long total = selected.Equipment ? selected.Price : _market.GetTotalPrice(selected.Id, quantity, buy);
+            using (var observation = PlayerAnalyticsSafe.Observe(buy ? PlayerAnalyticsAction.BuyItem : PlayerAnalyticsAction.SellItem, selected.Id, quantity))
+            {
+                if (selected.Hull) success = _market.TradeHull(selected.Id, buy, operation, _revision, out reason, _warehouse);
+                else if (selected.Equipment) success = _market.TradeEquipment(selected.Id, buy, operation, _revision, out reason, _warehouse);
+                else { var result = _market.Trade(selected.Id, quantity, buy, operation, _revision, _warehouse); success = result.Success; reason = result.ErrorCode.ToString(); }
+                observation.Complete(success, reason, success ? (int)Math.Min(int.MaxValue, total) : 0);
+            }
+            AppLog.Info(DebugLogChannel.Market, "[MARKET_UI_TRADE] Buy=" + buy + " | Quantity=" + quantity + " | Success=" + success + " | Reason=" + reason);
         }
-
-        SellItemResult result = _marketTransactionService.SellItem(itemId, 1);
-        if (IsDebug())
-            AppLog.Info(DebugLogChannel.Market,
-                typeof(MarketScreenController),
-                $"Sell result: {result.resultType} | item={result.itemId} | total={result.totalPrice}");
-
-        Refresh();
+        finally { _busy = false; Refresh(); }
+    }
+    private void Transfer()
+    {
+        if (_busy || !Visible) return;
+        var selected = Find(_right, _rightKey);
+        if (selected == null || selected.Hull) return;
+        if (!HasCurrentContext()) { Refresh(); return; }
+        _busy = true;
+        try
+        {
+            int quantity = selected.Equipment ? 1 : _saleQuantity;
+            string operation = Guid.NewGuid().ToString("N");
+            bool success = _market.Transfer(selected.Id, selected.Equipment, !_warehouse, quantity, operation, _revision, out string reason);
+            AppLog.Info(DebugLogChannel.Market, "[MARKET_UI_TRANSFER] Quantity=" + quantity + " | Success=" + success + " | Reason=" + reason);
+        }
+        finally { _busy = false; Refresh(); }
     }
 }

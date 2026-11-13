@@ -426,7 +426,7 @@ public class ContinueGameService : CustomService, IContinueGameService
 
     private void ProcessOfflineStations(GameRuntimeState save)
     {
-        // Must precede NPC relocation, which consumes/rewrites Meta.LastSaveUtc.
+        // Station catch-up also advances market alongside research; precedes NPC relocation rewriting LastSaveUtc.
         if (Bootstrapper.Instance.ServiceRegistry.TryGet<IStationService>(out var stations))
             stations.ProcessOffline(save, DateTime.UtcNow.Ticks);
     }

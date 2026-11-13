@@ -353,7 +353,9 @@ public sealed class SystemPlayerWeaponListHud2A :
     private string ResolveLootName(SpaceLootRuntimeState loot)
     {
         if (loot.Kind == SpaceLootKind.Equipment)
-            return _configService.GetWeaponConfigById(loot.EquipmentConfigId)?.DisplayName ?? "Оборудование";
+            return (loot.Equipment?.IsComponent == true
+                ? _configService.GetItemConfigById(loot.EquipmentConfigId)?.DisplayName
+                : _configService.GetWeaponConfigById(loot.EquipmentConfigId)?.DisplayName) ?? "Оборудование";
         if (loot.Kind == SpaceLootKind.Credits)
             return "Кредиты";
         if (loot.Kind == SpaceLootKind.Diamonds)
@@ -397,8 +399,8 @@ public sealed class SystemPlayerWeaponListHud2A :
 
                 string weaponConfigId = activeShip.EquippedWeaponIds[slotIndex];
                 string color = (isNpc
-                    ? CanWeaponReachTarget(weaponConfigId, target)
-                    : CanWeaponReachLoot(weaponConfigId, loot))
+                    ? CanWeaponReachTarget(weaponConfigId, target, ShipLoadoutRules.Weapon(activeShip, slotIndex))
+                    : CanWeaponReachLoot(weaponConfigId, loot, ShipLoadoutRules.Weapon(activeShip, slotIndex)))
                     ? "#61FF7A"
                     : "#FF4A4A";
 
@@ -417,7 +419,8 @@ public sealed class SystemPlayerWeaponListHud2A :
              slotIndex < activeShip.EquippedWeaponIds.Count;
              slotIndex++)
         {
-            if (_playerAttackService.WeaponTargetNpcIdsBySlot.ContainsKey(slotIndex))
+            if (string.IsNullOrEmpty(activeShip.EquippedWeaponIds[slotIndex]) ||
+                _playerAttackService.WeaponTargetNpcIdsBySlot.ContainsKey(slotIndex))
                 continue;
 
             if (!hasUntargetedWeapons)
@@ -832,7 +835,8 @@ public sealed class SystemPlayerWeaponListHud2A :
 
     private bool CanWeaponReachTarget(
     string weaponConfigId,
-    SystemNpcRuntimeState target)
+    SystemNpcRuntimeState target,
+    SystemNpcWeaponRuntimeState installed)
     {
         if (target == null || _playerTargetService == null)
             return false;
@@ -851,7 +855,7 @@ public sealed class SystemPlayerWeaponListHud2A :
             GetNextPlayerAttackPreviewTick();
 
         WeaponRuntimeStats weaponStats =
-            weaponConfig.RollRuntimeStats(
+            installed?.RolledStats ?? weaponConfig.RollRuntimeStats(
                 BuildPlayerWeaponRollSeed(
                     target.RuntimeNpcId,
                     weaponConfigId,
@@ -860,7 +864,7 @@ public sealed class SystemPlayerWeaponListHud2A :
         return distance <= weaponStats.Range;
     }
 
-    private bool CanWeaponReachLoot(string weaponConfigId, SpaceLootRuntimeState loot)
+    private bool CanWeaponReachLoot(string weaponConfigId, SpaceLootRuntimeState loot, SystemNpcWeaponRuntimeState installed)
     {
         if (loot == null || _playerTargetService == null)
             return false;
@@ -869,7 +873,7 @@ public sealed class SystemPlayerWeaponListHud2A :
         if (weaponConfig == null)
             return false;
 
-        WeaponRuntimeStats stats = weaponConfig.RollRuntimeStats(
+        WeaponRuntimeStats stats = installed?.RolledStats ?? weaponConfig.RollRuntimeStats(
             BuildPlayerWeaponRollSeed(loot.LootId, weaponConfigId,
                 GetNextPlayerAttackPreviewTick()));
         return Vector3.Distance(ToFlat(_playerTargetService.GetPlayerPosition()),

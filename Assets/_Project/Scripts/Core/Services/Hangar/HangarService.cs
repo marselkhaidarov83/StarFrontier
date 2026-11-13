@@ -1,24 +1,38 @@
 using System;
 using UnityEngine;
 
-public class HangarService : IHangarService
+public partial class HangarService : IHangarService
 {
     private readonly IConfigService _configService;
     private readonly SimpleEventBus _eventBus;
     private readonly IGameSessionService _gameSessionService;
     private readonly ShipStatCalculator _statCalculator;
+    private readonly IPlanetMarketService _market;
+    private readonly IInventoryService _inventory;
 
-    public HangarService()
+    public HangarService() : this(
+        Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>(),
+        Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>(),
+        Bootstrapper.Instance.ServiceRegistry.Get<IPlanetMarketService>(),
+        Bootstrapper.Instance.ServiceRegistry.Get<IInventoryService>(),
+        Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>())
     {
-        _eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
-        _gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
-        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _statCalculator = new ShipStatCalculator();
+    }
+
+    public HangarService(IGameSessionService session, IConfigService config, IPlanetMarketService market,
+        IInventoryService inventory, SimpleEventBus events)
+    {
+        _gameSessionService = session;
+        _configService = config;
+        _market = market;
+        _inventory = inventory;
+        _eventBus = events;
+        _statCalculator = new ShipStatCalculator(config);
     }
 
     public ShipRuntimeData GetActiveShipState()
     {
-        if (_gameSessionService.State.Player.PlayerShipState == null)
+        if (_gameSessionService.State?.Player?.PlayerShipState == null)
             return null;
 
         return _gameSessionService.State.Player.PlayerShipState.GetActiveShip();
@@ -42,12 +56,20 @@ public class HangarService : IHangarService
         if (activeShip == null || shipData == null)
             return null;
 
-        return _statCalculator.Calculate(shipData, activeShip.EquippedModuleIds);
+        var stats = _statCalculator.Calculate(shipData, activeShip.EquippedModuleIds);
+        if (!activeShip.HasModularLoadout) return stats;
+
+        stats.MaxHull = Mathf.Max(1, activeShip.HullCapacity);
+        stats.CargoCapacity = Mathf.Max(0, activeShip.CargoCapacity);
+        var shield = GetComponent(ShipLoadoutRules.ComponentId(activeShip, ShipComponentSlot.ShieldGenerator));
+        stats.MaxShield = shield != null ? Mathf.Max(0, Mathf.RoundToInt(stats.MaxShield * shield.ShieldMultiplier)) : 0;
+        stats.Speed = ShipStatCalculator.GetEngineSpeed(activeShip, _configService);
+        return stats;
     }
 
     public HangarOperationResult SwitchShip(string shipId)
     {
-        if (_gameSessionService.State.Player.PlayerShipState == null)
+        if (_gameSessionService.State?.Player?.PlayerShipState == null)
             return HangarOperationResult.Fail(HangarError.ActiveShipMissing);
 
         if (string.IsNullOrEmpty(shipId))
@@ -83,6 +105,18 @@ public class HangarService : IHangarService
             typeof(HangarService),
             "EquipWeapon " + weaponId);
 
+        if (activeShip?.HasModularLoadout == true)
+        {
+            for (int i = 0; i < ShipLoadoutRules.AvailableWeapons(shipData); i++)
+            {
+                if (ShipLoadoutRules.Weapon(activeShip, i) != null) continue;
+                var item = activeShip.CargoEquipment?.Find(x => x?.WeaponConfigId == weaponId);
+                return item != null && TryChangeLoadout(ShipLoadoutRules.FirstWeaponSlot + i, item.InstanceId, false, out _)
+                    ? HangarOperationResult.Ok() : HangarOperationResult.Fail(HangarError.WeaponNotFound);
+            }
+            return HangarOperationResult.Fail(HangarError.NoWeaponSlots);
+        }
+
         WeaponConfig weaponData = _configService.GetWeaponConfigById(weaponId);
 
         AppLog.Info(DebugLogChannel.Hangar,
@@ -106,10 +140,14 @@ public class HangarService : IHangarService
             return result;
         }
 
+        if (!FitsCargo(weaponData.CargoSize, activeShip.CargoCapacity, activeShip.CargoCapacity))
+            return HangarOperationResult.Fail(HangarError.NotEnoughCargoSpace);
+
         activeShip.EquippedWeaponIds.Add(weaponId);
 
         _eventBus.Publish(new ShipEquipmentChangedEvent(activeShip.ShipId));
 
+        PublishLoadoutEvent(new CargoChangedEvent(_inventory.GetUsedCargo()));
         SaveAfterSuccessfulHangarOperation("EquipWeapon");
         PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ShipUpgrade, true, contentId: weaponId);
         return HangarOperationResult.Ok();
@@ -118,6 +156,13 @@ public class HangarService : IHangarService
     public HangarOperationResult UnequipWeapon(string weaponId)
     {
         var activeShip = GetActiveShipState();
+
+        if (activeShip?.HasModularLoadout == true)
+        {
+            var item = activeShip.InstalledWeapons?.Find(x => x?.WeaponConfigId == weaponId);
+            return item != null && TryChangeLoadout(ShipLoadoutRules.FirstWeaponSlot + item.SlotIndex, null, false, out _)
+                ? HangarOperationResult.Ok() : HangarOperationResult.Fail(HangarError.WeaponNotFound);
+        }
 
         var result = ShipSlotRules.CanUnequipWeapon(
             activeShip,
@@ -130,6 +175,7 @@ public class HangarService : IHangarService
 
         _eventBus.Publish(new ShipEquipmentChangedEvent(activeShip.ShipId));
 
+        PublishLoadoutEvent(new CargoChangedEvent(_inventory.GetUsedCargo()));
         SaveAfterSuccessfulHangarOperation("UnequipWeapon");
         return HangarOperationResult.Ok();
     }
@@ -155,11 +201,15 @@ public class HangarService : IHangarService
             return result;
         }
 
+        if (!FitsCargo(moduleData.CargoSize, activeShip.CargoCapacity, activeShip.CargoCapacity))
+            return HangarOperationResult.Fail(HangarError.NotEnoughCargoSpace);
+
         activeShip.EquippedModuleIds.Add(moduleId);
 
         _eventBus.Publish(new ShipEquipmentChangedEvent(activeShip.ShipId));
         _eventBus.Publish(new ShipStatsChangedEvent(activeShip.ShipId));
 
+        PublishLoadoutEvent(new CargoChangedEvent(_inventory.GetUsedCargo()));
         SaveAfterSuccessfulHangarOperation("EquipModule");
         PlayerAnalyticsSafe.Track(PlayerAnalyticsAction.ShipUpgrade, true, contentId: moduleId);
         return HangarOperationResult.Ok();
@@ -181,32 +231,8 @@ public class HangarService : IHangarService
         _eventBus.Publish(new ShipEquipmentChangedEvent(activeShip.ShipId));
         _eventBus.Publish(new ShipStatsChangedEvent(activeShip.ShipId));
 
+        PublishLoadoutEvent(new CargoChangedEvent(_inventory.GetUsedCargo()));
         SaveAfterSuccessfulHangarOperation("UnequipModule");
-        return HangarOperationResult.Ok();
-    }
-
-    public HangarOperationResult RepairActiveShip()
-    {
-        var activeShip = GetActiveShipState();
-        var shipData = GetActiveShipData();
-        var stats = GetActiveShipStats();
-
-        if (activeShip == null || shipData == null || stats == null)
-            return HangarOperationResult.Fail(HangarError.ActiveShipMissing);
-
-        if (activeShip.CurrentHull >= stats.MaxHull &&
-            activeShip.CurrentShield >= stats.MaxShield)
-        {
-            return HangarOperationResult.Ok();
-        }
-
-        activeShip.CurrentHull = stats.MaxHull;
-        activeShip.CurrentShield = stats.MaxShield;
-
-        _eventBus.Publish(new ShipRepairedEvent(activeShip.ShipId));
-        _eventBus.Publish(new ShipStatsChangedEvent(activeShip.ShipId));
-
-        SaveAfterSuccessfulHangarOperation("RepairActiveShip");
         return HangarOperationResult.Ok();
     }
 

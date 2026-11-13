@@ -110,10 +110,6 @@ public sealed class ShipStatsService : IShipStatsService
                 accumulator.MaxShield += value;
                 break;
 
-            case ShipStatType.Speed:
-                accumulator.MaxSpeed += value;
-                break;
-
             case ShipStatType.Acceleration:
                 accumulator.Acceleration += value;
                 break;
@@ -155,10 +151,6 @@ public sealed class ShipStatsService : IShipStatsService
 
             case ShipStatType.Shield:
                 accumulator.MaxShield *= multiplier;
-                break;
-
-            case ShipStatType.Speed:
-                accumulator.MaxSpeed *= multiplier;
                 break;
 
             case ShipStatType.Acceleration:
@@ -222,7 +214,7 @@ public sealed class ShipStatsService : IShipStatsService
                 AllyConfigId = allyConfig.Id,
                 MaxHull = allyConfig.BaseHull,
                 MaxShield = allyConfig.BaseShield,
-                MaxSpeed = allyConfig.BaseSpeed,
+                MaxSpeed = allyConfig.DefaultEngine?.Speed ?? 0f,
                 Acceleration = allyConfig.BaseAcceleration,
                 TurnRate = allyConfig.BaseTurnRate,
                 TurnRadius = allyConfig.TurnRadius,

@@ -106,7 +106,7 @@ public sealed class S08_07_LootContentAndSaveEditModeTests
             {
                 InstanceId = "equipment-01",
                 WeaponConfigId = "weapon-01",
-                DurabilityPercent = 37,
+                CurrentDurability = 37, MaximumDurability = 100,
                 SlotIndex = 2,
                 RolledStats = new WeaponRuntimeStats { Damage = 19, Range = 650f }
             }
@@ -123,7 +123,7 @@ public sealed class S08_07_LootContentAndSaveEditModeTests
         Assert.That(drop.EjectionRemainingSeconds, Is.EqualTo(0.3f));
         Assert.That(drop.Quantity, Is.EqualTo(1));
         Assert.That(drop.Equipment.InstanceId, Is.EqualTo("equipment-01"));
-        Assert.That(drop.Equipment.DurabilityPercent, Is.EqualTo(37));
+        Assert.That(drop.Equipment.CurrentDurability, Is.EqualTo(37));
         Assert.That(drop.Equipment.RolledStats.Damage, Is.EqualTo(19));
     }
 
@@ -166,12 +166,12 @@ public sealed class S08_07_LootContentAndSaveEditModeTests
             Quantity = 1,
             Equipment = new SystemNpcWeaponRuntimeState
             {
-                InstanceId = "equipment-01", DurabilityPercent = 64
+                InstanceId = "equipment-01", CurrentDurability = 64, MaximumDurability = 100
             }
         };
 
         SpaceLootRuntimeState copy = original.Copy();
-        original.Equipment.DurabilityPercent = 1;
+        original.Equipment.CurrentDurability = 1;
         original.LootId = "changed";
 
         Assert.That(copy.LootId, Is.EqualTo("loot-01"));
@@ -179,7 +179,7 @@ public sealed class S08_07_LootContentAndSaveEditModeTests
         Assert.That(copy.SourceNpcConfigId, Is.EqualTo("enemy_ancients_L01_01"));
         Assert.That(copy.CurrentHealth, Is.EqualTo(1));
         Assert.That(copy.Equipment.InstanceId, Is.EqualTo("equipment-01"));
-        Assert.That(copy.Equipment.DurabilityPercent, Is.EqualTo(64));
+        Assert.That(copy.Equipment.CurrentDurability, Is.EqualTo(64));
     }
 
     [Test]

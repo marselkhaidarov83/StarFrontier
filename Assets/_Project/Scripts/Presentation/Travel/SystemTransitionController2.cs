@@ -239,10 +239,14 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
         }
 
         TravelFailReason failReason = _travelService.GetTravelFailReason(fromSystemId, toSystemId);
-        if (failReason != TravelFailReason.NotEnoughFuel)
-            return true;
+        if (failReason == TravelFailReason.FuelTankNotInstalled || failReason == TravelFailReason.EngineNotInstalled)
+        {
+            ShowTravelFailReason(failReason);
+            return false;
+        }
 
-        ShowTravelFailReason(failReason);
+        if (failReason == TravelFailReason.NotEnoughFuel)
+            ShowTravelFailReason(failReason);
         return true;
     }
 
@@ -259,6 +263,14 @@ public sealed class SystemTransitionController2 : CustomMonoBehaviour
     {
         switch (failReason)
         {
+            case TravelFailReason.EngineNotInstalled:
+                ShowMessage(ShipLoadoutRules.EngineNotInstalledMessage, runner);
+                break;
+
+            case TravelFailReason.FuelTankNotInstalled:
+                ShowMessage(ShipLoadoutRules.FuelTankNotInstalledMessage, runner);
+                break;
+
             case TravelFailReason.NotEnoughFuel:
                 ShowMessage(
                     "Для прыжка недостаточно топлива", runner);

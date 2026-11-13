@@ -175,6 +175,8 @@ MonoBehaviour:
   itemsContent: {fileID: 1356476162}
   marketItemRowPrefab: {fileID: 8658991366749448654, guid: 1a55949f50aea48ceb8f450f2a4c220c, type: 3}
   backButton: {fileID: 0}
+  marketVisuals: {fileID: 11400000, guid: c63112249de2478e8614c8e57c84ac9d, type: 2}
+  serviceVisuals: {fileID: 11400000, guid: 2082f9f9360445d78f71c07bb81e391f, type: 2}
 --- !u!1 &10713350
 GameObject:
   m_ObjectHideFlags: 0
@@ -11003,6 +11005,7 @@ MonoBehaviour:
   refuelWarningText: {fileID: 600687515}
   refuelCountSlider: {fileID: 1745201141}
   refuelButton: {fileID: 1556237321}
+  serviceVisuals: {fileID: 11400000, guid: 2082f9f9360445d78f71c07bb81e391f, type: 2}
 --- !u!1 &1021507073
 GameObject:
   m_ObjectHideFlags: 0
@@ -15107,6 +15110,7 @@ MonoBehaviour:
   repairButton: {fileID: 2110456737}
   backButton: {fileID: 0}
   messageText: {fileID: 1578712360}
+  serviceVisuals: {fileID: 11400000, guid: 2082f9f9360445d78f71c07bb81e391f, type: 2}
 --- !u!1 &1587708905
 GameObject:
   m_ObjectHideFlags: 0

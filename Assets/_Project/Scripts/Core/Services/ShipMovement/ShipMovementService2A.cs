@@ -17,12 +17,15 @@ public sealed class ShipMovementService2A : IShipMovementService
     private readonly ShipMovementConfig _shipMovementConfig;
     private readonly ISystemGameplayStateService _stateService;
 
+    private readonly IGameSessionService _session;
+    private readonly IConfigService _configService;
     private ShipFinalStats _shipStats;
 
     public ShipMovementService2A()
     {
-        IConfigService configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        _shipMovementConfig = configService.ShipMovementConfig;
+        _configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
+        _session = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
+        _shipMovementConfig = _configService.ShipMovementConfig;
         _stateService = Bootstrapper.Instance.ServiceRegistry.Get<ISystemGameplayStateService>();
 
         IsEnabled = true;
@@ -320,6 +323,8 @@ public sealed class ShipMovementService2A : IShipMovementService
 
     private float GetMaxSpeed()
     {
+        if (_session != null)
+            return ShipStatCalculator.GetEngineSpeed(_session.State?.Player?.PlayerShipState?.GetActiveShip(), _configService);
         if (_shipStats != null)
             return Mathf.Max(0f, _shipStats.MaxSpeed);
 

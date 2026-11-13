@@ -199,10 +199,7 @@ using UnityEngine;
                         allySave.CurrentEnergy,
                         allyConfig.BaseEnergyMin,
                         allyConfig.BaseEnergyMax),
-                    Speed = ValidateIntRange(
-                        allySave.Speed,
-                        allyConfig.BaseSpeedMin,
-                        allyConfig.BaseSpeedMax),
+                    Speed = Mathf.RoundToInt(allyConfig.DefaultEngine?.Speed ?? 0f),
                     Acceleration = ValidateFloatRange(
                         allySave.Acceleration,
                         allyConfig.BaseAccelerationMin,

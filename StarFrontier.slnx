@@ -17,5 +17,6 @@
   <Project Path="Audit.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Sprint45VerifiedWorking.csproj" />
+  <Project Path="Sprint9Economy.csproj" />
   <Project Path="SystemScene.csproj" />
 </Solution>

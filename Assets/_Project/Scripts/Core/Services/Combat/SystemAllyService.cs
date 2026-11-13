@@ -47,7 +47,7 @@ public sealed class SystemAllyService : ISystemAllyService
             CurrentHull = RandomInt(allyConfig.BaseHullMin, allyConfig.BaseHullMax),
             CurrentShield = RandomInt(allyConfig.BaseShieldMin, allyConfig.BaseShieldMax),
             CurrentEnergy = RandomInt(allyConfig.BaseEnergyMin, allyConfig.BaseEnergyMax),
-            Speed = RandomInt(allyConfig.BaseSpeedMin, allyConfig.BaseSpeedMax),
+            Speed = Mathf.RoundToInt(allyConfig.DefaultEngine?.Speed ?? 0f),
             Acceleration = RandomFloat(allyConfig.BaseAccelerationMin, allyConfig.BaseAccelerationMax),
             TurnRate = RandomFloat(allyConfig.BaseTurnRateMin, allyConfig.BaseTurnRateMax),
             CargoCapacity = RandomInt(allyConfig.BaseCargoCapacityMin, allyConfig.BaseCargoCapacityMax),

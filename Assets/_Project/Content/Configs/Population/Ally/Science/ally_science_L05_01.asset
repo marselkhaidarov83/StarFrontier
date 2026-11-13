@@ -29,15 +29,13 @@ MonoBehaviour:
   baseEnergyMin: 213
   baseEnergyMax: 233
   baseEnergyRegen: 9.8
-  baseSpeedMin: 260
-  baseSpeedMax: 300
   baseAccelerationMin: 4.6
   baseAccelerationMax: 5.1
   baseTurnRateMin: 81
   baseTurnRateMax: 91
   turnRadius: 300
-  baseCargoCapacityMin: 57
-  baseCargoCapacityMax: 63
+  baseCargoCapacityMin: 174
+  baseCargoCapacityMax: 186
   weaponSlotCount: 1
   moduleSlotCount: 3
   level: 5
@@ -59,3 +57,12 @@ MonoBehaviour:
   combatSprite: {fileID: 21300000, guid: 51601d5419461468481cd18c4ef4cda3, type: 3}
   visualSize: 31
   lootTable: {fileID: 11400000, guid: cc0626deb803496da01542b74a55f42f, type: 2}
+  availableComponentSlots: 127
+  defaultComponents:
+  - {fileID: 11400000, guid: 0736a8316a4b5b678710da5be4b420c9, type: 2}
+  - {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+  - {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+  - {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+  - {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+  - {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+  - {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}

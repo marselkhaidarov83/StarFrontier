@@ -36,6 +36,10 @@ public class PlanetConfig : BaseConfig
     [Tooltip("Визуальный размер объекта на сцене.")]
     [SerializeField][Min(0f)] private float visualSize = 96f;
 
+    [Header("Market Screen")]
+    [SerializeField] private Sprite marketIllustration;
+    public Sprite MarketIllustration => marketIllustration;
+
     public PlanetType PlanetType => planetType;
     public bool IsInhabited => isInhabited;
     public PlanetOrbitConfig PlanetOrbit => planetOrbit;

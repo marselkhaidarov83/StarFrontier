@@ -13,6 +13,7 @@ public class PirateConfig : BaseConfig
     [SerializeField] private int baseEnergy;
     [Tooltip("Базовая скорость движения корабля.")]
     [SerializeField] private float baseSpeed;
+    [SerializeField, Min(0)] private int baseCargoCapacity = 60;
     [Tooltip("Радиус поворота корабля. Используется при движении и построении плавного маршрута.")]
     [SerializeField] [Min(0f)] private float turnRadius = 60f;
 
@@ -40,6 +41,7 @@ public class PirateConfig : BaseConfig
     public int BaseShield => baseShield;
     public int BaseEnergy => baseEnergy;
     public float BaseSpeed => baseSpeed;
+    public int BaseCargoCapacity => Mathf.Max(0, baseCargoCapacity);
     public float TurnRadius => turnRadius;
     public EnemyArchetype AiArchetype => archetype;
     public WeaponConfig WeaponConfig => weaponConfig;

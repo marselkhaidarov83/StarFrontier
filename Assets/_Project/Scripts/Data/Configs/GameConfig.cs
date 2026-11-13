@@ -5,6 +5,9 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Game/Game Config")]
 public class GameConfig : BaseConfig
 {
+    [Header("Экономика и базовые услуги")]
+    public MarketEconomyBalanceConfig MarketEconomy;
+
     [Header("Миссии")]
     public MissionGameplayConfig MissionGameplay;
 

@@ -159,8 +159,14 @@ public sealed class SystemSpaceLootService : CustomService
     private GrabberConfig PlayerGrabber()
     {
         ShipRuntimeData ship = _gameSessionService.State?.Player?.GetActiveShip();
-        return ship == null || ship.DebugGrabberRemoved
-            ? null : _configService.GetAllyConfigById(ship.AllyConfigId)?.Grabber;
+        return ship == null || ship.DebugGrabberRemoved ? null : ConfiguredGrabber(ship);
+    }
+
+    private GrabberConfig ConfiguredGrabber(ShipRuntimeData ship)
+    {
+        if (!ship.HasModularLoadout) return _configService.GetAllyConfigById(ship.AllyConfigId)?.Grabber;
+        string id = ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.Grabber);
+        return (_configService.GetItemConfigById(id) as ShipComponentConfig)?.Grabber;
     }
 
     public bool TrySetPlayerGrabberEnabled(bool enabled, out string error)
@@ -172,7 +178,7 @@ public sealed class SystemSpaceLootService : CustomService
             error = "Корабль игрока недоступен";
             return false;
         }
-        if (enabled && _configService.GetAllyConfigById(ship.AllyConfigId)?.Grabber == null)
+        if (enabled && ConfiguredGrabber(ship) == null)
         {
             error = "В конфигурации корабля нет захвата";
             return false;
@@ -235,7 +241,9 @@ public sealed class SystemSpaceLootService : CustomService
         if (mass > grabber.Strength)
         {
             string name = loot.Kind == SpaceLootKind.Equipment
-                ? _configService.GetWeaponConfigById(loot.EquipmentConfigId)?.DisplayName
+                ? loot.Equipment?.IsComponent == true
+                    ? _configService.GetItemConfigById(loot.EquipmentConfigId)?.DisplayName
+                    : _configService.GetWeaponConfigById(loot.EquipmentConfigId)?.DisplayName
                 : _configService.GetItemConfigById(loot.ItemConfigId)?.DisplayName;
             error = string.IsNullOrWhiteSpace(name)
                 ? "Трофей\nслишком тяжёлый" : "Трофей «" + name.Trim() + "»\nслишком тяжёлый";
@@ -348,7 +356,8 @@ public sealed class SystemSpaceLootService : CustomService
             ship.CargoEquipment.Add(new SystemNpcWeaponRuntimeState
             {
                 InstanceId = Guid.NewGuid().ToString("N"), WeaponConfigId = configs[i].Id,
-                RolledStats = stats, ShotDistance = stats.Range, DurabilityPercent = 100,
+                RolledStats = stats, ShotDistance = stats.Range,
+                CurrentDurability = configs[i].MaximumDurability, MaximumDurability = configs[i].MaximumDurability,
                 HasLootOrigin = true, LootOriginNpcType = sourceType, LootOriginNpcConfigId = sourceIds[i]
             });
         }
@@ -704,7 +713,7 @@ public sealed class SystemSpaceLootService : CustomService
             return false;
         }
         SpaceLootRuntimeState drop = NewPlayerDrop(player, SpaceLootKind.Equipment,
-            null, equipment.WeaponConfigId, equipment, 1);
+            null, equipment.EquipmentConfigId, equipment, 1);
         if (!Add(drop) || !ship.CargoEquipment.Remove(equipment))
         {
             Remove(drop.LootId);

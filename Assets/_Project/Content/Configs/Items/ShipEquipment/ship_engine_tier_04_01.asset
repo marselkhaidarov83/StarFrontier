@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: ship_engine_tier_04_01
+  m_EditorClassIdentifier: Data::ShipComponentConfig
+  id: ship_engine_tier_04_01
+  displayName: Двигатель ур. 4
+  description: Скорость 220.
+  icon: {fileID: 21300000, guid: f882e0a2aa5b46d182363083a9e5a066, type: 3}
+  itemCategory: 10
+  basePrice: 280
+  cargoSize: 3
+  rarity: 0
+  isLegal: 1
+  MaximumDurability: 100
+  Slot: 0
+  Speed: 220
+  EngineRange: 1000

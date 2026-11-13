@@ -286,7 +286,7 @@ public sealed class SystemPlayerCargoPanel2A : MonoBehaviour
         if (equipment != null)
             foreach (var item in equipment)
                 if (item != null) fingerprint = unchecked(fingerprint * 31 +
-                    (item.InstanceId?.GetHashCode() ?? 0) + item.RolledStats.CargoSize);
+                    (item.InstanceId?.GetHashCode() ?? 0) + item.RolledStats.CargoSize + item.CurrentDurability * 31 + item.MaximumDurability);
         if (fingerprint == _lastFingerprint) return;
         _lastFingerprint = fingerprint;
         foreach (CargoCard card in _cards)
@@ -314,12 +314,14 @@ public sealed class SystemPlayerCargoPanel2A : MonoBehaviour
             foreach (var item in equipment)
             {
                 if (item == null || string.IsNullOrWhiteSpace(item.InstanceId)) continue;
-                WeaponConfig config = _configs.GetWeaponConfigById(item.WeaponConfigId);
+                var component = item.IsComponent ? _configs.GetItemConfigById(item.ComponentConfigId) : null;
+                var config = !item.IsComponent ? _configs.GetWeaponConfigById(item.WeaponConfigId) : null;
+                string name = component != null ? component.DisplayName : config != null ? config.DisplayName : "Оборудование";
                 AddCard(new CargoCard { EquipmentId = item.InstanceId, Count = 1,
-                    Name = config != null ? config.DisplayName : "Оборудование",
-                    Icon = config != null ? config.Icon : null,
+                    Name = $"{name} · {item.CurrentDurability} / {item.MaximumDurability}",
+                    Icon = component != null ? component.Icon : config != null ? config.Icon : null,
                     UnitVolume = item.RolledStats.CargoSize > 0 ? item.RolledStats.CargoSize
-                        : config != null ? config.CargoSize : 0,
+                        : component != null ? component.CargoSize : config != null ? config.CargoSize : 0,
                     Background = ResolveEquipmentBackground(item), OriginLabel = ResolveEquipmentOriginLabel(item) });
             }
         _content.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,

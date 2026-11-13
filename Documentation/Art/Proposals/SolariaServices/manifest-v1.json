@@ -1,0 +1,42 @@
+{
+  "tool": "built-in image_gen",
+  "status": "proposal; not bound to game screens",
+  "reference_size": [
+    1881,
+    836
+  ],
+  "mission_references_reviewed": [
+    "Assets/Art/Missions/Government/government-mission-delivery-hub-v3-9x4.png",
+    "Assets/Art/Missions/Government/government-mission-recon-hub-v2-9x4.png",
+    "Assets/Art/Missions/Government/government-mission-defense-hub-v3-9x4.png",
+    "Assets/Art/Missions/Government/government-mission-liberation-hub-v3-9x4.png",
+    "Assets/Art/Missions/Government/government-mission-route-unlock-hub-v3-9x4.png",
+    "Assets/Art/Missions/Government/government-mission-route-improve-hub-v2-9x4.png"
+  ],
+  "generation_references": [
+    "Assets/Art/Missions/Government/government-neutral-hub-v2-9x4.png",
+    "Assets/Art/Missions/Government/government-mission-delivery-hub-v3-9x4.png"
+  ],
+  "outputs": [
+    {
+      "service": "refuel",
+      "file": "solaria-refuel-v1-9x4.png",
+      "width": 1881,
+      "height": 836
+    },
+    {
+      "service": "repair",
+      "file": "solaria-repair-v1-9x4.png",
+      "width": 1881,
+      "height": 836
+    },
+    {
+      "service": "market",
+      "file": "solaria-market-v1-9x4.png",
+      "width": 1881,
+      "height": 836
+    }
+  ],
+  "prompts": "prompts-v1.json",
+  "notes": "Three distinct workers; shared Solaria blue/gold visual world. Final market canvas corrected through image_gen from 1882 to 1881 pixels wide."
+}

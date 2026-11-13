@@ -48,6 +48,10 @@ public class StationTypeConfig : BaseConfig
     [Tooltip("Параметр localOffset. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private Vector2 localOffset = Vector2.zero;
 
+    [Header("Market Screen")]
+    [SerializeField] private Sprite marketIllustration;
+    public Sprite MarketIllustration => marketIllustration;
+
     public StationType StationType => stationType;
 
     public bool HasMarket => hasMarket;

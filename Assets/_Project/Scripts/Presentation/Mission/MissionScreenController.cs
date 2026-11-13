@@ -132,6 +132,12 @@ public class MissionScreenController : CustomMonoBehaviour
         IServiceRegistry services = Bootstrapper.Instance?.ServiceRegistry;
         PlayerState player = services?.Get<IGameSessionService>()?.State?.Player;
         if (player == null || string.IsNullOrWhiteSpace(player.CurrentSystemId)) return;
+        if (ShipLoadoutRules.IsComponentMissing(player.GetActiveShip(), ShipComponentSlot.Engine))
+        {
+            FindFirstObjectByType<SystemTransitionController2>(FindObjectsInactive.Include)
+                ?.ShowMessage(ShipLoadoutRules.EngineNotInstalledMessage, this);
+            return;
+        }
         MissionNavigationPlanner.Destination(mission, out string targetSystemId, out _);
         if (!string.IsNullOrWhiteSpace(targetSystemId) && targetSystemId != player.CurrentSystemId)
         {
@@ -161,11 +167,11 @@ public class MissionScreenController : CustomMonoBehaviour
             }
             TravelFailReason reason = services.Get<ITravelService>()
                 .GetTravelFailReason(player.CurrentSystemId, path[1]);
-            if (reason == TravelFailReason.NotEnoughFuel)
+            if (reason == TravelFailReason.FuelTankNotInstalled || reason == TravelFailReason.NotEnoughFuel)
             {
                 transition?.ShowTravelFailReason(reason, this);
                 AppLog.Info(DebugLogChannel.Mission, typeof(MissionScreenController),
-                    "Takeoff blocked by first-hop fuel | From=" + player.CurrentSystemId +
+                    "Takeoff blocked | Reason=" + reason + " | From=" + player.CurrentSystemId +
                     " | To=" + path[1]);
                 return;
             }

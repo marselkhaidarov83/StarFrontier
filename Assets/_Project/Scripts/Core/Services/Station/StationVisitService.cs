@@ -3,6 +3,8 @@ using UnityEngine;
 
 public sealed class StationVisitService : IStationVisitService
 {
+    public const string EngineNotInstalled = "EngineNotInstalled";
+
     private readonly IGameSessionService _session;
     private readonly Func<string, StarSystemConfig> _resolve;
     private readonly IStationService _stations;
@@ -75,6 +77,12 @@ public sealed class StationVisitService : IStationVisitService
         var player = _session.State?.Player;
         var system = player != null ? _resolve(player.CurrentSystemId) : null;
         if (!_ownsDisabled || !StationLocationRules.IsInside(_session.State, system)) return false;
+        if (ShipLoadoutRules.IsComponentMissing(player.GetActiveShip(), ShipComponentSlot.Engine))
+        {
+            reason = EngineNotInstalled;
+            Log("TAKEOFF_BLOCKED | Reason=" + reason, player.CurrentStationId);
+            return false;
+        }
         if (_departureBlocked?.Invoke() == true) { reason = "CargoOverloaded"; Log("TAKEOFF_BLOCKED", player.CurrentStationId); return false; }
         string systemId = player.CurrentSystemId;
         Vector2 position = _movement.State.Position;
@@ -99,7 +107,12 @@ public sealed class StationVisitService : IStationVisitService
         _events?.PublishSafely(new SaveNeedEvent("station_takeoff"), _ => { });
         Log("TAKEOFF", system.Station.Id); return true;
     }
-    public void Leave(bool forced = false) => EndVisit(forced, true);
+    public void Leave(bool forced = false)
+    {
+        if (!forced && ShipLoadoutRules.IsComponentMissing(_session.State?.Player?.GetActiveShip(), ShipComponentSlot.Engine))
+            return;
+        EndVisit(forced, true);
+    }
     private void EndVisit(bool forced, bool cancelRoute, bool reposition = true, bool save = true)
     {
         var player = _session.State?.Player;
@@ -132,7 +145,11 @@ public sealed class StationVisitService : IStationVisitService
     }
     private void OnPlanetEntered(PlanetEnteredEvent evt) { if (_ownsDisabled) EndVisit(false, false); }
     private void OnStationChanged(StationStateChangedEvent evt) { Tick(); }
-    private void OnDestination(DestinationSelectedEvent evt) { if (_ownsDisabled) EndVisit(false, false); }
+    private void OnDestination(DestinationSelectedEvent evt)
+    {
+        if (_ownsDisabled && !ShipLoadoutRules.IsComponentMissing(_session.State?.Player?.GetActiveShip(), ShipComponentSlot.Engine))
+            EndVisit(false, false);
+    }
     private void OnTravelFinished(TravelFinishedEvent evt) { if (evt.Success && evt.FromSystemId != evt.ToSystemId) EndVisit(false, false); }
     private static void Log(string action, string id) => AppLog.Info(DebugLogChannel.StationInterface, "[StationInterface] " + action + " | Station=" + id);
 }

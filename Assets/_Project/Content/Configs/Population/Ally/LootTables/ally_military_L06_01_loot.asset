@@ -17,7 +17,7 @@ MonoBehaviour:
   description: Настраиваемая таблица лута для ally_military_L06_01.
   icon: {fileID: 0}
   InitialCargo: []
-  initialEquipmentDurabilityPercent: 100
+  initialEquipmentDurability: -1
   Rules:
   - IsDeath: 0
     HullThresholdPercent: 50

@@ -21,7 +21,7 @@ MonoBehaviour:
     Quantity: 5
   - Item: {fileID: 11400000, guid: a006717fb8e04459b994235b87140afa, type: 2}
     Quantity: 5
-  initialEquipmentDurabilityPercent: 100
+  initialEquipmentDurability: -1
   Rules:
   - IsDeath: 0
     HullThresholdPercent: 50

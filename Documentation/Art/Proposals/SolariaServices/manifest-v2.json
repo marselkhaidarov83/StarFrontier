@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "tool": "built-in image_gen",
+  "status": "proposals; game screen bindings unchanged",
+  "outputs": [
+    {
+      "service": "refuel",
+      "file": "solaria-refuel-v2-9x4.png",
+      "width": 1881,
+      "height": 836
+    },
+    {
+      "service": "repair",
+      "file": "solaria-repair-v2-9x4.png",
+      "width": 1881,
+      "height": 836
+    },
+    {
+      "service": "market",
+      "file": "solaria-market-v2-9x4.png",
+      "width": 1881,
+      "height": 836
+    }
+  ],
+  "prompts": "prompts-v2.json",
+  "changes": {
+    "refuel": "fair-skinned white male attendant; original work scene retained",
+    "repair": "fair-skinned white male mechanic replacing the original female mechanic",
+    "market": "fair-skinned white female merchant replacing the original male merchant"
+  }
+}

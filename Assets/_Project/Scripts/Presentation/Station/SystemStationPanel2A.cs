@@ -379,7 +379,17 @@ public sealed class SystemStationPanel2A : MonoBehaviour
         {
             Nav("Карточка станции", () => Tab("card")); Nav("Заправка, ремонт корабля и рынок", () => Tab("services"));
             if (card.Station.StationType == StationType.Science) Nav("Исследования галактики", () => { var location = FindFirstObjectByType<PlanetController>(FindObjectsInactive.Include); if (location != null && location.OpenStationResearch()) Close(); });
-            Nav("Покинуть станцию", () => { _visits.Leave(); Tab("card"); });
+            Nav("Покинуть станцию", () =>
+            {
+                if (ShipLoadoutRules.IsComponentMissing(_session.State?.Player?.GetActiveShip(), ShipComponentSlot.Engine))
+                {
+                    _message = ShipLoadoutRules.EngineNotInstalledMessage;
+                    Refresh();
+                    return;
+                }
+                _visits.Leave();
+                Tab("card");
+            });
         }
         if (_confirmation != null)
         {
@@ -479,19 +489,23 @@ public sealed class SystemStationPanel2A : MonoBehaviour
             Facility(() => { bool ok = _facilities.TryRefuel(out string reason); return ok ? "Заправка выполнена" : StationInterfaceRules.Reason(reason); }), out _, out _);
         ActionButton("Ремонт корабля · " + _repair.GetRepairUnitPrice() + " кр./ед. корпуса", () =>
             Facility(() => { bool ok = _facilities.TryRepairHull(out string reason); return ok ? "Корабль отремонтирован" : StationInterfaceRules.Reason(reason); }), out _, out _);
-        var profile = StationLocationRules.Market(_session.State, _config.GetStarSystemConfigById(card.SystemId));
-        if (profile?.Items == null) { var text = StationPanelStyle2A.Text(_actions, _style, "MarketUnavailable", "Ассортимент рынка не настроен"); Fit(text); return; }
-        foreach (var entry in profile.Items)
+        if (_facilities is IPartialStationFacilityService partial)
         {
-            if (entry?.ItemConfig == null || !entry.IsAvailable) continue;
-            string id = entry.ItemConfig.Id;
-            var text = StationPanelStyle2A.Text(_actions, _style, "MarketItem", entry.ItemConfig.DisplayName); Fit(text);
-            ActionButton("Купить 1 · " + _economy.GetBuyPrice(id) + " кр.", () =>
-                Facility(() => { bool ok = _facilities.TryBuy(id, 1, out string reason); return ok ? "Товар куплен" : StationInterfaceRules.Reason(reason); }), out _, out _);
-            ActionButton("Продать 1 · " + _economy.GetSellPrice(id) + " кр.", () =>
-                Facility(() => { bool ok = _facilities.TrySell(id, 1, out string reason); return ok ? "Товар продан" : StationInterfaceRules.Reason(reason); }), out _, out _);
+            foreach (int units in new[] { 1, 10 })
+            {
+                int requested = units;
+                ActionButton("Ремонт " + units + " ед. · до " + ((long)units * _repair.GetRepairUnitPrice()) + " кр.", () =>
+                    Facility(() => { bool ok = partial.TryRepairHull(requested, out string reason); return ok ? "Корпус отремонтирован" : StationInterfaceRules.Reason(reason); }), out _, out _);
+            }
         }
+        ActionButton("Открыть рынок", () =>
+        {
+            var location = FindFirstObjectByType<PlanetController>(FindObjectsInactive.Include);
+            if (location != null && location.OpenMarket()) Close();
+            else { _message = "Экран рынка недоступен"; Refresh(); }
+        }, out _, out _);
     }
+
     private void Facility(Func<string> action)
     {
         if (_busy) return; _busy = true;

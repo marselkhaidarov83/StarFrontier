@@ -372,6 +372,14 @@ public sealed class TravelService2A :
                 .SystemsAreNotNeighbors;
         }
 
+        var player = _gameSessionService.State?.Player;
+        var ship = player?.GetActiveShip();
+        if (ShipLoadoutRules.IsComponentMissing(ship, ShipComponentSlot.FuelTank))
+            return TravelFailReason.FuelTankNotInstalled;
+        if (player != null && (!string.IsNullOrEmpty(player.CurrentPlanetId) || !string.IsNullOrEmpty(player.CurrentStationId)) &&
+            ShipLoadoutRules.IsComponentMissing(ship, ShipComponentSlot.Engine))
+            return TravelFailReason.EngineNotInstalled;
+
         int fuelCost =
             CalculateFuelCostByRoute(
                 routeConfig);

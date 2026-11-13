@@ -43,15 +43,6 @@ public sealed class AllyConfig : BaseConfig
     [Tooltip("Базовое восстановление энергии. Используется в расчётах боевой выносливости корабля.")]
     private float baseEnergyRegen = 0f;
 
-    [FormerlySerializedAs("baseSpeed")]
-    [SerializeField]
-    [Tooltip("Минимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
-    private int baseSpeedMin = 2;
-
-    [SerializeField]
-    [Tooltip("Максимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
-    private int baseSpeedMax = 2;
-
     [Header("Movement")]
     [FormerlySerializedAs("baseAcceleration")]
     [SerializeField]
@@ -99,6 +90,26 @@ public sealed class AllyConfig : BaseConfig
     [Range(0, 10)]
     [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]
     private int level = 1;
+
+    [Header("Hull Equipment")]
+    [SerializeField] private ShipComponentSlots availableComponentSlots = ShipComponentSlots.All;
+    [SerializeField] private ShipComponentConfig[] defaultComponents = new ShipComponentConfig[0];
+
+    public ShipComponentSlots AvailableComponentSlots => availableComponentSlots;
+    public IReadOnlyList<ShipComponentConfig> DefaultComponents => defaultComponents;
+
+    public ShipComponentConfig DefaultEngine
+    {
+        get
+        {
+            if ((availableComponentSlots & ShipComponentSlots.Engine) == 0 || defaultComponents == null)
+                return null;
+            foreach (var component in defaultComponents)
+                if (component != null && component.Slot == ShipComponentSlot.Engine)
+                    return component;
+            return null;
+        }
+    }
 
     [Header("Ally Role")]
     [SerializeField]
@@ -154,14 +165,11 @@ public sealed class AllyConfig : BaseConfig
     public int BaseShieldMax => baseShieldMax;
     public int BaseEnergyMin => baseEnergyMin;
     public int BaseEnergyMax => baseEnergyMax;
-    public int BaseSpeedMin => baseSpeedMin;
-    public int BaseSpeedMax => baseSpeedMax;
 
     public int BaseHull => baseHullMin;
     public int BaseShield => baseShieldMin;
     public int BaseEnergy => baseEnergyMin;
     public float BaseEnergyRegen => baseEnergyRegen;
-    public int BaseSpeed => baseSpeedMin;
     public float BaseAccelerationMin => baseAccelerationMin;
     public float BaseAccelerationMax => baseAccelerationMax;
     public float BaseTurnRateMin => baseTurnRateMin;
@@ -414,9 +422,6 @@ public sealed class AllyConfig : BaseConfig
         baseEnergyMin = Mathf.Max(0, baseEnergyMin);
         baseEnergyMax = Mathf.Max(baseEnergyMin, baseEnergyMax);
         baseEnergyRegen = Mathf.Max(0f, baseEnergyRegen);
-
-        baseSpeedMin = Mathf.Max(0, baseSpeedMin);
-        baseSpeedMax = Mathf.Max(baseSpeedMin, baseSpeedMax);
 
         baseAccelerationMin = Mathf.Max(0f, baseAccelerationMin);
         baseAccelerationMax = Mathf.Max(baseAccelerationMin, baseAccelerationMax);

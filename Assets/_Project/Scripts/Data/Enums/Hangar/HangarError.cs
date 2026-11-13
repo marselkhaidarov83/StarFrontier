@@ -17,5 +17,6 @@ public enum HangarError
     NotEquipped,
 
     InvalidWeaponId,
-    InvalidModuleId
+    InvalidModuleId,
+    NotEnoughCargoSpace
 }

@@ -20,7 +20,7 @@ MonoBehaviour:
     \u0440\u043E\u043B\u044C, \u0443\u0440\u043E\u0432\u0435\u043D\u044C, \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u0438
     \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
     \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
-  icon: {fileID: 21300000, guid: 47a8877e003d14952a0a3cbda86951d3, type: 3}
+  icon: {fileID: 21300000, guid: ddc6929fb916c4e1eb744e87f16cd805, type: 3}
   baseHullMin: 119
   baseHullMax: 140
   baseShieldMin: 66
@@ -28,15 +28,13 @@ MonoBehaviour:
   baseEnergyMin: 132
   baseEnergyMax: 148
   baseEnergyRegen: 7.4
-  baseSpeedMin: 180
-  baseSpeedMax: 220
   baseAccelerationMin: 3.8
   baseAccelerationMax: 4.3
   baseTurnRateMin: 68
   baseTurnRateMax: 78
   turnRadius: 300
-  baseCargoCapacityMin: 102
-  baseCargoCapacityMax: 114
+  baseCargoCapacityMin: 264
+  baseCargoCapacityMax: 288
   weaponSlotCount: 1
   moduleSlotCount: 3
   level: 3
@@ -58,3 +56,11 @@ MonoBehaviour:
   combatSprite: {fileID: 21300000, guid: ddc6929fb916c4e1eb744e87f16cd805, type: 3}
   visualSize: 29
   lootTable: {fileID: 11400000, guid: 7253f45e15a540db91bdb756eb559d5b, type: 2}
+  availableComponentSlots: 119
+  defaultComponents:
+  - {fileID: 11400000, guid: 8dd363ce17f75e06bf96f4abbdd218e2, type: 2}
+  - {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+  - {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+  - {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+  - {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+  - {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}

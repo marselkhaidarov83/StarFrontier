@@ -9,5 +9,6 @@ public enum ItemCategory
     Industrial,
     Luxury,
     Technology,
-    Currency
+    Currency,
+    ShipEquipment
 }

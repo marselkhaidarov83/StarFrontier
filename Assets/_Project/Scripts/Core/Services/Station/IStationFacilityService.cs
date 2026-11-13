@@ -5,3 +5,8 @@ public interface IStationFacilityService
     bool TryBuy(string itemId, int quantity, out string reason);
     bool TrySell(string itemId, int quantity, out string reason);
 }
+
+public interface IPartialStationFacilityService
+{
+    bool TryRepairHull(int hullUnits, out string reason);
+}

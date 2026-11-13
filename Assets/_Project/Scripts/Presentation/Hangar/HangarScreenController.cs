@@ -1,73 +1,78 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HangarScreenController : MonoBehaviour
 {
-    [Header("Root")]
     [SerializeField] private GameObject root;
-
-    [Header("Ship Preview")]
-    [SerializeField] private Image shipImage;
     [SerializeField] private TMP_Text shipNameText;
-    [SerializeField] private TMP_Text shipDescriptionText;
-
-    [Header("Stats")]
-    [SerializeField] private TMP_Text hullText;
-    [SerializeField] private TMP_Text shieldText;
-    [SerializeField] private TMP_Text energyText;
-    [SerializeField] private TMP_Text speedText;
-    [SerializeField] private TMP_Text cargoText;
-
-    [Header("Ship Buttons")]
-    [SerializeField] private Button scoutButton;
-    [SerializeField] private Button frigateButton;
-    [SerializeField] private Button traderButton;
-
-    [Header("Weapon Buttons")]
-    [SerializeField] private Button pulseLaserButton;
-    [SerializeField] private Button missileLauncherButton;
-
-    [Header("Module Buttons")]
-    [SerializeField] private Button shieldBoosterButton;
-    [SerializeField] private Button afterburnerButton;
-    [SerializeField] private Button cargoExpansionButton;
-    [SerializeField] private Button energyCapacitorButton;
-    [SerializeField] private Button hullReinforcementButton;
-
-    [Header("Actions")]
     [SerializeField] private Button repairButton;
     [SerializeField] private Button backButton;
+    [SerializeField] private PlanetServiceVisualCatalog2A serviceVisuals;
+    [SerializeField] private bool useLegacyLayout;
 
-    [Header("Message")]
-    [SerializeField] private TMP_Text messageText;
+    private sealed class InventoryChoice
+    {
+        public string Id, Title, Info;
+        public Sprite Icon;
+        public bool CanInstall;
+        public (int Current, int Maximum) Durability;
+    }
 
-    private IHangarService _hangarService;
+    private readonly List<InventoryChoice> _choices = new List<InventoryChoice>();
+    private IHangarService _hangar;
+    private IPlanetMarketService _market;
+    private IInventoryService _inventory;
+    private IConfigService _config;
+    private IGameSessionService _session;
+    private PlanetGovernmentMissionPresenter _government;
+    private HangarPanelView2A _view;
+    private int _slot;
+    private bool _warehouse, _busy;
+    private string _choice, _message, _context;
+    private long _installedRepairPrice, _fullRepairPrice, _inventoryRepairPrice;
 
     private void Awake()
     {
-        _hangarService = Bootstrapper.Instance.ServiceRegistry.Get<IHangarService>();
-
-        scoutButton?.onClick.AddListener(() => SwitchShip("runtime_ship_001"));
-        frigateButton?.onClick.AddListener(() => SwitchShip("runtime_ship_002"));
-        traderButton?.onClick.AddListener(() => SwitchShip("runtime_ship_003"));
-
-        pulseLaserButton?.onClick.AddListener(() => EquipWeapon("weapon_laser_pulse_01"));
-        missileLauncherButton?.onClick.AddListener(() => EquipWeapon("weapon_missile_light_01"));
-
-        shieldBoosterButton?.onClick.AddListener(() => EquipModule("module_shield_booster_small_01"));
-        afterburnerButton?.onClick.AddListener(() => EquipModule("module_afterburner_01"));
-        cargoExpansionButton?.onClick.AddListener(() => EquipModule("module_cargo_expansion_01"));
-        energyCapacitorButton?.onClick.AddListener(() => EquipModule("module_energy_capacitor_01"));
-        hullReinforcementButton?.onClick.AddListener(() => EquipModule("module_hull_reinforcement_01"));
-
-        repairButton?.onClick.AddListener(Repair);    
+        var registry = Bootstrapper.Instance.ServiceRegistry;
+        _hangar = registry.Get<IHangarService>();
+        _market = registry.Get<IPlanetMarketService>();
+        _inventory = registry.Get<IInventoryService>();
+        _config = registry.Get<IConfigService>();
+        _session = registry.Get<IGameSessionService>();
         backButton?.onClick.AddListener(Close);
+
+        var legacy = GetComponent<HangarPanelView2A>() ?? gameObject.AddComponent<HangarPanelView2A>();
+        BuildView(legacy, repairButton, false);
+        if (useLegacyLayout)
+        {
+            _government = FindFirstObjectByType<PlanetGovernmentMissionPresenter>(FindObjectsInactive.Include);
+            _view = legacy;
+            return;
+        }
+
+        legacy.HideLayout();
+        var stacked = ResearchPanelUi2A.Rect(transform, "StackedHangar");
+        _view = stacked.gameObject.AddComponent<HangarPanelView2A>();
+        BuildView(_view, null, true);
+    }
+
+    private void BuildView(HangarPanelView2A view, Button repair, bool stacked)
+    {
+        view.BuildLoadout(shipNameText, repair, SelectSlot, SelectStorage, SelectChoice,
+            () => ChangeEquipment(_choice), () => ChangeEquipment(null),
+            () => Repair(HangarRepairScope.Installed, _installedRepairPrice),
+            () => Repair(HangarRepairScope.FullShip, _fullRepairPrice),
+            () => Repair(HangarRepairScope.Inventory, _inventoryRepairPrice), RemoveAllEquipment, stacked);
     }
 
     private void OnEnable()
     {
+        _view?.ResetCardSelections();
+        _message = string.Empty;
         Refresh();
+        AppLog.Info(DebugLogChannel.Hangar, typeof(HangarScreenController), "Shared repair/hangar panel opened");
     }
 
     public void Open()
@@ -78,147 +83,304 @@ public class HangarScreenController : MonoBehaviour
 
     public void Close()
     {
+        _view?.CloseEquipmentModal();
         root.SetActive(false);
     }
 
-    private void SwitchShip(string shipId)
+    private void SelectSlot(int slot)
     {
-        AppLog.Info(DebugLogChannel.Hangar,
-            typeof(HangarScreenController),
-            "SwitchShip " + shipId);
-        var result = _hangarService.SwitchShip(shipId);
+        _slot = slot;
+        _choice = null;
+        _message = string.Empty;
+        Refresh();
+        _view.ResetLoadoutInventoryScroll();
+    }
 
-        if (!result.Success)
-        {
-            ShowError(result.Error);
-            return;
-        }
+    private void SelectStorage(bool warehouse)
+    {
+        _warehouse = warehouse;
+        _choice = null;
+        _message = string.Empty;
+        Refresh();
+        _view.ResetLoadoutInventoryScroll();
+    }
 
-        ShowMessage("Ship switched");
+    private void SelectChoice(int index)
+    {
+        if (index < 0 || index >= _choices.Count) return;
+        _choice = _choices[index].Id;
+        _message = string.Empty;
         Refresh();
     }
 
-    private void EquipWeapon(string weaponId)
+    private void ChangeEquipment(string id)
     {
-        var result = _hangarService.EquipWeapon(weaponId);
-
-        if (!result.Success)
+        if (_busy || !isActiveAndEnabled) return;
+        _busy = true;
+        try
         {
-            ShowError(result.Error);
-            return;
+            if (_hangar.TryChangeLoadout(_slot, id, _warehouse, out _message)) _choice = null;
         }
-
-        ShowMessage("Weapon equipped");
-        Refresh();
+        finally
+        {
+            _busy = false;
+            Refresh();
+        }
     }
 
-    private void EquipModule(string moduleId)
+    private void RemoveAllEquipment()
     {
-        var result = _hangarService.EquipModule(moduleId);
-
-        if (!result.Success)
+        if (_busy || !isActiveAndEnabled) return;
+        _busy = true;
+        try
         {
-            ShowError(result.Error);
-            return;
+            if (_hangar.TryRemoveAllEquipment(_warehouse, out _message)) _choice = null;
         }
-
-        ShowMessage("Module equipped");
-        Refresh();
+        finally
+        {
+            _busy = false;
+            Refresh();
+        }
     }
 
-    private void Repair()
+    [ContextMenu("STAR FRONTIER/Ангар/Нанести 10 ед. урона выбранному оборудованию")]
+    private void DebugDamageSelectedEquipment()
     {
-        var result = _hangarService.RepairActiveShip();
-
-        if (!result.Success)
+        if (!DeveloperModeGate.CanRunExplicitCommand(Application.isPlaying, Application.isEditor, DeveloperModeGate.IsEnabled) ||
+            !isActiveAndEnabled || _busy || _hangar == null)
         {
-            ShowError(result.Error);
+            AppLog.Warning(DebugLogChannel.Hangar, "Открой ангар в Play Mode и выбери оборудование.");
             return;
         }
 
-        ShowMessage("Ship repaired");
-        Refresh();
+        _busy = true;
+        try
+        {
+            _hangar.TryDebugDamageSelection(_slot, _choice, _warehouse, out _message);
+        }
+        finally
+        {
+            _busy = false;
+            Refresh();
+        }
+    }
+
+    private void Repair(HangarRepairScope scope, long price)
+    {
+        if (_busy || !isActiveAndEnabled || price <= 0) return;
+        _busy = true;
+        try
+        {
+            bool repaired = _hangar.TryRepair(scope, _slot, _choice, _warehouse, price, out string reason);
+            _message = repaired ? "Ремонт выполнен." : reason;
+        }
+        finally
+        {
+            _busy = false;
+            Refresh();
+        }
     }
 
     private void Refresh()
     {
-        if (_hangarService == null)
-            return;
-
-        var shipData = _hangarService.GetActiveShipData();
-        var stats = _hangarService.GetActiveShipStats();
-        var activeShip = _hangarService.GetActiveShipState();
-
-        if (shipData == null || stats == null || activeShip == null)
+        if (_view == null || !_view.IsReady) return;
+        var player = _session.State?.Player;
+        var station = PlanetServiceVisualCatalog2A.GetDockedStation(player, _config);
+        if (useLegacyLayout)
         {
-            ShowMessage("No active ship");
-            return;
+            var planet = station == null ? _config.GetPlanetConfigById(player?.CurrentPlanetId) : null;
+            var fallback = _government != null ? _government.CurrentLocationIllustration : null;
+            _view.SetHeader(serviceVisuals != null
+                ? serviceVisuals.Get(planet, PlanetServiceKind2A.Repair, fallback, station) : fallback);
         }
 
-        shipNameText.text = shipData.DisplayName;
-        shipDescriptionText.text = shipData.Description;
-
-        if (shipData.Icon != null)
+        var ship = _hangar.GetActiveShipState();
+        var hull = _hangar.GetActiveShipData();
+        var stats = _hangar.GetActiveShipStats();
+        var market = _market.CurrentMarket;
+        string context = player?.CurrentSystemId + "|" + player?.CurrentPlanetId + "|" + player?.CurrentStationId + "|" + ship?.ShipId;
+        if (_context != context)
         {
-            shipImage.sprite = shipData.Icon;
-            shipImage.enabled = true;
+            _context = context;
+            _slot = ShipLoadoutRules.HullSlot;
+            _choice = null;
+            _warehouse = false;
+        }
+        bool ready = ship?.HasModularLoadout == true && hull != null && market != null && stats != null;
+        if (!SlotAvailable(hull, _slot))
+        {
+            _slot = ShipLoadoutRules.HullSlot;
+            _choice = null;
+        }
+
+        int usedCargo = ready ? _inventory.GetUsedCargo() : 0;
+        RenderSlots(ship, hull, ready, usedCargo);
+        BuildChoices(ship, market, ready);
+        var selectedChoice = _choices.Find(item => item.Id == _choice);
+        if (selectedChoice == null) _choice = null;
+        _view.SetInventory(_warehouse, station != null ? "Станция" : "Планета", _choices.Count, ready);
+        for (int i = 0; i < _choices.Count; i++)
+        {
+            var item = _choices[i];
+            _view.SetChoice(i, item.Title, item.Icon, item.Id == _choice, item.Info, item.Id, item.Durability);
+        }
+
+        bool occupied = IsOccupied(ship, _slot);
+        string summary = stats == null ? "Корабль недоступен" :
+            $"Корпус {ship.CurrentHull}/{stats.MaxHull}    Поле {ship.CurrentShield}/{stats.MaxShield}    Скорость {stats.Speed:0.##}\n" +
+            $"Топливо {ship.CurrentFuel}/{ship.FuelCapacity}";
+        bool canRemoveAll = ready && (ship.InstalledComponents.Exists(item => item != null) ||
+            ship.InstalledWeapons.Exists(item => item != null));
+        _installedRepairPrice = ready ? _hangar.GetRepairPrice(HangarRepairScope.Installed, _slot) : 0;
+        _fullRepairPrice = ready ? _hangar.GetRepairPrice(HangarRepairScope.FullShip, _slot) : 0;
+        _inventoryRepairPrice = ready && selectedChoice != null
+            ? _hangar.GetRepairPrice(HangarRepairScope.Inventory, _slot, _choice, _warehouse) : 0;
+        _view.SetLoadoutActions(occupied, ready && selectedChoice?.CanInstall == true,
+            ready && occupied && _slot != ShipLoadoutRules.HullSlot, summary, _message ?? string.Empty,
+            _installedRepairPrice, _fullRepairPrice, _inventoryRepairPrice, player?.Credits ?? 0, canRemoveAll);
+    }
+
+    private void RenderSlots(ShipRuntimeData ship, AllyConfig hull, bool ready, int usedCargo)
+    {
+        _view.SetSlot(ShipLoadoutRules.HullSlot, hull == null ? "Корпус" : string.Empty,
+            hull != null ? hull.CombatSprite ?? hull.Icon : null, ready, _slot == ShipLoadoutRules.HullSlot,
+            ship != null && hull != null
+                ? WithDescription(hull.Description, $"Вместимость трюма {usedCargo} / {ship.CargoCapacity}")
+                : null,
+            ship?.InstalledHull?.InstanceId, equipmentName: hull?.DisplayName, durability: (ship?.CurrentHull ?? 0, ship?.HullCapacity ?? 0));
+
+        for (int i = ShipLoadoutRules.FirstComponentSlot; i < ShipLoadoutRules.FirstWeaponSlot; i++)
+        {
+            bool allowed = SlotAvailable(hull, i);
+            var instance = ShipLoadoutRules.Component(ship, (ShipComponentSlot)(i - ShipLoadoutRules.FirstComponentSlot));
+            var component = _config.GetItemConfigById(instance?.ComponentConfigId) as ShipComponentConfig;
+            _view.SetSlot(i, instance == null ? SlotName(i) : string.Empty, component?.Icon, ready && allowed, _slot == i,
+                instance != null ? ComponentInfo(instance, component, ship.CurrentFuel) : null,
+                instance?.InstanceId, empty: instance == null, equipmentName: component?.DisplayName ?? SlotName(i),
+                durability: Durability(instance));
+        }
+
+        for (int i = ShipLoadoutRules.FirstWeaponSlot; i < ShipLoadoutRules.TotalSlots; i++)
+        {
+            bool allowed = SlotAvailable(hull, i);
+            var weapon = ShipLoadoutRules.Weapon(ship, i - ShipLoadoutRules.FirstWeaponSlot);
+            var config = _config.GetWeaponConfigById(weapon?.WeaponConfigId);
+            _view.SetSlot(i, weapon == null ? SlotName(i) : string.Empty, config?.Icon, ready && allowed, _slot == i,
+                weapon != null ? WeaponInfo(weapon, config) : null, weapon?.InstanceId, empty: weapon == null, equipmentName: config?.DisplayName ?? SlotName(i),
+                durability: Durability(weapon));
+        }
+    }
+
+    private void BuildChoices(ShipRuntimeData ship, MarketRuntimeData market, bool ready)
+    {
+        _choices.Clear();
+        if (!ready) return;
+        if (_slot == ShipLoadoutRules.HullSlot)
+        {
+            if (!_warehouse) return;
+            foreach (var hull in market.PersonalHulls)
+            {
+                var config = _market.GetHullConfig(hull?.ConfigId);
+                if (hull == null || config?.Hull == null) continue;
+                AddChoice(hull.InstanceId, config.DisplayName, config.Icon,
+                    WithDescription(config.Hull.Description, $"Вместимость трюма {config.Hull.BaseCargoCapacity}"),
+                    (hull.CurrentDurability, hull.MaximumDurability), hull.CurrentDurability > 0);
+            }
+        }
+        else if (_slot >= ShipLoadoutRules.FirstWeaponSlot)
+        {
+            foreach (var weapon in _warehouse ? market.PersonalEquipment : ship.CargoEquipment)
+            {
+                if (weapon == null || weapon.IsComponent) continue;
+                var config = _config.GetWeaponConfigById(weapon.WeaponConfigId);
+                if (config != null)
+                    AddChoice(weapon.InstanceId, config.DisplayName, config.Icon, WeaponInfo(weapon, config), Durability(weapon));
+            }
         }
         else
         {
-            shipImage.enabled = false;
+            var slot = (ShipComponentSlot)(_slot - ShipLoadoutRules.FirstComponentSlot);
+            foreach (var item in _warehouse ? market.PersonalEquipment : ship.CargoEquipment)
+            {
+                if (item == null || !item.IsComponent ||
+                    _config.GetItemConfigById(item.ComponentConfigId) is not ShipComponentConfig component || component.Slot != slot)
+                    continue;
+                AddChoice(item.InstanceId, component.DisplayName, component.Icon, ComponentInfo(item, component), Durability(item));
+            }
+        }
+    }
+
+    private void AddChoice(string id, string title, Sprite icon, string info, (int Current, int Maximum) durability, bool canInstall = true)
+    {
+        _choices.Add(new InventoryChoice { Id = id, Title = title, Icon = icon, Info = info, Durability = durability, CanInstall = canInstall });
+    }
+
+    private static (int Current, int Maximum) Durability(SystemNpcWeaponRuntimeState item) =>
+        (item?.CurrentDurability ?? 0, item?.MaximumDurability ?? 0);
+
+    private static string WithDescription(string description, string details) =>
+        string.IsNullOrWhiteSpace(description) ? details : description.Trim() + "\n\n" + details;
+
+    private static string CargoSpaceLine(int size) => $"Занимает места в трюме: {Mathf.Max(1, size)}";
+
+    private static string ComponentInfo(SystemNpcWeaponRuntimeState item, ShipComponentConfig component, int? installedFuel = null)
+    {
+        string details = component?.Description;
+        if (component != null && component.Slot == ShipComponentSlot.Engine)
+        {
+            string range = component.EngineRange > 0 ? component.EngineRange.ToString("0.##") : "—";
+            details = $"Скорость: {component.Speed:0.##}\nДальность: {range}";
         }
 
-        hullText.text =
-            $"Hull: {Mathf.Clamp(activeShip.CurrentHull, 0, stats.MaxHull)} / {stats.MaxHull}";
+        if (component != null && component.Slot == ShipComponentSlot.FuelTank)
+            details = $"Топливо: {installedFuel ?? item.StoredFuel} / {component.FuelCapacity}";
 
-        shieldText.text =
-            $"Shield: {Mathf.Clamp(activeShip.CurrentShield, 0, stats.MaxShield)} / {stats.MaxShield}";
-
-        energyText.text =
-            $"Energy: {Mathf.Clamp(activeShip.CurrentEnergy, 0, stats.MaxEnergy)} / {stats.MaxEnergy}";
-
-        speedText.text = $"Speed: {stats.Speed:0.0}";
-
-        cargoText.text =
-            $"Cargo: {GetUsedCargo(activeShip)} / {stats.CargoCapacity}";
+        int cargoSize = item.RolledStats.CargoSize > 0 ? item.RolledStats.CargoSize : component?.CargoSize ?? 1;
+        string cargo = CargoSpaceLine(cargoSize);
+        if (component != null && (component.Slot == ShipComponentSlot.Engine || component.Slot == ShipComponentSlot.FuelTank))
+            return WithDescription(component.Description, details + "\n" + cargo);
+        return WithDescription(details, cargo);
     }
 
-    private int GetUsedCargo(
-        ShipRuntimeData activeShip)
+    private static string WeaponInfo(SystemNpcWeaponRuntimeState weapon, WeaponConfig config)
     {
-        if (activeShip == null ||
-            activeShip.Cargo == null)
+        var stats = weapon.RolledStats;
+        int cargo = stats.CargoSize > 0 ? stats.CargoSize : config?.CargoSize ?? 1;
+        var lines = MarketScreenRules2A.WeaponDetails(stats.Range, stats.Damage, stats.ShotCount, cargo);
+        return WithDescription(config?.Description, lines.Range + "\n" + lines.Damage + "\n" + lines.Shots + "\n" + CargoSpaceLine(cargo));
+    }
+
+    private static bool SlotAvailable(AllyConfig hull, int index)
+    {
+        if (index == ShipLoadoutRules.HullSlot) return hull != null;
+        if (index >= ShipLoadoutRules.FirstWeaponSlot)
+            return index - ShipLoadoutRules.FirstWeaponSlot < ShipLoadoutRules.AvailableWeapons(hull);
+        return ShipLoadoutRules.Supports(hull, (ShipComponentSlot)(index - ShipLoadoutRules.FirstComponentSlot));
+    }
+
+    private static bool IsOccupied(ShipRuntimeData ship, int index)
+    {
+        if (index == ShipLoadoutRules.HullSlot) return ship != null;
+        if (index >= ShipLoadoutRules.FirstWeaponSlot)
+            return ShipLoadoutRules.Weapon(ship, index - ShipLoadoutRules.FirstWeaponSlot) != null;
+        return !string.IsNullOrEmpty(ShipLoadoutRules.ComponentId(ship, (ShipComponentSlot)(index - ShipLoadoutRules.FirstComponentSlot)));
+    }
+
+    private static string SlotName(int index)
+    {
+        if (index == ShipLoadoutRules.HullSlot) return "Корпус";
+        if (index >= ShipLoadoutRules.FirstWeaponSlot)
+            return "Оружие";
+        return ((ShipComponentSlot)(index - ShipLoadoutRules.FirstComponentSlot)) switch
         {
-            return 0;
-        }
-
-        return Bootstrapper.Instance.ServiceRegistry.Get<IInventoryService>().GetUsedCargo();
-    }
-
-    private void ShowMessage(string message)
-    {
-        if (messageText != null)
-            messageText.text = message;
-    }
-
-    private void ShowError(HangarError error)
-    {
-        var message = error switch
-        {
-            HangarError.ActiveShipMissing => "No active ship",
-            HangarError.ShipNotOwned => "Ship is not owned",
-            HangarError.ShipNotFound => "Ship not found",
-            HangarError.WeaponNotFound => "Weapon not found",
-            HangarError.ModuleNotFound => "Module not found",
-            HangarError.NoWeaponSlots => "No free weapon slots",
-            HangarError.NoModuleSlots => "No free module slots",
-            HangarError.AlreadyEquipped => "Already equipped",
-            HangarError.NotEquipped => "Not equipped",
-            HangarError.InvalidWeaponId => "Invalid weapon",
-            HangarError.InvalidModuleId => "Invalid module",
-            _ => "Hangar operation failed"
+            ShipComponentSlot.Engine => "Двигатель",
+            ShipComponentSlot.FuelTank => "Топливный бак",
+            ShipComponentSlot.Radar => "Радар",
+            ShipComponentSlot.Scanner => "Сканер",
+            ShipComponentSlot.RepairDroid => "Ремонтный дроид",
+            ShipComponentSlot.Grabber => "Захват",
+            ShipComponentSlot.ShieldGenerator => "Генератор поля",
+            _ => string.Empty
         };
-
-        ShowMessage(message);
     }
 }

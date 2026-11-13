@@ -17,7 +17,7 @@ MonoBehaviour:
   description: Настраиваемая таблица лута для enemy_infected_L07_01.
   icon: {fileID: 0}
   InitialCargo: []
-  initialEquipmentDurabilityPercent: 100
+  initialEquipmentDurability: -1
   Rules:
   - IsDeath: 0
     HullThresholdPercent: 50

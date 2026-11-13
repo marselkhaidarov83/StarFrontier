@@ -6,7 +6,7 @@ public class ItemConfig : BaseConfig
     [Header("Market Data")]
     [SerializeField] private ItemCategory itemCategory;
     [SerializeField] private int basePrice;
-    [SerializeField] private int cargoSize;
+    [SerializeField, Tooltip("Занимает места в трюме за одну единицу.")] private int cargoSize;
     [SerializeField] private ItemRarity rarity;
     [SerializeField] private bool isLegal = true;
 
