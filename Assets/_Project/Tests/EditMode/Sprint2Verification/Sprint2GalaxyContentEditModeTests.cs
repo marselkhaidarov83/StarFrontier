@@ -128,14 +128,9 @@ namespace StarFrontier.Tests.Sprint2
                     $"A route cannot connect a system to itself: {Sprint2TestData.RouteLabel(route)}");
 
                 Assert.That(
-                    route.ParsecDistance,
+                    route.FuelByDevelopmentLevel[0],
                     Is.GreaterThan(0),
-                    $"ParsecDistance must be positive: {Sprint2TestData.RouteLabel(route)}");
-
-                Assert.That(
-                    route.RequiredScanLevel,
-                    Is.GreaterThanOrEqualTo(0),
-                    $"RequiredScanLevel cannot be negative: {Sprint2TestData.RouteLabel(route)}");
+                    $"Level-one fuel cost must be positive: {Sprint2TestData.RouteLabel(route)}");
 
                 Assert.That(
                     route.FromSystem.Routes,

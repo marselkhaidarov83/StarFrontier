@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_reactor_spine_silent_wake_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_reactor_spine_silent_wake_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u0420\u0435\u0430\u043a\u0442\u043e\u0440\u043d\u044b\u0439 \u0425\u0440\u0435\u0431\u0435\u0442\u00bb \u2014 \u00ab\u0422\u0438\u0445\u0438\u0439 \u0421\u043b\u0435\u0434\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u0420\u0435\u0430\u043a\u0442\u043e\u0440\u043d\u044b\u0439 \u0425\u0440\u0435\u0431\u0435\u0442\u00bb \u0438 \u00ab\u0422\u0438\u0445\u0438\u0439 \u0421\u043b\u0435\u0434\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 995107ea8be8b49f2a444e51f2634214, type: 2}
   ToSystem: {fileID: 11400000, guid: 2040b296626134ff2a68840b69d0dc41, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 25
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 2ec22e1799afb4dbc83079d576777378, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 37c1ef5b5529743eca570b06db24d9e7, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 23
   - 22
   - 21
+  - 20
+  - 19
+  - 18
+  - 17
+  - 16

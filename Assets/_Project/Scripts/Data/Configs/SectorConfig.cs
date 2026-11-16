@@ -18,9 +18,6 @@ public class SectorConfig : BaseConfig
     [Tooltip("Если включено, все системы этого сектора при новой игре стартуют как вражеские системы.")]
     [SerializeField] private bool isEnemyAtStart;
 
-    [Tooltip("Фракция, которой принадлежат стартовые вражеские системы этого сектора.")]
-    [SerializeField] private EnemyFaction2A enemyFactionAtStart = EnemyFaction2A.AI;
-
     [Header("Position")]
     [Tooltip("Позиция объекта на карте галактики или сектора.")]
     [SerializeField] private Vector2 mapPosition;
@@ -38,7 +35,6 @@ public class SectorConfig : BaseConfig
     public StarSystemConfig[] Systems => systems;
     public int Order => order;
     public bool IsEnemyAtStart => isEnemyAtStart;
-    public EnemyFaction2A EnemyFactionAtStart => enemyFactionAtStart;
     public Vector2 MapPosition => mapPosition;
     public Vector2 MapSize => mapSize;
 }

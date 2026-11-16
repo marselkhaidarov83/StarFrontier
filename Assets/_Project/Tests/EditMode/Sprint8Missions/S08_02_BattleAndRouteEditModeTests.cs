@@ -111,7 +111,9 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         _testPlanets = _systems.Select(s => Config<PlanetConfig>("planet_" + s.Id)).ToArray();
         for (int i = 0; i < _systems.Length; i++)
         {
-            SetField(_testPlanets[i], "isInhabited", true);
+            var inhabitedType = Config<PlanetTypeConfig>("inhabited_planet_type_" + i);
+            SetField(inhabitedType, "isInhabited", true);
+            SetField(_testPlanets[i], "planetTypeConfig", inhabitedType);
             SetField(_systems[i], "planetRefs", new[] { _testPlanets[i] });
         }
         _sector = Config<SectorConfig>("sector"); SetField(_sector, "systems", _systems);
@@ -403,18 +405,22 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         _state.Galaxy.Routes.Find(r => r.RouteId == "CB").IsUnlocked = false;
         Assert.That(Candidates(false).Select(r => r.Id), Does.Not.Contain("AB"));
         _state.Galaxy.Routes.Find(r => r.RouteId == "CB").IsUnlocked = true;
-        var direct = _state.Galaxy.Routes.Find(r => r.RouteId == "AB"); direct.IsUnlocked = true; direct.DevelopmentLevel = 5;
+        var direct = _state.Galaxy.Routes.Find(r => r.RouteId == "AB"); direct.IsUnlocked = true; direct.DevelopmentLevel = RouteConfig.MaxDevelopmentLevel;
         Assert.That(Candidates(true).Select(r => r.Id), Does.Not.Contain("AB"));
         direct.DevelopmentLevel = 1; _state.Galaxy.Systems[1].SystemStatus = StarSystemStatus.Captured;
         Assert.That(Candidates(true).Select(r => r.Id), Does.Not.Contain("AB"));
     }
 
     [Test]
-    public void RouteFuel_HasFiveLevelsAndNeverDropsBelowOne()
+    public void RouteFuel_UsesLevelOneWhenRequestedLevelIsMissing()
     {
         Assert.That(Enumerable.Range(1, 5).Select(_direct.GetFuelCost), Is.EqualTo(new[] { 4, 3, 2, 1, 1 }));
         SetField(_direct, "fuelByDevelopmentLevel", new List<int> { 9, 7, 5, 3, 1 });
         Assert.That(_direct.GetFuelCost(3), Is.EqualTo(5));
+        Assert.That(_direct.GetFuelCost(6), Is.EqualTo(9));
+        Assert.That(_direct.GetFuelCost(0), Is.EqualTo(9));
+        SetField(_direct, "fuelByDevelopmentLevel", new List<int>());
+        Assert.That(_direct.GetFuelCost(10), Is.EqualTo(1));
     }
 
     private void StartBattle(bool liberation)
@@ -441,7 +447,9 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
     }
     private RouteConfig Route(string id, StarSystemConfig a, StarSystemConfig b, bool locked, int fuel)
     {
-        var route = Config<RouteConfig>(id); route.FromSystem = a; route.ToSystem = b; route.IsLockedAtStart = locked; route.ParsecDistance = fuel;
+        var route = Config<RouteConfig>(id); route.FromSystem = a; route.ToSystem = b; route.IsLockedAtStart = locked;
+        SetField(route, "fuelByDevelopmentLevel", Enumerable.Range(0, RouteConfig.MaxDevelopmentLevel)
+            .Select(index => Math.Max(1, fuel - index)).ToList());
         a.Routes.Add(route); b.Routes.Add(route); return route;
     }
     private T Config<T>(string id) where T : BaseConfig

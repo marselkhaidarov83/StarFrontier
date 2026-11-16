@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_siege_point_quantum_reach_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_siege_point_quantum_reach_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041e\u0441\u0430\u0434\u043d\u044b\u0439 \u0423\u0437\u0435\u043b\u00bb \u2014 \u00ab\u041a\u0432\u0430\u043d\u0442\u043e\u0432\u044b\u0439 \u041f\u0440\u0435\u0434\u0435\u043b\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041e\u0441\u0430\u0434\u043d\u044b\u0439 \u0423\u0437\u0435\u043b\u00bb \u0438 \u00ab\u041a\u0432\u0430\u043d\u0442\u043e\u0432\u044b\u0439 \u041f\u0440\u0435\u0434\u0435\u043b\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 5e3589de3dfd0485cabf123819bb66d0, type: 2}
   ToSystem: {fileID: 11400000, guid: d2f45e09b9580415c9df1e1846dcf022, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 33
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 5ec2d6d63ae7345c794181df4e904efa, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 8d3677979f2b9491593798c8eba4a638, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 31
   - 30
   - 29
+  - 28
+  - 27
+  - 26
+  - 25
+  - 24

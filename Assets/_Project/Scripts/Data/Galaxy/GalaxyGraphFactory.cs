@@ -44,8 +44,6 @@ using System.Collections.Generic;
             return new GalaxyNodeData(
                 systemId: config.Id,
                 displayName: config.DisplayName,
-                dangerLevel: config.DangerLevel,
-                economyType: config.EconomyType,
                 // neighborSystemIds: config.NeighborSystemIds,
                 linkedSystems: config.LinkedSystems
             );

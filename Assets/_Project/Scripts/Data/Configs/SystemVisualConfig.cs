@@ -6,6 +6,9 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Sprint 3/System Visual")]
 public sealed class SystemVisualConfig : BaseConfig
 {
+    public const float DefaultSystemExitVisualSize = 50f;
+    public const float DefaultStationVisualSize = 50f;
+
     [Header("System Object Size Grid")]
     [SerializeField]
     [Min(0.01f)]
@@ -37,6 +40,16 @@ public sealed class SystemVisualConfig : BaseConfig
     [SerializeField]
     [Tooltip("Спрайт для поля stationPlaceholderSprite. Используется визуальной частью игры при отображении объекта.")]
     private Sprite stationPlaceholderSprite;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip("Общий визуальный размер точки выхода из звёздной системы.")]
+    private float systemExitVisualSize = DefaultSystemExitVisualSize;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip("Общий визуальный размер станции на карте системы.")]
+    private float stationVisualSize = DefaultStationVisualSize;
 
     [Header("Markers")]
     [SerializeField]
@@ -90,6 +103,8 @@ public sealed class SystemVisualConfig : BaseConfig
     public Sprite ShipShadowSprite => shipShadowSprite;
     public Sprite EngineGlowSprite => engineGlowSprite;
     public float SizeUnitPixels => Mathf.Max(0.01f, sizeUnitPixels);
+    public float SystemExitVisualSize => Mathf.Max(0f, systemExitVisualSize);
+    public float StationVisualSize => Mathf.Max(0f, stationVisualSize);
 
     public Sprite SunPlaceholderSprite => sunPlaceholderSprite;
     public Sprite PlanetPlaceholderSprite => planetPlaceholderSprite;
@@ -134,7 +149,7 @@ public sealed class SystemVisualConfig : BaseConfig
     public float GetStationWorldSize(StationConfig station)
     {
         float units = station != null
-            ? station.VisualSize
+            ? StationVisualSize
             : 0f;
 
         return UnitsToWorldSize(units);
@@ -170,7 +185,7 @@ public sealed class SystemVisualConfig : BaseConfig
     public float GetSystemExitWorldSize(RouteEndpointConfig endpoint)
     {
         float units = endpoint != null
-            ? endpoint.VisualSize
+            ? SystemExitVisualSize
             : 0f;
 
         return UnitsToWorldSize(units);

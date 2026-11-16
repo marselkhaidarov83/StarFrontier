@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s02_system_ashen_crossing_02
   displayName: "\u041F\u0435\u043F\u0435\u043B\u044C\u043D\u044B\u0439 \u041F\u0435\u0440\u0435\u0445\u043E\u0434"
   description: "\u041F\u0435\u043F\u0435\u043B\u044C\u043D\u044B\u0439 \u041F\u0435\u0440\u0435\u0445\u043E\u0434"
-  icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
-  economyType: 4
-  dangerLevel: 2
+  icon: {fileID: 21300000, guid: 834b74f3c04a34ed0a65e6eb4feb8ab1, type: 3}
   sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: 1fe293bff45ef4b03afe411bb27a7718, type: 2}
@@ -46,15 +44,12 @@ MonoBehaviour:
     sprite: {fileID: 0}
     size: 0
   station: {fileID: 11400000, guid: ed6fd20d3e3d04144ba13631525750dd, type: 2}
-  missionTags: 010000000500000000000000
   mapPosition: {x: -4.3, y: -5.2}
   systemPopulationRule: {fileID: 11400000, guid: 66c62cc24edfc4f1dbb54807b1cd44e5, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: f26d1d9d4926b434ca03c837190a8a77, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: f26d1d9d4926b434ca03c837190a8a77, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 2
   routes:
   - {fileID: 11400000, guid: dfea616f1cb7448e990591e4fa56aa68, type: 2}
   - {fileID: 11400000, guid: 224c0219a455245108eba51c444b6ea3, type: 2}

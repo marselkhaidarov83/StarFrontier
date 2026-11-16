@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 public static class StationInfrastructureRules
 {
@@ -65,10 +64,9 @@ public static class StationInfrastructureRules
     public static bool CanCapture(StarSystemRuntimeState system, bool hasMilitary) =>
         system != null && !hasMilitary && (system.Station == null || system.Station.Level <= 0 || system.Station.IsDestroyed);
 
-    public static float Efficiency(StarSystemRuntimeState system, StationLevelEffectsSettings settings) =>
+    public static bool CanApplyEffects(StarSystemRuntimeState system) =>
         system?.Station != null && system.Station.IsOperational && !system.Station.ConfigMissing &&
-        system.SystemStatus != StarSystemStatus.Captured && settings != null
-            ? settings.Efficiency(DamagePercent(system.Station, system.InfrastructureDamage)) : 0f;
+        system.SystemStatus != StarSystemStatus.Captured;
 
     // Called only for completed game ticks, never for render frames or partial offline ticks.
     public static bool AutoRepair(StarSystemRuntimeState system, StationLevelEffectsSettings settings,
@@ -92,17 +90,4 @@ public static class StationInfrastructureRules
         return true;
     }
 
-    public static bool TryRepairQuote(StationConfig config, StationRuntimeState station, double damage,
-        string optionId, out StationOperationRuntimeState quote)
-    {
-        quote = null;
-        var options = config?.LevelEffects?.GetLevel(station?.Level ?? 0)?.RepairPaymentOptions;
-        if (station == null || !station.IsOperational || station.ConfigMissing || damage <= 0 || options == null) return false;
-        var matches = options.Where(x => x != null && x.Id == optionId).ToArray();
-        if (matches.Length != 1 || !matches[0].TryCreateSnapshot(StationOperationKind.Repair, station.Level, out quote)) return false;
-        quote.DurationSeconds = 0;
-        foreach (var cost in quote.PaidCosts)
-            cost.Amount = (int)Math.Max(1, Math.Ceiling(cost.Amount * Math.Min(100, damage) / 100d));
-        return true;
-    }
 }

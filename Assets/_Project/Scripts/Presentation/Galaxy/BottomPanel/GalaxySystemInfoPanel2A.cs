@@ -206,7 +206,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             return;
         }
         var station = targetSystemConfig.Station;
-        if (station == null || !station.IsActive)
+        if (station == null)
         {
             baseText.text = "Станция: нет";
             baseText.color = Color.gray;
@@ -598,7 +598,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             exitPoint,
             entryPoint,
             departureEndpoint != null
-                ? departureEndpoint.VisualSize
+                ? _configService?.SystemVisualConfig?.SystemExitVisualSize ?? SystemVisualConfig.DefaultSystemExitVisualSize
                 : 0f
         ));
         _gameStateMachine.Enter(new SystemState());

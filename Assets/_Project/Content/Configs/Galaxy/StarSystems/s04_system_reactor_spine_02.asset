@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s04_system_reactor_spine_02
   displayName: "\u0420\u0435\u0430\u043A\u0442\u043E\u0440\u043D\u044B\u0439 \u0425\u0440\u0435\u0431\u0435\u0442"
   description: "\u0420\u0435\u0430\u043A\u0442\u043E\u0440\u043D\u044B\u0439 \u0425\u0440\u0435\u0431\u0435\u0442"
-  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
-  economyType: 4
-  dangerLevel: 4
+  icon: {fileID: 21300000, guid: 834b74f3c04a34ed0a65e6eb4feb8ab1, type: 3}
   sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: b992f9280aad84dc5b94b7c359cc7c50, type: 2}
@@ -47,15 +45,12 @@ MonoBehaviour:
     sprite: {fileID: 0}
     size: 0
   station: {fileID: 11400000, guid: 8804a06a8e57f48dfb297c8f239f4cc6, type: 2}
-  missionTags: 
   mapPosition: {x: 2.3, y: -1.8}
   systemPopulationRule: {fileID: 11400000, guid: 4b1d438efa08846cda430036235fe0e6, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: ceed031d6ba404db3aa0a432d60ada0f, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: ceed031d6ba404db3aa0a432d60ada0f, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 5
   routes:
   - {fileID: 11400000, guid: 38fe4936724a643ad9bea27c62dfaf1d, type: 2}
   - {fileID: 11400000, guid: b96f130f3f72047fb88fae91572e4557, type: 2}

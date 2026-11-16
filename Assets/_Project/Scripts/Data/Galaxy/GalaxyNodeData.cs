@@ -6,8 +6,6 @@ public sealed class GalaxyNodeData
 {
     public string SystemId { get; }
     public string DisplayName { get; }
-    public int DangerLevel { get; }
-    public SystemEconomyType EconomyType { get; }
 
     // Храним как IReadOnlyList, чтобы снаружи никто не менял список случайно.
     public IReadOnlyList<string> NeighborIds => _neighborIds;
@@ -16,8 +14,6 @@ public sealed class GalaxyNodeData
     public GalaxyNodeData(
         string systemId,
         string displayName,
-        int dangerLevel,
-        SystemEconomyType economyType,
         // IEnumerable<string> neighborSystemIds,
         IEnumerable<StarSystemLink> linkedSystems)
     {
@@ -26,8 +22,6 @@ public sealed class GalaxyNodeData
 
         SystemId = systemId.Trim();
         DisplayName = string.IsNullOrWhiteSpace(displayName) ? SystemId : displayName.Trim();
-        DangerLevel = Math.Max(0, dangerLevel);
-        EconomyType = economyType;
 
         _neighborIds = new List<string>();
 
@@ -80,6 +74,6 @@ public sealed class GalaxyNodeData
 
     public override string ToString()
     {
-        return $"GalaxyNodeData(Id={SystemId}, Name={DisplayName}, Danger={DangerLevel}, Economy={EconomyType}, Neighbors={_neighborIds.Count})";
+        return $"GalaxyNodeData(Id={SystemId}, Name={DisplayName}, Neighbors={_neighborIds.Count})";
     }
 }

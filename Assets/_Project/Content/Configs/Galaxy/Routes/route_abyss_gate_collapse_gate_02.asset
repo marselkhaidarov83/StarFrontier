@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_abyss_gate_collapse_gate_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_abyss_gate_collapse_gate_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u0412\u0440\u0430\u0442\u0430 \u0411\u0435\u0437\u0434\u043d\u044b\u00bb \u2014 \u00ab\u0412\u0440\u0430\u0442\u0430 \u041a\u0440\u0443\u0448\u0435\u043d\u0438\u044f\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u0412\u0440\u0430\u0442\u0430 \u0411\u0435\u0437\u0434\u043d\u044b\u00bb \u0438 \u00ab\u0412\u0440\u0430\u0442\u0430 \u041a\u0440\u0443\u0448\u0435\u043d\u0438\u044f\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 62af30f5944844c98952ea679f0f09c5, type: 2}
   ToSystem: {fileID: 11400000, guid: e2a5344a0a8e94750aa03dcb8b391501, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 59
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 8d3677979f2b9491593798c8eba4a638, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 691aa30a03cd442cab96961cc3d1f1ff, type: 2}
   galaxyMapCurveStrength: 0.27
@@ -30,3 +28,8 @@ MonoBehaviour:
   - 57
   - 56
   - 55
+  - 54
+  - 53
+  - 52
+  - 51
+  - 50

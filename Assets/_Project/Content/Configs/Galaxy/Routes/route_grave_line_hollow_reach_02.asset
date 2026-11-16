@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_grave_line_hollow_reach_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_grave_line_hollow_reach_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041c\u043e\u0433\u0438\u043b\u044c\u043d\u0430\u044f \u041b\u0438\u043d\u0438\u044f\u00bb \u2014 \u00ab\u041f\u0443\u0441\u0442\u043e\u0439 \u041f\u0440\u0435\u0434\u0435\u043b\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041c\u043e\u0433\u0438\u043b\u044c\u043d\u0430\u044f \u041b\u0438\u043d\u0438\u044f\u00bb \u0438 \u00ab\u041f\u0443\u0441\u0442\u043e\u0439 \u041f\u0440\u0435\u0434\u0435\u043b\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: f5e06f770b6bf474798968301caec276, type: 2}
   ToSystem: {fileID: 11400000, guid: 38605d55aa54249299e3cd6b49354870, type: 2}
   IsLockedAtStart: 0
-  RequiredScanLevel: 0
-  ParsecDistance: 23
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: f74916dd2b9a44027a50b38400cfe591, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: ebf6cb7621b0749c9b46757329e9e49c, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 21
   - 20
   - 19
+  - 18
+  - 17
+  - 16
+  - 15
+  - 14

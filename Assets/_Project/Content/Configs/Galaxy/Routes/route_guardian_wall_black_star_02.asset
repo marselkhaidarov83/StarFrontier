@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_guardian_wall_black_star_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_guardian_wall_black_star_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u0421\u0442\u0435\u043d\u0430 \u0421\u0442\u0440\u0430\u0436\u0435\u0439\u00bb \u2014 \u00ab\u0427\u0435\u0440\u043d\u0430\u044f \u0417\u0432\u0435\u0437\u0434\u0430\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u0421\u0442\u0435\u043d\u0430 \u0421\u0442\u0440\u0430\u0436\u0435\u0439\u00bb \u0438 \u00ab\u0427\u0435\u0440\u043d\u0430\u044f \u0417\u0432\u0435\u0437\u0434\u0430\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 779cd11d14a8b4fd886dc4b8b9bbe059, type: 2}
   ToSystem: {fileID: 11400000, guid: cdb504ef6adc4409ead09ef267fd7c25, type: 2}
   IsLockedAtStart: 0
-  RequiredScanLevel: 0
-  ParsecDistance: 47
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 2a281d0339c9d4bd080d3c90d231e721, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: f74916dd2b9a44027a50b38400cfe591, type: 2}
   galaxyMapCurveStrength: 0.11
@@ -30,3 +28,8 @@ MonoBehaviour:
   - 45
   - 44
   - 43
+  - 42
+  - 41
+  - 40
+  - 39
+  - 38

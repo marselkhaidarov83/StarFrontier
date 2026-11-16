@@ -39,18 +39,12 @@ public sealed class StationNodeView2A : CustomMonoBehaviour
 
         if (stationImage != null)
         {
-            stationImage.sprite =
-                _station.IsDestroyed
-                    ? _station.DestroyedSprite
-                    : _station.StationSprite;
-
-            if (stationImage.sprite == null)
-                stationImage.sprite = _station.StationSprite;
+            stationImage.sprite = _station.EffectiveIcon;
 
             float worldSize =
                 visualConfig != null
                     ? visualConfig.GetStationWorldSize(_station)
-                    : _station.VisualSize;
+                    : SystemVisualConfig.DefaultStationVisualSize;
 
             _stationWorldSize = worldSize;
             SpriteRendererSizeUtility.SetWorldSize(
@@ -159,7 +153,7 @@ public sealed class StationNodeView2A : CustomMonoBehaviour
         targetMarkerView.Initialize(
             _station.Id,
             true,
-            _station.IsActive);
+            true);
     }
 
     private GameObject ResolveTargetMarkerRoot(
@@ -221,7 +215,7 @@ public sealed class StationNodeView2A : CustomMonoBehaviour
             !_stationService.TryGetStation(systemId, out var state) || state.ConfigId != _station.Id) return;
         float brightness = state.IsDestroyed ? destroyedBrightness : state.Level == 0 ? unbuiltBrightness : 1f;
         stationImage.color = new Color(_originalColor.r * brightness, _originalColor.g * brightness, _originalColor.b * brightness, _originalColor.a);
-        Sprite sprite = state.IsDestroyed && _station.DestroyedSprite != null ? _station.DestroyedSprite : _station.StationSprite;
+        Sprite sprite = _station.EffectiveIcon;
         if (stationImage.sprite != sprite)
         {
             stationImage.sprite = sprite;

@@ -82,15 +82,15 @@ public sealed class StationInfrastructureAndPaymentsEditModeTests
         Assert.That(StationInfrastructureRules.AutoRepair(system, settings, false), Is.False);
         Assert.That(system.Station.Health, Is.EqualTo(350));
     }
-    [Test] public void Efficiency_IsCalculatedWithoutAccumulatingBonuses()
+    [Test] public void StationEffects_RequireWorkingStationRegardlessOfDamage()
     {
-        var system = System(40); var settings = new StationLevelEffectsSettings();
-        Assert.That(StationInfrastructureRules.Efficiency(system, settings), Is.EqualTo(.6f).Within(.001));
-        Assert.That(StationInfrastructureRules.Efficiency(system, settings), Is.EqualTo(.6f).Within(.001));
+        var system = System(40);
+        Assert.That(StationInfrastructureRules.CanApplyEffects(system), Is.True);
         system.Station.IsDestroyed = true;
-        Assert.That(StationInfrastructureRules.Efficiency(system, settings), Is.Zero);
-        system.Station.IsDestroyed = false; system.InfrastructureDamage = 0;
-        Assert.That(StationInfrastructureRules.Efficiency(system, settings), Is.EqualTo(1));
+        Assert.That(StationInfrastructureRules.CanApplyEffects(system), Is.False);
+        system.Station.IsDestroyed = false;
+        system.SystemStatus = StarSystemStatus.Captured;
+        Assert.That(StationInfrastructureRules.CanApplyEffects(system), Is.False);
     }
     [Test] public void Capture_RequiresDestroyedStationAndNoMilitary()
     {
@@ -133,17 +133,6 @@ public sealed class StationInfrastructureAndPaymentsEditModeTests
         var p = new PlayerState { Diamonds = 10 };
         Assert.That(StationPaymentRules.TrySpend(p, Quote(Cost(StationPaymentResource.Diamonds, 7)), out _), Is.True);
         Assert.That(p.Diamonds, Is.EqualTo(3));
-    }
-    [Test] public void RepairQuote_ScalesCostAndHasNoDuration()
-    {
-        var config = Asset<StationConfig>(); var profile = Asset<StationLevelEffectsConfig>();
-        profile.Levels = new[] { new StationLevelEffectsSettings { Level = 2,
-            RepairPaymentOptions = new[] { new StationInstantPaymentOption { Id = "pay", Costs = new[] {
-                new StationPaymentCost { Resource = StationPaymentResource.Diamonds, Amount = 100 } } } } } };
-        Set(config, "levelEffects", profile);
-        Assert.That(StationInfrastructureRules.TryRepairQuote(config, System().Station, 30, "pay", out var quote), Is.True);
-        Assert.That(quote.DurationSeconds, Is.Zero);
-        Assert.That(quote.PaidCosts[0].Amount, Is.EqualTo(30));
     }
     [Test] public void SourceIdentity_SurvivesCompactSaveRuleIdAndJson()
     {
@@ -299,12 +288,10 @@ public sealed class StationInfrastructureAndPaymentsEditModeTests
         system.ApplyInfrastructureDamageFromWar(50, false); StationLifecycleRules.Normalize(system);
         Assert.That(system.Station.Health, Is.EqualTo(1150)); Assert.That(system.Station.MaxHealth, Is.EqualTo(1200));
     }
-    [Test] public void AbsoluteHealth_SubPercentDamageIsRepairedAndChangesEfficiency()
+    [Test] public void AbsoluteHealth_SubPercentDamageIsRepaired()
     {
         var system = System(); system.ApplyInfrastructureDamageFromWar(1, false);
         Assert.That(system.InfrastructureDamage, Is.EqualTo(1));
-        Assert.That(StationInfrastructureRules.Efficiency(system, new StationLevelEffectsSettings()),
-            Is.EqualTo(449f / 450f).Within(.00001));
         system = JsonUtility.FromJson<StarSystemRuntimeState>(JsonUtility.ToJson(system));
         StationInfrastructureRules.AutoRepair(system, new StationLevelEffectsSettings { HealthPerTick = 1 }, true);
         Assert.That(system.Station.Health, Is.EqualTo(449));
@@ -325,10 +312,10 @@ public sealed class StationInfrastructureAndPaymentsEditModeTests
     [TestCase("military", 700, 4, 35)] [TestCase("science", 800, 5, 40)] [TestCase("medical", 900, 6, 45)]
     public void RecoveryPrices_UseStationTypeAndReachedLevel_ForBothPaymentChoices(string kind, int credits, int astralites, int diamonds)
     {
-        var profile = UnityEditor.AssetDatabase.LoadAssetAtPath<StationLevelEffectsConfig>(
-            "Assets/_Project/Content/Configs/Stations2A/Levels/station_levels_" + kind + ".asset");
+        var profile = UnityEditor.AssetDatabase.LoadAssetAtPath<StationTypeConfig>(
+            "Assets/_Project/Content/Configs/Galaxy/Stations/StationType/station_type_" + kind + "_01.asset");
         Assert.That(profile, Is.Not.Null);
-        var config = Asset<StationConfig>(); Set(config, "levelEffects", profile);
+        var config = Asset<StationConfig>(); Set(config, "stationTypeConfig", profile);
         for (int level = 1; level <= 10; level++)
         {
             Assert.That(config.TryCreateOperation(StationOperationKind.Recovery, level, "credits_astralites", out var ordinary), Is.True);

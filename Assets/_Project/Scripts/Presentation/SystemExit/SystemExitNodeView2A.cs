@@ -63,6 +63,7 @@ public sealed class SystemExitNodeView2A :
 
     private RouteConfig _routeConfig;
     private RouteEndpointConfig _endpointConfig;
+    private SystemVisualConfig _visualConfig;
 
     private string _currentSystemId =
         string.Empty;
@@ -111,6 +112,7 @@ public sealed class SystemExitNodeView2A :
 
         _endpointConfig =
             endpointConfig;
+        _visualConfig = visualConfig;
 
         _currentSystemId =
             NormalizeId(
@@ -401,7 +403,7 @@ public sealed class SystemExitNodeView2A :
                 _endpointConfig.ExitPoint,
                 _routeConfig.GetEntryPoint(
                     _targetSystemId),
-                _endpointConfig.VisualSize));
+                _visualConfig?.SystemExitVisualSize ?? SystemVisualConfig.DefaultSystemExitVisualSize));
     }
 
     private void LateUpdate()

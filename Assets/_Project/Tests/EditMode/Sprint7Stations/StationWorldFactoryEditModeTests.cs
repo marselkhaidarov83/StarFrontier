@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
@@ -39,14 +40,12 @@ public sealed class StationWorldFactoryEditModeTests
     }
 
     [Test]
-    public void NewWorld_UsesIndividualStationLevelsWithoutChangingHiddenDiscovery()
+    public void NewWorld_UsesIndividualStationLevels()
     {
         var unbuilt = Make<StarSystemConfig>("system_unbuilt");
         var developed = Make<StarSystemConfig>("system_developed");
         Set(unbuilt, "station", Station("station_unbuilt", 0));
         Set(developed, "station", Station("station_developed", 6));
-        Set(unbuilt, "isHiddenAtStart", true);
-        Set(developed, "isHiddenAtStart", true);
         var galaxy = GalaxyWith(SectorWith("sector", unbuilt, developed));
 
         var state = GalaxyRuntimeStateFactory.CreateNewGalaxyRuntimeState(galaxy, false, false);
@@ -56,9 +55,48 @@ public sealed class StationWorldFactoryEditModeTests
         Assert.That(state.Systems[1].Station.Level, Is.EqualTo(6));
         Assert.That(state.Systems[0].Station.IsOperational, Is.False);
         Assert.That(state.Systems[1].Station.IsOperational, Is.True);
-        Assert.That(state.Systems[0].IsDiscovered, Is.False);
-        Assert.That(state.Systems[1].IsDiscovered, Is.False);
         Assert.That(StationLifecycleRules.GetValidationErrors(state), Is.Empty);
+    }
+
+    [TestCase(false, 0)]
+    [TestCase(false, 6)]
+    [TestCase(false, 7)]
+    [TestCase(false, 8)]
+    [TestCase(true, 8)]
+    public void NewWorld_DistributesCapturedSystemsAcrossFactions(bool mobileTestMode, int enemyCount)
+    {
+        var allied = SectorWith("allied", Make<StarSystemConfig>("allied_system"));
+        var enemies = Enumerable.Range(0, enemyCount)
+            .Select(index => Make<StarSystemConfig>("enemy_" + index))
+            .ToArray();
+        Set(allied.Systems[0], "station", Station("station_allied", 1));
+        foreach (var enemy in enemies)
+            Set(enemy, "station", Station("station_" + enemy.Id, 1));
+        var firstEnemy = SectorWith("enemy_first", enemies.Take(enemyCount / 2).ToArray());
+        var secondEnemy = SectorWith("enemy_second", enemies.Skip(enemyCount / 2).ToArray());
+        Set(allied, "order", 0);
+        Set(firstEnemy, "order", 1);
+        Set(secondEnemy, "order", 2);
+        Set(firstEnemy, "isEnemyAtStart", !mobileTestMode);
+        Set(secondEnemy, "isEnemyAtStart", !mobileTestMode);
+        var galaxy = GalaxyWith(allied, firstEnemy, secondEnemy);
+
+        var state = GalaxyRuntimeStateFactory.CreateNewGalaxyRuntimeState(
+            galaxy, false, false, mobileTestMode, alliedSectorCount: 1);
+
+        string[] factionIds = { "ai", "ancients", "infected" };
+        Assert.That(state.EnemyFactions.Select(faction => faction.FactionId),
+            Is.EqualTo(factionIds.Take(Math.Min(enemyCount, factionIds.Length))));
+        Assert.That(state.Systems.Where(system => system.SystemStatus == StarSystemStatus.Captured)
+            .Select(system => system.SystemId), Is.EqualTo(enemies.Select(system => system.Id)));
+        Assert.That(state.Systems.All(system => system.Station.IsEnabled && !system.Station.IsDestroyed), Is.True);
+        for (int index = 0; index < state.EnemyFactions.Count; index++)
+        {
+            var expected = enemies.Where((system, position) => position % factionIds.Length == index)
+                .Select(system => system.Id);
+            Assert.That(state.EnemyFactions[index].OwnedSystemIds, Is.EqualTo(expected));
+            Assert.That(state.EnemyFactions[index].TerritorySystemIds, Is.EqualTo(expected));
+        }
     }
 
     private StationConfig Station(string id, int level)

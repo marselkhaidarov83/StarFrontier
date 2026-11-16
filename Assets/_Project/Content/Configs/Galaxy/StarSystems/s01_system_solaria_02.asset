@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s01_system_solaria_02
   displayName: "\u0421\u043E\u043B\u044F\u0440\u0438\u044F"
   description: "\u0421\u043E\u043B\u044F\u0440\u0438\u044F"
-  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
-  economyType: 0
-  dangerLevel: 1
+  icon: {fileID: 21300000, guid: 1fe825ce7ba4145bb82a1760bd715aea, type: 3}
   sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: 9f4f2e7189f8e4aaba831085216b8f5e, type: 2}
@@ -29,13 +27,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 98f685346fdb0476a8804fef0b058976, type: 2}
   linkedSystems: []
   station: {fileID: 11400000, guid: 3f68810ed069d4d56a8b153cdadfc41d, type: 2}
-  missionTags: 040000000300000000000000
   mapPosition: {x: -0.2, y: -6.6}
   systemPopulationRule: {fileID: 11400000, guid: 8bbee09ad94fc463ca04e9af38d72e78, type: 2}
-  npcSpawnPoints: {fileID: 11400000, guid: 24eecd023b6a14d7297aa04a758019b0, type: 2}
+  enemySpawnPoints: {fileID: 0}
   isStartSystem: 1
-  isHiddenAtStart: 0
-  recommendedPower: 1
   routes:
   - {fileID: 11400000, guid: df0f3f31f97fa4a9da4a76fa6b3f9d0b, type: 2}
   - {fileID: 11400000, guid: 12d8214bc6ed648978b28d17aea4c62b, type: 2}

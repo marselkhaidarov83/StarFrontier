@@ -173,18 +173,6 @@ public sealed class S03_02_RouteEndpointAssetTests
                 Is.True,
                 "Duplicate route pair: " + pair);
 
-            int parsecDistance =
-                Convert.ToInt32(
-                    SfTestReflection.GetMemberValue(
-                        route,
-                        "ParsecDistance"));
-
-            Assert.That(
-                parsecDistance,
-                Is.GreaterThan(0),
-                "ParsecDistance must be > 0: " +
-                path);
-
             object fromEndpoint =
                 SfTestReflection.GetMemberValue(
                     route,

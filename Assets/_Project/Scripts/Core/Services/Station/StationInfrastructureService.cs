@@ -36,9 +36,6 @@ public sealed class StationInfrastructureService : IStationInfrastructureService
             var capturedSystem = system;
             system.HasLivingMilitary = () => _npcs.Npcs.Any(n => n != null && n.IsAlive && n.IsAlly &&
                 n.AllyRole == AllyRole2A.Military && n.CurrentSystemId == capturedSystem.SystemId);
-            // Legacy saves can contain an intact station in Captured; ownership implies its destruction.
-            if (system.SystemStatus == StarSystemStatus.Captured && system.Station != null)
-                StationLifecycleRules.Destroy(system.Station);
         }
         foreach (var sector in _config.GetAllSectors())
         {
@@ -49,7 +46,7 @@ public sealed class StationInfrastructureService : IStationInfrastructureService
         }
     }
     private StationLevelEffectsSettings Settings(StarSystemRuntimeState system) =>
-        system?.Station == null ? null : _config.GetStarSystemConfigById(system.SystemId)?.Station?.LevelEffects?.GetLevel(system.Station.Level);
+        system?.Station == null ? null : _config.GetStarSystemConfigById(system.SystemId)?.Station?.StationTypeConfig?.GetLevel(system.Station.Level);
     public float GetRangerAttackProbability(string systemId, out bool configured)
     {
         configured = false;
@@ -59,11 +56,10 @@ public sealed class StationInfrastructureService : IStationInfrastructureService
         {
             if (config?.Station == null || config.Station.StationType != StationType.RangerBase) continue;
             var system = _session.State?.Galaxy?.Systems?.Find(x => x != null && x.SystemId == config.Id);
-            var settings = Settings(system) ?? config.Station.LevelEffects?.GetLevel(1);
-            if (settings == null || system?.Station == null || !system.Station.IsOperational ||
-                system.Station.ConfigMissing || system.SystemStatus == StarSystemStatus.Captured) return 0;
+            var settings = Settings(system) ?? config.Station.StationTypeConfig?.GetLevel(1);
+            if (settings == null || !StationInfrastructureRules.CanApplyEffects(system)) return 0;
             configured = true;
-            return Mathf.Clamp01(settings.RangerAttackProbability * StationInfrastructureRules.Efficiency(system, settings));
+            return Mathf.Clamp01(settings.RangerAttackProbability);
         }
         return 0;
     }
@@ -72,10 +68,10 @@ public sealed class StationInfrastructureService : IStationInfrastructureService
         double rate = 0;
         foreach (var system in _session.State?.Galaxy?.Systems ?? new List<StarSystemRuntimeState>())
         {
-            if (system?.Station?.StationType != StationType.Science) continue;
+            if (system?.Station?.StationType != StationType.Science || !StationInfrastructureRules.CanApplyEffects(system)) continue;
             var settings = Settings(system);
             if (settings == null || float.IsNaN(settings.ScienceRate) || float.IsInfinity(settings.ScienceRate)) continue;
-            rate += Math.Max(0, settings.ScienceRate) * StationInfrastructureRules.Efficiency(system, settings);
+            rate += Math.Max(0, settings.ScienceRate);
         }
         return rate;
     }
@@ -137,8 +133,7 @@ public sealed class StationInfrastructureService : IStationInfrastructureService
     }
     private void Populate(StarSystemRuntimeState system, StationLevelEffectsSettings settings, double seconds)
     {
-        float efficiency = StationInfrastructureRules.Efficiency(system, settings);
-        if (efficiency <= 0 || settings.Population?.AllySpawnRules == null ||
+        if (!StationInfrastructureRules.CanApplyEffects(system) || settings.Population?.AllySpawnRules == null ||
             Bootstrapper.Instance.StopAutomaticAllySpawns) return;
         int galaxyLevel = Mathf.Clamp(_session.State.Galaxy.Sectors.Count(x => x != null && x.IsUnlocked), 1, 10);
         var home = _config.GetStarSystemConfigById(system.SystemId);
@@ -152,7 +147,7 @@ public sealed class StationInfrastructureService : IStationInfrastructureService
                 string timerId = source + ":" + entry.AllyConfig.Id;
                 bool initialized = _population.RuntimeState.Timers.Any(t => t != null && t.SystemId == system.SystemId && t.RuleId == timerId);
                 var timer = _population.RuntimeState.GetOrCreateTimer(system.SystemId, timerId);
-                timer.TimerSeconds += (float)(seconds * efficiency);
+                timer.TimerSeconds += (float)seconds;
                 float interval = rule.GetSpawnIntervalSeconds(galaxyLevel);
                 int count = _npcs.Npcs.Count(n => n != null && n.IsAlive && n.ConfigId == entry.AllyConfig.Id &&
                     StationMilitaryRules.SourceSystem(n) == system.SystemId);

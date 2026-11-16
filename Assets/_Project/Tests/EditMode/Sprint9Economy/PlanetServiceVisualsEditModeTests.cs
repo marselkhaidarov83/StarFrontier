@@ -14,8 +14,14 @@ public sealed class PlanetServiceVisualsEditModeTests
     private PlanetConfig Planet(PlanetType type)
     {
         var planet = ScriptableObject.CreateInstance<PlanetConfig>(); _temporary.Add(planet);
-        var fields = new SerializedObject(planet); fields.FindProperty("planetType").intValue = (int)type;
-        fields.ApplyModifiedPropertiesWithoutUndo(); return planet;
+        var planetType = AssetDatabase.LoadAssetAtPath<PlanetTypeConfig>(
+            "Assets/_Project/Content/Configs/Galaxy/Planets/PlanetTypes/planet_type_" +
+            type.ToString().ToLowerInvariant() + "_01.asset");
+        Assert.That(planetType, Is.Not.Null);
+        Assert.That(planetType.PlanetType, Is.EqualTo(type));
+        var planetFields = new SerializedObject(planet);
+        planetFields.FindProperty("planetTypeConfig").objectReferenceValue = planetType;
+        planetFields.ApplyModifiedPropertiesWithoutUndo(); return planet;
     }
     private GameObject Root(string name)
     {
@@ -56,17 +62,18 @@ public sealed class PlanetServiceVisualsEditModeTests
     [TestCase(StationType.Medical, "medical")]
     public void StationTypes_UseTheirOwnServiceArt(StationType type, string location)
     {
-        var stationType = ScriptableObject.CreateInstance<StationTypeConfig>();
-        _temporary.Add(stationType);
-        var typeFields = new SerializedObject(stationType);
-        typeFields.FindProperty("stationType").intValue = (int)type;
-        typeFields.ApplyModifiedPropertiesWithoutUndo();
+        string assetName = type == StationType.RangerBase ? "ranger_base" : location;
+        var stationType = AssetDatabase.LoadAssetAtPath<StationTypeConfig>(
+            "Assets/_Project/Content/Configs/Galaxy/Stations/StationType/station_type_" + assetName + "_01.asset");
+        Assert.That(stationType, Is.Not.Null);
+        Assert.That(stationType.StationType, Is.EqualTo(type));
 
         var station = ScriptableObject.CreateInstance<StationConfig>();
         _temporary.Add(station);
         var stationFields = new SerializedObject(station);
         stationFields.FindProperty("stationTypeConfig").objectReferenceValue = stationType;
         stationFields.ApplyModifiedPropertiesWithoutUndo();
+        Assert.That(Catalog.Get(null, PlanetServiceKind2A.Market, null, station), Is.SameAs(stationType.MarketIllustration));
         AssertServiceArt(kind => Catalog.Get(null, kind, null, station), "Stations/station-" + location);
     }
 

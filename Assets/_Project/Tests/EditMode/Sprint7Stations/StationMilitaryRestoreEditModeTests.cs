@@ -151,10 +151,10 @@ public sealed class StationMilitaryRestoreEditModeTests
     private StationInfrastructureService RepairFixture(out Session session, out FakeNpcs npcs,
         out StarSystemRuntimeState system, int rate = 7)
     {
-        var effects = Asset<StationLevelEffectsConfig>();
+        var effects = Asset<StationTypeConfig>();
         effects.Levels = new[] { new StationLevelEffectsSettings { Level = 2, MaxHealth = 450, HealthPerTick = rate } };
         var station = Asset<StationConfig>(); Set(station, "id", "repair-station"); Set(station, "initialLevel", 2);
-        Set(station, "stationTypeConfig", Asset<StationTypeConfig>()); Set(station, "levelEffects", effects);
+        Set(station, "stationTypeConfig", effects);
         var home = Asset<StarSystemConfig>(); Set(home, "id", "repair"); Set(home, "station", station);
         var sector = Asset<SectorConfig>(); Set(sector, "systems", new[] { home });
         var config = new Config { Sectors = new[] { sector } }; _repairConfig = config;
@@ -227,8 +227,8 @@ public sealed class StationMilitaryRestoreEditModeTests
     [TestCase("science", 1)] [TestCase("medical", 3)]
     public void TickRepair_TypeAssetsContainExplicitLevelRates(string kind, int factor)
     {
-        var config = UnityEditor.AssetDatabase.LoadAssetAtPath<StationLevelEffectsConfig>(
-            "Assets/_Project/Content/Configs/Stations2A/Levels/station_levels_" + kind + ".asset");
+        var config = UnityEditor.AssetDatabase.LoadAssetAtPath<StationTypeConfig>(
+            "Assets/_Project/Content/Configs/Galaxy/Stations/StationType/station_type_" + kind + "_01.asset");
         Assert.That(config, Is.Not.Null);
         for (int level = 1; level <= 10; level++)
             Assert.That(config.GetLevel(level).HealthPerTick, Is.EqualTo(level * factor), kind + " level " + level);
@@ -258,13 +258,13 @@ public sealed class StationMilitaryRestoreEditModeTests
         finally { GameTimeState.SecondsPerDay = oldTick; }
     }
     [Test]
-    public void ScienceEffect_RepeatedInitializationQueriesAndReload_DoNotStackAndReflectDamage()
+    public void ScienceEffect_ReloadAndPartialDamageKeepFullRateUntilDestruction()
     {
         var infrastructure = RepairFixture(out var session, out _, out var system);
         var config = _repairConfig.GetStarSystemConfigById("repair");
         Set(config.Station.StationTypeConfig, "stationType", StationType.Science);
         system.Station.StationType = StationType.Science;
-        config.Station.LevelEffects.Levels[0].ScienceRate = 9;
+        config.Station.StationTypeConfig.Levels[0].ScienceRate = 9;
         var stations = new StationService(session, _repairConfig.GetStarSystemConfigById, new SimpleEventBus());
         StationInfrastructureRules.RepairFully(system);
         for (int i = 0; i < 3; i++)
@@ -276,7 +276,7 @@ public sealed class StationMilitaryRestoreEditModeTests
         }
         system = session.State.Galaxy.Systems[0];
         system.ApplyInfrastructureDamageFromWar(150, false); stations.ReconcileSystem("repair");
-        Assert.That(infrastructure.GetScienceRate(), Is.EqualTo(6).Within(.00001));
+        Assert.That(infrastructure.GetScienceRate(), Is.EqualTo(9));
         system.ApplyInfrastructureDamageFromWar(1, true); stations.ReconcileSystem("repair");
         Assert.That(infrastructure.GetScienceRate(), Is.Zero);
         session.State.Player.CurrentSystemId = "repair";

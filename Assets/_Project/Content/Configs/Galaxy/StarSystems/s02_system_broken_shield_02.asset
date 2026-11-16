@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s02_system_broken_shield_02
   displayName: "\u0421\u043B\u043E\u043C\u0430\u043D\u043D\u044B\u0439 \u0429\u0438\u0442"
   description: "\u0421\u043B\u043E\u043C\u0430\u043D\u043D\u044B\u0439 \u0429\u0438\u0442"
-  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
-  economyType: 5
-  dangerLevel: 3
+  icon: {fileID: 21300000, guid: cc6146af7bd554e7eba8f8e88d4d5577, type: 3}
   sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: 1a5a457ac883e4ce6afd0af319336bdd, type: 2}
@@ -41,15 +39,12 @@ MonoBehaviour:
     sprite: {fileID: 0}
     size: 0
   station: {fileID: 11400000, guid: 21b34e446354f4239a4c5f93c94773f3, type: 2}
-  missionTags: 020000000500000006000000
   mapPosition: {x: -2.1, y: -4.6}
   systemPopulationRule: {fileID: 11400000, guid: 7873c5d66bb264ff5a9758e0aa9ae316, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: 61bcc1939609b489f8936423d185672a, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: 61bcc1939609b489f8936423d185672a, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 3
   routes:
   - {fileID: 11400000, guid: d9859f1a7596e469e87a649d1815e969, type: 2}
   - {fileID: 11400000, guid: ec79ee251b6954b95bdfcf8b75523b92, type: 2}

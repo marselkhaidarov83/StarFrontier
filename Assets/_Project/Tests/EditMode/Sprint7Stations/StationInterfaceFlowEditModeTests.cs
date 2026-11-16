@@ -13,7 +13,7 @@ public sealed class StationInterfaceFlowEditModeTests
     private StationCardService _cards;
     private StationConfig _station;
     private StarSystemConfig _config;
-    private StationLevelEffectsConfig _effects;
+    private StationTypeConfig _effects;
     private StationPaymentOption _upgrade;
     private Vector2 _position;
     private StarSystemRuntimeState System => _session.State.Galaxy.Systems[0];
@@ -39,14 +39,19 @@ public sealed class StationInterfaceFlowEditModeTests
         _session.State.Player.CurrentSystemId = "sys"; _session.State.Player.Diamonds = 100;
         var type = Asset<StationTypeConfig>(); _station = Asset<StationConfig>(); Set(_station, "id", "station");
         Set(_station, "stationTypeConfig", type); Set(_station, "initialLevel", 2);
-        _effects = Asset<StationLevelEffectsConfig>(); _effects.Levels = new[] {
-            new StationLevelEffectsSettings { Level = 2, RepairPaymentOptions = new[] { new StationInstantPaymentOption { Id = "pay", Costs = Costs(100) } },
-                RecoveryPaymentOptions = new[] { new StationInstantPaymentOption { Id = "pay", Costs = Costs(20) } } },
+        var recoveryPayment = Asset<StationPaymentOptionsConfig>();
+        recoveryPayment.Options = new[] { new StationPaymentOption { Id = "pay", Costs = Costs(20) } };
+        _effects = type; _effects.Levels = new[] {
+            new StationLevelEffectsSettings { Level = 2, RecoveryPayment = recoveryPayment },
             new StationLevelEffectsSettings { Level = 3, RequiredGalaxyLevel = 1 } };
-        Set(_station, "levelEffects", _effects);
         _upgrade = new StationPaymentOption { Id = "pay", Costs = Costs(10), DurationSeconds = 20 };
-        Set(_station, "upgradeSettings", new[] { new StationUpgradeSettings { TargetLevel = 3, PaymentOptions = new[] { _upgrade } } });
-        Set(_station, "constructionPaymentOptions", new[] { new StationPaymentOption { Id = "pay", Costs = Costs(10), DurationSeconds = 5 } });
+        var buildPayment = Asset<StationPaymentOptionsConfig>();
+        buildPayment.Options = new[] { new StationPaymentOption { Id = "pay", Costs = Costs(10), DurationSeconds = 5 } };
+        var upgradePayment = Asset<StationPaymentOptionsConfig>();
+        upgradePayment.Options = new[] { _upgrade };
+        Set(type, "upgradeSettings", new[] {
+            new StationUpgradeSettings { TargetLevel = 1, Payment = buildPayment },
+            new StationUpgradeSettings { TargetLevel = 3, Payment = upgradePayment } });
         _config = Asset<StarSystemConfig>(); Set(_config, "id", "sys"); Set(_config, "station", _station);
         _session.State.Galaxy.Systems.Add(new StarSystemRuntimeState { SystemId = "sys" });
         _stations = new StationService(_session, _ => _config, new SimpleEventBus(), new StationResourcePaymentGateway(_session)); _stations.InitializeSession(true);
@@ -111,9 +116,9 @@ public sealed class StationInterfaceFlowEditModeTests
         var ticket = Prepare(); _session.State.Player.CurrentSystemId = "other";
         Assert.That(_cards.Confirm(ticket.TicketId, out _), Is.False); Assert.That(_session.State.Player.Diamonds, Is.EqualTo(100));
     }
-    [Test] public void MovingAwayAfterRepairPreview_PreventsExecution()
+    [Test] public void MovingAwayAfterRecoveryPreview_PreventsExecution()
     {
-        System.ApplyInfrastructureDamageFromWar(135, false); var ticket = Prepare(StationOperationKind.Repair);
+        System.ApplyInfrastructureDamageFromWar(135, true); var ticket = Prepare(StationOperationKind.Recovery);
         _position = new Vector2(1000, 1000);
         Assert.That(_cards.Confirm(ticket.TicketId, out string reason), Is.False); Assert.That(reason, Is.EqualTo("ApproachRequired"));
         Assert.That(_session.State.Player.Diamonds, Is.EqualTo(100));
@@ -138,12 +143,6 @@ public sealed class StationInterfaceFlowEditModeTests
     }
     [Test] public void Snapshot_IsDetachedFromLiveStation()
     { _cards.GetCard("sys").Station.Level = 10; Assert.That(System.Station.Level, Is.EqualTo(2)); }
-    [Test] public void RepairPreview_ShowsProportionalInstantPrice()
-    {
-        System.ApplyInfrastructureDamageFromWar(135, false);
-        var offer = _cards.GetOffers("sys").First(x => x.Kind == StationOperationKind.Repair);
-        Assert.That(offer.Quote.DurationSeconds, Is.Zero); Assert.That(offer.Quote.PaidCosts[0].Amount, Is.EqualTo(30));
-    }
     [Test] public void DestroyedStation_OffersRecoveryAndKeepsLevel()
     {
         System.ApplyInfrastructureDamageFromWar(100, true);

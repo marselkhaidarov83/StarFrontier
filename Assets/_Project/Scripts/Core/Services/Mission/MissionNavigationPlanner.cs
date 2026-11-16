@@ -99,7 +99,7 @@ public static class MissionNavigationPlanner
                 if (visitedSystemIds != null && other.Id != startSystemId &&
                     visitedSystemIds.Contains(other.Id))
                     continue;
-                int cost = Math.Max(1, route.ParsecDistance);
+                int cost = route.GetFuelCost(galaxy);
                 if (best > int.MaxValue - cost) continue;
                 int next = best + cost;
                 if (next >= distance[other.Id]) continue;

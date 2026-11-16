@@ -53,7 +53,7 @@ public sealed class StationSelectableView2A :
                         position.x,
                         position.y),
                     true,
-                    station.IsActive,
+                    true,
                     true,
                     out TargetSelectionFailReason2A failReason);
 

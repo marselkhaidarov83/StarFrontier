@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 public static class GalaxyRuntimeStateFactory
 {
+    private static readonly string[] InitialEnemyFactionIds = { "ai", "ancients", "infected" };
+
     public static GalaxyRuntimeState CreateNewGalaxyRuntimeState(
         GalaxyConfig config,
         bool sectorAllOpened,
@@ -27,6 +29,7 @@ public static class GalaxyRuntimeStateFactory
             return state;
 
         var systemIds = new HashSet<string>(System.StringComparer.Ordinal);
+        var capturedSystemIds = new List<string>();
         var orderedSectors = new List<SectorConfig>();
         foreach (SectorConfig sector in config.Sectors)
         {
@@ -73,8 +76,7 @@ public static class GalaxyRuntimeStateFactory
                     SystemId = systemConfig.Id,
                     StationStateVersion = StationLifecycleRules.SchemaVersion,
                     Station = StationLifecycleRules.Create(systemConfig.Station),
-                    IsDiscovered = systemConfig.IsStartSystem ||
-                        (mobileTestMode ? sectorState.IsUnlocked : !systemConfig.IsHiddenAtStart),
+                    IsDiscovered = !mobileTestMode || sectorState.IsUnlocked || systemConfig.IsStartSystem,
                     IsVisited = systemConfig.IsStartSystem,
                     DevelopmentLevel = 1,
                     DangerLevel = 0,
@@ -84,17 +86,11 @@ public static class GalaxyRuntimeStateFactory
                         : StarSystemStatus.Stable
                 };
 
-                if (isEnemyAtStart) StationLifecycleRules.Destroy(systemState.Station);
                 StationLifecycleRules.Normalize(systemState);
                 state.Systems.Add(systemState);
 
                 if (isEnemyAtStart)
-                {
-                    AddOwnedSystemToFaction(
-                        state,
-                        ToFactionId(sectorConfig.EnemyFactionAtStart),
-                        systemConfig.Id);
-                }
+                    capturedSystemIds.Add(systemConfig.Id);
 
                 if (systemConfig.IsStartSystem)
                 {
@@ -118,6 +114,12 @@ public static class GalaxyRuntimeStateFactory
                     state.Routes.Add(routeState);
                 }
             }
+        }
+
+        for (int index = 0; index < capturedSystemIds.Count; index++)
+        {
+            string factionId = InitialEnemyFactionIds[index % InitialEnemyFactionIds.Length];
+            AddOwnedSystemToFaction(state, factionId, capturedSystemIds[index]);
         }
 
         RebuildInitialEnemyFrontlines(
@@ -273,20 +275,6 @@ public static class GalaxyRuntimeStateFactory
         }
 
         return result;
-    }
-
-    private static string ToFactionId(
-    EnemyFaction2A faction)
-    {
-        switch (faction)
-        {
-            case EnemyFaction2A.Ancients:
-                return "ancients";
-            case EnemyFaction2A.Infected:
-                return "infected";
-            default:
-                return "ai";
-        }
     }
 
     private static string NormalizeFactionId(

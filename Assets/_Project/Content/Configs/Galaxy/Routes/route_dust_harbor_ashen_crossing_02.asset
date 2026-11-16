@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_dust_harbor_ashen_crossing_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_dust_harbor_ashen_crossing_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041f\u044b\u043b\u044c\u043d\u0430\u044f \u0413\u0430\u0432\u0430\u043d\u044c\u00bb \u2014 \u00ab\u041f\u0435\u043f\u0435\u043b\u044c\u043d\u044b\u0439 \u041f\u0435\u0440\u0435\u0445\u043e\u0434\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041f\u044b\u043b\u044c\u043d\u0430\u044f \u0413\u0430\u0432\u0430\u043d\u044c\u00bb \u0438 \u00ab\u041f\u0435\u043f\u0435\u043b\u044c\u043d\u044b\u0439 \u041f\u0435\u0440\u0435\u0445\u043e\u0434\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: fa762db6a87814477af7a564fc083f1f, type: 2}
   ToSystem: {fileID: 11400000, guid: 75405d83c44a84536b8c5d1c0f15fb1d, type: 2}
   IsLockedAtStart: 0
-  RequiredScanLevel: 0
-  ParsecDistance: 7
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: d954f7864f17f4c8faf73b18238b5d9e, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 2c1d81db0e340494e951aa5fd9bd294f, type: 2}
   galaxyMapCurveStrength: 0.07
@@ -30,3 +28,8 @@ MonoBehaviour:
   - 5
   - 4
   - 3
+  - 2
+  - 1
+  - 1
+  - 1
+  - 1

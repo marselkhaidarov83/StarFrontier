@@ -7,6 +7,8 @@ using UnityEngine;
 )]
 public class RouteConfig : BaseConfig
 {
+    public const int MaxDevelopmentLevel = 10;
+
     [Header("Системы")]
 
     [SerializeField]
@@ -23,24 +25,29 @@ public class RouteConfig : BaseConfig
     [Tooltip("Переключатель IsLockedAtStart. Включает или выключает соответствующее правило или отображение.")]
     public bool IsLockedAtStart;
 
-    [SerializeField]
-    [Tooltip("Параметр RequiredScanLevel. Используется связанными игровыми системами этого конфига.")]
-    public int RequiredScanLevel;
-
-    [SerializeField]
-    [Tooltip("Параметр ParsecDistance. Используется связанными игровыми системами этого конфига.")]
-    public int ParsecDistance;
-
-    [Header("Топливо по уровням развития (1–5)")]
+    [Header("Топливо по уровням развития (1–10)")]
     [SerializeField] private System.Collections.Generic.List<int> fuelByDevelopmentLevel = new();
     public System.Collections.Generic.IReadOnlyList<int> FuelByDevelopmentLevel => fuelByDevelopmentLevel;
 
     public int GetFuelCost(int level)
     {
-        int index = System.Math.Max(1, System.Math.Min(5, level)) - 1;
-        if (fuelByDevelopmentLevel != null && fuelByDevelopmentLevel.Count == 5)
-            return System.Math.Max(1, fuelByDevelopmentLevel[index]);
-        return System.Math.Max(1, ParsecDistance - index);
+        if (fuelByDevelopmentLevel == null || fuelByDevelopmentLevel.Count == 0)
+            return 1;
+
+        int index = level >= 1 && level <= MaxDevelopmentLevel && level <= fuelByDevelopmentLevel.Count
+            ? level - 1
+            : 0;
+        return System.Math.Max(1, fuelByDevelopmentLevel[index]);
+    }
+
+    public int GetFuelCost(GalaxyRuntimeState galaxy)
+    {
+        if (galaxy?.Routes != null)
+            foreach (RouteRuntimeState route in galaxy.Routes)
+                if (route != null && route.RouteId == Id)
+                    return GetFuelCost(route.DevelopmentLevel);
+
+        return GetFuelCost(1);
     }
 
     [Header("Точки входа и выхода")]

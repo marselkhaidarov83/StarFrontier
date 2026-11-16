@@ -10,8 +10,6 @@ public class RouteEndpointConfig : BaseConfig
     [SerializeField] private Vector3 exitPoint;
     [Tooltip("Параметр entryPoint. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private Vector3 entryPoint;
-    [Tooltip("Визуальный размер объекта на сцене.")]
-    [SerializeField] [Min(0f)] private float visualSize = 50f;
 
     /// <summary>
     /// Точка выхода из этой системы в гиперпространство.
@@ -24,5 +22,4 @@ public class RouteEndpointConfig : BaseConfig
     /// Используется, когда игрок прилетает в эту систему.
     /// </summary>
     public Vector3 EntryPoint => entryPoint;
-    public float VisualSize => visualSize;
 }

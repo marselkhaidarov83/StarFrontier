@@ -15,15 +15,18 @@ MonoBehaviour:
   id: planet_eternal_maw_dead01_01
   displayName: "\u041F\u0440\u043E\u0433\u043B\u043E\u0447\u0435\u043D\u043D\u0430\u044F
     \u0421\u0444\u0435\u0440\u0430"
-  description: 
-  icon: {fileID: 21300000, guid: 89b03ca14a1f74132b9741a3da71afb6, type: 3}
-  planetType: 5
-  isInhabited: 0
+  description: "\u0423 \u044D\u0442\u043E\u0439
+    \u043F\u043B\u0430\u043D\u0435\u0442\u044B \u043D\u0435\u0442
+    \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u043E\u0439 \u0440\u043E\u0441\u0441\u044B\u043F\u0438
+    \u043D\u043E\u0447\u043D\u044B\u0445 \u043E\u0433\u043D\u0435\u0439. \u0412 \u044F\u0441\u043D\u043E\u043C
+    \u0440\u0430\u043A\u0443\u0440\u0441\u0435 \u0432\u0438\u0434\u043D\u044B \u0446\u0435\u043B\u044B\u0435
+    \u0446\u0435\u043F\u043E\u0447\u043A\u0438 \u0432\u043F\u0430\u0434\u0438\u043D. \u0412
+    \u043D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u043E\u043D\u043D\u044B\u0445
+    \u0437\u0430\u043F\u0438\u0441\u044F\u0445 \u0435\u0451
+    \u043F\u0440\u0438\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0432\u044B\u0434\u0430\u0451\u0442
+    \u043B\u0438\u0448\u044C \u043C\u0435\u0434\u043B\u0435\u043D\u043D\u043E\u0435
+    \u0441\u043C\u0435\u0449\u0435\u043D\u0438\u0435 \u043D\u0430 \u0444\u043E\u043D\u0435
+    \u0437\u0432\u0451\u0437\u0434."
+  planetTypeConfig: {fileID: 11400000, guid: 88da382ec5c39e96f308ead9297fb2e7, type: 2}
   planetOrbit: {fileID: 11400000, guid: 571dbe444eafc4e1296918ecdecf37a2, type: 2}
-  missionPool: {fileID: 0}
-  encounterProfile: {fileID: 0}
-  marketProfile: {fileID: 0}
-  planetMissionConfig: {fileID: 0}
-  planetSprite: {fileID: 21300000, guid: 89b03ca14a1f74132b9741a3da71afb6, type: 3}
-  backgroundSprite: {fileID: 0}
   visualSize: 42.5

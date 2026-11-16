@@ -939,7 +939,7 @@ public class GalaxyMapSystemBuilder : CustomMonoBehaviour
                 exitPoint,
                 entryPoint,
                 departureEndpoint != null
-                    ? departureEndpoint.VisualSize
+                    ? configService?.SystemVisualConfig?.SystemExitVisualSize ?? SystemVisualConfig.DefaultSystemExitVisualSize
                     : 0f
             )
         );

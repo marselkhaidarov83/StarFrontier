@@ -11,11 +11,12 @@ public sealed class MarketVisualCatalog2A : ScriptableObject
     public Sprite MissileIcon;
     public Sprite Get(PlanetConfig planet, StationConfig station)
     {
-        if (station != null) return station.StationTypeConfig?.MarketIllustration ?? station.StationTypeConfig?.MissionIllustration;
+        if (station != null) return station.MarketIllustration ?? station.MissionIllustration;
         if (planet == null) return null;
-        if (planet.MarketIllustration != null) return planet.MarketIllustration;
+        var illustration = planet.PlanetTypeConfig?.MarketIllustration;
+        if (illustration != null) return illustration;
         foreach (var entry in Planets)
             if (entry != null && entry.Type == planet.PlanetType && entry.Illustration != null) return entry.Illustration;
-        return BasePlanetIllustrations != null ? BasePlanetIllustrations.Get(planet.PlanetType, null) : planet.BackgroundSprite;
+        return BasePlanetIllustrations != null ? BasePlanetIllustrations.Get(planet.PlanetType, null) : null;
     }
 }

@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_dust_harbor_orion_trade_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_dust_harbor_orion_trade_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041f\u044b\u043b\u044c\u043d\u0430\u044f \u0413\u0430\u0432\u0430\u043d\u044c\u00bb \u2014 \u00ab\u0422\u043e\u0440\u0433\u0438 \u041e\u0440\u0438\u043e\u043d\u0430\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041f\u044b\u043b\u044c\u043d\u0430\u044f \u0413\u0430\u0432\u0430\u043d\u044c\u00bb \u0438 \u00ab\u0422\u043e\u0440\u0433\u0438 \u041e\u0440\u0438\u043e\u043d\u0430\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: fa762db6a87814477af7a564fc083f1f, type: 2}
   ToSystem: {fileID: 11400000, guid: 6b4c5bfc158b1419bb3d2a7c6532e3e8, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 12
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 2c14710495ff2408498ddead3e561267, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 61e76dc94fb7c4b5b9929a2ce2ca461c, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 10
   - 9
   - 8
+  - 7
+  - 6
+  - 5
+  - 4
+  - 3

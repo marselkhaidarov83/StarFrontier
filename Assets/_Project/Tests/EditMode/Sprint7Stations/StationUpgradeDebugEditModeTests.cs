@@ -3,10 +3,10 @@ using UnityEngine;
 
 public sealed class StationUpgradeDebugEditModeTests
 {
-    private StationLevelEffectsConfig _levels;
+    private StationTypeConfig _levels;
     [SetUp] public void Setup()
     {
-        _levels = ScriptableObject.CreateInstance<StationLevelEffectsConfig>();
+        _levels = ScriptableObject.CreateInstance<StationTypeConfig>();
         _levels.Levels = new[] { new StationLevelEffectsSettings { Level = 2, RequiredGalaxyLevel = 2, MaxHealth = 450 },
             new StationLevelEffectsSettings { Level = 3, RequiredGalaxyLevel = 3, MaxHealth = 500 } };
     }

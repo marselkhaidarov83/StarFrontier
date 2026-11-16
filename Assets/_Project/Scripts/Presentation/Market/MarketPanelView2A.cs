@@ -22,6 +22,13 @@ public sealed class MarketPanelView2A : MonoBehaviour
     private Vector2 _lastSize;
     private Sprite _lastHero;
     private bool _equipmentVisible;
+    private RectTransform _infoWindow, _infoHeading;
+    private Image _infoOverlay, _infoPicture, _infoDurabilityTrack, _infoDurabilityFill;
+    private ScrollRect _infoScroll;
+    private TMP_Text _infoTitle, _infoText, _infoDurability, _infoTradeLabel;
+    private Button _infoClose, _infoTrade;
+    private string _infoKey;
+    private bool _infoOwned;
     public Image Header { get; private set; }
     public bool IsReady => _screen != null && Header != null && _buy != null && _sell != null;
     public int MarketCardPoolCount => _marketCards.Count;
@@ -70,6 +77,7 @@ public sealed class MarketPanelView2A : MonoBehaviour
         _ownedEmpty = ResearchPanelUi2A.Text(_right, template, "OwnedEmpty", "Здесь пока пусто");
         foreach (var text in new[] { _buyInfo, _sellInfo, _marketEmpty, _ownedEmpty })
         { text.fontSize = 24; text.fontSizeMax = 24; text.fontSizeMin = 18; }
+        BuildInfoWindow();
         Layout();
     }
     private static ScrollRect GridScroll(Transform parent, out RectTransform content)
@@ -132,6 +140,12 @@ public sealed class MarketPanelView2A : MonoBehaviour
         foreach (var item in market) if (item.Equipment || item.MaximumDurability > 0) { _equipmentVisible = true; break; }
         Fill(_marketCards, _leftContent, market, selectedLeft, _leftSelect);
         Fill(_ownedCards, _rightContent, owned, selectedRight, _rightSelect);
+        if (_infoKey != null)
+        {
+            var item = FindCard(_infoOwned ? owned : market, _infoKey);
+            if (item == null || _infoKey != (_infoOwned ? selectedRight : selectedLeft)) CloseInfo();
+            else BindInfo(item);
+        }
         _marketEmpty.gameObject.SetActive(market.Count == 0); _ownedEmpty.gameObject.SetActive(owned.Count == 0);
         Layout();
     }
@@ -140,15 +154,164 @@ public sealed class MarketPanelView2A : MonoBehaviour
         while (pool.Count < items.Count)
         {
             var rect = ResearchPanelUi2A.Rect(parent, "MarketCard_" + pool.Count);
-            var view = rect.gameObject.AddComponent<MarketCardView2A>(); view.Build(_template, select); pool.Add(view);
+            var view = rect.gameObject.AddComponent<MarketCardView2A>(); view.Build(_template, select, item => OpenInfo(item, pool == _ownedCards)); pool.Add(view);
         }
         for (int i = 0; i < pool.Count; i++)
         { pool[i].gameObject.SetActive(i < items.Count); if (i < items.Count) pool[i].Bind(items[i], items[i].Key == selected); }
     }
+    private void BuildInfoWindow()
+    {
+        var rootCanvas = _screen.GetComponentInParent<Canvas>()?.rootCanvas;
+        var host = rootCanvas != null ? (RectTransform)rootCanvas.transform : _screen;
+        _infoOverlay = ResearchPanelUi2A.Picture(host, "EquipmentModal", new Color(0, 0, 0, .75f));
+        ResearchPanelUi2A.Stretch(_infoOverlay.rectTransform);
+        _infoOverlay.raycastTarget = true;
+        var canvas = _infoOverlay.gameObject.AddComponent<Canvas>();
+        canvas.overrideSorting = true;
+        if (rootCanvas != null) canvas.sortingLayerID = rootCanvas.sortingLayerID;
+        canvas.sortingOrder = 100;
+        _infoOverlay.gameObject.AddComponent<GraphicRaycaster>();
+
+        var backdrop = ResearchPanelUi2A.Picture(_infoOverlay.transform, "CloseBackdrop", Color.clear);
+        ResearchPanelUi2A.Stretch(backdrop.rectTransform);
+        backdrop.raycastTarget = true;
+        var closeBackdrop = backdrop.gameObject.AddComponent<Button>();
+        closeBackdrop.transition = Selectable.Transition.None;
+        closeBackdrop.navigation = new Navigation { mode = Navigation.Mode.None };
+        closeBackdrop.onClick.AddListener(CloseInfo);
+
+        _infoWindow = Panel(_infoOverlay.transform, "EquipmentWindow");
+        _infoWindow.GetComponent<Image>().raycastTarget = true;
+        _infoHeading = Panel(_infoWindow, "Heading");
+        _infoTitle = ResearchPanelUi2A.Text(_infoHeading, _template, "Title", string.Empty);
+        _infoTitle.alignment = TextAlignmentOptions.Center;
+        _infoTitle.textWrappingMode = TextWrappingModes.Normal;
+        _infoClose = ResearchPanelUi2A.Button(_infoWindow, _template, "Close", "×", out _);
+        _infoClose.navigation = new Navigation { mode = Navigation.Mode.None };
+        _infoClose.onClick.AddListener(CloseInfo);
+
+        _infoScroll = ResearchPanelUi2A.Scroll(_infoWindow, "EquipmentDetails", false, out var content);
+        content.GetComponent<VerticalLayoutGroup>().padding = new RectOffset(16, 16, 12, 12);
+        _infoPicture = ResearchPanelUi2A.Picture(content, "Image", Color.white);
+        _infoPicture.preserveAspect = true;
+        _infoPicture.gameObject.AddComponent<LayoutElement>().preferredHeight = 280;
+        _infoText = ResearchPanelUi2A.Text(content, _template, "EquipmentInfo", string.Empty);
+        _infoText.gameObject.AddComponent<LayoutElement>();
+        _infoText.alignment = TextAlignmentOptions.Center;
+        _infoText.enableAutoSizing = false;
+        _infoText.textWrappingMode = TextWrappingModes.Normal;
+        _infoText.overflowMode = TextOverflowModes.Overflow;
+
+        _infoDurabilityTrack = ResearchPanelUi2A.Picture(_infoWindow, "DurabilityTrack", MissionPanelStyle2A.Workspace);
+        MissionPanelStyle2A.Frame(_infoDurabilityTrack, MissionPanelStyle2A.CardAccent);
+        _infoDurabilityFill = ResearchPanelUi2A.Picture(_infoDurabilityTrack.transform, "Fill", MissionPanelStyle2A.ActionBackground);
+        _infoDurability = ResearchPanelUi2A.Text(_infoDurabilityTrack.transform, _template, "Durability", string.Empty);
+        ResearchPanelUi2A.Stretch(_infoDurability.rectTransform);
+        _infoDurability.alignment = TextAlignmentOptions.Center;
+        _infoTrade = ResearchPanelUi2A.Button(_infoWindow, _template, "Trade", string.Empty, out _infoTradeLabel);
+        _infoTrade.onClick.AddListener(() =>
+        {
+            var action = _infoOwned ? _sell : _buy;
+            if (_infoKey != null && _infoTrade.interactable && action.interactable) action.onClick.Invoke();
+        });
+        CloseInfo();
+    }
+
+    private static MarketCardData2A FindCard(IReadOnlyList<MarketCardData2A> cards, string key)
+    {
+        foreach (var card in cards)
+            if (card.Key == key) return card;
+        return null;
+    }
+
+    private void OpenInfo(MarketCardData2A item, bool owned)
+    {
+        _infoKey = item.Key;
+        _infoOwned = owned;
+        BindInfo(item);
+        UpdateInfoTrade();
+        _infoOverlay.gameObject.SetActive(true);
+        _infoOverlay.transform.SetAsLastSibling();
+        LayoutInfoWindow();
+        _infoScroll.StopMovement();
+        _infoScroll.verticalNormalizedPosition = 1;
+        UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(_infoClose.gameObject);
+    }
+
+    private void BindInfo(MarketCardData2A item)
+    {
+        _infoTitle.SetText(item.Title);
+        _infoPicture.sprite = item.Icon;
+        _infoPicture.gameObject.SetActive(item.Icon != null);
+        _infoText.SetText(item.Info);
+        _infoText.gameObject.SetActive(!string.IsNullOrWhiteSpace(item.Info));
+        bool showDurability = item.MaximumDurability > 0;
+        _infoDurabilityTrack.gameObject.SetActive(showDurability);
+        _infoDurability.SetText($"Прочность: {item.CurrentDurability} / {item.MaximumDurability}");
+        var fill = _infoDurabilityFill.rectTransform;
+        fill.anchorMin = Vector2.zero;
+        fill.anchorMax = new Vector2(showDurability ? Mathf.Clamp01((float)item.CurrentDurability / item.MaximumDurability) : 0, 1);
+        fill.offsetMin = fill.offsetMax = Vector2.zero;
+    }
+
+    private void CloseInfo()
+    {
+        if (_infoOverlay == null) return;
+        _infoKey = null;
+        _infoOverlay.gameObject.SetActive(false);
+        var events = UnityEngine.EventSystems.EventSystem.current;
+        if (events != null && events.currentSelectedGameObject != null &&
+            events.currentSelectedGameObject.transform.IsChildOf(_infoOverlay.transform))
+            events.SetSelectedGameObject(null);
+    }
+
+    private void OnDisable() => CloseInfo();
+    private void OnDestroy()
+    {
+        if (_infoOverlay != null && _infoOverlay.transform.parent != _screen)
+            Destroy(_infoOverlay.gameObject);
+    }
+
+    private void UpdateInfoTrade()
+    {
+        var action = _infoOwned ? _sell : _buy;
+        _infoTradeLabel.SetText((_infoOwned ? _sellLabel : _buyLabel).text);
+        SetButton(_infoTrade, action.interactable);
+    }
+
+    private void LayoutInfoWindow()
+    {
+        const float header = 64;
+        const float inset = 16;
+        const float barHeight = 46;
+        const float buttonHeight = 64;
+        var overlay = _infoOverlay.rectTransform.rect;
+        float width = overlay.width * .94f;
+        float maxHeight = overlay.height * .9f;
+        if (width <= 0 || maxHeight <= 0) return;
+        float barSpace = _infoDurabilityTrack.gameObject.activeSelf ? barHeight + 12 : 0;
+        float footer = inset * 2 + buttonHeight + barSpace;
+        var content = _infoScroll.content;
+        var textHeight = _infoText.GetPreferredValues(_infoText.text, Mathf.Max(1, width - 2 * inset), 0).y;
+        _infoText.GetComponent<LayoutElement>().preferredHeight = Mathf.Ceil(textHeight) + 8;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+        float body = Mathf.Min(LayoutUtility.GetPreferredHeight(content), Mathf.Max(0, maxHeight - header - footer));
+        float height = header + body + footer;
+        ResearchPanelUi2A.Place(_infoWindow, (overlay.width - width) / 2, (overlay.height - height) / 2, width, height);
+        ResearchPanelUi2A.Place(_infoHeading, 0, 0, width, header);
+        ResearchPanelUi2A.Place(_infoTitle.rectTransform, 74, 0, width - 148, header);
+        ResearchPanelUi2A.Place((RectTransform)_infoClose.transform, width - 68, 10, 56, 48);
+        ResearchPanelUi2A.Place((RectTransform)_infoScroll.transform, 0, header, width, body);
+        ResearchPanelUi2A.Place(_infoDurabilityTrack.rectTransform, inset, header + body, width - 2 * inset, barHeight);
+        ResearchPanelUi2A.Place((RectTransform)_infoTrade.transform, inset, header + body + barSpace + inset,
+            width - 2 * inset, buttonHeight);
+    }
+
     public void SetActions(string buyInfo, string sellInfo, bool canBuy, bool canSell, bool canTransfer)
     {
         _buyInfo.SetText(buyInfo); _sellInfo.SetText(sellInfo);
         SetButton(_buy, canBuy); SetButton(_sell, canSell); SetButton(_transfer, canTransfer);
+        if (_infoKey != null) UpdateInfoTrade();
     }
     private RectTransform CreateQuantityPicker(Transform parent, string name, Action<int> change, Action maximum, Action minimum,
         out Button minus, out Button plus, out Button max, out Button min, out TMP_Text label)
@@ -238,6 +401,7 @@ public sealed class MarketPanelView2A : MonoBehaviour
         ResearchPanelUi2A.Place((RectTransform)_sell.transform, 14, panelHeight - 82, right - 28, 68);
         ResearchPanelUi2A.Place(_marketEmpty.rectTransform, 20, 188, left - 40, 80);
         ResearchPanelUi2A.Place(_ownedEmpty.rectTransform, 20, 188, right - 40, 80);
+        if (_infoOverlay.gameObject.activeSelf) LayoutInfoWindow();
         _grid.constraintCount = left >= 820 ? 3 : 2;
         _grid.cellSize = new Vector2(Mathf.Max(80, (left - 28 - 14 * (_grid.constraintCount - 1)) / _grid.constraintCount), _equipmentVisible ? 300 : 236);
     }

@@ -21,19 +21,121 @@ MonoBehaviour:
     \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u043E\u0432"
   icon: {fileID: 21300000, guid: 5a3c9395712f34e97911526f60d150ce, type: 3}
   stationType: 0
-  hasMarket: 0
+  hasMarket: 1
   hasMissions: 1
   hasRepair: 1
   hasMedical: 0
   hasResearch: 0
+  hasSpecializedResearch: 1
+  operationInteractionDistance: 300
   hasRangerBoard: 0
   hasMilitaryContracts: 1
-  defaultMarketProfile: {fileID: 0}
-  defaultMissionPool: {fileID: 0}
-  defaultEncounterProfile: {fileID: 0}
+  defaultMarketProfile: {fileID: 11400000, guid: c8495eecf57c4c73b8c49581e4f77b70, type: 2}
+  defaultMissionPool: {fileID: 11400000, guid: 634e9f9cf07249ee9cdaeb03e0387454, type: 2}
   missionIllustration: {fileID: 21300000, guid: fd75b62c2648401f8bcc50e0531607e3, type: 3}
-  stationSprite: {fileID: 21300000, guid: 5a3c9395712f34e97911526f60d150ce, type: 3}
-  destroyedSprite: {fileID: 0}
-  shadowSprite: {fileID: 0}
-  visualSize: 50
+  refuelIllustration: {fileID: 21300000, guid: e7e892a5efd14d3aa3140e1fbc35f20a, type: 3}
+  researchIllustration: {fileID: 21300000, guid: fd75b62c2648401f8bcc50e0531607e3, type: 3}
   localOffset: {x: 0, y: 0}
+  marketIllustration: {fileID: 21300000, guid: 419429d9a76a440f84fa771ae455536b, type: 3}
+  upgradeSettings:
+  - TargetLevel: 1
+    Payment: {fileID: 11400000, guid: dce7f713cbdcb34f7714d02a2530a33b, type: 2}
+  - TargetLevel: 2
+    Payment: {fileID: 11400000, guid: e712fcdf745d262c8e1157a439ec3b4c, type: 2}
+  - TargetLevel: 3
+    Payment: {fileID: 11400000, guid: b63a6237a2de1949d2246a8f736ab82d, type: 2}
+  - TargetLevel: 4
+    Payment: {fileID: 11400000, guid: ffefec1ad94d161b364babb6514cd524, type: 2}
+  - TargetLevel: 5
+    Payment: {fileID: 11400000, guid: 5967a6e15beea8483cce446f40cbb1aa, type: 2}
+  - TargetLevel: 6
+    Payment: {fileID: 11400000, guid: 065e00cc6c80cdbcf2d03be325160dec, type: 2}
+  - TargetLevel: 7
+    Payment: {fileID: 11400000, guid: a745ddc48cbecf8e663934bd6c3e3cec, type: 2}
+  - TargetLevel: 8
+    Payment: {fileID: 11400000, guid: 0dd2553f04dd97fe2dfcc7707cb0c719, type: 2}
+  - TargetLevel: 9
+    Payment: {fileID: 11400000, guid: 6511165d8ed73c5751ce7691b96df017, type: 2}
+  - TargetLevel: 10
+    Payment: {fileID: 11400000, guid: 0b31cbc72aa600cb2bd3de65e144d0f0, type: 2}
+  Levels:
+  - Level: 1
+    MaxHealth: 400
+    Population: {fileID: 11400000, guid: 4f28bc239a5753a88cb1e5a43a88f6d8, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 2
+    RecoveryPayment: {fileID: 11400000, guid: 9d3294ff4a5fbb92d27bc3db5a660a86, type: 2}
+    RequiredGalaxyLevel: 1
+  - Level: 2
+    MaxHealth: 450
+    Population: {fileID: 11400000, guid: 88c8ac8f36f25e31a8daff362c580c1a, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 4
+    RecoveryPayment: {fileID: 11400000, guid: d018fbd44fe5272113fcf69277108585, type: 2}
+    RequiredGalaxyLevel: 2
+  - Level: 3
+    MaxHealth: 500
+    Population: {fileID: 11400000, guid: 13626b73b3005b87bfe6cde0b5bc3585, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 6
+    RecoveryPayment: {fileID: 11400000, guid: 9c555c42ab2c8c2908f745f6237b31e2, type: 2}
+    RequiredGalaxyLevel: 3
+  - Level: 4
+    MaxHealth: 550
+    Population: {fileID: 11400000, guid: 6307a5e8fefb5d7e82b15e5f5026bd92, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 8
+    RecoveryPayment: {fileID: 11400000, guid: da6d9ca3c19011360c61e95060321641, type: 2}
+    RequiredGalaxyLevel: 4
+  - Level: 5
+    MaxHealth: 600
+    Population: {fileID: 11400000, guid: b628004c7d64550f88726b4701de3f50, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 10
+    RecoveryPayment: {fileID: 11400000, guid: cc4cc44ba5b19e7af7f0a56ed0f86f5f, type: 2}
+    RequiredGalaxyLevel: 5
+  - Level: 6
+    MaxHealth: 650
+    Population: {fileID: 11400000, guid: a4abb743cbe1510e98998bf8013eae0c, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 12
+    RecoveryPayment: {fileID: 11400000, guid: f02abbfba106c91ea1bad4f1d8eccd99, type: 2}
+    RequiredGalaxyLevel: 6
+  - Level: 7
+    MaxHealth: 700
+    Population: {fileID: 11400000, guid: af48f77d99f95bd0b412134986602848, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 14
+    RecoveryPayment: {fileID: 11400000, guid: a358dadffbbebe4ab8c42b0f01df0135, type: 2}
+    RequiredGalaxyLevel: 7
+  - Level: 8
+    MaxHealth: 750
+    Population: {fileID: 11400000, guid: 0aa13fe2c43d5b71afe15a05d112c23d, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 16
+    RecoveryPayment: {fileID: 11400000, guid: a178efc12d264f39a7be706091d3aaee, type: 2}
+    RequiredGalaxyLevel: 8
+  - Level: 9
+    MaxHealth: 800
+    Population: {fileID: 11400000, guid: 0f08950fd2505f6a8328b14b62dd758a, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 18
+    RecoveryPayment: {fileID: 11400000, guid: 4af617158e9ee1136c1d1b94e76fc9a2, type: 2}
+    RequiredGalaxyLevel: 9
+  - Level: 10
+    MaxHealth: 850
+    Population: {fileID: 11400000, guid: 4ff1b84aaf9e598b8888f5076947834a, type: 2}
+    RangerAttackProbability: 0
+    ScienceRate: 0
+    HealthPerTick: 20
+    RecoveryPayment: {fileID: 11400000, guid: cd5f05a0bb2a40077494589aa0204bc5, type: 2}
+    RequiredGalaxyLevel: 10

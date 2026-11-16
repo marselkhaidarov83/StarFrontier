@@ -88,7 +88,8 @@ public class MarketScreenController : CustomMonoBehaviour
         bool station = !string.IsNullOrEmpty(player?.CurrentStationId);
         var stationConfig = PlanetServiceVisualCatalog2A.GetDockedStation(player, _config);
         var planet = !station ? _config.GetPlanetConfigById(player?.CurrentPlanetId) : null;
-        var illustration = marketVisuals != null ? marketVisuals.Get(planet, stationConfig) : planet?.BackgroundSprite;
+        var illustration = stationConfig?.MarketIllustration ?? planet?.PlanetTypeConfig?.MarketIllustration ??
+            marketVisuals?.Get(planet, stationConfig);
         _view.SetHeader(serviceVisuals != null
             ? serviceVisuals.Get(planet, PlanetServiceKind2A.Market, illustration, stationConfig)
             : illustration);
@@ -104,7 +105,7 @@ public class MarketScreenController : CustomMonoBehaviour
         _purchaseMaximum = buy == null ? 0 : buy.Equipment ? 1 : _market.GetMaximumTradeQuantity(buy.Id, true, _warehouse);
         // The right selector serves both sale and storage transfer; it must not depend on market demand or wallet headroom.
         _saleMaximum = sell == null ? 0 : sell.Equipment ? 1 : Math.Max(0, sell.TradeableQuantity >= 0 ? sell.TradeableQuantity : sell.Quantity);
-        _purchaseQuantity = buy != null && buy.Equipment ? 1 : ClampQuantity(_purchaseQuantity, _purchaseMaximum);
+        _purchaseQuantity = buy != null && (buy.Equipment || buy.Component) ? 1 : ClampQuantity(_purchaseQuantity, _purchaseMaximum);
         _saleQuantity = sell != null && sell.Equipment ? 1 : ClampQuantity(_saleQuantity, _saleMaximum);
         long totalPrice = buy == null ? 0 : buy.Equipment ? buy.Price : _market.GetTotalPrice(buy.Id, _purchaseQuantity, true);
         long salePrice = sell == null ? 0 : sell.Equipment ? sell.Price : _market.GetTotalPrice(sell.Id, _saleQuantity, false);
@@ -114,7 +115,7 @@ public class MarketScreenController : CustomMonoBehaviour
             _market.CanTransfer(sell.Id, sell.Equipment, !_warehouse, sell.Equipment ? 1 : _saleQuantity);
         string buyInfo = buy == null ? "Выбери товар на рынке" : "";
         string sellInfo = sell == null ? "Выбери предмет" : sell.Locked ? "Миссионный груз" : "";
-        _view.SetPurchase(buy != null && !buy.Equipment, _purchaseQuantity, _purchaseMaximum, totalPrice);
+        _view.SetPurchase(buy != null && !buy.Equipment && !buy.Component, _purchaseQuantity, _purchaseMaximum, totalPrice);
         _view.SetSale(sell != null && !sell.Equipment, _saleQuantity, _saleMaximum, salePrice);
         _view.SetActions(buyInfo, sellInfo, canBuy, canSell, canTransfer);
         _revision = _boundMarket?.Revision ?? -1;
@@ -154,12 +155,18 @@ public class MarketScreenController : CustomMonoBehaviour
             foreach (var hull in hulls) if (hull != null) _owned.Add(Hull(hull, false));
         if (equipment != null) foreach (var item in equipment) if (item != null) _owned.Add(Equipment(item, false));
     }
-    private MarketCardData2A Goods(ItemConfig config, int quantity, bool buy) => new MarketCardData2A {
-        Key = "goods:" + config.Id, Id = config.Id, Title = config.DisplayName, Icon = config.Icon, Quantity = quantity, Component = config is ShipComponentConfig,
-        Price = _market.GetPrice(config.Id, buy), CargoSize = config.CargoSize, CategoryKey = "goods:" + config.ItemCategory,
-        CategoryTitle = MarketScreenRules2A.GoodsName(config.ItemCategory),
-        CurrentDurability = config is ShipComponentConfig part ? part.MaximumDurability : 0,
-        MaximumDurability = config is ShipComponentConfig module ? module.MaximumDurability : 0 };
+    private MarketCardData2A Goods(ItemConfig config, int quantity, bool buy)
+    {
+        var component = config as ShipComponentConfig;
+        return new MarketCardData2A {
+            Key = "goods:" + config.Id, Id = config.Id, Title = config.DisplayName, Icon = config.Icon, Quantity = quantity,
+            Component = component != null, Price = _market.GetPrice(config.Id, buy), CargoSize = config.CargoSize,
+            CategoryKey = component != null ? MarketScreenRules2A.ComponentCategory(component.Slot) : "goods:" + config.ItemCategory,
+            CategoryTitle = MarketScreenRules2A.GoodsName(config.ItemCategory),
+            Info = HangarScreenController.WithDescription(config.Description, HangarScreenController.CargoSpaceLine(config.CargoSize)),
+            CurrentDurability = component?.MaximumDurability ?? 0,
+            MaximumDurability = component?.MaximumDurability ?? 0 };
+    }
     private MarketCardData2A Equipment(SystemNpcWeaponRuntimeState item, bool buy)
     {
         if (item.IsComponent)
@@ -167,9 +174,11 @@ public class MarketScreenController : CustomMonoBehaviour
             var component = _config.GetItemConfigById(item.ComponentConfigId) as ShipComponentConfig;
             return new MarketCardData2A { Key = "module:" + item.InstanceId, Id = item.InstanceId,
                 Title = component != null ? component.DisplayName : item.ComponentConfigId, Icon = component?.Icon,
+                Info = HangarScreenController.ComponentInfo(item, component),
                 Component = true, Equipment = true, Quantity = 1, Price = _market.EquipmentPrice(item, buy),
                 CargoSize = item.RolledStats.CargoSize, CurrentDurability = item.CurrentDurability,
-                MaximumDurability = item.MaximumDurability, CategoryKey = "goods:" + ItemCategory.ShipEquipment, CategoryTitle = "Модули" };
+                MaximumDurability = item.MaximumDurability,
+                CategoryKey = MarketScreenRules2A.ComponentCategory(component?.Slot), CategoryTitle = "Модули" };
         }
         var config = _config.GetWeaponConfigById(item.WeaponConfigId);
         WeaponType type = config != null ? config.WeaponType : item.RolledStats.WeaponType;
@@ -177,18 +186,21 @@ public class MarketScreenController : CustomMonoBehaviour
         if (icon == null && marketVisuals != null) icon = type == WeaponType.Missile ? marketVisuals.MissileIcon : marketVisuals.EquipmentIcon;
         return new MarketCardData2A { Key = "equipment:" + item.InstanceId, Id = item.InstanceId,
             Title = config != null ? config.DisplayName : item.WeaponConfigId, Equipment = true, Icon = icon, Quantity = 1,
+            Info = HangarScreenController.WeaponInfo(item, config),
             Price = _market.EquipmentPrice(item, buy), CargoSize = item.RolledStats.CargoSize > 0 ? item.RolledStats.CargoSize : config?.CargoSize ?? 1,
-            Range = item.RolledStats.Range, Damage = item.RolledStats.Damage, ShotCount = item.RolledStats.ShotCount,
             CurrentDurability = item.CurrentDurability, MaximumDurability = item.MaximumDurability, CategoryKey = "equipment:" + type, CategoryTitle = MarketScreenRules2A.EquipmentName(type) };
     }
     private MarketCardData2A Hull(HullEquipmentRuntimeState item, bool buy)
     {
         var config = _market.GetHullConfig(item.ConfigId);
         return new MarketCardData2A { Key = "hull:" + item.InstanceId, Id = item.InstanceId, Equipment = true, Hull = true,
-            Title = config != null ? config.DisplayName : item.ConfigId, Icon = config?.Icon, Quantity = 1,
+            Title = config != null ? config.DisplayName : item.ConfigId,
+            Icon = config?.Hull?.CombatSprite ?? config?.Icon, Quantity = 1,
+            Info = HangarScreenController.WithDescription(config?.Hull != null ? config.Hull.Description : config?.Description,
+                config?.Hull != null ? $"Вместимость трюма: {config.Hull.BaseCargoCapacity}" : string.Empty),
             Price = _market.HullPrice(item, buy),
             CurrentDurability = item.CurrentDurability, MaximumDurability = item.MaximumDurability,
-            Damage = item.MaximumDurability, CategoryKey = "equipment:hull", CategoryTitle = "Корпус" };
+            CategoryKey = "equipment:hull", CategoryTitle = "Корпус" };
     }
     private void BuildCategories()
     {
@@ -243,7 +255,7 @@ public class MarketScreenController : CustomMonoBehaviour
         {
             string operation = Guid.NewGuid().ToString("N"); string reason;
             bool success;
-            int quantity = selected.Equipment ? 1 : buy ? _purchaseQuantity : _saleQuantity;
+            int quantity = selected.Equipment || selected.Component ? 1 : buy ? _purchaseQuantity : _saleQuantity;
             long total = selected.Equipment ? selected.Price : _market.GetTotalPrice(selected.Id, quantity, buy);
             using (var observation = PlayerAnalyticsSafe.Observe(buy ? PlayerAnalyticsAction.BuyItem : PlayerAnalyticsAction.SellItem, selected.Id, quantity))
             {

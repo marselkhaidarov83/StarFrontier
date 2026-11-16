@@ -296,8 +296,10 @@ public sealed class S08_04_MissionUiAndNavigationEditModeTests
         PlanetConfig barren = ScriptableObject.CreateInstance<PlanetConfig>();
         _assets.Add(inhabited);
         _assets.Add(barren);
-        SetField(inhabited, "isInhabited", true);
-        SetField(barren, "isInhabited", false);
+        var inhabitedType = ScriptableObject.CreateInstance<PlanetTypeConfig>();
+        _assets.Add(inhabitedType);
+        SetField(inhabitedType, "isInhabited", true);
+        SetField(inhabited, "planetTypeConfig", inhabitedType);
         IConfigService config = S08_04_ConfigProxy.Make((method, args) =>
             method.Name == "GetPlanetConfigById"
                 ? (string)args[0] == "colony" ? inhabited : barren
@@ -380,6 +382,9 @@ public sealed class S08_04_MissionUiAndNavigationEditModeTests
 
         CollectionAssert.AreEqual(new[] { "A", "B", "C" },
             MissionNavigationPlanner.FindShortestUnlockedPath(systems, galaxy, routes, "A", "C"));
+        galaxy.Routes = new List<RouteRuntimeState> { new RouteRuntimeState { RouteId = "AC", DevelopmentLevel = 10 } };
+        CollectionAssert.AreEqual(new[] { "A", "C" },
+            MissionNavigationPlanner.FindShortestUnlockedPath(systems, galaxy, routes, "A", "C"));
         routes.Lock("BC");
         CollectionAssert.AreEqual(new[] { "A", "C" },
             MissionNavigationPlanner.FindShortestUnlockedPath(systems, galaxy, routes, "A", "C"));
@@ -402,13 +407,16 @@ public sealed class S08_04_MissionUiAndNavigationEditModeTests
         return asset;
     }
 
-    private RouteConfig Route(string id, StarSystemConfig from, StarSystemConfig to, int parsecs)
+    private RouteConfig Route(string id, StarSystemConfig from, StarSystemConfig to, int fuel)
     {
         var asset = ScriptableObject.CreateInstance<RouteConfig>();
         SetField(asset, "id", id);
         asset.FromSystem = from;
         asset.ToSystem = to;
-        asset.ParsecDistance = parsecs;
+        var costs = new List<int>();
+        for (int index = 0; index < RouteConfig.MaxDevelopmentLevel; index++)
+            costs.Add(Math.Max(1, fuel - index));
+        SetField(asset, "fuelByDevelopmentLevel", costs);
         _assets.Add(asset);
         return asset;
     }

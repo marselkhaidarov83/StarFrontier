@@ -99,11 +99,6 @@ public class SystemMapController2 : CustomMonoBehaviour
             return;
         }
 
-        if (!starSystem.Station.IsActive)
-        {
-            return;
-        }
-
         if (systemMapStationPrefab == null)
         {
             if (IsDebug())

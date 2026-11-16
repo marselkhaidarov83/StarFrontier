@@ -7,14 +7,6 @@ public class StarSystemConfigValidator : IConfigValidator<StarSystemConfig>
     {
         var issues = new List<ValidationIssue>();
 
-        if (config.DangerLevel < 1 || config.DangerLevel > 5)
-        {
-            issues.Add(new ValidationIssue(
-            ValidationSeverity.Error,
-            "DangerLevel must be between 1 and 5.",
-            config));
-        }
-
         // if (config.NeighborSystemIds == null || config.NeighborSystemIds.Length == 0)
         if (config.LinkedSystems == null || config.LinkedSystems.Length == 0)
         {
@@ -39,13 +31,6 @@ public class StarSystemConfigValidator : IConfigValidator<StarSystemConfig>
             }
         }
 
-        if (config.MissionTags == null || config.MissionTags.Length == 0)
-        {
-            issues.Add(new ValidationIssue(
-            ValidationSeverity.Warning,
-            "MissionTags is empty.",
-            config));
-        }
 
         return issues;
     }

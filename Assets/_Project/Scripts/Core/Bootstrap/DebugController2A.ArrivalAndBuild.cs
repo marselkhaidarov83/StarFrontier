@@ -56,7 +56,7 @@ public sealed partial class DebugController2A
         var system = session.State.Galaxy.Systems.Find(x => x != null && x.SystemId == systemId);
         bool hasEnemies = registry.TryGet<ISystemNpcRuntimeService>(out var npcs) &&
             npcs.GetAliveNpcsInSystem(systemId).Any(x => x != null && x.IsAlive && (x.IsEnemy || x.IsHostileToPlayer));
-        int health = stationConfig.LevelEffects?.GetLevel(1)?.EffectiveMaxHealth ?? StationInfrastructureRules.DefaultMaxHealth(1);
+        int health = stationConfig.StationTypeConfig?.GetLevel(1)?.EffectiveMaxHealth ?? StationInfrastructureRules.DefaultMaxHealth(1);
         if (!StationArrivalBuildDebug2A.TryBuildFirstLevel(system, health, hasEnemies, out string reason))
         { LogArrivalAndBuildRejection(reason); return; }
         stations.ReconcileSystem(systemId);

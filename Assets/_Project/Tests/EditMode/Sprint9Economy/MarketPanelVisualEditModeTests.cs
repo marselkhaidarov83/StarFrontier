@@ -9,12 +9,14 @@ using TMPro;
 public sealed class MarketPanelVisualEditModeTests
 {
     private GameObject _root;
-    private MarketPanelView2A View(Action<string> select = null, Action<string> category = null, Action<MarketKindFilter2A> kind = null)
+    private MarketPanelView2A View(Action<string> select = null, Action<string> category = null,
+        Action<MarketKindFilter2A> kind = null, Action<string> rightSelect = null, Action buy = null, Action sell = null)
     {
         _root = new GameObject("MarketLayoutFixture", typeof(RectTransform));
         _root.GetComponent<RectTransform>().sizeDelta = new Vector2(1440, 2560);
         var view = _root.AddComponent<MarketPanelView2A>();
-        view.Build(null, kind ?? (_ => { }), category ?? (_ => { }), _ => { }, select ?? (_ => { }), _ => { }, () => { }, () => { }, () => { });
+        view.Build(null, kind ?? (_ => { }), category ?? (_ => { }), _ => { }, select ?? (_ => { }),
+            rightSelect ?? (_ => { }), buy ?? (() => { }), sell ?? (() => { }), () => { });
         return view;
     }
     [TearDown] public void Cleanup() { if (_root != null) UnityEngine.Object.DestroyImmediate(_root); }
@@ -62,6 +64,14 @@ public sealed class MarketPanelVisualEditModeTests
             Assert.That(rows.Exists(x => x.Key == "equipment:" + type), Is.True, type.ToString());
         Assert.That(rows.Exists(x => x.Key == "equipment:hull"), Is.False);
         Assert.That(rows.Exists(x => x.Key == "equipment:Spore"), Is.False);
+        MarketScreenRules2A.BuildCategories(MarketKindFilter2A.Components, offers, offers, rows, seen, alliedTypes);
+        Assert.That(rows, Has.Count.EqualTo(8));
+        var engine = new MarketCardData2A { Component = true, Quantity = 1,
+            CategoryKey = MarketScreenRules2A.ComponentCategory(ShipComponentSlot.Engine) };
+        Assert.That(rows.Exists(x => x.Key == engine.CategoryKey), Is.True);
+        Assert.That(engine.Matches(MarketKindFilter2A.Components, engine.CategoryKey), Is.True);
+        Assert.That(engine.Matches(MarketKindFilter2A.Components, MarketScreenRules2A.ComponentCategory(ShipComponentSlot.FuelTank)), Is.False);
+        Assert.That(engine.Matches(MarketKindFilter2A.All, MarketScreenRules2A.AllComponentsCategory), Is.True);
         MarketScreenRules2A.BuildCategories(MarketKindFilter2A.All, offers, offers, rows, seen, alliedTypes);
         Assert.That(rows.Exists(x => x.Key == "goods:Medicine"), Is.True);
         Assert.That(rows.Exists(x => x.Key == "equipment:hull"), Is.True);
@@ -179,20 +189,18 @@ public sealed class MarketPanelVisualEditModeTests
         var image = rendered.transform.Find("ItemImage").GetComponent<RectTransform>();
         Assert.That(image.anchorMin, Is.EqualTo(Vector2.zero));
         Assert.That(image.anchorMax, Is.EqualTo(Vector2.one));
-        Assert.That(image.offsetMin, Is.EqualTo(Vector2.zero));
-        Assert.That(image.offsetMax, Is.EqualTo(Vector2.zero));
+        Assert.That(image.offsetMin, Is.EqualTo(new Vector2(12, 50)));
+        Assert.That(image.offsetMax, Is.EqualTo(new Vector2(-12, -52)));
         var stock = rendered.transform.Find("Quantity").GetComponent<TMP_Text>();
         Assert.That(stock.text, Is.EqualTo("0 ед."));
-        card.Equipment = true; card.Quantity = 1; card.Range = 12.5f; card.Damage = 42; card.ShotCount = 3;
+        card.Equipment = true; card.Quantity = 1;
         rendered.Bind(card, false);
+        Assert.That(image.offsetMin, Is.EqualTo(new Vector2(12, 52)));
         Assert.That(stock.gameObject.activeSelf, Is.False);
-        Assert.That(rendered.transform.Find("Range").GetComponent<TMP_Text>().text, Does.StartWith("Дальность: "));
-        Assert.That(rendered.transform.Find("Damage").GetComponent<TMP_Text>().text, Is.EqualTo("Урон: 42"));
-        Assert.That(rendered.transform.Find("ShotCount").GetComponent<TMP_Text>().text, Is.EqualTo("Кол-во выстрелов: 3"));
         card.Equipment = false;
         rendered.Bind(card, false);
+        Assert.That(image.offsetMin, Is.EqualTo(new Vector2(12, 50)));
         Assert.That(stock.gameObject.activeSelf, Is.True, "Pooled cards restore the goods stock label.");
-        Assert.That(rendered.transform.Find("Range").gameObject.activeSelf, Is.False);
         Assert.That(stock.rectTransform.anchoredPosition.y, Is.EqualTo(rendered.transform.Find("UnitPrice").GetComponent<RectTransform>().anchoredPosition.y));
     }
     [Test] public void PurchaseQuantityForwardsChanges_RespectsLimits_AndHidesForEquipment()
@@ -253,87 +261,56 @@ public sealed class MarketPanelVisualEditModeTests
         Assert.That(sale.gameObject.activeSelf, Is.False);
         Assert.That(panel.parent.Find("Notice"), Is.Null);
     }
-    [Test] public void EquipmentDetailsToggle_ReplacesImage_PreservesModeOnRefresh_ResetsForAnotherItem()
+    [TestCase(false)]
+    [TestCase(true)]
+    public void EquipmentCard_SelectsFirst_AndOpensInfoOnSecondClick(bool owned)
     {
         int selections = 0;
-        var view = View(_ => selections++);
-        var data = new MarketCardData2A { Key = "weapon-a", Title = "Laser", Equipment = true, Quantity = 1,
-            Damage = 19, Range = 8, ShotCount = 3, CargoSize = 7 };
-        view.SetCards(new[] { data }, Array.Empty<MarketCardData2A>(), null, null);
+        int purchases = 0;
+        int sales = 0;
+        var view = View(_ => selections++, rightSelect: _ => selections++, buy: () => purchases++, sell: () => sales++);
+        var data = new MarketCardData2A { Key = "equipment", Title = "Оборудование", Info = "Характеристики",
+            Equipment = true, Quantity = 1, Price = 123, CurrentDurability = 80, MaximumDurability = 160 };
+        var items = new[] { data };
+        var empty = Array.Empty<MarketCardData2A>();
+        var market = owned ? empty : items;
+        var inventory = owned ? items : empty;
+        view.SetCards(market, inventory, null, null);
         var card = _root.GetComponentInChildren<MarketCardView2A>(true);
-        var toggle = card.transform.Find("DetailsToggle").GetComponent<Button>();
-        Assert.That(toggle.gameObject.activeSelf, Is.True);
+        var modal = _root.transform.Find("SharedMarketLayout/EquipmentModal");
+        var click = card.GetComponent<Button>().onClick;
+        Assert.That(card.transform.Find("DetailsToggle"), Is.Null);
+        click.Invoke();
+        Assert.That(selections, Is.EqualTo(1));
+        Assert.That(modal.gameObject.activeSelf, Is.False);
+        view.SetCards(market, inventory, owned ? null : data.Key, owned ? data.Key : null);
+        view.SetPurchase(false, 1, 1, 123);
+        view.SetSale(false, 1, 1, 123);
+        view.SetActions("", "", !owned, owned, false);
+        click.Invoke();
+        Assert.That(selections, Is.EqualTo(1));
+        Assert.That(modal.gameObject.activeSelf, Is.True);
+        var track = modal.Find("EquipmentWindow/DurabilityTrack");
+        Assert.That(track.Find("Fill").GetComponent<RectTransform>().anchorMax.x, Is.EqualTo(.5f));
+        Assert.That(track.Find("Durability").GetComponent<TMP_Text>().text, Is.EqualTo("Прочность: 80 / 160"));
         Assert.That(card.transform.Find("ItemImage").gameObject.activeSelf, Is.True);
-        Assert.That(card.transform.Find("Range").gameObject.activeSelf, Is.False);
-        toggle.onClick.Invoke();
-        Assert.That(selections, Is.Zero, "The help button must not change the trade selection.");
-        Assert.That(card.transform.Find("ItemImage").gameObject.activeSelf, Is.False);
-        Assert.That(card.transform.Find("Placeholder").gameObject.activeSelf, Is.False);
-        foreach (string name in new[] { "Range", "Damage", "ShotCount", "CargoInfo" })
-            Assert.That(card.transform.Find(name).gameObject.activeSelf, Is.True);
-        Assert.That(card.transform.Find("CardFooter").gameObject.activeSelf, Is.True);
-        card.Bind(data, true);
-        Assert.That(card.transform.Find("Range").gameObject.activeSelf, Is.True);
-        toggle.onClick.Invoke();
-        Assert.That(card.transform.Find("ItemImage").gameObject.activeSelf, Is.True);
-        Assert.That(card.transform.Find("Range").gameObject.activeSelf, Is.False);
-        toggle.onClick.Invoke(); data.Key = "weapon-b"; card.Bind(data, false);
-        Assert.That(card.transform.Find("Range").gameObject.activeSelf, Is.False);
-        Assert.That(card.transform.Find("ItemImage").gameObject.activeSelf, Is.True);
-        data.Equipment = false; card.Bind(data, false);
-        Assert.That(toggle.gameObject.activeSelf, Is.True);
-        toggle.onClick.Invoke();
-        Assert.That(card.transform.Find("Range").gameObject.activeSelf, Is.False);
-        Assert.That(card.transform.Find("ItemImage").gameObject.activeSelf, Is.False);
-        Assert.That(card.transform.Find("CargoInfo").gameObject.activeSelf, Is.True);
-        Assert.That(card.transform.Find("CargoInfo").GetComponent<TMP_Text>().text, Is.EqualTo("Занимает в трюме: 7"));
-        toggle.onClick.Invoke();
-        Assert.That(card.transform.Find("ItemImage").gameObject.activeSelf, Is.True);
-        Assert.That(card.transform.Find("Range").gameObject.activeSelf, Is.False);
+        var trade = modal.Find("EquipmentWindow/Trade").GetComponent<Button>();
+        Assert.That(trade.GetComponentInChildren<TMP_Text>().text, Is.EqualTo(owned ? "Продать за 123 кр" : "Купить за 123 кр"));
+        Assert.That(trade.interactable, Is.True);
+        trade.onClick.Invoke();
+        Assert.That(purchases, Is.EqualTo(owned ? 0 : 1));
+        Assert.That(sales, Is.EqualTo(owned ? 1 : 0));
+        view.SetActions("", "", false, false, false);
+        Assert.That(trade.interactable, Is.False);
+        trade.onClick.Invoke();
+        Assert.That(purchases + sales, Is.EqualTo(1));
+        modal.Find("EquipmentWindow/Close").GetComponent<Button>().onClick.Invoke();
+        Assert.That(modal.gameObject.activeSelf, Is.False);
+        click.Invoke();
+        view.SetCards(empty, empty, null, null);
+        Assert.That(modal.gameObject.activeSelf, Is.False);
     }
-    [Test] public void HullCard_UsesEquipmentFilterAndShowsHullSpecificInformation()
-    {
-        var data = new MarketCardData2A { Key = "hull", Title = "Hull", Equipment = true, Hull = true, Quantity = 1,
-            CategoryKey = "equipment:hull", Damage = 120, CargoSize = 7 };
-        Assert.That(data.Matches(MarketKindFilter2A.Hulls, "equipment:hull"), Is.True);
-        Assert.That(data.Matches(MarketKindFilter2A.Goods, "all"), Is.False);
-        var view = View(); view.SetCards(new[] { data }, Array.Empty<MarketCardData2A>(), null, null);
-        var card = _root.GetComponentInChildren<MarketCardView2A>(true);
-        card.transform.Find("DetailsToggle").GetComponent<Button>().onClick.Invoke();
-        Assert.That(card.transform.Find("Range").GetComponent<TMP_Text>().text, Is.EqualTo("Прочность: 120"));
-        Assert.That(card.transform.Find("Damage").gameObject.activeSelf, Is.False);
-        Assert.That(card.transform.Find("ShotCount").gameObject.activeSelf, Is.False);
-        Assert.That(card.transform.Find("CargoInfo").gameObject.activeSelf, Is.False);
-        Assert.That(card.transform.Find("CargoSizeBadge").gameObject.activeSelf, Is.False);
-    }
-    [TestCase(0)] [TestCase(80)] [TestCase(160)]
-    public void EquipmentFooter_ShowsConditionOnlyInDetails_AndCentersPrice(int current)
-    {
-        var view = View();
-        var data = new MarketCardData2A { Key = "weapon", Title = "Laser", Equipment = true, Quantity = 1, Price = 123, CurrentDurability = current, MaximumDurability = 160 };
-        view.SetCards(new[] { data }, Array.Empty<MarketCardData2A>(), null, null);
-        var rendered = _root.GetComponentInChildren<MarketCardView2A>(true);
-        var rect = (RectTransform)rendered.transform; rect.sizeDelta = new Vector2(360, 300);
-        rendered.Bind(data, false);
-        var footer = rendered.transform.Find("CardFooter").GetComponent<RectTransform>();
-        Assert.That(footer.gameObject.activeSelf, Is.True);
-        Assert.That(footer.anchoredPosition.y, Is.EqualTo(-(300 - 44)));
-        var fill = footer.Find("DurabilityFill").GetComponent<RectTransform>();
-        var condition = footer.Find("Durability").GetComponent<TMP_Text>();
-        Assert.That(fill.gameObject.activeSelf, Is.False);
-        Assert.That(condition.gameObject.activeSelf, Is.False);
-        rendered.transform.Find("DetailsToggle").GetComponent<Button>().onClick.Invoke();
-        Assert.That(fill.gameObject.activeSelf, Is.True);
-        Assert.That(condition.gameObject.activeSelf, Is.True);
-        Assert.That(fill.anchorMax.x, Is.EqualTo(current / 160f));
-        Assert.That(condition.text, Is.EqualTo(current + " / 160"));
-        var price = footer.Find("UnitPrice").GetComponent<RectTransform>();
-        Assert.That(price.anchoredPosition.x + price.sizeDelta.x / 2, Is.EqualTo(180).Within(.1f));
-        Assert.That(rendered.transform.Find("Name").GetComponent<TMP_Text>().text, Is.EqualTo("Laser"));
-        data.Equipment = false; data.MaximumDurability = 0; rendered.Bind(data, false);
-        Assert.That(footer.gameObject.activeSelf, Is.False);
-        Assert.That(rendered.transform.Find("UnitPrice").gameObject.activeInHierarchy, Is.True);
-    }
+
     [Test] public void NewHubIllustrationIsBound_AndOtherPlanetTypesUseTheirBaseArtwork()
     {
         var catalog = AssetDatabase.LoadAssetAtPath<MarketVisualCatalog2A>("Assets/_Project/Content/Configs/MarketProfiles/marketVisualCatalog_01.asset");

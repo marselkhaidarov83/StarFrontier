@@ -4,38 +4,36 @@ using NUnit.Framework;
 using UnityEngine;
 
 /// <summary>
-/// Normal games respect HiddenAtStart. Test games discover systems in the configured
+/// Normal games discover all systems. Test games discover systems in the configured
 /// number of unlocked sectors, ordered by SectorConfig.Order.
 /// </summary>
 public sealed class S02_HiddenSystemDiscoveryContract_RED_Test
 {
     [Test]
-    public void NewGame_ShouldNotAutoDiscoverSystemMarkedHiddenAtStart()
+    public void NewGame_DiscoversSystemsInLockedSectors()
     {
         var galaxy = ScriptableObject.CreateInstance<GalaxyConfig>();
         var sector = ScriptableObject.CreateInstance<SectorConfig>();
-        var hidden = ScriptableObject.CreateInstance<StarSystemConfig>();
+        var system = ScriptableObject.CreateInstance<StarSystemConfig>();
 
         try
         {
             SetConfigId(galaxy, "galaxy_hidden_discovery");
             SetConfigId(sector, "sector_hidden_discovery");
-            SetConfigId(hidden, "system_hidden_discovery");
-            SetPrivate(hidden, "isHiddenAtStart", true);
-            SetPrivate(hidden, "isStartSystem", false);
-            SetPrivate(sector, "systems", new[] { hidden });
+            SetConfigId(system, "system_discovery");
+            SetPrivate(sector, "systems", new[] { system });
             galaxy.Sectors.Add(sector);
 
             GalaxyRuntimeState state =
                 GalaxyRuntimeStateFactory.CreateNewGalaxyRuntimeState(galaxy, false, false);
 
             Assert.That(state.Systems.Count, Is.EqualTo(1));
-            Assert.That(state.Systems[0].IsDiscovered, Is.False,
-                "HiddenAtStart must not be bypassed by a debug discovery override.");
+            Assert.That(state.Sectors[0].IsUnlocked, Is.False);
+            Assert.That(state.Systems[0].IsDiscovered, Is.True);
         }
         finally
         {
-            Object.DestroyImmediate(hidden);
+            Object.DestroyImmediate(system);
             Object.DestroyImmediate(sector);
             Object.DestroyImmediate(galaxy);
         }
@@ -56,18 +54,16 @@ public sealed class S02_HiddenSystemDiscoveryContract_RED_Test
             for (int order = 5; order >= 0; order--)
             {
                 var sector = ScriptableObject.CreateInstance<SectorConfig>();
-                var hidden = ScriptableObject.CreateInstance<StarSystemConfig>();
-                var visible = ScriptableObject.CreateInstance<StarSystemConfig>();
+                var first = ScriptableObject.CreateInstance<StarSystemConfig>();
+                var second = ScriptableObject.CreateInstance<StarSystemConfig>();
                 assets.Add(sector);
-                assets.Add(hidden);
-                assets.Add(visible);
+                assets.Add(first);
+                assets.Add(second);
                 SetConfigId(sector, "sector_" + order);
-                SetConfigId(hidden, "system_hidden_" + order);
-                SetConfigId(visible, "system_visible_" + order);
+                SetConfigId(first, "system_first_" + order);
+                SetConfigId(second, "system_second_" + order);
                 SetPrivate(sector, "order", order);
-                SetPrivate(hidden, "isHiddenAtStart", true);
-                SetPrivate(visible, "isHiddenAtStart", false);
-                SetPrivate(sector, "systems", new[] { hidden, visible });
+                SetPrivate(sector, "systems", new[] { first, second });
                 galaxy.Sectors.Add(sector);
             }
 
@@ -81,9 +77,9 @@ public sealed class S02_HiddenSystemDiscoveryContract_RED_Test
                 Assert.That(state.Sectors[index].SectorId, Is.EqualTo("sector_" + index));
                 Assert.That(state.Sectors[index].IsUnlocked, Is.EqualTo(expected));
                 Assert.That(state.Systems[index * 2].IsDiscovered, Is.EqualTo(expected),
-                    "Hidden system in test sector index " + index);
+                    "First system in test sector index " + index);
                 Assert.That(state.Systems[index * 2 + 1].IsDiscovered, Is.EqualTo(expected),
-                    "Visible system in test sector index " + index);
+                    "Second system in test sector index " + index);
             }
         }
         finally

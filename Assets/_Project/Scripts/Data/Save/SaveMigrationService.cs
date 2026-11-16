@@ -77,9 +77,6 @@ public static class SaveMigrationService
         {
             state.Galaxy.Research ??= new ResearchRuntimeState();
             state.Galaxy.Research.Normalize();
-            foreach (var system in state.Galaxy.Systems)
-                if (system?.Station != null && system.SystemStatus == StarSystemStatus.Captured)
-                    StationLifecycleRules.Destroy(system.Station);
         }
 
         MarketPersistenceRules.Normalize(state);

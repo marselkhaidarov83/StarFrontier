@@ -832,11 +832,7 @@ public sealed class SystemTravelHudController :
 
     private string BuildStationTargetLabel(string stationId)
     {
-        string label = "станция " + GetStationDisplayName(stationId);
-        StationConfig station = FindStationConfig(stationId);
-        return station != null && !station.IsActive
-            ? "<color=#E9AB63>" + label + "</color>"
-            : label;
+        return "станция " + GetStationDisplayName(stationId);
     }
 
     private string GetPlanetDisplayName(

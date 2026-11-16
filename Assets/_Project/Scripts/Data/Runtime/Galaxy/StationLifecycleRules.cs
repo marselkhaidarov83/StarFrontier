@@ -15,7 +15,7 @@ public static class StationLifecycleRules
             ConfigId = config.Id, StationType = config.StationType,
             // Old saves had an already existing station, but no level. Do not turn it into a building site.
             Level = legacySave ? 1 : config.InitialLevel,
-            IsEnabled = config.IsActive, IsDestroyed = config.IsDestroyed
+            IsEnabled = true, IsDestroyed = false
         };
     }
 

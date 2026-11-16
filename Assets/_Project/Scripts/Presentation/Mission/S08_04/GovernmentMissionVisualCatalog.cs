@@ -20,21 +20,22 @@ public sealed class GovernmentMissionVisualSet
     public Sprite routeUnlockOverlay;
     public Sprite routeImproveOverlay;
 
-    public Sprite ForMission(MissionInstanceData mission)
+    public Sprite ForMission(MissionInstanceData mission, Sprite baseIllustration = null)
     {
-        if (useNeutralAsFixedBackground && neutral != null) return neutral;
-        if (mission == null) return neutral;
+        Sprite background = baseIllustration != null ? baseIllustration : neutral;
+        if (useNeutralAsFixedBackground && background != null) return background;
+        if (mission == null) return background;
         switch (mission.MissionType)
         {
-            case MissionType.Delivery: return delivery != null ? delivery : neutral;
-            case MissionType.Recon: return recon != null ? recon : neutral;
-            case MissionType.Defense: return defense != null ? defense : neutral;
-            case MissionType.Liberation: return liberation != null ? liberation : neutral;
+            case MissionType.Delivery: return delivery != null ? delivery : background;
+            case MissionType.Recon: return recon != null ? recon : background;
+            case MissionType.Defense: return defense != null ? defense : background;
+            case MissionType.Liberation: return liberation != null ? liberation : background;
             case MissionType.RouteSearch:
                 return mission.Objective != null && mission.Objective.RouteIsUpgrade
-                    ? (routeImprove != null ? routeImprove : neutral)
-                    : (routeUnlock != null ? routeUnlock : neutral);
-            default: return neutral;
+                    ? (routeImprove != null ? routeImprove : background)
+                    : (routeUnlock != null ? routeUnlock : background);
+            default: return background;
         }
     }
 
@@ -62,13 +63,13 @@ public sealed class GovernmentMissionVisualCatalog : ScriptableObject
 {
     [SerializeField] private GovernmentMissionVisualSet[] planets;
 
-    public Sprite Get(PlanetType type, MissionInstanceData mission)
+    public Sprite Get(PlanetType type, MissionInstanceData mission, Sprite baseIllustration = null)
     {
-        if (planets == null) return null;
+        if (planets == null) return baseIllustration;
         for (int i = 0; i < planets.Length; i++)
             if (planets[i] != null && planets[i].planetType == type)
-                return planets[i].ForMission(mission);
-        return null;
+                return planets[i].ForMission(mission, baseIllustration);
+        return baseIllustration;
     }
 
     public Sprite GetOverlay(PlanetType type, MissionInstanceData mission)

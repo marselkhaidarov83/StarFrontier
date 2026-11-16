@@ -14,15 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::PlanetConfig
   id: planet_bastion_front_mining_01
   displayName: "\u0411\u0440\u043E\u043D\u0437\u043E\u0432\u044B\u0435 \u041A\u0430\u0440\u044C\u0435\u0440\u044B"
-  description: 
-  icon: {fileID: 21300000, guid: 43b49bf299c2f4df2a9b71b68f855da8, type: 3}
-  planetType: 2
-  isInhabited: 1
+  description: "\u041F\u043E\u0434 \u043F\u044B\u043B\u044C\u044E \u0438
+    \u043F\u043E\u0440\u043E\u0434\u043E\u0439 \u0441\u043A\u0440\u044B\u0432\u0430\u044E\u0442\u0441\u044F
+    \u0431\u043E\u0433\u0430\u0442\u044B\u0435 \u0436\u0438\u043B\u044B.
+    \u0413\u043B\u0443\u0431\u043E\u043A\u0438\u0435 \u0448\u0430\u0445\u0442\u044B
+    \u0443\u0445\u043E\u0434\u044F\u0442 \u0434\u0430\u043B\u0435\u043A\u043E \u0437\u0430
+    \u043F\u0440\u0435\u0434\u0435\u043B\u044B \u0441\u0432\u0435\u0442\u043E\u0432\u044B\u0445
+    \u0432\u044B\u0448\u0435\u043A. \u041F\u0435\u0440\u0432\u044B\u0435
+    \u0448\u0430\u0445\u0442\u0451\u0440\u0441\u043A\u0438\u0435 \u043F\u043E\u0441\u0451\u043B\u043A\u0438
+    \u0434\u0430\u0432\u043D\u043E \u0441\u043B\u0438\u043B\u0438\u0441\u044C \u0441
+    \u043F\u043E\u0440\u0442\u043E\u043C, \u043D\u043E \u0438\u0445
+    \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044F \u043E\u0441\u0442\u0430\u043B\u0438\u0441\u044C \u043D\u0430
+    \u0443\u043A\u0430\u0437\u0430\u0442\u0435\u043B\u044F\u0445 \u0433\u0440\u0443\u0437\u043E\u0432\u044B\u0445
+    \u043B\u0438\u043D\u0438\u0439."
+  planetTypeConfig: {fileID: 11400000, guid: 65c07d8f1cdb44c669958a6ce6284b7b, type: 2}
   planetOrbit: {fileID: 11400000, guid: 6297e6bf85baf49cd8c4530894990634, type: 2}
-  missionPool: {fileID: 0}
-  encounterProfile: {fileID: 0}
-  marketProfile: {fileID: 11400000, guid: ca5e830c7249349bcbb4a89787d29d1e, type: 2}
-  planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
-  planetSprite: {fileID: 21300000, guid: 43b49bf299c2f4df2a9b71b68f855da8, type: 3}
-  backgroundSprite: {fileID: 0}
   visualSize: 54

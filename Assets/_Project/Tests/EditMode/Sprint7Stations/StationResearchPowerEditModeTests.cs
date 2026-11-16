@@ -14,12 +14,12 @@ public sealed class StationResearchPowerEditModeTests
     [TearDown] public void Cleanup() { foreach (var asset in _assets) Object.DestroyImmediate(asset); _assets.Clear(); }
     [Test] public void Maximum_UsesReachableLevelsInUnlockedSectorsIncludingUnbuiltSlots()
     {
-        var levels = Asset<StationLevelEffectsConfig>();
+        var levels = Asset<StationTypeConfig>();
         levels.Levels = new[] { new StationLevelEffectsSettings { Level = 1, ScienceRate = 2 },
             new StationLevelEffectsSettings { Level = 2, RequiredGalaxyLevel = 2, ScienceRate = 5 },
             new StationLevelEffectsSettings { Level = 3, RequiredGalaxyLevel = 3, ScienceRate = 9 } };
-        var type = Asset<StationTypeConfig>(); Set(type, "stationType", StationType.Science);
-        var station = Asset<StationConfig>(); Set(station, "stationTypeConfig", type); Set(station, "levelEffects", levels);
+        Set(levels, "stationType", StationType.Science);
+        var station = Asset<StationConfig>(); Set(station, "stationTypeConfig", levels);
         var firstSystem = Asset<StarSystemConfig>(); Id(firstSystem, "first"); Set(firstSystem, "station", station);
         var secondSystem = Asset<StarSystemConfig>(); Id(secondSystem, "second"); Set(secondSystem, "station", station);
         var first = Asset<SectorConfig>(); Id(first, "a"); Set(first, "systems", new[] { firstSystem });

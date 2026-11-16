@@ -305,8 +305,8 @@ public sealed class StationPanelStyleEditModeTests
     }
     [Test] public void UpgradeVisibility_UsesNextLevelGalaxyRequirement_AndHidesAtMaximum()
     {
-        var config = ScriptableObject.CreateInstance<StationConfig>(); var effects = ScriptableObject.CreateInstance<StationLevelEffectsConfig>();
-        effects.Levels = new[] { new StationLevelEffectsSettings { Level = 2, RequiredGalaxyLevel = 3 } }; Field(config, "levelEffects", effects);
+        var config = ScriptableObject.CreateInstance<StationConfig>(); var effects = ScriptableObject.CreateInstance<StationTypeConfig>();
+        effects.Levels = new[] { new StationLevelEffectsSettings { Level = 2, RequiredGalaxyLevel = 3 } }; Field(config, "stationTypeConfig", effects);
         var card = new StationCardSnapshot { Config = config, GalaxyLevel = 2, Station = new StationRuntimeState { Level = 1 } };
         var show = typeof(SystemStationPanel2A).GetMethod("CanShowUpgrade", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
         try

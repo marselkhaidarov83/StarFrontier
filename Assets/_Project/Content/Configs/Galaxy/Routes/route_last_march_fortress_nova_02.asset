@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_last_march_fortress_nova_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_last_march_fortress_nova_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u041c\u0430\u0440\u0448\u00bb \u2014 \u00ab\u041a\u0440\u0435\u043f\u043e\u0441\u0442\u044c \u041d\u043e\u0432\u0430\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u041c\u0430\u0440\u0448\u00bb \u0438 \u00ab\u041a\u0440\u0435\u043f\u043e\u0441\u0442\u044c \u041d\u043e\u0432\u0430\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: a66697daa8bdc422a83720dfb847a152, type: 2}
   ToSystem: {fileID: 11400000, guid: 8c998835230804baa921cad4deaf4b98, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 80
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: d7efd7056c433479a8f3c69335c6cdff, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 19327703a7bb84c79aaa315a08351d65, type: 2}
   galaxyMapCurveStrength: -0.04
@@ -30,3 +28,8 @@ MonoBehaviour:
   - 78
   - 77
   - 76
+  - 75
+  - 74
+  - 73
+  - 72
+  - 71

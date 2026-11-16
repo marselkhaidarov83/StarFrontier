@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_helix_core_elysium_reach_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_helix_core_elysium_reach_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u042f\u0434\u0440\u043e \u0421\u043f\u0438\u0440\u0430\u043b\u0438\u00bb \u2014 \u00ab\u042d\u043b\u0438\u0437\u0438\u0443\u043c\u0441\u043a\u0438\u0439 \u041f\u0440\u0435\u0434\u0435\u043b\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u042f\u0434\u0440\u043e \u0421\u043f\u0438\u0440\u0430\u043b\u0438\u00bb \u0438 \u00ab\u042d\u043b\u0438\u0437\u0438\u0443\u043c\u0441\u043a\u0438\u0439 \u041f\u0440\u0435\u0434\u0435\u043b\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 1945e1dce8de0401a8f6db680a89fa9e, type: 2}
   ToSystem: {fileID: 11400000, guid: 07f1425eaa2954b46849817b86432221, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 56
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 691aa30a03cd442cab96961cc3d1f1ff, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 8d3677979f2b9491593798c8eba4a638, type: 2}
   galaxyMapCurveStrength: 0.25
@@ -30,3 +28,8 @@ MonoBehaviour:
   - 54
   - 53
   - 52
+  - 51
+  - 50
+  - 49
+  - 48
+  - 47

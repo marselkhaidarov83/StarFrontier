@@ -14,15 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::PlanetConfig
   id: planet_cargo_prime_frontier_01
   displayName: "\u0414\u0430\u043B\u044C\u043D\u0438\u0435 \u0421\u043A\u043B\u0430\u0434\u044B"
-  description: 
-  icon: {fileID: 21300000, guid: 63946824568d94c6ba25e431c61eb197, type: 3}
-  planetType: 1
-  isInhabited: 1
+  description: "\u0413\u0440\u0443\u0437\u043E\u0432\u044B\u0435 \u043F\u043B\u0430\u0442\u0444\u043E\u0440\u043C\u044B \u0438
+    \u0436\u0438\u043B\u044B\u0435 \u043A\u0443\u043F\u043E\u043B\u0430 \u0437\u0434\u0435\u0441\u044C
+    \u0441\u043E\u0441\u0435\u0434\u0441\u0442\u0432\u0443\u044E\u0442 \u0441
+    \u043F\u0443\u0441\u0442\u043E\u0448\u0430\u043C\u0438, \u043A\u043E\u0442\u043E\u0440\u044B\u0445
+    \u043F\u043E\u043A\u0430 \u043D\u0435\u0442 \u043D\u0430 \u043F\u043E\u0434\u0440\u043E\u0431\u043D\u044B\u0445
+    \u043A\u0430\u0440\u0442\u0430\u0445. \u041D\u0430 \u043F\u0440\u0438\u0447\u0430\u043B\u0430\u0445
+    \u043F\u043E\u0434\u043E\u043B\u0433\u0443 \u043F\u043E\u043C\u043D\u044F\u0442 \u0438\u043C\u0435\u043D\u0430
+    \u043F\u0438\u043B\u043E\u0442\u043E\u0432,
+    \u0434\u043E\u0431\u0438\u0440\u0430\u0432\u0448\u0438\u0445\u0441\u044F \u0441\u044E\u0434\u0430 \u0432
+    \u043E\u0434\u0438\u043D\u043E\u0447\u043A\u0443."
+  planetTypeConfig: {fileID: 11400000, guid: 42f1790cda59797ac09a0a30c9f4f7c0, type: 2}
   planetOrbit: {fileID: 11400000, guid: 879be300b8ca84554994a3da31a83a4f, type: 2}
-  missionPool: {fileID: 0}
-  encounterProfile: {fileID: 0}
-  marketProfile: {fileID: 11400000, guid: 2dc1cc107807a4680943bbabd83cdd64, type: 2}
-  planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
-  planetSprite: {fileID: 21300000, guid: 63946824568d94c6ba25e431c61eb197, type: 3}
-  backgroundSprite: {fileID: 0}
   visualSize: 52.5

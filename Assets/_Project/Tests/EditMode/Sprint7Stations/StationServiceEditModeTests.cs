@@ -253,9 +253,9 @@ public sealed class StationServiceEditModeTests
     public void LegacyTimedRecovery_ActiveInvasionPreventsOfflineProgress()
     {
         var system = AddSystem("sys", 2, 100000);
-        Set(_configs["sys"].Station, "isDestroyed", true);
         var service = Service(new PaymentStub());
         service.InitializeSession(true);
+        StationLifecycleRules.Destroy(system.Station);
         Assert.That(StationLifecycleRules.BeginPaidOperation(system.Station, new StationOperationRuntimeState {
             OperationId = "legacy-paid", Kind = StationOperationKind.Recovery, TargetLevel = system.Station.Level,
             DurationSeconds = 100000, PaymentOptionId = "pay" }), Is.True);
@@ -414,18 +414,22 @@ public sealed class StationServiceEditModeTests
         Set(station, "id", "station_" + id);
         Set(station, "stationTypeConfig", type);
         Set(station, "initialLevel", initialLevel);
-        Set(station, "isActive", true);
         var option = new StationPaymentOption
         {
             Id = "pay", DurationSeconds = duration,
             Costs = new[] { new StationPaymentCost { Resource = StationPaymentResource.Diamonds, Amount = 7 } }
         };
-        Set(station, "constructionPaymentOptions", new[] { option });
-        Set(station, "recoveryPaymentOptions", new[] { option });
+        var payment = Make<StationPaymentOptionsConfig>();
+        payment.Options = new[] { option };
+        var levels = new List<StationLevelEffectsSettings>();
         var upgrades = new List<StationUpgradeSettings>();
-        for (int level = 2; level <= 10; level++)
-            upgrades.Add(new StationUpgradeSettings { TargetLevel = level, PaymentOptions = new[] { option } });
-        Set(station, "upgradeSettings", upgrades.ToArray());
+        for (int level = 1; level <= 10; level++)
+        {
+            upgrades.Add(new StationUpgradeSettings { TargetLevel = level, Payment = payment });
+            levels.Add(new StationLevelEffectsSettings { Level = level, RecoveryPayment = payment });
+        }
+        Set(type, "upgradeSettings", upgrades.ToArray());
+        type.Levels = levels.ToArray();
         var config = Make<StarSystemConfig>();
         Set(config, "id", id);
         Set(config, "station", station);

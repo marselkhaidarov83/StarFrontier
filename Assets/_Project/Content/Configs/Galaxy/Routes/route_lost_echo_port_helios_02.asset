@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_lost_echo_port_helios_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_lost_echo_port_helios_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041f\u043e\u0442\u0435\u0440\u044f\u043d\u043d\u043e\u0435 \u042d\u0445\u043e\u00bb \u2014 \u00ab\u041f\u043e\u0440\u0442 \u0413\u0435\u043b\u0438\u043e\u0441\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041f\u043e\u0442\u0435\u0440\u044f\u043d\u043d\u043e\u0435 \u042d\u0445\u043e\u00bb \u0438 \u00ab\u041f\u043e\u0440\u0442 \u0413\u0435\u043b\u0438\u043e\u0441\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: d148c549e397b4fcaa51e59a74bf42df, type: 2}
   ToSystem: {fileID: 11400000, guid: a88906c1b167842e199a14945756ee52, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 28
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 39a1ecd1937584a6f87b8745a726fe31, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 06016c6be7cec46b3b0249729a5b16fc, type: 2}
   galaxyMapCurveStrength: 0.45
@@ -30,3 +28,8 @@ MonoBehaviour:
   - 26
   - 25
   - 24
+  - 23
+  - 22
+  - 21
+  - 20
+  - 19

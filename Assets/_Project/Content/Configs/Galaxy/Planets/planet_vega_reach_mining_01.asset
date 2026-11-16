@@ -15,15 +15,17 @@ MonoBehaviour:
   id: planet_vega_reach_mining_01
   displayName: "\u041A\u0440\u0438\u0441\u0442\u0430\u043B\u044C\u043D\u044B\u0439
     \u0420\u0430\u0437\u043B\u043E\u043C"
-  description: 
-  icon: {fileID: 21300000, guid: 43b49bf299c2f4df2a9b71b68f855da8, type: 3}
-  planetType: 2
-  isInhabited: 1
+  description: "\u041F\u043B\u0430\u043D\u0435\u0442\u0430
+    \u0432\u0441\u0442\u0440\u0435\u0447\u0430\u0435\u0442
+    \u043F\u0440\u0438\u0431\u044B\u0432\u0430\u044E\u0449\u0438\u0445 \u0433\u0443\u043B\u043E\u043C
+    \u0434\u0440\u043E\u0431\u0438\u043B\u043E\u043A \u0438 \u0440\u043E\u0432\u043D\u043E\u0439
+    \u043F\u043E\u043B\u043E\u0441\u043E\u0439 \u043E\u0433\u043D\u0435\u0439 \u0432\u0434\u043E\u043B\u044C
+    \u0440\u0443\u0434\u043D\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u0438. \u041A
+    \u043A\u043E\u043D\u0446\u0443 \u0441\u043C\u0435\u043D\u044B \u043A\u0440\u043E\u043C\u043A\u0438
+    \u043A\u0430\u0440\u044C\u0435\u0440\u043E\u0432 \u0441\u0442\u0430\u043D\u043E\u0432\u044F\u0442\u0441\u044F
+    \u043F\u043E\u0445\u043E\u0436\u0438 \u043D\u0430 \u0441\u0442\u0443\u043F\u0435\u043D\u0438, \u043F\u043E
+    \u043A\u043E\u0442\u043E\u0440\u044B\u043C \u0441\u043F\u0443\u0441\u043A\u0430\u0435\u0442\u0441\u044F
+    \u0441\u0432\u0435\u0442."
+  planetTypeConfig: {fileID: 11400000, guid: 65c07d8f1cdb44c669958a6ce6284b7b, type: 2}
   planetOrbit: {fileID: 11400000, guid: 577d9f155896648f6aa34a08b58b320b, type: 2}
-  missionPool: {fileID: 0}
-  encounterProfile: {fileID: 0}
-  marketProfile: {fileID: 11400000, guid: ca5e830c7249349bcbb4a89787d29d1e, type: 2}
-  planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
-  planetSprite: {fileID: 21300000, guid: 43b49bf299c2f4df2a9b71b68f855da8, type: 3}
-  backgroundSprite: {fileID: 0}
   visualSize: 56

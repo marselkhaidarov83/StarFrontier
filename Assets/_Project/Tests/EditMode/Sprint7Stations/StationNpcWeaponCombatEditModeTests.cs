@@ -75,7 +75,7 @@ public sealed class StationNpcWeaponCombatEditModeTests
         _session.State.Galaxy.Systems.Add(_system);
         _typeConfig = Asset<StationTypeConfig>(); Field(_typeConfig, "stationType", StationType.Military);
         _stationConfig = Asset<StationConfig>(); Id(_stationConfig, "station"); Field(_stationConfig, "stationTypeConfig", _typeConfig);
-        Field(_stationConfig, "overrideLocalOffset", true); Field(_stationConfig, "localOffsetOverride", new Vector2(20, 0));
+        Field(_typeConfig, "localOffset", new Vector2(20, 0));
         _systemConfig = Asset<StarSystemConfig>(); Id(_systemConfig, "sys"); Field(_systemConfig, "station", _stationConfig);
         _stations = new Stations { System = _system };
         _combat = new StationCombatService2A(_session, id => id == "sys" ? _systemConfig : null, _stations,

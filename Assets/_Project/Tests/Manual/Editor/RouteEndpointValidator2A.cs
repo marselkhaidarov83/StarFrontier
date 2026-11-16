@@ -16,7 +16,7 @@ using UnityEngine;
 /// - уникальность пары систем;
 /// - FromSystem и ToSystem;
 /// - наличие Route в обеих системах;
-/// - ParsecDistance;
+/// - fuel costs by development level;
 /// - обе ссылки RouteEndpointConfig;
 /// - валидность ExitPoint и EntryPoint;
 /// - соответствие endpoint направлению систем
@@ -423,7 +423,7 @@ public static class RouteEndpointValidator2A
                 routesBySystemPair,
                 report);
 
-            ValidateRouteDistance(
+            ValidateRouteFuel(
                 route,
                 report);
 
@@ -672,19 +672,24 @@ public static class RouteEndpointValidator2A
             route);
     }
 
-    private static void ValidateRouteDistance(
+    private static void ValidateRouteFuel(
         RouteConfig route,
         ValidationReport report)
     {
-        if (route.ParsecDistance > 0)
-            return;
+        var costs = route.FuelByDevelopmentLevel;
+        if (costs != null && costs.Count == RouteConfig.MaxDevelopmentLevel)
+        {
+            bool valid = true;
+            foreach (int cost in costs)
+                valid &= cost > 0;
+            if (valid)
+                return;
+        }
 
         report.Add(
             ValidationSeverity.Error,
             "ROUTE-030",
-            "ParsecDistance must be greater " +
-            "than zero. Current value: " +
-            route.ParsecDistance,
+            $"Expected {RouteConfig.MaxDevelopmentLevel} positive fuel costs.",
             route);
     }
 

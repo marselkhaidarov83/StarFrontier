@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s06_system_crimson_line_02
   displayName: "\u0411\u0430\u0433\u0440\u043E\u0432\u0430\u044F \u041B\u0438\u043D\u0438\u044F"
   description: "\u0411\u0430\u0433\u0440\u043E\u0432\u0430\u044F \u041B\u0438\u043D\u0438\u044F"
-  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
-  economyType: 0
-  dangerLevel: 4
+  icon: {fileID: 21300000, guid: 1fe825ce7ba4145bb82a1760bd715aea, type: 3}
   sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: ccd79eb7ddb19438280c41183c7694de, type: 2}
@@ -29,15 +27,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 90beaac1c247148baa7e84e4ad263135, type: 2}
   linkedSystems: []
   station: {fileID: 11400000, guid: 6b69035988bb1484bb62ec5f6ddb1e59, type: 2}
-  missionTags: 020000000500000006000000
   mapPosition: {x: -2.1, y: 1}
   systemPopulationRule: {fileID: 11400000, guid: 7873c5d66bb264ff5a9758e0aa9ae316, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: 09d3dc0405b524d8da4f0163fbb2794c, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: 09d3dc0405b524d8da4f0163fbb2794c, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 6
   routes:
   - {fileID: 11400000, guid: b4f680c611eef434cb9b43e09b404226, type: 2}
   - {fileID: 11400000, guid: 36e03971b8e88484493abb13782033eb, type: 2}

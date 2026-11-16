@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_port_helios_meridian_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_port_helios_meridian_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041f\u043e\u0440\u0442 \u0413\u0435\u043b\u0438\u043e\u0441\u00bb \u2014 \u00ab\u041c\u0435\u0440\u0438\u0434\u0438\u0430\u043d\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041f\u043e\u0440\u0442 \u0413\u0435\u043b\u0438\u043e\u0441\u00bb \u0438 \u00ab\u041c\u0435\u0440\u0438\u0434\u0438\u0430\u043d\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: a88906c1b167842e199a14945756ee52, type: 2}
   ToSystem: {fileID: 11400000, guid: e2a163fadab994745b3ab8a5b24f7962, type: 2}
   IsLockedAtStart: 0
-  RequiredScanLevel: 0
-  ParsecDistance: 11
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 421cf27aa739e4aab8340b571cf5b659, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 0151f07f5379e4083976794ff0104537, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 9
   - 8
   - 7
+  - 6
+  - 5
+  - 4
+  - 3
+  - 2

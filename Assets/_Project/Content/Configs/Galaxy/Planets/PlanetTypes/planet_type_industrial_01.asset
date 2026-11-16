@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85ec56cc8dee40ec9ec17f2ad0dd03bc, type: 3}
+  m_Name: planet_type_industrial_01
+  m_EditorClassIdentifier: Data::PlanetTypeConfig
+  id: planet_type_industrial_01
+  displayName: "\u041F\u0440\u043E\u043C\u044B\u0448\u043B\u0435\u043D\u043D\u044B\u0439 \u043C\u0438\u0440"
+  description: "\u041E\u0431\u0449\u0438\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043F\u043B\u0430\u043D\u0435\u0442 \u0442\u0438\u043F\u0430 \u00AB\u041F\u0440\u043E\u043C\u044B\u0448\u043B\u0435\u043D\u043D\u044B\u0439 \u043C\u0438\u0440\u00BB."
+  icon: {fileID: 21300000, guid: 72334256b6d1a432bb1f81aec74eae29, type: 3}
+  planetType: 3
+  isInhabited: 1
+  marketProfile: {fileID: 11400000, guid: 214732c6b762140bab1525d3f60689c9, type: 2}
+  planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
+  hasMarket: 0
+  hasMissions: 0
+  hasRepair: 0
+  hasMedical: 0
+  hasResearch: 0
+  hasSpecializedResearch: 0
+  hasRangerBoard: 0
+  hasMilitaryContracts: 0
+  marketIllustration: {fileID: 21300000, guid: b2342a360c7440ce8810bb33c69d5c5c, type: 3}
+  missionIllustration: {fileID: 21300000, guid: c1fb7f7164aa4b6484624bedfb2d8344, type: 3}
+  refuelIllustration: {fileID: 21300000, guid: a75735f5d4aa44f8a4bc6e1036967938, type: 3}
+  researchIllustration: {fileID: 21300000, guid: c1fb7f7164aa4b6484624bedfb2d8344, type: 3}

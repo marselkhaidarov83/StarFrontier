@@ -57,6 +57,6 @@ public sealed class StationPaymentOption
 [Serializable]
 public sealed class StationUpgradeSettings
 {
-    [Range(2, 10)] public int TargetLevel = 2;
-    public StationPaymentOption[] PaymentOptions = Array.Empty<StationPaymentOption>();
+    [Range(1, 10)] public int TargetLevel = 1;
+    public StationPaymentOptionsConfig Payment;
 }

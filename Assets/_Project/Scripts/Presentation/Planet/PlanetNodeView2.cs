@@ -19,7 +19,7 @@ public class PlanetNodeView2 : CustomMonoBehaviour
         _planet = planet;
 
         label.text = _planet.DisplayName;
-        planetImage.sprite = _planet.PlanetSprite;
+        planetImage.sprite = _planet.Icon;
 
         SpriteRendererSizeUtility.SetWorldSize(
             planetImage,

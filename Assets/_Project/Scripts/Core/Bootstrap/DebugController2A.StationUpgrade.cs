@@ -16,7 +16,7 @@ public sealed partial class DebugController2A
         { LogStationUpgradeRejection("ServicesUnavailable"); return; }
         string systemId = session.State?.Player?.CurrentSystemId;
         if (string.IsNullOrEmpty(systemId)) { LogStationUpgradeRejection("CurrentSystemMissing"); return; }
-        var settings = config.GetStarSystemConfigById(systemId)?.Station?.LevelEffects;
+        var settings = config.GetStarSystemConfigById(systemId)?.Station?.StationTypeConfig;
         if (settings == null || !stations.TryGetStation(systemId, out _))
         { LogStationUpgradeRejection("StationUnavailable"); return; }
         var system = session.State.Galaxy.Systems.Find(x => x != null && x.SystemId == systemId);
@@ -37,7 +37,7 @@ public sealed partial class DebugController2A
 
 public static class StationUpgradeDebug2A
 {
-    public static bool TryIncrease(StarSystemRuntimeState system, StationLevelEffectsConfig config,
+    public static bool TryIncrease(StarSystemRuntimeState system, StationTypeConfig config,
         int galaxyLevel, bool hasEnemies, out string reason)
     {
         reason = "StationUnavailable";

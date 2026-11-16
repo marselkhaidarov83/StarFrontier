@@ -19,5 +19,5 @@ public abstract class BaseConfig : ScriptableObject
     public string Id => id;
     public string DisplayName => displayName;
     public string Description => description;
-    public Sprite Icon => icon;
+    public virtual Sprite Icon => icon;
 }

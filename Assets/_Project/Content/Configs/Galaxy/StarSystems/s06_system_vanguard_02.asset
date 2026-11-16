@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s06_system_vanguard_02
   displayName: "\u0410\u0432\u0430\u043D\u0433\u0430\u0440\u0434"
   description: "\u0410\u0432\u0430\u043D\u0433\u0430\u0440\u0434"
-  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
-  economyType: 6
-  dangerLevel: 4
+  icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
   sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: e7f03ff1ce21045c7bcc547cab51c7a5, type: 2}
@@ -29,15 +27,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 27eb56b0e6faa4d2b94f4ddb97ba67b6, type: 2}
   linkedSystems: []
   station: {fileID: 11400000, guid: db9f1df73a84646728280bb39de76a12, type: 2}
-  missionTags: 020000000700000004000000
   mapPosition: {x: 4.5, y: 0.4}
   systemPopulationRule: {fileID: 11400000, guid: 66c62cc24edfc4f1dbb54807b1cd44e5, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: 031aa930d7e624cdaabe794641e5daf2, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: 031aa930d7e624cdaabe794641e5daf2, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 6
   routes:
   - {fileID: 11400000, guid: 6c24b5f15129b45d88ccdc5ac07b2a4c, type: 2}
   - {fileID: 11400000, guid: 8a742aea7c40b4b6ca706965d83e467c, type: 2}

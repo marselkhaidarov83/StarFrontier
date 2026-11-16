@@ -30,7 +30,6 @@ public sealed class GalaxyStationInfoEditModeTests
         _label = new GameObject("StationLabel", typeof(RectTransform), typeof(TextMeshProUGUI));
         _text = _label.GetComponent<TMP_Text>(); Set(_panel, "baseText", _text);
         _station = Asset<StationConfig>(); Set(_station, "id", "station"); Set(_station, "displayName", "Золотая пристань");
-        Set(_station, "isActive", true);
         _type = Asset<StationTypeConfig>(); Set(_type, "stationType", StationType.Trade); Set(_station, "stationTypeConfig", _type);
         _system = Asset<StarSystemConfig>(); Set(_system, "station", _station);
     }

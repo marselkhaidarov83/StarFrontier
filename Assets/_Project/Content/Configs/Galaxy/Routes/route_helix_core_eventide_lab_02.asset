@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_helix_core_eventide_lab_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_helix_core_eventide_lab_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u042f\u0434\u0440\u043e \u0421\u043f\u0438\u0440\u0430\u043b\u0438\u00bb \u2014 \u00ab\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u0438\u044f \u0421\u0443\u043c\u0435\u0440\u0435\u043a\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u042f\u0434\u0440\u043e \u0421\u043f\u0438\u0440\u0430\u043b\u0438\u00bb \u0438 \u00ab\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u0438\u044f \u0421\u0443\u043c\u0435\u0440\u0435\u043a\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 1945e1dce8de0401a8f6db680a89fa9e, type: 2}
   ToSystem: {fileID: 11400000, guid: c837657b571d041a0adb7abdcf66f66a, type: 2}
   IsLockedAtStart: 0
-  RequiredScanLevel: 0
-  ParsecDistance: 31
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 2a6a4725c84c84ed0908870f9c0fda66, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 2ec22e1799afb4dbc83079d576777378, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 29
   - 28
   - 27
+  - 26
+  - 25
+  - 24
+  - 23
+  - 22

@@ -18,13 +18,6 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
     [SerializeField] private StarSystemConfig starSystemConfig;
 
     [Header("System Visual")]
-    [SerializeField] private Sprite balancedSystemSprite;
-    [SerializeField] private Sprite miningSystemSprite;
-    [SerializeField] private Sprite industrialSystemSprite;
-    [SerializeField] private Sprite agriculturalSystemSprite;
-    [SerializeField] private Sprite tradeSystemSprite;
-    [SerializeField] private Sprite highTechSystemSprite;
-    [SerializeField] private Sprite frontierSystemSprite;
     [SerializeField] private Sprite hiddenSystemSprite;
     [SerializeField] private Sprite disabledSystemSprite;
 
@@ -125,7 +118,7 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
         bool isDiscovered = runtimeState != null && runtimeState.IsDiscovered;
         bool isCurrent = IsCurrentSystem();
 
-        Sprite systemSprite = GetEconomySprite();
+        Sprite systemSprite = starSystemConfig.Icon;
         Color systemColor = systemColorNormal;
 
         Sprite fuelSprite = fuelNormalSprite;
@@ -171,14 +164,12 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
         switch (travelFailReason)
         {
             case TravelFailReason.TargetSystemIsCurrent:
-                systemSprite = GetEconomySprite();
                 systemColor = systemColorCurrent;
                 fuelColor = fuelColorCurrent;
                 fuelVisible = false;
                 break;
 
             case TravelFailReason.None:
-                systemSprite = GetEconomySprite();
                 systemColor = systemColorNormal;
                 fuelSprite = runtimeState != null &&
                     runtimeState.SystemStatus == StarSystemStatus.Captured &&
@@ -191,7 +182,6 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
 
             case TravelFailReason.FuelTankNotInstalled:
             case TravelFailReason.NotEnoughFuel:
-                systemSprite = GetEconomySprite();
                 systemColor = systemColorNormal;
                 fuelSprite = fuelNotEnoughSprite;
                 fuelColor = fuelColorNotEnough;
@@ -199,7 +189,6 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
                 break;
 
             case TravelFailReason.SystemsAreNotNeighbors:
-                systemSprite = GetEconomySprite();
                 systemColor = systemColorNormal;
                 fuelSprite = fuelNotEnoughSprite;
                 fuelColor = fuelColorNotEnough;
@@ -209,7 +198,7 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
             default:
                 systemSprite = disabledSystemSprite != null
                     ? disabledSystemSprite
-                    : GetEconomySprite();
+                    : systemSprite;
 
                 systemColor = systemColorDisabled;
                 fuelColor = fuelColorDisabled;
@@ -313,36 +302,6 @@ public class StarSystemNodeView2A : CustomMonoBehaviour, IPointerClickHandler
         SystemWarStateIcon2A.Apply(
             warStateIcon, runtimeState, warThreatSprite, warInvasionSprite,
             warIconThreatColor, warIconInvasionColor);
-    }
-
-    private Sprite GetEconomySprite()
-    {
-        if (starSystemConfig == null)
-            return balancedSystemSprite;
-
-        switch (starSystemConfig.EconomyType)
-        {
-            case SystemEconomyType.Mining:
-                return miningSystemSprite != null ? miningSystemSprite : balancedSystemSprite;
-
-            case SystemEconomyType.Industrial:
-                return industrialSystemSprite != null ? industrialSystemSprite : balancedSystemSprite;
-
-            case SystemEconomyType.Agricultural:
-                return agriculturalSystemSprite != null ? agriculturalSystemSprite : balancedSystemSprite;
-
-            case SystemEconomyType.Trade:
-                return tradeSystemSprite != null ? tradeSystemSprite : balancedSystemSprite;
-
-            case SystemEconomyType.HighTech:
-                return highTechSystemSprite != null ? highTechSystemSprite : balancedSystemSprite;
-
-            case SystemEconomyType.Frontier:
-                return frontierSystemSprite != null ? frontierSystemSprite : balancedSystemSprite;
-
-            default:
-                return balancedSystemSprite;
-        }
     }
 
     /*

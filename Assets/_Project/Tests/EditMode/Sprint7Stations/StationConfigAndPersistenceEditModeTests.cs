@@ -55,7 +55,7 @@ public sealed class StationConfigAndPersistenceEditModeTests
             }
         };
         var diamondsWithTime = Diamonds("diamonds_timed", 30);
-        Set(config, "constructionPaymentOptions", new[] { creditsAndMaterial, diamondsWithTime });
+        Set(config.StationTypeConfig, "upgradeSettings", new[] { Payment(1, creditsAndMaterial, diamondsWithTime) });
 
         Assert.That(config.TryCreateOperation(StationOperationKind.Construction, 0,
             "credits_material", out var instant), Is.True);
@@ -99,11 +99,10 @@ public sealed class StationConfigAndPersistenceEditModeTests
     public void ConfigQuotes_RejectUnknownOptionAndImpossibleTransitions()
     {
         var config = Station(0);
-        Set(config, "constructionPaymentOptions", new[] { Diamonds("build", 10) });
-        Set(config, "upgradeSettings", new[]
+        Set(config.StationTypeConfig, "upgradeSettings", new[]
         {
-            new StationUpgradeSettings { TargetLevel = 3,
-                PaymentOptions = new[] { Diamonds("upgrade", 10) } }
+            Payment(1, Diamonds("build", 10)),
+            Payment(3, Diamonds("upgrade", 10))
         });
         Assert.That(config.TryCreateOperation(StationOperationKind.Construction, 0,
             "unknown", out _), Is.False);
@@ -125,7 +124,7 @@ public sealed class StationConfigAndPersistenceEditModeTests
     {
         var config = Station(0);
         var option = Diamonds("build", 20);
-        Set(config, "constructionPaymentOptions", new[] { option });
+        Set(config.StationTypeConfig, "upgradeSettings", new[] { Payment(1, option) });
         Assert.That(config.TryCreateOperation(StationOperationKind.Construction, 0,
             "build", out var snapshot), Is.True);
         option.Costs[0].Amount = 999;
@@ -134,6 +133,13 @@ public sealed class StationConfigAndPersistenceEditModeTests
         Assert.That(snapshot.DurationSeconds, Is.EqualTo(20));
         Assert.That(snapshot.PaidCosts[0].Amount, Is.EqualTo(7));
         Assert.That(snapshot.PaymentOptionId, Is.EqualTo("build"));
+    }
+
+    private StationUpgradeSettings Payment(int targetLevel, params StationPaymentOption[] options)
+    {
+        var payment = Make<StationPaymentOptionsConfig>();
+        payment.Options = options;
+        return new StationUpgradeSettings { TargetLevel = targetLevel, Payment = payment };
     }
 
     [Test]
@@ -311,8 +317,8 @@ public sealed class StationConfigAndPersistenceEditModeTests
     {
         var config = Make<StationConfig>();
         Set(config, "id", "station_asset_test");
+        Set(config, "stationTypeConfig", Make<StationTypeConfig>());
         Set(config, "initialLevel", level);
-        Set(config, "isActive", true);
         return config;
     }
 

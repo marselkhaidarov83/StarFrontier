@@ -10,7 +10,7 @@ public static class InhabitedPlanetMissionConfigBinder
     private const string DebugConfigPath =
         "Assets/_Project/Content/Configs/Game/debugLogConfig01.asset";
 
-    [MenuItem("STAR FRONTIER/Content/12. Missions/Bind shared config to inhabited planets")]
+    [MenuItem("STAR FRONTIER/Content/12. Missions/Bind shared config to inhabited planet types")]
     public static void BindSharedConfig()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -48,7 +48,7 @@ public static class InhabitedPlanetMissionConfigBinder
             return;
         }
 
-        string[] guids = AssetDatabase.FindAssets("t:PlanetConfig", new[] { PlanetRoot });
+        string[] guids = AssetDatabase.FindAssets("t:PlanetTypeConfig", new[] { PlanetRoot });
         Array.Sort(guids, StringComparer.Ordinal);
         int inhabited = 0;
         int updated = 0;
@@ -59,11 +59,11 @@ public static class InhabitedPlanetMissionConfigBinder
         foreach (string guid in guids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
-            var planet = AssetDatabase.LoadAssetAtPath<PlanetConfig>(path);
+            var planet = AssetDatabase.LoadAssetAtPath<PlanetTypeConfig>(path);
             if (planet == null)
             {
                 invalid++;
-                Log("Skipped missing PlanetConfig | Path=" + path);
+                Log("Skipped missing PlanetTypeConfig | Path=" + path);
                 continue;
             }
             if (!planet.IsInhabited)

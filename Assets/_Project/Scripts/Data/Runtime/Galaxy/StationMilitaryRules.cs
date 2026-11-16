@@ -23,7 +23,7 @@ public static class StationMilitaryRules
         string.IsNullOrEmpty(systemId) || string.IsNullOrEmpty(stationId) ? 0 :
         npcs?.Count(n => n != null && n.IsAlive && IsStationMilitary(n) &&
             SourceSystem(n) == systemId && SourceStationId(n) == stationId) ?? 0;
-    public static int MaximumCapacity(StationLevelEffectsConfig config, int galaxyLevel)
+    public static int MaximumCapacity(StationTypeConfig config, int galaxyLevel)
     {
         int maximum = 0;
         galaxyLevel = Math.Max(1, Math.Min(10, galaxyLevel));

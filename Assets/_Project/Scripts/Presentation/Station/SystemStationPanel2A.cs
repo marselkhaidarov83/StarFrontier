@@ -198,7 +198,7 @@ public sealed class SystemStationPanel2A : MonoBehaviour
         if (!card.IsInside && _tab != "card") { _tab = "card"; ClearConfirmation(); _layoutKey = null; }
         _header.color = Color.white;
         _header.SetText(card.Config.DisplayName.ToUpperInvariant());
-        var headerSprite = card.Station.IsDestroyed && card.Config.DestroyedSprite != null ? card.Config.DestroyedSprite : card.Config.StationSprite;
+        var headerSprite = card.Config.EffectiveIcon;
         StationPanelStyle2A.LayoutStationHeader(_panelRect, _header, _headerIcon, headerSprite);
         bool developing = StationPanelStyle2A.IsDevelopmentRunning(card.Station);
         bool builtOverview = IsBuiltOverview(card);
@@ -280,7 +280,7 @@ public sealed class SystemStationPanel2A : MonoBehaviour
     private static bool CanShowUpgrade(StationCardSnapshot card)
     {
         if (card.IsCaptured || !IsBuiltOverview(card) || card.Station.Level >= 10 || card.Config == null) return false;
-        int required = card.Config.LevelEffects?.GetLevel(card.Station.Level + 1)?.RequiredGalaxyLevel ?? 1;
+        int required = card.Config.StationTypeConfig?.GetLevel(card.Station.Level + 1)?.RequiredGalaxyLevel ?? 1;
         return card.GalaxyLevel >= required;
     }
     private static bool IsConstructionOverview(StationCardSnapshot card) =>
@@ -326,24 +326,23 @@ public sealed class SystemStationPanel2A : MonoBehaviour
             .Append(s.Development.PauseReason != StationOperationPauseReason.None ? " · приостановлено" : "");
         if (s.Recovery != null) text.Append("\nВосстановление: ").Append(s.Recovery.ElapsedSeconds.ToString("0")).Append(" / ")
             .Append(s.Recovery.DurationSeconds.ToString("0")).Append(" сек.").Append(s.Recovery.PauseReason != StationOperationPauseReason.None ? " · приостановлено" : "");
-        var settings = card.Config.LevelEffects?.GetLevel(s.Level);
+        var settings = card.Config.StationTypeConfig?.GetLevel(s.Level);
         if (card.Damage > 0 && !s.IsDestroyed && settings != null)
             text.Append("\nСаморемонт: ").Append(card.HasEnemies ? "остановлен — в системе враги" :
                 settings.HealthPerTick <= 0 ? "отключён" : settings.HealthPerTick + " здоровья за тик");
         if (s.Level == 10) text.Append("\nДостигнут максимальный уровень");
         if (s.IsOperational && !s.ConfigMissing && !card.IsCaptured && settings != null)
         {
-            float efficiency = settings.Efficiency(card.Damage);
             switch (s.StationType)
             {
                 case StationType.Military:
                     int count = (settings.Population?.AllySpawnRules ?? Array.Empty<AllySpawnRuleConfig>()).Where(x => x != null)
                         .Sum(rule => rule.GetAlliesForGalaxyLevel(card.GalaxyLevel).Where(x => x?.AllyConfig?.Role == AllyRole2A.Military).Sum(x => x.MaxCount));
-                    text.Append("\nВоенные базы: до ").Append(count).Append(" · Пополнение: ").Append(efficiency.ToString("0%")); break;
+                    text.Append("\nВоенные базы: до ").Append(count); break;
                 case StationType.RangerBase:
-                    text.Append("\nВероятность «Атаковать врага» у рейнджеров сектора: ").Append((settings.RangerAttackProbability * efficiency).ToString("0%")); break;
+                    text.Append("\nВероятность «Атаковать врага» у рейнджеров сектора: ").Append(settings.RangerAttackProbability.ToString("0%")); break;
                 case StationType.Science:
-                    text.Append("\nВклад в скорость исследований: ").Append((settings.ScienceRate * efficiency).ToString("0.##")); break;
+                    text.Append("\nВклад в скорость исследований: ").Append(settings.ScienceRate.ToString("0.##")); break;
                 case StationType.Trade: text.Append("\nОсобое влияние появится вместе с экономикой"); break;
                 case StationType.Medical: text.Append("\nОсобое влияние появится вместе с болезнями"); break;
             }

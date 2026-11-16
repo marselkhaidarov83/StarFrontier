@@ -198,9 +198,12 @@ public sealed class StationPaymentModalEditModeTests
     [Test] public void StationTitleAndAdjacentIcon_AreCenteredTogether()
     {
         var sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), new Vector2(.5f, .5f));
+        var stationType = ScriptableObject.CreateInstance<StationTypeConfig>();
         try
         {
-            typeof(StationConfig).GetField("stationSpriteOverride", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(_station, sprite);
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            typeof(BaseConfig).GetField("icon", flags).SetValue(stationType, sprite);
+            typeof(StationConfig).GetField("stationTypeConfig", flags).SetValue(_station, stationType);
             _modal.Open("sys");
             var title = Form.Find("HeaderText").GetComponent<TMP_Text>(); var icon = Form.Find("HeaderIcon").GetComponent<Image>();
             var a = new Vector3[4]; var b = new Vector3[4]; icon.rectTransform.GetWorldCorners(a); title.rectTransform.GetWorldCorners(b);
@@ -208,7 +211,11 @@ public sealed class StationPaymentModalEditModeTests
             Assert.That((a[0].x + b[2].x) * .5f, Is.EqualTo(center).Within(.01));
             Assert.That(b[0].x - a[2].x, Is.EqualTo(8).Within(.01)); Assert.That(icon.sprite, Is.SameAs(sprite));
         }
-        finally { UnityEngine.Object.DestroyImmediate(sprite); }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(stationType);
+            UnityEngine.Object.DestroyImmediate(sprite);
+        }
     }
 
     [TestCase(false)] [TestCase(true)] public void OpeningSelectsOrdinaryPayment_WithoutCommitting(bool unavailable)

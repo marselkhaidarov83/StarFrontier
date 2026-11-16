@@ -126,7 +126,8 @@ public sealed class S08_02_MissionGameplayEditModeTests
         var source = System("source"); var intermediate = System("intermediate");
         var target = System("target"); var enemy = System("enemy");
         var planet = Create<PlanetConfig>(); Set(planet, "id", "target_planet");
-        Set(planet, "isInhabited", true); Set(target, "planetRefs", new[] { planet });
+        var planetType = Create<PlanetTypeConfig>(); Set(planetType, "isInhabited", true);
+        Set(planet, "planetTypeConfig", planetType); Set(target, "planetRefs", new[] { planet });
         var direct = Create<RouteConfig>(); Set(direct, "id", "direct");
         direct.FromSystem = source; direct.ToSystem = target;
         var first = Create<RouteConfig>(); Set(first, "id", "first");

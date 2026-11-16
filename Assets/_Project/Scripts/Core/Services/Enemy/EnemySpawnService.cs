@@ -637,10 +637,10 @@ public sealed class EnemySpawnService :
             new Vector3(6f, 0f, 0f);
 
         if (starSystem != null &&
-            starSystem.NpcSpawnPoints != null)
+            starSystem.EnemySpawnPoints != null)
         {
             position =
-                starSystem.NpcSpawnPoints.PickEnemySpawnBasePosition();
+                starSystem.EnemySpawnPoints.PickEnemySpawnBasePosition();
         }
 
         return position;
@@ -653,10 +653,10 @@ public sealed class EnemySpawnService :
         float scatterRadius = 1.5f;
 
         if (starSystem != null &&
-            starSystem.NpcSpawnPoints != null)
+            starSystem.EnemySpawnPoints != null)
         {
             scatterRadius =
-                starSystem.NpcSpawnPoints.EnemyRandomRadius;
+                starSystem.EnemySpawnPoints.EnemyRandomRadius;
         }
 
         Vector2 radial =

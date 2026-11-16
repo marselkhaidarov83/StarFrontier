@@ -142,7 +142,7 @@ public sealed class StationConstructionPaymentPanel2A : MonoBehaviour
             current.Revision != _ticket.Offer.Revision || current.Signature() != _ticket.Offer.Signature());
         if (expired) { _ticket = null; Source.CancelConfirmation(); }
         _header.SetText((_researchSource != null ? _researchSource.Title : card.Config != null ? card.Config.DisplayName : "Название станции").ToUpperInvariant());
-        var stationSprite = _researchSource != null && _researchSource.Icon != null ? _researchSource.Icon : card.Config != null ? card.Config.StationSprite : null;
+        var stationSprite = _researchSource != null && _researchSource.Icon != null ? _researchSource.Icon : card.Config?.EffectiveIcon;
         double researchRate = _researchSource?.ScienceRate ?? 0;
         for (int i = 0; i < 2; i++)
         {

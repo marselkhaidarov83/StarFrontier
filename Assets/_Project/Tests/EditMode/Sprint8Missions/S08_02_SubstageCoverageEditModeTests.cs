@@ -538,11 +538,18 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
     {
         var pool = Config<PlanetMissionConfig>("pool"); var entry = Config<PlanetMissionOfferEntryConfig>("entry");
         SetField(entry, "missionTemplateConfig", template); SetField(entry, "isEnabled", true); SetField(entry, "weight", 1);
-        pool.PossibleMissionOffers.Add(entry); SetField(_testPlanets[0], "planetMissionConfig", pool);
+        pool.PossibleMissionOffers.Add(entry); SetMissionPool(pool);
+    }
+
+    private void SetMissionPool(PlanetMissionConfig pool)
+    {
+        var planetType = Config<PlanetTypeConfig>("planet_type");
+        SetField(planetType, "planetMissionConfig", pool);
+        SetField(_testPlanets[0], "planetTypeConfig", planetType);
     }
     private PlanetGovernmentMissionService RerollService(Func<PlanetOfferedMissionData> generator, bool failOnNewSet = false)
     {
-        SetField(_testPlanets[0], "planetMissionConfig", Config<PlanetMissionConfig>("pool"));
+        SetMissionPool(Config<PlanetMissionConfig>("pool"));
         _state.Player.CurrentSystemId = "A"; _state.Player.CurrentPlanetId = "planet_A";
         var offers = new PlanetMissionOfferStateService();
         if (!failOnNewSet) _registry.Register<IPlanetMissionOfferStateService>(offers);

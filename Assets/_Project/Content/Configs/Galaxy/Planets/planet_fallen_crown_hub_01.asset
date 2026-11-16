@@ -14,15 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::PlanetConfig
   id: planet_fallen_crown_hub_01
   displayName: "\u041F\u0430\u0432\u0448\u0430\u044F \u041A\u043E\u0440\u043E\u043D\u0430"
-  description: 
-  icon: {fileID: 21300000, guid: 26cb1e10f4eaa495bbe1c968d0dabcb4, type: 3}
-  planetType: 0
-  isInhabited: 1
+  description: "\u0412
+    \u0433\u0440\u0443\u0437\u043E\u0432\u044B\u0445 \u0442\u0435\u0440\u043C\u0438\u043D\u0430\u043B\u0430\u0445
+    \u043F\u0443\u0442\u044C \u043C\u0435\u0436\u0434\u0443 \u0441\u0435\u043A\u0442\u043E\u0440\u0430\u043C\u0438
+    \u043C\u0435\u0440\u044F\u044E\u0442 \u0432\u0440\u0435\u043C\u0435\u043D\u0435\u043C \u0434\u043E
+    \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0433\u043E \u0432\u044B\u043B\u0435\u0442\u0430.
+    \u0417\u0434\u0435\u0441\u044C \u043D\u0430 \u0442\u0430\u0431\u043B\u043E
+    \u0441\u043E\u0441\u0435\u0434\u0441\u0442\u0432\u0443\u044E\u0442
+    \u0440\u0430\u0441\u043F\u0438\u0441\u0430\u043D\u0438\u044F \u043C\u0435\u0441\u0442\u043D\u044B\u0445
+    \u0448\u0430\u0442\u0442\u043B\u043E\u0432 \u0438 \u0440\u0435\u0439\u0441\u043E\u0432 \u043D\u0430
+    \u0434\u0440\u0443\u0433\u043E\u0439 \u043A\u0440\u0430\u0439 \u0441\u0435\u043A\u0442\u043E\u0440\u0430."
+  planetTypeConfig: {fileID: 11400000, guid: 4b027f8cd8a021bb6be42f0e93b49711, type: 2}
   planetOrbit: {fileID: 11400000, guid: e61517859b4a9463db7f6a6a8c9754c0, type: 2}
-  missionPool: {fileID: 0}
-  encounterProfile: {fileID: 0}
-  marketProfile: {fileID: 11400000, guid: df2c09367dfcd4248ba5304d3f24c0e6, type: 2}
-  planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
-  planetSprite: {fileID: 21300000, guid: 26cb1e10f4eaa495bbe1c968d0dabcb4, type: 3}
-  backgroundSprite: {fileID: 0}
   visualSize: 59

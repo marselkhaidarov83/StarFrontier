@@ -46,8 +46,9 @@ public sealed class PlanetMarketEconomyTests
         _profile.GalaxyLevels.Add(new MarketGalaxyLevelSettings { GalaxyLevel = 1, IntervalSeconds = 10,
             Items = new List<MarketItemEntry> { new MarketItemEntry { ItemConfig = _item, Quantity = 50, StockChange = 7, MaximumStock = 100, BasePrice = 10, MaximumPrice = 30 } },
             Equipment = new List<MarketEquipmentRule> { new MarketEquipmentRule { Weapon = _weapon, Allied = true, NewPrice = 100, SpawnIntervalSeconds = 10, LifetimeSeconds = 25, MaximumListings = 1 } } });
-        var one = Asset<PlanetConfig>("one"); one.marketProfile = _profile;
-        var two = Asset<PlanetConfig>("two"); two.marketProfile = _profile;
+        var planetType = Asset<PlanetTypeConfig>("planet_type"); Set(planetType, "marketProfile", _profile);
+        var one = Asset<PlanetConfig>("one"); Set(one, "planetTypeConfig", planetType);
+        var two = Asset<PlanetConfig>("two"); Set(two, "planetTypeConfig", planetType);
         var system = Asset<StarSystemConfig>("system"); Set(system, "planetRefs", new[] { one, two });
         var game = Asset<GameConfig>("game"); _balance = Asset<MarketEconomyBalanceConfig>("balance"); game.MarketEconomy = _balance;
         _balance.ResearchLevels = new[] {
@@ -526,11 +527,16 @@ public sealed class PlanetMarketEconomyTests
         component.MaximumDurability = 140;
         Set(component, "cargoSize", 3);
         _config.Components.Add(component);
-        _profile.GalaxyLevels[0].Items.Add(new MarketItemEntry
-            { ItemConfig = component, Quantity = 2, BasePrice = 140, MaximumPrice = 140 });
-        Market.Items.Add(new MarketRuntimeItemState { ItemId = component.Id, Quantity = 2 });
+        _profile.GalaxyLevels[0].Equipment.Add(new MarketEquipmentRule
+            { Component = component, StartInStock = true, NewPrice = 140, SpawnIntervalSeconds = 10, MaximumListings = 1 });
         var hangar = ConfigureLoadout(ConfigureHull("engine-hull", 1, 1000));
-        Assert.That(_market.Trade(component.Id, 2, true, "buy-engine", -1).Success, Is.True);
+        ReloadThroughSaveValidation();
+        var first = Market.Equipment.Single(x => x.Equipment.IsComponent).Equipment;
+        Assert.That(_market.TradeEquipment(first.InstanceId, true, "buy-engine", -1, out _), Is.True);
+        Assert.That(Market.Equipment.Any(x => x.Equipment.IsComponent), Is.False);
+        _market.AdvanceTime(10);
+        var second = Market.Equipment.Single(x => x.Equipment.IsComponent).Equipment;
+        Assert.That(_market.TradeEquipment(second.InstanceId, true, "buy-second-engine", -1, out _), Is.True);
         Assert.That(Ship.Cargo.GetQuantity(component.Id), Is.Zero);
         Assert.That(Ship.CargoEquipment.Select(x => x.InstanceId).Distinct().Count(), Is.EqualTo(2));
         var engine = Ship.CargoEquipment[0];
@@ -575,7 +581,10 @@ public sealed class PlanetMarketEconomyTests
         var config = Asset<HullEquipmentConfig>("hull_test"); config.MaximumHull = 120;
         var rule = new MarketHullRule { Hull = config, NewPrice = 200, SpawnIntervalSeconds = 10, LifetimeSeconds = 25, MaximumListings = 1 };
         _profile.GalaxyLevels[0].Hulls.Add(rule); _balance.HullCatalog.Add(rule);
-        var station = Asset<StationConfig>("station"); Set(station, "marketProfileOverride", _profile);
+        var station = Asset<StationConfig>("station");
+        var stationType = Asset<StationTypeConfig>("station_type");
+        Set(stationType, "defaultMarketProfile", _profile);
+        Set(station, "stationTypeConfig", stationType);
         Set(_config.System, "station", station);
         _session.State.Galaxy.Systems[0].Station = new StationRuntimeState { ConfigId = "station", Level = 1 };
         _session.State.Player.CurrentPlanetId = ""; _session.State.Player.CurrentStationId = "station";
@@ -936,7 +945,8 @@ public sealed class PlanetMarketEconomyTests
     }
     private StarSystemConfig AddDeferredSystem()
     {
-        var planet = Asset<PlanetConfig>("remote_planet"); planet.marketProfile = _profile;
+        var planetType = Asset<PlanetTypeConfig>("remote_planet_type"); Set(planetType, "marketProfile", _profile);
+        var planet = Asset<PlanetConfig>("remote_planet"); Set(planet, "planetTypeConfig", planetType);
         var remote = Asset<StarSystemConfig>("remote"); Set(remote, "planetRefs", new[] { planet });
         _config.Systems = new[] { _config.System, remote };
         _session.State.Galaxy.Systems.Add(new StarSystemRuntimeState { SystemId = remote.Id });

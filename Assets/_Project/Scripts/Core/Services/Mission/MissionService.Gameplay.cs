@@ -26,7 +26,7 @@ public partial class MissionService
         var state = galaxy.Routes?.Find(r => r != null && r.RouteId == objective.RouteId);
         if (route == null || state == null || !route.ConnectsSystems(mission.SourceSystemId, mission.TargetSystemId)) return false;
         return objective.RouteIsUpgrade
-            ? state.IsUnlocked && _routes.IsRouteUnlocked(route.Id) && MissionBattleRules.RouteLevel(state.DevelopmentLevel) == objective.RouteExpectedLevel && objective.RouteExpectedLevel < 5
+            ? state.IsUnlocked && _routes.IsRouteUnlocked(route.Id) && MissionBattleRules.RouteLevel(state.DevelopmentLevel) == objective.RouteExpectedLevel && objective.RouteExpectedLevel < RouteConfig.MaxDevelopmentLevel
             : !state.IsUnlocked;
     }
 

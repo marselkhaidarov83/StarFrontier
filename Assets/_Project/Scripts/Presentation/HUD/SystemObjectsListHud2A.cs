@@ -341,10 +341,9 @@ public sealed class SystemObjectsListHud2A :
 
         var runtime = _gameSessionService?.State?.Galaxy?.Systems?.Find(x => x != null && x.SystemId == system.Id)?.Station;
         bool awaiting = runtime != null ? StationPanelStyle2A.IsAwaitingConstruction(runtime) :
-            station.InitialLevel == 0 && !station.IsDestroyed;
+            station.InitialLevel == 0;
         string remaining = StationPanelStyle2A.DevelopmentRemainingTime(runtime);
-        string suffix = !string.IsNullOrEmpty(remaining) ? " (" + remaining + ")" :
-            station.IsActive ? string.Empty : " - не построена";
+        string suffix = !string.IsNullOrEmpty(remaining) ? " (" + remaining + ")" : string.Empty;
         AppendGroup("Станция");
         AppendLink(
             StationPrefix + index,
@@ -616,7 +615,7 @@ public sealed class SystemObjectsListHud2A :
                     targetSystem.Id,
                     endpoint.ExitPoint,
                     route.GetEntryPoint(targetSystem.Id),
-                    endpoint.VisualSize));
+                    _configService?.SystemVisualConfig?.SystemExitVisualSize ?? SystemVisualConfig.DefaultSystemExitVisualSize));
         }
 
         return true;
@@ -660,7 +659,7 @@ public sealed class SystemObjectsListHud2A :
                 SystemGameplayTargetType.Station,
                 new Vector2(position.x, position.y),
                 true,
-                station.IsActive,
+                true,
                 true,
                 out TargetSelectionFailReason2A failReason);
     }

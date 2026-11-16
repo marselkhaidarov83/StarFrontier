@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: systemVisualConfig_01
   m_EditorClassIdentifier: Data::SystemVisualConfig
   sizeUnitPixels: 1
+  systemExitVisualSize: 50
+  stationVisualSize: 50
   playerShipPlaceholderSprite: {fileID: 0}
   shipShadowSprite: {fileID: 0}
   engineGlowSprite: {fileID: 0}

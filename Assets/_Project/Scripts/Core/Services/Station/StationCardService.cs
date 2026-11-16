@@ -48,7 +48,7 @@ public sealed class StationCardService : IStationCardService
             MaximumResearchPower = station.StationType == StationType.Science ? StationResearchPowerRules.Maximum(state.Galaxy, _sectors?.Invoke()) : 0,
             MilitaryPopulation = station.StationType == StationType.Military ? StationMilitaryRules.AliveFromStation(_npcs?.Invoke(), systemId, station.ConfigId) : 0,
             MaximumMilitaryPopulation = station.StationType == StationType.Military ?
-                StationMilitaryRules.MaximumCapacity(config.LevelEffects, galaxyLevel) : 0 };
+                StationMilitaryRules.MaximumCapacity(config.StationTypeConfig, galaxyLevel) : 0 };
     }
     public IReadOnlyList<StationActionOffer> GetOffers(string systemId)
     {
@@ -57,7 +57,6 @@ public sealed class StationCardService : IStationCardService
         var kind = card.Station.IsDestroyed ? StationOperationKind.Recovery : card.Station.Level == 0
             ? StationOperationKind.Construction : StationOperationKind.Upgrade;
         AddOffers(result, card, kind);
-        if (!card.Station.IsDestroyed && card.Station.Level > 0 && card.Damage > 0) AddOffers(result, card, StationOperationKind.Repair);
         return result;
     }
     private void AddOffers(List<StationActionOffer> result, StationCardSnapshot card, StationOperationKind kind)
@@ -67,11 +66,7 @@ public sealed class StationCardService : IStationCardService
         foreach (var option in options)
         {
             if (option == null) continue;
-            StationOperationRuntimeState quote = null;
-            bool valid = kind == StationOperationKind.Repair
-                ? StationInfrastructureRules.TryRepairQuote(card.Config, card.Station, StationInfrastructureRules.DamagePercent(card.Station, card.Damage), option.Id, out quote)
-                : card.Config.TryCreateOperation(kind, card.Station.Level, option.Id, out quote);
-            if (quote != null && kind == StationOperationKind.Recovery) quote.DurationSeconds = 0;
+            bool valid = card.Config.TryCreateOperation(kind, card.Station.Level, option.Id, out var quote);
             var offer = new StationActionOffer { SystemId = card.SystemId, StationId = card.Station.ConfigId,
                 Level = card.Station.Level, Revision = card.Station.Revision, Damage = card.Damage,
                 Kind = kind, OptionId = option.Id, Quote = quote };

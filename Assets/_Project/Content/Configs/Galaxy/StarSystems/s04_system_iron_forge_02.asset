@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s04_system_iron_forge_02
   displayName: "\u0416\u0435\u043B\u0435\u0437\u043D\u0430\u044F \u041A\u0443\u0437\u043D\u0438\u0446\u0430"
   description: "\u0416\u0435\u043B\u0435\u0437\u043D\u0430\u044F \u041A\u0443\u0437\u043D\u0438\u0446\u0430"
-  icon: {fileID: 21300000, guid: 7d79f9528604e46a7940cfd11135984f, type: 3}
-  economyType: 5
-  dangerLevel: 3
+  icon: {fileID: 21300000, guid: cc6146af7bd554e7eba8f8e88d4d5577, type: 3}
   sun: {fileID: 11400000, guid: f773b9afaf96f49af9ef2bd402ba8077, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: 5ad0d825e57dd428ba76bd569d1180dc, type: 2}
@@ -41,15 +39,12 @@ MonoBehaviour:
     sprite: {fileID: 0}
     size: 0
   station: {fileID: 11400000, guid: c07df5f848d1544e7a7b7bf61ef7a9a6, type: 2}
-  missionTags: 000000000000000000000000
   mapPosition: {x: 0.2, y: -2.4}
   systemPopulationRule: {fileID: 11400000, guid: 7873c5d66bb264ff5a9758e0aa9ae316, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: a5941ed037dac4c42b843f83664c9e7d, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: a5941ed037dac4c42b843f83664c9e7d, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 4
   routes:
   - {fileID: 11400000, guid: f51a54360d58a488fa4cc7d59d922a20, type: 2}
   - {fileID: 11400000, guid: b96f130f3f72047fb88fae91572e4557, type: 2}

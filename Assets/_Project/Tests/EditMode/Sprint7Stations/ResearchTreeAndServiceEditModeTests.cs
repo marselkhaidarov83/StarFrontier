@@ -351,11 +351,11 @@ public sealed class ResearchTreeAndServiceEditModeTests
             var view = screen.AddComponent<StationResearchPanelView2A>(); view.Build(null);
             var config = UnityEditor.AssetDatabase.LoadAssetAtPath<StationConfig>(
                 "Assets/_Project/Content/Configs/Galaxy/Stations/station_s01_science_vega_reach_01.asset");
-            Assert.That(config.StationTypeConfig.MissionIllustration, Is.Not.Null);
+            Assert.That(config.StationTypeConfig.ResearchIllustration, Is.Not.Null);
             view.SetStation(new StationCardSnapshot { Config = config, GalaxyLevel = 5, Station = new StationRuntimeState {
-                Level = 3, HealthVersion = 1, HealthLevel = 3, Health = 500, MaxHealth = 500 } }, config.StationTypeConfig.MissionIllustration);
+                Level = 3, HealthVersion = 1, HealthLevel = 3, Health = 500, MaxHealth = 500 } }, config.StationTypeConfig.ResearchIllustration);
             var hero = screen.transform.Find("LocationIllustration").GetComponent<UnityEngine.UI.Image>();
-            Assert.That(hero.enabled, Is.True); Assert.That(hero.sprite, Is.SameAs(config.StationTypeConfig.MissionIllustration));
+            Assert.That(hero.enabled, Is.True); Assert.That(hero.sprite, Is.SameAs(config.StationTypeConfig.ResearchIllustration));
             Assert.That(screen.transform.Find("ResearchWorkspace").gameObject.activeInHierarchy, Is.True);
         }
         finally { UnityEngine.Object.DestroyImmediate(root); }

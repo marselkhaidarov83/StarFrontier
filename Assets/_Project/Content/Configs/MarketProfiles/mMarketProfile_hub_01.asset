@@ -38,51 +38,6 @@ MonoBehaviour:
     BuyMultiplier: 1
     SellMultiplier: 0.8
     IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
-  - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-    Quantity: 3
-    BuyMultiplier: 1
-    SellMultiplier: 0.5
-    IsAvailable: 1
   GalaxyLevels:
   - GalaxyLevel: 1
     IntervalSeconds: 60
@@ -123,97 +78,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -224,6 +392,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -353,97 +584,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -454,6 +898,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -673,97 +1180,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -774,6 +1494,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -1083,97 +1866,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -1184,6 +2180,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -1583,97 +2642,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -1684,6 +2956,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -2173,97 +3508,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -2274,6 +3822,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -2853,97 +4464,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -2954,6 +4778,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -3623,97 +5510,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -3724,6 +5824,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -4483,97 +6646,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -4584,6 +6960,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100
@@ -5433,97 +7872,310 @@ MonoBehaviour:
       BuyMultiplier: 1
       SellMultiplier: 1
       IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 280
-      MaximumPrice: 560
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 210
-      MaximumPrice: 420
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 230
-      MaximumPrice: 460
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 240
-      MaximumPrice: 480
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 290
-      MaximumPrice: 580
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 250
-      MaximumPrice: 500
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 320
-      MaximumPrice: 640
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 560
-      MaximumPrice: 1120
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
-    - ItemConfig: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
-      Quantity: 3
-      StockChange: 1
-      MaximumStock: 5
-      BasePrice: 420
-      MaximumPrice: 840
-      BuyMultiplier: 1
-      SellMultiplier: 0.5
-      IsAvailable: 1
     Hulls:
-    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+    - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
       StartInStock: 1
-      NewPrice: 950
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
+      StartInStock: 1
+      NewPrice: 935
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 13c1c025db8f4461acbde9ec4bf6dfd3, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e1c57a53a6740d8b8999ec80700d6b1, type: 2}
+      StartInStock: 1
+      NewPrice: 1055
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d542bae590134a3eb8da1ee0d276bd77, type: 2}
+      StartInStock: 1
+      NewPrice: 1115
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+      StartInStock: 1
+      NewPrice: 1175
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9da4db8425a44bf89cfbdfb2f944319e, type: 2}
+      StartInStock: 1
+      NewPrice: 1235
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e574c392761e4e47889f7700aa634940, type: 2}
+      StartInStock: 1
+      NewPrice: 1295
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b8bd26155f9346399f90da78ba8f545b, type: 2}
+      StartInStock: 1
+      NewPrice: 1355
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6523d9602eed4f39a00823929f85d783, type: 2}
+      StartInStock: 1
+      NewPrice: 1415
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
+      StartInStock: 1
+      NewPrice: 1200
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 50d0c1c3539b4a65b922eb58ce18c8bd, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: b1b2e33f4fcf4bebbc496f437b3ee64e, type: 2}
+      StartInStock: 1
+      NewPrice: 1425
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 821cd42ed8134e7d9aa28c132f7d9d38, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 09ccaa8545a64c8c958f74876b9ffff2, type: 2}
+      StartInStock: 1
+      NewPrice: 1650
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 08446e7e1e26455eb67c15b387db59a4, type: 2}
+      StartInStock: 1
+      NewPrice: 1760
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: bedc628519cd4bb5941060d592ec1ec3, type: 2}
+      StartInStock: 1
+      NewPrice: 1870
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e48352a1f1d444678f95e466ba392606, type: 2}
+      StartInStock: 1
+      NewPrice: 1985
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e1cb12d15ded4b119d6c958ed4d79e91, type: 2}
+      StartInStock: 1
+      NewPrice: 2095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
+      StartInStock: 1
+      NewPrice: 2210
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
+      StartInStock: 1
+      NewPrice: 875
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
+      StartInStock: 1
+      NewPrice: 1050
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+      StartInStock: 1
+      NewPrice: 1140
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e948e769a4f14deda485c36d1bff8cb0, type: 2}
+      StartInStock: 1
+      NewPrice: 1225
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}
+      StartInStock: 1
+      NewPrice: 1315
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c7462bcef3004c2fbf96b7a97d144b63, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: e0afff7959ad47b18f0103c5d7555b73, type: 2}
+      StartInStock: 1
+      NewPrice: 1490
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0ee80af7ac88433e9c6370780c0a3e33, type: 2}
+      StartInStock: 1
+      NewPrice: 1580
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: c4c4bf6f543a4c319d10383106c3ca81, type: 2}
+      StartInStock: 1
+      NewPrice: 1665
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 0b0375e84a8d4669bb9e16f0f7dc3bea, type: 2}
+      StartInStock: 1
+      NewPrice: 1755
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
     - Hull: {fileID: 11400000, guid: 595d62270678425aa467b4cb2e3b9c5b, type: 2}
       StartInStock: 1
       NewPrice: 1840
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8e3087f79ce54c7bb642272c45abc21b, type: 2}
+      StartInStock: 1
+      NewPrice: 925
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4e61d9f1db8a4f5cb8c2a87dc2d51db8, type: 2}
+      StartInStock: 1
+      NewPrice: 995
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 4780b23f77304c9c8db8b530895e040e, type: 2}
+      StartInStock: 1
+      NewPrice: 1060
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 062ebc49c3d84ddc90594e3a85b2241f, type: 2}
+      StartInStock: 1
+      NewPrice: 1130
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 627ed87553104cb598739e4345ce2fd5, type: 2}
+      StartInStock: 1
+      NewPrice: 1195
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 32d2a7c975a94ef6b17510fc9630a355, type: 2}
+      StartInStock: 1
+      NewPrice: 1265
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 5daea5413b5c4b16a0ef20d2d6e01220, type: 2}
+      StartInStock: 1
+      NewPrice: 1335
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 10d8c80e7d664d578440562ae7703d7d, type: 2}
+      StartInStock: 1
+      NewPrice: 1400
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: fb0b5916c1ea43209cd173d6c1f16929, type: 2}
+      StartInStock: 1
+      NewPrice: 1470
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 9ff136b9c1424b93a64e8a47c88c11e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1535
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
+      StartInStock: 1
+      NewPrice: 950
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 8181000cd52347c396fbf9ddb87c5641, type: 2}
+      StartInStock: 1
+      NewPrice: 1020
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 33ddcc310cb74f6eb60f4a461cbee288, type: 2}
+      StartInStock: 1
+      NewPrice: 1095
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 2a5c0e900448418d9b184a146ee138f2, type: 2}
+      StartInStock: 1
+      NewPrice: 1165
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: f7c76c96647f4c208d48f4d42e0ecc4f, type: 2}
+      StartInStock: 1
+      NewPrice: 1240
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 203ad8945b3348759dfe86a35729285d, type: 2}
+      StartInStock: 1
+      NewPrice: 1310
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 7a3a81a9ff2646d6885cb7415452c543, type: 2}
+      StartInStock: 1
+      NewPrice: 1380
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 1d7ba05d1eda4b24b50972c5b5a5f638, type: 2}
+      StartInStock: 1
+      NewPrice: 1455
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: a8455863e3df4670941ec77e2dee22e0, type: 2}
+      StartInStock: 1
+      NewPrice: 1525
+      SpawnIntervalSeconds: 60
+      LifetimeSeconds: 900
+      MaximumListings: 1
+    - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
+      StartInStock: 1
+      NewPrice: 1600
       SpawnIntervalSeconds: 60
       LifetimeSeconds: 900
       MaximumListings: 1
@@ -5534,6 +8186,69 @@ MonoBehaviour:
       LifetimeSeconds: 900
       MaximumListings: 1
     Equipment:
+    - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 280
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 210
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 230
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 240
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 290
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 250
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 320
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 560
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
+    - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+      StartInStock: 1
+      Allied: 1
+      NewPrice: 420
+      SpawnIntervalSeconds: 300
+      LifetimeSeconds: 600
+      MaximumListings: 1
     - Weapon: {fileID: 11400000, guid: f48265fdbe9fb409698c12f3a4e44576, type: 2}
       Allied: 1
       NewPrice: 100

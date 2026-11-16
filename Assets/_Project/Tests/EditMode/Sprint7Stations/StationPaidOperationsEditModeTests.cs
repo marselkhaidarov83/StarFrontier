@@ -34,14 +34,13 @@ public sealed class StationPaidOperationsEditModeTests
         _session = new Session(); _session.State.Player.Diamonds = 100;
         _station = Asset<StationConfig>(); Set(_station, "id", "station"); Set(_station, "initialLevel", 2);
         var type = Asset<StationTypeConfig>(); Set(_station, "stationTypeConfig", type);
-        Set(_station, "upgradeSettings", new[] { new StationUpgradeSettings { TargetLevel = 3,
-            PaymentOptions = new[] { new StationPaymentOption { Id = "pay", Costs = Costs(10), DurationSeconds = 100 } } } });
-        var effects = Asset<StationLevelEffectsConfig>();
-        effects.Levels = new[] { new StationLevelEffectsSettings { Level = 2,
-            RepairPaymentOptions = new[] { new StationInstantPaymentOption { Id = "pay", Costs = Costs(100) } },
-            RecoveryPaymentOptions = new[] { new StationInstantPaymentOption { Id = "pay", Costs = Costs(20) } } },
+        var upgradePayment = Asset<StationPaymentOptionsConfig>();
+        upgradePayment.Options = new[] { new StationPaymentOption { Id = "pay", Costs = Costs(10), DurationSeconds = 100 } };
+        Set(type, "upgradeSettings", new[] { new StationUpgradeSettings { TargetLevel = 3, Payment = upgradePayment } });
+        var recoveryPayment = Asset<StationPaymentOptionsConfig>();
+        recoveryPayment.Options = new[] { new StationPaymentOption { Id = "pay", Costs = Costs(20) } };
+        type.Levels = new[] { new StationLevelEffectsSettings { Level = 2, RecoveryPayment = recoveryPayment },
             new StationLevelEffectsSettings { Level = 3 } };
-        Set(_station, "levelEffects", effects);
         var config = Asset<StarSystemConfig>(); Set(config, "id", "sys"); Set(config, "station", _station);
         _system = new StarSystemRuntimeState { SystemId = "sys" }; _session.State.Galaxy.Systems.Add(_system);
         _service = new StationService(_session, _ => config, new SimpleEventBus(), new StationResourcePaymentGateway(_session), hasEnemies: _ => _hasEnemies);
@@ -63,14 +62,6 @@ public sealed class StationPaidOperationsEditModeTests
         _session.State.Player.Diamonds = 9;
         Assert.That(Start(StationOperationKind.Upgrade), Is.False);
         Assert.That(_system.Station.Development, Is.Null); Assert.That(_session.State.Player.Diamonds, Is.EqualTo(9));
-    }
-    [Test] public void PartialRepair_IsInstantAndCostIsProportional()
-    {
-        _system.ApplyInfrastructureDamageFromWar(135, false);
-        Assert.That(Start(StationOperationKind.Repair), Is.True);
-        Assert.That(_session.State.Player.Diamonds, Is.EqualTo(70)); Assert.That(_system.InfrastructureDamage, Is.Zero);
-        Assert.That(_system.Station.Health, Is.EqualTo(450));
-        Assert.That(Start(StationOperationKind.Repair), Is.False); Assert.That(_session.State.Player.Diamonds, Is.EqualTo(70));
     }
     [Test] public void Recovery_IsInstantRestoresLevelAndResumesPaidUpgrade()
     {
@@ -153,7 +144,6 @@ public sealed class StationPaidOperationsEditModeTests
     [TestCase(StationOperationKind.Construction)]
     [TestCase(StationOperationKind.Upgrade)]
     [TestCase(StationOperationKind.Recovery)]
-    [TestCase(StationOperationKind.Repair)]
     public void CapturedSystem_RejectsEveryPaidStationAction(StationOperationKind kind)
     {
         _system.ApplyInfrastructureDamageFromWar(100, true);

@@ -12,7 +12,6 @@ public class RefuelPanelController : MonoBehaviour
     [SerializeField] private Slider refuelCountSlider;
     [SerializeField] private Button refuelButton;
 
-    [SerializeField] private PlanetServiceVisualCatalog2A serviceVisuals;
     private SimpleEventBus eventBus;
     private IRefuelService _refuelService;
     private IGameSessionService gameSessionService;
@@ -41,7 +40,7 @@ public class RefuelPanelController : MonoBehaviour
                 var station = PlanetServiceVisualCatalog2A.GetDockedStation(player, config);
                 var planet = string.IsNullOrEmpty(player?.CurrentStationId) ? config.GetPlanetConfigById(player?.CurrentPlanetId) : null;
                 var fallback = government != null ? government.CurrentLocationIllustration : null;
-                return serviceVisuals != null ? serviceVisuals.Get(planet, PlanetServiceKind2A.Refuel, fallback, station) : fallback;
+                return PlanetServiceVisualCatalog2A.GetRefuelIllustration(planet, station) ?? fallback;
             });
     }
 

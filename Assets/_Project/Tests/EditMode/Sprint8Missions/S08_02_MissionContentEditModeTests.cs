@@ -8,7 +8,7 @@ public sealed class S08_02_MissionContentEditModeTests
     private const string Root = "Assets/_Project/Content/Configs/";
 
     [Test]
-    public void RouteAssets_HaveFiveFuelLevelsPreservingOriginalLevelOneCost()
+    public void RouteAssets_HaveTenPositiveFuelLevels()
     {
         var guids = AssetDatabase.FindAssets("t:RouteConfig", new[] { Root + "Galaxy/Routes" });
         Assert.That(guids.Length, Is.GreaterThan(0));
@@ -16,9 +16,9 @@ public sealed class S08_02_MissionContentEditModeTests
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             var route = AssetDatabase.LoadAssetAtPath<RouteConfig>(path);
-            Assert.That(route.FuelByDevelopmentLevel, Has.Count.EqualTo(5), path);
-            Assert.That(route.GetFuelCost(1), Is.EqualTo(Math.Max(1, route.ParsecDistance)), path);
-            for (int level = 2; level <= 5; level++)
+            Assert.That(route.FuelByDevelopmentLevel, Has.Count.EqualTo(RouteConfig.MaxDevelopmentLevel), path);
+            Assert.That(route.FuelByDevelopmentLevel[0], Is.GreaterThan(0), path);
+            for (int level = 6; level <= RouteConfig.MaxDevelopmentLevel; level++)
                 Assert.That(route.GetFuelCost(level), Is.EqualTo(Math.Max(1, route.GetFuelCost(level - 1) - 1)), path + " level " + level);
         }
     }

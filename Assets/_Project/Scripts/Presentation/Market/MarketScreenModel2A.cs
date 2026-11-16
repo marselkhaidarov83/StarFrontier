@@ -5,12 +5,10 @@ using UnityEngine;
 public enum MarketKindFilter2A { Goods, Hulls, Weapons, Components, All }
 public sealed class MarketCardData2A
 {
-    public string Key, Id, Title, CategoryKey, CategoryTitle;
+    public string Key, Id, Title, CategoryKey, CategoryTitle, Info;
     public bool Equipment, Hull, Component;
     public Sprite Icon;
     public int Quantity, Price, CargoSize, CurrentDurability, MaximumDurability;
-    public float Range;
-    public int Damage, ShotCount;
     // Market offers use -1. Owned goods expose the ordinary amount separately from mission-owned cargo.
     public int TradeableQuantity = -1;
     public bool Locked => !Equipment && TradeableQuantity == 0;
@@ -21,10 +19,17 @@ public sealed class MarketCardData2A
          (kind == MarketKindFilter2A.Components && Component) ||
          (kind == MarketKindFilter2A.Hulls && Equipment && Hull) ||
          (kind == MarketKindFilter2A.Weapons && Equipment && !Hull && !Component)) &&
-        (category == "all" || category == CategoryKey);
+        (category == "all" || category == CategoryKey ||
+         (Component && category == MarketScreenRules2A.AllComponentsCategory));
 }
 public static class MarketScreenRules2A
 {
+    public const string AllComponentsCategory = "goods:" + nameof(ItemCategory.ShipEquipment);
+    private static readonly ShipComponentSlot[] ComponentSlots = (ShipComponentSlot[])Enum.GetValues(typeof(ShipComponentSlot));
+
+    public static string ComponentCategory(ShipComponentSlot? slot) =>
+        slot.HasValue ? "module:" + slot.Value : AllComponentsCategory;
+
     public static (string Range, string Damage, string Shots, string Cargo) WeaponDetails(float range, int damage, int shots, int cargo) =>
         ("Дальность: " + range.ToString("0.##"), "Урон: " + damage, "Кол-во выстрелов: " + shots, "Занимает в трюме: " + cargo);
 
@@ -43,8 +48,11 @@ public static class MarketScreenRules2A
         result.Add(new KeyValuePair<string, string>("all", "\u0412\u0441\u0435")); seen.Add("all");
         if (kind == MarketKindFilter2A.Goods || kind == MarketKindFilter2A.All)
         { AddGoods(offers); AddGoods(owned); }
+        if (kind == MarketKindFilter2A.Components)
+            foreach (var slot in ComponentSlots)
+                result.Add(new KeyValuePair<string, string>(ComponentCategory(slot), ComponentName(slot)));
         if (kind == MarketKindFilter2A.All)
-            result.Add(new KeyValuePair<string, string>("goods:" + ItemCategory.ShipEquipment, "Модули"));
+            result.Add(new KeyValuePair<string, string>(AllComponentsCategory, "Модули"));
         if (kind == MarketKindFilter2A.All)
             result.Add(new KeyValuePair<string, string>("equipment:hull", "\u041a\u043e\u0440\u043f\u0443\u0441"));
         if ((kind == MarketKindFilter2A.Weapons || kind == MarketKindFilter2A.All) && alliedWeaponTypes != null)
@@ -59,6 +67,12 @@ public static class MarketScreenRules2A
                     result.Add(new KeyValuePair<string, string>(item.CategoryKey, item.CategoryTitle));
         }
     }
+    private static string ComponentName(ShipComponentSlot slot) => slot switch {
+        ShipComponentSlot.Engine => "Двигатели", ShipComponentSlot.FuelTank => "Топливные баки",
+        ShipComponentSlot.Radar => "Радары", ShipComponentSlot.Scanner => "Сканеры",
+        ShipComponentSlot.RepairDroid => "Ремонтные дроиды", ShipComponentSlot.Grabber => "Захваты",
+        ShipComponentSlot.ShieldGenerator => "Генераторы поля", _ => slot.ToString() };
+
     public static string GoodsName(ItemCategory type) => type switch {
         ItemCategory.Minerals => "Минералы", ItemCategory.Fuel => "Топливо", ItemCategory.Medicine => "Медицина",
         ItemCategory.Electronics => "Электроника", ItemCategory.Food => "Продовольствие", ItemCategory.ConsumerGoods => "Потребительские товары",

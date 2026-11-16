@@ -2,74 +2,66 @@ using UnityEngine;
 
 // Конфиг StationTypeConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(fileName = "StationTypeConfig", menuName = "StarFrontier/Configs/System/Station Type")]
-public class StationTypeConfig : BaseConfig
+public class StationTypeConfig : LocationServicesConfig
 {
+    public const float DefaultOperationInteractionDistance = 300f;
+
     [Header("Type")]
     [Tooltip("Параметр stationType. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private StationType stationType;
 
-    [Header("Gameplay Access")]
-    [Tooltip("Переключатель hasMarket. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool hasMarket;
-    [Tooltip("Переключатель hasMissions. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool hasMissions;
-    [Tooltip("Переключатель hasRepair. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool hasRepair;
-    [Tooltip("Переключатель hasMedical. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool hasMedical;
-    [Tooltip("Переключатель hasResearch. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool hasResearch;
-    [Tooltip("Переключатель hasRangerBoard. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool hasRangerBoard;
-    [Tooltip("Переключатель hasMilitaryContracts. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool hasMilitaryContracts;
+    [Tooltip("Максимальная дистанция для входа на станцию, строительства и восстановления.")]
+    [SerializeField, Min(0.01f)] private float operationInteractionDistance = DefaultOperationInteractionDistance;
+
+    [Header("Эффекты уровней")]
+    public StationLevelEffectsSettings[] Levels = System.Array.Empty<StationLevelEffectsSettings>();
+
+    [Header("Оплата строительства и улучшений")]
+    [Tooltip("Оплата по целевому уровню. Уровень 1 — постройка станции.")]
+    [SerializeField] private StationUpgradeSettings[] upgradeSettings = System.Array.Empty<StationUpgradeSettings>();
 
     [Header("Default Content Links")]
     [Tooltip("Параметр defaultMarketProfile. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private MarketProfileConfig defaultMarketProfile;
     [Tooltip("Параметр defaultMissionPool. Используется связанными игровыми системами этого конфига.")]
-    [SerializeField] private ScriptableObject defaultMissionPool;
-    [Tooltip("Количество для параметра defaultEncounterProfile. Используется соответствующей системой при генерации или расчёте.")]
-    [SerializeField] private ScriptableObject defaultEncounterProfile;
-
-    [Header("Mission Screen")]
-    [Tooltip("Иллюстрация окна миссий при посадке на станцию этого типа. Формат и расположение как у планет.")]
-    [SerializeField] private Sprite missionIllustration;
+    [SerializeField] private PlanetMissionConfig defaultMissionPool;
 
     [Header("Default Visuals")]
-    [Tooltip("Спрайт для поля stationSprite. Используется визуальной частью игры при отображении объекта.")]
-    [SerializeField] private Sprite stationSprite;
-    [Tooltip("Спрайт для поля destroyedSprite. Используется визуальной частью игры при отображении объекта.")]
-    [SerializeField] private Sprite destroyedSprite;
-    [Tooltip("Спрайт для поля shadowSprite. Используется визуальной частью игры при отображении объекта.")]
-    [SerializeField] private Sprite shadowSprite;
-    [Tooltip("Визуальный размер объекта на сцене.")]
-    [SerializeField] private float visualSize = 180f;
     [Tooltip("Параметр localOffset. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private Vector2 localOffset = Vector2.zero;
 
-    [Header("Market Screen")]
-    [SerializeField] private Sprite marketIllustration;
-    public Sprite MarketIllustration => marketIllustration;
-
     public StationType StationType => stationType;
+    public float OperationInteractionDistance => operationInteractionDistance > 0f && !float.IsInfinity(operationInteractionDistance)
+        ? operationInteractionDistance : DefaultOperationInteractionDistance;
+    public StationPaymentOptionsConfig GetUpgradePayment(int targetLevel)
+    {
+        if (upgradeSettings == null) return null;
 
-    public bool HasMarket => hasMarket;
-    public bool HasMissions => hasMissions;
-    public bool HasRepair => hasRepair;
-    public bool HasMedical => hasMedical;
-    public bool HasResearch => hasResearch;
-    public bool HasRangerBoard => hasRangerBoard;
-    public bool HasMilitaryContracts => hasMilitaryContracts;
+        StationUpgradeSettings found = null;
+        foreach (var entry in upgradeSettings)
+        {
+            if (entry == null || entry.TargetLevel != targetLevel) continue;
+            if (found != null) return null;
+            found = entry;
+        }
+        return found?.Payment;
+    }
 
     public MarketProfileConfig DefaultMarketProfile => defaultMarketProfile;
-    public ScriptableObject DefaultMissionPool => defaultMissionPool;
-    public ScriptableObject DefaultEncounterProfile => defaultEncounterProfile;
+    public PlanetMissionConfig DefaultMissionPool => defaultMissionPool;
 
-    public Sprite MissionIllustration => missionIllustration;
-    public Sprite StationSprite => stationSprite;
-    public Sprite DestroyedSprite => destroyedSprite;
-    public Sprite ShadowSprite => shadowSprite;
-    public float VisualSize => visualSize;
     public Vector2 LocalOffset => localOffset;
+
+    public StationLevelEffectsSettings GetLevel(int level)
+    {
+        StationLevelEffectsSettings found = null;
+        if (Levels == null) return null;
+        foreach (var entry in Levels)
+        {
+            if (entry == null || entry.Level != level) continue;
+            if (found != null) return null;
+            found = entry;
+        }
+        return found;
+    }
 }

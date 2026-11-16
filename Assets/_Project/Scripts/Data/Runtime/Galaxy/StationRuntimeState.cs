@@ -1,6 +1,6 @@
 using System;
 
-public enum StationOperationKind { None = 0, Construction = 1, Upgrade = 2, Recovery = 3, Repair = 4 }
+public enum StationOperationKind { None = 0, Construction = 1, Upgrade = 2, Recovery = 3 }
 public enum StationOperationPauseReason { None = 0, Destroyed = 1, UnderAttack = 2, Damaged = 3 }
 public enum StationPaymentResource { Credits = 0, Astralites = 1, Diamonds = 2 }
 

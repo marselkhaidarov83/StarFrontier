@@ -92,33 +92,24 @@ public sealed class StationService : IStationService
             { reason = "StationStateChanged"; return Reject(systemId, reason); }
             if (system.SystemStatus == StarSystemStatus.Captured)
             { reason = "SystemCaptured"; return Reject(systemId, reason); }
-            if (kind != StationOperationKind.Repair && !StationLifecycleRules.CanBegin(system.Station, kind, out reason)) return Reject(systemId, reason);
+            if (!StationLifecycleRules.CanBegin(system.Station, kind, out reason)) return Reject(systemId, reason);
             var config = _resolveSystem(systemId)?.Station;
-            StationOperationRuntimeState quote = null;
-            bool valid = kind == StationOperationKind.Repair
-                ? StationInfrastructureRules.TryRepairQuote(config, system.Station, StationInfrastructureRules.DamagePercent(system.Station, system.InfrastructureDamage), paymentOptionId, out quote)
-                : config != null && config.TryCreateOperation(kind, system.Station.Level, paymentOptionId, out quote);
             if (config == null) { reason = "StationConfigMissing"; return Reject(systemId, reason); }
-            if (!valid) { reason = "InvalidPaymentOption"; return Reject(systemId, reason); }
+            if (!config.TryCreateOperation(kind, system.Station.Level, paymentOptionId, out var quote))
+            { reason = "InvalidPaymentOption"; return Reject(systemId, reason); }
             if (system.SystemStatus == StarSystemStatus.Captured) { reason = "SystemCaptured"; return Reject(systemId, reason); }
-            var levelSettings = config.LevelEffects?.GetLevel(quote.TargetLevel);
+            var levelSettings = config.StationTypeConfig?.GetLevel(quote.TargetLevel);
             int galaxyLevel = Math.Max(1, _session.State.Galaxy.Sectors?.FindAll(x => x != null && x.IsUnlocked).Count ?? 1);
             if (levelSettings != null && galaxyLevel < levelSettings.RequiredGalaxyLevel)
             { reason = "GalaxyLevelRequired"; return Reject(systemId, reason); }
-            if (kind == StationOperationKind.Recovery) quote.DurationSeconds = 0;
             if (_payments == null)
             { reason = "PaymentUnavailable"; return Reject(systemId, reason); }
             // The gateway is the S07-03 transaction boundary; never grant a free operation when it is absent.
             if (!_payments.TryPay(systemId, quote.Copy(), out reason)) return Reject(systemId, reason);
-            if (kind == StationOperationKind.Repair)
-            {
-                StationInfrastructureRules.RepairFully(system);
-                system.Station.Revision++;
-            }
-            else if (!StationLifecycleRules.BeginPaidOperation(system.Station, quote))
+            if (!StationLifecycleRules.BeginPaidOperation(system.Station, quote))
                 throw new InvalidOperationException("Station payment gateway changed the operation preconditions.");
             StationLifecycleRules.ApplySystemStatus(system.Station, system.SystemStatus);
-            StationLifecycleRules.Advance(system, 0d, level => config.LevelEffects?.GetLevel(level)?.EffectiveMaxHealth ?? StationInfrastructureRules.DefaultMaxHealth(level), HasEnemies(systemId)); // Complete zero-time variants exactly once.
+            StationLifecycleRules.Advance(system, 0d, level => config.StationTypeConfig?.GetLevel(level)?.EffectiveMaxHealth ?? StationInfrastructureRules.DefaultMaxHealth(level), HasEnemies(systemId)); // Complete zero-time variants exactly once.
             Notify(system, "OperationStarted");
             PublishSaveRequest("station_operation_started");
             _events?.PublishSafely(new CreditsChangedEvent(_session.State.Player.Credits), _ => { });
@@ -152,7 +143,7 @@ public sealed class StationService : IStationService
             var station = system.Station;
             bool hadRecovery = station.Recovery != null;
             bool hadDevelopment = station.Development != null;
-            StationLifecycleRules.Advance(system, seconds, level => _resolveSystem(system.SystemId)?.Station?.LevelEffects?.GetLevel(level)?.EffectiveMaxHealth ?? StationInfrastructureRules.DefaultMaxHealth(level), HasEnemies(system.SystemId));
+            StationLifecycleRules.Advance(system, seconds, level => _resolveSystem(system.SystemId)?.Station?.StationTypeConfig?.GetLevel(level)?.EffectiveMaxHealth ?? StationInfrastructureRules.DefaultMaxHealth(level), HasEnemies(system.SystemId));
             bool completed = (hadRecovery && station.Recovery == null) ||
                 (hadDevelopment && station.Development == null);
             Notify(system, completed ? "OperationCompleted" : "Progress");
@@ -269,7 +260,7 @@ public sealed class StationService : IStationService
         }
         // Saved type/level and accepted duration/costs are authoritative even after an asset edit/removal.
         StationLifecycleRules.Normalize(system);
-        if (StationInfrastructureRules.EnsureHealth(system, config?.LevelEffects?.GetLevel(station.Level)?.EffectiveMaxHealth ?? 0))
+        if (StationInfrastructureRules.EnsureHealth(system, config?.StationTypeConfig?.GetLevel(station.Level)?.EffectiveMaxHealth ?? 0))
             Log("HEALTH", system.SystemId, "Health=" + station.Health + "/" + station.MaxHealth);
         var previousPause = station.Development?.PauseReason;
         StationLifecycleRules.RefreshDevelopmentPause(system, HasEnemies(system.SystemId));

@@ -57,12 +57,11 @@ public static class StationInterfaceRules
     {
         if (card?.Station == null || card.Config == null || card.Station.ConfigMissing) return "StationConfigMissing";
         if (card.IsCaptured) return "SystemCaptured";
-        if (kind != StationOperationKind.Repair && !StationLifecycleRules.CanBegin(card.Station, kind, out string reason)) return reason;
-        if (kind == StationOperationKind.Repair && (!card.Station.IsOperational || card.Damage <= 0)) return "RepairNotRequired";
+        if (!StationLifecycleRules.CanBegin(card.Station, kind, out string reason)) return reason;
         if (!card.Station.IsEnabled) return "StationDisabled";
         if (kind != StationOperationKind.Upgrade && card.Distance >= card.Config.OperationInteractionDistance) return "ApproachRequired";
         if (quote == null) return "InvalidPaymentOption";
-        var target = card.Config.LevelEffects?.GetLevel(Mathf.Max(1, quote.TargetLevel));
+        var target = card.Config.StationTypeConfig?.GetLevel(Mathf.Max(1, quote.TargetLevel));
         if (target != null && card.GalaxyLevel < target.RequiredGalaxyLevel) return "GalaxyLevelRequired";
         return string.Empty;
     }
@@ -84,7 +83,6 @@ public static class StationInterfaceRules
         {
             case StationOperationKind.Construction: return "Построить";
             case StationOperationKind.Upgrade: return "Улучшить";
-            case StationOperationKind.Repair: return "Отремонтировать станцию";
             case StationOperationKind.Recovery: return "Восстановить станцию";
             default: return "Действие";
         }
@@ -116,7 +114,6 @@ public static class StationInterfaceRules
             case "SystemCaptured": return "Сначала освободите систему";
             case "GalaxyLevelRequired": return "Требуется более высокий уровень галактики";
             case "NotBuilt": return "Сначала постройте станцию";
-            case "RepairNotRequired": return "Ремонт не требуется";
             case "StationStateChanged": case "QuoteChanged": return "Состояние или цена изменились. Выберите действие снова";
             case "ConfirmationExpired": return "Подтверждение уже использовано или закрыто";
             case "NotInsideStation": return "Услуга доступна внутри станции";

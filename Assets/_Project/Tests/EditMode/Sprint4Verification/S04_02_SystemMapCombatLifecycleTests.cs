@@ -12,6 +12,7 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
     private TestPlayerCombatTargetService _playerTargetService;
     private StarSystemConfig _rewardSystem;
     private PlanetConfig _rewardPlanet;
+    private PlanetTypeConfig _rewardPlanetType;
 
     [SetUp]
     public void SetUp()
@@ -53,6 +54,8 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
             Object.DestroyImmediate(_rewardSystem);
         if (_rewardPlanet != null)
             Object.DestroyImmediate(_rewardPlanet);
+        if (_rewardPlanetType != null)
+            Object.DestroyImmediate(_rewardPlanetType);
 
         if (_bootstrapRoot != null)
             Object.DestroyImmediate(_bootstrapRoot);
@@ -229,7 +232,9 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
         const BindingFlags fields = BindingFlags.Instance | BindingFlags.NonPublic;
         typeof(BaseConfig).GetField("id", fields).SetValue(_rewardPlanet, "planet_test");
         typeof(BaseConfig).GetField("id", fields).SetValue(_rewardSystem, "system_test");
-        typeof(PlanetConfig).GetField("isInhabited", fields).SetValue(_rewardPlanet, true);
+        _rewardPlanetType = ScriptableObject.CreateInstance<PlanetTypeConfig>();
+        typeof(PlanetTypeConfig).GetField("isInhabited", fields).SetValue(_rewardPlanetType, true);
+        typeof(PlanetConfig).GetField("planetTypeConfig", fields).SetValue(_rewardPlanet, _rewardPlanetType);
         typeof(StarSystemConfig).GetField("planetRefs", fields).SetValue(_rewardSystem,
             new[] { _rewardPlanet });
         _registry.Register(RewardDependencyProxy.Make<IConfigService>((method, args) =>

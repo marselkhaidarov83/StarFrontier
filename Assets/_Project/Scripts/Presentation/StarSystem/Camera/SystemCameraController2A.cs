@@ -1310,7 +1310,7 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
         }
 
         return station != null
-            ? station.VisualSize
+            ? SystemVisualConfig.DefaultStationVisualSize
             : 0f;
     }
 

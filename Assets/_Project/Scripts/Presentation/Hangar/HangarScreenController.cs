@@ -318,12 +318,12 @@ public class HangarScreenController : MonoBehaviour
     private static (int Current, int Maximum) Durability(SystemNpcWeaponRuntimeState item) =>
         (item?.CurrentDurability ?? 0, item?.MaximumDurability ?? 0);
 
-    private static string WithDescription(string description, string details) =>
+    internal static string WithDescription(string description, string details) =>
         string.IsNullOrWhiteSpace(description) ? details : description.Trim() + "\n\n" + details;
 
-    private static string CargoSpaceLine(int size) => $"Занимает места в трюме: {Mathf.Max(1, size)}";
+    internal static string CargoSpaceLine(int size) => $"Занимает места в трюме: {Mathf.Max(1, size)}";
 
-    private static string ComponentInfo(SystemNpcWeaponRuntimeState item, ShipComponentConfig component, int? installedFuel = null)
+    internal static string ComponentInfo(SystemNpcWeaponRuntimeState item, ShipComponentConfig component, int? installedFuel = null)
     {
         string details = component?.Description;
         if (component != null && component.Slot == ShipComponentSlot.Engine)
@@ -342,7 +342,7 @@ public class HangarScreenController : MonoBehaviour
         return WithDescription(details, cargo);
     }
 
-    private static string WeaponInfo(SystemNpcWeaponRuntimeState weapon, WeaponConfig config)
+    internal static string WeaponInfo(SystemNpcWeaponRuntimeState weapon, WeaponConfig config)
     {
         var stats = weapon.RolledStats;
         int cargo = stats.CargoSize > 0 ? stats.CargoSize : config?.CargoSize ?? 1;

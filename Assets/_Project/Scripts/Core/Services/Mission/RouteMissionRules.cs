@@ -22,7 +22,7 @@ public static class RouteMissionRules
             var state = galaxy.Routes?.Find(r => r != null && r.RouteId == route.Id);
             if (target == null || state == null || targetState == null || !targetState.IsDiscovered ||
                 targetState.SystemStatus == StarSystemStatus.Captured || !canUseSystem(target.Id)) continue;
-            if (upgrade ? !canTraverse(route) || MissionBattleRules.RouteLevel(state.DevelopmentLevel) >= 5 : state.IsUnlocked) continue;
+            if (upgrade ? !canTraverse(route) || MissionBattleRules.RouteLevel(state.DevelopmentLevel) >= RouteConfig.MaxDevelopmentLevel : state.IsUnlocked) continue;
             if (HasIndirectPath(all, sourceId, target.Id, canTraverse, canUseSystem)) result.Add(route);
         }
         return result;

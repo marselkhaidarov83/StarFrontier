@@ -61,14 +61,14 @@ public sealed class StationResearchPanelView2A : MonoBehaviour
         _station.SetText("Уровень станции: " + s.Level + "/10"); _health.SetText("Здоровье: " + s.Health + " / " + s.MaxHealth);
         _sciencePower.gameObject.SetActive((s.StationType == StationType.Science || s.StationType == StationType.Military) && s.Level > 0 && !s.IsDestroyed);
         _sciencePower.SetText(StationInterfaceRules.StationMetricText(card));
-        var settings = card.Config?.LevelEffects?.GetLevel(s.Level);
+        var settings = card.Config?.StationTypeConfig?.GetLevel(s.Level);
         bool repair = s.Health > 0 && s.Health < s.MaxHealth && settings?.HealthPerTick > 0 && !card.HasEnemies;
         _repairTrack.gameObject.SetActive(repair); _repair.gameObject.SetActive(s.Health < s.MaxHealth);
         _repair.SetText(card.HasEnemies ? "Самовосстановление приостановлено: враги" : settings?.HealthPerTick > 0
             ? "Самовосстановление: +" + settings.HealthPerTick + " здоровья за тик" : "Самовосстановление отключено");
         _repairFill.rectTransform.anchorMax = new Vector2(s.MaxHealth > 0 ? Mathf.Clamp01((float)s.Health / s.MaxHealth) : 0, 1);
         _repairFill.rectTransform.offsetMin = _repairFill.rectTransform.offsetMax = Vector2.zero;
-        var next = card.Config?.LevelEffects?.GetLevel(s.Level + 1);
+        var next = card.Config?.StationTypeConfig?.GetLevel(s.Level + 1);
         bool running = StationPanelStyle2A.IsDevelopmentRunning(s);
         bool show = !card.IsCaptured && (running || (s.Level < 10 && (next == null || card.GalaxyLevel >= next.RequiredGalaxyLevel)));
         Upgrade.gameObject.SetActive(show);

@@ -16,8 +16,6 @@ MonoBehaviour:
   displayName: "\u0412\u0440\u0430\u0442\u0430 \u0411\u0435\u0437\u0434\u043D\u044B"
   description: "\u0412\u0440\u0430\u0442\u0430 \u0411\u0435\u0437\u0434\u043D\u044B"
   icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
-  economyType: 6
-  dangerLevel: 5
   sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: a147f7f4142d843b792454d098d6cd0a, type: 2}
@@ -29,15 +27,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: dcc79d6ab2c3441be9632f337c631918, type: 2}
   linkedSystems: []
   station: {fileID: 11400000, guid: 693563e97d16644bf9fcb1729c46fc2e, type: 2}
-  missionTags: 010000000200000005000000
   mapPosition: {x: -4.4, y: 6.5}
   systemPopulationRule: {fileID: 11400000, guid: 66c62cc24edfc4f1dbb54807b1cd44e5, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: e3f96346589434f38b4db333baeef533, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: e3f96346589434f38b4db333baeef533, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 10
   routes:
   - {fileID: 11400000, guid: 028f913f791d84e51ab306db37071dd5, type: 2}
   - {fileID: 11400000, guid: 37fd9a08c91b34099afdba49654651c9, type: 2}

@@ -64,14 +64,12 @@ public sealed class SystemVisualSizeGridEditModeTests
 
             SetPrivateField(sun, "visualSize", 70f);
             SetPrivateField(planet, "visualSize", 42f);
-            SetPrivateField(station, "overrideVisualSize", true);
-            SetPrivateField(station, "visualSizeOverride", 88f);
-            SetPrivateField(stationType, "visualSize", 88f);
+            SetPrivateField(visualConfig, "stationVisualSize", 88f);
             SetPrivateField(station, "stationTypeConfig", stationType);
             SetPrivateField(ally, "visualSize", 24f);
             SetPrivateField(enemy, "visualSize", 36f);
             SetPrivateField(pirate, "visualSize", 34f);
-            SetPrivateField(endpoint, "visualSize", 18f);
+            SetPrivateField(visualConfig, "systemExitVisualSize", 18f);
 
             Assert.AreEqual(
                 140f,

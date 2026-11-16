@@ -436,35 +436,48 @@ public class GalaxyMapRoutesBuilder2A : CustomMonoBehaviour
         if (!graph.ContainsKey(targetSystemId))
             return new List<string>();
 
-        Queue<string> queue = new();
-        HashSet<string> visited = new();
+        HashSet<string> pending = new(graph.Keys);
+        Dictionary<string, long> fuelCosts = new() { [startSystemId] = 0 };
         Dictionary<string, string> previous = new();
 
-        queue.Enqueue(startSystemId);
-        visited.Add(startSystemId);
-
-        while (queue.Count > 0)
+        while (pending.Count > 0)
         {
-            string currentSystemId = queue.Dequeue();
+            string currentSystemId = null;
+            long bestCost = long.MaxValue;
+            foreach (string systemId in pending)
+            {
+                if (!fuelCosts.TryGetValue(systemId, out long cost))
+                    continue;
+                if (cost < bestCost || (cost == bestCost && string.CompareOrdinal(systemId, currentSystemId) < 0))
+                {
+                    currentSystemId = systemId;
+                    bestCost = cost;
+                }
+            }
 
-            if (currentSystemId == targetSystemId)
+            if (currentSystemId == null)
                 break;
+            if (currentSystemId == targetSystemId)
+                return RestorePath(previous, startSystemId, targetSystemId);
+
+            pending.Remove(currentSystemId);
 
             foreach (string nextSystemId in graph[currentSystemId])
             {
-                if (visited.Contains(nextSystemId))
+                if (!pending.Contains(nextSystemId))
                     continue;
 
-                visited.Add(nextSystemId);
+                RouteConfig route = _routeConfigsByKey[MakeRouteKey(currentSystemId, nextSystemId)];
+                long nextCost = bestCost + route.GetFuelCost(_galaxyRuntimeState);
+                if (fuelCosts.TryGetValue(nextSystemId, out long knownCost) && nextCost >= knownCost)
+                    continue;
+
+                fuelCosts[nextSystemId] = nextCost;
                 previous[nextSystemId] = currentSystemId;
-                queue.Enqueue(nextSystemId);
             }
         }
 
-        if (!visited.Contains(targetSystemId))
-            return new List<string>();
-
-        return RestorePath(previous, startSystemId, targetSystemId);
+        return new List<string>();
     }
 
     private Dictionary<string, List<string>> BuildGraph()

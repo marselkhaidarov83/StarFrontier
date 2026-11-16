@@ -163,7 +163,7 @@ public sealed class SystemDestinationMarkerController2 :
                 _systemVisualConfig != null
                     ? _systemVisualConfig.GetStationWorldSize(
                         station)
-                    : station.VisualSize);
+                    : SystemVisualConfig.DefaultStationVisualSize);
         }
 
         SetLegacyFrameVisible(

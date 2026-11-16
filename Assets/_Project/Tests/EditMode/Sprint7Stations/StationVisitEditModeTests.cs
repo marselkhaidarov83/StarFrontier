@@ -159,15 +159,16 @@ public sealed class StationVisitEditModeTests
     }
     [Test] public void StationMarket_CannotLeakIntoPlanetContext()
     {
-        var market = Asset<MarketProfileConfig>(); Set(_station, "marketProfileOverride", market);
+        var market = Asset<MarketProfileConfig>(); Set(_station.StationTypeConfig, "defaultMarketProfile", market);
         Assert.That(StationLocationRules.Market(_session.State, _systemConfig), Is.Null);
         _visit.TryEnter("sys", out _); Assert.That(StationLocationRules.Market(_session.State, _systemConfig), Is.SameAs(market));
         _visit.Leave(); Assert.That(StationLocationRules.Market(_session.State, _systemConfig), Is.Null);
     }
-    [Test] public void StationWithoutOverride_UsesLocalInhabitedMarket()
+    [Test] public void StationTypeWithoutProfile_UsesLocalInhabitedMarket()
     {
         var market = Asset<MarketProfileConfig>(); var planet = Asset<PlanetConfig>();
-        Set(planet, "isInhabited", true); planet.marketProfile = market; Set(_systemConfig, "planetRefs", new[] { planet });
+        var planetType = Asset<PlanetTypeConfig>(); Set(planetType, "isInhabited", true); Set(planetType, "marketProfile", market);
+        Set(planet, "planetTypeConfig", planetType); Set(_systemConfig, "planetRefs", new[] { planet });
         _visit.TryEnter("sys", out _);
         Assert.That(StationLocationRules.Market(_session.State, _systemConfig), Is.SameAs(market));
     }

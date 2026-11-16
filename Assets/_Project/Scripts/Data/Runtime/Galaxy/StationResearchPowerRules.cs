@@ -17,13 +17,13 @@ public static class StationResearchPowerRules
             foreach (var system in sector.Systems ?? Array.Empty<StarSystemConfig>())
             {
                 var station = system?.Station;
-                if (station == null || !station.IsActive || station.StationType != StationType.Science || !seen.Add(system.Id)) continue;
-                total += MaximumForLevels(station.LevelEffects, galaxyLevel);
+                if (station == null || station.StationType != StationType.Science || !seen.Add(system.Id)) continue;
+                total += MaximumForLevels(station.StationTypeConfig, galaxyLevel);
             }
         }
         return total;
     }
-    public static double MaximumForLevels(StationLevelEffectsConfig config, int galaxyLevel)
+    public static double MaximumForLevels(StationTypeConfig config, int galaxyLevel)
     {
         double maximum = 0;
         for (int level = 1; level <= StationLifecycleRules.MaxLevel; level++)

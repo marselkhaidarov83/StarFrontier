@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_bastion_front_eventide_lab_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_bastion_front_eventide_lab_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u0411\u0430\u0441\u0442\u0438\u043e\u043d\u043d\u044b\u0439 \u0424\u0440\u043e\u043d\u0442\u00bb \u2014 \u00ab\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u0438\u044f \u0421\u0443\u043c\u0435\u0440\u0435\u043a\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u0411\u0430\u0441\u0442\u0438\u043e\u043d\u043d\u044b\u0439 \u0424\u0440\u043e\u043d\u0442\u00bb \u0438 \u00ab\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u0438\u044f \u0421\u0443\u043c\u0435\u0440\u0435\u043a\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 7196989b500a24f498007c7e9dd68a75, type: 2}
   ToSystem: {fileID: 11400000, guid: c837657b571d041a0adb7abdcf66f66a, type: 2}
   IsLockedAtStart: 0
-  RequiredScanLevel: 0
-  ParsecDistance: 35
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: b79545a938d3d41b29012670e88b279b, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 97e2f797d9adb42b7b90cabd78534351, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 33
   - 32
   - 31
+  - 30
+  - 29
+  - 28
+  - 27
+  - 26

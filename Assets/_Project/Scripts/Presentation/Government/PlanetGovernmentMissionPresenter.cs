@@ -118,7 +118,7 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 
     private void RefreshStationIllustration(StationConfig station)
     {
-        Sprite sprite = station?.StationTypeConfig?.MissionIllustration;
+        Sprite sprite = station?.MissionIllustration;
         _currentSprite = sprite;
         if (_heroImage != null)
         {
@@ -184,9 +184,10 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 
         if (_heroImage != null)
         {
+            Sprite baseIllustration = _planetConfig.PlanetTypeConfig?.MissionIllustration;
             Sprite sprite = visualCatalog != null
-                ? visualCatalog.Get(_planetConfig.PlanetType, featured)
-                : null;
+                ? visualCatalog.Get(_planetConfig.PlanetType, featured, baseIllustration)
+                : baseIllustration;
             _heroImage.sprite = sprite;
             _heroImage.enabled = sprite != null;
             _currentSprite = sprite;

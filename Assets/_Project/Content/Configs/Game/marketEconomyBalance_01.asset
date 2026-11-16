@@ -1867,6 +1867,69 @@ MonoBehaviour:
     SpawnIntervalSeconds: 300
     LifetimeSeconds: 600
     MaximumListings: 1
+  - Component: {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 280
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 210
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 230
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 240
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 290
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 250
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 320
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 560
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
+  - Component: {fileID: 11400000, guid: b30f0454d30f4a839e2fb7bc3035885b, type: 2}
+    StartInStock: 0
+    Allied: 1
+    NewPrice: 420
+    SpawnIntervalSeconds: 300
+    LifetimeSeconds: 600
+    MaximumListings: 1
   HullCatalog:
   - Hull: {fileID: 11400000, guid: 1a7d9c2fc85448e79b4456d85867873e, type: 2}
     NewPrice: 875

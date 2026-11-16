@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s01_system_new_horizon_02
   displayName: "\u041D\u043E\u0432\u044B\u0439 \u0413\u043E\u0440\u0438\u0437\u043E\u043D\u0442"
   description: "\u041D\u043E\u0432\u044B\u0439 \u0413\u043E\u0440\u0438\u0437\u043E\u043D\u0442"
-  icon: {fileID: 21300000, guid: 8cf91fb38492e483a9922ba0738973c5, type: 3}
-  economyType: 5
-  dangerLevel: 1
+  icon: {fileID: 21300000, guid: cc6146af7bd554e7eba8f8e88d4d5577, type: 3}
   sun: {fileID: 11400000, guid: 1edfd01ab567d4180838d1be1f83083d, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: 7415eed3b014c4f08b34b4fad2668872, type: 2}
@@ -40,13 +38,10 @@ MonoBehaviour:
     sprite: {fileID: 0}
     size: 0
   station: {fileID: 11400000, guid: 83bc6f9c99e624b0e847780b8289b357, type: 2}
-  missionTags: 040000000000000008000000
   mapPosition: {x: 2.1, y: -6.2}
   systemPopulationRule: {fileID: 11400000, guid: c12bcb570baf64b44bbe5a63748a4993, type: 2}
-  npcSpawnPoints: {fileID: 11400000, guid: 39edb24a30b4b4ae0ba1d2486b307aaa, type: 2}
+  enemySpawnPoints: {fileID: 0}
   isStartSystem: 0
-  isHiddenAtStart: 0
-  recommendedPower: 1
   routes:
   - {fileID: 11400000, guid: e16d4f1b41e3940d09958d72de1396ea, type: 2}
   - {fileID: 11400000, guid: 5953765dc4738437a9b01463c195274f, type: 2}

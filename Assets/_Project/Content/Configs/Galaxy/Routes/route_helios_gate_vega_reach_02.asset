@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_helios_gate_vega_reach_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_helios_gate_vega_reach_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u0412\u0440\u0430\u0442\u0430 \u0413\u0435\u043b\u0438\u043e\u0441\u0430\u00bb \u2014 \u00ab\u041f\u0440\u0435\u0434\u0435\u043b \u0412\u0435\u0433\u0438\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u0412\u0440\u0430\u0442\u0430 \u0413\u0435\u043b\u0438\u043e\u0441\u0430\u00bb \u0438 \u00ab\u041f\u0440\u0435\u0434\u0435\u043b \u0412\u0435\u0433\u0438\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 48006508003f14c158fbcc25d4f4c9e1, type: 2}
   ToSystem: {fileID: 11400000, guid: 03a893a7348d3438ca180070a07d7109, type: 2}
   IsLockedAtStart: 0
-  RequiredScanLevel: 0
-  ParsecDistance: 5
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 61c75cefb48ec4ec3a730ab1f38914a9, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 9056c581c486241ec8e6d4a226b59fe3, type: 2}
   galaxyMapCurveStrength: 0.08
@@ -29,4 +27,9 @@ MonoBehaviour:
   - 4
   - 3
   - 2
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
   - 1

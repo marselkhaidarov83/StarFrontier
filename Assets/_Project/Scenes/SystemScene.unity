@@ -11005,7 +11005,6 @@ MonoBehaviour:
   refuelWarningText: {fileID: 600687515}
   refuelCountSlider: {fileID: 1745201141}
   refuelButton: {fileID: 1556237321}
-  serviceVisuals: {fileID: 11400000, guid: 2082f9f9360445d78f71c07bb81e391f, type: 2}
 --- !u!1 &1021507073
 GameObject:
   m_ObjectHideFlags: 0

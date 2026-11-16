@@ -1385,10 +1385,10 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             new Vector3(6f, 0f, 0f);
 
         if (starSystem != null &&
-            starSystem.NpcSpawnPoints != null)
+            starSystem.EnemySpawnPoints != null)
         {
             position =
-                starSystem.NpcSpawnPoints.PickEnemySpawnBasePosition();
+                starSystem.EnemySpawnPoints.PickEnemySpawnBasePosition();
         }
 
         return ClampNpcSpawnPositionToBoundaryProtectionRadius(
@@ -1414,9 +1414,9 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         float scatterRadius = randomPosition;
 
         if (starSystem != null &&
-            starSystem.NpcSpawnPoints != null)
+            starSystem.EnemySpawnPoints != null)
         {
-            scatterRadius = starSystem.NpcSpawnPoints.EnemyRandomRadius;
+            scatterRadius = starSystem.EnemySpawnPoints.EnemyRandomRadius;
         }
 
         Vector3 position =

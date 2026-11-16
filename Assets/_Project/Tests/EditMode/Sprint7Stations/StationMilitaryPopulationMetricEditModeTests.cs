@@ -76,8 +76,8 @@ public sealed class StationMilitaryPopulationMetricEditModeTests
     [TestCase(1, 1)] [TestCase(2, 2)] [TestCase(3, 3)]
     public void MaximumCapacity_UsesRealAssetsAtGalaxyGateInsteadOfCurrentBaseLevel(int galaxyLevel, int expected)
     {
-        var config = UnityEditor.AssetDatabase.LoadAssetAtPath<StationLevelEffectsConfig>(
-            "Assets/_Project/Content/Configs/Stations2A/Levels/station_levels_military.asset");
+        var config = UnityEditor.AssetDatabase.LoadAssetAtPath<StationTypeConfig>(
+            "Assets/_Project/Content/Configs/Galaxy/Stations/StationType/station_type_military_01.asset");
         Assert.That(config, Is.Not.Null);
         Assert.That(StationMilitaryRules.MaximumCapacity(config, galaxyLevel), Is.EqualTo(expected));
         if (galaxyLevel == 2) Assert.That(StationMilitaryRules.Capacity(config.GetLevel(1), galaxyLevel), Is.EqualTo(1));

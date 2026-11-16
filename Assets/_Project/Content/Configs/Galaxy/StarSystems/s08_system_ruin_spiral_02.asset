@@ -15,9 +15,7 @@ MonoBehaviour:
   id: s08_system_ruin_spiral_02
   displayName: "\u0421\u043F\u0438\u0440\u0430\u043B\u044C \u0420\u0443\u0438\u043D"
   description: "\u0421\u043F\u0438\u0440\u0430\u043B\u044C \u0420\u0443\u0438\u043D"
-  icon: {fileID: 21300000, guid: d8a68f08acc1d444bb9f3fcbd0fd856a, type: 3}
-  economyType: 0
-  dangerLevel: 5
+  icon: {fileID: 21300000, guid: 1fe825ce7ba4145bb82a1760bd715aea, type: 3}
   sun: {fileID: 11400000, guid: 42ae83952920246ab8d992c18dc6fe0b, type: 2}
   planetRefs:
   - {fileID: 11400000, guid: 29bb9be80be31438f998407cce1da70c, type: 2}
@@ -29,15 +27,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8de928c4316d448379584ecd2b254481, type: 2}
   linkedSystems: []
   station: {fileID: 11400000, guid: 5f18f8ef4942a424f8f5ec5cb3d91f76, type: 2}
-  missionTags: 020000000500000008000000
   mapPosition: {x: 2.3, y: 3.8}
   systemPopulationRule: {fileID: 11400000, guid: 4b1d438efa08846cda430036235fe0e6, type: 2}
   enemySystemPopulationRule: {fileID: 0}
-  npcSpawnPoints: {fileID: 11400000, guid: 3d7d296a882454f7fa0df6ccd1a609d7, type: 2}
+  enemySpawnPoints: {fileID: 11400000, guid: 3d7d296a882454f7fa0df6ccd1a609d7, type: 2}
   enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
-  isHiddenAtStart: 1
-  recommendedPower: 9
   routes:
   - {fileID: 11400000, guid: e118aa4a44c7446f78271bf088cc66a7, type: 2}
   - {fileID: 11400000, guid: e3260570aa2ce413288e4a5721853656, type: 2}

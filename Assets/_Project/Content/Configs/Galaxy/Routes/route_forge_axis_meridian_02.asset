@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: route_forge_axis_meridian_02
   m_EditorClassIdentifier: Data::RouteConfig
   id: route_forge_axis_meridian_02
-  displayName: 
-  description: 
+  displayName: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u00ab\u041e\u0441\u044c \u041a\u0443\u0437\u043d\u0438\u0446\u00bb \u2014 \u00ab\u041c\u0435\u0440\u0438\u0434\u0438\u0430\u043d\u00bb"
+  description: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442 \u043c\u0435\u0436\u0434\u0443 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438 \u00ab\u041e\u0441\u044c \u041a\u0443\u0437\u043d\u0438\u0446\u00bb \u0438 \u00ab\u041c\u0435\u0440\u0438\u0434\u0438\u0430\u043d\u00bb."
   icon: {fileID: 0}
   FromSystem: {fileID: 11400000, guid: 864c4b08379da496ebba2539b781a403, type: 2}
   ToSystem: {fileID: 11400000, guid: e2a163fadab994745b3ab8a5b24f7962, type: 2}
   IsLockedAtStart: 1
-  RequiredScanLevel: 0
-  ParsecDistance: 19
   fromSystemRouteEndpointConfig: {fileID: 11400000, guid: 8e34f07ce7db946318eda56e438eada3, type: 2}
   toSystemRouteEndpointConfig: {fileID: 11400000, guid: 86490255e4bf9435397b4cac8ffaf035, type: 2}
   fuelByDevelopmentLevel:
@@ -29,3 +27,8 @@ MonoBehaviour:
   - 17
   - 16
   - 15
+  - 14
+  - 13
+  - 12
+  - 11
+  - 10
