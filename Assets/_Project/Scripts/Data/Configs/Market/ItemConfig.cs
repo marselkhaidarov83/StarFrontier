@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ItemConfig", menuName = "StarFrontier/Configs/Market/Item")]
-public class ItemConfig : BaseConfig
+public class ItemConfig : SpaceLootCombatConfig
 {
     [Header("Market Data")]
     [SerializeField] private ItemCategory itemCategory;

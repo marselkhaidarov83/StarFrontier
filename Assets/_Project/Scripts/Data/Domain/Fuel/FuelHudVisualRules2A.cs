@@ -9,7 +9,8 @@ public static class FuelHudVisualRules2A
     public static FuelHudVisualState2A Resolve(
         float currentFuel,
         float fuelCapacity,
-        float lowFuelThresholdNormalized)
+        float lowFuelThresholdNormalized,
+        float normalFuelThresholdNormalized)
     {
         if (!IsFinite(currentFuel) ||
             !IsFinite(fuelCapacity) ||
@@ -39,12 +40,15 @@ public static class FuelHudVisualRules2A
             safeCurrentFuel /
             fuelCapacity;
 
-        if (normalizedFuel <= safeThreshold)
+        if (normalizedFuel < safeThreshold)
         {
             return FuelHudVisualState2A.Low;
         }
 
-        return FuelHudVisualState2A.Normal;
+        float normalThreshold = Mathf.Clamp(normalFuelThresholdNormalized, safeThreshold, 1f);
+        return normalizedFuel >= normalThreshold
+            ? FuelHudVisualState2A.Normal
+            : FuelHudVisualState2A.Medium;
     }
 
     private static bool IsFinite(float value)

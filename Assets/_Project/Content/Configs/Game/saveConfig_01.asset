@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dc02b931a0f64ac6bfd6d04d763042e, type: 3}
   m_Name: saveConfig_01
   m_EditorClassIdentifier: Data::SaveConfig
+  id: saveConfig_01
+  displayName: Настройки сохранения игры
+  description: Задаёт формат и версию сохранений, расположение файлов, правила резервного копирования и автосохранения.
+  icon: {fileID: 0}
   SaveFileName: save_star_frontier.json
   BackupFileName: save_star_frontier_backup.json
   UseMultiFileSave: 1

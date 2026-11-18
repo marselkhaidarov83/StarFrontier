@@ -1,11 +1,88 @@
 using UnityEngine;
 
-// Конфиг SystemHudConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
+/// <summary>
+/// Настройки интерфейса звёздной системы и индикатора топлива.
+/// </summary>
 [CreateAssetMenu(
-    fileName = "SystemHudConfig",
+    fileName = "systemHudConfig_01",
     menuName = "StarFrontier/Configs/Game/System HUD")]
-public sealed class SystemHudConfig : BaseConfig
+public sealed class SystemHudConfig :
+    BaseConfig
 {
+    [Header("Порог топлива")]
+
+    [Tooltip(
+        "Ниже этой доли топлива индикатор показывает малый запас. " +
+        "Например, 0.25 означает 25 процентов. Используется при выборе цвета и иконки индикатора топлива.")]
+    [SerializeField]
+    [Range(0.01f, 0.99f)]
+    private float lowFuelThresholdNormalized =
+        0.25f;
+
+    [SerializeField, Range(0.01f, 1f)]
+    [Tooltip("Минимальная доля топлива для индикатора нормального запаса.")]
+    private float normalFuelThresholdNormalized = 0.75f;
+
+    [Header("Иконки")]
+
+    [Tooltip(
+        "Иконка нормального запаса топлива. " +
+        "Используется индикатором топлива, когда топлива больше порога малого запаса.")]
+    [SerializeField]
+    private Sprite normalIcon;
+
+    [SerializeField]
+    [Tooltip("Иконка среднего запаса топлива.")]
+    private Sprite mediumIcon;
+
+    [Tooltip(
+        "Иконка малого или пустого запаса топлива. " +
+        "Используется индикатором топлива, когда топлива мало или оно закончилось.")]
+    [SerializeField]
+    private Sprite lowIcon;
+
+    [Header("Цвета")]
+
+    [Tooltip(
+        "Цвет индикатора при нормальном запасе топлива. " +
+        "Применяется в верхнем индикаторе топлива.")]
+    [SerializeField]
+    private Color normalColor =
+        Color.white;
+
+    [SerializeField]
+    [Tooltip("Цвет иконки при среднем запасе топлива.")]
+    private Color mediumColor = Color.white;
+
+    [Tooltip(
+        "Цвет индикатора при малом запасе топлива. " +
+        "Применяется в верхнем индикаторе топлива, когда запас ниже заданного порога.")]
+    [SerializeField]
+    private Color lowColor =
+        Color.white;
+
+    [Tooltip(
+        "Цвет индикатора, когда топливо закончилось. " +
+        "Применяется в верхнем индикаторе топлива при нулевом запасе.")]
+    [SerializeField]
+    private Color emptyColor =
+        new Color(
+            1f,
+            0.2f,
+            0.2f,
+            1f);
+
+    [Tooltip(
+        "Цвет индикатора, когда состояние топлива нельзя определить или оно недоступно. " +
+        "Используется как запасной вариант для неизвестного состояния.")]
+    [SerializeField]
+    private Color unavailableColor =
+        new Color(
+            0.65f,
+            0.65f,
+            0.65f,
+            1f);
+
     [Header("Visibility")]
     [SerializeField]
     [Tooltip("Переключатель showFuel. Включает или выключает соответствующее правило или отображение.")]
@@ -150,11 +227,6 @@ public sealed class SystemHudConfig : BaseConfig
     [Header("Warnings")]
     [SerializeField]
     [Range(0f, 1f)]
-    [Tooltip("Параметр lowFuelNormalizedThreshold. Используется связанными игровыми системами этого конфига.")]
-    private float lowFuelNormalizedThreshold = 0.2f;
-
-    [SerializeField]
-    [Range(0f, 1f)]
     [Tooltip("Параметр lowHullNormalizedThreshold. Используется связанными игровыми системами этого конфига.")]
     private float lowHullNormalizedThreshold = 0.25f;
 
@@ -171,6 +243,70 @@ public sealed class SystemHudConfig : BaseConfig
     public float BarHeight => barHeight;
     public float BarSpacing => barSpacing;
 
-    public float LowFuelNormalizedThreshold => lowFuelNormalizedThreshold;
     public float LowHullNormalizedThreshold => lowHullNormalizedThreshold;
+
+    public FuelHudVisualState2A ResolveState(
+        float currentFuel,
+        float fuelCapacity)
+    {
+        return FuelHudVisualRules2A.Resolve(
+            currentFuel,
+            fuelCapacity,
+            lowFuelThresholdNormalized,
+            normalFuelThresholdNormalized);
+    }
+
+    public Sprite GetIcon(
+        FuelHudVisualState2A state)
+    {
+        switch (state)
+        {
+            case FuelHudVisualState2A.Normal:
+                return normalIcon;
+
+            case FuelHudVisualState2A.Medium:
+                return mediumIcon;
+
+            case FuelHudVisualState2A.Low:
+            case FuelHudVisualState2A.Empty:
+            case FuelHudVisualState2A.Unavailable:
+                return lowIcon;
+
+            default:
+                return null;
+        }
+    }
+
+    public Color GetColor(
+        FuelHudVisualState2A state)
+    {
+        switch (state)
+        {
+            case FuelHudVisualState2A.Normal:
+                return normalColor;
+
+            case FuelHudVisualState2A.Medium:
+                return mediumColor;
+
+            case FuelHudVisualState2A.Low:
+                return lowColor;
+
+            case FuelHudVisualState2A.Empty:
+                return emptyColor;
+
+            default:
+                return unavailableColor;
+        }
+    }
+
+    private void OnValidate()
+    {
+        lowFuelThresholdNormalized =
+            Mathf.Clamp(
+                lowFuelThresholdNormalized,
+                0.01f,
+                0.99f);
+        normalFuelThresholdNormalized =
+            Mathf.Clamp(normalFuelThresholdNormalized, lowFuelThresholdNormalized, 1f);
+    }
 }

@@ -13,7 +13,6 @@ public class MarketScreenController : CustomMonoBehaviour
     [SerializeField] private MarketItemRowView marketItemRowPrefab;
     [SerializeField] private Button backButton;
     [SerializeField] private MarketVisualCatalog2A marketVisuals;
-    [SerializeField] private PlanetServiceVisualCatalog2A serviceVisuals;
     private IPlanetMarketService _market;
     private int _purchaseQuantity = 1, _saleQuantity = 1, _purchaseMaximum, _saleMaximum;
     private IGameSessionService _session;
@@ -38,7 +37,7 @@ public class MarketScreenController : CustomMonoBehaviour
         var registry = Bootstrapper.Instance.ServiceRegistry;
         _market = registry.Get<IPlanetMarketService>(); _session = registry.Get<IGameSessionService>();
         _config = registry.Get<IConfigService>(); _events = registry.Get<SimpleEventBus>();
-        MarketScreenRules2A.CollectAlliedWeaponTypes(_config.GameConfig?.MarketEconomy?.EquipmentCatalog, _alliedWeaponTypes);
+        MarketScreenRules2A.CollectAlliedWeaponTypes(_config.MarketEconomy?.EquipmentCatalog, _alliedWeaponTypes);
         TMP_Text template = cargoText != null ? cargoText : GetComponentInChildren<TMP_Text>(true);
         if (template == null && marketItemRowPrefab != null) template = marketItemRowPrefab.GetComponentInChildren<TMP_Text>(true);
         if (template == null && transform.parent != null) template = transform.parent.GetComponentInChildren<TMP_Text>(true);
@@ -86,13 +85,12 @@ public class MarketScreenController : CustomMonoBehaviour
         { _purchaseQuantity = _saleQuantity = 1; _leftKey = _rightKey = null; _warehouse = false; _location = location; }
         _boundState = state; _boundMarket = _market.CurrentMarket;
         bool station = !string.IsNullOrEmpty(player?.CurrentStationId);
-        var stationConfig = PlanetServiceVisualCatalog2A.GetDockedStation(player, _config);
+        var stationConfig = StationLocationRules.GetDockedStation(
+            player, _config.GetStarSystemConfigById(player?.CurrentSystemId));
         var planet = !station ? _config.GetPlanetConfigById(player?.CurrentPlanetId) : null;
         var illustration = stationConfig?.MarketIllustration ?? planet?.PlanetTypeConfig?.MarketIllustration ??
             marketVisuals?.Get(planet, stationConfig);
-        _view.SetHeader(serviceVisuals != null
-            ? serviceVisuals.Get(planet, PlanetServiceKind2A.Market, illustration, stationConfig)
-            : illustration);
+        _view.SetHeader(illustration);
         BuildOffers(); BuildOwned(); BuildCategories();
         _left.Clear(); _right.Clear();
         foreach (var item in _offers) if (item.Matches(_kind, _category)) _left.Add(item);

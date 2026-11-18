@@ -19,7 +19,7 @@
 | Назначение профиля | Assets/_Project/Scripts/Data/Configs/PlanetConfig.cs, существующее поле marketProfile. Файл не меняется. |
 | Профиль по уровням | Assets/_Project/Scripts/Data/Configs/Market/MarketProfileConfig.cs: GalaxyLevels, GetLevel. При пропусках наследуется ближайший нижний уровень. Старый Items сохранён для совместимости. |
 | Строка товара | Assets/_Project/Scripts/Data/Domain/Market/MarketItemEntry.cs: один StockChange, MaximumStock, BasePrice, MaximumPrice. |
-| Глобальный баланс | Assets/_Project/Scripts/Data/Configs/Market/MarketEconomyBalanceConfig.cs; ссылка GameConfig.MarketEconomy. |
+| Глобальный баланс | Assets/_Project/Scripts/Data/Configs/Market/MarketEconomyBalanceConfig.cs; ссылка marketEconomy в BootstrapScene, доступ через IConfigService.MarketEconomy. |
 | Состояние рынка | Assets/_Project/Scripts/Data/Runtime/MarketRuntimeData.cs: запасы, индивидуальное оборудование, таймеры, квитанции операций, ревизия и остаток интервала. Ключ — SystemId + PlanetId; станции имеют отдельный ключ station:<id>. |
 | Формулы | Assets/_Project/Scripts/Data/Runtime/MarketEconomyRules.cs: Price, TotalPrice, AdvanceStock, EquipmentSellPrice. |
 | Координатор | Assets/_Project/Scripts/Core/Services/Market/PlanetMarketService.cs: Bind, AdvanceTime, ClaimOffline, Trade, TradeEquipment. |
@@ -33,7 +33,7 @@
 | Уведомления | MarketStateChangedEvent после шага рынка; CreditsChangedEvent, CargoChangedEvent и SaveNeedEvent после полного коммита сделки и квитанции. Ошибка наблюдателя не блокирует оставшиеся уведомления. |
 | Оборудование | Существующий ShipRuntimeData.CargoEquipment / SystemNpcWeaponRuntimeState сохраняет InstanceId, RolledStats, DurabilityPercent и происхождение. В этом подэтапе не вводится новая модель индивидуальных модулей. |
 | Ремонт | RepairService реализует дополнительный IPartialRepairService. StationFacilityService реализует IPartialStationFacilityService, проверяет доступ к станции. SystemStationPanel2A добавляет ремонт 1/10 ед. |
-| Топливо | RefuelService использует живую цену GameConfig.MarketEconomy.FuelUnitPrice через RefuelCostProvider. Существующий выбор частичной заправки сохранён. |
+| Топливо | RefuelService использует живую цену IConfigService.MarketEconomy.FuelUnitPrice через RefuelCostProvider. Существующий выбор частичной заправки сохранён. |
 | Сохранение | SaveDataVersions.PlanetMarketEconomy = 12. MarketPersistenceRules нормализует новые коллекции, сохраняет старые остатки; SaveValidationStage проверяет дубли экземпляров и квитанций. Существующий SaveCorePartData.Markets уже входит в core.json. |
 
 ## Правила сделок
@@ -50,7 +50,7 @@
 
 ## Настройки ассетов
 
-Четыре существующих Assets/_Project/Content/Configs/MarketProfiles/mMarketProfile_*_01.asset дополнены десятью уровнями. Ссылки планет на эти профили сохранены. Новый Assets/_Project/Content/Configs/Game/marketEconomyBalance_01.asset назначен GameConfig.MarketEconomy в gameConfig_01.asset. В research_branch_trade.asset добавлены стабильные ID 17 и 18, старые ID не перенумерованы.
+Четыре существующих Assets/_Project/Content/Configs/MarketProfiles/mMarketProfile_*_01.asset дополнены десятью уровнями. Ссылки планет на эти профили сохранены. Ассет Assets/_Project/Content/Configs/Market/marketEconomyBalance_01.asset назначен напрямую в поле marketEconomy в BootstrapScene. В research_branch_trade.asset добавлены стабильные ID 17 и 18, старые ID не перенумерованы.
 
 Все новые численные параметры — предварительный баланс для проверки поведения, а не утверждённый окончательный баланс: интервал 60 с; максимум 100 × уровень; изменение ±7 × уровень либо 0; первоначальный запас 80%/20%/50% по направлению производства; максимальная цена 2 × базовая; масштаб базовой цены +10% на уровень после первого. Направление производства выбрано по прежнему BuyMultiplier профиля: <1 производство, >1 потребление, =1 ноль. Редкость и доступность не выводятся из NPC-торговцев.
 

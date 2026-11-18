@@ -37,10 +37,12 @@ public class RefuelPanelController : MonoBehaviour
             () =>
             {
                 var player = session.State?.Player;
-                var station = PlanetServiceVisualCatalog2A.GetDockedStation(player, config);
+                var station = StationLocationRules.GetDockedStation(
+                    player, config.GetStarSystemConfigById(player?.CurrentSystemId));
                 var planet = string.IsNullOrEmpty(player?.CurrentStationId) ? config.GetPlanetConfigById(player?.CurrentPlanetId) : null;
                 var fallback = government != null ? government.CurrentLocationIllustration : null;
-                return PlanetServiceVisualCatalog2A.GetRefuelIllustration(planet, station) ?? fallback;
+                return station?.StationTypeConfig?.RefuelIllustration ??
+                    planet?.PlanetTypeConfig?.RefuelIllustration ?? fallback;
             });
     }
 

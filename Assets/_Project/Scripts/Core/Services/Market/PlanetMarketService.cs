@@ -31,7 +31,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         _events?.Subscribe<ResearchCompletedEvent>(OnResearchCompleted);
     }
     private GameRuntimeState State => _session.State;
-    private MarketEconomyBalanceConfig Balance => _config.GameConfig?.MarketEconomy;
+    private MarketEconomyBalanceConfig Balance => _config.MarketEconomy;
     private int GalaxyLevel
     {
         get

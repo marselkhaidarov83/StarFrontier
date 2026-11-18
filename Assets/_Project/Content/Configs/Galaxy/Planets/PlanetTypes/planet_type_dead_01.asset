@@ -32,3 +32,4 @@ MonoBehaviour:
   missionIllustration: {fileID: 0}
   refuelIllustration: {fileID: 0}
   researchIllustration: {fileID: 0}
+  repairIllustration: {fileID: 0}

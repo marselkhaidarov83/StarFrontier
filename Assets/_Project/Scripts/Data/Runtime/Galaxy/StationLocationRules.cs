@@ -2,6 +2,13 @@ using System;
 using System.Linq;
 public static class StationLocationRules
 {
+    public static StationConfig GetDockedStation(PlayerState player, StarSystemConfig system)
+    {
+        var station = system?.Station;
+        return station != null && !string.IsNullOrEmpty(player?.CurrentStationId) &&
+            station.Id == player.CurrentStationId ? station : null;
+    }
+
     public static bool IsInside(GameRuntimeState state, StarSystemConfig system)
     {
         var player = state?.Player;

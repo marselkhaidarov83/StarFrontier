@@ -176,7 +176,6 @@ MonoBehaviour:
   marketItemRowPrefab: {fileID: 8658991366749448654, guid: 1a55949f50aea48ceb8f450f2a4c220c, type: 3}
   backButton: {fileID: 0}
   marketVisuals: {fileID: 11400000, guid: c63112249de2478e8614c8e57c84ac9d, type: 2}
-  serviceVisuals: {fileID: 11400000, guid: 2082f9f9360445d78f71c07bb81e391f, type: 2}
 --- !u!1 &10713350
 GameObject:
   m_ObjectHideFlags: 0
@@ -571,7 +570,7 @@ MonoBehaviour:
   _debugStop: 1
   targetCamera: {fileID: 757877087}
   shipTarget: {fileID: 1132738918}
-  cameraConfig: {fileID: 11400000, guid: 6944029378bee4a669c1b150a1ce3fdc, type: 2}
+  cameraConfig: {fileID: 11400000, guid: 86e99c2d948214bd6aaee0b92c06ceae, type: 2}
   mode: 0
 --- !u!114 &10713374
 MonoBehaviour:
@@ -15109,7 +15108,6 @@ MonoBehaviour:
   repairButton: {fileID: 2110456737}
   backButton: {fileID: 0}
   messageText: {fileID: 1578712360}
-  serviceVisuals: {fileID: 11400000, guid: 2082f9f9360445d78f71c07bb81e391f, type: 2}
 --- !u!1 &1587708905
 GameObject:
   m_ObjectHideFlags: 0

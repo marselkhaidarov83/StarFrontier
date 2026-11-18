@@ -4,7 +4,7 @@ using UnityEngine;
 // Конфиг описывает оружие: уровень, урон, дальность, стоимость энергии, тип выстрела, боеприпасы и визуальные настройки.
 [CreateAssetMenu(fileName = "WeaponConfig", menuName = "StarFrontier/Configs/Combat/Weapon")]
 [Serializable]
-public class WeaponConfig : BaseConfig
+public class WeaponConfig : SpaceLootCombatConfig
 {
     [Header("Progression")]
     [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]

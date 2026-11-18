@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using TMPro;
@@ -9,20 +8,16 @@ using UnityEngine.UI;
 public sealed class PlanetServiceVisualsEditModeTests
 {
     private readonly List<UnityEngine.Object> _temporary = new List<UnityEngine.Object>();
-    private PlanetServiceVisualCatalog2A Catalog => AssetDatabase.LoadAssetAtPath<PlanetServiceVisualCatalog2A>(
-        "Assets/_Project/Content/Configs/ServiceVisuals/planetServiceVisuals_01.asset");
-    private PlanetConfig Planet(PlanetType type)
+    private static PlanetTypeConfig LoadPlanetType(PlanetType type)
     {
-        var planet = ScriptableObject.CreateInstance<PlanetConfig>(); _temporary.Add(planet);
-        var planetType = AssetDatabase.LoadAssetAtPath<PlanetTypeConfig>(
+        var config = AssetDatabase.LoadAssetAtPath<PlanetTypeConfig>(
             "Assets/_Project/Content/Configs/Galaxy/Planets/PlanetTypes/planet_type_" +
             type.ToString().ToLowerInvariant() + "_01.asset");
-        Assert.That(planetType, Is.Not.Null);
-        Assert.That(planetType.PlanetType, Is.EqualTo(type));
-        var planetFields = new SerializedObject(planet);
-        planetFields.FindProperty("planetTypeConfig").objectReferenceValue = planetType;
-        planetFields.ApplyModifiedPropertiesWithoutUndo(); return planet;
+        Assert.That(config, Is.Not.Null);
+        Assert.That(config.PlanetType, Is.EqualTo(type));
+        return config;
     }
+
     private GameObject Root(string name)
     {
         var root = new GameObject(name, typeof(RectTransform)); _temporary.Add(root);
@@ -33,17 +28,12 @@ public sealed class PlanetServiceVisualsEditModeTests
         for (int i = _temporary.Count - 1; i >= 0; i--) if (_temporary[i] != null) UnityEngine.Object.DestroyImmediate(_temporary[i]);
         _temporary.Clear();
     }
-    [TestCase(PlanetServiceKind2A.Refuel, "solaria-refuel-v2-9x4.png")]
-    [TestCase(PlanetServiceKind2A.Repair, "solaria-repair-v3-9x4.png")]
-    [TestCase(PlanetServiceKind2A.Market, "solaria-market-v3-9x4.png")]
-    public void HubPlanets_UseApprovedServiceArtRegardlessOfPlanetIdentity(PlanetServiceKind2A kind, string name)
+    [Test] public void HubType_UsesApprovedServiceArt()
     {
-        Assert.That(Catalog, Is.Not.Null);
-        var first = Catalog.Get(Planet(PlanetType.Hub), kind, null);
-        var second = Catalog.Get(Planet(PlanetType.Hub), kind, null);
-        Assert.That(first, Is.Not.Null); Assert.That(second, Is.SameAs(first));
-        Assert.That(AssetDatabase.GetAssetPath(first), Is.EqualTo("Assets/Art/Services/Solaria/" + name));
-        Assert.That(first.rect.width, Is.EqualTo(1881)); Assert.That(first.rect.height, Is.EqualTo(836));
+        var hub = LoadPlanetType(PlanetType.Hub);
+        AssertSprite(hub.RefuelIllustration, "Solaria/solaria-refuel-v2-9x4.png");
+        AssertSprite(hub.RepairIllustration, "Solaria/solaria-repair-v3-9x4.png");
+        AssertSprite(hub.MarketIllustration, "Solaria/solaria-market-v3-9x4.png");
     }
     [TestCase(PlanetType.Frontier, "frontier")]
     [TestCase(PlanetType.Mining, "mining")]
@@ -51,8 +41,7 @@ public sealed class PlanetServiceVisualsEditModeTests
     [TestCase(PlanetType.Science, "science")]
     public void PlanetTypes_UseTheirOwnServiceArt(PlanetType type, string location)
     {
-        var planet = Planet(type);
-        AssertServiceArt(kind => Catalog.Get(planet, kind, null), "Planets/planet-" + location);
+        AssertServiceArt(LoadPlanetType(type), "Planets/planet-" + location);
     }
 
     [TestCase(StationType.Military, "military")]
@@ -68,47 +57,41 @@ public sealed class PlanetServiceVisualsEditModeTests
         Assert.That(stationType, Is.Not.Null);
         Assert.That(stationType.StationType, Is.EqualTo(type));
 
-        var station = ScriptableObject.CreateInstance<StationConfig>();
-        _temporary.Add(station);
-        var stationFields = new SerializedObject(station);
-        stationFields.FindProperty("stationTypeConfig").objectReferenceValue = stationType;
-        stationFields.ApplyModifiedPropertiesWithoutUndo();
-        Assert.That(Catalog.Get(null, PlanetServiceKind2A.Market, null, station), Is.SameAs(stationType.MarketIllustration));
-        AssertServiceArt(kind => Catalog.Get(null, kind, null, station), "Stations/station-" + location);
+        AssertServiceArt(stationType, "Stations/station-" + location);
     }
 
-    private static void AssertServiceArt(Func<PlanetServiceKind2A, Sprite> lookup, string pathPrefix)
+    private static void AssertServiceArt(LocationServicesConfig config, string prefix)
     {
-        foreach (PlanetServiceKind2A kind in Enum.GetValues(typeof(PlanetServiceKind2A)))
-        {
-            var sprite = lookup(kind);
-            Assert.That(sprite, Is.Not.Null);
-            Assert.That(AssetDatabase.GetAssetPath(sprite),
-                Is.EqualTo("Assets/Art/Services/" + pathPrefix + "-" + kind.ToString().ToLowerInvariant() + "-v1-9x4.png"));
-            Assert.That(sprite.rect.size, Is.EqualTo(new Vector2(1881, 836)));
-        }
+        AssertSprite(config.RefuelIllustration, prefix + "-refuel-v1-9x4.png");
+        AssertSprite(config.RepairIllustration, prefix + "-repair-v1-9x4.png");
+        AssertSprite(config.MarketIllustration, prefix + "-market-v1-9x4.png");
     }
 
-    [Test] public void DeadPlanetAndMissingLocation_KeepExistingFallback()
+    private static void AssertSprite(Sprite sprite, string path)
     {
-        var fallback = Catalog.Get(Planet(PlanetType.Hub), PlanetServiceKind2A.Refuel, null);
-        foreach (PlanetServiceKind2A kind in Enum.GetValues(typeof(PlanetServiceKind2A)))
-        {
-            Assert.That(Catalog.Get(Planet(PlanetType.Dead), kind, fallback), Is.SameAs(fallback));
-            Assert.That(Catalog.Get(null, kind, fallback), Is.SameAs(fallback));
-        }
+        Assert.That(sprite, Is.Not.Null);
+        Assert.That(AssetDatabase.GetAssetPath(sprite), Is.EqualTo("Assets/Art/Services/" + path));
+        Assert.That(sprite.rect.size, Is.EqualTo(new Vector2(1881, 836)));
+    }
+
+    [Test] public void DeadPlanetType_HasNoServiceArtOverrides()
+    {
+        var dead = LoadPlanetType(PlanetType.Dead);
+        Assert.That(dead.RepairIllustration, Is.Null);
+        Assert.That(dead.RefuelIllustration, Is.Null);
+        Assert.That(dead.MarketIllustration, Is.Null);
     }
     [Test] public void RepairFuelAndMarket_KeepHeroInTheSamePlaceAndWorkBelowIt()
     {
-        var hub = Planet(PlanetType.Hub);
+        var hub = LoadPlanetType(PlanetType.Hub);
         var repairRoot = Root("Repair"); var repair = repairRoot.AddComponent<HangarPanelView2A>();
         repair.BuildLoadout(null, null, _ => { }, _ => { }, _ => { }, () => { }, () => { });
-        repair.SetHeader(Catalog.Get(hub, PlanetServiceKind2A.Repair, null));
+        repair.SetHeader(hub.RepairIllustration);
         var fuelRoot = Root("Fuel"); var fuel = fuelRoot.AddComponent<RefuelPanelView2A>(); fuel.Build(null);
-        fuel.SetSprites(Catalog.Get(hub, PlanetServiceKind2A.Refuel, null), null);
+        fuel.SetSprites(hub.RefuelIllustration, null);
         var marketRoot = Root("Market"); var market = marketRoot.AddComponent<MarketPanelView2A>();
         market.Build(null, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, () => { }, () => { }, () => { });
-        market.SetHeader(Catalog.Get(hub, PlanetServiceKind2A.Market, null));
+        market.SetHeader(hub.MarketIllustration);
         foreach (var image in new[] { repair.Header, fuel.Header, market.Header })
         {
             Assert.That(image.preserveAspect, Is.True);

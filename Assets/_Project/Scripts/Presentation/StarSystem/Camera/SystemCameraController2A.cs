@@ -1272,10 +1272,10 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     private float GetSunWorldSize(SunConfig sun)
     {
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetSunWorldSize(sun);
         }
 
@@ -1287,10 +1287,10 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     private float GetPlanetWorldSize(PlanetConfig planet)
     {
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetPlanetWorldSize(planet);
         }
 
@@ -1302,15 +1302,15 @@ public sealed class SystemCameraController2A : CustomMonoBehaviour
     private float GetStationWorldSize(StationConfig station)
     {
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetStationWorldSize(station);
         }
 
         return station != null
-            ? SystemVisualConfig.DefaultStationVisualSize
+            ? GameVisualConfig.DefaultStationVisualSize
             : 0f;
     }
 

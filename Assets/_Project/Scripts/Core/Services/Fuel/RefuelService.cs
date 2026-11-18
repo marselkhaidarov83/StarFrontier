@@ -25,7 +25,7 @@ public class RefuelService : IRefuelService
                 .Get<SimpleEventBus>(),
 
             new RefuelCostProvider(
-                () => Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>().GameConfig?.MarketEconomy?.FuelUnitPrice ?? 0),
+                () => Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>().MarketEconomy?.FuelUnitPrice ?? 0),
 
             new PlanetRefuelAvailabilityProvider())
     {

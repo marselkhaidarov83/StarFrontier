@@ -419,7 +419,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
     {
         if (npc == null ||
             _configService == null ||
-            _configService.SystemVisualConfig == null)
+            _configService.GameVisualConfig == null)
         {
             return 0f;
         }
@@ -430,7 +430,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
                 _configService.GetEnemyConfigById(npc.ConfigId);
 
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetEnemyWorldSize(enemyConfig);
         }
 
@@ -440,7 +440,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
                 _configService.GetAllyConfigById(npc.ConfigId);
 
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetAllyWorldSize(allyConfig);
         }
 
@@ -450,7 +450,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
                 _configService.GetPirateConfigById(npc.ConfigId);
 
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetPirateWorldSize(pirateConfig);
         }
 

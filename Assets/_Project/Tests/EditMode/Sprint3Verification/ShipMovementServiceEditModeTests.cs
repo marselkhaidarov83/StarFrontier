@@ -377,12 +377,9 @@ public sealed class ShipMovementServiceEditModeTests
         SetPrivateField(config, "maxSpeed", maxSpeed);
         SetPrivateField(config, "acceleration", acceleration);
         SetPrivateField(config, "deceleration", deceleration);
-        SetPrivateField(config, "brakingDeceleration", deceleration);
         SetPrivateField(config, "turnSpeedDegrees", turnSpeedDegrees);
-        SetPrivateField(config, "rotationSmoothing", 0f);
         SetPrivateField(config, "visualTiltAmount", 0.18f);
         SetPrivateField(config, "visualBankAmount", 0.25f);
-        SetPrivateField(config, "visualTiltReturnSpeed", 8f);
         SetPrivateField(config, "clampToSystemBounds", clampToBounds);
         SetPrivateField(config, "systemBoundsHalfSize", bounds);
 

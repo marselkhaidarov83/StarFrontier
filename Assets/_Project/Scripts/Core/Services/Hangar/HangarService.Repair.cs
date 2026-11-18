@@ -65,7 +65,7 @@ public partial class HangarService
     private RepairPlan BuildRepairPlan(ShipRuntimeData ship, MarketRuntimeData market, HangarRepairScope scope,
         int slot, string itemId, bool warehouse)
     {
-        var prices = _configService.GameConfig?.MarketEconomy;
+        var prices = _configService.MarketEconomy;
         if (ship?.HasModularLoadout != true || market == null || prices == null) return null;
 
         var plan = new RepairPlan();

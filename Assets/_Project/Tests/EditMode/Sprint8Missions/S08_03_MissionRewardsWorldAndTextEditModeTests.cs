@@ -164,7 +164,7 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
     public void BattleMission_UsesConfiguredTextsForBothKinds(bool liberation)
     {
         SetField(_systems[0], "displayName", "Система A");
-        var config = _registry.Get<IConfigService>().GameConfig.MissionGameplay;
+        var config = _registry.Get<IConfigService>().MissionGameplay;
         string prefix = liberation ? "liberation" : "defense";
         SetField(config, prefix + "TitlePattern", "Приказ: {targetSystem}");
         SetField(config, prefix + "DescriptionPattern", "Удержите систему {targetSystem}.");

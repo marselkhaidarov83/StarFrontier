@@ -444,7 +444,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::Bootstrapper
   _debugEnabled: 0
   _debugStop: 1
-  gameConfig: {fileID: 11400000, guid: f76b09e1774ab45c7a1c5e6e6af8934e, type: 2}
+  marketEconomy: {fileID: 11400000, guid: e51eba8c5601492d8f2af3ec4d7889ac, type: 2}
+  missionGameplay: {fileID: 11400000, guid: d240ea1427a04a49b9361ee36880b198, type: 2}
   debugConfig: {fileID: 11400000, guid: f8321279228bb4eddafd48cb3c16d030, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
   newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
@@ -453,7 +454,7 @@ MonoBehaviour:
   systemCameraConfig: {fileID: 11400000, guid: 86e99c2d948214bd6aaee0b92c06ceae, type: 2}
   targetingConfig: {fileID: 11400000, guid: da27ecc38d9de4e85bbd55e607c87d49, type: 2}
   interactionConfig: {fileID: 11400000, guid: 81f60bef057d7448dbef6b3c6f02c558, type: 2}
-  systemHudConfig: {fileID: 11400000, guid: 28d7a2f86e70c457ab50c89e22dc7c73, type: 2}
+  systemHudConfig: {fileID: 11400000, guid: da570685b4f7b4d47987fc945dd00702, type: 2}
   systemVisualConfig: {fileID: 11400000, guid: 0d8b1a6dc71c44bcdab3fda74bcd01d9, type: 2}
   galaxyConfig: {fileID: 11400000, guid: ffe6cbcb4b5134ac7a88b96987b65082, type: 2}
   sectors:

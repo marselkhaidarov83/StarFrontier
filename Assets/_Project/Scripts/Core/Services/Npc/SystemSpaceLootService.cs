@@ -43,8 +43,7 @@ public sealed class SystemSpaceLootService : CustomService
             return false;
 
         if (state.CurrentHealth <= 0)
-            state.CurrentHealth = Bootstrapper.Instance.SpaceLootCombatConfig != null
-                ? Bootstrapper.Instance.SpaceLootCombatConfig.MaxHealth : 1;
+            state.CurrentHealth = GetInitialLootHealth(state);
 
         SpaceLootRuntimeState copy = state.Copy();
         if (copy.Equipment != null && !copy.Equipment.HasLootOrigin &&
@@ -64,6 +63,23 @@ public sealed class SystemSpaceLootService : CustomService
             " | Kind=" + state.Kind + " | Quantity=" + state.Quantity +
             " | SourceNpc=" + state.SourceNpcId);
         return true;
+    }
+
+    private int GetInitialLootHealth(SpaceLootRuntimeState state)
+    {
+        switch (state.Kind)
+        {
+            case SpaceLootKind.Item:
+            case SpaceLootKind.Astralite:
+                return _configService.GetItemConfigById(state.ItemConfigId)?.LootHealth ?? 1;
+            case SpaceLootKind.Equipment:
+                if (state.Equipment?.IsComponent == true)
+                    return (_configService.GetItemConfigById(state.EquipmentConfigId) as ShipComponentConfig)
+                        ?.LootHealth ?? 1;
+                return _configService.GetWeaponConfigById(state.EquipmentConfigId)?.LootHealth ?? 1;
+            default:
+                return 1;
+        }
     }
 
     public List<SpaceLootRuntimeState> Capture()

@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: name_pool_ally_trader_100
   m_EditorClassIdentifier: Data::AllyNamePoolConfig
   id: name_pool_ally_trader_100
-  displayName: "\u0422\u043E\u0440\u0433\u043E\u0432\u0435\u0446 name pool"
-  description: "100 runtime names for \u0422\u043E\u0440\u0433\u043E\u0432\u0435\u0446
-    allies."
+  displayName: "\u0418\u043c\u0435\u043d\u0430 \u0442\u043e\u0440\u0433\u043e\u0432\u0446\u0435\u0432"
+  description: "\u0421\u043f\u0438\u0441\u043e\u043a \u0438\u043c\u0451\u043d \u0434\u043b\u044f \u0441\u043e\u044e\u0437\u043d\u044b\u0445 \u0442\u043e\u0440\u0433\u043e\u0432\u044b\u0445 \u043a\u043e\u0440\u0430\u0431\u043b\u0435\u0439."
   icon: {fileID: 0}
   role: 20
   names:

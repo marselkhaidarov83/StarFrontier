@@ -49,7 +49,7 @@ public sealed class SystemDestinationMarkerController2 :
     private PlanetConfig _currentPlanet;
 
     private bool _isPlanetDestinationVisible;
-    private SystemVisualConfig _systemVisualConfig;
+    private GameVisualConfig _systemVisualConfig;
 
     private void Awake()
     {
@@ -163,7 +163,7 @@ public sealed class SystemDestinationMarkerController2 :
                 _systemVisualConfig != null
                     ? _systemVisualConfig.GetStationWorldSize(
                         station)
-                    : SystemVisualConfig.DefaultStationVisualSize);
+                    : GameVisualConfig.DefaultStationVisualSize);
         }
 
         SetLegacyFrameVisible(
@@ -279,7 +279,7 @@ public sealed class SystemDestinationMarkerController2 :
                     .Get<IConfigService>();
 
             _systemVisualConfig = configService != null
-                ? configService.SystemVisualConfig
+                ? configService.GameVisualConfig
                 : null;
         }
         catch

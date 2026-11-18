@@ -19,7 +19,9 @@ public sealed class StationMilitaryRestoreEditModeTests
     private sealed class Config : IConfigService
     {
         public SectorConfig[] Sectors;
-        public GameConfig GameConfig => null;
+        public MarketEconomyBalanceConfig MarketEconomy => null;
+        public MissionGameplayConfig MissionGameplay => null;
+        public GameTimeConfig GameTimeConfig => null;
         public DebugSettings DebugSettings => null;
         public SaveConfig SaveConfig => null;
         public GalaxyConfig GalaxyConfig => null;
@@ -30,7 +32,7 @@ public sealed class StationMilitaryRestoreEditModeTests
         public TargetingConfig TargetingConfig => null;
         public InteractionConfig InteractionConfig => null;
         public SystemHudConfig SystemHudConfig => null;
-        public SystemVisualConfig SystemVisualConfig => null;
+        public GameVisualConfig GameVisualConfig => null;
         public CombatFxVisualConfig CombatFxVisualConfig => null;
         public InvasionScheduleConfig InvasionScheduleConfig => null;
         public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig => null;

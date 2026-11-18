@@ -121,7 +121,6 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         Route("AC", _systems[0], _systems[2], false, 2);
         Route("CB", _systems[2], _systems[1], false, 2);
         var gameplay = Config<MissionGameplayConfig>("missions"); gameplay.DefenseKillRewardDeflator = 125; gameplay.LiberationKillRewardDeflator = 175;
-        var game = Config<GameConfig>("game"); game.MissionGameplay = gameplay;
         _state = new GameRuntimeState { Player = new PlayerState { CurrentSystemId = "A", CurrentPlanetId = "", Credits = 0 },
             Galaxy = new GalaxyRuntimeState(), MissionBlock = new RuntimeMissionSaveBlock() };
         _state.Galaxy.Systems = _systems.Select(s => new StarSystemRuntimeState { SystemId = s.Id, IsDiscovered = true }).ToList();
@@ -130,7 +129,7 @@ public sealed partial class S08_02_BattleAndRouteEditModeTests
         _registry.Register(S08MissionTestProxy.Make<IGameSessionService>((m, a) => m.Name == "get_State" ? _state : Default(m)));
         _registry.Register(S08MissionTestProxy.Make<IConfigService>((m, a) => m.Name switch
         {
-            "get_GameConfig" => game, "GetAllStarSystems" => _systems, "GetAllSectors" => new[] { _sector },
+            "get_MissionGameplay" => gameplay, "GetAllStarSystems" => _systems, "GetAllSectors" => new[] { _sector },
             "GetStarSystemConfigById" => _systems.FirstOrDefault(s => s.Id == (string)a[0]),
             "GetItemConfigById" => _testItems.Find(i => i.Id == (string)a[0]),
             "GetAllItems" => _testItems,

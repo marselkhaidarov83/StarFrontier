@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlayerAnalyticsConfig", menuName = "StarFrontier/Configs/Analytics/Player Analytics")]
-public sealed class PlayerAnalyticsConfig : ScriptableObject
+public sealed class PlayerAnalyticsConfig : BaseConfig
 {
     [Tooltip("Собирать события действий игрока. Личный выбор в настройках игры также учитывается.")]
     public bool collectionEnabled = true;

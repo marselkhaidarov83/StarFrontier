@@ -43,9 +43,6 @@ public sealed class SystemTravelHudController :
     private const float SpeedEpsilon =
         0.0001f;
 
-    private const int DefaultMinutesPerGameTick =
-        15;
-
     private static readonly DateTime
         GameStartDateTime =
             new DateTime(
@@ -653,26 +650,8 @@ public sealed class SystemTravelHudController :
             CultureInfo.InvariantCulture);
     }
 
-    private int GetMinutesPerGameTick()
-    {
-        if (_configService == null ||
-            _configService.GameConfig == null)
-        {
-            return DefaultMinutesPerGameTick;
-        }
-
-        int configuredValue =
-            _configService
-                .GameConfig
-                .minutesPerGameTick;
-
-        if (configuredValue <= 0)
-        {
-            return DefaultMinutesPerGameTick;
-        }
-
-        return configuredValue;
-    }
+    private int GetMinutesPerGameTick() =>
+        _configService?.GameTimeConfig?.MinutesPerGameTick ?? GameTimeConfig.DefaultMinutesPerGameTick;
 
     private void RefreshTravelState()
     {

@@ -156,11 +156,11 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
                 spriteRenderer.sprite = runtimeEnemy.EnemyConfig.CombatSprite;
 
                 if (_configService != null &&
-                    _configService.SystemVisualConfig != null)
+                    _configService.GameVisualConfig != null)
                 {
                     float worldSize =
                         _configService
-                            .SystemVisualConfig
+                            .GameVisualConfig
                             .GetEnemyWorldSize(
                                 runtimeEnemy.EnemyConfig);
 

@@ -107,7 +107,7 @@ public class GalaxyRouteLineView :
     public string RouteKey =>
         _routeKey;
 
-    private const float DefaultPointSpacing = 0.25f;
+    private const float DefaultPointSpacing = GameVisualConfig.DefaultGalaxyMapRoutePointSpacing;
 
     private float _pointSpacing =
         DefaultPointSpacing;
@@ -349,7 +349,7 @@ public class GalaxyRouteLineView :
          * RoundToInt выбирает количество промежутков,
          * при котором фактическое расстояние между
          * точками будет максимально близко
-         * к значению из GameConfig.
+         * к значению из GameVisualConfig.
          */
         int segmentsCount =
             Mathf.Max(

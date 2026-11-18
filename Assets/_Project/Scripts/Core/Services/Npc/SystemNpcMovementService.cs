@@ -5794,10 +5794,10 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private float GetPlanetWorldSize(PlanetConfig planet)
     {
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetPlanetWorldSize(planet);
         }
 
@@ -6312,10 +6312,10 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
     private float GetSunWorldSize(SunConfig sun)
     {
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetSunWorldSize(sun);
         }
 

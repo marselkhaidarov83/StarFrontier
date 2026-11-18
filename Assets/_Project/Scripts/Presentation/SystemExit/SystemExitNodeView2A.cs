@@ -63,7 +63,7 @@ public sealed class SystemExitNodeView2A :
 
     private RouteConfig _routeConfig;
     private RouteEndpointConfig _endpointConfig;
-    private SystemVisualConfig _visualConfig;
+    private GameVisualConfig _visualConfig;
 
     private string _currentSystemId =
         string.Empty;
@@ -102,7 +102,7 @@ public sealed class SystemExitNodeView2A :
         string targetSystemId,
         RouteEndpointConfig endpointConfig,
         Vector2 center,
-        SystemVisualConfig visualConfig = null)
+        GameVisualConfig visualConfig = null)
     {
         ResolveRuntimeDependencies();
 
@@ -403,7 +403,7 @@ public sealed class SystemExitNodeView2A :
                 _endpointConfig.ExitPoint,
                 _routeConfig.GetEntryPoint(
                     _targetSystemId),
-                _visualConfig?.SystemExitVisualSize ?? SystemVisualConfig.DefaultSystemExitVisualSize));
+                _visualConfig?.SystemExitVisualSize ?? GameVisualConfig.DefaultSystemExitVisualSize));
     }
 
     private void LateUpdate()

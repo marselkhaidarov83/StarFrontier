@@ -192,12 +192,9 @@ public sealed class SystemBoundsAndSaveSyncEditModeTests
         SetPrivateField(config, "maxSpeed", 10f);
         SetPrivateField(config, "acceleration", 100f);
         SetPrivateField(config, "deceleration", 100f);
-        SetPrivateField(config, "brakingDeceleration", 100f);
         SetPrivateField(config, "turnSpeedDegrees", 360f);
-        SetPrivateField(config, "rotationSmoothing", 0f);
         SetPrivateField(config, "visualTiltAmount", 0.18f);
         SetPrivateField(config, "visualBankAmount", 0.25f);
-        SetPrivateField(config, "visualTiltReturnSpeed", 8f);
         SetPrivateField(config, "clampToSystemBounds", clampToBounds);
         SetPrivateField(config, "systemBoundsHalfSize", bounds);
 

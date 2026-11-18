@@ -1,10 +1,10 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "spaceLootCombatConfig",
-    menuName = "StarFrontier/Configs/Combat/Space Loot Combat")]
-public sealed class SpaceLootCombatConfig : ScriptableObject
+public abstract class SpaceLootCombatConfig : BaseConfig
 {
-    [SerializeField, Min(1)] private int maxHealth = 1;
+    [Header("Космический лут")]
+    [SerializeField, Min(1), Tooltip("Здоровье объекта после выброса в космос.")]
+    private int lootHealth = 1;
 
-    public int MaxHealth => Mathf.Max(1, maxHealth);
+    public int LootHealth => Mathf.Max(1, lootHealth);
 }

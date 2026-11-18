@@ -9,7 +9,6 @@ public class HangarScreenController : MonoBehaviour
     [SerializeField] private TMP_Text shipNameText;
     [SerializeField] private Button repairButton;
     [SerializeField] private Button backButton;
-    [SerializeField] private PlanetServiceVisualCatalog2A serviceVisuals;
     [SerializeField] private bool useLegacyLayout;
 
     private sealed class InventoryChoice
@@ -185,13 +184,14 @@ public class HangarScreenController : MonoBehaviour
     {
         if (_view == null || !_view.IsReady) return;
         var player = _session.State?.Player;
-        var station = PlanetServiceVisualCatalog2A.GetDockedStation(player, _config);
+        var station = StationLocationRules.GetDockedStation(
+            player, _config.GetStarSystemConfigById(player?.CurrentSystemId));
         if (useLegacyLayout)
         {
             var planet = station == null ? _config.GetPlanetConfigById(player?.CurrentPlanetId) : null;
             var fallback = _government != null ? _government.CurrentLocationIllustration : null;
-            _view.SetHeader(serviceVisuals != null
-                ? serviceVisuals.Get(planet, PlanetServiceKind2A.Repair, fallback, station) : fallback);
+            _view.SetHeader(station?.StationTypeConfig?.RepairIllustration ??
+                planet?.PlanetTypeConfig?.RepairIllustration ?? fallback);
         }
 
         var ship = _hangar.GetActiveShipState();

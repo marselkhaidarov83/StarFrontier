@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d81ffced8174445f59daa3f83a82381c, type: 3}
   m_Name: targetingConfig_01
   m_EditorClassIdentifier: Data::TargetingConfig
+  id: targetingConfig_01
+  displayName: Выбор целей в звёздной системе
+  description: Задаёт дальность и допустимые типы целей, а также параметры их маркера.
+  icon: {fileID: 0}
   maxTargetDistance: 6
-  tapSelectRadiusWorld: 0.75
-  autoSelectRadiusWorld: 3.5
-  preferInteractableTargets: 1
   allowPlanets: 1
   allowStations: 1
   allowTravelPoints: 1
   allowEnemies: 0
-  markerWorldScale: 1
   markerPulseSpeed: 2.5
   unavailableTargetAlpha: 0.35

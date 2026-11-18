@@ -32,3 +32,4 @@ MonoBehaviour:
   missionIllustration: {fileID: 21300000, guid: 3e804cbaf52042f5bd3722fa8e5dbf63, type: 3}
   refuelIllustration: {fileID: 21300000, guid: d010b33be0da44cebb4e81e772d6e838, type: 3}
   researchIllustration: {fileID: 21300000, guid: 3e804cbaf52042f5bd3722fa8e5dbf63, type: 3}
+  repairIllustration: {fileID: 21300000, guid: 57fce6e1585a47f686d36816f4683e5a, type: 3}

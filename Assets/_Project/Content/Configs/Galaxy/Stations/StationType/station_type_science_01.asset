@@ -34,6 +34,7 @@ MonoBehaviour:
   missionIllustration: {fileID: 21300000, guid: 0866461d6108415a9c1b7e9d97cc722d, type: 3}
   refuelIllustration: {fileID: 21300000, guid: 61537e1ca26c4ce8a3e8b2b7ae590170, type: 3}
   researchIllustration: {fileID: 21300000, guid: 0866461d6108415a9c1b7e9d97cc722d, type: 3}
+  repairIllustration: {fileID: 21300000, guid: 5af0198a39134251b20dd228e839616a, type: 3}
   localOffset: {x: 0, y: 0}
   marketIllustration: {fileID: 21300000, guid: a2e0ad86249d4615803159fe800d294c, type: 3}
   upgradeSettings:

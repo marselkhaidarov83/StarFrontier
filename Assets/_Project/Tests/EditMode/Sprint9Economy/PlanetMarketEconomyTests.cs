@@ -50,11 +50,11 @@ public sealed class PlanetMarketEconomyTests
         var one = Asset<PlanetConfig>("one"); Set(one, "planetTypeConfig", planetType);
         var two = Asset<PlanetConfig>("two"); Set(two, "planetTypeConfig", planetType);
         var system = Asset<StarSystemConfig>("system"); Set(system, "planetRefs", new[] { one, two });
-        var game = Asset<GameConfig>("game"); _balance = Asset<MarketEconomyBalanceConfig>("balance"); game.MarketEconomy = _balance;
+        _balance = Asset<MarketEconomyBalanceConfig>("balance");
         _balance.ResearchLevels = new[] {
             new MarketResearchEffect { Level = 0, WarProductionLoss = 0.5f, WarConsumptionIncrease = 0.5f, MinimumEquipmentBuyoutPercent = 0.1f },
             new MarketResearchEffect { Level = 1, WarProductionLoss = 0, WarConsumptionIncrease = 0, MinimumEquipmentBuyoutPercent = 0.5f } };
-        _config = new Configs { GameConfig = game, System = system, Item = _item, Weapon = _weapon, Planets = new[] { one, two } };
+        _config = new Configs { MarketEconomy = _balance, System = system, Item = _item, Weapon = _weapon, Planets = new[] { one, two } };
         _events = new SimpleEventBus(); _inventory = new InventoryService(_session, _config, _events);
         _market = new PlanetMarketService(_session, _config, _inventory, _events); _market.InitializeSession();
     }
@@ -859,8 +859,8 @@ public sealed class PlanetMarketEconomyTests
       Assert.That(logs.IsEnabled(DebugLogChannel.Market), Is.False); Assert.That(logs.IsEnabled(DebugLogChannel.Economy), Is.False); }
     [Test] public void ProductionAssets_AreBoundToTenLevelProfilesAndTwoResearchNodes()
     {
-        var game = AssetDatabase.LoadAssetAtPath<GameConfig>("Assets/_Project/Content/Configs/Game/gameConfig_01.asset");
-        Assert.That(game.MarketEconomy, Is.Not.Null); Assert.That(game.MarketEconomy.ResearchLevels.Length, Is.EqualTo(11));
+        var balance = AssetDatabase.LoadAssetAtPath<MarketEconomyBalanceConfig>("Assets/_Project/Content/Configs/Market/marketEconomyBalance_01.asset");
+        Assert.That(balance, Is.Not.Null); Assert.That(balance.ResearchLevels.Length, Is.EqualTo(11));
         foreach (string id in AssetDatabase.FindAssets("t:MarketProfileConfig", new[] { "Assets/_Project/Content/Configs/MarketProfiles" })) {
             var profile = AssetDatabase.LoadAssetAtPath<MarketProfileConfig>(AssetDatabase.GUIDToAssetPath(id));
             Assert.That(profile.GalaxyLevels.Count, Is.EqualTo(10));
@@ -1177,14 +1177,16 @@ public sealed class PlanetMarketEconomyTests
     { public bool IsRefuelAvailable() => true; }
     private sealed class Configs : IConfigService
     {
-        public GameConfig GameConfig { get; set; }
+        public MarketEconomyBalanceConfig MarketEconomy { get; set; }
+        public MissionGameplayConfig MissionGameplay => null;
+        public GameTimeConfig GameTimeConfig => null;
         public readonly List<AllyConfig> Hulls = new List<AllyConfig>();
         public readonly List<ShipComponentConfig> Components = new List<ShipComponentConfig>();
         public StarSystemConfig System; public StarSystemConfig[] Systems; public int SystemListReads; public ItemConfig Item; public WeaponConfig Weapon; public PlanetConfig[] Planets;
         public DebugSettings DebugSettings => null; public SaveConfig SaveConfig => null; public GalaxyConfig GalaxyConfig => null; public NewGameConfig NewGameConfig => null;
         public PlayerControlConfig PlayerControlConfig => null; public ShipMovementConfig ShipMovementConfig => null; public SystemCameraConfig SystemCameraConfig => null;
         public TargetingConfig TargetingConfig => null; public InteractionConfig InteractionConfig => null; public SystemHudConfig SystemHudConfig => null;
-        public SystemVisualConfig SystemVisualConfig => null; public CombatFxVisualConfig CombatFxVisualConfig => null;
+        public GameVisualConfig GameVisualConfig => null; public CombatFxVisualConfig CombatFxVisualConfig => null;
         public InvasionScheduleConfig InvasionScheduleConfig => null; public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig => null;
         public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig => null;
         public IReadOnlyList<SectorConfig> GetAllSectors() => Array.Empty<SectorConfig>();

@@ -158,14 +158,6 @@ public static class Sprint3ProjectValidator
         SerializedObject serialized,
         string path)
     {
-        if (TryBool(serialized, out bool useFloatingJoystick, "useFloatingJoystick") &&
-            useFloatingJoystick)
-        {
-            report.Error(
-                $"{path}: useFloatingJoystick должен быть выключен. " +
-                "В Sprint 3 действует управление кликом/тапом без виртуального стика.");
-        }
-
         ValidateRange(report, serialized, path, 0f, 1f, true, "deadZone");
         ValidatePositive(report, serialized, path, true, "inputSmoothing");
     }
@@ -182,8 +174,7 @@ public static class Sprint3ProjectValidator
             serialized,
             path,
             true,
-            "deceleration",
-            "brakingDeceleration");
+            "deceleration");
         ValidatePositive(
             report,
             serialized,
@@ -200,15 +191,6 @@ public static class Sprint3ProjectValidator
     "stopDistance",
     "destinationTolerance",
     "arrivalDistance");
-        ValidateRange(
-            report,
-            serialized,
-            path,
-            0f,
-            1f,
-            false,
-            "rotationSmoothing");
-
         if (TryBool(serialized, out bool clamp, "clampToSystemBounds") && clamp)
         {
             SerializedProperty halfSize =

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Unity.Profiling;
 
 public class Bootstrapper : CustomMonoBehaviour
@@ -9,7 +10,9 @@ public class Bootstrapper : CustomMonoBehaviour
     [Header("Game")]
     [Range(30, 120)]
     [SerializeField] private int targetFrameRate = 60;
-    [SerializeField] private GameConfig gameConfig;
+    [SerializeField] private MarketEconomyBalanceConfig marketEconomy;
+    [SerializeField] private MissionGameplayConfig missionGameplay;
+    [SerializeField] private GameTimeConfig gameTimeConfig;
     [SerializeField] private SaveConfig saveConfig;
     [SerializeField] private NewGameConfig newGameConfig;
     [SerializeField] private InvasionScheduleConfig invasionScheduleConfig;
@@ -26,9 +29,9 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private TargetingConfig targetingConfig;
     [SerializeField] private InteractionConfig interactionConfig;
     [SerializeField] private SystemHudConfig systemHudConfig;
-    [SerializeField] private SystemVisualConfig systemVisualConfig;
+    [FormerlySerializedAs("systemVisualConfig")]
+    [SerializeField] private GameVisualConfig gameVisualConfig;
     [SerializeField] private CombatFxVisualConfig combatFxVisualConfig;
-    [SerializeField] private SpaceLootCombatConfig spaceLootCombatConfig;
     [SerializeField] private CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig;
     [SerializeField] private NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig;
     [SerializeField] private OffscreenNpcSimulationScheduleConfig offscreenNpcSimulationScheduleConfig;
@@ -105,7 +108,6 @@ public class Bootstrapper : CustomMonoBehaviour
     public CurrentSystemNpcSimulationConfig CurrentSystemNpcSimulationConfig =>
     currentSystemNpcSimulationConfig;
     public float SpaceLootPlayerSafeRadius => Mathf.Max(0f, spaceLootPlayerSafeRadius);
-    public SpaceLootCombatConfig SpaceLootCombatConfig => spaceLootCombatConfig;
     public float SpaceLootEjectionDistance => Mathf.Max(0f, spaceLootEjectionDistance);
 
     public bool StopAutomaticAllySpawns =>
@@ -284,7 +286,8 @@ public class Bootstrapper : CustomMonoBehaviour
 
         RegisterService<IConfigService>(
             new ConfigService(
-                gameConfig,
+                marketEconomy,
+                missionGameplay,
                 NpcPopulationDebugSettings,
                 saveConfig,
                 galaxyConfig,
@@ -296,7 +299,7 @@ public class Bootstrapper : CustomMonoBehaviour
                 targetingConfig,
                 interactionConfig,
                 systemHudConfig,
-                systemVisualConfig,
+                gameVisualConfig,
                 items,
                 enemies,
                 allies,
@@ -307,7 +310,8 @@ public class Bootstrapper : CustomMonoBehaviour
                 weapons,
                 combatFxVisualConfig,
                 combatDamagePopupVisualConfig,
-                npcBehaviourTransitionMatrixConfig));
+                npcBehaviourTransitionMatrixConfig,
+                gameTimeConfig));
 
         RegisterService<IStationPaymentGateway>(new StationResourcePaymentGateway(ServiceRegistry.Get<IGameSessionService>()));
         RegisterService<IStationService, StationService>();

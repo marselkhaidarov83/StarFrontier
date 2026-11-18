@@ -41,12 +41,11 @@ public sealed class S08_02_MissionContentEditModeTests
     }
 
     [Test]
-    public void GameConfig_HasAssignedBattleRewardSettings()
+    public void MissionGameplayConfig_HasBattleRewardSettings()
     {
-        var game = AssetDatabase.LoadAssetAtPath<GameConfig>(Root + "Game/gameConfig_01.asset");
-        Assert.That(game, Is.Not.Null);
-        Assert.That(game.MissionGameplay, Is.Not.Null);
-        Assert.That(game.MissionGameplay.DefenseKillRewardDeflator, Is.GreaterThanOrEqualTo(0));
-        Assert.That(game.MissionGameplay.LiberationKillRewardDeflator, Is.GreaterThanOrEqualTo(0));
+        var gameplay = AssetDatabase.LoadAssetAtPath<MissionGameplayConfig>(Root + "Mission/MissionTemplates/mission_gameplay_01.asset");
+        Assert.That(gameplay, Is.Not.Null);
+        Assert.That(gameplay.DefenseKillRewardDeflator, Is.GreaterThanOrEqualTo(0));
+        Assert.That(gameplay.LiberationKillRewardDeflator, Is.GreaterThanOrEqualTo(0));
     }
 }

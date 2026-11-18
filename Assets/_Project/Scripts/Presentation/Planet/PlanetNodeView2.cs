@@ -14,7 +14,7 @@ public class PlanetNodeView2 : CustomMonoBehaviour
 
     public void Initialize(
         PlanetConfig planet,
-        SystemVisualConfig visualConfig = null)
+        GameVisualConfig visualConfig = null)
     {
         _planet = planet;
 

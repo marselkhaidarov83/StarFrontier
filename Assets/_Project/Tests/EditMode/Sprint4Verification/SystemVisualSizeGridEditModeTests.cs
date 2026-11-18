@@ -7,8 +7,8 @@ public sealed class SystemVisualSizeGridEditModeTests
     [Test]
     public void UnitsToWorldSize_UsesConfiguredPixelUnit()
     {
-        SystemVisualConfig visualConfig =
-            ScriptableObject.CreateInstance<SystemVisualConfig>();
+        GameVisualConfig visualConfig =
+            ScriptableObject.CreateInstance<GameVisualConfig>();
 
         try
         {
@@ -31,8 +31,8 @@ public sealed class SystemVisualSizeGridEditModeTests
     [Test]
     public void ObjectWorldSizes_UseUnifiedGridAndObjectUnits()
     {
-        SystemVisualConfig visualConfig =
-            ScriptableObject.CreateInstance<SystemVisualConfig>();
+        GameVisualConfig visualConfig =
+            ScriptableObject.CreateInstance<GameVisualConfig>();
 
         SunConfig sun =
             ScriptableObject.CreateInstance<SunConfig>();
@@ -116,8 +116,8 @@ public sealed class SystemVisualSizeGridEditModeTests
     [Test]
     public void ObjectWorldSizes_ReturnZeroWithoutObjectConfig()
     {
-        SystemVisualConfig visualConfig =
-            ScriptableObject.CreateInstance<SystemVisualConfig>();
+        GameVisualConfig visualConfig =
+            ScriptableObject.CreateInstance<GameVisualConfig>();
 
         try
         {

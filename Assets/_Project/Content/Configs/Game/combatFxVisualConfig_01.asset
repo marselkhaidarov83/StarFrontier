@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: combatFxVisualConfig_01
   m_EditorClassIdentifier: Data::CombatFxVisualConfig
   id: combatFxVisualConfig_01
-  displayName: 
-  description: 
+  displayName: Цвета боевых эффектов
+  description: Задаёт цвета боевых эффектов игрока, союзников, пиратов и вражеских фракций.
   icon: {fileID: 0}
   playerColor: {r: 0.35, g: 0.88, b: 1, a: 1}
   allyColor: {r: 0.35, g: 0.88, b: 1, a: 1}

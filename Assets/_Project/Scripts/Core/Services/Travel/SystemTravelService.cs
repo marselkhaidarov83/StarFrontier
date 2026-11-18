@@ -6550,10 +6550,10 @@ int maxSmallDots)
     private float GetSunWorldSize(SunConfig sun)
     {
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
             return _configService
-                .SystemVisualConfig
+                .GameVisualConfig
                 .GetSunWorldSize(sun);
         }
 

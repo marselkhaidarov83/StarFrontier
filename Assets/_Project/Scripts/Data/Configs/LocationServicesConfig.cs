@@ -18,6 +18,7 @@ public abstract class LocationServicesConfig : BaseConfig
     [SerializeField] private Sprite missionIllustration;
     [SerializeField] private Sprite refuelIllustration;
     [SerializeField] private Sprite researchIllustration;
+    [SerializeField] private Sprite repairIllustration;
 
     public bool HasMarket => hasMarket;
     public bool HasMissions => hasMissions;
@@ -31,4 +32,5 @@ public abstract class LocationServicesConfig : BaseConfig
     public Sprite MissionIllustration => missionIllustration;
     public Sprite RefuelIllustration => refuelIllustration;
     public Sprite ResearchIllustration => researchIllustration;
+    public Sprite RepairIllustration => repairIllustration;
 }

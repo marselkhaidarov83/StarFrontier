@@ -2,6 +2,18 @@ using NUnit.Framework;
 
 public sealed class FuelHudState2AEditModeTests
 {
+    [TestCase(0, 100, FuelHudVisualState2A.Empty)]
+    [TestCase(1, 0, FuelHudVisualState2A.Unavailable)]
+    [TestCase(24, 100, FuelHudVisualState2A.Low)]
+    [TestCase(25, 100, FuelHudVisualState2A.Medium)]
+    [TestCase(74, 100, FuelHudVisualState2A.Medium)]
+    [TestCase(75, 100, FuelHudVisualState2A.Normal)]
+    public void Resolve_UsesConfiguredFuelBoundaries(
+        int currentFuel, int capacity, FuelHudVisualState2A expected)
+    {
+        Assert.AreEqual(expected, FuelHudVisualRules2A.Resolve(currentFuel, capacity, 0.25f, 0.75f));
+    }
+
     [Test]
     public void GetStateByPercent_ReturnsNormal_WhenPercentIs75()
     {

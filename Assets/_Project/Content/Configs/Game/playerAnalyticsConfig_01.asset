@@ -11,7 +11,18 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ad336ea16d7f446c84d359882754f18b, type: 3}
   m_Name: playerAnalyticsConfig_01
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
+  id: playerAnalyticsConfig_01
+  displayName: "\u0410\u043D\u0430\u043B\u0438\u0442\u0438\u043A\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0439
+    \u0438\u0433\u0440\u043E\u043A\u0430"
+  description: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u0431\u043E\u0440\u0430
+    \u0438 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u0438 \u0438\u0433\u0440\u043E\u0432\u044B\u0445
+    \u0441\u043E\u0431\u044B\u0442\u0438\u0439 \u0432 AppMetrica, \u0432\u043A\u043B\u044E\u0447\u0430\u044F
+    \u0432\u0435\u0440\u0441\u0438\u044E \u0431\u0430\u043B\u0430\u043D\u0441\u0430,
+    \u043E\u0447\u0435\u0440\u0435\u0434\u044C \u0441\u043E\u0431\u044B\u0442\u0438\u0439
+    \u0438 \u0432\u0440\u0435\u043C\u044F \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u044F
+    \u0441\u0435\u0441\u0441\u0438\u0438."
+  icon: {fileID: 0}
   collectionEnabled: 1
   productionApiKey: 05fff0a3-9c17-4195-9c1d-67688704531b
   testApiKey: 522b2b58-94c1-45dc-8db5-7824ab6aa454

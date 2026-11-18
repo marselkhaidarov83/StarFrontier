@@ -21,7 +21,7 @@ public class SystemMapController2 : CustomMonoBehaviour
     private SimpleEventBus eventBus;
     private IGameSessionService gameSessionService;
     private IConfigService configService;
-    private SystemVisualConfig systemVisualConfig;
+    private GameVisualConfig gameVisualConfig;
 
     private readonly List<GameObject> _spawnedPlanets = new();
     private readonly List<GameObject> _spawnedStations = new();
@@ -33,8 +33,8 @@ public class SystemMapController2 : CustomMonoBehaviour
         eventBus = Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>();
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
         configService = Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>();
-        systemVisualConfig = configService != null
-            ? configService.SystemVisualConfig
+        gameVisualConfig = configService != null
+            ? configService.GameVisualConfig
             : null;
         SubscribeToEvents();
 
@@ -133,7 +133,7 @@ public class SystemMapController2 : CustomMonoBehaviour
 
         stationNodeView.Initialize(
             starSystem.Station,
-            systemVisualConfig);
+            gameVisualConfig);
 
         if (IsDebug())
             AppLog.Info(DebugLogChannel.SystemMap,
@@ -166,7 +166,7 @@ public class SystemMapController2 : CustomMonoBehaviour
         _spawnedSun.GetComponent<SunNodeView>().Initialize(
             starSystem.Sun,
             OnSunClicked,
-            systemVisualConfig);
+            gameVisualConfig);
 
         if (IsDebug())
             AppLog.Info(DebugLogChannel.SystemMap,
@@ -237,7 +237,7 @@ public class SystemMapController2 : CustomMonoBehaviour
 
             planetNodeView.Initialize(
                 planet,
-                systemVisualConfig);
+                gameVisualConfig);
 
             // selectableView.Initialize(planet);
             // planetSelectableViews.Add(selectableView);
@@ -450,7 +450,7 @@ public class SystemMapController2 : CustomMonoBehaviour
                 targetSystem.Id,
                 endpointConfig,
                 center,
-                systemVisualConfig
+                gameVisualConfig
             );
         }
 

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // Конфиг NewGameConfig содержит настройки соответствующей игровой системы и используется связанными сервисами и экранными представлениями.
 [CreateAssetMenu(fileName = "NewGameConfig", menuName = "StarFrontier/Configs/Game/New game")]
@@ -14,8 +15,7 @@ public class NewGameConfig : BaseConfig
     public int StartCredit = 1000;
     [Tooltip("Количество алмазов у игрока при начале обычной новой игры.")]
     [Min(0)] public int StartDiamonds = 10;
-    [Tooltip("Текущий запас топлива у стартового корабля.")]
-    public int CurrentFuel = 100;
-    [Tooltip("Максимальный запас топлива у стартового корабля.")]
-    public int FuelCapacity = 100;
+    [FormerlySerializedAs("CurrentFuel")]
+    [Tooltip("Начальный запас топлива. Ограничивается ёмкостью установленного бака.")]
+    [Min(0)] public int StartFuel = 100;
 }

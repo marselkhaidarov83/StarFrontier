@@ -598,7 +598,7 @@ public class GalaxySystemInfoPanel2A : CustomMonoBehaviour
             exitPoint,
             entryPoint,
             departureEndpoint != null
-                ? _configService?.SystemVisualConfig?.SystemExitVisualSize ?? SystemVisualConfig.DefaultSystemExitVisualSize
+                ? _configService?.GameVisualConfig?.SystemExitVisualSize ?? GameVisualConfig.DefaultSystemExitVisualSize
                 : 0f
         ));
         _gameStateMachine.Enter(new SystemState());

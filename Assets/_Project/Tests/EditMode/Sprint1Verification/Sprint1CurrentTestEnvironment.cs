@@ -38,7 +38,9 @@ namespace StarFrontier.Tests.Sprint1
     internal sealed class TestConfigService : IConfigService
     {
         public InvasionScheduleConfig InvasionScheduleConfig => null;
-        public GameConfig GameConfig => null;
+        public MarketEconomyBalanceConfig MarketEconomy => null;
+        public MissionGameplayConfig MissionGameplay => null;
+        public GameTimeConfig GameTimeConfig => null;
         public DebugSettings DebugSettings => null;
         public SaveConfig SaveConfig { get; }
         public GalaxyConfig GalaxyConfig => null;
@@ -49,7 +51,7 @@ namespace StarFrontier.Tests.Sprint1
         public TargetingConfig TargetingConfig => null;
         public InteractionConfig InteractionConfig => null;
         public SystemHudConfig SystemHudConfig => null;
-        public SystemVisualConfig SystemVisualConfig => null;
+        public GameVisualConfig GameVisualConfig => null;
         public CombatFxVisualConfig CombatFxVisualConfig => null;
         public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig => null;
         public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig => null;

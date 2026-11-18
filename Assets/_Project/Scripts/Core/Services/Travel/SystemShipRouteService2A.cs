@@ -1492,9 +1492,9 @@ public sealed class SystemShipRouteService2A : CustomService, ISystemShipRouteSe
     private float GetSunWorldSize(SunConfig sun)
     {
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
-            return _configService.SystemVisualConfig.GetSunWorldSize(sun);
+            return _configService.GameVisualConfig.GetSunWorldSize(sun);
         }
 
         return sun != null

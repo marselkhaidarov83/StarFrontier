@@ -44,18 +44,6 @@ public sealed class InteractionConfig : BaseConfig
 
     [Header("Правила")]
     [Tooltip(
-        "Требует, чтобы цель была выбрана перед взаимодействием. " +
-        "Используется системой взаимодействия перед выполнением действия.")]
-    [SerializeField]
-    private bool requireSelectedTarget = true;
-
-    [Tooltip(
-        "Если цель не выбрана, разрешает автоматически выбрать ближайшую подходящую цель. " +
-        "Используется системой взаимодействия при попытке действия без выбранного объекта.")]
-    [SerializeField]
-    private bool autoSelectNearestIfNoneSelected = true;
-
-    [Tooltip(
         "Останавливает корабль игрока при успешном взаимодействии. " +
         "Используется после выполнения действия с планетой, станцией или точкой перехода.")]
     [SerializeField]
@@ -68,7 +56,5 @@ public sealed class InteractionConfig : BaseConfig
     public float HoldToInteractSeconds => holdToInteractSeconds;
     public float InteractionCooldownSeconds => interactionCooldownSeconds;
 
-    public bool RequireSelectedTarget => requireSelectedTarget;
-    public bool AutoSelectNearestIfNoneSelected => autoSelectNearestIfNoneSelected;
     public bool PauseShipOnInteraction => pauseShipOnInteraction;
 }

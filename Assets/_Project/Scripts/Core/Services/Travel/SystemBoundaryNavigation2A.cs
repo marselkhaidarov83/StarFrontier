@@ -874,8 +874,8 @@ public static class SystemBoundaryNavigation2A
         SystemCameraConfig cameraConfig =
             configService.SystemCameraConfig;
 
-        SystemVisualConfig visualConfig =
-            configService.SystemVisualConfig;
+        GameVisualConfig visualConfig =
+            configService.GameVisualConfig;
 
         Vector2 min = Vector2.zero;
         Vector2 max = Vector2.zero;
@@ -953,7 +953,7 @@ public static class SystemBoundaryNavigation2A
             float stationRadius =
                 visualConfig != null
                     ? visualConfig.GetStationWorldSize(system.Station) * 0.5f
-                    : SystemVisualConfig.DefaultStationVisualSize * 0.5f;
+                    : GameVisualConfig.DefaultStationVisualSize * 0.5f;
 
             float stationPadding =
                 cameraConfig != null
@@ -987,7 +987,7 @@ public static class SystemBoundaryNavigation2A
                 float exitRadius =
                     visualConfig != null
                         ? visualConfig.GetSystemExitWorldSize(endpoint) * 0.5f
-                        : SystemVisualConfig.DefaultSystemExitVisualSize * 0.5f;
+                        : GameVisualConfig.DefaultSystemExitVisualSize * 0.5f;
 
                 float exitPadding =
                     cameraConfig != null

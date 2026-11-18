@@ -34,11 +34,6 @@ public sealed class ShipMovementConfig : BaseConfig
     [Tooltip("Параметр deceleration. Используется связанными игровыми системами этого конфига.")]
     private float deceleration = 22f;
 
-    [SerializeField]
-    [Min(0f)]
-    [Tooltip("Параметр brakingDeceleration. Используется связанными игровыми системами этого конфига.")]
-    private float brakingDeceleration = 30f;
-
     [Header("Runtime Tuning")]
     [SerializeField]
     [Range(0.01f, 10f)]
@@ -54,11 +49,6 @@ public sealed class ShipMovementConfig : BaseConfig
     [Min(0f)]
     [Tooltip("Скорость для параметра turnSpeedDegrees. Используется при движении или анимации.")]
     private float turnSpeedDegrees = 240f;
-
-    [SerializeField]
-    [Range(0f, 1f)]
-    [Tooltip("Параметр rotationSmoothing. Используется связанными игровыми системами этого конфига.")]
-    private float rotationSmoothing = 0.18f;
 
     [Header("Travel Maneuver Assist")]
     [SerializeField]
@@ -171,11 +161,6 @@ public sealed class ShipMovementConfig : BaseConfig
     [Tooltip("Количество для параметра visualBankAmount. Используется соответствующей системой при генерации или расчёте.")]
     private float visualBankAmount = 0.25f;
 
-    [SerializeField]
-    [Min(0f)]
-    [Tooltip("Скорость для параметра visualTiltReturnSpeed. Используется при движении или анимации.")]
-    private float visualTiltReturnSpeed = 8f;
-
     [Header("Bounds")]
     [SerializeField]
     [Tooltip("Переключатель clampToSystemBounds. Включает или выключает соответствующее правило или отображение.")]
@@ -211,10 +196,8 @@ public sealed class ShipMovementConfig : BaseConfig
     public float MaxSpeed => maxSpeed;
     public float Acceleration => acceleration;
     public float Deceleration => deceleration;
-    public float BrakingDeceleration => brakingDeceleration;
 
     public float TurnSpeedDegrees => turnSpeedDegrees;
-    public float RotationSmoothing => rotationSmoothing;
 
     public float RouteTurnRadiusAdjustmentStepPercent =>
         Mathf.Clamp(routeTurnRadiusAdjustmentStepPercent, 0.1f, 50f);
@@ -242,7 +225,6 @@ public sealed class ShipMovementConfig : BaseConfig
 
     public float VisualTiltAmount => visualTiltAmount;
     public float VisualBankAmount => visualBankAmount;
-    public float VisualTiltReturnSpeed => visualTiltReturnSpeed;
 
     public bool ClampToSystemBounds => clampToSystemBounds;
     public Vector2 SystemBoundsHalfSize => systemBoundsHalfSize;

@@ -66,7 +66,7 @@ public partial class MissionService
             if (string.IsNullOrWhiteSpace(npcId) && !MissionCapacityHelper.CanAcceptMoreMissions(this)) return;
             string id = "mission_battle_" + encounter.EncounterId;
             if (GetMissionById(id) != null || Block.RewardGrantedMissionIds.Contains(id)) return;
-            var settings = _config.GameConfig?.MissionGameplay;
+            var settings = _config.MissionGameplay;
             if (settings == null) { AppLog.Error(DebugLogChannel.Mission, "[MissionBattle] Missing MissionGameplayConfig"); return; }
             int deflator = Math.Max(0, liberation ? settings.LiberationKillRewardDeflator : settings.DefenseKillRewardDeflator);
             string systemName = _config.GetStarSystemConfigById(systemId)?.DisplayName ?? systemId;
@@ -212,7 +212,7 @@ public partial class MissionService
         if (system == null || planet?.IsInhabited != true ||
             system.PlanetRefs?.Any(p => p != null && p.Id == planetId) != true)
         { reason = "CurrentPlanetNotInhabitedOrInvalid"; return false; }
-        var settings = _config.GameConfig?.MissionGameplay;
+        var settings = _config.MissionGameplay;
         if (settings == null) { reason = "MissingMissionGameplayConfig"; return false; }
         bool liberation = type == MissionType.Liberation;
         int deflator = Math.Max(0, liberation

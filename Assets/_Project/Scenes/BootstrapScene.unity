@@ -447,7 +447,9 @@ MonoBehaviour:
   _debugEnabled: 1
   _debugStop: 0
   targetFrameRate: 60
-  gameConfig: {fileID: 11400000, guid: f76b09e1774ab45c7a1c5e6e6af8934e, type: 2}
+  marketEconomy: {fileID: 11400000, guid: e51eba8c5601492d8f2af3ec4d7889ac, type: 2}
+  missionGameplay: {fileID: 11400000, guid: d240ea1427a04a49b9361ee36880b198, type: 2}
+  gameTimeConfig: {fileID: 11400000, guid: 7c67cd90304a4f7e9b3ca6901c0441af, type: 2}
   saveConfig: {fileID: 11400000, guid: 43ad7a7c5524b4fd8ac9a4f45a00ded5, type: 2}
   newGameConfig: {fileID: 11400000, guid: d4f0679533f614a49804392740d14805, type: 2}
   invasionScheduleConfig: {fileID: 11400000, guid: 6dfe35b0aae854788b3a10665161c166, type: 2}
@@ -459,10 +461,9 @@ MonoBehaviour:
   systemCameraConfig: {fileID: 11400000, guid: 86e99c2d948214bd6aaee0b92c06ceae, type: 2}
   targetingConfig: {fileID: 11400000, guid: da27ecc38d9de4e85bbd55e607c87d49, type: 2}
   interactionConfig: {fileID: 11400000, guid: 81f60bef057d7448dbef6b3c6f02c558, type: 2}
-  systemHudConfig: {fileID: 11400000, guid: 28d7a2f86e70c457ab50c89e22dc7c73, type: 2}
-  systemVisualConfig: {fileID: 11400000, guid: 0d8b1a6dc71c44bcdab3fda74bcd01d9, type: 2}
+  systemHudConfig: {fileID: 11400000, guid: da570685b4f7b4d47987fc945dd00702, type: 2}
+  gameVisualConfig: {fileID: 11400000, guid: 0d8b1a6dc71c44bcdab3fda74bcd01d9, type: 2}
   combatFxVisualConfig: {fileID: 11400000, guid: 5335864e44ee244729fd857790c1023e, type: 2}
-  spaceLootCombatConfig: {fileID: 11400000, guid: e6a5c3104f8e45f1b86a239bd423a7f0, type: 2}
   combatDamagePopupVisualConfig: {fileID: 11400000, guid: efa8c304b4fb84af39c05a2791fb7715, type: 2}
   npcBehaviourTransitionMatrixConfig: {fileID: 11400000, guid: f0fba1b681522430e84c74a61bcbdd99, type: 2}
   offscreenNpcSimulationScheduleConfig: {fileID: 11400000, guid: 5f7f970f8ec1540b68afd1a05ee7b20b, type: 2}
@@ -978,7 +979,6 @@ MonoBehaviour:
   showDebugOverlayInEditor: 0
   showDebugOverlayInMobileBuild: 0
   mobileTestMode: 1
-  mobileTestFuelCapacity: 100
   mobileTestCurrentFuel: 0
   mobileTestCredits: 9999
   mobileTestDiamonds: 10000

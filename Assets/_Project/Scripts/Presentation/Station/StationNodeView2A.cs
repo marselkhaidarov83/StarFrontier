@@ -22,7 +22,7 @@ public sealed class StationNodeView2A : CustomMonoBehaviour
 
     public void Initialize(
         StationConfig station,
-        SystemVisualConfig visualConfig = null)
+        GameVisualConfig visualConfig = null)
     {
         _station = station;
 
@@ -44,7 +44,7 @@ public sealed class StationNodeView2A : CustomMonoBehaviour
             float worldSize =
                 visualConfig != null
                     ? visualConfig.GetStationWorldSize(_station)
-                    : SystemVisualConfig.DefaultStationVisualSize;
+                    : GameVisualConfig.DefaultStationVisualSize;
 
             _stationWorldSize = worldSize;
             SpriteRendererSizeUtility.SetWorldSize(

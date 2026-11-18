@@ -615,7 +615,7 @@ public sealed class SystemObjectsListHud2A :
                     targetSystem.Id,
                     endpoint.ExitPoint,
                     route.GetEntryPoint(targetSystem.Id),
-                    _configService?.SystemVisualConfig?.SystemExitVisualSize ?? SystemVisualConfig.DefaultSystemExitVisualSize));
+                    _configService?.GameVisualConfig?.SystemExitVisualSize ?? GameVisualConfig.DefaultSystemExitVisualSize));
         }
 
         return true;

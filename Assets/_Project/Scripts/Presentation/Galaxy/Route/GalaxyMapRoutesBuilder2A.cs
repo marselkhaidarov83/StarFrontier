@@ -217,24 +217,8 @@ public class GalaxyMapRoutesBuilder2A : CustomMonoBehaviour
         _routeViewsByKey[routeKey] = view;
     }
 
-    private float GetGalaxyMapRoutePointSpacing()
-    {
-        const float fallbackSpacing = 0.25f;
-
-        if (_configService == null)
-            return fallbackSpacing;
-
-        GameConfig gameConfig =
-            _configService.GameConfig;
-
-        if (gameConfig == null)
-            return fallbackSpacing;
-
-        if (gameConfig.galaxyMapRoutePointSpacing <= 0f)
-            return fallbackSpacing;
-
-        return gameConfig.galaxyMapRoutePointSpacing;
-    }
+    private float GetGalaxyMapRoutePointSpacing() =>
+        _configService?.GameVisualConfig?.GalaxyMapRoutePointSpacing ?? GameVisualConfig.DefaultGalaxyMapRoutePointSpacing;
 
     public void ClearSelectedPath()
     {

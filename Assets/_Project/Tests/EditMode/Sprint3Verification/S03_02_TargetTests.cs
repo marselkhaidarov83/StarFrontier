@@ -195,14 +195,10 @@ public sealed class S03_02_TargetTests
         string[] requiredProperties =
         {
             "MaxTargetDistance",
-            "TapSelectRadiusWorld",
-            "AutoSelectRadiusWorld",
-            "PreferInteractableTargets",
             "AllowPlanets",
             "AllowStations",
             "AllowTravelPoints",
             "AllowEnemies",
-            "MarkerWorldScale",
             "MarkerPulseSpeed",
             "UnavailableTargetAlpha"
         };

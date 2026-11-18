@@ -12,7 +12,7 @@ public class SunNodeView : MonoBehaviour
     public void Initialize(
         SunConfig sun,
         System.Action<string> onClick,
-        SystemVisualConfig visualConfig = null)
+        GameVisualConfig visualConfig = null)
     {
         _sun = sun;
         _onClick = onClick;

@@ -49,9 +49,7 @@ public sealed class S08_03_MissionContentEditModeTests
     [Test]
     public void BattleGameplayConfig_HasSeparateDefenseAndLiberationText()
     {
-        var game = AssetDatabase.LoadAssetAtPath<GameConfig>(Root + "Game/gameConfig_01.asset");
-        Assert.That(game, Is.Not.Null);
-        var text = game.MissionGameplay;
+        var text = AssetDatabase.LoadAssetAtPath<MissionGameplayConfig>(Root + "Mission/MissionTemplates/mission_gameplay_01.asset");
         Assert.That(text, Is.Not.Null);
         Assert.That(text.DefenseTitlePattern, Is.Not.Empty);
         Assert.That(text.LiberationTitlePattern, Is.Not.Empty);

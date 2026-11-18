@@ -13,9 +13,6 @@ public sealed class DebugSettings : MonoBehaviour
     [Tooltip("Общий выключатель всех настроек DebugSettings: интерфейса, тестовой новой игры, годмода, NPC и войны. При выключении игра использует обычные конфиги. Сохранения не перезаписываются.")]
     public bool mobileTestMode = false;
 
-    [Tooltip("Размер топливного бака тестового стартового корабля.")]
-    [Min(1)] public int mobileTestFuelCapacity = 100;
-
     [Tooltip("Начальный запас топлива тестового корабля. Ограничивается размером бака.")]
     [Min(0)] public int mobileTestCurrentFuel = 100;
 

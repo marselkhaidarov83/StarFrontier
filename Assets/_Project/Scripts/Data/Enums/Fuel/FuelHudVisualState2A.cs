@@ -11,5 +11,6 @@ public enum FuelHudVisualState2A
     Unavailable = 0,
     Normal = 1,
     Low = 2,
-    Empty = 3
+    Empty = 3,
+    Medium = 4
 }

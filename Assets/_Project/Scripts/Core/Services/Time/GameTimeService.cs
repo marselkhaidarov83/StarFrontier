@@ -522,10 +522,10 @@ public sealed class GameTimeService : CustomService, IGameTimeService
             Bootstrapper.Instance.ServiceRegistry != null &&
             Bootstrapper.Instance.ServiceRegistry.TryGet<IConfigService>(
                 out IConfigService configService) &&
-            configService.GameConfig != null)
+            configService.GameTimeConfig != null)
         {
             secondsPerTick =
-                configService.GameConfig.SecondsPerGameTick;
+                configService.GameTimeConfig.SecondsPerGameTick;
         }
 
         GameTimeState.SecondsPerDay =

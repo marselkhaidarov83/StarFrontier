@@ -176,11 +176,11 @@ public sealed class SystemShipMarkerController2 :
         }
 
         if (_configService != null &&
-            _configService.SystemVisualConfig != null)
+            _configService.GameVisualConfig != null)
         {
             float worldSize =
                 _configService
-                    .SystemVisualConfig
+                    .GameVisualConfig
                     .GetAllyWorldSize(activeShipData);
 
             if (!force &&

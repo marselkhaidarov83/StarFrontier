@@ -73,35 +73,32 @@ public class NewGameFactory
                 ? starterShipConfig.BaseCargoCapacity
                 : 30;
 
-        int fuelCapacity = IsMobileTestMode
-            ? Mathf.Max(1, _configService.DebugSettings.mobileTestFuelCapacity)
-            : newGameConfig.FuelCapacity;
-        int currentFuel = IsMobileTestMode
-            ? Mathf.Clamp(_configService.DebugSettings.mobileTestCurrentFuel, 0, fuelCapacity)
-            : newGameConfig.CurrentFuel;
+        var ship = new ShipRuntimeData
+        {
+            ShipId = "runtime_ship_001",
+            AllyConfigId = starterShipConfig != null
+                ? starterShipConfig.Id
+                : FallbackStarterShipConfigId,
+            CurrentHull = hullCapacity,
+            CurrentShield = shieldCapacity,
+            CurrentEnergy = energyCapacity,
+            CargoCapacity = cargoCapacity,
+            HullCapacity = hullCapacity,
+            EquippedWeaponIds = CreateStarterWeaponIds(starterShipConfig),
+            EquippedModuleIds = new List<string>()
+        };
+        ShipLoadoutRules.Initialize(ship, starterShipConfig, _configService.GetWeaponConfigById);
+        string tankId = ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.FuelTank);
+        ship.FuelCapacity = !string.IsNullOrEmpty(tankId) && _configService.GetItemConfigById(tankId) is ShipComponentConfig tank
+            ? Mathf.Max(0, tank.FuelCapacity)
+            : 0;
+        int startFuel = IsMobileTestMode ? _configService.DebugSettings.mobileTestCurrentFuel : newGameConfig.StartFuel;
+        ship.CurrentFuel = Mathf.Clamp(startFuel, 0, ship.FuelCapacity);
 
         return new ShipRuntimeState
         {
-            ActiveShipId = "runtime_ship_001",
-            OwnedShips = new List<ShipRuntimeData>
-            {
-                new ShipRuntimeData
-                {
-                    ShipId = "runtime_ship_001",
-                    AllyConfigId = starterShipConfig != null
-                        ? starterShipConfig.Id
-                        : FallbackStarterShipConfigId,
-                    CurrentHull = hullCapacity,
-                    CurrentShield = shieldCapacity,
-                    CurrentEnergy = energyCapacity,
-                    CurrentFuel = currentFuel,
-                    FuelCapacity = fuelCapacity,
-                    CargoCapacity = cargoCapacity,
-                    HullCapacity = hullCapacity,
-                    EquippedWeaponIds = CreateStarterWeaponIds(starterShipConfig),
-                    EquippedModuleIds = new List<string>()
-                }
-            }
+            ActiveShipId = ship.ShipId,
+            OwnedShips = new List<ShipRuntimeData> { ship }
         };
     }
 

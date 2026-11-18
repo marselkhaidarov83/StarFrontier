@@ -15,7 +15,7 @@ Local branch at start of work: `stage-2a-prereliz`, base SHA `ad596aaeed6c81a3fb
 - `Assets/_Project/Scripts/Presentation/Npc/SystemSpaceLootViewController.cs` and `SystemSpaceLootView.cs`: icon views and upper-left detail panel in `SystemScene.unity`; sprites resolve from `ItemConfig.Icon` or `WeaponConfig.Icon`.
 - `Assets/_Project/Scripts/Core/Services/Combat/PlayerAttackService.cs`, `Assets/_Project/Scripts/Core/Services/Npc/SystemNpcCombatService.cs`, and `Assets/_Project/Scripts/Presentation/StarSystem/Camera/SystemCameraController2A.cs`: loot targeting, player shot impact, and camera focus.
 - `Assets/_Project/Scripts/Presentation/HUD/SystemPlayerWeaponListHud2A.cs`: shows the weapon assignment panel when loot is selected, even without a nearby hostile ship.
-- `Assets/_Project/Scripts/Data/Configs/SpaceLootCombatConfig.cs` and `Assets/_Project/Content/Configs/Game/spaceLootCombatConfig_01.asset`: configurable loot health, initially 1, bound in `BootstrapScene.unity`.
+- `SpaceLootCombatConfig`: common base of `ItemConfig` and `WeaponConfig`. Each item, ship component and weapon sets its own space-loot health, defaulting to 1. Saved loot retains its remaining health.
 - `Assets/_Project/Scripts/Data/Runtime/Npc/SpaceLootRuntimeState.cs` and `Assets/_Project/Scripts/Data/Events/Npc/SpaceLootDestroyedEvent.cs`: saved loot health and source ship metadata; destruction event.
 - `Assets/_Project/Scripts/Presentation/Npc/GalaxyNpcCombatVisualController.cs`: reuses the ship explosion effect for destroyed loot, colored by the source ship's type and enemy configuration.
 - `Assets/_Project/Scripts/Data/Configs/Debug/DebugLogConfig.cs`: `Loot` debug log channel with its own switch.

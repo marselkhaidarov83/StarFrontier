@@ -56,11 +56,11 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
 
     private IGameSessionService _gameSessionService;
     private SimpleEventBus _eventBus;
+    private SystemHudConfig _systemHudConfig;
 
     private bool _initialized;
     private int _lastFuel = int.MinValue;
     private int _lastCapacity = int.MinValue;
-    private FuelHudState2A _lastState = FuelHudState2A.Low;
 
     private void Awake()
     {
@@ -159,26 +159,15 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
         int currentFuel = activeShip.CurrentFuel;
         int fuelCapacity = activeShip.FuelCapacity;
 
-        FuelHudState2A state =
-            FuelHudStateUtility2A.GetState(
-                currentFuel,
-                fuelCapacity);
-
         if (_lastFuel == currentFuel &&
-            _lastCapacity == fuelCapacity &&
-            _lastState == state)
+            _lastCapacity == fuelCapacity)
         {
             return;
         }
 
         _lastFuel = currentFuel;
         _lastCapacity = fuelCapacity;
-        _lastState = state;
-
-        ApplyFuelView(
-            currentFuel,
-            fuelCapacity,
-            state);
+        ApplyFuelView(currentFuel, fuelCapacity);
     }
 
     public void ForceRefresh()
@@ -213,6 +202,9 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
         _eventBus =
             Bootstrapper.Instance.ServiceRegistry
                 .Get<SimpleEventBus>();
+
+        if (Bootstrapper.Instance.ServiceRegistry.TryGet(out IConfigService configs))
+            _systemHudConfig = configs.SystemHudConfig;
 
         if (_gameSessionService == null)
         {
@@ -272,8 +264,7 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
 
     private void ApplyFuelView(
         int currentFuel,
-        int fuelCapacity,
-        FuelHudState2A state)
+        int fuelCapacity)
     {
         gameObject.SetActive(true);
 
@@ -298,12 +289,27 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
 
         if (fuelIconImage != null)
         {
-            fuelIconImage.sprite =
-                GetSpriteForState(state);
-
-            fuelIconImage.enabled =
-                fuelIconImage.sprite != null;
+            if (_systemHudConfig != null)
+            {
+                FuelHudVisualState2A state = _systemHudConfig.ResolveState(currentFuel, fuelCapacity);
+                ApplyFuelIcon(state);
+            }
+            else
+            {
+                fuelIconImage.sprite = GetSpriteForState(
+                    FuelHudStateUtility2A.GetState(currentFuel, fuelCapacity));
+                fuelIconImage.enabled = fuelIconImage.sprite != null;
+            }
         }
+    }
+
+    private void ApplyFuelIcon(FuelHudVisualState2A state)
+    {
+        fuelIconImage.sprite = _systemHudConfig.GetIcon(state);
+        fuelIconImage.color = _systemHudConfig.GetColor(state);
+        fuelIconImage.enabled = fuelIconImage.sprite != null;
+        if (!fuelIconImage.enabled)
+            LogMissingSprite(state.ToString());
     }
 
     private Sprite GetSpriteForState(
@@ -345,8 +351,13 @@ public sealed class SystemTopHudFuelIndicator2A : MonoBehaviour
 
         if (fuelIconImage != null)
         {
-            fuelIconImage.sprite = iconFuelLow;
-            fuelIconImage.enabled = iconFuelLow != null;
+            if (_systemHudConfig != null)
+                ApplyFuelIcon(FuelHudVisualState2A.Unavailable);
+            else
+            {
+                fuelIconImage.sprite = iconFuelLow;
+                fuelIconImage.enabled = iconFuelLow != null;
+            }
         }
     }
 

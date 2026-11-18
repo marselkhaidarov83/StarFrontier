@@ -2,7 +2,9 @@ using System.Collections.Generic;
 
 public interface IConfigService
 {
-    GameConfig GameConfig { get; }
+    MarketEconomyBalanceConfig MarketEconomy { get; }
+    MissionGameplayConfig MissionGameplay { get; }
+    GameTimeConfig GameTimeConfig { get; }
     DebugSettings DebugSettings { get; }
     SaveConfig SaveConfig { get; }
     GalaxyConfig GalaxyConfig { get; }
@@ -14,7 +16,7 @@ public interface IConfigService
     TargetingConfig TargetingConfig { get; }
     InteractionConfig InteractionConfig { get; }
     SystemHudConfig SystemHudConfig { get; }
-    SystemVisualConfig SystemVisualConfig { get; }
+    GameVisualConfig GameVisualConfig { get; }
     CombatFxVisualConfig CombatFxVisualConfig { get; }
     InvasionScheduleConfig InvasionScheduleConfig { get; }
     CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig { get; }

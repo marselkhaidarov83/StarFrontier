@@ -6,7 +6,9 @@ using UnityEngine;
 
 public sealed class ConfigService : IConfigService
 {
-    public GameConfig GameConfig { get; }
+    public MarketEconomyBalanceConfig MarketEconomy { get; }
+    public MissionGameplayConfig MissionGameplay { get; }
+    public GameTimeConfig GameTimeConfig { get; }
     public DebugSettings DebugSettings { get; }
     public SaveConfig SaveConfig { get; }
     public GalaxyConfig GalaxyConfig { get; }
@@ -19,7 +21,7 @@ public sealed class ConfigService : IConfigService
     public InvasionScheduleConfig InvasionScheduleConfig { get; }
     public InteractionConfig InteractionConfig { get; }
     public SystemHudConfig SystemHudConfig { get; }
-    public SystemVisualConfig SystemVisualConfig { get; }
+    public GameVisualConfig GameVisualConfig { get; }
     public CombatFxVisualConfig CombatFxVisualConfig { get; }
     public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig { get; }
     public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig { get; }
@@ -49,7 +51,8 @@ public sealed class ConfigService : IConfigService
 
     private readonly IGameSessionService gameSessionService;
 
-    public ConfigService(GameConfig gameConfig,
+    public ConfigService(MarketEconomyBalanceConfig marketEconomy,
+                MissionGameplayConfig missionGameplay,
                 DebugSettings debugSettings,
                 SaveConfig saveConfig,
                 GalaxyConfig galaxyConfig,
@@ -68,9 +71,12 @@ public sealed class ConfigService : IConfigService
                 IEnumerable<WeaponConfig> weapons,
                 CombatFxVisualConfig combatFxVisualConfig = null,
                 CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
-                NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
+                NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null,
+                GameTimeConfig gameTimeConfig = null)
     {
-        GameConfig = gameConfig;
+        MarketEconomy = marketEconomy;
+        MissionGameplay = missionGameplay;
+        GameTimeConfig = gameTimeConfig;
         DebugSettings = debugSettings;
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
@@ -95,7 +101,8 @@ public sealed class ConfigService : IConfigService
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
     }
 
-    public ConfigService(GameConfig gameConfig,
+    public ConfigService(MarketEconomyBalanceConfig marketEconomy,
+                MissionGameplayConfig missionGameplay,
                 DebugSettings debugSettings,
                 SaveConfig saveConfig,
                 GalaxyConfig galaxyConfig,
@@ -107,7 +114,7 @@ public sealed class ConfigService : IConfigService
                 TargetingConfig targetingConfig,
                 InteractionConfig interactionConfig,
                 SystemHudConfig systemHudConfig,
-                SystemVisualConfig systemVisualConfig,
+                GameVisualConfig gameVisualConfig,
                 IEnumerable<ItemConfig> items,
                 IEnumerable<EnemyConfig> enemies,
                 IEnumerable<AllyConfig> allies,
@@ -118,9 +125,12 @@ public sealed class ConfigService : IConfigService
                 IEnumerable<WeaponConfig> weapons,
                 CombatFxVisualConfig combatFxVisualConfig = null,
                 CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
-                NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null)
+                NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null,
+                GameTimeConfig gameTimeConfig = null)
     {
-        GameConfig = gameConfig;
+        MarketEconomy = marketEconomy;
+        MissionGameplay = missionGameplay;
+        GameTimeConfig = gameTimeConfig;
         DebugSettings = debugSettings;
         SaveConfig = saveConfig;
         GalaxyConfig = galaxyConfig;
@@ -132,7 +142,7 @@ public sealed class ConfigService : IConfigService
         TargetingConfig = targetingConfig;
         InteractionConfig = interactionConfig;
         SystemHudConfig = systemHudConfig;
-        SystemVisualConfig = systemVisualConfig;
+        GameVisualConfig = gameVisualConfig;
         CombatFxVisualConfig = combatFxVisualConfig;
         CombatDamagePopupVisualConfig = combatDamagePopupVisualConfig;
         NpcBehaviourTransitionMatrixConfig = npcBehaviourTransitionMatrixConfig;
