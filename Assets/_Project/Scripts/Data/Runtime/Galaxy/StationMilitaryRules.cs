@@ -31,14 +31,14 @@ public static class StationMilitaryRules
         {
             var settings = config?.GetLevel(level);
             if (settings == null || settings.RequiredGalaxyLevel > galaxyLevel) break;
-            maximum = Math.Max(maximum, Capacity(settings, galaxyLevel));
+            maximum = Math.Max(maximum, Capacity(config.Population, level, galaxyLevel));
         }
         return maximum;
     }
-    public static int Capacity(StationLevelEffectsSettings settings, int galaxyLevel)
+    public static int Capacity(PopulationConfig population, int stationLevel, int galaxyLevel)
     {
         var counts = new Dictionary<string, int>();
-        foreach (var rule in settings?.Population?.AllySpawnRules ?? Array.Empty<AllySpawnRuleConfig>())
+        foreach (var rule in population?.GetAllySpawnRules(stationLevel) ?? Array.Empty<AllySpawnRuleConfig>())
         {
             if (rule == null || rule.GetSpawnIntervalSeconds(galaxyLevel) <= 0) continue;
             foreach (var entry in rule.GetAlliesForGalaxyLevel(galaxyLevel))

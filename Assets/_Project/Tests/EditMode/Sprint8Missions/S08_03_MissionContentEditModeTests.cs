@@ -13,8 +13,6 @@ public sealed class S08_03_MissionContentEditModeTests
     };
 
     [TestCase("mission_delivery_basic_01.asset", MissionType.Delivery)]
-    [TestCase("mission_delivery_basic_02.asset", MissionType.Delivery)]
-    [TestCase("mission_recon_jump_point_01.asset", MissionType.Recon)]
     [TestCase("mission_recon_jump_point_02.asset", MissionType.Recon)]
     [TestCase("mission_route_unlock_01.asset", MissionType.RouteSearch)]
     [TestCase("mission_route_improve_01.asset", MissionType.RouteSearch)]

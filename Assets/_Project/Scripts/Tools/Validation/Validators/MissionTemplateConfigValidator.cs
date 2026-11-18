@@ -71,41 +71,6 @@ public class MissionTemplateConfigValidator : IConfigValidator<MissionTemplateCo
             config));
         }
 
-        if (config.MinDangerLevel > config.MaxDangerLevel)
-        {
-            issues.Add(new ValidationIssue(
-            ValidationSeverity.Error,
-            "MinDangerLevel must be <= MaxDangerLevel.",
-            config));
-        }
-
-        if (config.RequiredMissionTags == null || config.RequiredMissionTags.Length == 0)
-        {
-            issues.Add(new ValidationIssue(
-            ValidationSeverity.Warning,
-            "RequiredMissionTags is empty.",
-            config));
-        }
-
-        if (config.MissionType == MissionType.Elimination)
-        {
-            if (config.TargetEnemyCountMin <= 0)
-            {
-                issues.Add(new ValidationIssue(
-                ValidationSeverity.Error,
-                "Elimination mission must have TargetEnemyCountMin > 0.",
-                config));
-            }
-
-            if (config.TargetEnemyCountMax < config.TargetEnemyCountMin)
-            {
-                issues.Add(new ValidationIssue(
-                ValidationSeverity.Error,
-                "TargetEnemyCountMax must be >= TargetEnemyCountMin.",
-                config));
-            }
-        }
-
         if (config.CreditRewardMode == MissionCreditRewardMode.Fixed && config.RewardCredits < 0)
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "Fixed reward must be nonnegative.", config));
         if (config is DeliveryMissionTemplateConfig delivery)

@@ -486,7 +486,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             if (starSystem == null || IsEnemySystem(starSystem))
                 continue;
 
-            SystemPopulationRule populationRule =
+            PopulationConfig populationRule =
                 GetCurrentPopulationRule(starSystem);
 
             if (populationRule == null)
@@ -647,7 +647,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         StarSystemConfig starSystem,
         float deltaTime)
     {
-        SystemPopulationRule populationRule =
+        PopulationConfig populationRule =
             GetCurrentPopulationRule(starSystem);
 
         if (populationRule == null)
@@ -1163,14 +1163,14 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             return false;
         }
 
-        SystemPopulationRule populationRule =
+        PopulationConfig populationRule =
             GetCurrentPopulationRule(starSystem);
 
         if (populationRule == null)
         {
             AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug ally spawn failed. " +
-                "System has no SystemPopulationRule. System: " +
+                "System has no PopulationConfig. System: " +
                 starSystem.Id);
 
             return false;
@@ -1181,7 +1181,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         {
             AppLog.Warning(DebugLogChannel.NpcMovement,
                 "[SystemPopulationService] Debug ally spawn failed. " +
-                "SystemPopulationRule has no AllySpawnRules. Rule: " +
+                "PopulationConfig has no AllySpawnRules. Rule: " +
                 populationRule.Id);
 
             return false;
@@ -1561,13 +1561,13 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         return _configService.GetStarSystemConfigById(currentSystemId);
     }
 
-    private SystemPopulationRule GetCurrentPopulationRule(
+    private PopulationConfig GetCurrentPopulationRule(
         StarSystemConfig starSystem)
     {
         if (starSystem == null)
             return null;
 
-        return starSystem.SystemPopulationRule;
+        return starSystem.Population;
     }
 
     private bool CanSpawnEnemyPopulation(StarSystemConfig system)
@@ -1879,7 +1879,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (starSystem == null || StopAutomaticAllySpawns || IsEnemySystem(starSystem))
             return;
 
-        SystemPopulationRule populationRule = GetCurrentPopulationRule(starSystem);
+        PopulationConfig populationRule = GetCurrentPopulationRule(starSystem);
         if (populationRule == null || populationRule.AllySpawnRules == null)
             return;
 
@@ -2056,7 +2056,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 system.Id == currentSystemId)
                 continue;
 
-            SystemPopulationRule populationRule =
+            PopulationConfig populationRule =
                 GetCurrentPopulationRule(system);
 
             if (populationRule == null ||

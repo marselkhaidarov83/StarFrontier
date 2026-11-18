@@ -1,0 +1,501 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c8d0867fef3553b8fb0e439bc90d40a, type: 3}
+  m_Name: research_branch_missions
+  m_EditorClassIdentifier: Data::ResearchBranchConfig
+  id: research_branch_missions
+  displayName: "Миссии"
+  description: "Десять направлений развития миссий: от доставки и защиты до разведки, спасения и перехвата."
+  icon: {fileID: 0}
+  StationType: 3
+  ScienceOnly: 1
+  Nodes:
+  - Upgrade: 51
+    Title: "Доставка"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 0, y: 0}
+    StartingLevel: 1
+    Description: "Масса груза, дальность доставки и награда за рейс."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 52
+    Title: "Защита"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 1, y: 0}
+    StartingLevel: 1
+    Description: "Награда за лично уничтоженных врагов при отражении вторжения."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 53
+    Title: "Освобождение"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 2, y: 0}
+    StartingLevel: 1
+    Description: "Награда за личный вклад в освобождение захваченной системы."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 54
+    Title: "Открытие нового маршрута"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 3, y: 0}
+    StartingLevel: 0
+    Description: "Доступ к обследованию более удалённых и опасных переходов."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 55
+    Title: "Улучшение маршрута"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 4, y: 0}
+    StartingLevel: 0
+    Description: "Максимальный уровень улучшения маршрута через задания. Рост уровня маршрута снижает расход топлива."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 56
+    Title: "Разведка"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 5, y: 0}
+    StartingLevel: 0
+    Description: "Дальность проникновения на вражескую территорию и сложность целей наблюдения."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 57
+    Title: "Сопровождение"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 6, y: 0}
+    StartingLevel: 0
+    Description: "Защита союзного транспорта. С уровнем растут длина маршрута и сложность нападений."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 58
+    Title: "Спасение экипажа"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 7, y: 0}
+    StartingLevel: 0
+    Description: "Поиск спасательной капсулы и эвакуация экипажа. С уровнем растёт дальность операций."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 59
+    Title: "Возврат потерянного груза"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 8, y: 0}
+    StartingLevel: 0
+    Description: "Поиск груза в обломках. С уровнем растут размер зоны поиска и ценность находок."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+  - Upgrade: 60
+    Title: "Перехват"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 9, y: 0}
+    StartingLevel: 0
+    Description: "Уничтожение вражеского корабля до его ухода из системы. С уровнем растёт сложность цели и её охраны."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []

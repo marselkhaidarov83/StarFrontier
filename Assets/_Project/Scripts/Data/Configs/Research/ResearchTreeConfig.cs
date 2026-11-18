@@ -21,6 +21,9 @@ using UnityEngine;
     public Sprite Icon;
     [Range(1, 10)] public int RequiredGalaxyLevel = 1;
     public Vector2 TreePosition;
+    [Tooltip("Планируемый уровень в начале игры. Пока хранится как данные для настройки исследований.")]
+    [Range(0, 10)] public int StartingLevel;
+    [TextArea] public string Description;
     public ResearchNodeLevel[] Levels = Array.Empty<ResearchNodeLevel>();
 }
 [CreateAssetMenu(menuName = "StarFrontier/Configs/Research/Tree")]

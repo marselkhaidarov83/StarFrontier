@@ -45,9 +45,9 @@ public static class StarSystemPopulationRuleBinder
         if (!rules.HasRequiredRules())
         {
             EditorUtility.DisplayDialog(
-                "SystemPopulationRule binder",
-                "Required SystemPopulationRule assets were not found. " +
-                "Run Create generated SystemPopulationRule assets first.",
+                "PopulationConfig binder",
+                "Required PopulationConfig assets were not found. " +
+                "Run Create generated PopulationConfig assets first.",
                 "OK");
             return;
         }
@@ -58,7 +58,7 @@ public static class StarSystemPopulationRuleBinder
         if (enemyRuleSet == null)
         {
             EditorUtility.DisplayDialog(
-                "SystemPopulationRule binder",
+                "PopulationConfig binder",
                 "Required EnemySpawnRuleSetConfig was not found: " +
                 EnemySpawnRuleSetId +
                 ". Run Create generated EnemySpawnRule assets first.",
@@ -90,7 +90,7 @@ public static class StarSystemPopulationRuleBinder
 
             bool changed = false;
 
-            SystemPopulationRule populationRule =
+            PopulationConfig populationRule =
                 PickRuleForSystem(
                     starSystem,
                     rules,
@@ -188,7 +188,7 @@ public static class StarSystemPopulationRuleBinder
         AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog(
-            "SystemPopulationRule binder",
+            "PopulationConfig binder",
             "Done. " +
             $"Population updated: {populationUpdated}. " +
             $"Enemy updated: {enemyUpdated}. " +
@@ -230,13 +230,13 @@ public static class StarSystemPopulationRuleBinder
 
             checkedAssets++;
 
-            SystemPopulationRule expectedPopulationRule =
+            PopulationConfig expectedPopulationRule =
                 PickRuleForSystem(
                     starSystem,
                     rules,
                     ref warnings);
 
-            if (starSystem.SystemPopulationRule == null)
+            if (starSystem.Population == null)
             {
                 string assignError = string.Empty;
 
@@ -250,7 +250,7 @@ public static class StarSystemPopulationRuleBinder
 
                     AppLog.Info(
                         DebugLogChannel.DataValidation,
-                        "StarSystemPopulationRule validation: repaired missing SystemPopulationRule at " +
+                        "StarSystemPopulationRule validation: repaired missing PopulationConfig at " +
                         path + " (" + starSystem.Id + "). Assigned: " +
                         expectedPopulationRule.Id + ". Station: " + DescribeStation(starSystem));
                 }
@@ -260,7 +260,7 @@ public static class StarSystemPopulationRuleBinder
 
                     AppLog.Error(
                         DebugLogChannel.DataValidation,
-                        "StarSystemPopulationRule validation: missing SystemPopulationRule at " +
+                        "StarSystemPopulationRule validation: missing PopulationConfig at " +
                         path + " (" + starSystem.Id + "). Expected: " +
                         (expectedPopulationRule != null ? expectedPopulationRule.Id : "none") +
                         ". Station: " + DescribeStation(starSystem) +
@@ -328,7 +328,7 @@ public static class StarSystemPopulationRuleBinder
 
     private static bool TryAssignPopulationRule(
         StarSystemConfig starSystem,
-        SystemPopulationRule rule,
+        PopulationConfig rule,
         out string error)
     {
         error = string.Empty;
@@ -341,7 +341,7 @@ public static class StarSystemPopulationRuleBinder
 
         if (rule == null)
         {
-            error = "SystemPopulationRule is null.";
+            error = "PopulationConfig is null.";
             return false;
         }
 
@@ -443,7 +443,7 @@ public static class StarSystemPopulationRuleBinder
         return true;
     }
 
-    private static SystemPopulationRule PickRuleForSystem(
+    private static PopulationConfig PickRuleForSystem(
         StarSystemConfig starSystem,
         RuleSet rules,
         ref int warnings)
@@ -539,9 +539,9 @@ public static class StarSystemPopulationRuleBinder
         };
     }
 
-    private static SystemPopulationRule PickEnemyModeRule(
-        SystemPopulationRule regularRule,
-        SystemPopulationRule noEnemyRule,
+    private static PopulationConfig PickEnemyModeRule(
+        PopulationConfig regularRule,
+        PopulationConfig noEnemyRule,
         bool useNoEnemyRule)
     {
         if (useNoEnemyRule && noEnemyRule != null)
@@ -595,11 +595,11 @@ public static class StarSystemPopulationRuleBinder
         return 0;
     }
 
-    private static SystemPopulationRule FindRule(
+    private static PopulationConfig FindRule(
         string id)
     {
         string[] guids =
-            AssetDatabase.FindAssets("t:SystemPopulationRule", new[] { PopulationRuleRoot });
+            AssetDatabase.FindAssets("t:PopulationConfig", new[] { PopulationRuleRoot });
 
         for (int i = 0; i < guids.Length; i++)
         {
@@ -612,8 +612,8 @@ public static class StarSystemPopulationRuleBinder
             if (!lowerPath.Contains(id.ToLowerInvariant()))
                 continue;
 
-            SystemPopulationRule rule =
-                AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(path);
+            PopulationConfig rule =
+                AssetDatabase.LoadAssetAtPath<PopulationConfig>(path);
 
             if (rule != null)
                 return rule;
@@ -665,18 +665,18 @@ public static class StarSystemPopulationRuleBinder
 
     private sealed class RuleSet
     {
-        public SystemPopulationRule Balanced;
-        public SystemPopulationRule Trade;
-        public SystemPopulationRule Military;
-        public SystemPopulationRule Ranger;
-        public SystemPopulationRule Medical;
-        public SystemPopulationRule Science;
-        public SystemPopulationRule BalancedNoEnemies;
-        public SystemPopulationRule TradeNoEnemies;
-        public SystemPopulationRule MilitaryNoEnemies;
-        public SystemPopulationRule RangerNoEnemies;
-        public SystemPopulationRule MedicalNoEnemies;
-        public SystemPopulationRule ScienceNoEnemies;
+        public PopulationConfig Balanced;
+        public PopulationConfig Trade;
+        public PopulationConfig Military;
+        public PopulationConfig Ranger;
+        public PopulationConfig Medical;
+        public PopulationConfig Science;
+        public PopulationConfig BalancedNoEnemies;
+        public PopulationConfig TradeNoEnemies;
+        public PopulationConfig MilitaryNoEnemies;
+        public PopulationConfig RangerNoEnemies;
+        public PopulationConfig MedicalNoEnemies;
+        public PopulationConfig ScienceNoEnemies;
 
         public bool HasRequiredRules()
         {

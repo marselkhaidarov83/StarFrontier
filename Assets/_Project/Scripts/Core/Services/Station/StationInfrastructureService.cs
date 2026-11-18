@@ -125,19 +125,20 @@ public sealed class StationInfrastructureService : IStationInfrastructureService
         if (seconds <= 0 || double.IsNaN(seconds) || double.IsInfinity(seconds)) return;
         foreach (var system in _session.State?.Galaxy?.Systems ?? new List<StarSystemRuntimeState>())
         {
-            if (system?.Station == null) continue;
-            var settings = Settings(system);
-            if (system.Station.StationType == StationType.Military && settings != null)
-                Populate(system, settings, seconds);
+            if (system?.Station?.StationType != StationType.Military) continue;
+            var home = _config.GetStarSystemConfigById(system.SystemId);
+            var type = home?.Station?.StationTypeConfig;
+            if (type?.GetLevel(system.Station.Level) != null && type.Population != null)
+                Populate(system, home, type.Population.GetAllySpawnRules(system.Station.Level), seconds);
         }
     }
-    private void Populate(StarSystemRuntimeState system, StationLevelEffectsSettings settings, double seconds)
+    private void Populate(StarSystemRuntimeState system, StarSystemConfig home,
+        AllySpawnRuleConfig[] rules, double seconds)
     {
-        if (!StationInfrastructureRules.CanApplyEffects(system) || settings.Population?.AllySpawnRules == null ||
+        if (!StationInfrastructureRules.CanApplyEffects(system) || rules.Length == 0 ||
             Bootstrapper.Instance.StopAutomaticAllySpawns) return;
         int galaxyLevel = Mathf.Clamp(_session.State.Galaxy.Sectors.Count(x => x != null && x.IsUnlocked), 1, 10);
-        var home = _config.GetStarSystemConfigById(system.SystemId);
-        foreach (var rule in settings.Population.AllySpawnRules)
+        foreach (var rule in rules)
         {
             if (rule == null || rule.GetSpawnIntervalSeconds(galaxyLevel) <= 0) continue;
             string source = StationMilitaryRules.RuleId(system.SystemId, home.Station.Id, rule.Id);

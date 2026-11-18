@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f6d0cf26d58490cb27aa5c62e550f0, type: 3}
+  m_Name: station_population_military_base_01
+  m_EditorClassIdentifier: Data::PopulationConfig
+  id: station_population_military_base_01
+  displayName: Популяция военной базы
+  description: Правила появления союзников по уровням станции.
+  icon: {fileID: 0}
+  invasionSpawnRuleSet: {fileID: 0}
+  StationLevels:
+  - Level: 1
+    AllySpawnRules:
+    - {fileID: 11400000, guid: 5e2f06df37e0573889f1a7404d9fcb80, type: 2}
+  - Level: 2
+    AllySpawnRules:
+    - {fileID: 11400000, guid: 53c944bd33f35f4992f366d90d71c267, type: 2}
+  - Level: 3
+    AllySpawnRules:
+    - {fileID: 11400000, guid: adb3776768855684b5c590aa4a768ba5, type: 2}
+  - Level: 4
+    AllySpawnRules:
+    - {fileID: 11400000, guid: 8412ccd794df58c4a9f8d41c0409737f, type: 2}
+  - Level: 5
+    AllySpawnRules:
+    - {fileID: 11400000, guid: 73aa9bfb111d56a5a58365c949efb3d7, type: 2}
+  - Level: 6
+    AllySpawnRules:
+    - {fileID: 11400000, guid: b8b80d0116ca5fca887bcf4c774c4794, type: 2}
+  - Level: 7
+    AllySpawnRules:
+    - {fileID: 11400000, guid: d6a5ced97cb458009aff1de8b148a249, type: 2}
+  - Level: 8
+    AllySpawnRules:
+    - {fileID: 11400000, guid: f7cdc6eae5605540bd48e37ea8352546, type: 2}
+  - Level: 9
+    AllySpawnRules:
+    - {fileID: 11400000, guid: 169ed7179500563683652e337867b00e, type: 2}
+  - Level: 10
+    AllySpawnRules:
+    - {fileID: 11400000, guid: 42349282b336526a92725227fe72e8ae, type: 2}

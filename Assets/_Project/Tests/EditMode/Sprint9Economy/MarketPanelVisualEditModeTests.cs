@@ -311,17 +311,18 @@ public sealed class MarketPanelVisualEditModeTests
         Assert.That(modal.gameObject.activeSelf, Is.False);
     }
 
-    [Test] public void NewHubIllustrationIsBound_AndOtherPlanetTypesUseTheirBaseArtwork()
+    [Test] public void MarketIllustrationsComeFromPlanetTypes()
     {
-        var catalog = AssetDatabase.LoadAssetAtPath<MarketVisualCatalog2A>("Assets/_Project/Content/Configs/MarketProfiles/marketVisualCatalog_01.asset");
-        Assert.That(catalog, Is.Not.Null); Assert.That(catalog.BasePlanetIllustrations, Is.Not.Null);
+        var catalog = AssetDatabase.LoadAssetAtPath<MarketVisualCatalog2A>("Assets/_Project/Content/Configs/Market/MarketProfiles/marketVisualCatalog_01.asset");
+        Assert.That(catalog, Is.Not.Null);
         Assert.That(catalog.EquipmentIcon, Is.Not.Null); Assert.That(catalog.MissileIcon, Is.Not.Null);
         var hub = AssetDatabase.LoadAssetAtPath<PlanetConfig>("Assets/_Project/Content/Configs/Galaxy/Planets/planet_solaria_hub_01.asset");
         var mining = AssetDatabase.LoadAssetAtPath<PlanetConfig>("Assets/_Project/Content/Configs/Galaxy/Planets/planet_solaria_mining_01.asset");
         Sprite hero = catalog.Get(hub, null);
-        Assert.That(hero, Is.Not.Null); Assert.That(hero, Is.Not.SameAs(catalog.BasePlanetIllustrations.Get(PlanetType.Hub, null)));
+        Assert.That(hero, Is.Not.Null); Assert.That(hero, Is.SameAs(hub.PlanetTypeConfig.MarketIllustration));
         Assert.That(hero.rect.width / hero.rect.height, Is.EqualTo(9f / 4f).Within(.02f));
-        Assert.That(catalog.Get(mining, null), Is.SameAs(catalog.BasePlanetIllustrations.Get(PlanetType.Mining, null)));
+        Assert.That(mining.PlanetTypeConfig.MarketIllustration, Is.Not.Null);
+        Assert.That(catalog.Get(mining, null), Is.SameAs(mining.PlanetTypeConfig.MarketIllustration));
     }
     [Test] public void LayoutKeepsWideMarketAndNarrowPersonalColumn_BelowIllustration()
     {

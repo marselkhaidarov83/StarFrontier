@@ -48,7 +48,7 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private List<AllyConfig> allies;
     [SerializeField] private List<AllySpawnRuleConfig> allySpawnRuleConfigs;
     [SerializeField] private List<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules;
-    [SerializeField] private List<SystemPopulationRule> systemPopulationRules;
+    [SerializeField] private List<PopulationConfig> systemPopulationRules;
     [SerializeField] private List<PirateConfig> pirates;
     [SerializeField] private List<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules;
     [SerializeField] private List<ModuleConfig> modules;

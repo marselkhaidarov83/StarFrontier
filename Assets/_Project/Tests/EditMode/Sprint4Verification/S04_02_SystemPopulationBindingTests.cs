@@ -40,12 +40,12 @@ public sealed class S04_02_SystemPopulationBindingTests
             "Missing StarSystemConfig: " + SolariaSystemId);
 
         Assert.NotNull(
-            system.SystemPopulationRule,
-            SolariaSystemId + " must have SystemPopulationRule assigned.");
+            system.Population,
+            SolariaSystemId + " must have PopulationConfig assigned.");
 
         Assert.AreEqual(
             ExpectedSolariaPopulationRuleId,
-            system.SystemPopulationRule.Id,
+            system.Population.Id,
             SolariaSystemId + " must reference " +
             ExpectedSolariaPopulationRuleId);
     }
@@ -62,14 +62,14 @@ public sealed class S04_02_SystemPopulationBindingTests
             "Missing StarSystemConfig: " + SolariaSystemId);
 
         Assert.NotNull(
-            system.SystemPopulationRule,
-            SolariaSystemId + " must have SystemPopulationRule assigned.");
+            system.Population,
+            SolariaSystemId + " must have PopulationConfig assigned.");
 
         Assert.IsTrue(
             HasAllyRule(
-                system.SystemPopulationRule,
+                system.Population,
                 ExpectedSolariaAllySpawnRuleId),
-            system.SystemPopulationRule.Id + " must reference " +
+            system.Population.Id + " must reference " +
             ExpectedSolariaAllySpawnRuleId + ".");
     }
 
@@ -85,20 +85,20 @@ public sealed class S04_02_SystemPopulationBindingTests
             "Missing StarSystemConfig: " + VegaReachSystemId);
 
         Assert.NotNull(
-            system.SystemPopulationRule,
-            VegaReachSystemId + " must have SystemPopulationRule assigned.");
+            system.Population,
+            VegaReachSystemId + " must have PopulationConfig assigned.");
 
         Assert.AreEqual(
             ExpectedSciencePopulationRuleId,
-            system.SystemPopulationRule.Id,
+            system.Population.Id,
             VegaReachSystemId + " must reference " +
             ExpectedSciencePopulationRuleId);
 
         Assert.IsTrue(
             HasAllyRule(
-                system.SystemPopulationRule,
+                system.Population,
                 ExpectedScienceAllySpawnRuleId),
-            system.SystemPopulationRule.Id + " must reference " +
+            system.Population.Id + " must reference " +
             ExpectedScienceAllySpawnRuleId + ".");
     }
 
@@ -117,7 +117,7 @@ public sealed class S04_02_SystemPopulationBindingTests
             Assert.NotNull(
                 system,
                 "No StarSystemConfig references EnemyGroupSpawnRuleConfig " +
-                "through SystemPopulationRule: " + ruleId);
+                "through PopulationConfig: " + ruleId);
         }
     }
 
@@ -142,7 +142,7 @@ public sealed class S04_02_SystemPopulationBindingTests
                 continue;
 
             if (HasEnemyRule(
-                    system.SystemPopulationRule,
+                    system.Population,
                     enemyGroupRuleId))
             {
                 return system;
@@ -153,7 +153,7 @@ public sealed class S04_02_SystemPopulationBindingTests
     }
 
     private static bool HasAllyRule(
-        SystemPopulationRule populationRule,
+        PopulationConfig populationRule,
         string allyRuleId)
     {
         if (populationRule == null)
@@ -178,7 +178,7 @@ public sealed class S04_02_SystemPopulationBindingTests
     }
 
     private static bool HasEnemyRule(
-        SystemPopulationRule populationRule,
+        PopulationConfig populationRule,
         string enemyGroupRuleId)
     {
         if (populationRule == null)

@@ -71,7 +71,7 @@ public class StationConfig : BaseConfig
     public bool HasMilitaryContracts => stationTypeConfig != null && stationTypeConfig.HasMilitaryContracts;
 
     public MarketProfileConfig MarketProfile => stationTypeConfig != null ? stationTypeConfig.DefaultMarketProfile : null;
-    public PlanetMissionConfig MissionPool => stationTypeConfig != null ? stationTypeConfig.DefaultMissionPool : null;
+    public MissionPoolConfig MissionPool => stationTypeConfig != null ? stationTypeConfig.DefaultMissionPool : null;
 
     public Sprite MissionIllustration => stationTypeConfig != null ? stationTypeConfig.MissionIllustration : null;
     public Sprite MarketIllustration => stationTypeConfig != null ? stationTypeConfig.MarketIllustration : null;

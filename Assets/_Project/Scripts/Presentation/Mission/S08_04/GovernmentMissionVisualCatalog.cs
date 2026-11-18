@@ -5,53 +5,38 @@ using UnityEngine;
 public sealed class GovernmentMissionVisualSet
 {
     public PlanetType planetType;
-    public Sprite neutral;
     public Sprite delivery;
     public Sprite recon;
     public Sprite defense;
     public Sprite liberation;
     public Sprite routeUnlock;
     public Sprite routeImprove;
-    public bool useNeutralAsFixedBackground;
-    public Sprite deliveryOverlay;
-    public Sprite reconOverlay;
-    public Sprite defenseOverlay;
-    public Sprite liberationOverlay;
-    public Sprite routeUnlockOverlay;
-    public Sprite routeImproveOverlay;
+    [Tooltip("Показывать иллюстрацию миссии поверх основного фона типа планеты.")]
+    public bool useMissionOverlay;
 
-    public Sprite ForMission(MissionInstanceData mission, Sprite baseIllustration = null)
+    public Sprite ForMission(MissionInstanceData mission, Sprite baseIllustration)
     {
-        Sprite background = baseIllustration != null ? baseIllustration : neutral;
-        if (useNeutralAsFixedBackground && background != null) return background;
-        if (mission == null) return background;
-        switch (mission.MissionType)
-        {
-            case MissionType.Delivery: return delivery != null ? delivery : background;
-            case MissionType.Recon: return recon != null ? recon : background;
-            case MissionType.Defense: return defense != null ? defense : background;
-            case MissionType.Liberation: return liberation != null ? liberation : background;
-            case MissionType.RouteSearch:
-                return mission.Objective != null && mission.Objective.RouteIsUpgrade
-                    ? (routeImprove != null ? routeImprove : background)
-                    : (routeUnlock != null ? routeUnlock : background);
-            default: return background;
-        }
+        if (useMissionOverlay) return baseIllustration;
+        Sprite illustration = GetMissionSprite(mission);
+        return illustration != null ? illustration : baseIllustration;
     }
 
-    public Sprite OverlayForMission(MissionInstanceData mission)
+    public Sprite OverlayForMission(MissionInstanceData mission) =>
+        useMissionOverlay ? GetMissionSprite(mission) : null;
+
+    private Sprite GetMissionSprite(MissionInstanceData mission)
     {
-        if (!useNeutralAsFixedBackground || mission == null) return null;
+        if (mission == null) return null;
         switch (mission.MissionType)
         {
-            case MissionType.Delivery: return deliveryOverlay;
-            case MissionType.Recon: return reconOverlay;
-            case MissionType.Defense: return defenseOverlay;
-            case MissionType.Liberation: return liberationOverlay;
+            case MissionType.Delivery: return delivery;
+            case MissionType.Recon: return recon;
+            case MissionType.Defense: return defense;
+            case MissionType.Liberation: return liberation;
             case MissionType.RouteSearch:
                 return mission.Objective != null && mission.Objective.RouteIsUpgrade
-                    ? routeImproveOverlay
-                    : routeUnlockOverlay;
+                    ? routeImprove
+                    : routeUnlock;
             default: return null;
         }
     }

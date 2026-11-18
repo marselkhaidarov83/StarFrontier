@@ -59,10 +59,10 @@ MonoBehaviour:
     Payment: {fileID: 11400000, guid: 5cd592b7fb8c8d300698097cfc31ea48, type: 2}
   - TargetLevel: 10
     Payment: {fileID: 11400000, guid: 20bb6ed7a0e5d97fa269ca2da0dd4bfb, type: 2}
+  population: {fileID: 11400000, guid: 25e32ef21d184ba99324126987f387e5, type: 2}
   Levels:
   - Level: 1
     MaxHealth: 400
-    Population: {fileID: 11400000, guid: 25e32ef21d184ba99324126987f387e5, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 1
@@ -70,7 +70,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 1
   - Level: 2
     MaxHealth: 450
-    Population: {fileID: 11400000, guid: d641201f6c3c4e8ba29e481713fc05d7, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 2
@@ -78,7 +77,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 2
   - Level: 3
     MaxHealth: 500
-    Population: {fileID: 11400000, guid: 6758e2330870436c9287afa78d616c24, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 3
@@ -86,7 +84,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 3
   - Level: 4
     MaxHealth: 550
-    Population: {fileID: 11400000, guid: c45c094aea4247089afceb2eab07035c, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 4
@@ -94,7 +91,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 4
   - Level: 5
     MaxHealth: 600
-    Population: {fileID: 11400000, guid: c0fa83b2ed094f7993c597150a808984, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 5
@@ -102,7 +98,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 5
   - Level: 6
     MaxHealth: 650
-    Population: {fileID: 11400000, guid: 85bff968839f4cb9a88010317dc989a3, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 6
@@ -110,7 +105,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 6
   - Level: 7
     MaxHealth: 700
-    Population: {fileID: 11400000, guid: 7eab1335fdf2407599d747825b852b4f, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 7
@@ -118,7 +112,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 7
   - Level: 8
     MaxHealth: 750
-    Population: {fileID: 11400000, guid: 8072a80ff56d45ffaa8c7e6322d46ef8, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 8
@@ -126,7 +119,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 8
   - Level: 9
     MaxHealth: 800
-    Population: {fileID: 11400000, guid: ff9d04f89e5d45f4a2bc1409a5c3cb52, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 9
@@ -134,7 +126,6 @@ MonoBehaviour:
     RequiredGalaxyLevel: 9
   - Level: 10
     MaxHealth: 850
-    Population: {fileID: 11400000, guid: b896aa525c404cce8bbba348fc3fc44d, type: 2}
     RangerAttackProbability: 0
     ScienceRate: 0
     HealthPerTick: 10

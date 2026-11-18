@@ -11,7 +11,7 @@
 | Файл | Назначение / точка |
 |---|---|
 | `Assets/_Project/Scripts/Data/Configs/StationConfig.cs` | `initialLevel`, `operationInteractionDistance` (исходно 300), `constructionPaymentOptions`, `upgradeSettings`, `recoveryPaymentOptions`; `TryCreateOperation()` создаёт независимый снимок выбранного варианта. |
-| `Assets/_Project/Scripts/Data/Configs/StationOperationSettings.cs` | Сериализуемые варианты ресурсов/времени, настройки переходов уровней, создание снимка оплаты. Для астралитов указывается конкретный ItemConfig. |
+| `Assets/_Project/Scripts/Data/Runtime/Galaxy/StationOperationSettings.cs` | Сериализуемые варианты ресурсов/времени, настройки переходов уровней, создание снимка оплаты. Для астралитов указывается конкретный ItemConfig. |
 | `Assets/_Project/Scripts/Data/Runtime/Galaxy/StationRuntimeState.cs` | Уровень, сохранённый тип, ConfigId, разрушение, Revision; отдельные `Development` и `Recovery` с ID, стоимостью, длительностью, прогрессом и причиной паузы. |
 | `Assets/_Project/Scripts/Data/Runtime/Galaxy/StationLifecycleRules.cs` | Чистые переходы `Create`, `BeginPaidOperation`, `Destroy`, `ApplySystemStatus`, `Advance`, нормализация и проверка целостности. |
 | `Assets/_Project/Scripts/Data/Runtime/Galaxy/StarSystemRuntimeState.cs` | Единственный вложенный `Station`, маркер `StationStateVersion`; переходы войны вызывают правила станции, в том числе прямой путь `MarkCaptured()`. Восстановление защищает от инфраструктурного урона. |

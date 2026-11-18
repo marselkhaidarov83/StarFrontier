@@ -1,6 +1,6 @@
 ﻿<Solution>
-  <Project Path="Data.csproj" />
   <Project Path="Core.csproj" />
+  <Project Path="Data.csproj" />
   <Project Path="Presentation.csproj" />
   <Project Path="Editor.csproj" />
   <Project Path="Sprint3Verification.csproj" />

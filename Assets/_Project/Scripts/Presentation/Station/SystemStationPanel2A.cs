@@ -336,7 +336,8 @@ public sealed class SystemStationPanel2A : MonoBehaviour
             switch (s.StationType)
             {
                 case StationType.Military:
-                    int count = (settings.Population?.AllySpawnRules ?? Array.Empty<AllySpawnRuleConfig>()).Where(x => x != null)
+                    int count = (card.Config.StationTypeConfig.Population?.GetAllySpawnRules(s.Level)
+                        ?? Array.Empty<AllySpawnRuleConfig>()).Where(x => x != null)
                         .Sum(rule => rule.GetAlliesForGalaxyLevel(card.GalaxyLevel).Where(x => x?.AllyConfig?.Role == AllyRole2A.Military).Sum(x => x.MaxCount));
                     text.Append("\nВоенные базы: до ").Append(count); break;
                 case StationType.RangerBase:

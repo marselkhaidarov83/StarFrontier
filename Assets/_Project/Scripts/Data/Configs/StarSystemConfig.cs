@@ -22,7 +22,7 @@ public class StarSystemConfig : BaseConfig
 
     [Header("Npc")]
     [Tooltip("Правила союзной популяции. Группы вторжения назначаются отдельным набором в профиле.")]
-    [SerializeField] private SystemPopulationRule systemPopulationRule;
+    [SerializeField] private PopulationConfig systemPopulationRule;
 
     [Header("Спавн врагов")]
     [FormerlySerializedAs("npcSpawnPoints")]
@@ -45,7 +45,7 @@ public class StarSystemConfig : BaseConfig
     public StarSystemLink[] LinkedSystems => linkedSystems;
 
     public Vector3 MapPosition => mapPosition;
-    public SystemPopulationRule SystemPopulationRule => systemPopulationRule;
+    public PopulationConfig Population => systemPopulationRule;
     public SystemEnemySpawnPointConfig EnemySpawnPoints => enemySpawnPoints;
     public bool IsStartSystem => isStartSystem;
     public System.Collections.Generic.List<RouteConfig> Routes => routes;

@@ -26,7 +26,7 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
         if (planetConfig == null)
             return null;
 
-        if (planetConfig.PlanetMissionConfig == null)
+        if (planetConfig.MissionPool == null)
             return null;
 
         PlanetOfferedMissionData existingOffer = _offerStateService.GetOffer(planetConfig.Id);
@@ -71,8 +71,8 @@ public class PlanetGovernmentMissionService : IPlanetGovernmentMissionService
             return RejectRegeneration("PlayerNotLanded", system, planet);
         if (system == null || planet == null || system.Id != state.Player.CurrentSystemId || planet.Id != state.Player.CurrentPlanetId)
             return RejectRegeneration("PlanetOrSystemMismatch", system, planet);
-        if (planet.PlanetMissionConfig == null)
-            return RejectRegeneration("PlanetMissionConfigMissing", system, planet);
+        if (planet.MissionPool == null)
+            return RejectRegeneration("MissionPoolConfigMissing", system, planet);
         if (state.Galaxy?.HasActiveInvasionForTarget(system.Id) == true)
         {
             _missionService.RemoveUnacceptedOffersInSystem(system.Id);

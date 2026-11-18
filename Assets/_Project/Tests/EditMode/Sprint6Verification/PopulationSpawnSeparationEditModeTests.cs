@@ -6,16 +6,35 @@ using UnityEditor;
 public sealed class PopulationSpawnSeparationEditModeTests
 {
     [Test]
+    public void StationPopulationProfiles_UseSharedConfigWithTenLevelsAndNoInvasion()
+    {
+        const string root = "Assets/_Project/Content/Configs/Galaxy/Stations/StationType";
+        var types = AssetDatabase.FindAssets("t:StationTypeConfig", new[] { root })
+            .Select(guid => AssetDatabase.LoadAssetAtPath<StationTypeConfig>(AssetDatabase.GUIDToAssetPath(guid)))
+            .ToArray();
+        Assert.That(types.Length, Is.EqualTo(5));
+        Assert.That(types.Select(type => type.Population).Distinct().Count(), Is.EqualTo(types.Length));
+        foreach (var type in types)
+        {
+            var population = type.Population;
+            Assert.That(population, Is.Not.Null, type.Id);
+            Assert.That(population.StationLevels.Select(level => level.Level), Is.EqualTo(Enumerable.Range(1, 10)));
+            Assert.That(new SerializedObject(population).FindProperty("invasionSpawnRuleSet").objectReferenceValue,
+                Is.Null, type.Id);
+        }
+    }
+
+    [Test]
     public void AlliedPopulationProfiles_UseSeparateInvasionAsset_WithoutLegacySpawnArrays()
     {
-        foreach (string guid in AssetDatabase.FindAssets("t:SystemPopulationRule"))
+        foreach (string guid in AssetDatabase.FindAssets("t:PopulationConfig"))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             if (!path.Contains("/Population/SystemPopulationRules/"))
                 continue;
-            var profile = AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(path);
+            var profile = AssetDatabase.LoadAssetAtPath<PopulationConfig>(path);
             Assert.That(profile.AllySpawnRules.Any(rule => rule != null), Is.True, path);
-            var legacy = (SystemPopulationEnemyGroupRuleEntry[])typeof(SystemPopulationRule)
+            var legacy = (SystemPopulationEnemyGroupRuleEntry[])typeof(PopulationConfig)
                 .GetField("enemyGroupSpawnRuleEntries", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(profile);
             Assert.That(legacy, Is.Empty, path);

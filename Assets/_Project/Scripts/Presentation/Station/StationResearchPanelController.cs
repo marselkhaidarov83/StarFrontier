@@ -103,7 +103,11 @@ public sealed class StationResearchPanelController : MonoBehaviour
             var card = _cards.GetCard(_systemId);
             if (card == null) { gameObject.SetActive(false); return; }
             _view.SetStation(card, card.Config?.StationTypeConfig?.ResearchIllustration);
-            _branches = (_research.Tree?.Branches ?? Array.Empty<ResearchBranchConfig>()).Where(b => b != null && (card.Station.StationType == StationType.Science || b.StationType == card.Station.StationType)).ToArray();
+            var stationType = card.Station.StationType;
+            _branches = (_research.Tree?.Branches ?? Array.Empty<ResearchBranchConfig>())
+                .Where(branch => branch != null &&
+                    (stationType == StationType.Science || (!branch.ScienceOnly && branch.StationType == stationType)))
+                .ToArray();
             _selected = Mathf.Clamp(_selected, 0, Mathf.Max(0, _branches.Length - 1));
             _view.SetGroups(_branches, _selected, SelectBranch, card.Station.StationType == StationType.Science);
             _snapshot = _research.GetSnapshot();

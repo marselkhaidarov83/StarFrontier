@@ -19,7 +19,7 @@ MonoBehaviour:
   planetType: 4
   isInhabited: 1
   marketProfile: {fileID: 11400000, guid: df2c09367dfcd4248ba5304d3f24c0e6, type: 2}
-  planetMissionConfig: {fileID: 11400000, guid: 53aa874218404690b38be47582b6836e, type: 2}
+  planetMissionConfig: {fileID: 11400000, guid: 1e8107180903471987f224b484ddd871, type: 2}
   hasMarket: 0
   hasMissions: 0
   hasRepair: 0

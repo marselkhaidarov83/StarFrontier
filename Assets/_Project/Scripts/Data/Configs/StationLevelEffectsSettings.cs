@@ -8,8 +8,6 @@ public sealed class StationLevelEffectsSettings
     [Tooltip("Максимальное здоровье в единицах. 0 — 400 + 50 за каждый уровень после первого.")]
     [Min(0)] public int MaxHealth;
     public int EffectiveMaxHealth => MaxHealth > 0 ? MaxHealth : StationInfrastructureRules.DefaultMaxHealth(Level);
-    [Tooltip("Дополнительное население военной базы. В правилах допустимы только Military.")]
-    public SystemPopulationRule Population;
     [Range(0, 1)] public float RangerAttackProbability;
     [Min(0)] public float ScienceRate;
     [Tooltip("Здоровье за один завершённый игровой тик при отсутствии врагов. 0 — саморемонт отключён.")]

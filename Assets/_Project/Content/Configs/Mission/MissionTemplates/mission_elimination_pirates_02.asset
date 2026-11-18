@@ -9,31 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de66bbdf96d8f43b199e4b6fbb01820f, type: 3}
+  m_Script: {fileID: 11500000, guid: 6c83218dfa6c4bc88222eea55a4ad396, type: 3}
   m_Name: mission_elimination_pirates_02
-  m_EditorClassIdentifier: Data::MissionTemplateConfig
+  m_EditorClassIdentifier: Data::PirateEliminationMissionTemplateConfig
   id: mission_elimination_pirates_02
   displayName: Elimination
   description: Eliminate a hostile raider patrol threatening local trade routes
   icon: {fileID: 21300000, guid: 3353024e376634b818ee7e034d4dc27d, type: 3}
-  missionType: 1
   titlePattern: 
   descriptionPattern: 
-  difficultyBand: 0
   creditRewardMin: 0
   creditRewardMax: 0
   xpRewardMin: 0
   xpRewardMax: 0
   rewardCredits: 0
-  rewardItems: []
-  minDangerLevel: 1
-  maxDangerLevel: 5
-  requiredMissionTags: 
-  minCargoCapacity: 0
   sourcePlanet: {fileID: 11400000, guid: b04f0b0971a5b4e45bcf426b63d0c39d, type: 2}
-  targetPlanet: {fileID: 0}
-  targetSystem: {fileID: 11400000, guid: 799c3952b8c554e49b7895d5687c63d5, type: 2}
-  targetEnemy: {fileID: 11400000, guid: e23d093b6b66c4b99a8d53b21d83c631, type: 2}
-  targetEnemyCountMin: 0
-  targetEnemyCountMax: 0
-  pirateGroupSpawnRuleConfig: {fileID: 11400000, guid: 3e6655de2271b4c85badade0ca60e298, type: 2}

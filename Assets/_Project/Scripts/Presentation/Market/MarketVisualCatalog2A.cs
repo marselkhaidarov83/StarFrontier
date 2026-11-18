@@ -5,7 +5,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "StarFrontier/Configs/Market/Visual Catalog")]
 public sealed class MarketVisualCatalog2A : ScriptableObject
 {
-    public GovernmentMissionVisualCatalog BasePlanetIllustrations;
     public MarketPlanetVisual2A[] Planets = Array.Empty<MarketPlanetVisual2A>();
     public Sprite EquipmentIcon;
     public Sprite MissileIcon;
@@ -17,6 +16,6 @@ public sealed class MarketVisualCatalog2A : ScriptableObject
         if (illustration != null) return illustration;
         foreach (var entry in Planets)
             if (entry != null && entry.Type == planet.PlanetType && entry.Illustration != null) return entry.Illustration;
-        return BasePlanetIllustrations != null ? BasePlanetIllustrations.Get(planet.PlanetType, null) : null;
+        return planet.PlanetTypeConfig?.MissionIllustration;
     }
 }

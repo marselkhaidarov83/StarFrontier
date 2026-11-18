@@ -7,8 +7,8 @@ public sealed class SystemPopulationGalaxyLevelEditModeTests
     [Test]
     public void SystemPopulationRule_IsValidWhenItHasAnySpawnRule()
     {
-        SystemPopulationRule populationRule =
-            ScriptableObject.CreateInstance<SystemPopulationRule>();
+        PopulationConfig populationRule =
+            ScriptableObject.CreateInstance<PopulationConfig>();
 
         AllySpawnRuleConfig allyRule =
             ScriptableObject.CreateInstance<AllySpawnRuleConfig>();
@@ -36,8 +36,8 @@ public sealed class SystemPopulationGalaxyLevelEditModeTests
     [Test]
     public void SystemPopulationRule_IsInvalidWhenItHasNoSpawnRules()
     {
-        SystemPopulationRule populationRule =
-            ScriptableObject.CreateInstance<SystemPopulationRule>();
+        PopulationConfig populationRule =
+            ScriptableObject.CreateInstance<PopulationConfig>();
 
         Assert.That(
             populationRule.HasAnySpawnRule(),

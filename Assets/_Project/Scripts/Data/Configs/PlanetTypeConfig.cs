@@ -6,10 +6,10 @@ public sealed class PlanetTypeConfig : LocationServicesConfig
     [SerializeField] private PlanetType planetType;
     [SerializeField] private bool isInhabited;
     [SerializeField] private MarketProfileConfig marketProfile;
-    [SerializeField] private PlanetMissionConfig planetMissionConfig;
+    [SerializeField] private MissionPoolConfig planetMissionConfig;
 
     public PlanetType PlanetType => planetType;
     public bool IsInhabited => isInhabited;
     public MarketProfileConfig MarketProfile => marketProfile;
-    public PlanetMissionConfig PlanetMissionConfig => planetMissionConfig;
+    public MissionPoolConfig MissionPool => planetMissionConfig;
 }

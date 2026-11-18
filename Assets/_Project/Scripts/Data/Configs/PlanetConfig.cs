@@ -21,7 +21,7 @@ public class PlanetConfig : BaseConfig
     public bool IsInhabited => planetTypeConfig != null && planetTypeConfig.IsInhabited;
     public PlanetOrbitConfig PlanetOrbit => planetOrbit;
     public MarketProfileConfig MarketProfile => planetTypeConfig != null ? planetTypeConfig.MarketProfile : null;
-    public PlanetMissionConfig PlanetMissionConfig => planetTypeConfig != null ? planetTypeConfig.PlanetMissionConfig : null;
+    public MissionPoolConfig MissionPool => IsInhabited ? planetTypeConfig.MissionPool : null;
     public override Sprite Icon => planetTypeConfig != null ? planetTypeConfig.Icon : base.Icon;
     public float VisualSize => visualSize;
 }

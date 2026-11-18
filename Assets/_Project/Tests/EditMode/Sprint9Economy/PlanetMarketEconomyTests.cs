@@ -867,7 +867,7 @@ public sealed class PlanetMarketEconomyTests
             for (int level = 1; level <= 10; level++) { var settings = profile.GetLevel(level); Assert.That(settings.GalaxyLevel, Is.EqualTo(level));
                 Assert.That(settings.IntervalSeconds, Is.GreaterThan(0)); Assert.That(settings.Items.All(x => x.ItemConfig != null && x.MaximumStock > 0 && x.MaximumPrice >= x.BasePrice), Is.True); }
         }
-        const string tradePath = "Assets/_Project/Content/Configs/Stations2A/Research/research_branch_trade.asset";
+        const string tradePath = "Assets/_Project/Content/Configs/Research/research_branch_trade.asset";
         var trade = AssetDatabase.LoadAssetAtPath<ResearchBranchConfig>(tradePath);
         Assert.That(trade, Is.Not.Null, "Trade research branch must be imported: " + tradePath);
         var loadedIds = (trade.Nodes ?? Array.Empty<ResearchNode>()).Where(x => x != null).Select(x => x.Upgrade).ToArray();
@@ -875,7 +875,7 @@ public sealed class PlanetMarketEconomyTests
             "Trade branch is missing EconomyWarProtection (17). Loaded IDs: " + string.Join(", ", loadedIds));
         Assert.That(loadedIds, Does.Contain(ResearchUpgrade.EquipmentBuyout),
             "Trade branch is missing EquipmentBuyout (18). Loaded IDs: " + string.Join(", ", loadedIds));
-        var tree = AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>("Assets/_Project/Content/Configs/Stations2A/Research/research_tree_stage2a.asset");
+        var tree = AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>("Assets/_Project/Content/Configs/Research/research_tree_galaxy.asset");
         Assert.That(tree, Is.Not.Null, "Production research tree must be imported.");
         Assert.That(tree.Branches, Does.Contain(trade), "Production tree must reference the trade branch asset.");
         Assert.That(ResearchRules.Errors(tree), Is.Empty);

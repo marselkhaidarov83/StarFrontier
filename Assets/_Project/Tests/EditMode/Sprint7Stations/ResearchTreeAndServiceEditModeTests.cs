@@ -250,15 +250,15 @@ public sealed class ResearchTreeAndServiceEditModeTests
         Assert.That(ResearchRules.TryQuote(_tree, state, next.Upgrade, "pay", out _, out string reason, 2), Is.False);
         Assert.That(reason, Is.EqualTo("GalaxyLevelRequired"));
     }
-    [Test] public void ProductionResearchTree_HasFiveBranchesTenLevelsAndValidLevelDependencies()
+    [Test] public void ProductionResearchTree_HasSixBranchesTenNodesTenLevelsAndValidLevelDependencies()
     {
         var tree = UnityEditor.AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>(
-            "Assets/_Project/Content/Configs/Stations2A/Research/research_tree_stage2a.asset");
+            "Assets/_Project/Content/Configs/Research/research_tree_galaxy.asset");
         Assert.That(tree, Is.Not.Null); Assert.That(ResearchRules.Errors(tree), Is.Empty);
-        Assert.That(tree.Branches.Length, Is.EqualTo(5));
+        Assert.That(tree.Branches.Length, Is.EqualTo(6));
         foreach (var branch in tree.Branches)
         {
-            Assert.That(branch.Nodes.Length, Is.GreaterThanOrEqualTo(3));
+            Assert.That(branch.Nodes.Length, Is.EqualTo(10));
             for (int i = 0; i < branch.Nodes.Length; i++)
             {
                 Assert.That(branch.Nodes[i].Levels.Length, Is.EqualTo(10));
@@ -407,13 +407,13 @@ public sealed class ResearchTreeAndServiceEditModeTests
     [Test] public void RangerResearchBranch_IsFifthWithTenLevelsAndLinearDependencies()
     {
         var tree = UnityEditor.AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>(
-            "Assets/_Project/Content/Configs/Stations2A/Research/research_tree_stage2a.asset");
+            "Assets/_Project/Content/Configs/Research/research_tree_galaxy.asset");
         var ranger = tree.Branches[4];
-        Assert.That(ranger.DisplayName, Is.EqualTo("Рейнджерское превосходство"));
-        Assert.That(ranger.Nodes.Select(n => n.Upgrade), Is.EqualTo(new[] {
+        Assert.That(ranger.DisplayName, Is.EqualTo("Подготовка рейнджеров"));
+        Assert.That(ranger.Nodes.Take(3).Select(n => n.Upgrade), Is.EqualTo(new[] {
             ResearchUpgrade.RangerTraining, ResearchUpgrade.RangerPatrols, ResearchUpgrade.RangerMastery }));
-        Assert.That(ResearchRules.VisibleNodes(ranger, 1), Is.Empty);
-        Assert.That(ResearchRules.VisibleNodes(ranger, 2).Count(), Is.EqualTo(1));
+        Assert.That(ResearchRules.VisibleNodes(ranger, 1).Intersect(ranger.Nodes.Take(3)), Is.Empty);
+        Assert.That(ResearchRules.VisibleNodes(ranger, 2).Intersect(ranger.Nodes.Take(3)).Count(), Is.EqualTo(1));
         Assert.That(ResearchRules.Errors(tree), Is.Empty);
     }
 
@@ -431,9 +431,9 @@ public sealed class ResearchTreeAndServiceEditModeTests
     [Test] public void StationDirections_AreExplicitlyBoundAcrossAllFiveAssets()
     {
         var tree = UnityEditor.AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>(
-            "Assets/_Project/Content/Configs/Stations2A/Research/research_tree_stage2a.asset");
+            "Assets/_Project/Content/Configs/Research/research_tree_galaxy.asset");
         Assert.That(tree.Branches.Select(b => b.StationType).Distinct().Count(), Is.EqualTo(5));
-        Assert.That(ResearchRules.BranchForStation(tree, StationType.RangerBase).Id, Is.EqualTo("research_branch_05"));
+        Assert.That(ResearchRules.BranchForStation(tree, StationType.RangerBase).Id, Is.EqualTo("research_branch_ranger_base"));
         foreach (var branch in tree.Branches)
         {
             Assert.That(ResearchRules.CanAccessUpgrade(tree, branch.StationType, branch.Nodes[0].Upgrade), Is.True);

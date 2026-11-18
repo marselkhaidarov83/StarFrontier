@@ -30,11 +30,12 @@ public sealed class StationMilitaryPopulationMetricEditModeTests
         var first = new AllySpawnLevelEntryConfig(); Set(first, "allies", new[] { entry });
         var second = new AllySpawnLevelEntryConfig(); Set(second, "galaxyLevel", 2); Set(second, "allies", new[] { larger });
         Set(rule, "levelEntries", new[] { first, second }); Set(duplicate, "levelEntries", new[] { first, second });
-        var population = Asset<SystemPopulationRule>(); Set(population, "allySpawnRules", new[] { rule, duplicate });
-        var settings = new StationLevelEffectsSettings { Population = population };
-        Assert.That(StationMilitaryRules.Capacity(settings, 1), Is.EqualTo(3));
-        Assert.That(StationMilitaryRules.Capacity(settings, 2), Is.EqualTo(5));
-        Assert.That(StationMilitaryRules.Capacity(settings, 3), Is.Zero);
+        var population = Asset<PopulationConfig>();
+        population.StationLevels = new[] { new StationPopulationLevel { Level = 2, AllySpawnRules = new[] { rule, duplicate } } };
+        Assert.That(StationMilitaryRules.Capacity(population, 2, 1), Is.EqualTo(3));
+        Assert.That(StationMilitaryRules.Capacity(population, 2, 2), Is.EqualTo(5));
+        Assert.That(StationMilitaryRules.Capacity(population, 2, 3), Is.Zero);
+        Assert.That(StationMilitaryRules.Capacity(population, 1, 2), Is.Zero);
     }
     [TestCase(0)] [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)]
     public void MilitaryCard_ShowsOwnPopulationInEveryStationState(int state)
@@ -80,6 +81,6 @@ public sealed class StationMilitaryPopulationMetricEditModeTests
             "Assets/_Project/Content/Configs/Galaxy/Stations/StationType/station_type_military_01.asset");
         Assert.That(config, Is.Not.Null);
         Assert.That(StationMilitaryRules.MaximumCapacity(config, galaxyLevel), Is.EqualTo(expected));
-        if (galaxyLevel == 2) Assert.That(StationMilitaryRules.Capacity(config.GetLevel(1), galaxyLevel), Is.EqualTo(1));
+        if (galaxyLevel == 2) Assert.That(StationMilitaryRules.Capacity(config.Population, 1, galaxyLevel), Is.EqualTo(1));
     }
 }

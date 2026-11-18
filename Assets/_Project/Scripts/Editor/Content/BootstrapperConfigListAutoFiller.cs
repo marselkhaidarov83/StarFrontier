@@ -47,8 +47,9 @@ public static class BootstrapperConfigListAutoFiller
         List<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules =
             LoadAssetsSortedById<EnemyGroupSpawnRuleConfig>();
 
-        List<SystemPopulationRule> systemPopulationRules =
-            LoadAssetsSortedById<SystemPopulationRule>();
+        List<PopulationConfig> systemPopulationRules =
+            LoadAssetsSortedById<PopulationConfig>();
+        systemPopulationRules.RemoveAll(profile => profile.StationLevels?.Length > 0);
 
         int updatedCount = 0;
 
@@ -191,7 +192,7 @@ public static class BootstrapperConfigListAutoFiller
         IReadOnlyList<AllyConfig> allies,
         IReadOnlyList<AllySpawnRuleConfig> allySpawnRuleConfigs,
         IReadOnlyList<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules,
-        IReadOnlyList<SystemPopulationRule> systemPopulationRules)
+        IReadOnlyList<PopulationConfig> systemPopulationRules)
     {
         Undo.RecordObject(
             bootstrapper,

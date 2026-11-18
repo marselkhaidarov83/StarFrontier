@@ -79,7 +79,7 @@ public static class ResearchRules
     public static ResearchNode Find(ResearchTreeConfig tree, ResearchUpgrade upgrade) =>
         tree?.Branches?.Where(x => x != null).SelectMany(x => x.Nodes ?? Array.Empty<ResearchNode>()).FirstOrDefault(x => x != null && x.Upgrade == upgrade);
     public static ResearchBranchConfig BranchForStation(ResearchTreeConfig tree, StationType stationType) =>
-        tree?.Branches?.FirstOrDefault(b => b != null && b.StationType == stationType);
+        tree?.Branches?.FirstOrDefault(b => b != null && !b.ScienceOnly && b.StationType == stationType);
     public static bool CanAccessUpgrade(ResearchTreeConfig tree, StationType stationType, ResearchUpgrade upgrade) =>
         stationType == StationType.Science || (BranchForStation(tree, stationType)?.Nodes ?? Array.Empty<ResearchNode>())
             .Any(n => n != null && n.Upgrade == upgrade);

@@ -14,7 +14,7 @@ public static class SystemPopulationRuleAssetGenerator
     private const string EnemyGroupSpawnRuleRoot =
         "Assets/_Project/Content/Configs/Population/EnemyGroupSpawnRules";
 
-    [MenuItem("STAR FRONTIER/Content/08. System Population Rules/Create generated SystemPopulationRule assets")]
+    [MenuItem("STAR FRONTIER/Content/08. System Population Rules/Create generated PopulationConfig assets")]
     public static void CreateGeneratedSystemPopulationRules()
     {
         EnsureFolder(OutputRoot);
@@ -42,13 +42,13 @@ public static class SystemPopulationRuleAssetGenerator
                 string path =
                     $"{OutputRoot}/{id}.asset";
 
-                SystemPopulationRule asset =
+                PopulationConfig asset =
                     FindExistingPopulationRule(id, path);
 
                 if (asset == null)
                 {
                     asset =
-                        ScriptableObject.CreateInstance<SystemPopulationRule>();
+                        ScriptableObject.CreateInstance<PopulationConfig>();
 
                     AssetDatabase.CreateAsset(asset, path);
                     created++;
@@ -69,7 +69,7 @@ public static class SystemPopulationRuleAssetGenerator
                         if (!string.IsNullOrWhiteSpace(moveError))
                         {
                             throw new InvalidOperationException(
-                                $"Не удалось переместить существующий SystemPopulationRule {id}: {moveError}");
+                                $"Не удалось переместить существующий PopulationConfig {id}: {moveError}");
                         }
                     }
 
@@ -96,19 +96,19 @@ public static class SystemPopulationRuleAssetGenerator
         AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog(
-            "SystemPopulationRule generator",
+            "PopulationConfig generator",
             $"Done. Created: {created}. Updated: {updated}. Warnings: {warnings}. Errors: {errors}.",
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/08. System Population Rules/Validate generated SystemPopulationRule assets")]
+    [MenuItem("STAR FRONTIER/Content/08. System Population Rules/Validate generated PopulationConfig assets")]
     public static void ValidateGeneratedSystemPopulationRules()
     {
         int checkedAssets = 0;
         int errors = 0;
 
         string[] guids =
-            AssetDatabase.FindAssets("t:SystemPopulationRule", new[] { OutputRoot });
+            AssetDatabase.FindAssets("t:PopulationConfig", new[] { OutputRoot });
 
         for (int i = 0; i < guids.Length; i++)
         {
@@ -118,8 +118,8 @@ public static class SystemPopulationRuleAssetGenerator
             if (!IsGeneratedPopulationRulePath(path))
                 continue;
 
-            SystemPopulationRule rule =
-                AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(path);
+            PopulationConfig rule =
+                AssetDatabase.LoadAssetAtPath<PopulationConfig>(path);
 
             if (rule == null)
                 continue;
@@ -131,17 +131,17 @@ public static class SystemPopulationRuleAssetGenerator
         }
 
         EditorUtility.DisplayDialog(
-            "SystemPopulationRule validation",
+            "PopulationConfig validation",
             $"Checked: {checkedAssets}. Errors: {errors}.",
             "OK");
     }
 
-    [MenuItem("STAR FRONTIER/Content/08. System Population Rules/Delete generated SystemPopulationRule assets")]
+    [MenuItem("STAR FRONTIER/Content/08. System Population Rules/Delete generated PopulationConfig assets")]
     public static void DeleteGeneratedSystemPopulationRules()
     {
         if (!EditorUtility.DisplayDialog(
-                "Delete generated SystemPopulationRule assets",
-                $"Delete generated SystemPopulationRule assets inside:\n{OutputRoot}",
+                "Delete generated PopulationConfig assets",
+                $"Delete generated PopulationConfig assets inside:\n{OutputRoot}",
                 "Delete",
                 "Cancel"))
         {
@@ -155,13 +155,13 @@ public static class SystemPopulationRuleAssetGenerator
         AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog(
-            "SystemPopulationRule generator",
+            "PopulationConfig generator",
             $"Deleted: {deleted}.",
             "OK");
     }
 
     private static int WritePopulationRule(
-        SystemPopulationRule asset,
+        PopulationConfig asset,
         string id,
         PopulationRuleProfile profile)
     {
@@ -178,7 +178,7 @@ public static class SystemPopulationRuleAssetGenerator
         {
             warnings++;
             AppLog.Warning(DebugLogChannel.EditorGenerators,
-                $"SystemPopulationRule generator: missing AllySpawnRuleConfig '{profile.AllyRuleKey}'.");
+                $"PopulationConfig generator: missing AllySpawnRuleConfig '{profile.AllyRuleKey}'.");
         }
 
         SetPrivateField(
@@ -198,7 +198,7 @@ public static class SystemPopulationRuleAssetGenerator
     }
 
     private static bool ValidateRuleInMemory(
-        SystemPopulationRule rule,
+        PopulationConfig rule,
         string path)
     {
         bool isValid = true;
@@ -208,7 +208,7 @@ public static class SystemPopulationRuleAssetGenerator
             rule.AllySpawnRules[0] == null)
         {
             AppLog.Error(DebugLogChannel.EditorGenerators,
-                $"SystemPopulationRule validation: exactly one ally spawn rule is required at {path}");
+                $"PopulationConfig validation: exactly one ally spawn rule is required at {path}");
 
             isValid = false;
         }
@@ -222,7 +222,7 @@ public static class SystemPopulationRuleAssetGenerator
                 rule.EnemyGroupSpawnRuleEntries.Length > 0)
             {
                 AppLog.Error(DebugLogChannel.EditorGenerators,
-                    $"SystemPopulationRule validation: no_enemies rule must not contain enemy group spawn rules at {path}");
+                    $"PopulationConfig validation: no_enemies rule must not contain enemy group spawn rules at {path}");
 
                 isValid = false;
             }
@@ -234,7 +234,7 @@ public static class SystemPopulationRuleAssetGenerator
             rule.EnemyGroupSpawnRuleEntries.Length != 3)
         {
             AppLog.Error(DebugLogChannel.EditorGenerators,
-                $"SystemPopulationRule validation: regular rule must contain exactly 3 enemy group spawn rule entries at {path}");
+                $"PopulationConfig validation: regular rule must contain exactly 3 enemy group spawn rule entries at {path}");
 
             return false;
         }
@@ -250,7 +250,7 @@ public static class SystemPopulationRuleAssetGenerator
             if (enemyEntry == null || !enemyEntry.IsValid())
             {
                 AppLog.Error(DebugLogChannel.EditorGenerators,
-                    $"SystemPopulationRule validation: missing or invalid enemy group spawn rule entry at {path}");
+                    $"PopulationConfig validation: missing or invalid enemy group spawn rule entry at {path}");
 
                 isValid = false;
                 continue;
@@ -259,7 +259,7 @@ public static class SystemPopulationRuleAssetGenerator
             if (enemyEntry.Weight != 1)
             {
                 AppLog.Error(DebugLogChannel.EditorGenerators,
-                    $"SystemPopulationRule validation: enemy group spawn rule entry weight must be 1 at {path}");
+                    $"PopulationConfig validation: enemy group spawn rule entry weight must be 1 at {path}");
 
                 isValid = false;
             }
@@ -301,7 +301,7 @@ public static class SystemPopulationRuleAssetGenerator
                 continue;
 
             AppLog.Error(DebugLogChannel.EditorGenerators,
-                $"SystemPopulationRule validation: missing required enemy group spawn rule '{requiredId}' at {path}");
+                $"PopulationConfig validation: missing required enemy group spawn rule '{requiredId}' at {path}");
 
             isValid = false;
         }
@@ -309,18 +309,18 @@ public static class SystemPopulationRuleAssetGenerator
         return isValid;
     }
 
-    private static SystemPopulationRule FindExistingPopulationRule(
+    private static PopulationConfig FindExistingPopulationRule(
         string id,
         string path)
     {
-        SystemPopulationRule asset =
-            AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(path);
+        PopulationConfig asset =
+            AssetDatabase.LoadAssetAtPath<PopulationConfig>(path);
 
         if (asset != null)
             return asset;
 
         string[] guids =
-            AssetDatabase.FindAssets("t:SystemPopulationRule", new[] { OutputRoot });
+            AssetDatabase.FindAssets("t:PopulationConfig", new[] { OutputRoot });
 
         for (int i = 0; i < guids.Length; i++)
         {
@@ -330,8 +330,8 @@ public static class SystemPopulationRuleAssetGenerator
             if (string.IsNullOrWhiteSpace(candidatePath))
                 continue;
 
-            SystemPopulationRule candidate =
-                AssetDatabase.LoadAssetAtPath<SystemPopulationRule>(candidatePath);
+            PopulationConfig candidate =
+                AssetDatabase.LoadAssetAtPath<PopulationConfig>(candidatePath);
 
             if (candidate == null)
                 continue;
@@ -553,7 +553,7 @@ public static class SystemPopulationRuleAssetGenerator
         int deleted = 0;
 
         string[] guids =
-            AssetDatabase.FindAssets("t:SystemPopulationRule", new[] { OutputRoot });
+            AssetDatabase.FindAssets("t:PopulationConfig", new[] { OutputRoot });
 
         for (int i = 0; i < guids.Length; i++)
         {

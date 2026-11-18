@@ -16,6 +16,9 @@ public class StationTypeConfig : LocationServicesConfig
     [Header("Эффекты уровней")]
     public StationLevelEffectsSettings[] Levels = System.Array.Empty<StationLevelEffectsSettings>();
 
+    [Tooltip("Популяция по уровням станции.")]
+    [SerializeField] private PopulationConfig population;
+
     [Header("Оплата строительства и улучшений")]
     [Tooltip("Оплата по целевому уровню. Уровень 1 — постройка станции.")]
     [SerializeField] private StationUpgradeSettings[] upgradeSettings = System.Array.Empty<StationUpgradeSettings>();
@@ -24,13 +27,14 @@ public class StationTypeConfig : LocationServicesConfig
     [Tooltip("Параметр defaultMarketProfile. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private MarketProfileConfig defaultMarketProfile;
     [Tooltip("Параметр defaultMissionPool. Используется связанными игровыми системами этого конфига.")]
-    [SerializeField] private PlanetMissionConfig defaultMissionPool;
+    [SerializeField] private MissionPoolConfig defaultMissionPool;
 
     [Header("Default Visuals")]
     [Tooltip("Параметр localOffset. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private Vector2 localOffset = Vector2.zero;
 
     public StationType StationType => stationType;
+    public PopulationConfig Population => population;
     public float OperationInteractionDistance => operationInteractionDistance > 0f && !float.IsInfinity(operationInteractionDistance)
         ? operationInteractionDistance : DefaultOperationInteractionDistance;
     public StationPaymentOptionsConfig GetUpgradePayment(int targetLevel)
@@ -48,7 +52,7 @@ public class StationTypeConfig : LocationServicesConfig
     }
 
     public MarketProfileConfig DefaultMarketProfile => defaultMarketProfile;
-    public PlanetMissionConfig DefaultMissionPool => defaultMissionPool;
+    public MissionPoolConfig DefaultMissionPool => defaultMissionPool;
 
     public Vector2 LocalOffset => localOffset;
 

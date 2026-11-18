@@ -34,7 +34,7 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
         IReadOnlyList<MissionInstanceData> playerMissions, PlanetOfferedMissionData existingOffer,
         MissionType? requiredType, bool? routeIsUpgrade)
     {
-        if (system == null || planet?.PlanetMissionConfig?.PossibleMissionOffers == null || _session.State == null) return null;
+        if (system == null || planet?.MissionPool?.PossibleMissionOffers == null || _session.State == null) return null;
         if (_session.State.Galaxy?.HasActiveInvasionForTarget(system.Id) == true)
         {
             Log("OfferSkipped | Planet=" + planet.Id + " | Reason=ActiveInvasionInSourceSystem");
@@ -46,7 +46,7 @@ public class PlanetMissionOfferGenerator : CustomService, IPlanetMissionOfferGen
             ExistingOfferStillValid(system, old)) return existingOffer;
 
         var candidates = new List<KeyValuePair<PlanetMissionOfferEntryConfig, MissionInstanceData>>();
-        foreach (var entry in planet.PlanetMissionConfig.PossibleMissionOffers)
+        foreach (var entry in planet.MissionPool.PossibleMissionOffers)
         {
             if (entry == null || !entry.IsEnabled || entry.Weight <= 0) continue;
             MissionTemplateConfig template = entry.MissionTemplateConfig;

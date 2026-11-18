@@ -14,22 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Presentation::GovernmentMissionVisualCatalog
   planets:
   - planetType: 0
-    neutral: {fileID: 21300000, guid: 81f5771e4efe4694b078d31c75cb63aa, type: 3}
-    delivery: {fileID: 21300000, guid: 5652f709f722480c8d3e930413f2caed, type: 3}
-    recon: {fileID: 21300000, guid: c6b574b67c7548a1ac87393217fdf8f1, type: 3}
-    defense: {fileID: 21300000, guid: 9a562c44798342d391317c949921acee, type: 3}
-    liberation: {fileID: 21300000, guid: 2c877773c5704b4b817e82f35f0a2430, type: 3}
-    routeUnlock: {fileID: 21300000, guid: 4fbf03de1c13450b8a95494b3e8dc81a, type: 3}
-    routeImprove: {fileID: 21300000, guid: 8308b6e5522e494cbbad145203cff2c5, type: 3}
-    useNeutralAsFixedBackground: 1
-    deliveryOverlay: {fileID: 21300000, guid: 06cf327fff634804beda3e2e85484edb, type: 3}
-    reconOverlay: {fileID: 21300000, guid: 877bf8daf6a94776bf4356b7b8753499, type: 3}
-    defenseOverlay: {fileID: 21300000, guid: aa8bf953bb204b159bd152d20a07c1ef, type: 3}
-    liberationOverlay: {fileID: 21300000, guid: f5df3060802348fe8baafd89358f72b8, type: 3}
-    routeUnlockOverlay: {fileID: 21300000, guid: 1bef0a830cab4e1e8d46f8cfdd188791, type: 3}
-    routeImproveOverlay: {fileID: 21300000, guid: fc994b1246ed4212bae4a426e89f60a8, type: 3}
+    useMissionOverlay: 1
+    delivery: {fileID: 21300000, guid: 06cf327fff634804beda3e2e85484edb, type: 3}
+    recon: {fileID: 21300000, guid: 877bf8daf6a94776bf4356b7b8753499, type: 3}
+    defense: {fileID: 21300000, guid: aa8bf953bb204b159bd152d20a07c1ef, type: 3}
+    liberation: {fileID: 21300000, guid: f5df3060802348fe8baafd89358f72b8, type: 3}
+    routeUnlock: {fileID: 21300000, guid: 1bef0a830cab4e1e8d46f8cfdd188791, type: 3}
+    routeImprove: {fileID: 21300000, guid: fc994b1246ed4212bae4a426e89f60a8, type: 3}
   - planetType: 1
-    neutral: {fileID: 21300000, guid: 3e804cbaf52042f5bd3722fa8e5dbf63, type: 3}
+    useMissionOverlay: 0
     delivery: {fileID: 21300000, guid: 60a71ac693a34a829c1a4efd208e7008, type: 3}
     recon: {fileID: 21300000, guid: ae0877e7470443afbd48824d20b5b18e, type: 3}
     defense: {fileID: 21300000, guid: 68dc74d6d7aa4537b37a0fab3e51598d, type: 3}
@@ -37,7 +30,7 @@ MonoBehaviour:
     routeUnlock: {fileID: 21300000, guid: 7c7863f8133c492682072934e67cb6b4, type: 3}
     routeImprove: {fileID: 21300000, guid: 369912172f6a422e94a08317d46cb111, type: 3}
   - planetType: 2
-    neutral: {fileID: 21300000, guid: 1faf028adb1c4bd4a5d7f959dd38cf0b, type: 3}
+    useMissionOverlay: 0
     delivery: {fileID: 21300000, guid: 72d03cd9e0994a87b2ff289476565ac4, type: 3}
     recon: {fileID: 21300000, guid: 58f71f2d054f44af9c5f6ceffe2f4107, type: 3}
     defense: {fileID: 21300000, guid: e1a19812b1dd445fb3faf429eaa40ebf, type: 3}
@@ -45,7 +38,7 @@ MonoBehaviour:
     routeUnlock: {fileID: 21300000, guid: 3bee0aa6c8d84b3c8e3dabf1ec221c69, type: 3}
     routeImprove: {fileID: 21300000, guid: 8c0273fbb02f46aeb93e880b56b1d2b1, type: 3}
   - planetType: 3
-    neutral: {fileID: 21300000, guid: c1fb7f7164aa4b6484624bedfb2d8344, type: 3}
+    useMissionOverlay: 0
     delivery: {fileID: 21300000, guid: 50e2ea07c8984955bfe000a12dfcb269, type: 3}
     recon: {fileID: 21300000, guid: 6eb57a324bb84953ad503692772cdbb1, type: 3}
     defense: {fileID: 21300000, guid: 6bd0838b400846e1b584e73a7996a13f, type: 3}
@@ -53,7 +46,7 @@ MonoBehaviour:
     routeUnlock: {fileID: 21300000, guid: 6af5ef9161d54555b1cc26f349e9840f, type: 3}
     routeImprove: {fileID: 21300000, guid: 01a3e8fdc3a54aecbfdcfede94dd11b7, type: 3}
   - planetType: 4
-    neutral: {fileID: 21300000, guid: a5435e44d28e4e0c96d34fbf199eddec, type: 3}
+    useMissionOverlay: 0
     delivery: {fileID: 21300000, guid: f47f04fe427c45a99282fca2abdd52ce, type: 3}
     recon: {fileID: 21300000, guid: 5335487e64da40bca1f29eb0cdbf7c39, type: 3}
     defense: {fileID: 21300000, guid: 7efca4186156442996caf42b9ae6b0cf, type: 3}

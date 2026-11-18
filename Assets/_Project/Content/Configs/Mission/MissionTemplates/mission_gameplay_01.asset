@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: mission_gameplay_01
   m_EditorClassIdentifier: Data::MissionGameplayConfig
   id: mission_gameplay_01
-  displayName: "mission_gameplay_01"
-  description: ""
+  displayName: "Оборона и освобождение систем"
+  description: "Настройки автоматических боевых миссий. Задают тексты заданий и их исходов, а также награду за лично уничтоженных врагов при победе."
   icon: {fileID: 0}
   DefenseKillRewardDeflator: 100
   LiberationKillRewardDeflator: 100

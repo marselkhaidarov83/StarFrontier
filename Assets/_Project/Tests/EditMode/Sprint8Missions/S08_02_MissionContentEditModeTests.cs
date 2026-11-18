@@ -24,19 +24,28 @@ public sealed class S08_02_MissionContentEditModeTests
     }
 
     [Test]
-    public void SharedMissionPool_ContainsDeliveryReconAndBothRouteVariants()
+    public void MissionPools_ContainDeliveryReconAndBothRouteVariants()
     {
-        var pool = AssetDatabase.LoadAssetAtPath<PlanetMissionConfig>(Root + "PlanetMission/planetMissionConfig_shared_01.asset");
-        Assert.That(pool, Is.Not.Null);
-        var templates = pool.PossibleMissionOffers.Where(e => e != null).Select(e => e.MissionTemplateConfig).ToList();
-        Assert.That(templates.OfType<DeliveryMissionTemplateConfig>().Any(), Is.True);
-        Assert.That(templates.OfType<ReconMissionTemplateConfig>().Any(), Is.True);
-        Assert.That(templates.OfType<RouteMissionTemplateConfig>().Any(t => !t.ImproveExistingRoute), Is.True);
-        Assert.That(templates.OfType<RouteMissionTemplateConfig>().Any(t => t.ImproveExistingRoute), Is.True);
-        foreach (var route in templates.OfType<RouteMissionTemplateConfig>())
+        var guids = AssetDatabase.FindAssets("t:MissionPoolConfig", new[] { Root + "Mission/MissionPool" });
+        Assert.That(guids.Length, Is.EqualTo(10));
+        foreach (var guid in guids)
         {
-            Assert.That(route.CreditRewardMode, Is.EqualTo(MissionCreditRewardMode.Fixed));
-            Assert.That(route.RewardCredits, Is.GreaterThanOrEqualTo(0));
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            var pool = AssetDatabase.LoadAssetAtPath<MissionPoolConfig>(path);
+            Assert.That(pool, Is.Not.Null, path);
+            Assert.That(pool.PossibleMissionOffers, Has.Count.EqualTo(4), path);
+            Assert.That(pool.PossibleMissionOffers.All(e => e != null && e.IsEnabled && e.Weight > 0), Is.True, path);
+
+            var templates = pool.PossibleMissionOffers.Select(e => e.MissionTemplateConfig).ToList();
+            Assert.That(templates.OfType<DeliveryMissionTemplateConfig>().Count(), Is.EqualTo(1), path);
+            Assert.That(templates.OfType<ReconMissionTemplateConfig>().Count(), Is.EqualTo(1), path);
+            Assert.That(templates.OfType<RouteMissionTemplateConfig>().Count(t => !t.ImproveExistingRoute), Is.EqualTo(1), path);
+            Assert.That(templates.OfType<RouteMissionTemplateConfig>().Count(t => t.ImproveExistingRoute), Is.EqualTo(1), path);
+            foreach (var route in templates.OfType<RouteMissionTemplateConfig>())
+            {
+                Assert.That(route.CreditRewardMode, Is.EqualTo(MissionCreditRewardMode.Fixed), path);
+                Assert.That(route.RewardCredits, Is.GreaterThanOrEqualTo(0), path);
+            }
         }
     }
 
