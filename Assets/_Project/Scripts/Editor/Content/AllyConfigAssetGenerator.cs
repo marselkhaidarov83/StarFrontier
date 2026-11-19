@@ -392,7 +392,32 @@ public static class AllyConfigAssetGenerator
         SetFloat(serializedObject, "baseTurnRateMax", stats.TurnRateMax);
         SetInt(serializedObject, "baseCargoCapacityMin", stats.CargoCapacityMin);
         SetInt(serializedObject, "baseCargoCapacityMax", stats.CargoCapacityMax);
-        SetInt(serializedObject, "weaponSlotCount", stats.WeaponSlotCount);
+        string hullPath = "Assets/_Project/Content/Configs/Market/ShipHulls/hull_" + id + ".asset";
+        var hullConfig = AssetDatabase.LoadAssetAtPath<HullConfig>(hullPath);
+        if (hullConfig == null)
+        {
+            hullConfig = ScriptableObject.CreateInstance<HullConfig>();
+            hullConfig.MaximumHullMin = stats.HullMin; hullConfig.MaximumHullMax = stats.HullMax;
+            hullConfig.CargoCapacityMin = stats.CargoCapacityMin; hullConfig.CargoCapacityMax = stats.CargoCapacityMax;
+            var hullData = new SerializedObject(hullConfig);
+            SetString(hullData, "id", "hull_" + id);
+            SetString(hullData, "displayName", "Корпус союзного корабля");
+            hullData.ApplyModifiedPropertiesWithoutUndo();
+            AssetDatabase.CreateAsset(hullConfig, hullPath);
+        }
+        var hullVisual = new SerializedObject(hullConfig);
+        SetObject(hullVisual, "icon", mapSprite);
+        hullVisual.ApplyModifiedPropertiesWithoutUndo();
+        hullConfig.Hull = asset;
+        hullConfig.Level = Mathf.Clamp(level, 1, 10);
+        hullConfig.WeaponSlotCount = (hullConfig.Level + 1) / 2;
+        hullConfig.AvailableComponentSlots = ShipComponentSlots.Engine | ShipComponentSlots.FuelTank |
+            ShipComponentSlots.Radar | ShipComponentSlots.ShieldGenerator;
+        if (role == AllyRole2A.Ranger || role == AllyRole2A.Military)
+            hullConfig.AvailableComponentSlots |= ShipComponentSlots.Scanner | ShipComponentSlots.RepairDroid;
+        if (role == AllyRole2A.Ranger) hullConfig.AvailableComponentSlots |= ShipComponentSlots.Grabber;
+        EditorUtility.SetDirty(hullConfig);
+        SetObject(serializedObject, "hullConfig", hullConfig);
         SetInt(serializedObject, "moduleSlotCount", stats.ModuleSlotCount);
         SetInt(serializedObject, "level", level);
         SetEnum(serializedObject, "role", (int)role);
@@ -402,6 +427,7 @@ public static class AllyConfigAssetGenerator
             SetObject(serializedObject, "grabber",
                 AssetDatabase.LoadAssetAtPath<ShipEquipmentConfig>(
                     "Assets/_Project/Content/Configs/Market/ShipEquipment/ship_grabber_industrial_L01_01.asset"));
+        if (role != AllyRole2A.Ranger) SetObject(serializedObject, "grabber", null);
         SetBool(
             serializedObject,
             "avoidEnemyOwnedTravelDestinations",
@@ -1149,7 +1175,6 @@ public static class AllyConfigAssetGenerator
             TurnRateMax = Round(turnRate + 10f),
             CargoCapacityMin = cargoCapacity * 2,
             CargoCapacityMax = (cargoCapacity + Mathf.Max(4, baseStats.CargoPerLevel * 2)) * 2,
-            WeaponSlotCount = baseStats.WeaponSlotCount,
             ModuleSlotCount = baseStats.ModuleSlotCount
         };
     }
@@ -1172,7 +1197,6 @@ public static class AllyConfigAssetGenerator
             CargoCapacityMin = (36 + CargoCapacityBonus) * 2,
             CargoCapacityMax = (40 + CargoCapacityBonus) * 2,
             CargoPerLevel = 0,
-            WeaponSlotCount = 0,
             ModuleSlotCount = 0
         };
     }
@@ -1192,7 +1216,6 @@ public static class AllyConfigAssetGenerator
                     TurnRate = 90f,
                     CargoCapacity = 24,
                     CargoPerLevel = 2,
-                    WeaponSlotCount = 2,
                     ModuleSlotCount = 2
                 };
 
@@ -1207,7 +1230,6 @@ public static class AllyConfigAssetGenerator
                     TurnRate = 120f,
                     CargoCapacity = 30,
                     CargoPerLevel = 2,
-                    WeaponSlotCount = 1,
                     ModuleSlotCount = 2
                 };
 
@@ -1222,7 +1244,6 @@ public static class AllyConfigAssetGenerator
                     TurnRate = 65f,
                     CargoCapacity = 90,
                     CargoPerLevel = 6,
-                    WeaponSlotCount = 1,
                     ModuleSlotCount = 3
                 };
 
@@ -1237,7 +1258,6 @@ public static class AllyConfigAssetGenerator
                     TurnRate = 75f,
                     CargoCapacity = 45,
                     CargoPerLevel = 3,
-                    WeaponSlotCount = 1,
                     ModuleSlotCount = 3
                 };
 
@@ -1253,7 +1273,6 @@ public static class AllyConfigAssetGenerator
                     TurnRate = 85f,
                     CargoCapacity = 35,
                     CargoPerLevel = 3,
-                    WeaponSlotCount = 1,
                     ModuleSlotCount = 2
                 };
 
@@ -1268,7 +1287,6 @@ public static class AllyConfigAssetGenerator
                     TurnRate = 80f,
                     CargoCapacity = 20,
                     CargoPerLevel = 2,
-                    WeaponSlotCount = 1,
                     ModuleSlotCount = 1
                 };
         }
@@ -1795,7 +1813,6 @@ public static class AllyConfigAssetGenerator
         public int CargoCapacityMin;
         public int CargoCapacityMax;
         public int CargoPerLevel;
-        public int WeaponSlotCount;
         public int ModuleSlotCount;
     }
 }

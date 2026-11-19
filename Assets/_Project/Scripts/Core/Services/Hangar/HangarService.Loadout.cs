@@ -116,7 +116,7 @@ public partial class HangarService
         ShipComponentSlot slot, string itemId, bool warehouse, out string reason)
     {
         reason = "Этот слот недоступен.";
-        if (!ShipLoadoutRules.Supports(hull, slot)) return false;
+        if (!ShipLoadoutRules.Supports(hull, slot, _market.GetHullConfig(ship.InstalledHull?.ConfigId))) return false;
         var storage = warehouse ? market.PersonalEquipment : ship.CargoEquipment;
         var old = ShipLoadoutRules.Component(ship, slot);
         var nextItem = string.IsNullOrEmpty(itemId) ? null : storage.Find(x => x?.InstanceId == itemId && x.IsComponent);
@@ -160,7 +160,7 @@ public partial class HangarService
         int index, string itemId, bool warehouse, out string reason)
     {
         reason = "Этот оружейный слот недоступен.";
-        if (index < 0 || index >= ShipLoadoutRules.AvailableWeapons(hull)) return false;
+        if (index < 0 || index >= ShipLoadoutRules.AvailableWeapons(hull, _market.GetHullConfig(ship.InstalledHull?.ConfigId))) return false;
         var storage = warehouse ? market.PersonalEquipment : ship.CargoEquipment;
         var old = ShipLoadoutRules.Weapon(ship, index);
         var next = string.IsNullOrEmpty(itemId) ? null : storage.Find(x => x?.InstanceId == itemId && !x.IsComponent);
@@ -204,7 +204,8 @@ public partial class HangarService
         var storage = market.PersonalHulls;
         var next = storage.Find(x => x?.InstanceId == itemId);
         var old = ShipLoadoutRules.CurrentHull(ship, hull);
-        var config = next != null ? _market.GetHullConfig(next.ConfigId)?.Hull : null;
+        var selectedHull = next != null ? _market.GetHullConfig(next.ConfigId) : null;
+        var config = selectedHull?.Hull;
         reason = "Корпус недоступен или разрушен.";
         if (config == null || next.MaximumDurability <= 0 || next.InstanceId == old.InstanceId ||
             storage.Exists(x => x?.InstanceId == old.InstanceId)) return false;
@@ -216,14 +217,14 @@ public partial class HangarService
         long delta = 0;
 
         var detached = ship.InstalledComponents.FindAll(x => x != null &&
-            !ShipLoadoutRules.Supports(config, (ShipComponentSlot)x.SlotIndex));
+            !ShipLoadoutRules.Supports(config, (ShipComponentSlot)x.SlotIndex, selectedHull));
         if (detached.Exists(item => market.PersonalEquipment.Exists(x => x?.InstanceId == item.InstanceId)))
         {
             reason = "На складе уже есть экземпляр этого модуля.";
             return false;
         }
 
-        int weapons = ShipLoadoutRules.AvailableWeapons(config);
+        int weapons = ShipLoadoutRules.AvailableWeapons(config, selectedHull);
         var detachedWeapons = ship.InstalledWeapons.FindAll(x => x != null && x.SlotIndex >= weapons);
         if (detachedWeapons.Exists(weapon => market.PersonalEquipment.Exists(x => x?.InstanceId == weapon.InstanceId)))
         {

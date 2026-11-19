@@ -35,7 +35,6 @@ MonoBehaviour:
   turnRadius: 300
   baseCargoCapacityMin: 132
   baseCargoCapacityMax: 140
-  weaponSlotCount: 1
   moduleSlotCount: 2
   level: 4
   role: 0
@@ -59,7 +58,6 @@ MonoBehaviour:
   combatSprite: {fileID: 21300000, guid: d7b1db5bb55f344a89f91d216257661f, type: 3}
   visualSize: 30
   lootTable: {fileID: 11400000, guid: 175a705f44bd406d896aa0ebcc25715d, type: 2}
-  availableComponentSlots: 127
   defaultComponents:
   - {fileID: 11400000, guid: 452aaaac03995b67afa6ca4d13643050, type: 2}
   - {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
@@ -68,3 +66,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
   - {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
   - {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
+  hullConfig: {fileID: 11400000, guid: 5bd6b1d498c24026885497480d726d65, type: 2}

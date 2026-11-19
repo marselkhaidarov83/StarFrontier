@@ -108,7 +108,7 @@ public partial class HangarService : IHangarService
 
         if (activeShip?.HasModularLoadout == true)
         {
-            for (int i = 0; i < ShipLoadoutRules.AvailableWeapons(shipData); i++)
+            for (int i = 0; i < ShipLoadoutRules.AvailableWeapons(shipData, _market.GetHullConfig(activeShip.InstalledHull?.ConfigId)); i++)
             {
                 if (ShipLoadoutRules.Weapon(activeShip, i) != null) continue;
                 var item = activeShip.CargoEquipment?.Find(x => x?.WeaponConfigId == weaponId);

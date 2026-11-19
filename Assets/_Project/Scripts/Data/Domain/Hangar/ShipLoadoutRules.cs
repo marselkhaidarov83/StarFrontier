@@ -14,14 +14,14 @@ public static class ShipLoadoutRules
     public const int FirstWeaponSlot = FirstComponentSlot + ComponentSlots;
     public const int TotalSlots = FirstWeaponSlot + WeaponSlots;
 
-    public static int AvailableWeapons(AllyConfig hull) =>
-        Mathf.Clamp(hull != null ? hull.WeaponSlotCount : 0, 0, WeaponSlots);
+    public static int AvailableWeapons(AllyConfig hull, HullConfig selected = null) =>
+        Mathf.Clamp(selected != null ? selected.WeaponSlotCount : hull != null ? hull.WeaponSlotCount : 0, 0, WeaponSlots);
 
-    public static bool Supports(AllyConfig hull, ShipComponentSlot slot)
+    public static bool Supports(AllyConfig hull, ShipComponentSlot slot, HullConfig selected = null)
     {
         int index = (int)slot;
         return hull != null && index >= 0 && index < ComponentSlots &&
-            (hull.AvailableComponentSlots & (ShipComponentSlots)(1 << index)) != 0;
+            ((selected != null ? selected.AvailableComponentSlots : hull.AvailableComponentSlots) & (ShipComponentSlots)(1 << index)) != 0;
     }
 
     public static bool IsComponentMissing(ShipRuntimeData ship, ShipComponentSlot slot) =>
@@ -55,14 +55,14 @@ public static class ShipLoadoutRules
         };
     }
 
-    public static void Initialize(ShipRuntimeData ship, AllyConfig hull, Func<string, WeaponConfig> weapons)
+    public static void Initialize(ShipRuntimeData ship, AllyConfig hull, Func<string, WeaponConfig> weapons, HullConfig selected = null)
     {
         if (ship == null || hull == null || ship.HasModularLoadout) return;
 
         ship.InstalledComponents = new List<SystemNpcWeaponRuntimeState>();
         if (hull.DefaultComponents != null)
             foreach (var component in hull.DefaultComponents)
-                if (component != null && Supports(hull, component.Slot))
+                if (component != null && Supports(hull, component.Slot, selected))
                     ship.InstalledComponents.Add(SystemNpcWeaponRuntimeState.NewComponent(component,
                         "installed-component:" + ship.ShipId + ":" + (int)component.Slot, (int)component.Slot));
 
@@ -87,7 +87,7 @@ public static class ShipLoadoutRules
                     MaximumDurability = config.MaximumDurability,
                     RolledStats = config.RollRuntimeStats(StableSeed(instanceId))
                 };
-                if (i < AvailableWeapons(hull))
+                if (i < AvailableWeapons(hull, selected))
                 {
                     weapon.SlotIndex = i;
                     ship.EquippedWeaponIds[i] = id;

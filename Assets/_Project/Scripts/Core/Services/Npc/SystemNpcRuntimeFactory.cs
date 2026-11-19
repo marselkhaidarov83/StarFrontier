@@ -262,10 +262,10 @@ public static class SystemNpcRuntimeFactory
         if (weaponGroup != null)
         {
             AddWeapons(npc, weaponGroup.WeaponConfigs, null);
-            return;
         }
-
-        AddWeapons(npc, config.WeaponConfigs, config.WeaponConfig);
+        else AddWeapons(npc, config.WeaponConfigs, config.WeaponConfig);
+        int slots = ShipLoadoutRules.AvailableWeapons(config);
+        if (npc.Weapons.Count > slots) npc.Weapons.RemoveRange(slots, npc.Weapons.Count - slots);
     }
 
     private static WeaponGroupConfig PickRandomValidWeaponGroup(

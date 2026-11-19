@@ -78,9 +78,6 @@ public sealed class AllyConfig : BaseConfig
     private int baseCargoCapacityMax = 0;
 
     [Header("Slots")]
-    [SerializeField]
-    [Tooltip("Количество ячеек оружия у корабля.")]
-    private int weaponSlotCount = 1;
 
     [SerializeField]
     [Tooltip("Количество ячеек модулей у корабля.")]
@@ -92,17 +89,19 @@ public sealed class AllyConfig : BaseConfig
     private int level = 1;
 
     [Header("Hull Equipment")]
-    [SerializeField] private ShipComponentSlots availableComponentSlots = ShipComponentSlots.All;
+    [SerializeField] private HullConfig hullConfig;
+    public HullConfig HullConfig => hullConfig;
     [SerializeField] private ShipEquipmentConfig[] defaultComponents = new ShipEquipmentConfig[0];
 
-    public ShipComponentSlots AvailableComponentSlots => availableComponentSlots;
-    public IReadOnlyList<ShipEquipmentConfig> DefaultComponents => defaultComponents;
+    public ShipComponentSlots AvailableComponentSlots => hullConfig != null ? hullConfig.AvailableComponentSlots : ShipComponentSlots.None;
+    public IReadOnlyList<ShipEquipmentConfig> DefaultComponents => System.Array.FindAll(defaultComponents ?? new ShipEquipmentConfig[0],
+        component => component != null && (AvailableComponentSlots & (ShipComponentSlots)(1 << (int)component.Slot)) != 0);
 
     public ShipEquipmentConfig DefaultEngine
     {
         get
         {
-            if ((availableComponentSlots & ShipComponentSlots.Engine) == 0 || defaultComponents == null)
+            if ((AvailableComponentSlots & ShipComponentSlots.Engine) == 0 || defaultComponents == null)
                 return null;
             foreach (var component in defaultComponents)
                 if (component != null && component.Slot == ShipComponentSlot.Engine)
@@ -181,13 +180,13 @@ public sealed class AllyConfig : BaseConfig
     public float BaseAcceleration => baseAccelerationMin;
     public float BaseTurnRate => baseTurnRateMin;
     public int BaseCargoCapacity => baseCargoCapacityMin;
-    public int WeaponSlotCount => weaponSlotCount;
+    public int WeaponSlotCount => hullConfig != null ? hullConfig.WeaponSlotCount : 0;
     public int ModuleSlotCount => moduleSlotCount;
 
     public int Level => level;
     public AllyRole2A Role => role;
     public NpcLootTableConfig LootTable => lootTable;
-    public ShipEquipmentConfig Grabber => grabber;
+    public ShipEquipmentConfig Grabber => (AvailableComponentSlots & ShipComponentSlots.Grabber) != 0 ? grabber : null;
     public AllyNamePoolConfig NamePool => namePool;
 
     public IReadOnlyList<AllyBehaviourScenarioEntry> BehaviorScenarios =>
@@ -431,7 +430,6 @@ public sealed class AllyConfig : BaseConfig
 
         baseCargoCapacityMin = Mathf.Max(0, baseCargoCapacityMin);
         baseCargoCapacityMax = Mathf.Max(baseCargoCapacityMin, baseCargoCapacityMax);
-        weaponSlotCount = Mathf.Max(0, weaponSlotCount);
         moduleSlotCount = Mathf.Max(0, moduleSlotCount);
 
         level = Mathf.Clamp(level, 0, 10);

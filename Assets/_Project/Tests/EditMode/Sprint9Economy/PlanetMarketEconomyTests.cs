@@ -280,9 +280,10 @@ public sealed partial class PlanetMarketEconomyTests
     private AllyConfig ConfigureHull(string id, int weaponSlots, int cargo, ShipComponentSlots utility = ShipComponentSlots.All)
     {
         var hull = Asset<AllyConfig>(id);
-        Set(hull, "weaponSlotCount", weaponSlots);
+        var settings = Asset<HullConfig>("hull_" + id);
+        settings.Hull = hull; settings.WeaponSlotCount = weaponSlots; settings.AvailableComponentSlots = utility;
+        Set(hull, "hullConfig", settings);
         Set(hull, "baseCargoCapacityMin", cargo);
-        Set(hull, "availableComponentSlots", utility);
         _config.Hulls.Add(hull);
         return hull;
     }
@@ -422,6 +423,7 @@ public sealed partial class PlanetMarketEconomyTests
 
         var hullItem = Asset<HullConfig>("speed-test-hull-item");
         hullItem.Hull = otherHull;
+        hullItem.WeaponSlotCount = otherHull.WeaponSlotCount; hullItem.AvailableComponentSlots = otherHull.AvailableComponentSlots;
         _balance.HullCatalog.Add(new MarketHullRule { Hull = hullItem, NewPrice = 800 });
         var spare = new HullEquipmentRuntimeState
         {
@@ -469,6 +471,7 @@ public sealed partial class PlanetMarketEconomyTests
         var weapon = CargoWeapon(false, 52);
         Assert.That(hangar.TryChangeLoadout(ShipLoadoutRules.FirstWeaponSlot + 2, weapon.InstanceId, false, out _), Is.True);
         var equipment = Asset<HullConfig>("small-hull-item"); equipment.Hull = target;
+        equipment.WeaponSlotCount = target.WeaponSlotCount; equipment.AvailableComponentSlots = target.AvailableComponentSlots;
         _balance.HullCatalog.Add(new MarketHullRule { Hull = equipment, NewPrice = 800 });
         var spare = new HullEquipmentRuntimeState
             { InstanceId = "spare", ConfigId = equipment.Id, CargoCapacity = 15, MaximumDurability = 120, CurrentDurability = 72 };

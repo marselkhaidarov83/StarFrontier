@@ -97,7 +97,7 @@ public class NewGameFactory
             EquippedWeaponIds = CreateStarterWeaponIds(starterShipConfig),
             EquippedModuleIds = new List<string>()
         };
-        ShipLoadoutRules.Initialize(ship, starterShipConfig, _configService.GetWeaponConfigById);
+        ShipLoadoutRules.Initialize(ship, starterShipConfig, _configService.GetWeaponConfigById, starterHull);
         var tankItem = ShipLoadoutRules.Component(ship, ShipComponentSlot.FuelTank);
         string tankId = tankItem?.ComponentConfigId;
         ship.FuelCapacity = !string.IsNullOrEmpty(tankId) && _configService.GetItemConfigById(tankId) is ShipEquipmentConfig tank

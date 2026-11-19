@@ -355,12 +355,13 @@ public class HangarScreenController : MonoBehaviour
         return WithDescription(config?.Description, lines.Range + "\n" + lines.Damage + "\n" + lines.Shots + "\n" + CargoSpaceLine(cargo));
     }
 
-    private static bool SlotAvailable(AllyConfig hull, int index)
+    private bool SlotAvailable(AllyConfig hull, int index)
     {
         if (index == ShipLoadoutRules.HullSlot) return hull != null;
         if (index >= ShipLoadoutRules.FirstWeaponSlot)
-            return index - ShipLoadoutRules.FirstWeaponSlot < ShipLoadoutRules.AvailableWeapons(hull);
-        return ShipLoadoutRules.Supports(hull, (ShipComponentSlot)(index - ShipLoadoutRules.FirstComponentSlot));
+            return index - ShipLoadoutRules.FirstWeaponSlot < ShipLoadoutRules.AvailableWeapons(hull, _market.GetHullConfig(_hangar.GetActiveShipState()?.InstalledHull?.ConfigId));
+        return ShipLoadoutRules.Supports(hull, (ShipComponentSlot)(index - ShipLoadoutRules.FirstComponentSlot),
+            _market.GetHullConfig(_hangar.GetActiveShipState()?.InstalledHull?.ConfigId));
     }
 
     private static bool IsOccupied(ShipRuntimeData ship, int index)

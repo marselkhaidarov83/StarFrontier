@@ -22,3 +22,5 @@ MonoBehaviour:
   MaximumHullMax: 183
   CargoCapacityMin: 180
   CargoCapacityMax: 192
+  WeaponSlotCount: 3
+  AvailableComponentSlots: 71
