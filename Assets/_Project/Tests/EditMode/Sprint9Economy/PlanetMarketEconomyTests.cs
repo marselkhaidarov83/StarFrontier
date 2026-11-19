@@ -6,7 +6,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEditor;
 
-public sealed class PlanetMarketEconomyTests
+public sealed partial class PlanetMarketEconomyTests
 {
     private readonly List<ScriptableObject> _objects = new List<ScriptableObject>();
     private Session _session;
@@ -26,11 +26,40 @@ public sealed class PlanetMarketEconomyTests
     { var a = ScriptableObject.CreateInstance<T>(); _objects.Add(a); Set(a, "id", id); return a; }
     private static void Set(object value, string field, object data)
     {
+        if (value is ShipEquipmentConfig equipment && field == "cargoSize")
+            equipment.CargoSizeMin = equipment.CargoSizeMax = (int)data;
+        if (value is WeaponConfig && field == "cargoSize")
+        {
+            Set(value, "cargoSizeMin", data);
+            Set(value, "cargoSizeMax", data);
+            return;
+        }
+
         for (Type type = value.GetType(); type != null; type = type.BaseType)
         { var f = type.GetField(field, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
           if (f != null) { f.SetValue(value, data); return; } }
         throw new MissingFieldException(field);
     }
+    [TestCase(0, 1, true)]
+    [TestCase(0, 2, false)]
+    [TestCase(1, 2, false)]
+    [TestCase(2, 2, true)]
+    [TestCase(9, 10, false)]
+    [TestCase(10, 10, true)]
+    public void TradeNewGoods_ControlsListingAndTrading(int researchLevel, int requiredLevel, bool unlocked)
+    {
+        Set(_item, "marketDevelopmentLevel", requiredLevel);
+        _session.State.Galaxy.Research ??= new ResearchRuntimeState();
+        _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel
+        {
+            Upgrade = ResearchUpgrade.TradeNewGoods,
+            Level = researchLevel
+        });
+        Assert.That(_market.GetItems().Any(row => row.ItemConfig.Id == _item.Id), Is.EqualTo(unlocked));
+        Assert.That(_market.GetPrice(_item.Id, true) > 0, Is.EqualTo(unlocked));
+        Assert.That(_market.CanTrade(_item.Id, 1, true), Is.EqualTo(unlocked));
+    }
+
     [SetUp] public void Setup()
     {
         _session = new Session(); _session.StartNewSession(new GameRuntimeState());
@@ -43,9 +72,10 @@ public sealed class PlanetMarketEconomyTests
         _item = Asset<ItemConfig>("medicine"); Set(_item, "basePrice", 10); Set(_item, "cargoSize", 2);
         _weapon = Asset<WeaponConfig>("ally_weapon");
         _profile = Asset<MarketProfileConfig>("profile");
+        _profile.OfferRefreshIntervalSeconds = 10;
         _profile.GalaxyLevels.Add(new MarketGalaxyLevelSettings { GalaxyLevel = 1, IntervalSeconds = 10,
             Items = new List<MarketItemEntry> { new MarketItemEntry { ItemConfig = _item, Quantity = 50, StockChange = 7, MaximumStock = 100, BasePrice = 10, MaximumPrice = 30 } },
-            Equipment = new List<MarketEquipmentRule> { new MarketEquipmentRule { Weapon = _weapon, Allied = true, NewPrice = 100, SpawnIntervalSeconds = 10, LifetimeSeconds = 25, MaximumListings = 1 } } });
+            Equipment = new List<MarketEquipmentRule> { new MarketEquipmentRule { Weapon = _weapon, Allied = true, NewPrice = 100 } } });
         var planetType = Asset<PlanetTypeConfig>("planet_type"); Set(planetType, "marketProfile", _profile);
         var one = Asset<PlanetConfig>("one"); Set(one, "planetTypeConfig", planetType);
         var two = Asset<PlanetConfig>("two"); Set(two, "planetTypeConfig", planetType);
@@ -57,6 +87,10 @@ public sealed class PlanetMarketEconomyTests
         _config = new Configs { MarketEconomy = _balance, System = system, Item = _item, Weapon = _weapon, Planets = new[] { one, two } };
         _events = new SimpleEventBus(); _inventory = new InventoryService(_session, _config, _events);
         _market = new PlanetMarketService(_session, _config, _inventory, _events); _market.InitializeSession();
+        _session.State.Galaxy.Research.Normalize();
+        _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel { Upgrade = ResearchUpgrade.TradeMarketImprovement, Level = 1 });
+        // Transaction fixtures begin with an empty shelf; the first periodic batch has one weapon.
+        _profile.GalaxyLevels[0].WeaponOfferCount = 1;
     }
     [TearDown] public void TearDown()
     { foreach (var item in _objects) if (item != null) UnityEngine.Object.DestroyImmediate(item); _objects.Clear(); }
@@ -79,7 +113,7 @@ public sealed class PlanetMarketEconomyTests
         Stock.Quantity = 130;
         _profile.GalaxyLevels.Add(new MarketGalaxyLevelSettings { GalaxyLevel = 2, IntervalSeconds = 5,
             Items = new List<MarketItemEntry> { new MarketItemEntry { ItemConfig = _item, Quantity = 1, StockChange = -10, MaximumStock = 80, BasePrice = 20, MaximumPrice = 60 } } });
-        _session.State.Galaxy.Sectors.Add(new SectorRuntimeState { SectorId = "s2", IsUnlocked = true });
+        _session.State.Galaxy.Research.Levels.Find(x => x.Upgrade == ResearchUpgrade.TradeMarketImprovement).Level = 2;
         Assert.That(_market.GetPrice(_item.Id, true), Is.EqualTo(20)); Assert.That(Stock.Quantity, Is.EqualTo(130));
         _market.AdvanceTime(5); Assert.That(Stock.Quantity, Is.EqualTo(120));
     }
@@ -283,7 +317,7 @@ public sealed class PlanetMarketEconomyTests
     [TestCase(true)]
     public void RemoveAllEquipment_PreservesHullAndInstancesAndUsesSelectedStorage(bool warehouse)
     {
-        var tank = Asset<ShipComponentConfig>("bulk-remove-tank");
+        var tank = Asset<ShipEquipmentConfig>("bulk-remove-tank");
         tank.Slot = ShipComponentSlot.FuelTank;
         tank.FuelCapacity = 100;
         Set(tank, "cargoSize", 3);
@@ -327,10 +361,10 @@ public sealed class PlanetMarketEconomyTests
 
     [Test] public void InstalledEquipment_ReducesPurchaseLimitAndCannotBeCountedTwice()
     {
-        var engine = Asset<ShipComponentConfig>("cargo-test-engine");
+        var engine = Asset<ShipEquipmentConfig>("cargo-test-engine");
         engine.Slot = ShipComponentSlot.Engine;
         Set(engine, "cargoSize", 3);
-        var larger = Asset<ShipComponentConfig>("cargo-test-larger-engine");
+        var larger = Asset<ShipEquipmentConfig>("cargo-test-larger-engine");
         larger.Slot = ShipComponentSlot.Engine;
         Set(larger, "cargoSize", 5);
         _config.Components.Add(engine);
@@ -364,10 +398,10 @@ public sealed class PlanetMarketEconomyTests
 
     [Test] public void ShipSpeed_FollowsInstalledEngineAcrossHullSwapAndRemoval()
     {
-        var standard = Asset<ShipComponentConfig>("speed-standard");
+        var standard = Asset<ShipEquipmentConfig>("speed-standard");
         standard.Slot = ShipComponentSlot.Engine;
         standard.Speed = 100;
-        var fast = Asset<ShipComponentConfig>("speed-fast");
+        var fast = Asset<ShipEquipmentConfig>("speed-fast");
         fast.Slot = ShipComponentSlot.Engine;
         fast.Speed = 175;
         _config.Components.Add(standard);
@@ -386,12 +420,12 @@ public sealed class PlanetMarketEconomyTests
         Assert.That(hangar.TryChangeLoadout(engineSlot, upgrade.InstanceId, true, out var reason), Is.True, reason);
         Assert.That(hangar.GetActiveShipStats().Speed, Is.EqualTo(175));
 
-        var hullItem = Asset<HullEquipmentConfig>("speed-test-hull-item");
+        var hullItem = Asset<HullConfig>("speed-test-hull-item");
         hullItem.Hull = otherHull;
         _balance.HullCatalog.Add(new MarketHullRule { Hull = hullItem, NewPrice = 800 });
         var spare = new HullEquipmentRuntimeState
         {
-            InstanceId = "speed-spare-hull", ConfigId = hullItem.Id,
+            InstanceId = "speed-spare-hull", ConfigId = hullItem.Id, CargoCapacity = 1000,
             CurrentDurability = 120, MaximumDurability = 120
         };
         Market.PersonalHulls.Add(spare);
@@ -404,9 +438,9 @@ public sealed class PlanetMarketEconomyTests
 
     [Test] public void TankSwap_UsesOnlyTheTypedSlotAndReturnsTheOldTankToTheChosenInventory()
     {
-        var tank = Asset<ShipComponentConfig>("tank-standard");
+        var tank = Asset<ShipEquipmentConfig>("tank-standard");
         tank.Slot = ShipComponentSlot.FuelTank; tank.FuelCapacity = 100; Set(tank, "cargoSize", 3);
-        var next = Asset<ShipComponentConfig>("tank-large");
+        var next = Asset<ShipEquipmentConfig>("tank-large");
         next.Slot = ShipComponentSlot.FuelTank; next.FuelCapacity = 160; Set(next, "cargoSize", 5);
         _config.Components.Add(tank); _config.Components.Add(next);
         var hull = ConfigureHull("ship-with-tank", 1, 1000);
@@ -434,10 +468,10 @@ public sealed class PlanetMarketEconomyTests
         var hangar = ConfigureLoadout(start);
         var weapon = CargoWeapon(false, 52);
         Assert.That(hangar.TryChangeLoadout(ShipLoadoutRules.FirstWeaponSlot + 2, weapon.InstanceId, false, out _), Is.True);
-        var equipment = Asset<HullEquipmentConfig>("small-hull-item"); equipment.Hull = target;
+        var equipment = Asset<HullConfig>("small-hull-item"); equipment.Hull = target;
         _balance.HullCatalog.Add(new MarketHullRule { Hull = equipment, NewPrice = 800 });
         var spare = new HullEquipmentRuntimeState
-            { InstanceId = "spare", ConfigId = equipment.Id, MaximumDurability = 120, CurrentDurability = 72 };
+            { InstanceId = "spare", ConfigId = equipment.Id, CargoCapacity = 15, MaximumDurability = 120, CurrentDurability = 72 };
         Market.PersonalHulls.Add(spare);
 
         Assert.That(_inventory.GetUsedCargo(), Is.EqualTo(2));
@@ -522,14 +556,16 @@ public sealed class PlanetMarketEconomyTests
 
     [Test] public void ComponentDurability_SurvivesDamageRepairTransferAndUsedSale()
     {
-        var component = Asset<ShipComponentConfig>("test-engine");
+        var component = Asset<ShipEquipmentConfig>("test-engine");
         component.Slot = ShipComponentSlot.Engine;
         component.MaximumDurability = 140;
         Set(component, "cargoSize", 3);
         _config.Components.Add(component);
         _profile.GalaxyLevels[0].Equipment.Add(new MarketEquipmentRule
-            { Component = component, StartInStock = true, NewPrice = 140, SpawnIntervalSeconds = 10, MaximumListings = 1 });
+            { Component = component, NewPrice = 140 });
         var hangar = ConfigureLoadout(ConfigureHull("engine-hull", 1, 1000));
+        _profile.GalaxyLevels[0].EquipmentOfferCount = 1;
+        Market.OffersInitialized = false;
         ReloadThroughSaveValidation();
         var first = Market.Equipment.Single(x => x.Equipment.IsComponent).Equipment;
         Assert.That(_market.TradeEquipment(first.InstanceId, true, "buy-engine", -1, out _), Is.True);
@@ -578,9 +614,10 @@ public sealed class PlanetMarketEconomyTests
 
     private MarketHullRule EnterHullStation()
     {
-        var config = Asset<HullEquipmentConfig>("hull_test"); config.MaximumHull = 120;
-        var rule = new MarketHullRule { Hull = config, NewPrice = 200, SpawnIntervalSeconds = 10, LifetimeSeconds = 25, MaximumListings = 1 };
+        var config = Asset<HullConfig>("hull_test"); config.MaximumHullMin = config.MaximumHullMax = 120;
+        var rule = new MarketHullRule { Hull = config, NewPrice = 200 };
         _profile.GalaxyLevels[0].Hulls.Add(rule); _balance.HullCatalog.Add(rule);
+        _profile.GalaxyLevels[0].HullOfferCount = 1;
         var station = Asset<StationConfig>("station");
         var stationType = Asset<StationTypeConfig>("station_type");
         Set(stationType, "defaultMarketProfile", _profile);
@@ -676,15 +713,17 @@ public sealed class PlanetMarketEconomyTests
         Assert.That(_market.CanTradeHull(hull.InstanceId, false, true), Is.False);
         Assert.That(MarketPersistenceRules.Errors(_session.State), Does.Contain("InvalidStoredHull"));
     }
-    [Test] public void PlanetHullOffers_StartInStock_PersistAndReplenishAfterPurchase()
+    [Test] public void PlanetHullOffers_SeedBatch_PersistAndRefreshAfterPurchase()
     {
-        var config = Asset<HullEquipmentConfig>("planet-hull");
-        config.MaximumHull = 120;
+        var config = Asset<HullConfig>("planet-hull");
+        config.MaximumHullMin = config.MaximumHullMax = 120;
         _profile.GalaxyLevels[0].Hulls.Add(new MarketHullRule
         {
-            Hull = config, NewPrice = 200, StartInStock = true, SpawnIntervalSeconds = 10, LifetimeSeconds = 25
+            Hull = config, NewPrice = 200
         });
 
+        _profile.GalaxyLevels[0].HullOfferCount = 1;
+        Market.OffersInitialized = false;
         ReloadThroughSaveValidation();
         var hull = Market.Hulls.Single().Hull;
         _session.State.Player.CurrentPlanetId = "two";
@@ -710,7 +749,7 @@ public sealed class PlanetMarketEconomyTests
         var hull = Market.Hulls.Single().Hull;
         Assert.That(_market.TradeHull(hull.InstanceId, true, "keep-hull", -1, out _, true), Is.True);
         _market.AdvanceTime(10); string publicId = Market.Hulls.Single().Hull.InstanceId;
-        rule.MaximumListings = 0; _market.AdvanceTime(30);
+        _profile.GalaxyLevels[0].HullOfferCount = 0; _market.AdvanceTime(30);
         Assert.That(Market.Hulls.Any(x => x.Hull.InstanceId == publicId), Is.False);
         Assert.That(Market.PersonalHulls.Single().InstanceId, Is.EqualTo(hull.InstanceId));
         _session.State.Player.CurrentStationId = ""; _session.State.Player.CurrentPlanetId = "one";
@@ -718,14 +757,14 @@ public sealed class PlanetMarketEconomyTests
     }
     [Test] public void ProductionHullAssets_AreBoundToEveryLevelAndBalanceCatalog()
     {
-        var balance = AssetDatabase.LoadAssetAtPath<MarketEconomyBalanceConfig>("Assets/_Project/Content/Configs/Game/marketEconomyBalance_01.asset");
+        var balance = AssetDatabase.LoadAssetAtPath<MarketEconomyBalanceConfig>("Assets/_Project/Content/Configs/Market/marketEconomyBalance_01.asset");
         Assert.That(balance.HullCatalog.Any(x => x.Hull != null && x.NewPrice > 0), Is.True);
         foreach (var name in new[] { "hub", "mining", "industrial", "frontier" })
         {
-            var profile = AssetDatabase.LoadAssetAtPath<MarketProfileConfig>("Assets/_Project/Content/Configs/MarketProfiles/mMarketProfile_" + name + "_01.asset");
+            var profile = AssetDatabase.LoadAssetAtPath<MarketProfileConfig>("Assets/_Project/Content/Configs/Market/MarketProfiles/mMarketProfile_" + name + "_01.asset");
             Assert.That(profile.GalaxyLevels, Has.Count.EqualTo(10));
             foreach (var level in profile.GalaxyLevels)
-                Assert.That(level.Hulls.Any(x => x.Hull != null && x.NewPrice > 0 && x.LifetimeSeconds > 0), Is.True);
+                Assert.That(level.Hulls.Any(x => x.Hull != null && x.NewPrice > 0 && x.Weight > 0), Is.True);
         }
     }
     private SystemNpcWeaponRuntimeState CargoWeapon(bool enemy = false, int durability = 0)
@@ -861,7 +900,7 @@ public sealed class PlanetMarketEconomyTests
     {
         var balance = AssetDatabase.LoadAssetAtPath<MarketEconomyBalanceConfig>("Assets/_Project/Content/Configs/Market/marketEconomyBalance_01.asset");
         Assert.That(balance, Is.Not.Null); Assert.That(balance.ResearchLevels.Length, Is.EqualTo(11));
-        foreach (string id in AssetDatabase.FindAssets("t:MarketProfileConfig", new[] { "Assets/_Project/Content/Configs/MarketProfiles" })) {
+        foreach (string id in AssetDatabase.FindAssets("t:MarketProfileConfig", new[] { "Assets/_Project/Content/Configs/Market/MarketProfiles" })) {
             var profile = AssetDatabase.LoadAssetAtPath<MarketProfileConfig>(AssetDatabase.GUIDToAssetPath(id));
             Assert.That(profile.GalaxyLevels.Count, Is.EqualTo(10));
             for (int level = 1; level <= 10; level++) { var settings = profile.GetLevel(level); Assert.That(settings.GalaxyLevel, Is.EqualTo(level));
@@ -901,7 +940,7 @@ public sealed class PlanetMarketEconomyTests
             {
                 var settings = planet.MarketProfile.GetLevel(level);
                 Assert.That(settings, Is.Not.Null, path + " | Galaxy level=" + level);
-                Assert.That(settings.Items.Any(x => x != null && x.IsAvailable && x.ItemConfig != null), Is.True,
+                Assert.That(settings.Items.Any(x => x != null && x.ItemConfig != null), Is.True,
                     "Inhabited planet has no available market goods: " + path + " | Galaxy level=" + level);
             }
         }
@@ -1016,7 +1055,7 @@ public sealed class PlanetMarketEconomyTests
         _market.AdvanceScheduledTime(1, 2, schedule);
         Assert.That(Market.Equipment.Count, Is.EqualTo(1));
         Assert.That(Market.EquipmentPendingSeconds, Is.Zero);
-        Assert.That(Market.Equipment.Single().ExpiresAtSeconds, Is.EqualTo(35));
+        Assert.That(Market.Equipment.Single().ExpiresAtSeconds, Is.EqualTo(20));
     }
     [Test] public void SharedSelectionContainingCurrentSystem_DoesNotDoubleAdvanceIt()
     {
@@ -1181,7 +1220,7 @@ public sealed class PlanetMarketEconomyTests
         public MissionGameplayConfig MissionGameplay => null;
         public GameTimeConfig GameTimeConfig => null;
         public readonly List<AllyConfig> Hulls = new List<AllyConfig>();
-        public readonly List<ShipComponentConfig> Components = new List<ShipComponentConfig>();
+        public readonly List<ShipEquipmentConfig> Components = new List<ShipEquipmentConfig>();
         public StarSystemConfig System; public StarSystemConfig[] Systems; public int SystemListReads; public ItemConfig Item; public WeaponConfig Weapon; public PlanetConfig[] Planets;
         public DebugSettings DebugSettings => null; public SaveConfig SaveConfig => null; public GalaxyConfig GalaxyConfig => null; public NewGameConfig NewGameConfig => null;
         public PlayerControlConfig PlayerControlConfig => null; public ShipMovementConfig ShipMovementConfig => null; public SystemCameraConfig SystemCameraConfig => null;

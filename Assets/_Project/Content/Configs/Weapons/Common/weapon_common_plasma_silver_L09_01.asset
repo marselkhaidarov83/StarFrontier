@@ -14,34 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::WeaponConfig
   id: weapon_common_plasma_silver_L09_01
   displayName: "\u041F\u043B\u0430\u0437\u043C\u0435\u043D\u043D\u0430\u044F \u043F\u0443\u0448\u043A\u0430"
-  description: "\u041A\u0440\u0443\u043F\u043D\u044B\u0439 \u043C\u0435\u0434\u043B\u0435\u043D\u043D\u044B\u0439
-    \u043F\u043B\u0430\u0437\u043C\u0435\u043D\u043D\u044B\u0439 \u0448\u0430\u0440
-    blue/cyan \u0441 \u043C\u044F\u0433\u043A\u043E\u0439 \u0430\u0443\u0440\u043E\u0439.
-    \u0421\u0438\u043B\u044C\u043D\u044B\u0439, \u043D\u043E \u0442\u0440\u0435\u0431\u0443\u0435\u0442
-    \u0434\u0438\u0441\u0442\u0430\u043D\u0446\u0438\u0438 \u0438 \u0432\u0440\u0435\u043C\u0435\u043D\u0438
-    \u043F\u043E\u043B\u0451\u0442\u0430. IMG: PNG 512\xD7512, transparent background,
-    centered projectile/VFX sprite, pivot center, no text, no watermark, mobile-friendly,
-    stylized sci-fi, pseudo-3D/top-down readable silhouette."
+  description: "Сгусток раскалённой плазмы несёт к цели запас разрушительной энергии. Яркий след предупреждает о попадании раньше, чем вспыхивает обшивка."
   icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 9
-  equipmentTier: 2
-  cargoSize: 13
-  baseDamageMin: 59
-  baseDamageMax: 73
-  rangeMin: 150.82
-  rangeMax: 168.21
-  energyCostMin: 5
-  energyCostMax: 7
-  projectileLifetimeMin: 3
-  projectileLifetimeMax: 5
-  isHitscan: 0
+  cargoSizeMin: 9
+  cargoSizeMax: 10
+  baseDamageMin: 61
+  baseDamageMax: 75
+  rangeMin: 198
+  rangeMax: 221
+  energyCostMin: 11
+  energyCostMax: 13
+  projectileLifetimeMin: 11
+  projectileLifetimeMax: 13
   weaponType: 2
   damageType: 0
-  targetingMode: 0
-  autoDetectShotType: 0
   shotType: 3
-  shotCount: 1
+  shotCount: 9
   projectilePrefabRef: {fileID: 2113405778882139475, guid: b95df25f61bff4605a15bc220d987366, type: 3}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0
+  maximumDurability: 300

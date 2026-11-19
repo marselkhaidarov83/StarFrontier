@@ -14,33 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::WeaponConfig
   id: weapon_common_laser_bronze_L09_01
   displayName: "\u041B\u0430\u0437\u0435\u0440"
-  description: "\u0422\u043E\u043D\u043A\u0438\u0439 cyan-white \u043B\u0430\u0437\u0435\u0440\u043D\u044B\u0439
-    \u043B\u0443\u0447 \u0434\u043B\u044F \u0440\u0430\u043D\u043D\u0435\u0439 \u0438\u0433\u0440\u044B.
-    \u0411\u044B\u0441\u0442\u0440\u044B\u0439, \u0441\u0442\u0430\u0431\u0438\u043B\u044C\u043D\u044B\u0439,
-    \u043F\u0440\u043E\u0441\u0442\u043E\u0439 \u0434\u043B\u044F \u0447\u0442\u0435\u043D\u0438\u044F.
-    IMG: PNG 512\xD7512, transparent background, centered projectile/VFX sprite,
-    pivot center, no text, no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down
-    readable silhouette."
+  description: "Узкий луч прожигает защиту точно в выбранной точке. Стабильная фокусировка делает это оружие надёжным спутником в затяжной перестрелке."
   icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 9
-  equipmentTier: 1
-  cargoSize: 12
-  baseDamageMin: 21
-  baseDamageMax: 26
-  rangeMin: 179.08
-  rangeMax: 199.73
-  energyCostMin: 4
-  energyCostMax: 6
-  projectileLifetimeMin: 1
-  projectileLifetimeMax: 1
-  isHitscan: 1
+  cargoSizeMin: 9
+  cargoSizeMax: 10
+  baseDamageMin: 24
+  baseDamageMax: 25
+  rangeMin: 244
+  rangeMax: 278
+  energyCostMin: 10
+  energyCostMax: 12
+  projectileLifetimeMin: 9
+  projectileLifetimeMax: 9
   weaponType: 0
   damageType: 0
-  targetingMode: 0
-  autoDetectShotType: 0
   shotType: 0
-  shotCount: 5
+  shotCount: 13
   projectilePrefabRef: {fileID: 0}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0
+  maximumDurability: 300

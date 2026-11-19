@@ -1407,7 +1407,6 @@ public sealed partial class SystemNpcCombatService : CustomService, ISystemNpcCo
             " | WeaponType=" + weaponStats.WeaponType +
             " | ShotType=" + weaponStats.ShotType +
             " | DamageType=" + weaponStats.DamageType +
-            " | TargetingMode=" + weaponStats.TargetingMode +
             " | DistanceAtTickStart=" + distanceAtTickStart.ToString("F2") +
             " | Range=" + weaponStats.Range.ToString("F2") +
             " | Damage=" + weaponStats.Damage +

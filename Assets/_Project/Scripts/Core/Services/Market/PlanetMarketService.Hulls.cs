@@ -6,12 +6,13 @@ public sealed partial class PlanetMarketService
 {
     private static bool IsStationMarket(MarketRuntimeData market) => market?.PlanetId?.StartsWith("station:", StringComparison.Ordinal) == true;
     private MarketHullRule HullRule(MarketProfileConfig profile, string id) =>
-        profile?.GetLevel(GalaxyLevel)?.Hulls?.Find(x => x?.Hull != null && x.Hull.Id == id)
+        profile?.GetLevel(MarketLevel)?.Hulls?.Find(x => x?.Hull != null && x.Hull.Id == id)
         ?? Balance?.HullCatalog?.Find(x => x?.Hull != null && x.Hull.Id == id);
-    public HullEquipmentConfig GetHullConfig(string id)
+    public HullConfig GetHullConfig(string id)
     {
         if (!Current(out _, out var profile)) return null;
-        return HullRule(profile, id)?.Hull;
+        return Balance?.HullCatalog?.Find(rule => rule?.Hull != null && rule.Hull.Id == id)?.Hull
+            ?? HullRule(profile, id)?.Hull;
     }
     public int HullPrice(HullEquipmentRuntimeState hull, bool buy)
     {
@@ -41,6 +42,7 @@ public sealed partial class PlanetMarketService
         var listing = market.Hulls.Find(x => x?.Hull?.InstanceId == id && x.ExpiresAtSeconds > market.ElapsedSeconds);
         var hull = buy ? listing?.Hull : market.PersonalHulls.Find(x => x?.InstanceId == id);
         if (hull == null || HullRule(profile, hull.ConfigId)?.Hull == null) return false;
+        if (buy && GetHullConfig(hull.ConfigId).Level > MarketLevel) return false;
         int price = HullPrice(hull, buy);
         return price > 0 && (buy ? State.Player.Credits >= price && !market.PersonalHulls.Any(x => x?.InstanceId == id)
             : CanSellStoredHull(market, id) && (long)State.Player.Credits + price <= int.MaxValue && !market.Hulls.Any(x => x?.Hull?.InstanceId == id));
@@ -63,6 +65,7 @@ public sealed partial class PlanetMarketService
         var listing = market.Hulls.Find(x => x?.Hull?.InstanceId == id);
         var hull = buy ? listing.Hull : market.PersonalHulls.Find(x => x?.InstanceId == id);
         var rule = HullRule(profile, hull.ConfigId);
+        if (buy && GetHullConfig(hull.ConfigId).Level > MarketLevel) return false;
         int price = HullPrice(hull, buy);
         _committing = true;
         try
@@ -71,8 +74,8 @@ public sealed partial class PlanetMarketService
             else
             {
                 market.PersonalHulls.Remove(hull);
-                market.Hulls.Add(new MarketHullListing { Hull = hull, NewPrice = rule.NewPrice,
-                    ExpiresAtSeconds = market.ElapsedSeconds + Math.Max(.01, rule.LifetimeSeconds) });
+                if (ValidHullRule(rule, MarketLevel)) market.Hulls.Add(new MarketHullListing { Hull = hull, NewPrice = rule.NewPrice,
+                    ExpiresAtSeconds = NextOfferExpiry(market, profile) });
             }
             State.Player.Credits += buy ? -price : price;
             market.Revision++;
@@ -83,85 +86,6 @@ public sealed partial class PlanetMarketService
         }
         finally { _committing = false; }
     }
-    private static bool ValidHullRule(MarketHullRule rule) => rule?.Hull != null && rule.NewPrice > 0 && rule.MaximumListings > 0 &&
-        rule.SpawnIntervalSeconds > 0 && !float.IsNaN(rule.SpawnIntervalSeconds) && !float.IsInfinity(rule.SpawnIntervalSeconds) &&
-        rule.LifetimeSeconds > 0 && !float.IsNaN(rule.LifetimeSeconds) && !float.IsInfinity(rule.LifetimeSeconds);
-    private bool SeedHullListings(MarketRuntimeData market, MarketGalaxyLevelSettings settings)
-    {
-        if (settings?.Hulls == null) return false;
-        long before = market.Revision;
-        foreach (var rule in settings.Hulls)
-        {
-            if (!ValidHullRule(rule) || !rule.StartInStock) continue;
-            string timerId = "hull:" + rule.Hull.Id;
-            if (market.EquipmentSpawns.Exists(existing => existing?.WeaponId == timerId)) continue;
-
-            var timer = new MarketEquipmentSpawnState { WeaponId = timerId };
-            market.EquipmentSpawns.Add(timer);
-            if (market.Hulls.Exists(listing => listing?.Hull?.ConfigId == rule.Hull.Id &&
-                    listing.ExpiresAtSeconds > market.ElapsedSeconds)) continue;
-
-            timer.SpawnSequence++;
-            AddHullListing(market, rule, timer.SpawnSequence, market.ElapsedSeconds);
-        }
-
-        if (before == market.Revision) return false;
-        Log("HULL_INITIAL_STOCK", market, "Count=" + market.Hulls.Count);
-        return true;
-    }
-
-    private static void AddHullListing(MarketRuntimeData market, MarketHullRule rule, long sequence, double time)
-    {
-        int durability = Math.Max(1, rule.Hull.MaximumHull);
-        market.Hulls.Add(new MarketHullListing
-        {
-            Hull = new HullEquipmentRuntimeState
-            {
-                InstanceId = "hull:" + market.SystemId + ":" + market.PlanetId + ":" + rule.Hull.Id + ":" + sequence,
-                ConfigId = rule.Hull.Id,
-                CurrentDurability = durability,
-                MaximumDurability = durability
-            },
-            NewPrice = rule.NewPrice,
-            ExpiresAtSeconds = time + rule.LifetimeSeconds
-        });
-        market.Revision++;
-    }
-
-    private static double NextHullDeadline(MarketRuntimeData market, MarketGalaxyLevelSettings settings)
-    {
-        double next = double.PositiveInfinity;
-        foreach (var rule in settings.Hulls ?? new List<MarketHullRule>())
-        {
-            if (!ValidHullRule(rule)) continue;
-            var timer = market.EquipmentSpawns.Find(x => x?.WeaponId == "hull:" + rule.Hull.Id);
-            next = Math.Min(next, market.ElapsedSeconds - market.EquipmentPendingSeconds + rule.SpawnIntervalSeconds - (timer?.Remainder ?? 0));
-        }
-        foreach (var listing in market.Hulls)
-            if (listing?.Hull != null) next = Math.Min(next, listing.ExpiresAtSeconds);
-        return next;
-    }
-    private void AdvanceHulls(MarketRuntimeData market, MarketGalaxyLevelSettings settings, double seconds)
-    {
-        long before = market.Revision;
-        double end = market.ElapsedSeconds + seconds;
-        foreach (var rule in settings.Hulls ?? new List<MarketHullRule>())
-        {
-            if (!ValidHullRule(rule)) continue;
-            string timerId = "hull:" + rule.Hull.Id;
-            var timer = market.EquipmentSpawns.Find(x => x?.WeaponId == timerId);
-            if (timer == null) { timer = new MarketEquipmentSpawnState { WeaponId = timerId }; market.EquipmentSpawns.Add(timer); }
-            double next = market.ElapsedSeconds + rule.SpawnIntervalSeconds - timer.Remainder;
-            for (double time = next; time <= end + 1e-9; time += rule.SpawnIntervalSeconds)
-            {
-                timer.SpawnSequence++;
-                if (market.Hulls.RemoveAll(x => x?.Hull == null || (x.Hull.ConfigId == rule.Hull.Id && x.ExpiresAtSeconds <= time)) > 0) market.Revision++;
-                if (market.Hulls.Count(x => x.Hull.ConfigId == rule.Hull.Id) >= rule.MaximumListings) continue;
-                AddHullListing(market, rule, timer.SpawnSequence, time);
-            }
-            timer.Remainder = (timer.Remainder + seconds) % rule.SpawnIntervalSeconds;
-        }
-        if (market.Hulls.RemoveAll(x => x?.Hull == null || x.ExpiresAtSeconds <= end) > 0) market.Revision++;
-        if (market.Revision != before) Log("HULL_LISTINGS", market, "Count=" + market.Hulls.Count);
-    }
+    private static bool ValidHullRule(MarketHullRule rule, int marketLevel) =>
+        rule?.Hull != null && rule.Hull.Level <= marketLevel && rule.NewPrice > 0;
 }

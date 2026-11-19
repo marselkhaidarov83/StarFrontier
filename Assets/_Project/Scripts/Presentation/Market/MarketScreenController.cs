@@ -118,11 +118,15 @@ public class MarketScreenController : CustomMonoBehaviour
         _view.SetActions(buyInfo, sellInfo, canBuy, canSell, canTransfer);
         _revision = _boundMarket?.Revision ?? -1;
     }
+    private static bool IsVisibleMarketGoods(ItemConfig item) =>
+        item != null && item.ItemCategory != ItemCategory.Fuel &&
+        item.Id != "item_fuel_cells_01" && item.Id != "item_repair_01";
+
     private void BuildOffers()
     {
         _offers.Clear(); if (_boundMarket == null) return;
         foreach (var entry in _market.GetItems())
-            if (entry?.ItemConfig != null && entry.ItemConfig.ItemCategory != ItemCategory.Fuel) _offers.Add(Goods(entry.ItemConfig, entry.Quantity, true));
+            if (IsVisibleMarketGoods(entry?.ItemConfig)) _offers.Add(Goods(entry.ItemConfig, entry.Quantity, true));
         foreach (var listing in _boundMarket.Equipment)
             if (listing?.Equipment != null && listing.Allied && listing.ExpiresAtSeconds > _boundMarket.ElapsedSeconds)
                 _offers.Add(Equipment(listing.Equipment, true));
@@ -141,7 +145,7 @@ public class MarketScreenController : CustomMonoBehaviour
             {
                 if (entry == null || string.IsNullOrEmpty(entry.ItemId) || !_seen.Add(entry.ItemId)) continue;
                 int quantity = cargo.GetQuantity(entry.ItemId); var config = _config.GetItemConfigById(entry.ItemId);
-                if (quantity > 0 && config != null && config.ItemCategory != ItemCategory.Fuel && config is not ShipComponentConfig)
+                if (quantity > 0 && IsVisibleMarketGoods(config) && config is not ShipEquipmentConfig)
                 {
                     var card = Goods(config, quantity, false);
                     card.TradeableQuantity = cargo.GetTradeableQuantity(entry.ItemId);
@@ -155,7 +159,7 @@ public class MarketScreenController : CustomMonoBehaviour
     }
     private MarketCardData2A Goods(ItemConfig config, int quantity, bool buy)
     {
-        var component = config as ShipComponentConfig;
+        var component = config as ShipEquipmentConfig;
         return new MarketCardData2A {
             Key = "goods:" + config.Id, Id = config.Id, Title = config.DisplayName, Icon = config.Icon, Quantity = quantity,
             Component = component != null, Price = _market.GetPrice(config.Id, buy), CargoSize = config.CargoSize,
@@ -169,10 +173,11 @@ public class MarketScreenController : CustomMonoBehaviour
     {
         if (item.IsComponent)
         {
-            var component = _config.GetItemConfigById(item.ComponentConfigId) as ShipComponentConfig;
+            var component = _config.GetItemConfigById(item.ComponentConfigId) as ShipEquipmentConfig;
             return new MarketCardData2A { Key = "module:" + item.InstanceId, Id = item.InstanceId,
                 Title = component != null ? component.DisplayName : item.ComponentConfigId, Icon = component?.Icon,
                 Info = HangarScreenController.ComponentInfo(item, component),
+                Level = component?.Level ?? 0, LevelColor = LevelColor(component?.Level ?? 1),
                 Component = true, Equipment = true, Quantity = 1, Price = _market.EquipmentPrice(item, buy),
                 CargoSize = item.RolledStats.CargoSize, CurrentDurability = item.CurrentDurability,
                 MaximumDurability = item.MaximumDurability,
@@ -184,6 +189,7 @@ public class MarketScreenController : CustomMonoBehaviour
         if (icon == null && marketVisuals != null) icon = type == WeaponType.Missile ? marketVisuals.MissileIcon : marketVisuals.EquipmentIcon;
         return new MarketCardData2A { Key = "equipment:" + item.InstanceId, Id = item.InstanceId,
             Title = config != null ? config.DisplayName : item.WeaponConfigId, Equipment = true, Icon = icon, Quantity = 1,
+            Level = config?.Level ?? item.RolledStats.Level, LevelColor = LevelColor(config?.Level ?? item.RolledStats.Level),
             Info = HangarScreenController.WeaponInfo(item, config),
             Price = _market.EquipmentPrice(item, buy), CargoSize = item.RolledStats.CargoSize > 0 ? item.RolledStats.CargoSize : config?.CargoSize ?? 1,
             CurrentDurability = item.CurrentDurability, MaximumDurability = item.MaximumDurability, CategoryKey = "equipment:" + type, CategoryTitle = MarketScreenRules2A.EquipmentName(type) };
@@ -193,13 +199,15 @@ public class MarketScreenController : CustomMonoBehaviour
         var config = _market.GetHullConfig(item.ConfigId);
         return new MarketCardData2A { Key = "hull:" + item.InstanceId, Id = item.InstanceId, Equipment = true, Hull = true,
             Title = config != null ? config.DisplayName : item.ConfigId,
-            Icon = config?.Hull?.CombatSprite ?? config?.Icon, Quantity = 1,
-            Info = HangarScreenController.WithDescription(config?.Hull != null ? config.Hull.Description : config?.Description,
-                config?.Hull != null ? $"Вместимость трюма: {config.Hull.BaseCargoCapacity}" : string.Empty),
+            Icon = config?.Icon, Quantity = 1,
+            Level = config?.Level ?? 0, LevelColor = LevelColor(config?.Level ?? 1),
+            Info = HangarScreenController.WithDescription(config?.Description, $"Вместимость трюма: {item.CargoCapacity}"),
             Price = _market.HullPrice(item, buy),
             CurrentDurability = item.CurrentDurability, MaximumDurability = item.MaximumDurability,
             CategoryKey = "equipment:hull", CategoryTitle = "Корпус" };
     }
+    private Color LevelColor(int level) => _config.GameVisualConfig?.GetEquipmentLevelColor(level) ?? Color.white;
+
     private void BuildCategories()
     {
         MarketScreenRules2A.BuildCategories(_kind, _offers, _owned, _categories, _seen, _alliedWeaponTypes);

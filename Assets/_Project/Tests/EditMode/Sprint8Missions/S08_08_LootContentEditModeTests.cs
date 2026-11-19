@@ -8,12 +8,12 @@ public sealed class S08_08_LootContentEditModeTests
     [Test]
     public void PlayerAndEveryRangerUseOneStandardGrabber()
     {
-        var grabber = AssetDatabase.LoadAssetAtPath<GrabberConfig>(
-            Content + "Game/grabber_standard_01.asset");
+        var grabber = AssetDatabase.LoadAssetAtPath<ShipEquipmentConfig>(
+            Content + "Market/ShipEquipment/ship_grabber_industrial_L01_01.asset");
         Assert.That(grabber, Is.Not.Null);
-        Assert.That(grabber.Strength, Is.EqualTo(5));
+        Assert.That(grabber.Strength, Is.EqualTo(15));
         Assert.That(grabber.Range, Is.EqualTo(100f));
-        Assert.That(grabber.PullSpeedPerTick, Is.EqualTo(25f));
+        Assert.That(AssetDatabase.LoadAssetAtPath<InteractionConfig>(Content + "Game/interactionConfig_01.asset").LootPullSpeedPerTick, Is.EqualTo(25f));
 
         var newGame = AssetDatabase.LoadAssetAtPath<NewGameConfig>(
             Content + "Game/newGameConfig_01.asset");

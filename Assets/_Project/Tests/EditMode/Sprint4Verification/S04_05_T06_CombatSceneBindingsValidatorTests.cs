@@ -63,10 +63,6 @@ public sealed class S04_05_T06_CombatSceneBindingsValidatorTests
             "Validator must check combat runtime roots.");
 
         Assert.IsTrue(
-            validatorText.Contains("SystemNpcCombatVisualController"),
-            "Validator must check combat visual controller.");
-
-        Assert.IsTrue(
             validatorText.Contains("CombatWeaponTargetMarkerView2A"),
             "Validator must check weapon target marker.");
 

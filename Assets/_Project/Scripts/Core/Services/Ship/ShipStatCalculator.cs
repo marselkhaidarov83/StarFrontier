@@ -16,8 +16,10 @@ public class ShipStatCalculator
         if (!ship.HasModularLoadout)
             return Mathf.Max(0f, config.GetAllyConfigById(ship.AllyConfigId)?.DefaultEngine?.Speed ?? 0f);
 
-        var engine = config.GetItemConfigById(ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.Engine)) as ShipComponentConfig;
-        return engine != null && engine.Slot == ShipComponentSlot.Engine ? Mathf.Max(0f, engine.Speed) : 0f;
+        var instance = ShipLoadoutRules.Component(ship, ShipComponentSlot.Engine);
+        var engine = config.GetItemConfigById(instance?.ComponentConfigId) as ShipEquipmentConfig;
+        return engine != null && engine.Slot == ShipComponentSlot.Engine
+            ? Mathf.Max(0f, instance.GetComponentStats(engine).Speed) : 0f;
     }
 
     public ShipStats Calculate(AllyConfig shipData, List<string> equippedModuleIds)

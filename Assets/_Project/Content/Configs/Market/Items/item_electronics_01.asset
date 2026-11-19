@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: item_electronics_01
   m_EditorClassIdentifier: Data::ItemConfig
   id: item_electronics_01
-  displayName: Электроника
-  description: Commercial electronic equipment and circuitry
+  displayName: "Электроника"
+  description: "Датчики, платы и контроллеры для гражданской техники, связи и автоматизированных систем."
   icon: {fileID: 21300000, guid: 5f85e81a253304094bc92ff67d010359, type: 3}
   itemCategory: 3
-  basePrice: 50
-  cargoSize: 1
-  rarity: 1
+  basePrice: 260
+  marketDevelopmentLevel: 6
+  cargoSize: 2
   isLegal: 1

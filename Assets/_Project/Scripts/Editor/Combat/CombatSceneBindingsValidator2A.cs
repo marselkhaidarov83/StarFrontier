@@ -103,80 +103,35 @@ public static class CombatSceneBindingsValidator2A
         SystemEncounterRuntimeRoot encounterRoot =
             FindObjectInLoadedScene<SystemEncounterRuntimeRoot>();
 
-        SystemNpcCombatVisualController visualController =
-            FindObjectInLoadedScene<SystemNpcCombatVisualController>();
-
-        if (encounterRoot == null &&
-            visualController == null)
-        {
-            return;
-        }
-
         if (encounterRoot == null)
         {
-            errors.Add(
-                CombatScenePath +
-                ": missing SystemEncounterRuntimeRoot.");
-        }
-        else
-        {
-            RequireObjectField(
-                encounterRoot,
-                "enemiesRoot",
-                CombatScenePath,
-                errors);
-
-            RequireObjectField(
-                encounterRoot,
-                "alliesRoot",
-                CombatScenePath,
-                errors);
-
-            RequireObjectField(
-                encounterRoot,
-                "projectilesRoot",
-                CombatScenePath,
-                errors);
-
-            RequireObjectField(
-                encounterRoot,
-                "vfxRoot",
-                CombatScenePath,
-                errors);
-        }
-
-        if (visualController == null)
             return;
+        }
 
         RequireObjectField(
-            visualController,
-            "projectileVisualPrefab",
+            encounterRoot,
+            "enemiesRoot",
             CombatScenePath,
             errors);
 
-        RequirePositiveFloatField(
-            visualController,
-            "fallbackProjectileSpeed",
+        RequireObjectField(
+            encounterRoot,
+            "alliesRoot",
             CombatScenePath,
             errors);
 
-        RequirePositiveFloatField(
-            visualController,
-            "hitscanVisualTravelSeconds",
+        RequireObjectField(
+            encounterRoot,
+            "projectilesRoot",
             CombatScenePath,
             errors);
 
-        RequirePositiveFloatField(
-            visualController,
-            "minProjectileVisualTravelSeconds",
+        RequireObjectField(
+            encounterRoot,
+            "vfxRoot",
             CombatScenePath,
             errors);
 
-        RequirePositiveFloatField(
-            visualController,
-            "maxProjectileVisualTravelSeconds",
-            CombatScenePath,
-            errors);
     }
 
     private static void ValidateNpcPrefab(

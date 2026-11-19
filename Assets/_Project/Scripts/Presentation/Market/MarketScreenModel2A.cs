@@ -8,6 +8,8 @@ public sealed class MarketCardData2A
     public string Key, Id, Title, CategoryKey, CategoryTitle, Info;
     public bool Equipment, Hull, Component;
     public Sprite Icon;
+    public int Level;
+    public Color LevelColor = Color.white;
     public int Quantity, Price, CargoSize, CurrentDurability, MaximumDurability;
     // Market offers use -1. Owned goods expose the ordinary amount separately from mission-owned cargo.
     public int TradeableQuantity = -1;

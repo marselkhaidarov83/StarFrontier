@@ -258,7 +258,7 @@ public sealed class StationVisitEditModeTests
         Assert.That(exits, Is.Zero);
         Assert.That(saves, Is.Zero);
 
-        var engine = Asset<ShipComponentConfig>();
+        var engine = Asset<ShipEquipmentConfig>();
         Set(engine, "id", "engine");
         engine.Slot = ShipComponentSlot.Engine;
         ship.InstalledComponents.Add(SystemNpcWeaponRuntimeState.NewComponent(engine, "engine-instance", (int)ShipComponentSlot.Engine));

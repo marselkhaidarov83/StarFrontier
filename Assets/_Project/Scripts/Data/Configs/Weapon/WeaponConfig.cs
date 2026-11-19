@@ -9,12 +9,11 @@ public class WeaponConfig : SpaceLootCombatConfig
     [Header("Progression")]
     [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]
     [SerializeField][Min(1)] private int level = 1;
-    [Tooltip("Параметр equipmentTier. Используется связанными игровыми системами этого конфига.")]
-    [SerializeField] private WeaponEquipmentTier equipmentTier = WeaponEquipmentTier.Base;
 
     [Header("Cargo")]
     [Tooltip("Занимает места в трюме за один экземпляр оружия.")]
-    [SerializeField][Min(1)] private int cargoSize = 1;
+    [SerializeField][Min(1)] private int cargoSizeMin = 1;
+    [SerializeField][Min(1)] private int cargoSizeMax = 2;
 
     [Header("Base Stats / Randomized Runtime Ranges")]
     [Tooltip("Минимальное значение параметра baseDamageMin. Используется как нижняя граница диапазона.")]
@@ -23,9 +22,9 @@ public class WeaponConfig : SpaceLootCombatConfig
     [SerializeField][Min(1)] private int baseDamageMax = 1;
 
     [Tooltip("Минимальное значение параметра rangeMin. Используется как нижняя граница диапазона.")]
-    [SerializeField][Min(0f)] private float rangeMin = 1f;
+    [SerializeField][Min(0f)] private int rangeMin = 1;
     [Tooltip("Максимальное значение параметра rangeMax. Используется как верхняя граница диапазона.")]
-    [SerializeField][Min(0f)] private float rangeMax = 1f;
+    [SerializeField][Min(0f)] private int rangeMax = 1;
 
     [Tooltip("Минимальное значение параметра energyCostMin. Используется как нижняя граница диапазона.")]
     [SerializeField][Min(0)] private int energyCostMin = 0;
@@ -38,16 +37,10 @@ public class WeaponConfig : SpaceLootCombatConfig
     [SerializeField][Min(1)] private int projectileLifetimeMax = 1;
 
     [Header("Combat Behavior")]
-    [Tooltip("Переключатель isHitscan. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool isHitscan;
     [Tooltip("Параметр weaponType. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private WeaponType weaponType;
     [Tooltip("Параметр damageType. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private WeaponDamageType damageType;
-    [Tooltip("Параметр targetingMode. Используется связанными игровыми системами этого конфига.")]
-    [SerializeField] private WeaponTargetingMode targetingMode = WeaponTargetingMode.SelectedTarget;
-    [Tooltip("Переключатель autoDetectShotType. Включает или выключает соответствующее правило или отображение.")]
-    [SerializeField] private bool autoDetectShotType = true;
     [Tooltip("Параметр shotType. Используется связанными игровыми системами этого конфига.")]
     [SerializeField] private WeaponShotType2A shotType = WeaponShotType2A.Beam;
     [Tooltip("Количество для параметра shotCount. Используется соответствующей системой при генерации или расчёте.")]
@@ -66,11 +59,12 @@ public class WeaponConfig : SpaceLootCombatConfig
     [SerializeField][Min(0)] private int maxAmmoChargesMax = 0;
 
     public int Level => level;
-    public WeaponEquipmentTier EquipmentTier => equipmentTier;
 
     [SerializeField, Min(1)] private int maximumDurability = 100;
     public int MaximumDurability => maximumDurability > 0 ? maximumDurability : 100;
-    public int CargoSize => cargoSize;
+    public int CargoSize => cargoSizeMin;
+    public int CargoSizeMin => cargoSizeMin;
+    public int CargoSizeMax => cargoSizeMax;
 
     public int BaseDamageMin => baseDamageMin;
     public int BaseDamageMax => baseDamageMax;
@@ -84,10 +78,8 @@ public class WeaponConfig : SpaceLootCombatConfig
     public int ProjectileLifetimeMin => projectileLifetimeMin;
     public int ProjectileLifetimeMax => projectileLifetimeMax;
 
-    public bool IsHitscan => isHitscan;
     public WeaponType WeaponType => weaponType;
     public WeaponDamageType DamageType => damageType;
-    public WeaponTargetingMode TargetingMode => targetingMode;
 
     public GameObject ProjectilePrefabRef => projectilePrefabRef;
 
@@ -95,8 +87,7 @@ public class WeaponConfig : SpaceLootCombatConfig
     public int MaxAmmoChargesMin => maxAmmoChargesMin;
     public int MaxAmmoChargesMax => maxAmmoChargesMax;
 
-    public bool AutoDetectShotType => autoDetectShotType;
-    public WeaponShotType2A ShotType => autoDetectShotType ? ResolveShotType() : shotType;
+    public WeaponShotType2A ShotType => shotType;
     public int ShotCount => shotCount;
 
     public WeaponRuntimeStats RollRuntimeStats()
@@ -115,8 +106,9 @@ public class WeaponConfig : SpaceLootCombatConfig
         if (random == null)
             random = new System.Random();
 
+        int cargoSize = RollIntInclusive(random, cargoSizeMin, cargoSizeMax);
         int damage = RollIntInclusive(random, baseDamageMin, baseDamageMax);
-        float range = RollFloat(random, rangeMin, rangeMax);
+        int range = RollIntInclusive(random, rangeMin, rangeMax);
         int energyCost = RollIntInclusive(random, energyCostMin, energyCostMax);
         int projectileLifetime = RollIntInclusive(random, projectileLifetimeMin, projectileLifetimeMax);
 
@@ -127,17 +119,14 @@ public class WeaponConfig : SpaceLootCombatConfig
         return new WeaponRuntimeStats(
             Id,
             level,
-            equipmentTier,
             cargoSize,
             damage,
             range,
             energyCost,
             projectileLifetime,
-            isHitscan,
             weaponType,
             ShotType,
             damageType,
-            targetingMode,
             shotCount,
             usesAmmo,
             maxAmmoCharges
@@ -164,10 +153,6 @@ public class WeaponConfig : SpaceLootCombatConfig
                weaponType == WeaponType.Burst;
     }
 
-    public bool IsProjectileLike()
-    {
-        return !isHitscan;
-    }
 
     private static int RollIntInclusive(System.Random random, int min, int max)
     {
@@ -177,71 +162,18 @@ public class WeaponConfig : SpaceLootCombatConfig
         return random.Next(min, max + 1);
     }
 
-    private static float RollFloat(System.Random random, float min, float max)
-    {
-        if (max < min)
-            max = min;
-
-        double value01 = random.NextDouble();
-        return min + (float)value01 * (max - min);
-    }
-
-    private WeaponShotType2A ResolveShotType()
-    {
-        string normalizedId = string.IsNullOrWhiteSpace(Id)
-            ? string.Empty
-            : Id.ToLowerInvariant();
-
-        if (weaponType == WeaponType.Laser ||
-            weaponType == WeaponType.Beam ||
-            normalizedId.Contains("_laser_") ||
-            normalizedId.Contains("_lance_") ||
-            normalizedId.Contains("_tendril_"))
-        {
-            return WeaponShotType2A.Beam;
-        }
-
-        if (weaponType == WeaponType.Missile ||
-            normalizedId.Contains("_missile_") ||
-            normalizedId.Contains("_swarm_missile_") ||
-            normalizedId.Contains("_orb_") ||
-            normalizedId.Contains("_swarm_"))
-        {
-            return WeaponShotType2A.MissileSwarm;
-        }
-
-        if (weaponType == WeaponType.Plasma ||
-            normalizedId.Contains("_plasma_") ||
-            normalizedId.Contains("_core_bolt_") ||
-            normalizedId.Contains("_acid_"))
-        {
-            return WeaponShotType2A.HeavyProjectile;
-        }
-
-        if (weaponType == WeaponType.Disruptor ||
-            weaponType == WeaponType.Singularity ||
-            weaponType == WeaponType.Spore ||
-            normalizedId.Contains("_wave_cannon_") ||
-            normalizedId.Contains("_disruptor_") ||
-            normalizedId.Contains("_singularity_") ||
-            normalizedId.Contains("_spore_"))
-        {
-            return WeaponShotType2A.Wave;
-        }
-
-        return WeaponShotType2A.RapidEnergyVolley;
-    }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
         level = Mathf.Max(1, level);
-        cargoSize = Mathf.Max(1, cargoSize);
+        cargoSizeMin = Mathf.Max(1, cargoSizeMin);
+        cargoSizeMax = Mathf.Max(cargoSizeMin, cargoSizeMax);
 
         baseDamageMin = Mathf.Max(1, baseDamageMin);
         baseDamageMax = Mathf.Max(baseDamageMin, baseDamageMax);
 
-        rangeMin = Mathf.Max(0f, rangeMin);
+        rangeMin = Mathf.Max(0, rangeMin);
         rangeMax = Mathf.Max(rangeMin, rangeMax);
 
         energyCostMin = Mathf.Max(0, energyCostMin);

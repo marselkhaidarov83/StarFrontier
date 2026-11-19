@@ -16,7 +16,7 @@ public enum ResearchUpgrade
     MilitaryMissileDefense = 22,
     MilitaryElectronicWarfare = 23,
     MilitaryFleetCoordination = 24,
-    TradeMarketAnalysis = 25,
+    TradeNewGoods = 25,
     TradeWholesale = 26,
     TradeWarehouseReserves = 27,
     TradeCargoInsurance = 28,
@@ -51,7 +51,8 @@ public enum ResearchUpgrade
     MissionEscort = 57,
     MissionCrewRescue = 58,
     MissionCargoRecovery = 59,
-    MissionInterception = 60
+    MissionInterception = 60,
+    TradeMarketImprovement = 61
 }
 [Serializable] public sealed class ResearchUpgradeLevel
 {

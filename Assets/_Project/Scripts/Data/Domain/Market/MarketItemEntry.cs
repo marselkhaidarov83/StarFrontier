@@ -12,7 +12,4 @@ public class MarketItemEntry
     [UnityEngine.Min(0)] public int BasePrice;
     [UnityEngine.Min(0)] public int MaximumPrice;
 
-    public float BuyMultiplier = 1f;
-    public float SellMultiplier = 0.5f;
-    public bool IsAvailable = true;
 }

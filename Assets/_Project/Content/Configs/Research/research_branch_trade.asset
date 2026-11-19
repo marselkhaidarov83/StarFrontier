@@ -1003,11 +1003,12 @@ MonoBehaviour:
           Amount: 250
         DurationSeconds: 19
   - Upgrade: 25
-    Title: "Анализ рынков"
+    Title: "Новые товары"
     Icon: {fileID: 0}
     RequiredGalaxyLevel: 1
     TreePosition: {x: 5, y: 0}
-    StartingLevel: 0
+    StartingLevel: 1
+    Description: "Открывает торговые товары по уровню развития рынка. На первом уровне доступны продовольствие, руда и промышленные детали, на уровнях 2–10 открывается по одному новому товару."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
@@ -1237,3 +1238,201 @@ MonoBehaviour:
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+  - Upgrade: 61
+    Title: "Улучшение рынка"
+    Icon: {fileID: 0}
+    RequiredGalaxyLevel: 1
+    TreePosition: {x: 10, y: 0}
+    StartingLevel: 1
+    Description: "Расширяет ассортимент корпусов, оружия и оборудования и открывает модели соответствующего уровня. Повышает количество предложений во всех профилях рынка."
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 250
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 1
+        DurationSeconds: 30
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 10
+        DurationSeconds: 30
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 1000
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 1
+        DurationSeconds: 60
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 20
+        DurationSeconds: 60
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 2250
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 1
+        DurationSeconds: 90
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 30
+        DurationSeconds: 90
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 4000
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 2
+        DurationSeconds: 120
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 40
+        DurationSeconds: 120
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 6250
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 2
+        DurationSeconds: 150
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 50
+        DurationSeconds: 150
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 9000
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 2
+        DurationSeconds: 180
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 60
+        DurationSeconds: 180
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 12250
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 3
+        DurationSeconds: 210
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 70
+        DurationSeconds: 210
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 16000
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 3
+        DurationSeconds: 240
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 80
+        DurationSeconds: 240
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 20250
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 3
+        DurationSeconds: 270
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 90
+        DurationSeconds: 270
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions:
+      - Id: credits_astralites
+        Costs:
+        - Resource: 0
+          Item: {fileID: 0}
+          Amount: 25000
+        - Resource: 1
+          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
+          Amount: 4
+        DurationSeconds: 300
+      - Id: diamonds
+        Costs:
+        - Resource: 2
+          Item: {fileID: 0}
+          Amount: 100
+        DurationSeconds: 300

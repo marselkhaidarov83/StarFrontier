@@ -25,14 +25,6 @@ public class WeaponConfigValidator : IConfigValidator<WeaponConfig>
                 config));
         }
 
-        if (!Enum.IsDefined(typeof(WeaponEquipmentTier), config.EquipmentTier))
-        {
-            issues.Add(new ValidationIssue(
-                ValidationSeverity.Error,
-                "EquipmentTier has invalid value.",
-                config));
-        }
-
         if (config.CargoSize <= 0)
         {
             issues.Add(new ValidationIssue(

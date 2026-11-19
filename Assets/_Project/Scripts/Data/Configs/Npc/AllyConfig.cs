@@ -93,12 +93,12 @@ public sealed class AllyConfig : BaseConfig
 
     [Header("Hull Equipment")]
     [SerializeField] private ShipComponentSlots availableComponentSlots = ShipComponentSlots.All;
-    [SerializeField] private ShipComponentConfig[] defaultComponents = new ShipComponentConfig[0];
+    [SerializeField] private ShipEquipmentConfig[] defaultComponents = new ShipEquipmentConfig[0];
 
     public ShipComponentSlots AvailableComponentSlots => availableComponentSlots;
-    public IReadOnlyList<ShipComponentConfig> DefaultComponents => defaultComponents;
+    public IReadOnlyList<ShipEquipmentConfig> DefaultComponents => defaultComponents;
 
-    public ShipComponentConfig DefaultEngine
+    public ShipEquipmentConfig DefaultEngine
     {
         get
         {
@@ -136,7 +136,7 @@ public sealed class AllyConfig : BaseConfig
     [SerializeField] private NpcLootTableConfig lootTable;
 
     [Header("Loot capture")]
-    [SerializeField] private GrabberConfig grabber;
+    [SerializeField] private ShipEquipmentConfig grabber;
 
 
     [Header("Weapon Groups")]
@@ -187,7 +187,7 @@ public sealed class AllyConfig : BaseConfig
     public int Level => level;
     public AllyRole2A Role => role;
     public NpcLootTableConfig LootTable => lootTable;
-    public GrabberConfig Grabber => grabber;
+    public ShipEquipmentConfig Grabber => grabber;
     public AllyNamePoolConfig NamePool => namePool;
 
     public IReadOnlyList<AllyBehaviourScenarioEntry> BehaviorScenarios =>

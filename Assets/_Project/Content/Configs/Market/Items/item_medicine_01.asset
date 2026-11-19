@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: item_medicine_01
   m_EditorClassIdentifier: Data::ItemConfig
   id: item_medicine_01
-  displayName: Лекарства
-  description: Medical supplies in steady demand across populated systems
+  displayName: "Медикаменты"
+  description: "Лекарства, перевязочные материалы и медицинские расходники для клиник, станций и кораблей."
   icon: {fileID: 21300000, guid: 485fff50311c84705a89e13ac440bd34, type: 3}
   itemCategory: 2
-  basePrice: 35
+  basePrice: 100
+  marketDevelopmentLevel: 5
   cargoSize: 1
-  rarity: 1
   isLegal: 1

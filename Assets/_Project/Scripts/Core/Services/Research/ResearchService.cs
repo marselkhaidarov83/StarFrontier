@@ -22,6 +22,16 @@ public sealed class ResearchService : IResearchService
         if (_session.State?.Galaxy == null) return;
         _session.State.Galaxy.Research ??= new ResearchRuntimeState();
         _session.State.Galaxy.Research.Normalize();
+        var marketNode = Tree?.Branches?.Where(branch => branch != null)
+            .SelectMany(branch => branch.Nodes ?? Array.Empty<ResearchNode>())
+            .FirstOrDefault(node => node != null && node.Upgrade == ResearchUpgrade.TradeMarketImprovement);
+        var research = _session.State.Galaxy.Research;
+        if (marketNode != null && marketNode.StartingLevel > 0 && research.GetLevel(marketNode.Upgrade) < marketNode.StartingLevel)
+        {
+            var entry = research.Levels.Find(level => level != null && level.Upgrade == marketNode.Upgrade);
+            if (entry == null) research.Levels.Add(new ResearchUpgradeLevel { Upgrade = marketNode.Upgrade, Level = marketNode.StartingLevel });
+            else entry.Level = marketNode.StartingLevel;
+        }
         if (!ReferenceEquals(_loggedSession, _session.State))
         {
             _loggedSession = _session.State;

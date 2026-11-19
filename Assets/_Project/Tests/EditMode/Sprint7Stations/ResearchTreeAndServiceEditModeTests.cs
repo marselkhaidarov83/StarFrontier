@@ -250,7 +250,7 @@ public sealed class ResearchTreeAndServiceEditModeTests
         Assert.That(ResearchRules.TryQuote(_tree, state, next.Upgrade, "pay", out _, out string reason, 2), Is.False);
         Assert.That(reason, Is.EqualTo("GalaxyLevelRequired"));
     }
-    [Test] public void ProductionResearchTree_HasSixBranchesTenNodesTenLevelsAndValidLevelDependencies()
+    [Test] public void ProductionResearchTree_HasSixBranchesAndDedicatedMarketImprovementResearch()
     {
         var tree = UnityEditor.AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>(
             "Assets/_Project/Content/Configs/Research/research_tree_galaxy.asset");
@@ -258,7 +258,7 @@ public sealed class ResearchTreeAndServiceEditModeTests
         Assert.That(tree.Branches.Length, Is.EqualTo(6));
         foreach (var branch in tree.Branches)
         {
-            Assert.That(branch.Nodes.Length, Is.EqualTo(10));
+            Assert.That(branch.Nodes.Length, Is.EqualTo(branch.Id == "research_branch_trade" ? 11 : 10));
             for (int i = 0; i < branch.Nodes.Length; i++)
             {
                 Assert.That(branch.Nodes[i].Levels.Length, Is.EqualTo(10));

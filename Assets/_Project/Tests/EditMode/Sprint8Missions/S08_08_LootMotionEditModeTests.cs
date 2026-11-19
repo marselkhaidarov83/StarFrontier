@@ -10,7 +10,7 @@ public sealed class S08_08_LootMotionEditModeTests
 {
     private Bootstrapper _previousBootstrap;
     private GameObject _host;
-    private GrabberConfig _grabber;
+    private ShipEquipmentConfig _grabber;
     private AllyConfig _ally;
     private GameRuntimeState _state;
     private SystemNpcRuntimeState _ranger;
@@ -33,7 +33,10 @@ public sealed class S08_08_LootMotionEditModeTests
         Bootstrapper.Instance = bootstrap;
         var services = new ServiceRegistry();
         bootstrap.ServiceRegistry = services;
-        _grabber = ScriptableObject.CreateInstance<GrabberConfig>();
+        _grabber = ScriptableObject.CreateInstance<ShipEquipmentConfig>();
+        _grabber.Slot = ShipComponentSlot.Grabber;
+        _grabber.GrabberStrengthMin = _grabber.GrabberStrengthMax = 5;
+        _grabber.GrabberRangeMin = _grabber.GrabberRangeMax = 100;
         _ally = ScriptableObject.CreateInstance<AllyConfig>();
         typeof(AllyConfig).GetField("grabber", BindingFlags.Instance | BindingFlags.NonPublic)
             .SetValue(_ally, _grabber);
@@ -60,7 +63,7 @@ public sealed class S08_08_LootMotionEditModeTests
         services.Register(new SimpleEventBus());
         _heavyWeapon = null;
         _astralite = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemConfig>(
-            "Assets/_Project/Content/Configs/Items/item_astralite_ancients_01.asset");
+            "Assets/_Project/Content/Configs/Market/Items/item_astralite_ancients_01.asset");
         Assert.That(_astralite, Is.Not.Null);
         services.Register(S08MissionTestProxy.Make<IGameSessionService>((m, a) =>
             m.Name == "get_State" ? _state : DefaultValue(m)));
@@ -68,7 +71,7 @@ public sealed class S08_08_LootMotionEditModeTests
         {
             "GetAllyConfigById" => _ally,
             "GetItemConfigById" => UnityEditor.AssetDatabase.LoadAssetAtPath<ItemConfig>(
-                "Assets/_Project/Content/Configs/Items/" + (string)a[0] + ".asset"),
+                "Assets/_Project/Content/Configs/Market/Items/" + (string)a[0] + ".asset"),
             "GetWeaponConfigById" => LoadTestWeapon((string)a[0]),
             "GetEnemyConfigById" => LoadTestEnemy((string)a[0]),
             "get_CombatFxVisualConfig" => UnityEditor.AssetDatabase.LoadAssetAtPath<CombatFxVisualConfig>(

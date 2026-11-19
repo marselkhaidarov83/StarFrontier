@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: ship_engine_advanced_L06_01
+  m_EditorClassIdentifier: Data::ShipEquipmentConfig
+  id: ship_engine_advanced_L06_01
+  displayName: "Плазменный двигатель «Орион»"
+  description: "Разгоняет корабль ровным потоком тяги и уверенно ведёт его через пустоту. Точная настройка силового контура помогает держать курс в долгом перелёте."
+  icon: {fileID: 21300000, guid: 2875b803cba44899991bd96768c0adf0, type: 3}
+  lootHealth: 1
+  itemCategory: 10
+  basePrice: 7200
+  marketDevelopmentLevel: 6
+  cargoSize: 6
+  isLegal: 1
+  Level: 6
+  Variant: 2
+  Slot: 0
+  MaximumDurability: 225
+  CargoSizeMin: 6
+  CargoSizeMax: 7
+  SpeedMin: 300
+  SpeedMax: 320
+  EngineRangeMin: 2250
+  EngineRangeMax: 2350
+  FuelCapacityMin: 0
+  FuelCapacityMax: 0
+  RadarRangeMin: 0
+  RadarRangeMax: 0
+  ScannerRangeMin: 0
+  ScannerRangeMax: 0
+  RepairPerCycleMin: 0
+  RepairPerCycleMax: 0
+  GrabberStrengthMin: 0
+  GrabberStrengthMax: 0
+  GrabberRangeMin: 0
+  GrabberRangeMax: 0
+  ShieldMin: 0
+  ShieldMax: 0

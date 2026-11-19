@@ -32,17 +32,8 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
     }
     private GameRuntimeState State => _session.State;
     private MarketEconomyBalanceConfig Balance => _config.MarketEconomy;
-    private int GalaxyLevel
-    {
-        get
-        {
-            int count = 0;
-            var sectors = State?.Galaxy?.Sectors;
-            if (sectors != null)
-                for (int i = 0; i < sectors.Count; i++) if (sectors[i] != null && sectors[i].IsUnlocked) count++;
-            return Math.Max(1, count);
-        }
-    }
+    private int? _marketLevelOverride;
+    private int MarketLevel => _marketLevelOverride ?? Math.Max(1, Math.Min(10, ResearchLevel(ResearchUpgrade.TradeMarketImprovement)));
     private int ResearchLevel(ResearchUpgrade upgrade) => State?.Galaxy?.Research?.GetLevel(upgrade) ?? 0;
     private MarketResearchEffect WarEffect => _completingProtection ? _completionWarEffect : Balance?.GetEffect(ResearchLevel(Balance.WarProtectionResearch));
     private float MinimumBuyout => Balance?.GetEffect(ResearchLevel(Balance.EquipmentBuyoutResearch))?.MinimumEquipmentBuyoutPercent ?? 0.1f;
@@ -107,28 +98,31 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         }
         market.Items ??= new List<MarketRuntimeItemState>();
         market.Equipment ??= new List<MarketEquipmentListing>();
-        market.EquipmentSpawns ??= new List<MarketEquipmentSpawnState>();
         market.Receipts ??= new List<MarketTransactionReceipt>();
         market.PersonalStorage ??= new RuntimeCargoInventory();
         market.PersonalStorage.entries ??= new List<RuntimeCargoEntryData>();
         market.PersonalEquipment ??= new List<SystemNpcWeaponRuntimeState>();
         market.PersonalHulls ??= new List<HullEquipmentRuntimeState>();
         market.Hulls ??= new List<MarketHullListing>();
-        var level = profile.GetLevel(GalaxyLevel);
+        var level = profile.GetLevel(MarketLevel);
         int applied = level?.GalaxyLevel ?? 0;
         bool changed = created || market.AppliedGalaxyLevel != applied || market.AppliedProfileId != profile.Id;
         if (changed && market.EquipmentPendingSeconds > 0)
         {
             var oldSettings = profile.GetLevel(market.AppliedGalaxyLevel);
-            if (oldSettings != null) FlushEquipment(market, oldSettings);
+            if (oldSettings != null) FlushEquipment(market, oldSettings, profile.OfferRefreshIntervalSeconds);
         }
-        if (initialize || changed)
+        if (initialize || changed || !market.OffersInitialized)
         {
-            bool seededHulls = SeedHullListings(market, level);
-            bool seededComponents = SeedComponentListings(market, level);
-            if (seededHulls || seededComponents)
+            if (changed || !market.OffersInitialized)
+            {
+                market.EquipmentPendingSeconds = 0;
+                market.OfferRefreshRemainder = 0;
+                market.OfferRefreshSequence++;
+                RefreshOffers(market, profile, level, market.ElapsedSeconds);
                 _equipmentDeadlines.Remove(market);
-            var entries = level?.Items ?? profile.Items;
+            }
+            var entries = level?.Items;
             if (entries != null)
                 for (int i = 0; i < entries.Count; i++)
                 {
@@ -142,7 +136,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
             market.AppliedGalaxyLevel = applied; market.AppliedProfileId = profile.Id; market.Revision++;
             _equipmentDeadlines.Remove(market);
             if (_advancing) _changedMarkets.Add(new MarketStateChangedEvent(market.SystemId, market.PlanetId));
-            Log("PROFILE", market, "GalaxyLevel=" + GalaxyLevel + " | SettingsLevel=" + applied);
+            Log("PROFILE", market, "MarketLevel=" + MarketLevel + " | SettingsLevel=" + applied);
         }
         return market;
     }
@@ -172,27 +166,27 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         return market != null;
     }
     public MarketRuntimeData CurrentMarket => Current(out var market, out _) ? market : null;
+    private bool IsItemUnlocked(ItemConfig item) =>
+        item.MarketDevelopmentLevel <= Math.Max(1, ResearchLevel(ResearchUpgrade.TradeNewGoods));
+
     private MarketItemEntry Entry(MarketProfileConfig profile, string id) =>
-        (profile.GetLevel(GalaxyLevel)?.Items ?? profile.Items)?.Find(x => x?.ItemConfig != null && x.ItemConfig.Id == id && x.IsAvailable);
+        profile.GetLevel(MarketLevel)?.Items?.Find(x => x?.ItemConfig != null && x.ItemConfig.Id == id && IsItemUnlocked(x.ItemConfig));
     private static MarketRuntimeItemState Stock(MarketRuntimeData market, string id) => market.Items.Find(x => x != null && x.ItemId == id);
 
     public IReadOnlyList<MarketItemEntry> GetItems()
     {
         if (!Current(out var market, out var profile)) return Array.Empty<MarketItemEntry>();
-        return (profile.GetLevel(GalaxyLevel)?.Items ?? profile.Items ?? new List<MarketItemEntry>())
-            .Where(x => x?.ItemConfig != null && x.IsAvailable).Select(x => new MarketItemEntry {
+        return (profile.GetLevel(MarketLevel)?.Items ?? new List<MarketItemEntry>())
+            .Where(x => x?.ItemConfig != null && IsItemUnlocked(x.ItemConfig)).Select(x => new MarketItemEntry {
                 ItemConfig = x.ItemConfig, Quantity = Stock(market, x.ItemConfig.Id)?.Quantity ?? 0,
                 StockChange = x.StockChange, MaximumStock = x.MaximumStock, BasePrice = x.BasePrice,
-                MaximumPrice = x.MaximumPrice, BuyMultiplier = x.BuyMultiplier, SellMultiplier = x.SellMultiplier, IsAvailable = true }).ToList();
+                MaximumPrice = x.MaximumPrice }).ToList();
     }
     public int GetPrice(string itemId, bool buy)
     {
         if (!Current(out var market, out var profile)) return 0;
         var entry = Entry(profile, itemId);
         if (entry == null) return 0;
-        // Preserve station and unconverted legacy content until an explicit level table is assigned.
-        if (profile.GetLevel(GalaxyLevel) == null)
-            return (int)Math.Min(int.MaxValue, Math.Max(0, Math.Round(entry.ItemConfig.BasePrice * (double)(buy ? entry.BuyMultiplier : entry.SellMultiplier))));
         int stock = Stock(market, itemId)?.Quantity ?? 0;
         // Sale quote includes the incoming unit. The reverse trade uses the same marginal price.
         return MarketEconomyRules.Price(entry, buy ? stock : (int)Math.Min(int.MaxValue, (long)stock + 1));
@@ -207,7 +201,6 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         var entry = Entry(profile, id);
         var stock = Stock(market, id);
         if (entry == null || stock == null || quantity <= 0) return 0;
-        if (profile.GetLevel(GalaxyLevel) == null) return (long)GetPrice(id, buy) * quantity;
         return MarketEconomyRules.TotalPrice(entry, stock.Quantity, quantity, buy);
     }
     public int GetMaximumTradeQuantity(string itemId, bool buy, bool warehouse = false)
@@ -229,7 +222,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
     public bool CanTrade(string itemId, int quantity, bool buy, bool warehouse = false)
     {
         if (_committing || Ship?.Cargo == null || quantity <= 0 || !Current(out var market, out var profile)) return false;
-        if (Entry(profile, itemId)?.ItemConfig is ShipComponentConfig && (!buy || quantity != 1)) return false;
+        if (Entry(profile, itemId)?.ItemConfig is ShipEquipmentConfig && (!buy || quantity != 1)) return false;
         int price = GetPrice(itemId, buy);
         var stock = Stock(market, itemId);
         long total = Quote(market, profile, itemId, quantity, buy);
@@ -252,7 +245,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
             return receipt.Intent == intent ? EconomyOperationResult.Completed(buy ? -receipt.TotalPrice : receipt.TotalPrice, itemId, quantity) : Fail(EconomyErrorCode.OperationConflict);
         if (expectedRevision >= 0 && market.Revision != expectedRevision) return Fail(EconomyErrorCode.MarketChanged);
         if (Ship?.Cargo == null) return Fail(EconomyErrorCode.ItemNotOwned);
-        var component = Entry(profile, itemId)?.ItemConfig as ShipComponentConfig;
+        var component = Entry(profile, itemId)?.ItemConfig as ShipEquipmentConfig;
         if (component != null && quantity != 1) return Fail(EconomyErrorCode.InvalidQuantity);
         if (!buy && component != null) return Fail(EconomyErrorCode.ItemNotOwned);
         int price = GetPrice(itemId, buy);
@@ -367,7 +360,32 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
     }
     private void OnResearchCompleted(ResearchCompletedEvent completed)
     {
-        if (completed == null || Balance == null || completed.Upgrade != Balance.WarProtectionResearch || _advancing || _committing) return;
+        if (completed == null || _advancing || _committing) return;
+        if (completed.Upgrade == ResearchUpgrade.TradeMarketImprovement)
+        {
+            InitializeSession();
+            if (State?.Galaxy == null) return;
+            _advancing = true; _changedMarkets.Clear();
+            _marketLevelOverride = Math.Max(1, completed.Level - 1);
+            try
+            {
+                // Settle all deferred markets at the old research level first.
+                for (int i = 0; i < _systems.Count; i++) AdvanceSystem(_systems[i]);
+                _marketLevelOverride = null;
+                for (int i = 0; i < _systems.Count; i++) AdvanceSystem(_systems[i]);
+            }
+            finally { _marketLevelOverride = null; _advancing = false; }
+            PublishChanges();
+            return;
+        }
+        if (completed.Upgrade == ResearchUpgrade.TradeNewGoods)
+        {
+            var current = CurrentMarket;
+            if (current != null)
+                _events?.PublishSafely(new MarketStateChangedEvent(current.SystemId, current.PlanetId), _ => { });
+            return;
+        }
+        if (Balance == null || completed.Upgrade != Balance.WarProtectionResearch) return;
         InitializeSession();
         if (State?.Galaxy == null) return;
         // This rare boundary settles deferred systems under the old protection level before the new effect applies.
@@ -393,7 +411,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
     }
     private void Advance(MarketRuntimeData market, MarketProfileConfig profile, double seconds, bool war)
     {
-        var settings = profile.GetLevel(GalaxyLevel);
+        var settings = profile.GetLevel(MarketLevel);
         if (market == null || settings == null || settings.IntervalSeconds <= 0 || float.IsNaN(settings.IntervalSeconds) || float.IsInfinity(settings.IntervalSeconds)) return;
         long revisionBefore = market.Revision;
         double elapsed = market.IntervalRemainder + seconds;
@@ -414,13 +432,13 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         market.EquipmentPendingSeconds += seconds;
         if (!_equipmentDeadlines.TryGetValue(market, out double deadline))
         {
-            deadline = NextEquipmentDeadline(market, settings);
+            deadline = NextEquipmentDeadline(market, profile);
             _equipmentDeadlines[market] = deadline;
         }
         if (market.ElapsedSeconds + 1e-9 >= deadline)
         {
-            FlushEquipment(market, settings);
-            _equipmentDeadlines[market] = NextEquipmentDeadline(market, settings);
+            FlushEquipment(market, settings, profile.OfferRefreshIntervalSeconds);
+            _equipmentDeadlines[market] = NextEquipmentDeadline(market, profile);
         }
         if (market.Revision != revisionBefore)
             _changedMarkets.Add(new MarketStateChangedEvent(market.SystemId, market.PlanetId));
@@ -443,115 +461,33 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         _events?.PublishSafely(new SaveNeedEvent("market_offline_progress"), _ => { });
     }
 
-    private static double NextEquipmentDeadline(MarketRuntimeData market, MarketGalaxyLevelSettings settings)
+    private static double NextEquipmentDeadline(MarketRuntimeData market, MarketProfileConfig profile) =>
+        market.ElapsedSeconds - market.EquipmentPendingSeconds +
+        Math.Max(1, profile.OfferRefreshIntervalSeconds) - market.OfferRefreshRemainder;
+
+    private void FlushEquipment(MarketRuntimeData market, MarketGalaxyLevelSettings settings, int refreshSeconds)
     {
-        double next = double.PositiveInfinity;
-        double timerTime = market.ElapsedSeconds - market.EquipmentPendingSeconds;
-        if (settings.Equipment != null)
-            for (int i = 0; i < settings.Equipment.Count; i++)
-            {
-                var rule = settings.Equipment[i];
-                if (!ValidEquipmentRule(rule) || !rule.Allied) continue;
-                string spawnId = rule.SpawnId;
-                double remainder = 0;
-                for (int j = 0; j < market.EquipmentSpawns.Count; j++)
-                    if (market.EquipmentSpawns[j]?.WeaponId == spawnId) { remainder = market.EquipmentSpawns[j].Remainder; break; }
-                next = Math.Min(next, timerTime + rule.SpawnIntervalSeconds - remainder);
-            }
-        for (int i = 0; i < market.Equipment.Count; i++)
-            if (market.Equipment[i]?.Equipment != null) next = Math.Min(next, market.Equipment[i].ExpiresAtSeconds);
-        return Math.Min(next, NextHullDeadline(market, settings));
-    }
-    private void FlushEquipment(MarketRuntimeData market, MarketGalaxyLevelSettings settings)
-    {
-        double pending = market.EquipmentPendingSeconds;
-        if (pending <= 0) return;
+        double seconds = market.EquipmentPendingSeconds;
+        if (seconds <= 0) return;
         LastEquipmentUpdateCount++;
         market.EquipmentPendingSeconds = 0;
-        market.ElapsedSeconds -= pending;
-        AdvanceEquipment(market, settings, pending);
+        int period = Math.Max(1, refreshSeconds);
+        double total = market.OfferRefreshRemainder + seconds;
+        long cycles = (long)Math.Floor((total + 1e-9) / period);
+        market.OfferRefreshRemainder = Math.Max(0, total - cycles * period);
+        if (cycles == 0) return;
+        // Only the last batch can survive an unattended/offline interval.
+        market.OfferRefreshSequence += cycles;
+        RefreshOffers(market, market.AppliedProfileId, settings,
+            market.ElapsedSeconds - market.OfferRefreshRemainder, period);
     }
 
-    private void AdvanceEquipment(MarketRuntimeData market, MarketGalaxyLevelSettings settings, double seconds)
-    {
-        double end = market.ElapsedSeconds + seconds;
-        int spawned = 0, expired = 0;
-        foreach (var rule in settings.Equipment ?? new List<MarketEquipmentRule>())
-        {
-            if (!ValidEquipmentRule(rule)) continue;
-            string spawnId = rule.SpawnId;
-            var timer = market.EquipmentSpawns.Find(x => x?.WeaponId == spawnId);
-            if (timer == null)
-            {
-                timer = new MarketEquipmentSpawnState { WeaponId = spawnId };
-                market.EquipmentSpawns.Add(timer);
-            }
-            double next = market.ElapsedSeconds + rule.SpawnIntervalSeconds - timer.Remainder;
-            for (double time = next; time <= end + 1e-9; time += rule.SpawnIntervalSeconds)
-            {
-                timer.SpawnSequence++;
-                expired += market.Equipment.RemoveAll(x => x?.Equipment == null ||
-                    (rule.Matches(x.Equipment) && x.ExpiresAtSeconds <= time));
-                if (!rule.Allied || market.Equipment.Count(x => rule.Matches(x.Equipment)) >= rule.MaximumListings) continue;
-                AddEquipmentListing(market, rule, timer, time);
-                spawned++;
-            }
-            timer.Remainder = (timer.Remainder + seconds) % rule.SpawnIntervalSeconds;
-        }
-        expired += market.Equipment.RemoveAll(x => x == null || x.Equipment == null || x.ExpiresAtSeconds <= end);
-        if (expired > 0) market.Revision++;
-        AdvanceHulls(market, settings, seconds);
-        market.ElapsedSeconds = end;
-        if (spawned > 0 || expired > 0) Log("LISTINGS", market, "Spawned=" + spawned + " | Expired=" + expired);
-    }
-    private static bool ValidEquipmentRule(MarketEquipmentRule rule) =>
-        !string.IsNullOrEmpty(rule?.EquipmentId) && rule.NewPrice > 0 && rule.MaximumListings > 0 &&
-        rule.SpawnIntervalSeconds > 0 && !float.IsInfinity(rule.SpawnIntervalSeconds) &&
-        rule.LifetimeSeconds > 0 && !float.IsInfinity(rule.LifetimeSeconds);
-
-    private static bool SeedComponentListings(MarketRuntimeData market, MarketGalaxyLevelSettings settings)
-    {
-        if (settings?.Equipment == null) return false;
-        long revision = market.Revision;
-        foreach (var rule in settings.Equipment)
-        {
-            if (!ValidEquipmentRule(rule) || rule.Component == null || !rule.Allied || !rule.StartInStock) continue;
-            string spawnId = rule.SpawnId;
-            if (market.EquipmentSpawns.Exists(x => x?.WeaponId == spawnId)) continue;
-            var timer = new MarketEquipmentSpawnState { WeaponId = spawnId };
-            market.EquipmentSpawns.Add(timer);
-            if (market.Equipment.Exists(x => rule.Matches(x?.Equipment) && x.ExpiresAtSeconds > market.ElapsedSeconds)) continue;
-            timer.SpawnSequence++;
-            AddEquipmentListing(market, rule, timer, market.ElapsedSeconds);
-        }
-        return market.Revision != revision;
-    }
-
-    private static void AddEquipmentListing(MarketRuntimeData market, MarketEquipmentRule rule, MarketEquipmentSpawnState timer, double time)
-    {
-        string instanceId = $"market:{market.SystemId}:{market.PlanetId}:{timer.WeaponId}:{timer.SpawnSequence}";
-        SystemNpcWeaponRuntimeState equipment;
-        if (rule.Component != null)
-        {
-            equipment = SystemNpcWeaponRuntimeState.NewComponent(rule.Component, instanceId);
-        }
-        else
-        {
-            var previousRandom = UnityEngine.Random.state;
-            WeaponRuntimeStats stats;
-            try { UnityEngine.Random.InitState(StableHash(instanceId)); stats = rule.Weapon.RollRuntimeStats(); }
-            finally { UnityEngine.Random.state = previousRandom; }
-            equipment = new SystemNpcWeaponRuntimeState { InstanceId = instanceId, WeaponConfigId = rule.Weapon.Id,
-                RolledStats = stats, SlotIndex = -1, CurrentDurability = rule.Weapon.MaximumDurability,
-                MaximumDurability = rule.Weapon.MaximumDurability };
-        }
-        market.Equipment.Add(new MarketEquipmentListing { Equipment = equipment, NewPrice = rule.NewPrice,
-            Allied = true, ExpiresAtSeconds = time + rule.LifetimeSeconds });
-        market.Revision++;
-    }
+    private static bool ValidEquipmentRule(MarketEquipmentRule rule, int marketLevel) =>
+        !string.IsNullOrEmpty(rule?.EquipmentId) && rule.NewPrice > 0 &&
+        (rule.Component != null ? rule.Component.Level : rule.Weapon.Level) <= marketLevel;
 
     private MarketEquipmentRule EquipmentRule(MarketProfileConfig profile, SystemNpcWeaponRuntimeState item) =>
-        profile.GetLevel(GalaxyLevel)?.Equipment?.Find(x => x?.Matches(item) == true)
+        profile.GetLevel(MarketLevel)?.Equipment?.Find(x => x?.Matches(item) == true)
         ?? Balance?.EquipmentCatalog?.Find(x => x?.Matches(item) == true);
     public int EquipmentPrice(SystemNpcWeaponRuntimeState equipment, bool buy)
     {
@@ -565,7 +501,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         EquipmentRule(profile, item)?.NewPrice ?? (item.IsComponent ? GetPrice(item.ComponentConfigId, true) : 0);
 
     private bool HasEquipmentConfig(SystemNpcWeaponRuntimeState item) =>
-        item.IsComponent ? _config.GetItemConfigById(item.ComponentConfigId) is ShipComponentConfig
+        item.IsComponent ? _config.GetItemConfigById(item.ComponentConfigId) is ShipEquipmentConfig
             : _config.GetWeaponConfigById(item.WeaponConfigId) != null;
 
     public bool TradeEquipment(string instanceId, bool buy, string operationId, long expectedRevision, out string reason, bool warehouse = false)
@@ -584,6 +520,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         var equipment = buy ? listing?.Equipment : owned.Find(x => x != null && x.InstanceId == instanceId);
         if (equipment == null || (buy && (!listing.Allied || owned.Any(x => x?.InstanceId == instanceId)))) return false;
         var rule = EquipmentRule(profile, equipment);
+        if (buy && !ValidEquipmentRule(rule, MarketLevel)) return false;
         int basePrice = buy ? listing.NewPrice : EquipmentBasePrice(profile, equipment);
         int price = MarketEconomyRules.EquipmentSellPrice(basePrice, equipment.CurrentDurability, equipment.MaximumDurability, MinimumBuyout);
         if (!HasEquipmentConfig(equipment) || price <= 0) return false;
@@ -599,8 +536,8 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
                 owned.Remove(equipment);
                 bool allied = equipment.IsComponent || (rule?.Allied == true &&
                     (!equipment.HasLootOrigin || equipment.LootOriginNpcType == SystemNpcType.Ally));
-                if (allied) market.Equipment.Add(new MarketEquipmentListing { Equipment = equipment, Allied = true,
-                    NewPrice = basePrice, ExpiresAtSeconds = market.ElapsedSeconds + (rule?.LifetimeSeconds ?? 600f) });
+                if (allied && ValidEquipmentRule(rule, MarketLevel)) market.Equipment.Add(new MarketEquipmentListing { Equipment = equipment, Allied = true,
+                    NewPrice = basePrice, ExpiresAtSeconds = NextOfferExpiry(market, profile) });
             }
             equipment.SlotIndex = -1;
             State.Player.Credits += buy ? -price : price;
@@ -630,6 +567,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         var listing = buy ? market.Equipment.Find(x => x?.Equipment?.InstanceId == id && x.Allied && x.ExpiresAtSeconds > market.ElapsedSeconds) : null;
         var item = buy ? listing?.Equipment : owned?.Find(x => x?.InstanceId == id);
         if (item == null || !HasEquipmentConfig(item)) return false;
+        if (buy && !ValidEquipmentRule(EquipmentRule(profile, item), MarketLevel)) return false;
         int price = EquipmentPrice(item, buy);
         if (price <= 0) return false;
         return buy ? State.Player.Credits >= price && (warehouse || CanCarryEquipment(item))

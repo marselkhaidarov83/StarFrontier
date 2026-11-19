@@ -39,10 +39,10 @@ public class AllyConfigValidator : IConfigValidator<AllyConfig>
             issues.Add(new ValidationIssue(ValidationSeverity.Warning, "CombatSprite is not assigned.", config));
 
         if (config.Role == AllyRole2A.Ranger && config.Grabber == null)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Ranger requires a GrabberConfig.", config));
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Ranger requires a ShipEquipmentConfig.", config));
         if (config.Grabber != null &&
             (config.Grabber.Strength <= 0 || config.Grabber.Range <= 0f ||
-             config.Grabber.PullSpeedPerTick <= 0f))
+             config.Grabber.Slot != ShipComponentSlot.Grabber))
             issues.Add(new ValidationIssue(ValidationSeverity.Error, "Grabber strength, range and pull speed must be positive.", config));
 
         if (config.LootTable != null)

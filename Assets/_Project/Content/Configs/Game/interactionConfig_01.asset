@@ -28,3 +28,4 @@ MonoBehaviour:
   holdToInteractSeconds: 0.25
   interactionCooldownSeconds: 0.5
   pauseShipOnInteraction: 1
+  lootPullSpeedPerTick: 25

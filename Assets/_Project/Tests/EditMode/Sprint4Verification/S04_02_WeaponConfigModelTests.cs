@@ -7,16 +7,6 @@ public sealed class S04_02_WeaponConfigModelTests
         "Assets/_Project/Content/Configs/Weapons";
 
     [Test]
-    public void WeaponEquipmentTier_HasExpectedCanonicalValues()
-    {
-        Assert.AreEqual(0, (int)WeaponEquipmentTier.Base);
-        Assert.AreEqual(1, (int)WeaponEquipmentTier.Bronze);
-        Assert.AreEqual(2, (int)WeaponEquipmentTier.Silver);
-        Assert.AreEqual(3, (int)WeaponEquipmentTier.Gold);
-        Assert.AreEqual(4, (int)WeaponEquipmentTier.Epic);
-    }
-
-    [Test]
     public void WeaponType_HasExpectedCanonicalValues()
     {
         Assert.AreEqual(0, (int)WeaponType.Laser);
@@ -165,15 +155,8 @@ public sealed class S04_02_WeaponConfigModelTests
                 stats.Level,
                 config.Id + " rolled Level must match config.");
 
-            Assert.AreEqual(
-                config.EquipmentTier,
-                stats.EquipmentTier,
-                config.Id + " rolled EquipmentTier must match config.");
-
-            Assert.AreEqual(
-                config.CargoSize,
-                stats.CargoSize,
-                config.Id + " rolled CargoSize must match config.");
+            Assert.That(stats.CargoSize, Is.InRange(config.CargoSizeMin, config.CargoSizeMax),
+                config.Id + " rolled cargo must stay within its configured range.");
 
             Assert.GreaterOrEqual(
                 stats.Damage,
@@ -216,11 +199,6 @@ public sealed class S04_02_WeaponConfigModelTests
                 config.Id + " rolled projectile lifetime must be <= ProjectileLifetimeMax.");
 
             Assert.AreEqual(
-                config.IsHitscan,
-                stats.IsHitscan,
-                config.Id + " rolled IsHitscan must match config.");
-
-            Assert.AreEqual(
                 config.WeaponType,
                 stats.WeaponType,
                 config.Id + " rolled WeaponType must match config.");
@@ -229,11 +207,6 @@ public sealed class S04_02_WeaponConfigModelTests
                 config.DamageType,
                 stats.DamageType,
                 config.Id + " rolled DamageType must match config.");
-
-            Assert.AreEqual(
-                config.TargetingMode,
-                stats.TargetingMode,
-                config.Id + " rolled TargetingMode must match config.");
 
             Assert.AreEqual(
                 config.UsesAmmo,

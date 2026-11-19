@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: item_luxury_goods_01
   m_EditorClassIdentifier: Data::ItemConfig
   id: item_luxury_goods_01
-  displayName: Предметы роскоши
-  description: Premium consumer cargo valued in wealthy systems
+  displayName: "Предметы роскоши"
+  description: "Редкие украшения, произведения искусства и дорогие потребительские товары для состоятельных миров."
   icon: {fileID: 21300000, guid: 64809641e58ec49cd9c970026b4947f6, type: 3}
   itemCategory: 7
-  basePrice: 100
-  cargoSize: 1
-  rarity: 2
+  basePrice: 440
+  marketDevelopmentLevel: 8
+  cargoSize: 2
   isLegal: 1

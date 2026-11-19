@@ -14,33 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::WeaponConfig
   id: weapon_infected_tendril_silver_L08_01
   displayName: "\u0411\u0438\u043E\u0445\u043B\u044B\u0441\u0442"
-  description: "\u0420\u044B\u0432\u043E\u043A-\u0449\u0443\u043F\u0430\u043B\u044C\u0446\u0435
-    / \u0431\u0438\u043E\u0445\u043B\u044B\u0441\u0442. \u041F\u043E\u0447\u0442\u0438
-    \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u043D\u0430\u044F \u043A\u043E\u0440\u043E\u0442\u043A\u0430\u044F
-    \u0430\u0442\u0430\u043A\u0430 \u043D\u0430 \u0431\u043B\u0438\u0436\u043D\u0435\u0439
-    \u0434\u0438\u0441\u0442\u0430\u043D\u0446\u0438\u0438. IMG: PNG 512\xD7512,
-    transparent background, centered projectile/VFX sprite, pivot center, no text,
-    no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down readable silhouette."
+  description: "Вытягивает к противнику сияющую нить органической энергии. Гибкий разряд удерживает направление, пока питающий его узел продолжает пульсировать."
   icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 8
-  equipmentTier: 2
-  cargoSize: 12
-  baseDamageMin: 68
-  baseDamageMax: 84
-  rangeMin: 121.74
-  rangeMax: 136.41
-  energyCostMin: 5
-  energyCostMax: 7
-  projectileLifetimeMin: 1
-  projectileLifetimeMax: 1
-  isHitscan: 1
+  cargoSizeMin: 8
+  cargoSizeMax: 9
+  baseDamageMin: 69
+  baseDamageMax: 89
+  rangeMin: 149
+  rangeMax: 169
+  energyCostMin: 10
+  energyCostMax: 12
+  projectileLifetimeMin: 8
+  projectileLifetimeMax: 8
   weaponType: 13
   damageType: 4
-  targetingMode: 0
-  autoDetectShotType: 0
   shotType: 0
-  shotCount: 5
+  shotCount: 12
   projectilePrefabRef: {fileID: 0}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0
+  maximumDurability: 275

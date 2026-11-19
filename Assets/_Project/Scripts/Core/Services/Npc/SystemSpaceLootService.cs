@@ -6,6 +6,7 @@ using UnityEngine;
 public sealed class SystemSpaceLootService : CustomService
 {
     private readonly List<SpaceLootRuntimeState> _loot = new();
+    private readonly Dictionary<string, ShipEquipmentRuntimeStats> _grabberStats = new();
     private readonly HashSet<string> _lootIds = new();
     private readonly HashSet<string> _playerCollectionMarks = new();
     private readonly ISystemNpcRuntimeService _npcRuntimeService;
@@ -74,7 +75,7 @@ public sealed class SystemSpaceLootService : CustomService
                 return _configService.GetItemConfigById(state.ItemConfigId)?.LootHealth ?? 1;
             case SpaceLootKind.Equipment:
                 if (state.Equipment?.IsComponent == true)
-                    return (_configService.GetItemConfigById(state.EquipmentConfigId) as ShipComponentConfig)
+                    return (_configService.GetItemConfigById(state.EquipmentConfigId) as ShipEquipmentConfig)
                         ?.LootHealth ?? 1;
                 return _configService.GetWeaponConfigById(state.EquipmentConfigId)?.LootHealth ?? 1;
             default:
@@ -104,6 +105,7 @@ public sealed class SystemSpaceLootService : CustomService
     public void Clear()
     {
         _loot.Clear();
+        _grabberStats.Clear();
         _lootIds.Clear();
         _playerCollectionMarks.Clear();
     }
@@ -172,17 +174,42 @@ public sealed class SystemSpaceLootService : CustomService
         return (int)Math.Min(int.MaxValue, (long)Math.Max(0, unitMass) * loot.Quantity);
     }
 
-    private GrabberConfig PlayerGrabber()
+    private ShipEquipmentRuntimeStats PlayerGrabber()
     {
-        ShipRuntimeData ship = _gameSessionService.State?.Player?.GetActiveShip();
+        var ship = _gameSessionService.State?.Player?.GetActiveShip();
         return ship == null || ship.DebugGrabberRemoved ? null : ConfiguredGrabber(ship);
     }
 
-    private GrabberConfig ConfiguredGrabber(ShipRuntimeData ship)
+    private ShipEquipmentRuntimeStats ConfiguredGrabber(ShipRuntimeData ship)
     {
-        if (!ship.HasModularLoadout) return _configService.GetAllyConfigById(ship.AllyConfigId)?.Grabber;
-        string id = ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.Grabber);
-        return (_configService.GetItemConfigById(id) as ShipComponentConfig)?.Grabber;
+        if (!ship.HasModularLoadout)
+            return RollGrabber(_configService.GetAllyConfigById(ship.AllyConfigId)?.Grabber, "ship:" + ship.ShipId);
+        var instance = ShipLoadoutRules.Component(ship, ShipComponentSlot.Grabber);
+        var config = _configService.GetItemConfigById(instance?.ComponentConfigId) as ShipEquipmentConfig;
+        return WithPullSpeed(instance?.GetComponentStats(config));
+    }
+
+    private ShipEquipmentRuntimeStats NpcGrabber(SystemNpcRuntimeState npc) =>
+        RollGrabber(_configService.GetAllyConfigById(npc.ConfigId)?.Grabber, "npc:" + npc.RuntimeNpcId);
+
+    private ShipEquipmentRuntimeStats RollGrabber(ShipEquipmentConfig config, string identity)
+    {
+        if (config == null || config.Slot != ShipComponentSlot.Grabber) return null;
+        string key = identity + ":" + config.Id;
+        if (!_grabberStats.TryGetValue(key, out var stats))
+        {
+            stats = config.RollRuntimeStats(ShipEquipmentConfig.StableSeed(identity));
+            _grabberStats[key] = stats;
+        }
+        return WithPullSpeed(stats);
+    }
+
+    private ShipEquipmentRuntimeStats WithPullSpeed(ShipEquipmentRuntimeStats stats)
+    {
+        if (stats != null)
+            stats.PullSpeedPerTick = _configService.InteractionConfig?.LootPullSpeedPerTick ??
+                InteractionConfig.DefaultLootPullSpeedPerTick;
+        return stats;
     }
 
     public bool TrySetPlayerGrabberEnabled(bool enabled, out string error)
@@ -229,7 +256,7 @@ public sealed class SystemSpaceLootService : CustomService
             AppLog.Info(DebugLogChannel.Loot, "[LOOT_UNMARKED] Id=" + lootId);
             return true;
         }
-        GrabberConfig grabber = PlayerGrabber();
+        ShipEquipmentRuntimeStats grabber = PlayerGrabber();
         if (grabber == null)
         {
             error = "На корабле не установлен захват. Сбор невозможен";
@@ -409,7 +436,7 @@ public sealed class SystemSpaceLootService : CustomService
     private void TickPlayerCollection(float tickFraction)
     {
         PlayerState player = _gameSessionService.State?.Player;
-        GrabberConfig grabber = PlayerGrabber();
+        ShipEquipmentRuntimeStats grabber = PlayerGrabber();
         if (player == null || player.IsOnPlanet() || grabber == null)
         {
             foreach (string id in _playerCollectionMarks)
@@ -492,7 +519,7 @@ public sealed class SystemSpaceLootService : CustomService
                 ReleasePull(loot.LootId, collectorId);
                 continue;
             }
-            GrabberConfig grabber = _configService.GetAllyConfigById(npc.ConfigId)?.Grabber;
+            ShipEquipmentRuntimeStats grabber = NpcGrabber(npc);
             if (grabber == null || grabber.Range <= 0f || grabber.PullSpeedPerTick <= 0f ||
                 Vector3.Distance(loot.Position, npc.CurrentPosition) > grabber.Range ||
                 !RangerLootCollectionRules2A.CanCollect(npc, loot, GetLootMass(loot),
@@ -555,7 +582,7 @@ public sealed class SystemSpaceLootService : CustomService
                 "LootUnavailable", lootId);
             return false;
         }
-        GrabberConfig grabber = PlayerGrabber();
+        ShipEquipmentRuntimeStats grabber = PlayerGrabber();
         if (grabber == null || grabber.Range <= 0f ||
             grabber.PullSpeedPerTick <= 0f || GetLootMass(loot) > grabber.Strength ||
             Vector3.Distance(loot.Position, player.SystemMapShipPosition) > grabber.Range)
@@ -641,12 +668,12 @@ public sealed class SystemSpaceLootService : CustomService
             error = "Трофей недоступен";
             return false;
         }
-        AllyConfig ally = _configService.GetAllyConfigById(npc.ConfigId);
-        if (ally?.Grabber == null || ally.Grabber.Range <= 0f ||
-            ally.Grabber.PullSpeedPerTick <= 0f ||
-            GetLootMass(loot) > ally.Grabber.Strength ||
+        var grabber = NpcGrabber(npc);
+        if (grabber == null || grabber.Range <= 0f ||
+            grabber.PullSpeedPerTick <= 0f ||
+            GetLootMass(loot) > grabber.Strength ||
             RangerLootCollectionRules2A.GetFreeCargoMass(npc, _configService) < GetLootMass(loot) ||
-            Vector3.Distance(loot.Position, npc.CurrentPosition) > ally.Grabber.Range)
+            Vector3.Distance(loot.Position, npc.CurrentPosition) > grabber.Range)
         {
             error = "Захват или трюм не позволяет собрать трофей";
             return false;

@@ -55,6 +55,7 @@ public sealed class SpaceLootRuntimeState
                 CurrentDurability = Equipment.CurrentDurability,
                 MaximumDurability = Equipment.MaximumDurability,
                 ComponentConfigId = Equipment.ComponentConfigId,
+                ComponentStats = Equipment.ComponentStats?.Copy(),
                 StoredFuel = Equipment.StoredFuel,
                 SlotIndex = Equipment.SlotIndex,
                 WeaponConfigId = Equipment.WeaponConfigId,

@@ -35,7 +35,6 @@ public static class MarketPersistenceRules
             if (market == null) continue;
             market.Items ??= new List<MarketRuntimeItemState>();
             market.Equipment ??= new List<MarketEquipmentListing>();
-            market.EquipmentSpawns ??= new List<MarketEquipmentSpawnState>();
             market.Receipts ??= new List<MarketTransactionReceipt>();
             market.PersonalStorage ??= new RuntimeCargoInventory();
             market.PersonalStorage.entries ??= new List<RuntimeCargoEntryData>();
@@ -136,11 +135,8 @@ public static class MarketPersistenceRules
                     !operations.Add(receipt.OperationId) || receipt.TotalPrice < 0 ||
                     (receipt.TotalPrice == 0 && !receipt.Intent.StartsWith("transfer:", StringComparison.Ordinal)) || receipt.Quantity <= 0)
                     yield return "InvalidMarketReceipt";
-            var timers = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var timer in market.EquipmentSpawns ?? new List<MarketEquipmentSpawnState>())
-                if (timer == null || string.IsNullOrEmpty(timer.WeaponId) || !timers.Add(timer.WeaponId) ||
-                    !Finite(timer.Remainder) || timer.Remainder < 0 || timer.SpawnSequence < 0)
-                    yield return "InvalidMarketSpawnTimer";
+            if (!Finite(market.OfferRefreshRemainder) || market.OfferRefreshRemainder < 0 || market.OfferRefreshSequence < 0)
+                yield return "InvalidMarketRefreshClock";
         }
     }
     private static bool ValidHull(HullEquipmentRuntimeState hull) => hull != null && !string.IsNullOrEmpty(hull.InstanceId) &&

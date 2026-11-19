@@ -14,6 +14,8 @@ public sealed partial class HangarPanelView2A
         public bool SelectedByClick, Inventory;
         public string InfoKey, Info, EquipmentName;
         public (int Current, int Maximum) Durability;
+        public int Level;
+        public Color LevelColor;
     }
 
     private const float CardTitleSize = 25;
@@ -144,10 +146,10 @@ public sealed partial class HangarPanelView2A
     }
 
     public void SetSlot(int index, string title, Sprite icon, bool available, bool selected,
-        string info = null, string infoKey = null, bool empty = false, string equipmentName = null, (int Current, int Maximum) durability = default)
+        string info = null, string infoKey = null, bool empty = false, string equipmentName = null, (int Current, int Maximum) durability = default, int level = 0, Color? levelColor = null)
     {
         var card = _slots[index];
-        SetCard(card, title, icon, available, selected, info, infoKey, equipmentName, durability);
+        SetCard(card, title, icon, available, selected, info, infoKey, equipmentName, durability, level, levelColor ?? Color.white);
         if (available && empty)
         {
             var background = (Image)card.Button.targetGraphic;
@@ -171,7 +173,7 @@ public sealed partial class HangarPanelView2A
         }
     }
 
-    public void SetChoice(int index, string title, Sprite icon, bool selected, string info, string infoKey, (int Current, int Maximum) durability = default)
+    public void SetChoice(int index, string title, Sprite icon, bool selected, string info, string infoKey, (int Current, int Maximum) durability = default, int level = 0, Color? levelColor = null)
     {
         if (_choices.Count == index)
         {
@@ -181,7 +183,7 @@ public sealed partial class HangarPanelView2A
         }
         var card = _choices[index];
         card.Button.gameObject.SetActive(true);
-        SetCard(card, string.Empty, icon, true, selected, info, infoKey, title, durability);
+        SetCard(card, string.Empty, icon, true, selected, info, infoKey, title, durability, level, levelColor ?? Color.white);
         LayoutChoiceCard(card);
     }
 
@@ -218,7 +220,7 @@ public sealed partial class HangarPanelView2A
     }
 
     private void SetCard(LoadoutCard card, string title, Sprite icon, bool available, bool selected,
-        string info, string infoKey, string equipmentName, (int Current, int Maximum) durability)
+        string info, string infoKey, string equipmentName, (int Current, int Maximum) durability, int level, Color levelColor)
     {
         if (!available || !selected || card.InfoKey != infoKey)
         {
@@ -228,12 +230,16 @@ public sealed partial class HangarPanelView2A
         card.InfoKey = infoKey;
         card.Info = info;
         card.Durability = durability;
+        card.Level = level; card.LevelColor = levelColor;
         card.EquipmentName = equipmentName ?? title;
         card.Title.SetText(title);
         card.Title.gameObject.SetActive(!string.IsNullOrEmpty(title));
         card.Icon.sprite = icon;
         card.Icon.enabled = icon != null;
         SetButton(card.Button, available, selected);
+        if (available && level > 0)
+            ((Image)card.Button.targetGraphic).color = Color.Lerp(
+                MissionPanelStyle2A.CardBackground, levelColor, selected ? .38f : .22f);
         if (_modalCard == card) RefreshEquipmentModal();
     }
 
@@ -345,6 +351,7 @@ public sealed partial class HangarPanelView2A
         _equipmentPicture.sprite = _modalCard.Icon.sprite;
         _equipmentPicture.gameObject.SetActive(_equipmentPicture.sprite != null);
         _equipmentTitle.SetText(_modalCard.EquipmentName);
+        _equipmentTitle.color = Color.white;
         _equipmentInfo.SetText(_modalCard.Info);
         var (current, maximum) = _modalCard.Durability;
         _durabilityTrack.gameObject.SetActive(maximum > 0);

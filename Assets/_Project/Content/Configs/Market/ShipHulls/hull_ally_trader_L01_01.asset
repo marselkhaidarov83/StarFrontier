@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: hull_ally_trader_L01_01
+  m_EditorClassIdentifier: 
+  id: hull_ally_trader_L01_01
+  displayName: "Корпус «Караван»"
+  description: "Вместительный торговый корпус для долгих караванных рейсов. Просторные грузовые отсеки и надёжные переборки помогают доставить ценный груз сквозь неспокойные сектора."
+  icon: {fileID: 21300000, guid: 1cf0348b334d841a6a640994f1ed9062, type: 3}
+  Hull: {fileID: 11400000, guid: c4fa377921d5d4166ba7b66387b1d427, type: 2}
+  Level: 1
+  MaximumHullMin: 90
+  MaximumHullMax: 105
+  CargoCapacityMin: 240
+  CargoCapacityMax: 264

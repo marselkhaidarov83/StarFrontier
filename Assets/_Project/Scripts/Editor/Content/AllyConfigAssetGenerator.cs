@@ -400,8 +400,8 @@ public static class AllyConfigAssetGenerator
             SetObject(serializedObject, "lootTable", GetOrCreateLootTable(id));
         if (role == AllyRole2A.Ranger)
             SetObject(serializedObject, "grabber",
-                AssetDatabase.LoadAssetAtPath<GrabberConfig>(
-                    "Assets/_Project/Content/Configs/Game/grabber_standard_01.asset"));
+                AssetDatabase.LoadAssetAtPath<ShipEquipmentConfig>(
+                    "Assets/_Project/Content/Configs/Market/ShipEquipment/ship_grabber_industrial_L01_01.asset"));
         SetBool(
             serializedObject,
             "avoidEnemyOwnedTravelDestinations",
@@ -429,8 +429,8 @@ public static class AllyConfigAssetGenerator
     private static void SetDefaultEngine(SerializedObject hull, int level)
     {
         const string folder = "Assets/_Project/Content/Configs/Items/ShipEquipment";
-        string id = level <= 1 ? "ship_engine_standard_01" : $"ship_engine_tier_{level:D2}_01";
-        var engine = AssetDatabase.LoadAssetAtPath<ShipComponentConfig>($"{folder}/{id}.asset");
+        string id = level <= 1 ? "ship_engine_industrial_L01_01" : $"ship_engine_tier_{level:D2}_01";
+        var engine = AssetDatabase.LoadAssetAtPath<ShipEquipmentConfig>($"{folder}/{id}.asset");
         if (engine == null)
             throw new InvalidOperationException($"Missing engine asset: {id}");
 
@@ -438,7 +438,7 @@ public static class AllyConfigAssetGenerator
         for (int i = 0; i < components.arraySize; i++)
         {
             var entry = components.GetArrayElementAtIndex(i);
-            if (entry.objectReferenceValue is not ShipComponentConfig component || component.Slot != ShipComponentSlot.Engine)
+            if (entry.objectReferenceValue is not ShipEquipmentConfig component || component.Slot != ShipComponentSlot.Engine)
                 continue;
             entry.objectReferenceValue = engine;
             return;

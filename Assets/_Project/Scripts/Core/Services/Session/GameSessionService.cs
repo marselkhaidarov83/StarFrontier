@@ -57,8 +57,8 @@ public class GameSessionService : IGameSessionService
             var hull = config.GetAllyConfigById(ship.AllyConfigId);
             ShipLoadoutRules.Initialize(ship, hull, config.GetWeaponConfigById);
             if (ship.HasModularLoadout && ship.FuelCapacity <= 0 &&
-                config.GetItemConfigById(ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.FuelTank)) is ShipComponentConfig tank)
-                ship.FuelCapacity = Mathf.Max(0, tank.FuelCapacity);
+                config.GetItemConfigById(ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.FuelTank)) is ShipEquipmentConfig tank)
+                ship.FuelCapacity = ShipLoadoutRules.Component(ship, ShipComponentSlot.FuelTank)?.GetComponentStats(tank)?.FuelCapacity ?? 0;
         }
         if (State.Markets != null)
             foreach (var market in State.Markets)
@@ -75,7 +75,7 @@ public class GameSessionService : IGameSessionService
         ship.InstalledComponents ??= new List<SystemNpcWeaponRuntimeState>();
         for (int slot = 0; slot < ship.InstalledComponentIds.Count; slot++)
         {
-            if (config.GetItemConfigById(ship.InstalledComponentIds[slot]) is not ShipComponentConfig component)
+            if (config.GetItemConfigById(ship.InstalledComponentIds[slot]) is not ShipEquipmentConfig component)
                 continue;
             if (ShipLoadoutRules.Component(ship, (ShipComponentSlot)slot) == null)
                 ship.InstalledComponents.Add(SystemNpcWeaponRuntimeState.NewComponent(component,
@@ -92,7 +92,7 @@ public class GameSessionService : IGameSessionService
         {
             var entry = cargo.entries[i];
             if (entry == null || entry.Quantity <= 0 || !string.IsNullOrEmpty(entry.MissionRuntimeId) ||
-                config.GetItemConfigById(entry.ItemId) is not ShipComponentConfig component) continue;
+                config.GetItemConfigById(entry.ItemId) is not ShipEquipmentConfig component) continue;
             for (int j = 0; j < entry.Quantity; j++)
                 equipment.Add(SystemNpcWeaponRuntimeState.NewComponent(component, Guid.NewGuid().ToString("N")));
             cargo.entries.RemoveAt(i);

@@ -73,12 +73,22 @@ public class NewGameFactory
                 ? starterShipConfig.BaseCargoCapacity
                 : 30;
 
+        var starterHull = _configService.MarketEconomy?.HullCatalog?.Find(rule => rule?.Hull != null &&
+            rule.Hull.Id == ShipLoadoutRules.HullEquipmentId(starterShipConfig?.Id))?.Hull;
+        var installedHull = starterHull?.CreateRuntimeState("installed-hull:runtime_ship_001");
+        if (installedHull != null)
+        {
+            hullCapacity = installedHull.MaximumDurability;
+            cargoCapacity = installedHull.CargoCapacity;
+        }
+
         var ship = new ShipRuntimeData
         {
             ShipId = "runtime_ship_001",
             AllyConfigId = starterShipConfig != null
                 ? starterShipConfig.Id
                 : FallbackStarterShipConfigId,
+            InstalledHull = installedHull,
             CurrentHull = hullCapacity,
             CurrentShield = shieldCapacity,
             CurrentEnergy = energyCapacity,
@@ -88,12 +98,16 @@ public class NewGameFactory
             EquippedModuleIds = new List<string>()
         };
         ShipLoadoutRules.Initialize(ship, starterShipConfig, _configService.GetWeaponConfigById);
-        string tankId = ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.FuelTank);
-        ship.FuelCapacity = !string.IsNullOrEmpty(tankId) && _configService.GetItemConfigById(tankId) is ShipComponentConfig tank
-            ? Mathf.Max(0, tank.FuelCapacity)
+        var tankItem = ShipLoadoutRules.Component(ship, ShipComponentSlot.FuelTank);
+        string tankId = tankItem?.ComponentConfigId;
+        ship.FuelCapacity = !string.IsNullOrEmpty(tankId) && _configService.GetItemConfigById(tankId) is ShipEquipmentConfig tank
+            ? tankItem.GetComponentStats(tank).FuelCapacity
             : 0;
         int startFuel = IsMobileTestMode ? _configService.DebugSettings.mobileTestCurrentFuel : newGameConfig.StartFuel;
         ship.CurrentFuel = Mathf.Clamp(startFuel, 0, ship.FuelCapacity);
+        var shieldItem = ShipLoadoutRules.Component(ship, ShipComponentSlot.ShieldGenerator);
+        var shieldConfig = _configService.GetItemConfigById(shieldItem?.ComponentConfigId) as ShipEquipmentConfig;
+        ship.CurrentShield = shieldItem?.GetComponentStats(shieldConfig)?.ShieldCapacity ?? 0;
 
         return new ShipRuntimeState
         {

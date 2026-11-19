@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: hull_ally_military_L08_01
+  m_EditorClassIdentifier: 
+  id: hull_ally_military_L08_01
+  displayName: "Корпус «Авангард»"
+  description: "Бронированный корпус для тяжёлых столкновений на переднем рубеже. Усиленный силовой каркас защищает экипаж, когда путь домой приходится прокладывать огнём."
+  icon: {fileID: 21300000, guid: 75ef4e043d30b49eaa176b2aee10f462, type: 3}
+  Hull: {fileID: 11400000, guid: 28da5a8dbedfe4564a4af6a07d29b777, type: 2}
+  Level: 8
+  MaximumHullMin: 297
+  MaximumHullMax: 333
+  CargoCapacityMin: 136
+  CargoCapacityMax: 144

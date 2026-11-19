@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: hull_ally_military_L01_01
+  m_EditorClassIdentifier: 
+  id: hull_ally_military_L01_01
+  displayName: "Корпус «Дозор»"
+  description: "Бронированный корпус для тяжёлых столкновений на переднем рубеже. Усиленный силовой каркас защищает экипаж, когда путь домой приходится прокладывать огнём."
+  icon: {fileID: 21300000, guid: 798642447b4e243338dcd5f1a9e67eaf, type: 3}
+  Hull: {fileID: 11400000, guid: 74ed7608ed0424e4bbac15d014400353, type: 2}
+  Level: 1
+  MaximumHullMin: 140
+  MaximumHullMax: 155
+  CargoCapacityMin: 108
+  CargoCapacityMax: 116

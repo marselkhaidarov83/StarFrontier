@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: hull_ally_science_L10_01
+  m_EditorClassIdentifier: 
+  id: hull_ally_science_L10_01
+  displayName: "Корпус «Ноосфера»"
+  description: "Исследовательский корпус для наблюдений вдали от обжитых миров. Изолированные отсеки берегут чувствительное оборудование и редкие находки."
+  icon: {fileID: 21300000, guid: c9e6ce55a19434aed830ba5578eefe05, type: 3}
+  Hull: {fileID: 11400000, guid: ecc73f364316a4c0fafebc51fdf65c9a, type: 2}
+  Level: 10
+  MaximumHullMin: 207
+  MaximumHullMax: 249
+  CargoCapacityMin: 204
+  CargoCapacityMax: 216

@@ -18,7 +18,7 @@ public interface IPlanetMarketService
     bool CanTradeEquipment(string instanceId, bool buy, bool warehouse = false);
     bool CanTransfer(string id, bool equipment, bool toWarehouse, int quantity);
     bool Transfer(string id, bool equipment, bool toWarehouse, int quantity, string operationId, long expectedRevision, out string reason);
-    HullEquipmentConfig GetHullConfig(string configId);
+    HullConfig GetHullConfig(string configId);
     int HullPrice(HullEquipmentRuntimeState hull, bool buy);
     bool CanTradeHull(string instanceId, bool buy, bool warehouse = false);
     bool TradeHull(string instanceId, bool buy, string operationId, long expectedRevision, out string reason, bool warehouse = false);

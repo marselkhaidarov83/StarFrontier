@@ -15,33 +15,25 @@ MonoBehaviour:
   id: weapon_infected_burst_silver_L09_01
   displayName: "\u041F\u0443\u043B\u044C\u0441\u0438\u0440\u0443\u044E\u0449\u0438\u0439
     \u043D\u0430\u0440\u044B\u0432"
-  description: "\u0411\u043E\u043B\u044C\u0448\u043E\u0439 \u043F\u0443\u043B\u044C\u0441\u0438\u0440\u0443\u044E\u0449\u0438\u0439
-    \u043D\u0430\u0440\u044B\u0432-\u0441\u043D\u0430\u0440\u044F\u0434, \u043A\u043E\u0442\u043E\u0440\u044B\u0439
-    \u0432\u044B\u0433\u043B\u044F\u0434\u0438\u0442 \u043D\u0435\u0441\u0442\u0430\u0431\u0438\u043B\u044C\u043D\u044B\u043C
-    \u0438 \u0433\u043E\u0442\u043E\u0432\u044B\u043C \u0432\u0437\u043E\u0440\u0432\u0430\u0442\u044C\u0441\u044F.
-    IMG: PNG 512\xD7512, transparent background, centered projectile/VFX sprite,
-    pivot center, no text, no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down
-    readable silhouette."
+  description: "Разрывается серией резких органических выбросов. Осколки уплотнённой ткани летят плотной очередью, словно оружие само стремится настигнуть добычу."
   icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 9
-  equipmentTier: 2
-  cargoSize: 12
-  baseDamageMin: 24
-  baseDamageMax: 30
-  rangeMin: 150.82
-  rangeMax: 168.21
-  energyCostMin: 6
-  energyCostMax: 8
-  projectileLifetimeMin: 4
-  projectileLifetimeMax: 6
-  isHitscan: 0
+  cargoSizeMin: 9
+  cargoSizeMax: 10
+  baseDamageMin: 125
+  baseDamageMax: 160
+  rangeMin: 198
+  rangeMax: 221
+  energyCostMin: 12
+  energyCostMax: 14
+  projectileLifetimeMin: 13
+  projectileLifetimeMax: 15
   weaponType: 14
   damageType: 4
-  targetingMode: 0
-  autoDetectShotType: 0
   shotType: 1
-  shotCount: 5
+  shotCount: 9
   projectilePrefabRef: {fileID: 2113405778882139475, guid: b9230f1c5e5c94953bc6da3212a54613, type: 3}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0
+  maximumDurability: 300

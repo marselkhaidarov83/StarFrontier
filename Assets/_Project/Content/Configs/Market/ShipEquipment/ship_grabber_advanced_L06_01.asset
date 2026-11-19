@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: ship_grabber_advanced_L06_01
+  m_EditorClassIdentifier: Data::ShipEquipmentConfig
+  id: ship_grabber_advanced_L06_01
+  displayName: "Магнитный захват «Орион»"
+  description: "Удерживает дрейфующий груз и аккуратно направляет его к кораблю. Прочная сцепка помогает собрать находки после боя или аварии."
+  icon: {fileID: 21300000, guid: 6b10204650a940268a23012aa15c0eb0, type: 3}
+  lootHealth: 1
+  itemCategory: 10
+  basePrice: 7200
+  marketDevelopmentLevel: 6
+  cargoSize: 6
+  isLegal: 1
+  Level: 6
+  Variant: 2
+  Slot: 5
+  MaximumDurability: 225
+  CargoSizeMin: 6
+  CargoSizeMax: 7
+  SpeedMin: 0
+  SpeedMax: 0
+  EngineRangeMin: 0
+  EngineRangeMax: 0
+  FuelCapacityMin: 0
+  FuelCapacityMax: 0
+  RadarRangeMin: 0
+  RadarRangeMax: 0
+  ScannerRangeMin: 0
+  ScannerRangeMax: 0
+  RepairPerCycleMin: 0
+  RepairPerCycleMax: 0
+  GrabberStrengthMin: 55
+  GrabberStrengthMax: 60
+  GrabberRangeMin: 300
+  GrabberRangeMax: 320
+  ShieldMin: 0
+  ShieldMax: 0

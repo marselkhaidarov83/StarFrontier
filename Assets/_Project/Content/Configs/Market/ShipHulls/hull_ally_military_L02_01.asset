@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: hull_ally_military_L02_01
+  m_EditorClassIdentifier: 
+  id: hull_ally_military_L02_01
+  displayName: "Корпус «Бастион»"
+  description: "Бронированный корпус для тяжёлых столкновений на переднем рубеже. Усиленный силовой каркас защищает экипаж, когда путь домой приходится прокладывать огнём."
+  icon: {fileID: 21300000, guid: 64718de3ab28c471ab2c3f4ea9c1d4d8, type: 3}
+  Hull: {fileID: 11400000, guid: 0d9510e783c234b2ea18719f8a574b1d, type: 2}
+  Level: 2
+  MaximumHullMin: 162
+  MaximumHullMax: 180
+  CargoCapacityMin: 112
+  CargoCapacityMax: 120

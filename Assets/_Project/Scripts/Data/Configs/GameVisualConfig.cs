@@ -6,6 +6,31 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Game/Game Visual")]
 public sealed class GameVisualConfig : BaseConfig
 {
+    // Inspired by the WoW item-quality palette; interpolated to ten equipment levels.
+    // https://media.battle.net/documents/wow/WoW-BradyGAMES-enUS-Guide.pdf
+    private static readonly Color[] DefaultEquipmentLevelColors = new Color[]
+    {
+        new Color(0.61568627f, 0.61568627f, 0.61568627f, 1f),
+        new Color(1.00000000f, 1.00000000f, 1.00000000f, 1f),
+        new Color(0.11764706f, 1.00000000f, 0.00000000f, 1f),
+        new Color(0.17647059f, 0.83137255f, 0.74901961f, 1f),
+        new Color(0.00000000f, 0.43921569f, 0.86666667f, 1f),
+        new Color(0.35686275f, 0.49803922f, 1.00000000f, 1f),
+        new Color(0.63921569f, 0.20784314f, 0.93333333f, 1f),
+        new Color(0.89411765f, 0.35686275f, 0.93725490f, 1f),
+        new Color(1.00000000f, 0.50196078f, 0.00000000f, 1f),
+        new Color(0.90196078f, 0.80000000f, 0.50196078f, 1f),
+    };
+    [Header("Цвета уровней корпусов, оружия и оборудования")]
+    [SerializeField] private Color[] equipmentLevelColors = (Color[])DefaultEquipmentLevelColors.Clone();
+
+    public Color GetEquipmentLevelColor(int level)
+    {
+        int index = Mathf.Clamp(level, 1, 10) - 1;
+        return equipmentLevelColors != null && equipmentLevelColors.Length == 10
+            ? equipmentLevelColors[index] : DefaultEquipmentLevelColors[index];
+    }
+
     public const float DefaultSystemExitVisualSize = 50f;
     public const float DefaultStationVisualSize = 50f;
     public const float DefaultGalaxyMapRoutePointSpacing = 0.25f;

@@ -14,21 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::WeaponConfig
   id: weapon_common_wave_cannon_silver_L01_01
   displayName: "\u0412\u043E\u043B\u043D\u043E\u0432\u0430\u044F \u043F\u0443\u0448\u043A\u0430"
-  description: "\u0428\u0438\u0440\u043E\u043A\u0430\u044F \u0442\u0435\u0445\u043D\u043E\u043B\u043E\u0433\u0438\u0447\u0435\u0441\u043A\u0430\u044F
-    \u044D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u0430\u044F
-    \u0432\u043E\u043B\u043D\u0430 cyan-white. \u042D\u0442\u043E \u043D\u0435 \u0442\u043E\u043D\u043A\u0438\u0439
-    \u043B\u0443\u0447 \u0438 \u043D\u0435 \u0442\u043E\u0447\u0435\u0447\u043D\u044B\u0439
-    \u0441\u043D\u0430\u0440\u044F\u0434: \u0444\u0440\u043E\u043D\u0442 \u044D\u043D\u0435\u0440\u0433\u0438\u0438
-    \u0434\u043E\u043B\u0436\u0435\u043D \u0447\u0438\u0442\u0430\u0442\u044C\u0441\u044F
-    \u043A\u0430\u043A \u0432\u043E\u043B\u043D\u043E\u0432\u0430\u044F \u0430\u0442\u0430\u043A\u0430
-    \u0446\u0438\u0432\u0438\u043B\u0438\u0437\u0430\u0446\u0438\u0438. IMG: PNG
-    512\xD7512, transparent background, centered projectile/VFX sprite, pivot center,
-    no text, no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down readable
-    silhouette."
+  description: "Разворачивает перед кораблём плотный энергетический фронт. Широкая волна накрывает опасный участок пространства и заставляет врага менять курс."
   icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 1
-  equipmentTier: 2
-  cargoSize: 5
+  cargoSizeMin: 1
+  cargoSizeMax: 2
   baseDamageMin: 28
   baseDamageMax: 36
   rangeMin: 50
@@ -37,14 +27,12 @@ MonoBehaviour:
   energyCostMax: 6
   projectileLifetimeMin: 1
   projectileLifetimeMax: 3
-  isHitscan: 0
   weaponType: 5
   damageType: 0
-  targetingMode: 0
-  autoDetectShotType: 0
   shotType: 4
   shotCount: 1
   projectilePrefabRef: {fileID: 2113405778882139475, guid: 28979e031533441a0bce52584bde5e6f, type: 3}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0
+  maximumDurability: 100

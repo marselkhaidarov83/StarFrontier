@@ -5,6 +5,7 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Sprint 3/Interaction")]
 public sealed class InteractionConfig : BaseConfig
 {
+    public const float DefaultLootPullSpeedPerTick = 25f;
     [Header("Дистанции")]
     [Tooltip(
         "Дистанция, с которой игрок может взаимодействовать с планетой. " +
@@ -48,6 +49,11 @@ public sealed class InteractionConfig : BaseConfig
         "Используется после выполнения действия с планетой, станцией или точкой перехода.")]
     [SerializeField]
     private bool pauseShipOnInteraction = true;
+
+    [Header("Сбор трофеев")]
+    [SerializeField, Min(0f), Tooltip("Общая скорость притягивания трофеев за игровой тик.")]
+    private float lootPullSpeedPerTick = DefaultLootPullSpeedPerTick;
+    public float LootPullSpeedPerTick => lootPullSpeedPerTick;
 
     public float PlanetInteractionDistance => planetInteractionDistance;
     public float StationInteractionDistance => stationInteractionDistance;

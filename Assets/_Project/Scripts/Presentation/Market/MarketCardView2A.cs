@@ -66,12 +66,19 @@ public sealed class MarketCardView2A : MonoBehaviour
         _placeholder.gameObject.SetActive(item.Icon == null);
         _placeholder.SetText(item.Icon == null ? (_equipment ? "ОБОРУДОВАНИЕ" : "ТОВАР") : "");
         _name.SetText(item.Title);
+        _name.color = Color.white;
         _quantity.gameObject.SetActive(!_equipment);
         _quantity.SetText(_equipment ? "" : item.Quantity + " ед.");
         _price.SetText(item.Locked ? "Задание" : item.Price > 0 ? item.Price.ToString("N0") + " кр." : "—");
         _sizeBadge.gameObject.SetActive(!item.Hull);
         _size.SetText(item.Hull ? string.Empty : item.CargoSize.ToString());
-        _background.color = selected ? MissionPanelStyle2A.ActionBackground : MissionPanelStyle2A.CardBackground;
+        _background.color = item.Level > 0
+            ? Color.Lerp(MissionPanelStyle2A.CardBackground, item.LevelColor, selected ? .38f : .22f)
+            : selected ? MissionPanelStyle2A.ActionBackground : MissionPanelStyle2A.CardBackground;
+        _header.color = item.Level > 0
+            ? Color.Lerp(MissionPanelStyle2A.CardBackground, item.LevelColor, .16f)
+            : Color.Lerp(MissionPanelStyle2A.CardBackground, Color.black, .4f);
+        _footer.color = _header.color;
         _background.GetComponent<Outline>().effectColor = selected ? Color.white : MissionPanelStyle2A.CardAccent;
         _icon.color = item.Quantity > 0 && !item.Locked ? Color.white : new Color(1, 1, 1, .35f);
         _quantity.color = item.Quantity > 0 && !item.Locked ? Color.white : MissionPanelStyle2A.DisabledAccent;

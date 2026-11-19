@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: ship_shield_industrial_L02_01
+  m_EditorClassIdentifier: Data::ShipEquipmentConfig
+  id: ship_shield_industrial_L02_01
+  displayName: "Генератор поля «Ветер»"
+  description: "Окутывает корабль защитным полем, принимающим на себя первые удары. Стабилизаторы удерживают барьер даже при резких манёврах."
+  icon: {fileID: 21300000, guid: 24fb3fc3551f4f2990ebec227198ba54, type: 3}
+  lootHealth: 1
+  itemCategory: 10
+  basePrice: 800
+  marketDevelopmentLevel: 2
+  cargoSize: 2
+  isLegal: 1
+  Level: 2
+  Variant: 0
+  Slot: 6
+  MaximumDurability: 125
+  CargoSizeMin: 2
+  CargoSizeMax: 3
+  SpeedMin: 0
+  SpeedMax: 0
+  EngineRangeMin: 0
+  EngineRangeMax: 0
+  FuelCapacityMin: 0
+  FuelCapacityMax: 0
+  RadarRangeMin: 0
+  RadarRangeMax: 0
+  ScannerRangeMin: 0
+  ScannerRangeMax: 0
+  RepairPerCycleMin: 0
+  RepairPerCycleMax: 0
+  GrabberStrengthMin: 0
+  GrabberStrengthMax: 0
+  GrabberRangeMin: 0
+  GrabberRangeMax: 0
+  ShieldMin: 150
+  ShieldMax: 175

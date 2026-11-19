@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: ship_scanner_advanced_L06_01
+  m_EditorClassIdentifier: Data::ShipEquipmentConfig
+  id: ship_scanner_advanced_L06_01
+  displayName: "Квантовый сканер «Орион»"
+  description: "Разбирает отражённый сигнал на сотни спектральных линий. За неприметной оболочкой он умеет распознать то, что скрыто от обычного наблюдения."
+  icon: {fileID: 21300000, guid: d8534eb6977b457f979a1a4792511ff0, type: 3}
+  lootHealth: 1
+  itemCategory: 10
+  basePrice: 7200
+  marketDevelopmentLevel: 6
+  cargoSize: 6
+  isLegal: 1
+  Level: 6
+  Variant: 2
+  Slot: 3
+  MaximumDurability: 225
+  CargoSizeMin: 6
+  CargoSizeMax: 7
+  SpeedMin: 0
+  SpeedMax: 0
+  EngineRangeMin: 0
+  EngineRangeMax: 0
+  FuelCapacityMin: 0
+  FuelCapacityMax: 0
+  RadarRangeMin: 0
+  RadarRangeMax: 0
+  ScannerRangeMin: 1650
+  ScannerRangeMax: 1750
+  RepairPerCycleMin: 0
+  RepairPerCycleMax: 0
+  GrabberStrengthMin: 0
+  GrabberStrengthMax: 0
+  GrabberRangeMin: 0
+  GrabberRangeMax: 0
+  ShieldMin: 0
+  ShieldMax: 0

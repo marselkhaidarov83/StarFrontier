@@ -13,6 +13,7 @@ public sealed class SystemNpcWeaponRuntimeState
     // The same cargo, trade and loot record carries typed ship components.
     public string ComponentConfigId;
     public int StoredFuel;
+    public ShipEquipmentRuntimeStats ComponentStats;
     public bool IsComponent => !string.IsNullOrEmpty(ComponentConfigId);
     public string EquipmentConfigId => IsComponent ? ComponentConfigId : WeaponConfigId;
 
@@ -24,13 +25,27 @@ public sealed class SystemNpcWeaponRuntimeState
         DurabilityPercent = -1;
     }
 
-    public static SystemNpcWeaponRuntimeState NewComponent(ShipComponentConfig config, string instanceId, int slot = -1) =>
-        new SystemNpcWeaponRuntimeState
+    public ShipEquipmentRuntimeStats GetComponentStats(ShipEquipmentConfig config)
+    {
+        if (config == null) return null;
+        if (ComponentStats == null)
+        {
+            ComponentStats = config.RollRuntimeStats(ShipEquipmentConfig.StableSeed(InstanceId));
+            if (RolledStats.CargoSize > 0) ComponentStats.CargoSize = RolledStats.CargoSize;
+        }
+        return ComponentStats;
+    }
+
+    public static SystemNpcWeaponRuntimeState NewComponent(ShipEquipmentConfig config, string instanceId, int slot = -1)
+    {
+        var stats = config.RollRuntimeStats(ShipEquipmentConfig.StableSeed(instanceId));
+        return new SystemNpcWeaponRuntimeState
         {
             InstanceId = instanceId, ComponentConfigId = config.Id, SlotIndex = slot,
             CurrentDurability = config.MaximumDurability, MaximumDurability = config.MaximumDurability,
-            RolledStats = new WeaponRuntimeStats { CargoSize = config.CargoSize }
+            ComponentStats = stats, RolledStats = new WeaponRuntimeStats { CargoSize = stats.CargoSize }
         };
+    }
     public int SlotIndex = -1;
     public string WeaponConfigId;
     // Preserve the first loot source through cargo, saves, and repeated ejection.

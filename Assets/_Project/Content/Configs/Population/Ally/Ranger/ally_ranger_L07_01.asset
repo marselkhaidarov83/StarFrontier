@@ -48,7 +48,7 @@ MonoBehaviour:
   - scenario: 20
     behaviorConfig: {fileID: 11400000, guid: c4b421f35b8f04448acf97b4d3494ca7, type: 2}
   avoidEnemyOwnedTravelDestinations: 0
-  grabber: {fileID: 11400000, guid: 468ab29eaf9d40df9a76d9a8c33e8031, type: 2}
+  grabber: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
   weaponGroups:
   - {fileID: 11400000, guid: 930b0a5b1b0904299bcd3b7860c0330a, type: 2}
   - {fileID: 11400000, guid: ffc1a5868d0d64f51930b8d5c496b2c3, type: 2}

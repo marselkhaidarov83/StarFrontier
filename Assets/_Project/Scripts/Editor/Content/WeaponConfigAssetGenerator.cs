@@ -410,17 +410,18 @@ public static class WeaponConfigAssetGenerator
         SetSpriteReference(serializedObject, "icon", Get(row, "icon"), rowId, warnings);
 
         SetRequiredInt(serializedObject, "level", Get(row, "level"), rowId, warnings);
-        SetRequiredEnum(serializedObject, "equipmentTier", Get(row, "equipmentTier"), rowId, warnings);
 
         ApplyWeaponOwner(serializedObject, Get(row, "weaponOwner"), rowId, warnings);
 
-        SetRequiredInt(serializedObject, "cargoSize", Get(row, "cargoSize"), rowId, warnings);
+        SetRequiredInt(serializedObject, "maximumDurability", Get(row, "maximumDurability"), rowId, warnings);
+        SetRequiredInt(serializedObject, "cargoSizeMin", Get(row, "cargoSizeMin"), rowId, warnings);
+        SetRequiredInt(serializedObject, "cargoSizeMax", Get(row, "cargoSizeMax"), rowId, warnings);
 
         SetRequiredInt(serializedObject, "baseDamageMin", Get(row, "baseDamageMin"), rowId, warnings);
         SetRequiredInt(serializedObject, "baseDamageMax", Get(row, "baseDamageMax"), rowId, warnings);
 
-        SetRequiredFloat(serializedObject, "rangeMin", Get(row, "rangeMin"), rowId, warnings);
-        SetRequiredFloat(serializedObject, "rangeMax", Get(row, "rangeMax"), rowId, warnings);
+        SetRequiredInt(serializedObject, "rangeMin", Get(row, "rangeMin"), rowId, warnings);
+        SetRequiredInt(serializedObject, "rangeMax", Get(row, "rangeMax"), rowId, warnings);
 
         SetRequiredInt(serializedObject, "energyCostMin", Get(row, "energyCostMin"), rowId, warnings);
         SetRequiredInt(serializedObject, "energyCostMax", Get(row, "energyCostMax"), rowId, warnings);
@@ -428,14 +429,11 @@ public static class WeaponConfigAssetGenerator
         SetRequiredInt(serializedObject, "projectileLifetimeMin", Get(row, "projectileLifetimeMin"), rowId, warnings);
         SetRequiredInt(serializedObject, "projectileLifetimeMax", Get(row, "projectileLifetimeMax"), rowId, warnings);
 
-        SetRequiredBool(serializedObject, "isHitscan", Get(row, "isHitscan"), rowId, warnings);
 
         SetRequiredEnum(serializedObject, "weaponType", Get(row, "weaponType"), rowId, warnings);
-        SetRequiredBool(serializedObject, "autoDetectShotType", Get(row, "autoDetectShotType"), rowId, warnings);
         SetRequiredEnum(serializedObject, "shotType", Get(row, "shotType"), rowId, warnings);
         SetRequiredInt(serializedObject, "shotCount", Get(row, "shotCount"), rowId, warnings);
         SetRequiredEnum(serializedObject, "damageType", Get(row, "damageType"), rowId, warnings);
-        SetRequiredEnum(serializedObject, "targetingMode", Get(row, "targetingMode"), rowId, warnings);
 
         SetGameObjectReference(serializedObject, "projectilePrefabRef", Get(row, "projectilePrefabRef"), rowId, warnings);
 
@@ -507,9 +505,10 @@ public static class WeaponConfigAssetGenerator
         "displayName",
         "description",
         "level",
-        "equipmentTier",
         "weaponOwner",
-        "cargoSize",
+        "maximumDurability",
+        "cargoSizeMin",
+        "cargoSizeMax",
         "baseDamageMin",
         "baseDamageMax",
         "rangeMin",
@@ -518,13 +517,10 @@ public static class WeaponConfigAssetGenerator
         "energyCostMax",
         "projectileLifetimeMin",
         "projectileLifetimeMax",
-        "isHitscan",
         "weaponType",
-        "autoDetectShotType",
         "shotType",
         "shotCount",
         "damageType",
-        "targetingMode",
         "projectilePrefabRef",
         "usesAmmo",
         "maxAmmoChargesMin",
@@ -576,13 +572,15 @@ public static class WeaponConfigAssetGenerator
             }
 
             ValidateInt(row, "level", id, result.Errors);
-            ValidateInt(row, "cargoSize", id, result.Errors);
+            ValidateInt(row, "maximumDurability", id, result.Errors);
+            ValidateInt(row, "cargoSizeMin", id, result.Errors);
+            ValidateInt(row, "cargoSizeMax", id, result.Errors);
 
             ValidateInt(row, "baseDamageMin", id, result.Errors);
             ValidateInt(row, "baseDamageMax", id, result.Errors);
 
-            ValidateFloat(row, "rangeMin", id, result.Errors);
-            ValidateFloat(row, "rangeMax", id, result.Errors);
+            ValidateInt(row, "rangeMin", id, result.Errors);
+            ValidateInt(row, "rangeMax", id, result.Errors);
 
             ValidateInt(row, "energyCostMin", id, result.Errors);
             ValidateInt(row, "energyCostMax", id, result.Errors);
@@ -590,10 +588,8 @@ public static class WeaponConfigAssetGenerator
             ValidateInt(row, "projectileLifetimeMin", id, result.Errors);
             ValidateInt(row, "projectileLifetimeMax", id, result.Errors);
 
-            ValidateBool(row, "isHitscan", id, result.Errors);
             ValidateBool(row, "usesAmmo", id, result.Errors);
 
-            ValidateBool(row, "autoDetectShotType", id, result.Errors);
             ValidateInt(row, "shotCount", id, result.Errors);
 
             ValidateInt(row, "maxAmmoChargesMin", id, result.Errors);

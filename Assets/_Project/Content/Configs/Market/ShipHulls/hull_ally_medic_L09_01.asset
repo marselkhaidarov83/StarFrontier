@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: hull_ally_medic_L09_01
+  m_EditorClassIdentifier: 
+  id: hull_ally_medic_L09_01
+  displayName: "Корпус «Возрождение»"
+  description: "Медицинский корпус для спасательных рейдов и эвакуации. Защищённые палубы дают убежище тем, кого удалось вырвать из опасности."
+  icon: {fileID: 21300000, guid: c6074226962ed440e8dac3705da049ae, type: 3}
+  Hull: {fileID: 11400000, guid: 8de24b941383a4a3ab211ec2d4de7aa0, type: 2}
+  Level: 9
+  MaximumHullMin: 171
+  MaximumHullMax: 210
+  CargoCapacityMin: 178
+  CargoCapacityMax: 190

@@ -15,33 +15,25 @@ MonoBehaviour:
   id: weapon_ai_laser_silver_L04_01
   displayName: "\u041F\u0440\u0435\u0446\u0438\u0437\u0438\u043E\u043D\u043D\u044B\u0439
     \u043B\u0430\u0437\u0435\u0440"
-  description: "\u0420\u043E\u0432\u043D\u044B\u0439 \u043A\u0440\u0430\u0441\u043D\u044B\u0439
-    \u043C\u0430\u0448\u0438\u043D\u043D\u044B\u0439 \u043B\u0430\u0437\u0435\u0440.
-    \u0412\u044B\u0433\u043B\u044F\u0434\u0438\u0442 \u0445\u043E\u043B\u043E\u0434\u043D\u043E
-    \u0438 \u0442\u043E\u0447\u043D\u043E, \u0431\u0435\u0437 \u043E\u0440\u0433\u0430\u043D\u0438\u043A\u0438.
-    IMG: PNG 512\xD7512, transparent background, centered projectile/VFX sprite,
-    pivot center, no text, no watermark, mobile-friendly, stylized sci-fi, pseudo-3D/top-down
-    readable silhouette."
+  description: "Узкий луч прожигает защиту точно в выбранной точке. Стабильная фокусировка делает это оружие надёжным спутником в затяжной перестрелке."
   icon: {fileID: 21300000, guid: acc822bfc4c98471799885f3d3ba4e02, type: 3}
   level: 4
-  equipmentTier: 2
-  cargoSize: 6
-  baseDamageMin: 16
-  baseDamageMax: 20
-  rangeMin: 186.96
-  rangeMax: 208.15
-  energyCostMin: 2
-  energyCostMax: 4
-  projectileLifetimeMin: 1
-  projectileLifetimeMax: 1
-  isHitscan: 1
+  cargoSizeMin: 4
+  cargoSizeMax: 5
+  baseDamageMin: 15
+  baseDamageMax: 22
+  rangeMin: 216
+  rangeMax: 240
+  energyCostMin: 4
+  energyCostMax: 6
+  projectileLifetimeMin: 4
+  projectileLifetimeMax: 4
   weaponType: 0
   damageType: 0
-  targetingMode: 0
-  autoDetectShotType: 0
   shotType: 0
-  shotCount: 5
+  shotCount: 8
   projectilePrefabRef: {fileID: 0}
   usesAmmo: 0
   maxAmmoChargesMin: 0
   maxAmmoChargesMax: 0
+  maximumDurability: 175

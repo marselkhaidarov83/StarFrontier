@@ -61,8 +61,9 @@ public partial class HangarService : IHangarService
 
         stats.MaxHull = Mathf.Max(1, activeShip.HullCapacity);
         stats.CargoCapacity = Mathf.Max(0, activeShip.CargoCapacity);
-        var shield = GetComponent(ShipLoadoutRules.ComponentId(activeShip, ShipComponentSlot.ShieldGenerator));
-        stats.MaxShield = shield != null ? Mathf.Max(0, Mathf.RoundToInt(stats.MaxShield * shield.ShieldMultiplier)) : 0;
+        var shieldItem = ShipLoadoutRules.Component(activeShip, ShipComponentSlot.ShieldGenerator);
+        var shield = GetComponent(shieldItem?.ComponentConfigId);
+        stats.MaxShield = shieldItem?.GetComponentStats(shield)?.ShieldCapacity ?? 0;
         stats.Speed = ShipStatCalculator.GetEngineSpeed(activeShip, _configService);
         return stats;
     }

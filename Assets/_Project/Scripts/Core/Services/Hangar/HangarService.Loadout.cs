@@ -146,7 +146,7 @@ public partial class HangarService
         if (slot == ShipComponentSlot.FuelTank)
         {
             StoreTankFuel(ship, old);
-            ship.FuelCapacity = next != null ? Mathf.Max(0, next.FuelCapacity) : 0;
+            ship.FuelCapacity = nextItem?.GetComponentStats(next)?.FuelCapacity ?? 0;
             ship.CurrentFuel = nextItem != null ? Mathf.Clamp(nextItem.StoredFuel, 0, ship.FuelCapacity) : 0;
             if (nextItem != null) nextItem.StoredFuel = 0;
         }
@@ -212,7 +212,7 @@ public partial class HangarService
         if (remaining <= 0 || remaining > next.MaximumDurability) return false;
 
         var nextStats = _statCalculator.Calculate(config, ship.EquippedModuleIds);
-        int capacity = Mathf.Max(0, nextStats.CargoCapacity);
+        int capacity = Mathf.Max(0, next.CargoCapacity);
         long delta = 0;
 
         var detached = ship.InstalledComponents.FindAll(x => x != null &&
@@ -281,14 +281,13 @@ public partial class HangarService
     private int EquipmentSize(SystemNpcWeaponRuntimeState item) =>
         InventoryService.GetEquipmentCargoSize(_configService, item);
 
-    private ShipComponentConfig GetComponent(string id) =>
-        string.IsNullOrEmpty(id) ? null : _configService.GetItemConfigById(id) as ShipComponentConfig;
+    private ShipEquipmentConfig GetComponent(string id) =>
+        string.IsNullOrEmpty(id) ? null : _configService.GetItemConfigById(id) as ShipEquipmentConfig;
 
     private int ShieldCapacity(ShipRuntimeData ship, AllyConfig hull)
     {
-        var generator = GetComponent(ShipLoadoutRules.ComponentId(ship, ShipComponentSlot.ShieldGenerator));
-        int baseCapacity = _statCalculator.Calculate(hull, ship.EquippedModuleIds).MaxShield;
-        return generator != null ? Mathf.Max(0, Mathf.RoundToInt(baseCapacity * generator.ShieldMultiplier)) : 0;
+        var instance = ShipLoadoutRules.Component(ship, ShipComponentSlot.ShieldGenerator);
+        return instance?.GetComponentStats(GetComponent(instance.ComponentConfigId))?.ShieldCapacity ?? 0;
     }
 
     private void PublishLoadoutEvent<T>(T evt)

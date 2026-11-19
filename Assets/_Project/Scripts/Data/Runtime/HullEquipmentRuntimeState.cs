@@ -10,6 +10,7 @@ public sealed class HullEquipmentRuntimeState
     [SerializeField, HideInInspector] private int CargoSize;
     public int CurrentDurability;
     public int MaximumDurability;
+    public int CargoCapacity;
 
     [SerializeField, HideInInspector] private int MaximumHull;
     [SerializeField, HideInInspector] private int DurabilityPercent = -1;
@@ -32,7 +33,7 @@ public sealed class HullEquipmentRuntimeState
     // Only the InstalledHull slot may interpret this exact empty shape as absent equipment.
     public static bool IsEmptyPlaceholder(HullEquipmentRuntimeState hull) => hull == null ||
         (string.IsNullOrEmpty(hull.InstanceId) && string.IsNullOrEmpty(hull.ConfigId) &&
-         hull.CargoSize == 0 && hull.MaximumDurability == 0 && hull.CurrentDurability == 0 &&
+         hull.CargoSize == 0 && hull.CargoCapacity == 0 && hull.MaximumDurability == 0 && hull.CurrentDurability == 0 &&
          hull.MaximumHull == 0 && !hull.HasExactCondition && hull.RemainingHull == 0 &&
          (hull.DurabilityPercent == -1 || hull.DurabilityPercent == 0 || hull.DurabilityPercent == 100));
 }

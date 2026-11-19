@@ -168,7 +168,7 @@ public sealed class StationNpcWeaponCombatEditModeTests
         var weapon = Asset<WeaponConfig>(); Id(weapon, "weapon");
         Field(weapon, "rangeMin", 100f); Field(weapon, "rangeMax", 100f);
         Field(weapon, "baseDamageMin", 7); Field(weapon, "baseDamageMax", 7);
-        Field(weapon, "autoDetectShotType", false); Field(weapon, "shotType", WeaponShotType2A.HeavyProjectile);
+        Field(weapon, "shotType", WeaponShotType2A.HeavyProjectile);
         var config = Uninitialized<ConfigService>(); Field(config, "_weaponsById", new Dictionary<string, WeaponConfig> { { "weapon", weapon } });
         Field(weapons, "_configService", config);
         var npc = Enemy(); var runtimeWeapon = npc.Weapons[0]; var target = _combat.FindTarget(npc);

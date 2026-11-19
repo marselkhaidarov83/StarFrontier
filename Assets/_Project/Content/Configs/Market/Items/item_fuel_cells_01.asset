@@ -18,6 +18,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: f0f64dec243b445beb2e82810e57d89e, type: 3}
   itemCategory: 1
   basePrice: 25
+  marketDevelopmentLevel: 1
   cargoSize: 1
-  rarity: 0
   isLegal: 1

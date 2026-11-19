@@ -50,6 +50,7 @@ public static class ShipLoadoutRules
             ConfigId = HullEquipmentRuntimeState.IsEmptyPlaceholder(installed) ? HullEquipmentId(config.Id) : installed.ConfigId,
             InstanceId = HullEquipmentRuntimeState.IsEmptyPlaceholder(installed) ? "installed-hull:" + ship.ShipId : installed.InstanceId,
             MaximumDurability = maximum,
+            CargoCapacity = installed != null && installed.CargoCapacity > 0 ? installed.CargoCapacity : ship.CargoCapacity,
             CurrentDurability = Mathf.Clamp(ship.CurrentHull, 0, maximum)
         };
     }

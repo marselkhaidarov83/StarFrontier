@@ -16,6 +16,7 @@ public class HangarScreenController : MonoBehaviour
         public string Id, Title, Info;
         public Sprite Icon;
         public bool CanInstall;
+        public int Level;
         public (int Current, int Maximum) Durability;
     }
 
@@ -222,7 +223,7 @@ public class HangarScreenController : MonoBehaviour
         for (int i = 0; i < _choices.Count; i++)
         {
             var item = _choices[i];
-            _view.SetChoice(i, item.Title, item.Icon, item.Id == _choice, item.Info, item.Id, item.Durability);
+            _view.SetChoice(i, item.Title, item.Icon, item.Id == _choice, item.Info, item.Id, item.Durability, item.Level, LevelColor(item.Level));
         }
 
         bool occupied = IsOccupied(ship, _slot);
@@ -242,22 +243,25 @@ public class HangarScreenController : MonoBehaviour
 
     private void RenderSlots(ShipRuntimeData ship, AllyConfig hull, bool ready, int usedCargo)
     {
+        var hullConfig = _market.GetHullConfig(ship?.InstalledHull?.ConfigId ?? ShipLoadoutRules.HullEquipmentId(hull?.Id));
+        int hullLevel = hull == null ? 0 : hullConfig?.Level ?? Mathf.Max(1, hull.Level);
         _view.SetSlot(ShipLoadoutRules.HullSlot, hull == null ? "Корпус" : string.Empty,
-            hull != null ? hull.CombatSprite ?? hull.Icon : null, ready, _slot == ShipLoadoutRules.HullSlot,
+            hullConfig?.Icon ?? (hull != null ? hull.CombatSprite ?? hull.Icon : null), ready, _slot == ShipLoadoutRules.HullSlot,
             ship != null && hull != null
-                ? WithDescription(hull.Description, $"Вместимость трюма {usedCargo} / {ship.CargoCapacity}")
+                ? WithDescription(hullConfig?.Description ?? hull.Description, $"Вместимость трюма {usedCargo} / {ship.CargoCapacity}")
                 : null,
-            ship?.InstalledHull?.InstanceId, equipmentName: hull?.DisplayName, durability: (ship?.CurrentHull ?? 0, ship?.HullCapacity ?? 0));
+            ship?.InstalledHull?.InstanceId, equipmentName: hullConfig?.DisplayName ?? hull?.DisplayName, durability: (ship?.CurrentHull ?? 0, ship?.HullCapacity ?? 0),
+            level: hullLevel, levelColor: LevelColor(hullLevel));
 
         for (int i = ShipLoadoutRules.FirstComponentSlot; i < ShipLoadoutRules.FirstWeaponSlot; i++)
         {
             bool allowed = SlotAvailable(hull, i);
             var instance = ShipLoadoutRules.Component(ship, (ShipComponentSlot)(i - ShipLoadoutRules.FirstComponentSlot));
-            var component = _config.GetItemConfigById(instance?.ComponentConfigId) as ShipComponentConfig;
+            var component = _config.GetItemConfigById(instance?.ComponentConfigId) as ShipEquipmentConfig;
             _view.SetSlot(i, instance == null ? SlotName(i) : string.Empty, component?.Icon, ready && allowed, _slot == i,
                 instance != null ? ComponentInfo(instance, component, ship.CurrentFuel) : null,
                 instance?.InstanceId, empty: instance == null, equipmentName: component?.DisplayName ?? SlotName(i),
-                durability: Durability(instance));
+                durability: Durability(instance), level: component?.Level ?? 0, levelColor: LevelColor(component?.Level ?? 1));
         }
 
         for (int i = ShipLoadoutRules.FirstWeaponSlot; i < ShipLoadoutRules.TotalSlots; i++)
@@ -267,7 +271,7 @@ public class HangarScreenController : MonoBehaviour
             var config = _config.GetWeaponConfigById(weapon?.WeaponConfigId);
             _view.SetSlot(i, weapon == null ? SlotName(i) : string.Empty, config?.Icon, ready && allowed, _slot == i,
                 weapon != null ? WeaponInfo(weapon, config) : null, weapon?.InstanceId, empty: weapon == null, equipmentName: config?.DisplayName ?? SlotName(i),
-                durability: Durability(weapon));
+                durability: Durability(weapon), level: config?.Level ?? 0, levelColor: LevelColor(config?.Level ?? 1));
         }
     }
 
@@ -283,8 +287,8 @@ public class HangarScreenController : MonoBehaviour
                 var config = _market.GetHullConfig(hull?.ConfigId);
                 if (hull == null || config?.Hull == null) continue;
                 AddChoice(hull.InstanceId, config.DisplayName, config.Icon,
-                    WithDescription(config.Hull.Description, $"Вместимость трюма {config.Hull.BaseCargoCapacity}"),
-                    (hull.CurrentDurability, hull.MaximumDurability), hull.CurrentDurability > 0);
+                    WithDescription(config.Description, $"Вместимость трюма {hull.CargoCapacity}"),
+                    (hull.CurrentDurability, hull.MaximumDurability), hull.CurrentDurability > 0, config.Level);
             }
         }
         else if (_slot >= ShipLoadoutRules.FirstWeaponSlot)
@@ -294,7 +298,7 @@ public class HangarScreenController : MonoBehaviour
                 if (weapon == null || weapon.IsComponent) continue;
                 var config = _config.GetWeaponConfigById(weapon.WeaponConfigId);
                 if (config != null)
-                    AddChoice(weapon.InstanceId, config.DisplayName, config.Icon, WeaponInfo(weapon, config), Durability(weapon));
+                    AddChoice(weapon.InstanceId, config.DisplayName, config.Icon, WeaponInfo(weapon, config), Durability(weapon), level: config.Level);
             }
         }
         else
@@ -303,17 +307,19 @@ public class HangarScreenController : MonoBehaviour
             foreach (var item in _warehouse ? market.PersonalEquipment : ship.CargoEquipment)
             {
                 if (item == null || !item.IsComponent ||
-                    _config.GetItemConfigById(item.ComponentConfigId) is not ShipComponentConfig component || component.Slot != slot)
+                    _config.GetItemConfigById(item.ComponentConfigId) is not ShipEquipmentConfig component || component.Slot != slot)
                     continue;
-                AddChoice(item.InstanceId, component.DisplayName, component.Icon, ComponentInfo(item, component), Durability(item));
+                AddChoice(item.InstanceId, component.DisplayName, component.Icon, ComponentInfo(item, component), Durability(item), level: component.Level);
             }
         }
     }
 
-    private void AddChoice(string id, string title, Sprite icon, string info, (int Current, int Maximum) durability, bool canInstall = true)
+    private void AddChoice(string id, string title, Sprite icon, string info, (int Current, int Maximum) durability, bool canInstall = true, int level = 0)
     {
-        _choices.Add(new InventoryChoice { Id = id, Title = title, Icon = icon, Info = info, Durability = durability, CanInstall = canInstall });
+        _choices.Add(new InventoryChoice { Id = id, Title = title, Icon = icon, Info = info, Durability = durability, CanInstall = canInstall, Level = level });
     }
+
+    private Color LevelColor(int level) => _config.GameVisualConfig?.GetEquipmentLevelColor(level) ?? Color.white;
 
     private static (int Current, int Maximum) Durability(SystemNpcWeaponRuntimeState item) =>
         (item?.CurrentDurability ?? 0, item?.MaximumDurability ?? 0);
@@ -323,23 +329,22 @@ public class HangarScreenController : MonoBehaviour
 
     internal static string CargoSpaceLine(int size) => $"Занимает места в трюме: {Mathf.Max(1, size)}";
 
-    internal static string ComponentInfo(SystemNpcWeaponRuntimeState item, ShipComponentConfig component, int? installedFuel = null)
+    internal static string ComponentInfo(SystemNpcWeaponRuntimeState item, ShipEquipmentConfig component, int? installedFuel = null)
     {
-        string details = component?.Description;
-        if (component != null && component.Slot == ShipComponentSlot.Engine)
+        var stats = item.GetComponentStats(component);
+        string details = component?.Slot switch
         {
-            string range = component.EngineRange > 0 ? component.EngineRange.ToString("0.##") : "—";
-            details = $"Скорость: {component.Speed:0.##}\nДальность: {range}";
-        }
-
-        if (component != null && component.Slot == ShipComponentSlot.FuelTank)
-            details = $"Топливо: {installedFuel ?? item.StoredFuel} / {component.FuelCapacity}";
-
-        int cargoSize = item.RolledStats.CargoSize > 0 ? item.RolledStats.CargoSize : component?.CargoSize ?? 1;
-        string cargo = CargoSpaceLine(cargoSize);
-        if (component != null && (component.Slot == ShipComponentSlot.Engine || component.Slot == ShipComponentSlot.FuelTank))
-            return WithDescription(component.Description, details + "\n" + cargo);
-        return WithDescription(details, cargo);
+            ShipComponentSlot.Engine => $"Скорость: {stats.Speed:0.##}\nДальность: {stats.EngineRange:0.##}",
+            ShipComponentSlot.FuelTank => $"Топливо: {installedFuel ?? item.StoredFuel} / {stats.FuelCapacity}",
+            ShipComponentSlot.Radar => $"Дальность обнаружения: {stats.RadarRange:0.##}",
+            ShipComponentSlot.Scanner => $"Дальность сканирования: {stats.ScannerRange:0.##}",
+            ShipComponentSlot.RepairDroid => $"Восстановление за цикл: {stats.RepairPerCycle}",
+            ShipComponentSlot.Grabber => $"Грузоподъёмность: {stats.Strength}\nДальность захвата: {stats.Range:0.##}",
+            ShipComponentSlot.ShieldGenerator => $"Щит: {stats.ShieldCapacity}",
+            _ => string.Empty
+        };
+        int cargoSize = item.RolledStats.CargoSize > 0 ? item.RolledStats.CargoSize : stats?.CargoSize ?? 1;
+        return WithDescription(component?.Description, details + "\n" + CargoSpaceLine(cargoSize));
     }
 
     internal static string WeaponInfo(SystemNpcWeaponRuntimeState weapon, WeaponConfig config)

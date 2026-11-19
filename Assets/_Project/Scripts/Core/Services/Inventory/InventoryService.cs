@@ -101,7 +101,7 @@ public class InventoryService : IInventoryService
     {
         var config = configService.GetItemConfigById(itemId);
         if (config == null) return false;
-        if (config is ShipComponentConfig component)
+        if (config is ShipEquipmentConfig component)
         {
             Ship.CargoEquipment ??= new List<SystemNpcWeaponRuntimeState>();
             for (int i = 0; i < quantity; i++)
@@ -114,7 +114,7 @@ public class InventoryService : IInventoryService
     public bool RemoveItem(string itemId, int quantity)
     {
         if (Ship?.Cargo == null || quantity <= 0 || string.IsNullOrEmpty(itemId)) return false;
-        if (configService.GetItemConfigById(itemId) is ShipComponentConfig)
+        if (configService.GetItemConfigById(itemId) is ShipEquipmentConfig)
         {
             var matching = Ship.CargoEquipment?.FindAll(item => item?.ComponentConfigId == itemId);
             if (matching == null || matching.Count < quantity) return false;

@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: ship_radar_expedition_L07_01
+  m_EditorClassIdentifier: Data::ShipEquipmentConfig
+  id: ship_radar_expedition_L07_01
+  displayName: "Навигационный радар «Зенит»"
+  description: "Выделяет слабые сигналы на фоне звёздного шума. Его чувствительная антенна помогает раньше заметить чужой корабль и подготовиться к встрече."
+  icon: {fileID: 21300000, guid: 5f7d5ee610b746b2b59b43c319ef302b, type: 3}
+  lootHealth: 1
+  itemCategory: 10
+  basePrice: 9800
+  marketDevelopmentLevel: 7
+  cargoSize: 7
+  isLegal: 1
+  Level: 7
+  Variant: 1
+  Slot: 2
+  MaximumDurability: 250
+  CargoSizeMin: 7
+  CargoSizeMax: 8
+  SpeedMin: 0
+  SpeedMax: 0
+  EngineRangeMin: 0
+  EngineRangeMax: 0
+  FuelCapacityMin: 0
+  FuelCapacityMax: 0
+  RadarRangeMin: 3000
+  RadarRangeMax: 3150
+  ScannerRangeMin: 0
+  ScannerRangeMax: 0
+  RepairPerCycleMin: 0
+  RepairPerCycleMax: 0
+  GrabberStrengthMin: 0
+  GrabberStrengthMax: 0
+  GrabberRangeMin: 0
+  GrabberRangeMax: 0
+  ShieldMin: 0
+  ShieldMax: 0

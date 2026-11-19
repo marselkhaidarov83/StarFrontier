@@ -899,6 +899,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
         npc.IsFighting = true;
     }
 
+    private float LootPullSpeedPerTick => _configService.InteractionConfig?.LootPullSpeedPerTick ??
+        InteractionConfig.DefaultLootPullSpeedPerTick;
+
     private void TickCollectDebris(SystemNpcRuntimeState npc, int currentTick)
     {
         if (npc == null || !npc.IsAlive || !npc.IsAlly ||
@@ -906,10 +909,10 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
 
         AllyConfig allyConfig = _configService.GetAllyConfigById(npc.ConfigId);
-        GrabberConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
+        ShipEquipmentConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
         SpaceLootRuntimeState loot = FindCollectibleLoot(npc.LootTargetId);
         if (grabber == null || grabber.Range <= 0f ||
-            grabber.PullSpeedPerTick <= 0f || loot == null ||
+            LootPullSpeedPerTick <= 0f || loot == null ||
             !RangerLootCollectionRules2A.CanCollect(npc, loot,
                 _spaceLootService.GetLootMass(loot), grabber.Strength,
                 RangerLootCollectionRules2A.GetFreeCargoMass(npc, _configService)))
@@ -944,7 +947,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
 
         npc.LastLootPullTick = currentTick;
         if (!_spaceLootService.TryPullTowardNpc(loot.LootId, npc,
-                grabber.PullSpeedPerTick, out bool arrived))
+                LootPullSpeedPerTick, out bool arrived))
         {
             CompleteBehavior(npc, currentTick);
             return;
@@ -966,9 +969,9 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     {
         AllyConfig allyConfig = npc != null && npc.IsAlly
             ? _configService.GetAllyConfigById(npc.ConfigId) : null;
-        GrabberConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
+        ShipEquipmentConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
         if (npc == null || npc.AllyRole != AllyRole2A.Ranger || grabber == null ||
-            grabber.Range <= 0f || grabber.PullSpeedPerTick <= 0f)
+            grabber.Range <= 0f || LootPullSpeedPerTick <= 0f)
         {
             FallBackFromLootCollection(npc, "NoRangerGrabber");
             return;
