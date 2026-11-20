@@ -28,7 +28,7 @@ public sealed class EnemySpawnService :
     }
 
     public bool TrySpawnSystemGuardGroup(
-        StarSystemConfig starSystem, EnemyGroupSpawnRuleConfig rule, out EnemyGroupState enemyGroupState)
+        StarSystemConfig starSystem, EnemyInvasionGroupSpawnRuleConfig rule, out EnemyGroupState enemyGroupState)
     {
         // Legacy API: regular population must use EnemySpawnRuleSetConfig instead.
         enemyGroupState = null;
@@ -38,7 +38,7 @@ public sealed class EnemySpawnService :
     public bool TrySpawnInvasionGroup(
         StarSystemConfig ownerSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         string invasionId,
         out EnemyGroupState enemyGroupState)
     {
@@ -54,7 +54,7 @@ public sealed class EnemySpawnService :
     public bool TrySpawnInvasionGroup(
         StarSystemConfig ownerSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         string invasionId,
         string factionId,
         out EnemyGroupState enemyGroupState)
@@ -71,15 +71,12 @@ public sealed class EnemySpawnService :
     private bool TrySpawnEnemyGroup(
         StarSystemConfig ownerSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         string invasionId,
         string factionId,
         out EnemyGroupState enemyGroupState)
     {
         enemyGroupState = null;
-
-        if (ownerSystem == null)
-            return false;
 
         if (targetSystem == null)
             return false;
@@ -153,7 +150,7 @@ public sealed class EnemySpawnService :
                 LastUpdatedTick = currentTick,
                 NextSpawnTick = 0,
                 CleanupAfterTick = 0,
-                OwnerSystemId = ownerSystem.Id,
+                OwnerSystemId = (ownerSystem?.Id ?? string.Empty),
                 TargetSystemId = targetSystem.Id,
                 MemberRuntimeNpcIds = new List<string>(),
                 MemberConfigIds = new List<string>()
@@ -164,58 +161,35 @@ public sealed class EnemySpawnService :
         Vector3 groupSpawnBasePosition =
             PickEnemyGroupSpawnBasePosition(targetSystem);
 
-        for (int entryIndex = 0; entryIndex < enemies.Count; entryIndex++)
+        foreach (EnemyConfig enemyConfig in EnemyInvasionGroupSpawnRuleConfig.RollMembers(enemies))
         {
-            EnemyGroupEntryConfig entry =
-                enemies[entryIndex];
+            Vector3 position =
+                BuildEnemySpawnPosition(
+                    targetSystem,
+                    groupSpawnBasePosition);
 
-            if (entry == null || !entry.IsValid())
-                continue;
+            SystemNpcRuntimeState enemy =
+                SystemNpcRuntimeFactory.CreateEnemy(
+                    enemyConfig,
+                    (ownerSystem?.Id ?? string.Empty),
+                    targetSystem.Id,
+                    position,
+                    rule.Id,
+                    runtimeGroupId);
 
-            EnemyConfig enemyConfig =
-                entry.EnemyConfig;
+            ApplyInitialFacingToSun(
+                enemy,
+                targetSystem);
 
-            if (enemyConfig == null)
-                continue;
+            enemy.CanChangeLocationOnRestore = false;
 
-            if (enemyConfig.Level != currentGalaxyLevel)
-                continue;
+            _npcRuntimeService.AddNpc(enemy);
 
-            int count =
-                UnityEngine.Random.Range(
-                    entry.MinCount,
-                    entry.MaxCount + 1);
+            enemyGroupState.MemberRuntimeNpcIds.Add(
+                enemy.RuntimeNpcId);
 
-            for (int i = 0; i < count; i++)
-            {
-                Vector3 position =
-                    BuildEnemySpawnPosition(
-                        targetSystem,
-                        groupSpawnBasePosition);
-
-                SystemNpcRuntimeState enemy =
-                    SystemNpcRuntimeFactory.CreateEnemy(
-                        enemyConfig,
-                        ownerSystem.Id,
-                        targetSystem.Id,
-                        position,
-                        rule.Id,
-                        runtimeGroupId);
-
-                ApplyInitialFacingToSun(
-                    enemy,
-                    targetSystem);
-
-                enemy.CanChangeLocationOnRestore = false;
-
-                _npcRuntimeService.AddNpc(enemy);
-
-                enemyGroupState.MemberRuntimeNpcIds.Add(
-                    enemy.RuntimeNpcId);
-
-                enemyGroupState.MemberConfigIds.Add(
-                    enemyConfig.Id);
-            }
+            enemyGroupState.MemberConfigIds.Add(
+                enemyConfig.Id);
         }
 
         if (enemyGroupState.MemberRuntimeNpcIds.Count == 0)
@@ -248,7 +222,7 @@ public sealed class EnemySpawnService :
         LogCustom(
             "[EnemySpawnService] Enemy group spawned. " +
             "System: " + targetSystem.Id +
-            ", OwnerSystem: " + ownerSystem.Id +
+            ", OwnerSystem: " + (ownerSystem?.Id ?? string.Empty) +
             ", Rule: " + rule.Id +
             ", Faction: " + resolvedFactionId +
             ", GroupRuntimeId: " + runtimeGroupId +
@@ -352,14 +326,11 @@ public sealed class EnemySpawnService :
     private bool TrySpawnEnemyGroup(
         StarSystemConfig ownerSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         string invasionId,
         out EnemyGroupState enemyGroupState)
     {
         enemyGroupState = null;
-
-        if (ownerSystem == null)
-            return false;
 
         if (targetSystem == null)
             return false;
@@ -414,7 +385,7 @@ public sealed class EnemySpawnService :
                 LastUpdatedTick = currentTick,
                 NextSpawnTick = 0,
                 CleanupAfterTick = 0,
-                OwnerSystemId = ownerSystem.Id,
+                OwnerSystemId = (ownerSystem?.Id ?? string.Empty),
                 TargetSystemId = targetSystem.Id,
                 MemberRuntimeNpcIds = new List<string>(),
                 MemberConfigIds = new List<string>()
@@ -425,58 +396,35 @@ public sealed class EnemySpawnService :
         Vector3 groupSpawnBasePosition =
             PickEnemyGroupSpawnBasePosition(targetSystem);
 
-        for (int entryIndex = 0; entryIndex < enemies.Count; entryIndex++)
+        foreach (EnemyConfig enemyConfig in EnemyInvasionGroupSpawnRuleConfig.RollMembers(enemies))
         {
-            EnemyGroupEntryConfig entry =
-                enemies[entryIndex];
+            Vector3 position =
+                BuildEnemySpawnPosition(
+                    targetSystem,
+                    groupSpawnBasePosition);
 
-            if (entry == null || !entry.IsValid())
-                continue;
+            SystemNpcRuntimeState enemy =
+                SystemNpcRuntimeFactory.CreateEnemy(
+                    enemyConfig,
+                    (ownerSystem?.Id ?? string.Empty),
+                    targetSystem.Id,
+                    position,
+                    rule.Id,
+                    runtimeGroupId);
 
-            EnemyConfig enemyConfig =
-                entry.EnemyConfig;
+            ApplyInitialFacingToSun(
+                enemy,
+                targetSystem);
 
-            if (enemyConfig == null)
-                continue;
+            enemy.CanChangeLocationOnRestore = false;
 
-            if (enemyConfig.Level != currentGalaxyLevel)
-                continue;
+            _npcRuntimeService.AddNpc(enemy);
 
-            int count =
-                UnityEngine.Random.Range(
-                    entry.MinCount,
-                    entry.MaxCount + 1);
+            enemyGroupState.MemberRuntimeNpcIds.Add(
+                enemy.RuntimeNpcId);
 
-            for (int i = 0; i < count; i++)
-            {
-                Vector3 position =
-                    BuildEnemySpawnPosition(
-                        targetSystem,
-                        groupSpawnBasePosition);
-
-                SystemNpcRuntimeState enemy =
-                    SystemNpcRuntimeFactory.CreateEnemy(
-                        enemyConfig,
-                        ownerSystem.Id,
-                        targetSystem.Id,
-                        position,
-                        rule.Id,
-                        runtimeGroupId);
-
-                ApplyInitialFacingToSun(
-                    enemy,
-                    targetSystem);
-
-                enemy.CanChangeLocationOnRestore = false;
-
-                _npcRuntimeService.AddNpc(enemy);
-
-                enemyGroupState.MemberRuntimeNpcIds.Add(
-                    enemy.RuntimeNpcId);
-
-                enemyGroupState.MemberConfigIds.Add(
-                    enemyConfig.Id);
-            }
+            enemyGroupState.MemberConfigIds.Add(
+                enemyConfig.Id);
         }
 
         if (enemyGroupState.MemberRuntimeNpcIds.Count == 0)
@@ -509,7 +457,7 @@ public sealed class EnemySpawnService :
         LogCustom(
             "[EnemySpawnService] Enemy group spawned. " +
             "System: " + targetSystem.Id +
-            ", OwnerSystem: " + ownerSystem.Id +
+            ", OwnerSystem: " + (ownerSystem?.Id ?? string.Empty) +
             ", Rule: " + rule.Id +
             ", Faction: " + factionId +
             ", GroupRuntimeId: " + runtimeGroupId +

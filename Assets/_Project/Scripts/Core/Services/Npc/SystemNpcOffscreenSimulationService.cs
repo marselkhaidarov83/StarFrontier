@@ -859,7 +859,8 @@ public sealed class SystemNpcOffscreenSimulationService :
         string targetSystemId = npc.TargetSystemId;
         Vector3 entryPoint = npc.TargetSystemEntryPoint;
 
-        if (!string.IsNullOrWhiteSpace(targetSystemId))
+        if (!string.IsNullOrWhiteSpace(targetSystemId) &&
+            Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>().HasUnlockedRoute(npc.CurrentSystemId, targetSystemId))
         {
             npc.CurrentSystemId = targetSystemId;
             npc.CurrentPosition = entryPoint;

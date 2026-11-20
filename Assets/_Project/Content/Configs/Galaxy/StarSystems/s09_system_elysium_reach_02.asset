@@ -26,7 +26,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fb26113c990fa4029926a27308e09c28, type: 2}
   - {fileID: 11400000, guid: d96118c2fc86c45fa9193fbb5a7d0961, type: 2}
   - {fileID: 11400000, guid: b65625845e0e5410284bc6c7f7314de5, type: 2}
-  linkedSystems: []
   station: {fileID: 11400000, guid: e4347c3c0abb94856986c2cb4cbbb2e3, type: 2}
   mapPosition: {x: -2.3, y: 5.2}
   systemPopulationRule: {fileID: 11400000, guid: 4b1d438efa08846cda430036235fe0e6, type: 2}

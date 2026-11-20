@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: "enemy_equipment_ai_repair_droid_L02_01"
+  m_EditorClassIdentifier: Data::ShipEquipmentConfig
+  id: "enemy_equipment_ai_repair_droid_L02_01"
+  displayName: "Ремонтный автомат «Контур»"
+  description: "Ремонтный автомат фракции ИИ восстанавливает повреждённые узлы корабля. Конструкция хранит характерные следы технологий своих создателей."
+  icon: {fileID: 21300000, guid: 3f43b517009d4952b3a069f3c00f9b79, type: 3}
+  lootHealth: 1
+  itemCategory: 10
+  basePrice: 800
+  marketDevelopmentLevel: 2
+  cargoSize: 2
+  isLegal: 1
+  Level: 2
+  Variant: 0
+  Slot: 4
+  MaximumDurability: 125
+  CargoSizeMin: 2
+  CargoSizeMax: 3
+  SpeedMin: 0
+  SpeedMax: 0
+  EngineRangeMin: 0
+  EngineRangeMax: 0
+  FuelCapacityMin: 0
+  FuelCapacityMax: 0
+  RadarRangeMin: 0
+  RadarRangeMax: 0
+  ScannerRangeMin: 0
+  ScannerRangeMax: 0
+  RepairPerCycleMin: 8
+  RepairPerCycleMax: 10
+  GrabberStrengthMin: 0
+  GrabberStrengthMax: 0
+  GrabberRangeMin: 0
+  GrabberRangeMax: 0
+  ShieldMin: 0
+  ShieldMax: 0
+  enemyOnly: 1

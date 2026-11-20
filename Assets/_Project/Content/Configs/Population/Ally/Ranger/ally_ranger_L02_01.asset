@@ -21,21 +21,6 @@ MonoBehaviour:
     \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
     \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
   icon: {fileID: 21300000, guid: b39672fe277b544ea967efe2642e40f7, type: 3}
-  baseHullMin: 128
-  baseHullMax: 146
-  baseShieldMin: 93
-  baseShieldMax: 105
-  baseEnergyMin: 128
-  baseEnergyMax: 142
-  baseEnergyRegen: 10.2
-  baseAccelerationMin: 6.15
-  baseAccelerationMax: 6.65
-  baseTurnRateMin: 121.5
-  baseTurnRateMax: 131.5
-  turnRadius: 300
-  baseCargoCapacityMin: 124
-  baseCargoCapacityMax: 132
-  moduleSlotCount: 2
   level: 2
   role: 0
   namePool: {fileID: 11400000, guid: 9a60b2cb449c5430b80aa4d69d0d508b, type: 2}
@@ -47,23 +32,12 @@ MonoBehaviour:
   - scenario: 20
     behaviorConfig: {fileID: 11400000, guid: 216bf4cc1d0104f7385d83618732ffc7, type: 2}
   avoidEnemyOwnedTravelDestinations: 0
-  grabber: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
   weaponGroups:
   - {fileID: 11400000, guid: bdc76a30c69d643c58e75c32f1882f45, type: 2}
   - {fileID: 11400000, guid: 0b5703858b6d44bc89bfa0fa0426424d, type: 2}
   - {fileID: 11400000, guid: d782b6f78248842c0ab4aae60995a651, type: 2}
   - {fileID: 11400000, guid: 9f2356e83497846dba01921022100d1f, type: 2}
   - {fileID: 11400000, guid: 5d543b0093ef0437dad6e69b07ed3b15, type: 2}
-  mapSprite: {fileID: 21300000, guid: 46d2460f49e704a66af89131cd5eb7a7, type: 3}
-  combatSprite: {fileID: 21300000, guid: 46d2460f49e704a66af89131cd5eb7a7, type: 3}
-  visualSize: 28
   lootTable: {fileID: 11400000, guid: 16cdb76dd75346c0b57d58dd7612e67b, type: 2}
-  defaultComponents:
-  - {fileID: 11400000, guid: 7a7d548450c95295a605456e79ddce2e, type: 2}
-  - {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-  - {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-  - {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-  - {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-  - {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-  - {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-  hullConfig: {fileID: 11400000, guid: d0603b1f0f584679853decb341c2901d, type: 2}
+  hullGroup: {fileID: 11400000, guid: bbf7821204094e75bd4d8062e3da3c3c, type: 2}
+  equipmentGroup: {fileID: 11400000, guid: 6af40b10df5b4afaa9cd185ca5a984b5, type: 2}

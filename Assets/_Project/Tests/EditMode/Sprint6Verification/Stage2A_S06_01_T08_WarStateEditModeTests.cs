@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
@@ -6,9 +7,55 @@ using UnityEngine;
 public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
 {
     [Test]
+    public void AutomaticInvasionChoosesAllThreeFactionsWithoutTerritoriesOrRoutes()
+    {
+        Random.State previous = Random.state;
+        try
+        {
+            Random.InitState(6701);
+            var counts = new Dictionary<string, int> { ["ai"] = 0, ["ancients"] = 0, ["infected"] = 0 };
+            for (int i = 0; i < 6000; i++) counts[InvasionSchedulerService.PickRandomFactionId()]++;
+            foreach (int count in counts.Values) Assert.That(count, Is.InRange(1800, 2200));
+        }
+        finally { Random.state = previous; }
+    }
+
+    [Test]
+    public void InvasionCompositionSpawnsAllConfiguredEnemyLevelsAndCounts()
+    {
+        Random.State randomState = Random.state;
+        EnemyConfig low = CreateEnemyConfigWithLevel(3);
+        EnemyConfig current = CreateEnemyConfigWithLevel(4);
+        EnemyConfig high = CreateEnemyConfigWithLevel(8);
+        try
+        {
+            var rows = new[] { CreateEnemyGroupEntry(low, 1, 1), CreateEnemyGroupEntry(current, 2, 2),
+                CreateEnemyGroupEntry(high, 3, 3) };
+            var members = EnemyInvasionGroupSpawnRuleConfig.RollMembers(rows).ToArray();
+            Assert.That(members.Length, Is.EqualTo(6));
+            Assert.That(members.Count(x => x == low), Is.EqualTo(1));
+            Assert.That(members.Count(x => x == current), Is.EqualTo(2));
+            Assert.That(members.Count(x => x == high), Is.EqualTo(3));
+        }
+        finally { Random.state = randomState; Object.DestroyImmediate(low); Object.DestroyImmediate(current); Object.DestroyImmediate(high); }
+    }
+
+    [Test]
+    public void InvalidInvasionCompositionDoesNotYieldAPartialGroup()
+    {
+        EnemyConfig enemy = CreateEnemyConfigWithLevel(3);
+        try
+        {
+            var rows = new[] { CreateEnemyGroupEntry(enemy, 1, 1), null };
+            Assert.Throws<System.ArgumentException>(() => EnemyInvasionGroupSpawnRuleConfig.RollMembers(rows).Take(1).ToArray());
+        }
+        finally { Object.DestroyImmediate(enemy); }
+    }
+
+    [Test]
     public void EnemyGroupSpawnRule_UsesExactGalaxyLevelEntryAndPreservesConfiguredEnemyLevels()
     {
-        var rule = ScriptableObject.CreateInstance<EnemyGroupSpawnRuleConfig>();
+        var rule = ScriptableObject.CreateInstance<EnemyInvasionGroupSpawnRuleConfig>();
         EnemyConfig enemyLevel3 = CreateEnemyConfigWithLevel(3);
         EnemyConfig enemyLevel4 = CreateEnemyConfigWithLevel(4);
         try
@@ -47,8 +94,8 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
     [Test]
     public void EnemyGroupSpawnRule_ReturnsNoEnemiesWhenExactGalaxyLevelIsMissing()
     {
-        EnemyGroupSpawnRuleConfig rule =
-            ScriptableObject.CreateInstance<EnemyGroupSpawnRuleConfig>();
+        EnemyInvasionGroupSpawnRuleConfig rule =
+            ScriptableObject.CreateInstance<EnemyInvasionGroupSpawnRuleConfig>();
 
         EnemyConfig enemyLevel3 =
             CreateEnemyConfigWithLevel(3);
@@ -348,24 +395,24 @@ public sealed class Stage2A_S06_01_T08_WarStateEditModeTests
         Assert.That(typeof(IEnemySpawnService).GetMethod("TrySpawnSystemGuardGroup"), Is.Not.Null);
         Assert.That(typeof(IEnemySpawnService).GetMethod("TrySpawnInvasionGroup", new[]
         {
-            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyInvasionGroupSpawnRuleConfig),
             typeof(string), typeof(EnemyGroupState).MakeByRefType()
         }), Is.Not.Null);
         Assert.That(typeof(IEnemySpawnService).GetMethod("TrySpawnInvasionGroup", new[]
         {
-            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyInvasionGroupSpawnRuleConfig),
             typeof(string), typeof(string), typeof(EnemyGroupState).MakeByRefType()
         }), Is.Not.Null);
         Assert.That(typeof(IEnemySpawnService).GetMethod("MarkEnemyGroupDestroyed"), Is.Not.Null);
 
         Assert.That(typeof(IInvasionService).GetMethod("TryStartInvasion", new[]
         {
-            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyInvasionGroupSpawnRuleConfig),
             typeof(string), typeof(int), typeof(InvasionState).MakeByRefType()
         }), Is.Not.Null);
         Assert.That(typeof(IInvasionService).GetMethod("TryStartInvasion", new[]
         {
-            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyGroupSpawnRuleConfig),
+            typeof(StarSystemConfig), typeof(StarSystemConfig), typeof(EnemyInvasionGroupSpawnRuleConfig),
             typeof(string), typeof(int), typeof(int), typeof(InvasionState).MakeByRefType()
         }), Is.Not.Null);
         Assert.That(typeof(IInvasionService).GetMethod("UpdateInvasions"), Is.Not.Null);

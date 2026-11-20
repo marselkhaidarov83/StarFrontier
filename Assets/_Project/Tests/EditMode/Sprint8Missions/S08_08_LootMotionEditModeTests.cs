@@ -38,8 +38,7 @@ public sealed class S08_08_LootMotionEditModeTests
         _grabber.GrabberStrengthMin = _grabber.GrabberStrengthMax = 5;
         _grabber.GrabberRangeMin = _grabber.GrabberRangeMax = 100;
         _ally = ScriptableObject.CreateInstance<AllyConfig>();
-        typeof(AllyConfig).GetField("grabber", BindingFlags.Instance | BindingFlags.NonPublic)
-            .SetValue(_ally, _grabber);
+        typeof(BaseConfig).GetField("id", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(_grabber, "test_grabber");
         _state = new GameRuntimeState
         {
             Player = new PlayerState
@@ -50,7 +49,9 @@ public sealed class S08_08_LootMotionEditModeTests
         _state.Player.PlayerShipState.ActiveShipId = "ship-1";
         _state.Player.PlayerShipState.OwnedShips.Add(new ShipRuntimeData
         {
-            ShipId = "ship-1", AllyConfigId = "ally-1"
+            ShipId = "ship-1", AllyConfigId = "ally-1", HasModularLoadout = true,
+            InstalledComponents = new System.Collections.Generic.List<SystemNpcWeaponRuntimeState>
+            { SystemNpcWeaponRuntimeState.NewComponent(_grabber, "player-grabber", (int)ShipComponentSlot.Grabber) }
         });
         _ranger = new SystemNpcRuntimeState
         {
@@ -58,7 +59,9 @@ public sealed class S08_08_LootMotionEditModeTests
             AllyRole = AllyRole2A.Ranger, ConfigId = "ally-1",
             CurrentSystemId = "system-1", CurrentPosition = Vector3.zero,
             IsAlive = true, CurrentBehavior = SystemNpcBehaviorType.CollectDebris,
-            LootTargetId = "loot-1"
+            LootTargetId = "loot-1",
+            InstalledComponents = new System.Collections.Generic.List<SystemNpcWeaponRuntimeState>
+            { SystemNpcWeaponRuntimeState.NewComponent(_grabber, "npc-grabber", (int)ShipComponentSlot.Grabber) }
         };
         services.Register(new SimpleEventBus());
         _heavyWeapon = null;
@@ -70,7 +73,7 @@ public sealed class S08_08_LootMotionEditModeTests
         services.Register(S08MissionTestProxy.Make<IConfigService>((m, a) => m.Name switch
         {
             "GetAllyConfigById" => _ally,
-            "GetItemConfigById" => UnityEditor.AssetDatabase.LoadAssetAtPath<ItemConfig>(
+            "GetItemConfigById" => (string)a[0] == _grabber.Id ? _grabber : UnityEditor.AssetDatabase.LoadAssetAtPath<ItemConfig>(
                 "Assets/_Project/Content/Configs/Market/Items/" + (string)a[0] + ".asset"),
             "GetWeaponConfigById" => LoadTestWeapon((string)a[0]),
             "GetEnemyConfigById" => LoadTestEnemy((string)a[0]),

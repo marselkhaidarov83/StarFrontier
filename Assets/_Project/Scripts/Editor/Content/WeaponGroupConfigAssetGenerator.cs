@@ -26,15 +26,8 @@ public static class WeaponGroupConfigAssetGenerator
         "groupKind",
         "allyType",
         "enemyFaction",
-        "strengthRank",
-        "strengthOrder",
-        "weaponOwner",
-        "weaponOwnerKey",
         "variant",
         "weaponCount",
-        "powerScore",
-        "tierPattern",
-        "familyPattern",
         "weaponConfig01",
         "weaponConfig02",
         "weaponConfig03",
@@ -425,21 +418,10 @@ public static class WeaponGroupConfigAssetGenerator
         SetString(serialized, "displayName", Get(row, columnIndex, "displayName"));
         SetString(serialized, "description", Get(row, columnIndex, "description"));
 
-        SetInt(serialized, "level", ParseIntStrict(Get(row, columnIndex, "level")));
-        SetEnum(serialized, "groupKind", parsedRow.GroupKind);
-        SetEnum(serialized, "allyType", parsedRow.AllyType);
         SetEnum(serialized, "enemyFaction", parsedRow.EnemyFaction);
-        SetInt(serialized, "strengthRank", ParseIntStrict(Get(row, columnIndex, "strengthRank")));
-        SetString(serialized, "strengthOrder", Get(row, columnIndex, "strengthOrder"));
 
-        SetString(serialized, "weaponOwner", Get(row, columnIndex, "weaponOwner"));
-        SetString(serialized, "weaponOwnerKey", Get(row, columnIndex, "weaponOwnerKey"));
 
-        SetInt(serialized, "variant", ParseIntStrict(Get(row, columnIndex, "variant")));
         SetInt(serialized, "weaponCount", ParseIntStrict(Get(row, columnIndex, "weaponCount")));
-        SetInt(serialized, "powerScore", ParseIntStrict(Get(row, columnIndex, "powerScore")));
-        SetString(serialized, "tierPattern", Get(row, columnIndex, "tierPattern"));
-        SetString(serialized, "familyPattern", Get(row, columnIndex, "familyPattern"));
 
         var weaponsProperty = serialized.FindProperty("weaponConfigs");
         if (weaponsProperty == null || !weaponsProperty.isArray)

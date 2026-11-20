@@ -13,40 +13,82 @@ MonoBehaviour:
   m_Name: ally_medic_L04_01_loot
   m_EditorClassIdentifier: Data::NpcLootTableConfig
   id: ally_medic_L04_01_loot
-  displayName: ally_medic_L04_01_loot
-  description: Настраиваемая таблица лута для ally_medic_L04_01.
-  icon: {fileID: 0}
+  displayName: 'Добыча медицинского корабля: уровень 4'
+  description: 'Добыча медицинского корабля. Пять порогов потери суммарного запаса корпуса
+    и щита: 20, 40, 60, 80 и 100%. Каждый порог разыгрывается один раз. Оружие и установленные
+    компоненты выпадают только при уничтожении. Награды возрастают с уровнем корабля
+    и полученным уроном.'
+  icon:
+    fileID: 0
   InitialCargo: []
   initialEquipmentDurability: -1
   Rules:
-  - IsDeath: 0
-    HullThresholdPercent: 50
+  - DamageThresholdPercent: 20
+    CargoBatches: []
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 50
+      MaxAmount: 75
+      ChancePercent: 42
+  - DamageThresholdPercent: 40
+    CargoBatches: []
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 100
+      MaxAmount: 150
+      ChancePercent: 50
+  - DamageThresholdPercent: 60
+    CargoBatches: []
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 150
+      MaxAmount: 225
+      ChancePercent: 58
+  - DamageThresholdPercent: 80
+    CargoBatches: []
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 200
+      MaxAmount: 300
+      ChancePercent: 66
+  - DamageThresholdPercent: 100
     CargoBatches: []
     Equipment:
-    - SlotIndex: 0
-      ChancePercent: 20
-    - SlotIndex: 1
-      ChancePercent: 20
-    - SlotIndex: 2
-      ChancePercent: 20
-    - SlotIndex: 3
-      ChancePercent: 20
-    - SlotIndex: 4
-      ChancePercent: 20
-    Generated: []
-  - IsDeath: 1
-    HullThresholdPercent: 50
-    CargoBatches: []
-    Equipment:
-    - SlotIndex: 0
-      ChancePercent: 40
-    - SlotIndex: 1
-      ChancePercent: 40
-    - SlotIndex: 2
-      ChancePercent: 40
-    - SlotIndex: 3
-      ChancePercent: 40
-    - SlotIndex: 4
-      ChancePercent: 40
-    Generated: []
+    - IsComponent: 0
+      SlotIndex: 0
+      ChancePercent: 31
+    - IsComponent: 0
+      SlotIndex: 1
+      ChancePercent: 31
+    - IsComponent: 1
+      SlotIndex: 0
+      ChancePercent: 31
+    - IsComponent: 1
+      SlotIndex: 1
+      ChancePercent: 31
+    - IsComponent: 1
+      SlotIndex: 2
+      ChancePercent: 31
+    - IsComponent: 1
+      SlotIndex: 6
+      ChancePercent: 31
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 250
+      MaxAmount: 375
+      ChancePercent: 74
   AstraliteCatalog: {fileID: 0}

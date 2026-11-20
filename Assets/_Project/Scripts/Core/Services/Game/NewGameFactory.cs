@@ -53,34 +53,13 @@ public class NewGameFactory
         AllyConfig starterShipConfig =
             ResolveStarterShipConfig(newGameConfig);
 
-        int hullCapacity =
-            starterShipConfig != null
-                ? starterShipConfig.BaseHull
-                : 110;
-
-        int shieldCapacity =
-            starterShipConfig != null
-                ? starterShipConfig.BaseShield
-                : 80;
-
-        int energyCapacity =
-            starterShipConfig != null
-                ? starterShipConfig.BaseEnergy
-                : 110;
-
-        int cargoCapacity =
-            starterShipConfig != null
-                ? starterShipConfig.BaseCargoCapacity
-                : 30;
-
-        var starterHull = _configService.MarketEconomy?.HullCatalog?.Find(rule => rule?.Hull != null &&
-            rule.Hull.Id == ShipLoadoutRules.HullEquipmentId(starterShipConfig?.Id))?.Hull;
-        var installedHull = starterHull?.CreateRuntimeState("installed-hull:runtime_ship_001");
-        if (installedHull != null)
-        {
-            hullCapacity = installedHull.MaximumDurability;
-            cargoCapacity = installedHull.CargoCapacity;
-        }
+        HullConfig starterHull = starterShipConfig?.HullGroup?.PickRandom();
+        if (starterHull == null) throw new System.InvalidOperationException("Starter ship has no hull group.");
+        var installedHull = starterHull.CreateRuntimeState("installed-hull:runtime_ship_001");
+        int hullCapacity = installedHull.MaximumDurability;
+        int cargoCapacity = installedHull.CargoCapacity;
+        int shieldCapacity = 0;
+        int energyCapacity = 0;
 
         var ship = new ShipRuntimeData
         {

@@ -216,11 +216,11 @@ public sealed class ShipStatsService : IShipStatsService
                 MaxShield = allyConfig.BaseShield,
                 MaxSpeed = allyConfig.DefaultEngine?.Speed ?? 0f,
                 Acceleration = allyConfig.BaseAcceleration,
-                TurnRate = allyConfig.BaseTurnRate,
+                TurnRate = 0f,
                 TurnRadius = allyConfig.TurnRadius,
                 CargoCapacity = allyConfig.BaseCargoCapacity,
                 WeaponSlotCount = allyConfig.WeaponSlotCount,
-                ModuleSlotCount = allyConfig.ModuleSlotCount,
+                ModuleSlotCount = ShipLoadoutRules.ModuleSlots,
                 CombatSprite = allyConfig.CombatSprite
             };
         }

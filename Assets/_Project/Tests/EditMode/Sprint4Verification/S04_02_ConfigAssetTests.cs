@@ -161,13 +161,13 @@ public sealed class S04_02_ConfigAssetTests
             EnemyRuleExpectation expectation =
                 RequiredEnemyRules[i];
 
-            EnemyGroupSpawnRuleConfig rule =
-                FindConfigById<EnemyGroupSpawnRuleConfig>(
+            EnemyInvasionGroupSpawnRuleConfig rule =
+                FindConfigById<EnemyInvasionGroupSpawnRuleConfig>(
                     expectation.RuleId);
 
             Assert.NotNull(
                 rule,
-                "Missing EnemyGroupSpawnRuleConfig: " + expectation.RuleId);
+                "Missing EnemyInvasionGroupSpawnRuleConfig: " + expectation.RuleId);
 
             Assert.IsTrue(
                 rule.HasValidEnemies(),
@@ -245,7 +245,7 @@ public sealed class S04_02_ConfigAssetTests
     }
 
     private static void AssertEnemyGroupReferencesExpectedEnemy(
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         EnemyGroupSpawnLevelEntryConfig levelEntry,
         string expectedEnemyConfigId,
         int expectedMinCount,

@@ -448,7 +448,7 @@ public sealed class SystemSelectedTargetInfoHud2A :
         if (npc.NpcType == SystemNpcType.Enemy)
         {
             EnemyConfig config = _configService.GetEnemyConfigById(npc.ConfigId);
-            return config != null ? (config.CombatSprite != null ? config.CombatSprite : config.Icon) : null;
+            return config?.HullGroup?.Resolve(npc.InstalledHull?.ConfigId)?.Icon;
         }
 
         if (npc.NpcType == SystemNpcType.Pirate)
@@ -458,7 +458,7 @@ public sealed class SystemSelectedTargetInfoHud2A :
         }
 
         AllyConfig ally = _configService.GetAllyConfigById(npc.ConfigId);
-        return ally != null ? (ally.MapSprite != null ? ally.MapSprite : ally.Icon) : null;
+        return ally?.HullGroup?.Resolve(npc.InstalledHull?.ConfigId)?.Icon;
     }
 
     private Sprite ResolveEnemyIcon(SystemEnemyRuntimeState enemy)
@@ -467,7 +467,7 @@ public sealed class SystemSelectedTargetInfoHud2A :
         if (config == null && _configService != null)
             config = _configService.GetEnemyConfigById(enemy.EnemyConfigId);
 
-        return config != null ? (config.CombatSprite != null ? config.CombatSprite : config.Icon) : null;
+        return config?.HullGroup?.Resolve(enemy.InstalledHull?.ConfigId)?.Icon;
     }
 
     private void SetHeader(string text, bool isHostile, Sprite icon)

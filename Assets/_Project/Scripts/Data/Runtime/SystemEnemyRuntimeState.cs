@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -14,6 +15,10 @@ public sealed class SystemEnemyRuntimeState
     public Vector3 DestinationPosition;
     public Vector3 FacingDirection = Vector3.up;
     public float TravelProgress01;
+
+    public HullEquipmentRuntimeState InstalledHull;
+    public List<SystemNpcWeaponRuntimeState> InstalledComponents = new();
+    public HullConfig HullConfig => EnemyConfig?.HullGroup?.Resolve(InstalledHull?.ConfigId);
 
     public int CurrentHull;
     public int CurrentShield;

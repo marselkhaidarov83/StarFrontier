@@ -22,19 +22,8 @@ MonoBehaviour:
     \u0432\u0437\u0440\u044B\u0432\u043D\u043E\u0435 \u043E\u0440\u0443\u0436\u0438\u0435.
     Strict-level: 3; weapon count: 2; enemy baseline tier: Silver."
   icon: {fileID: 0}
-  level: 3
-  groupKind: 10
-  allyType: 0
   enemyFaction: 20
-  strengthRank: 0
-  strengthOrder: Enemy faction; not part of ally order
-  weaponOwner: Ancients
-  weaponOwnerKey: ancient
-  variant: 4
   weaponCount: 2
-  powerScore: 405
-  tierPattern: Silver + Silver
-  familyPattern: shard_volley + plasma
   weaponConfigs:
   - {fileID: 11400000, guid: d7f9a2a0d492b489fae63789a23afe38, type: 2}
   - {fileID: 11400000, guid: b705cabadbff3451c8e247dd49ea7a20, type: 2}

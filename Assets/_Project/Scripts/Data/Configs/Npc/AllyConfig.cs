@@ -11,104 +11,23 @@ public sealed class AllyConfig : BaseConfig
     private static readonly WeaponConfig[] EmptyWeaponConfigs =
         new WeaponConfig[0];
 
-    [Header("Base Stats Range")]
-    [FormerlySerializedAs("baseHull")]
-    [SerializeField]
-    [Tooltip("Минимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
-    private int baseHullMin = 50;
+    [SerializeField, Range(0, 10)] private int level = 1;
+    [Header("Loadout Groups")]
+    [SerializeField] private HullGroupConfig hullGroup;
+    [SerializeField] private EquipmentGroupConfig equipmentGroup;
+    public HullGroupConfig HullGroup => hullGroup;
+    public EquipmentGroupConfig EquipmentGroup => equipmentGroup;
 
-    [SerializeField]
-    [Tooltip("Максимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
-    private int baseHullMax = 50;
-
-    [FormerlySerializedAs("baseShield")]
-    [SerializeField]
-    [Tooltip("Минимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
-    private int baseShieldMin = 20;
-
-    [SerializeField]
-    [Tooltip("Максимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
-    private int baseShieldMax = 20;
-
-    [FormerlySerializedAs("baseEnergy")]
-    [SerializeField]
-    [Tooltip("Минимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
-    private int baseEnergyMin = 50;
-
-    [SerializeField]
-    [Tooltip("Максимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
-    private int baseEnergyMax = 50;
-
-    [SerializeField]
-    [Tooltip("Базовое восстановление энергии. Используется в расчётах боевой выносливости корабля.")]
-    private float baseEnergyRegen = 0f;
-
-    [Header("Movement")]
-    [FormerlySerializedAs("baseAcceleration")]
-    [SerializeField]
-    [Tooltip("Минимальное базовое ускорение корабля.")]
-    private float baseAccelerationMin = 1f;
-
-    [SerializeField]
-    [Tooltip("Максимальное базовое ускорение корабля.")]
-    private float baseAccelerationMax = 1f;
-
-    [FormerlySerializedAs("baseTurnRate")]
-    [SerializeField]
-    [Tooltip("Минимальная базовая скорость поворота корабля.")]
-    private float baseTurnRateMin = 90f;
-
-    [SerializeField]
-    [Tooltip("Максимальная базовая скорость поворота корабля.")]
-    private float baseTurnRateMax = 90f;
-
-    [SerializeField]
-    [Min(0f)]
-    [Tooltip("Радиус поворота корабля. Используется при движении и построении плавного маршрута.")]
-    private float turnRadius = 60f;
-
-    [Header("Capacity")]
-    [FormerlySerializedAs("baseCargoCapacity")]
-    [SerializeField]
-    [Tooltip("Минимальная вместимость грузового отсека.")]
-    private int baseCargoCapacityMin = 0;
-
-    [SerializeField]
-    [Tooltip("Максимальная вместимость грузового отсека.")]
-    private int baseCargoCapacityMax = 0;
-
-    [Header("Slots")]
-
-    [SerializeField]
-    [Tooltip("Количество ячеек модулей у корабля.")]
-    private int moduleSlotCount = 0;
-
-    [SerializeField]
-    [Range(0, 10)]
-    [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]
-    private int level = 1;
-
-    [Header("Hull Equipment")]
-    [SerializeField] private HullConfig hullConfig;
-    public HullConfig HullConfig => hullConfig;
-    [SerializeField] private ShipEquipmentConfig[] defaultComponents = new ShipEquipmentConfig[0];
-
-    public ShipComponentSlots AvailableComponentSlots => hullConfig != null ? hullConfig.AvailableComponentSlots : ShipComponentSlots.None;
-    public IReadOnlyList<ShipEquipmentConfig> DefaultComponents => System.Array.FindAll(defaultComponents ?? new ShipEquipmentConfig[0],
-        component => component != null && (AvailableComponentSlots & (ShipComponentSlots)(1 << (int)component.Slot)) != 0);
-
-    public ShipEquipmentConfig DefaultEngine
-    {
-        get
-        {
-            if ((AvailableComponentSlots & ShipComponentSlots.Engine) == 0 || defaultComponents == null)
-                return null;
-            foreach (var component in defaultComponents)
-                if (component != null && component.Slot == ShipComponentSlot.Engine)
-                    return component;
-            return null;
-        }
-    }
+    // Preview values are only for config inspection and legacy adapters.
+    // Spawning selects and rolls one actual hull and one component per available slot.
+    public HullConfig HullConfig => hullGroup != null ? hullGroup.PreviewHull : null;
+    public ShipComponentSlots AvailableComponentSlots => HullConfig != null ? HullConfig.AvailableComponentSlots : ShipComponentSlots.None;
+    public int WeaponSlotCount => HullConfig != null ? HullConfig.WeaponSlotCount : 0;
+    public IReadOnlyList<ShipEquipmentConfig> DefaultComponents => equipmentGroup != null
+        ? equipmentGroup.PreviewComponents(AvailableComponentSlots) : new ShipEquipmentConfig[0];
+    public ShipEquipmentConfig DefaultEngine => Component(ShipComponentSlot.Engine);
+    private ShipEquipmentConfig Component(ShipComponentSlot slot) =>
+        (AvailableComponentSlots & (ShipComponentSlots)(1 << (int)slot)) != 0 ? equipmentGroup?.PreviewComponent(slot) : null;
 
     [Header("Ally Role")]
     [SerializeField]
@@ -134,59 +53,34 @@ public sealed class AllyConfig : BaseConfig
     [Header("Loot")]
     [SerializeField] private NpcLootTableConfig lootTable;
 
-    [Header("Loot capture")]
-    [SerializeField] private ShipEquipmentConfig grabber;
-
-
     [Header("Weapon Groups")]
     [SerializeField]
     [Tooltip("Группы оружия, из которых выбирается оснащение реального корабля.")]
     private WeaponGroupConfig[] weaponGroups =
         new WeaponGroupConfig[0];
 
-    [Header("Visuals")]
-    [SerializeField]
-    [Tooltip("Спрайт корабля на карте системы.")]
-    private Sprite mapSprite;
 
-    [SerializeField]
-    [Tooltip("Спрайт корабля в боевой визуализации.")]
-    private Sprite combatSprite;
 
-    [SerializeField]
-    [Min(0f)]
-    [Tooltip("Визуальный размер объекта на сцене.")]
-    private float visualSize = 48f;
-
-    public int BaseHullMin => baseHullMin;
-    public int BaseHullMax => baseHullMax;
-    public int BaseShieldMin => baseShieldMin;
-    public int BaseShieldMax => baseShieldMax;
-    public int BaseEnergyMin => baseEnergyMin;
-    public int BaseEnergyMax => baseEnergyMax;
-
-    public int BaseHull => baseHullMin;
-    public int BaseShield => baseShieldMin;
-    public int BaseEnergy => baseEnergyMin;
-    public float BaseEnergyRegen => baseEnergyRegen;
-    public float BaseAccelerationMin => baseAccelerationMin;
-    public float BaseAccelerationMax => baseAccelerationMax;
-    public float BaseTurnRateMin => baseTurnRateMin;
-    public float BaseTurnRateMax => baseTurnRateMax;
-    public float TurnRadius => turnRadius;
-    public int BaseCargoCapacityMin => baseCargoCapacityMin;
-    public int BaseCargoCapacityMax => baseCargoCapacityMax;
-
-    public float BaseAcceleration => baseAccelerationMin;
-    public float BaseTurnRate => baseTurnRateMin;
-    public int BaseCargoCapacity => baseCargoCapacityMin;
-    public int WeaponSlotCount => hullConfig != null ? hullConfig.WeaponSlotCount : 0;
-    public int ModuleSlotCount => moduleSlotCount;
-
+    public int BaseHullMin => HullConfig != null ? HullConfig.MaximumHullMin : 1;
+    public int BaseHullMax => HullConfig != null ? HullConfig.MaximumHullMax : 1;
+    public int BaseShieldMin => Component(ShipComponentSlot.ShieldGenerator)?.ShieldMin ?? 0;
+    public int BaseShieldMax => Component(ShipComponentSlot.ShieldGenerator)?.ShieldMax ?? 0;
+    public int BaseHull => BaseHullMin;
+    public int BaseShield => BaseShieldMin;
+    public int BaseSpeedMin => DefaultEngine?.SpeedMin ?? 0;
+    public int BaseSpeedMax => DefaultEngine?.SpeedMax ?? 0;
+    public int BaseSpeed => BaseSpeedMin;
+    public float TurnRadius => HullConfig != null ? HullConfig.TurnRadius : 0f;
+    public int BaseCargoCapacityMin => HullConfig != null ? HullConfig.CargoCapacityMin : 0;
+    public int BaseCargoCapacityMax => HullConfig != null ? HullConfig.CargoCapacityMax : 0;
+    public int BaseCargoCapacity => BaseCargoCapacityMin;
+    public float BaseAccelerationMin => HullConfig != null ? HullConfig.AccelerationMin : 0f;
+    public float BaseAccelerationMax => HullConfig != null ? HullConfig.AccelerationMax : 0f;
+    public float BaseAcceleration => BaseAccelerationMin;
     public int Level => level;
     public AllyRole2A Role => role;
     public NpcLootTableConfig LootTable => lootTable;
-    public ShipEquipmentConfig Grabber => (AvailableComponentSlots & ShipComponentSlots.Grabber) != 0 ? grabber : null;
+    public ShipEquipmentConfig Grabber => Component(ShipComponentSlot.Grabber);
     public AllyNamePoolConfig NamePool => namePool;
 
     public IReadOnlyList<AllyBehaviourScenarioEntry> BehaviorScenarios =>
@@ -221,9 +115,9 @@ public sealed class AllyConfig : BaseConfig
         }
     }
 
-    public Sprite MapSprite => mapSprite;
-    public Sprite CombatSprite => combatSprite != null ? combatSprite : mapSprite;
-    public float VisualSize => visualSize;
+    public Sprite MapSprite => HullConfig != null ? HullConfig.Icon : Icon;
+    public Sprite CombatSprite => MapSprite;
+    public float VisualSize => HullConfig != null ? HullConfig.VisualSize : 0f;
 
     public string PickRuntimeDisplayName(string runtimeNpcId)
     {
@@ -394,44 +288,8 @@ public sealed class AllyConfig : BaseConfig
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (behaviorScenarios == null)
-            behaviorScenarios = new AllyBehaviourScenarioEntry[0];
-
-        for (int i = 0; i < behaviorScenarios.Length; i++)
-        {
-            if (behaviorScenarios[i] == null)
-                behaviorScenarios[i] = new AllyBehaviourScenarioEntry();
-        }
-
-        if (weaponGroups == null)
-            weaponGroups = new WeaponGroupConfig[0];
-
-        for (int i = 0; i < weaponGroups.Length; i++)
-        {
-            if (weaponGroups[i] == null)
-                weaponGroups[i] = new WeaponGroupConfig();
-        }
-
-        baseHullMin = Mathf.Max(1, baseHullMin);
-        baseHullMax = Mathf.Max(baseHullMin, baseHullMax);
-
-        baseShieldMin = Mathf.Max(0, baseShieldMin);
-        baseShieldMax = Mathf.Max(baseShieldMin, baseShieldMax);
-
-        baseEnergyMin = Mathf.Max(0, baseEnergyMin);
-        baseEnergyMax = Mathf.Max(baseEnergyMin, baseEnergyMax);
-        baseEnergyRegen = Mathf.Max(0f, baseEnergyRegen);
-
-        baseAccelerationMin = Mathf.Max(0f, baseAccelerationMin);
-        baseAccelerationMax = Mathf.Max(baseAccelerationMin, baseAccelerationMax);
-
-        baseTurnRateMin = Mathf.Max(0f, baseTurnRateMin);
-        baseTurnRateMax = Mathf.Max(baseTurnRateMin, baseTurnRateMax);
-
-        baseCargoCapacityMin = Mathf.Max(0, baseCargoCapacityMin);
-        baseCargoCapacityMax = Mathf.Max(baseCargoCapacityMin, baseCargoCapacityMax);
-        moduleSlotCount = Mathf.Max(0, moduleSlotCount);
-
+        behaviorScenarios ??= new AllyBehaviourScenarioEntry[0];
+        weaponGroups ??= new WeaponGroupConfig[0];
         level = Mathf.Clamp(level, 0, 10);
     }
 #endif

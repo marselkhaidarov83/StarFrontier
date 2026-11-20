@@ -369,7 +369,7 @@ public sealed class InvasionService :
     public bool TryStartInvasion(
         StarSystemConfig sourceSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig invasionSpawnRule,
+        EnemyInvasionGroupSpawnRuleConfig invasionSpawnRule,
         string factionId,
         int resolveAfterTicks,
         out InvasionState invasionState)
@@ -387,16 +387,13 @@ public sealed class InvasionService :
     public bool TryStartInvasion(
         StarSystemConfig sourceSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig invasionSpawnRule,
+        EnemyInvasionGroupSpawnRuleConfig invasionSpawnRule,
         string factionId,
         int resolveAfterTicks,
         int maxActiveInvasions,
         out InvasionState invasionState)
     {
         invasionState = null;
-
-        if (sourceSystem == null)
-            return false;
 
         if (targetSystem == null)
             return false;
@@ -405,13 +402,13 @@ public sealed class InvasionService :
             !targetSystem.InvasionSpawnRuleSet.ContainsRule(invasionSpawnRule))
             return false;
 
-        if (string.IsNullOrWhiteSpace(sourceSystem.Id) ||
+        if ((sourceSystem != null && string.IsNullOrWhiteSpace(sourceSystem.Id)) ||
             string.IsNullOrWhiteSpace(targetSystem.Id))
         {
             return false;
         }
 
-        if (sourceSystem.Id == targetSystem.Id)
+        if (sourceSystem != null && sourceSystem.Id == targetSystem.Id)
             return false;
 
         if (!CanStartInvasion(
@@ -457,7 +454,7 @@ public sealed class InvasionService :
             {
                 InvasionId = invasionId,
                 FactionId = normalizedFactionId,
-                SourceSystemId = sourceSystem.Id,
+                SourceSystemId = sourceSystem?.Id ?? string.Empty,
                 TargetSystemId = targetSystem.Id,
                 Level = currentGalaxyLevel,
                 LifecycleState = InvasionLifecycleState.Preparing,
@@ -526,7 +523,7 @@ public sealed class InvasionService :
             "[InvasionService] Invasion started. " +
             "InvasionId: " + invasionId +
             ", Faction: " + normalizedFactionId +
-            ", Source: " + sourceSystem.Id +
+            ", Source: " + (sourceSystem?.Id ?? string.Empty) +
             ", Target: " + targetSystem.Id +
             ", Rule: " + invasionSpawnRule.Id);
 

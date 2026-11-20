@@ -15,24 +15,6 @@ public static class SystemNpcRuntimeFactory
         if (config == null)
             throw new ArgumentNullException(nameof(config));
 
-        int hull =
-            UnityEngine.Random.Range(config.BaseHullMin, config.BaseHullMax + 1);
-
-        int shield =
-            UnityEngine.Random.Range(config.BaseShieldMin, config.BaseShieldMax + 1);
-
-        int energy =
-            UnityEngine.Random.Range(config.BaseEnergyMin, config.BaseEnergyMax + 1);
-
-        int speed =
-            UnityEngine.Random.Range(config.BaseSpeedMin, config.BaseSpeedMax + 1);
-
-        int creditReward =
-            UnityEngine.Random.Range(config.CreditRewardMin, config.CreditRewardMax + 1);
-
-        int xpReward =
-            UnityEngine.Random.Range(config.XpRewardMin, config.XpRewardMax + 1);
-
         string runtimeNpcId =
             Guid.NewGuid().ToString("N");
 
@@ -53,35 +35,36 @@ public static class SystemNpcRuntimeFactory
             CurrentPosition = position,
             TargetPosition = position,
             FacingDirection = Vector3.up,
-            TurnRadius = config.TurnRadius,
+            TurnRadius = 0f,
 
             TravelState = SystemNpcTravelState.Idle,
             CurrentBehavior = SystemNpcBehaviorType.EngageEnemies,
             CombatState = SystemNpcCombatState.SearchingTarget,
 
-            MaxHull = hull,
-            CurrentHull = hull,
+            MaxHull = 1,
+            CurrentHull = 1,
 
-            MaxShield = shield,
-            CurrentShield = shield,
+            MaxShield = 0,
+            CurrentShield = 0,
 
-            MaxEnergy = energy,
-            CurrentEnergy = energy,
+            MaxEnergy = 0,
+            CurrentEnergy = 0,
 
-            Speed = speed,
+            Speed = 0,
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
             DestroyedAtTick = 0,
             NextRespawnTick = 0,
 
-            CreditReward = creditReward,
-            XpReward = xpReward,
-            DangerTier = config.DangerTier
+            CreditReward = 0,
+            XpReward = 0,
+            DangerTier = 0
         };
 
+        InitializeInstalledEquipment(npc, config.HullGroup, config.EquipmentGroup);
         AddRandomEnemyWeaponGroup(npc, config);
-        InitializeLootInventory(npc, config.LootTable, config.BaseCargoCapacity);
+        InitializeLootInventory(npc, config.LootTable, npc.CargoCapacity);
 
         return npc;
     }
@@ -161,17 +144,6 @@ public static class SystemNpcRuntimeFactory
         if (config == null)
             throw new ArgumentNullException(nameof(config));
 
-        int hull =
-            UnityEngine.Random.Range(config.BaseHullMin, config.BaseHullMax + 1);
-
-        int shield =
-            UnityEngine.Random.Range(config.BaseShieldMin, config.BaseShieldMax + 1);
-
-        int energy =
-            UnityEngine.Random.Range(config.BaseEnergyMin, config.BaseEnergyMax + 1);
-
-        int speed = Mathf.RoundToInt(config.DefaultEngine?.Speed ?? 0f);
-
         string runtimeNpcId =
             Guid.NewGuid().ToString("N");
 
@@ -194,23 +166,23 @@ public static class SystemNpcRuntimeFactory
             CurrentPosition = position,
             TargetPosition = position,
             FacingDirection = Vector3.up,
-            TurnRadius = config.TurnRadius,
+            TurnRadius = 0f,
             TravelProgress01 = 1f,
 
             TravelState = SystemNpcTravelState.OnPlanet,
             CurrentBehavior = SystemNpcBehaviorType.StayOnPlanetForDays,
             CombatState = SystemNpcCombatState.None,
 
-            MaxHull = hull,
-            CurrentHull = hull,
+            MaxHull = 1,
+            CurrentHull = 1,
 
-            MaxShield = shield,
-            CurrentShield = shield,
+            MaxShield = 0,
+            CurrentShield = 0,
 
-            MaxEnergy = energy,
-            CurrentEnergy = energy,
+            MaxEnergy = 0,
+            CurrentEnergy = 0,
 
-            Speed = speed,
+            Speed = 0,
 
             LifeState = SystemNpcLifeState.Alive,
             IsAlive = true,
@@ -224,8 +196,9 @@ public static class SystemNpcRuntimeFactory
             DangerTier = 1
         };
 
+        InitializeInstalledEquipment(npc, config.HullGroup, config.EquipmentGroup);
         AddRandomAllyWeaponGroup(npc, config);
-        InitializeLootInventory(npc, config.LootTable, config.BaseCargoCapacity);
+        InitializeLootInventory(npc, config.LootTable, npc.CargoCapacity);
 
         return npc;
     }
@@ -240,13 +213,10 @@ public static class SystemNpcRuntimeFactory
         WeaponGroupConfig weaponGroup =
             PickRandomValidWeaponGroup(config.WeaponGroups);
 
-        if (weaponGroup != null)
-        {
-            AddWeapons(npc, weaponGroup.WeaponConfigs, null);
-            return;
-        }
-
-        AddWeapons(npc, config.WeaponConfigs, config.WeaponConfig);
+        if (weaponGroup != null) AddWeapons(npc, weaponGroup.WeaponConfigs, null);
+        else AddWeapons(npc, config.WeaponConfigs, config.WeaponConfig);
+        int slots = Mathf.Clamp(config.HullGroup?.Resolve(npc.InstalledHull?.ConfigId)?.WeaponSlotCount ?? 0, 0, ShipLoadoutRules.WeaponSlots);
+        if (npc.Weapons.Count > slots) npc.Weapons.RemoveRange(slots, npc.Weapons.Count - slots);
     }
 
     private static void AddRandomAllyWeaponGroup(
@@ -264,7 +234,7 @@ public static class SystemNpcRuntimeFactory
             AddWeapons(npc, weaponGroup.WeaponConfigs, null);
         }
         else AddWeapons(npc, config.WeaponConfigs, config.WeaponConfig);
-        int slots = ShipLoadoutRules.AvailableWeapons(config);
+        int slots = ShipLoadoutRules.AvailableWeapons(config, config.HullGroup?.Resolve(npc.InstalledHull?.ConfigId));
         if (npc.Weapons.Count > slots) npc.Weapons.RemoveRange(slots, npc.Weapons.Count - slots);
     }
 
@@ -367,12 +337,39 @@ public static class SystemNpcRuntimeFactory
         return true;
     }
 
+    private static void InitializeInstalledEquipment(SystemNpcRuntimeState npc,
+        HullGroupConfig hullGroup, EquipmentGroupConfig equipmentGroup)
+    {
+        if (hullGroup == null || equipmentGroup == null || hullGroup.Level != npc.Level || equipmentGroup.Level != npc.Level)
+            throw new InvalidOperationException("NPC loadout groups must match its level: " + npc.ConfigId);
+        HullConfig hull = hullGroup.PickRandom();
+        if (hull == null) throw new InvalidOperationException("NPC hull group has no valid hull: " + npc.ConfigId);
+        npc.InstalledHull = hull.CreateRuntimeState("npc-hull:" + npc.RuntimeNpcId);
+        npc.MaxHull = npc.InstalledHull.MaximumDurability;
+        npc.CurrentHull = npc.MaxHull;
+        npc.CargoCapacity = npc.InstalledHull.CargoCapacity;
+        npc.TurnRadius = hull.TurnRadius;
+        foreach (ShipEquipmentConfig config in equipmentGroup.PickComponents(hull.AvailableComponentSlots))
+        {
+            var item = SystemNpcWeaponRuntimeState.NewComponent(config,
+                "npc-component:" + npc.RuntimeNpcId + ":" + (int)config.Slot, (int)config.Slot);
+            npc.InstalledComponents.Add(item);
+            if (config.Slot == ShipComponentSlot.Engine) npc.Speed = Mathf.RoundToInt(item.ComponentStats.Speed);
+            if (config.Slot == ShipComponentSlot.ShieldGenerator)
+            {
+                npc.MaxShield = item.ComponentStats.ShieldCapacity;
+                npc.CurrentShield = npc.MaxShield;
+            }
+            if (config.Slot == ShipComponentSlot.FuelTank) item.StoredFuel = item.ComponentStats.FuelCapacity;
+        }
+    }
+
     private static void InitializeLootInventory(
         SystemNpcRuntimeState npc,
         NpcLootTableConfig table,
         int cargoCapacity)
     {
-        npc.CargoCapacity = Math.Max(0, cargoCapacity);
+        npc.CargoCapacity = Math.Max(0, npc.InstalledHull != null ? npc.InstalledHull.CargoCapacity : cargoCapacity);
         if (table == null)
             return;
 
@@ -402,6 +399,10 @@ public static class SystemNpcRuntimeFactory
             if (weapon != null)
                 weapon.CurrentDurability = table.InitialEquipmentDurability < 0 ? weapon.MaximumDurability :
                     Math.Min(weapon.MaximumDurability, table.InitialEquipmentDurability);
+        foreach (SystemNpcWeaponRuntimeState component in npc.InstalledComponents)
+            if (component != null)
+                component.CurrentDurability = table.InitialEquipmentDurability < 0 ? component.MaximumDurability :
+                    Math.Min(component.MaximumDurability, table.InitialEquipmentDurability);
     }
 
     private static bool HasWeapon(

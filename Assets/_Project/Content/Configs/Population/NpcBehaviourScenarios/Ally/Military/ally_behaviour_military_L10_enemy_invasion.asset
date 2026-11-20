@@ -19,13 +19,6 @@ MonoBehaviour:
   icon: {fileID: 0}
   behaviorWeights:
   - behaviorType: 10
-    targetStationType: 0
-    targetUnitSide: 20
-    targetUnitType: 10
     weight: 100
   - behaviorType: 20
-    targetStationType: 0
-    targetUnitSide: 0
-    targetUnitType: 0
     weight: 1
-  engageEnemiesWeight: 100

@@ -1,58 +1,19 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 public class AllyConfigValidator : IConfigValidator<AllyConfig>
 {
     public List<ValidationIssue> Validate(AllyConfig config)
     {
-        var issues = new List<ValidationIssue>();
-
-        if (config.BaseHull <= 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseHull must be > 0.", config));
-        if (config.BaseShield < 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseShield must be >= 0.", config));
-        if (config.BaseEnergy < 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseEnergy must be >= 0.", config));
-        if (config.BaseEnergyRegen < 0f)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseEnergyRegen must be >= 0.", config));
-        if (config.DefaultEngine == null || !(config.DefaultEngine.Speed > 0f))
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "A default engine with positive speed is required.", config));
-        if (config.BaseAccelerationMin <= 0f)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseAccelerationMin must be > 0.", config));
-        if (config.BaseAccelerationMax < config.BaseAccelerationMin)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseAccelerationMax must be >= BaseAccelerationMin.", config));
-        if (config.BaseTurnRateMin <= 0f)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseTurnRateMin must be > 0.", config));
-        if (config.BaseTurnRateMax < config.BaseTurnRateMin)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseTurnRateMax must be >= BaseTurnRateMin.", config));
-        if (config.BaseCargoCapacityMin < 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseCargoCapacityMin must be >= 0.", config));
-        if (config.BaseCargoCapacityMax < config.BaseCargoCapacityMin)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "BaseCargoCapacityMax must be >= BaseCargoCapacityMin.", config));
-        if (config.WeaponSlotCount < 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "WeaponSlotCount must be >= 0.", config));
-        if (config.ModuleSlotCount < 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "ModuleSlotCount must be >= 0.", config));
-        if (config.WeaponSlotCount == 0)
-            issues.Add(new ValidationIssue(ValidationSeverity.Warning, "WeaponSlotCount is 0.", config));
-        if (config.CombatSprite == null)
-            issues.Add(new ValidationIssue(ValidationSeverity.Warning, "CombatSprite is not assigned.", config));
-
-        if (config.Role == AllyRole2A.Ranger && config.Grabber == null)
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Ranger requires a ShipEquipmentConfig.", config));
-        if (config.Grabber != null &&
-            (config.Grabber.Strength <= 0 || config.Grabber.Range <= 0f ||
-             config.Grabber.Slot != ShipComponentSlot.Grabber))
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Grabber strength, range and pull speed must be positive.", config));
-
+        var issues = NpcLoadoutGroupValidator.Validate(config, config.Level, false, config.HullGroup, config.EquipmentGroup);
+        if (config.HasDuplicateBehaviorScenarios())
+            issues.Add(new ValidationIssue(ValidationSeverity.Error, "Duplicate behaviour scenarios.", config));
         if (config.LootTable != null)
         {
             foreach (string error in config.LootTable.GetValidationErrors())
                 issues.Add(new ValidationIssue(ValidationSeverity.Error, error, config.LootTable));
             if (config.LootTable.GetInitialCargoQuantity() > config.BaseCargoCapacityMin)
-                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Initial NPC cargo exceeds BaseCargoCapacityMin used by the runtime factory.", config));
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "Initial cargo exceeds the minimum hull capacity.", config));
         }
-
         return issues;
     }
 }

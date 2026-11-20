@@ -533,35 +533,11 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     private RouteConfig FindRouteConfig(string fromSystemId, string toSystemId)
     {
-        if (string.IsNullOrWhiteSpace(fromSystemId))
-            return null;
-
-        if (string.IsNullOrWhiteSpace(toSystemId))
-            return null;
-
-        IReadOnlyList<StarSystemConfig> systems = _configService.GetAllStarSystems();
-
-        if (systems == null)
-            return null;
-
-        foreach (StarSystemConfig systemConfig in systems)
-        {
-            if (systemConfig == null)
-                continue;
-
-            if (systemConfig.Routes == null)
-                continue;
-
-            foreach (RouteConfig routeConfig in systemConfig.Routes)
-            {
-                if (routeConfig == null)
-                    continue;
-
-                if (routeConfig.ConnectsSystems(fromSystemId, toSystemId))
-                    return routeConfig;
-            }
-        }
-
+        if (string.IsNullOrWhiteSpace(fromSystemId) || string.IsNullOrWhiteSpace(toSystemId)) return null;
+        StarSystemConfig source = _configService.GetStarSystemConfigById(fromSystemId);
+        if (source?.Routes == null) return null;
+        foreach (RouteConfig route in source.Routes)
+            if (route != null && route.ConnectsSystems(fromSystemId, toSystemId)) return route;
         return null;
     }
 
@@ -848,43 +824,6 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         _targetService?.ClearTarget();
     }
 
-    public void SetSystemExitDestination(StarSystemLink link)
-    {
-        if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
-        if (link == null)
-        {
-            AppLog.Warning(DebugLogChannel.Travel,
-                typeof(SystemTravelService),
-                "Cannot set system exit destination: link is null.");
-            return;
-        }
-
-        if (link.LinkedSystem == null)
-        {
-            AppLog.Warning(DebugLogChannel.Travel,
-                typeof(SystemTravelService),
-                "Cannot set system exit destination: linked system is null.");
-            return;
-        }
-
-        State.Destination = SystemTravelDestination.SystemExit(link);
-        State.DestinationPosition = link.ExitPoint;
-        State.Status = SystemTravelStatus.DestinationSelected;
-        State.TravelProgress01 = 0f;
-
-        _eventBus.Publish(new DestinationSelectedEvent(
-            TravelDestinationType.SystemExit,
-            link.ExitPoint,
-            string.Empty,
-            link.LinkedSystem.Id
-        ));
-
-        LogCustom($"System exit destination selected. Target system: {link.LinkedSystem.Id}");
-        LogCustom("State = " + State);
-
-        StartTravelAutomaticallyIfPossible();
-    }
-
     public void SetSystemExitDestination(RouteExitMapChangedEvent evt)
     {
         if (PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
@@ -896,14 +835,21 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             return;
         }
 
+        StarSystemConfig currentSystem = _configService.GetCurrentSystemConfig();
+        if (currentSystem?.Routes == null || evt.RouteConfig == null ||
+            !currentSystem.Routes.Contains(evt.RouteConfig) || evt.FromSystemId != currentSystem.Id ||
+            !evt.RouteConfig.ConnectsSystems(currentSystem.Id, evt.ToSystemId) ||
+            !Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>().IsRouteUnlocked(evt.RouteConfig.Id))
+            return;
+
         State.Destination = SystemTravelDestination.SystemExit(evt);
-        State.DestinationPosition = evt.ExitPoint;
+        State.DestinationPosition = evt.RouteConfig.GetExitPoint(currentSystem.Id);
         State.Status = SystemTravelStatus.DestinationSelected;
         State.TravelProgress01 = 0f;
 
         _eventBus.Publish(new DestinationSelectedEvent(
             TravelDestinationType.SystemExit,
-            evt.ExitPoint,
+            State.DestinationPosition,
             string.Empty,
             evt.ToSystemId
         ));
@@ -925,9 +871,21 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         StartTravelAutomaticallyIfPossible();
     }
 
+    private bool IsSelectedExitRouteAvailable()
+    {
+        SystemTravelDestination destination = State?.Destination;
+        if (destination?.Type != TravelDestinationType.SystemExit) return true;
+        StarSystemConfig current = _configService.GetCurrentSystemConfig();
+        return current?.Routes != null && destination.RouteConfig != null &&
+            current.Routes.Contains(destination.RouteConfig) && destination.FromSystemId == current.Id &&
+            destination.RouteConfig.ConnectsSystems(current.Id, destination.ToSystemId) &&
+            Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>().IsRouteUnlocked(destination.RouteConfig.Id);
+    }
+
     public void StartTravel()
     {
         if (GetCurrentShipTravelSpeed() <= 0f || PlayerCargoOverload2A.RejectRouteIfOverloaded()) return;
+        if (!IsSelectedExitRouteAvailable()) { CancelTravel(); return; }
         _planetTakeoffDistancePerTick = 0f;
         double startedAt =
             Time.realtimeSinceStartupAsDouble;
@@ -3009,6 +2967,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
     public void CompleteTravel()
     {
+        if (!IsSelectedExitRouteAvailable()) { CancelTravel(); return; }
         LogPlanetArrivalDiagnostics("Complete.BeforeSnap", GetCurrentTravelQuantTick(), true);
         LogPlayerTravelSpeedDiagnostics("Arrived", GetCurrentTravelQuantTick(), true);
         _planetTakeoffDistancePerTick = 0f;
@@ -3044,7 +3003,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
         string planetId = State.Destination.PlanetId;
         string targetSystemId = State.Destination.TargetSystemId;
         StarSystemConfig targetSystemConfig = State.Destination.TargetSystemConfig;
-        StarSystemLink systemLink = State.Destination.SystemLink;
+        RouteConfig routeConfig = State.Destination.RouteConfig;
         TravelDestinationType destinationType = State.Destination.Type;
 
         bool wasPlanetDestination = destinationType == TravelDestinationType.Planet;
@@ -3076,7 +3035,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
             planetId,
             targetSystemId,
             targetSystemConfig,
-            systemLink
+            routeConfig
         ));
 
         LogCustom($"Travel completed. Type: {destinationType}");
@@ -3447,6 +3406,7 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
                 return true;
 
             case TravelDestinationType.SystemExit:
+                if (!IsSelectedExitRouteAvailable()) return false;
                 if (destination.RouteConfig != null &&
                     !string.IsNullOrWhiteSpace(destination.FromSystemId))
                 {
@@ -3459,20 +3419,6 @@ public sealed class SystemTravelService : CustomService, ISystemTravelService
 
                     destinationPosition =
                         exitPoint;
-
-                    return true;
-                }
-
-                if (destination.SystemLink != null)
-                {
-                    Vector3 linkExitPoint =
-                        destination.SystemLink.ExitPoint;
-
-                    linkExitPoint.z =
-                        State.GetCurrentPosition().z;
-
-                    destinationPosition =
-                        linkExitPoint;
 
                     return true;
                 }
@@ -7770,53 +7716,9 @@ int maxSmallDots)
 
     private float GetCurrentShipTurnRadius()
     {
-        AllyConfig activeShipConfig =
-            _hangarService != null
-                ? _hangarService.GetActiveShipData()
-                : null;
-
-        if (activeShipConfig == null)
-            return 0f;
-
-        if (_shipStatsService == null)
-            return Mathf.Max(0f, activeShipConfig.TurnRadius);
-
-        ShipRuntimeData activeShipState =
-            _hangarService.GetActiveShipState();
-
-        List<ModuleConfig> equippedModules =
-            new List<ModuleConfig>();
-
-        if (activeShipState != null &&
-            activeShipState.EquippedModuleIds != null)
-        {
-            for (int i = 0;
-                 i < activeShipState.EquippedModuleIds.Count;
-                 i++)
-            {
-                string moduleId =
-                    activeShipState.EquippedModuleIds[i];
-
-                if (string.IsNullOrWhiteSpace(moduleId))
-                    continue;
-
-                ModuleConfig moduleConfig =
-                    _configService.GetModuleConfigById(moduleId);
-
-                if (moduleConfig != null)
-                    equippedModules.Add(moduleConfig);
-            }
-        }
-
-        ShipFinalStats activeShipStats =
-            _shipStatsService.Calculate(
-                activeShipConfig,
-                equippedModules);
-
-        if (activeShipStats != null)
-            return Mathf.Max(0f, activeShipStats.TurnRadius);
-
-        return 0f;
+        AllyConfig config = _hangarService?.GetActiveShipData();
+        HullConfig hull = ShipLoadoutRules.SelectedHull(config, _hangarService?.GetActiveShipState());
+        return hull != null ? Mathf.Max(0f, hull.TurnRadius) : 0f;
     }
 
     private void RefreshNpcDestinationAtTickStart(

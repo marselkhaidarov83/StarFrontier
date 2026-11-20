@@ -60,7 +60,7 @@ public static class ShipSlotRules
         if (shipState.EquippedModuleIds.Contains(moduleId))
             return HangarOperationResult.Fail(HangarError.AlreadyEquipped);
 
-        if (shipState.EquippedModuleIds.Count >= shipData.ModuleSlotCount)
+        if (shipState.EquippedModuleIds.Count >= ShipLoadoutRules.ModuleSlots)
             return HangarOperationResult.Fail(HangarError.NoModuleSlots);
 
         return HangarOperationResult.Ok();

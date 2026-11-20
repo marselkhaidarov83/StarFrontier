@@ -23,19 +23,8 @@ MonoBehaviour:
     \u0431\u043E\u0439. Tier-mix intentionally avoids mono-tier groups when weaponCount
     > 1."
   icon: {fileID: 0}
-  level: 8
-  groupKind: 0
-  allyType: 10
   enemyFaction: 0
-  strengthRank: 5
-  strengthOrder: "1 \u2014 strongest ally"
-  weaponOwner: PlayerAndRangers
-  weaponOwnerKey: common
-  variant: 2
   weaponCount: 4
-  powerScore: 1014
-  tierPattern: Gold + Silver + Gold + Silver
-  familyPattern: wave_cannon + missile + laser + plasma
   weaponConfigs:
   - {fileID: 11400000, guid: fc7f595ba919b45d9be3f695b5cce793, type: 2}
   - {fileID: 11400000, guid: 72fdec6a0d5a5408a98dc4a0ebcd9236, type: 2}

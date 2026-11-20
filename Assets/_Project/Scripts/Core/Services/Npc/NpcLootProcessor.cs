@@ -9,6 +9,7 @@ public static class NpcLootProcessor
     public static void ProcessDamage(
         SystemNpcRuntimeState npc,
         int hullBefore,
+        int shieldBefore,
         int quantTick,
         IConfigService configs,
         SystemSpaceLootService spaceLoot)
@@ -36,7 +37,7 @@ public static class NpcLootProcessor
         for (int index = 0; index < table.Rules.Length; index++)
         {
             NpcLootTriggerRule rule = table.Rules[index];
-            if (rule == null)
+            if (rule == null || npc.ProcessedLootRuleIndexes.Contains(index))
                 continue;
 
             if (rule.IsDeath)
@@ -44,22 +45,17 @@ public static class NpcLootProcessor
                 if (!destroyed || npc.DeathLootProcessed)
                     continue;
             }
-            else
-            {
-                if (npc.ProcessedLootRuleIndexes.Contains(index))
-                    continue;
-
-                if (!CrossedThreshold(hullBefore, npc.CurrentHull,
-                        npc.MaxHull, rule.HullThresholdPercent))
-                    continue;
-
-                npc.ProcessedLootRuleIndexes.Add(index);
-            }
+            if (!CrossedDamageThreshold(hullBefore, shieldBefore, npc.CurrentHull, npc.CurrentShield,
+                    npc.MaxHull, npc.MaxShield, rule.DamageThresholdPercent))
+                continue;
+            npc.ProcessedLootRuleIndexes.Add(index);
 
             AppLog.Info(DebugLogChannel.Loot,
                 "[LOOT_TRIGGER] Npc=" + npc.RuntimeNpcId +
                 " | Rule=" + index + " | Death=" + rule.IsDeath +
-                " | Hull=" + npc.CurrentHull + "/" + npc.MaxHull);
+                " | DamageThreshold=" + rule.DamageThresholdPercent +
+                " | Hull=" + npc.CurrentHull + "/" + npc.MaxHull +
+                " | Shield=" + npc.CurrentShield + "/" + npc.MaxShield);
             DropCargo(npc, rule, quantTick, spaceLoot);
             DropEquipment(npc, rule, quantTick, spaceLoot);
             Generate(npc, rule, table, species, quantTick, spaceLoot);
@@ -96,7 +92,7 @@ public static class NpcLootProcessor
     private static void DropEquipment(SystemNpcRuntimeState npc, NpcLootTriggerRule rule,
         int tick, SystemSpaceLootService spaceLoot)
     {
-        if (npc.Weapons == null || rule.Equipment == null)
+        if (!rule.IsDeath || rule.Equipment == null)
             return;
 
         foreach (NpcLootEquipmentChance chance in rule.Equipment)
@@ -104,13 +100,14 @@ public static class NpcLootProcessor
             if (chance == null || chance.SlotIndex < 0 || !Roll(chance.ChancePercent))
                 continue;
 
-            SystemNpcWeaponRuntimeState weapon = npc.Weapons.Find(
+            var installed = chance.IsComponent ? npc.InstalledComponents : npc.Weapons;
+            SystemNpcWeaponRuntimeState weapon = installed?.Find(
                 entry => entry != null && entry.SlotIndex == chance.SlotIndex);
-            if (weapon == null || !npc.Weapons.Remove(weapon))
+            if (weapon == null || !installed.Remove(weapon))
                 continue;
 
             SpaceLootRuntimeState drop = NewDrop(npc, SpaceLootKind.Equipment,
-                null, weapon.WeaponConfigId, 1, tick);
+                null, weapon.EquipmentConfigId, 1, tick);
             drop.Equipment = weapon;
             spaceLoot.Add(drop);
         }
@@ -153,7 +150,7 @@ public static class NpcLootProcessor
                 }
             }
             else if (entry.Kind == NpcLootGeneratedKind.Equipment &&
-                entry.EquipmentConfig != null)
+                rule.IsDeath && entry.EquipmentConfig != null)
             {
                 for (int i = 0; i < amount; i++)
                 {
@@ -209,14 +206,16 @@ public static class NpcLootProcessor
             Mathf.Sin(angleRadians) * distance, 0f);
     }
 
-    public static bool CrossedThreshold(int before, int after,
-        int maximum, int percent)
+    public static bool CrossedDamageThreshold(int hullBefore, int shieldBefore,
+        int hullAfter, int shieldAfter, int maxHull, int maxShield, int percent)
     {
-        if (maximum <= 0 || percent <= 0 || percent >= 100)
+        long maximum = (long)Math.Max(0, maxHull) + Math.Max(0, maxShield);
+        if (maximum <= 0 || percent <= 0 || percent > 100)
             return false;
-        // A new flight that starts below a threshold does not create a drop.
-        return (long)before * 100 > (long)maximum * percent &&
-               (long)after * 100 <= (long)maximum * percent;
+        long before = (long)Mathf.Clamp(hullBefore, 0, Math.Max(0, maxHull)) + Mathf.Clamp(shieldBefore, 0, Math.Max(0, maxShield));
+        long after = (long)Mathf.Clamp(hullAfter, 0, Math.Max(0, maxHull)) + Mathf.Clamp(shieldAfter, 0, Math.Max(0, maxShield));
+        return (maximum - before) * 100 < maximum * percent &&
+               (maximum - after) * 100 >= maximum * percent;
     }
 
     private static bool Roll(float chancePercent)

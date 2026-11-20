@@ -13,6 +13,7 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
     private StarSystemConfig _rewardSystem;
     private PlanetConfig _rewardPlanet;
     private PlanetTypeConfig _rewardPlanetType;
+    private readonly System.Collections.Generic.List<Object> _loadoutObjects = new();
 
     [SetUp]
     public void SetUp()
@@ -49,6 +50,8 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
     public void TearDown()
     {
         Bootstrapper.Instance = null;
+        foreach (Object item in _loadoutObjects) Object.DestroyImmediate(item);
+        _loadoutObjects.Clear();
 
         if (_rewardSystem != null)
             Object.DestroyImmediate(_rewardSystem);
@@ -331,10 +334,7 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
             CreateEnemyConfig(
                 configId,
                 hull: 20,
-                shield: 0,
-                creditReward: 100,
-                xpReward: 25,
-                dangerTier: 1);
+                shield: 0);
 
         SystemEnemyRuntimeState enemy =
             _enemyService.CreateEnemy(
@@ -352,31 +352,37 @@ public sealed class S04_02_SystemMapCombatLifecycleTests
         return enemy;
     }
 
-    private static EnemyConfig CreateEnemyConfig(
-        string id,
-        int hull,
-        int shield,
-        int creditReward,
-        int xpReward,
-        int dangerTier)
+    private T LoadoutAsset<T>() where T : ScriptableObject
     {
-        EnemyConfig config =
-            ScriptableObject.CreateInstance<EnemyConfig>();
+        T asset = ScriptableObject.CreateInstance<T>(); _loadoutObjects.Add(asset); return asset;
+    }
 
+    private EnemyConfig CreateEnemyConfig(string id, int hull, int shield)
+    {
+        EnemyConfig config = LoadoutAsset<EnemyConfig>();
         SetPrivateField(config, "id", id);
         SetPrivateField(config, "displayName", id);
-        SetPrivateField(config, "baseHullMin", hull);
-        SetPrivateField(config, "baseHullMax", hull);
-        SetPrivateField(config, "baseShieldMin", shield);
-        SetPrivateField(config, "baseShieldMax", shield);
-        SetPrivateField(config, "baseEnergyMin", 10);
-        SetPrivateField(config, "baseEnergyMax", 10);
-        SetPrivateField(config, "creditRewardMin", creditReward);
-        SetPrivateField(config, "creditRewardMax", creditReward);
-        SetPrivateField(config, "xpRewardMin", xpReward);
-        SetPrivateField(config, "xpRewardMax", xpReward);
-        SetPrivateField(config, "dangerTier", dangerTier);
-
+        HullConfig body = LoadoutAsset<HullConfig>();
+        SetPrivateField(body, "id", "hull_" + id);
+        body.EnemyHull = config;
+        body.MaximumHullMin = body.MaximumHullMax = hull;
+        body.AvailableComponentSlots = ShipComponentSlots.Engine | ShipComponentSlots.ShieldGenerator;
+        HullGroupConfig hullGroup = LoadoutAsset<HullGroupConfig>();
+        SetPrivateField(hullGroup, "hullConfigs", new System.Collections.Generic.List<HullConfig> { body });
+        SetPrivateField(config, "hullGroup", hullGroup);
+        ShipEquipmentConfig engine = LoadoutAsset<ShipEquipmentConfig>();
+        SetPrivateField(engine, "id", "engine_" + id);
+        engine.Slot = ShipComponentSlot.Engine; engine.SpeedMin = engine.SpeedMax = 1;
+        ShipEquipmentConfig field = LoadoutAsset<ShipEquipmentConfig>();
+        SetPrivateField(field, "id", "shield_" + id);
+        field.Slot = ShipComponentSlot.ShieldGenerator; field.ShieldMin = field.ShieldMax = shield;
+        EquipmentGroupConfig equipment = LoadoutAsset<EquipmentGroupConfig>();
+        SetPrivateField(equipment, "slotGroups", new System.Collections.Generic.List<EquipmentSlotGroup>
+        {
+            new() { Slot = ShipComponentSlot.Engine, Equipment = new() { engine } },
+            new() { Slot = ShipComponentSlot.ShieldGenerator, Equipment = new() { field } }
+        });
+        SetPrivateField(config, "equipmentGroup", equipment);
         return config;
     }
 

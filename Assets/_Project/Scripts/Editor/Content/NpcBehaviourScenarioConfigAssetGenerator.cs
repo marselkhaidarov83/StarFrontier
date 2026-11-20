@@ -27,7 +27,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         "folder",
         "displayName",
         "description",
-        "engageEnemiesWeight"
     };
 
     private static readonly string[] RequiredWeightColumns =
@@ -35,9 +34,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         "assetId",
         "weightOrder",
         "behaviorType",
-        "targetStationType",
-        "targetUnitSide",
-        "targetUnitType",
         "weight"
     };
 
@@ -341,17 +337,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     $"Asset CSV row {rowNumber} / {assetId}: folder должен быть внутри {OutputRoot}, получено: {folder}");
             }
 
-            float engageEnemiesWeight =
-                ParseFloat(
-                    Get(row, columnIndex, "engageEnemiesWeight"),
-                    rowNumber,
-                    assetId,
-                    "engageEnemiesWeight",
-                    errors);
-
-            engageEnemiesWeight =
-                Mathf.Clamp(engageEnemiesWeight, 0f, 1000f);
-
             string assetPath =
                 $"{folder}/{assetId}.asset";
 
@@ -360,7 +345,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     assetId,
                     Get(row, columnIndex, "displayName"),
                     Get(row, columnIndex, "description"),
-                    engageEnemiesWeight,
                     assetPath,
                     rowNumber));
         }
@@ -451,30 +435,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     "behaviorType",
                     errors);
 
-            NpcBehaviourTargetStationType targetStationType =
-                ParseEnum<NpcBehaviourTargetStationType>(
-                    Get(row, columnIndex, "targetStationType"),
-                    rowNumber,
-                    assetId,
-                    "targetStationType",
-                    errors);
-
-            NpcBehaviourTargetUnitSide targetUnitSide =
-                ParseEnum<NpcBehaviourTargetUnitSide>(
-                    Get(row, columnIndex, "targetUnitSide"),
-                    rowNumber,
-                    assetId,
-                    "targetUnitSide",
-                    errors);
-
-            NpcBehaviourTargetUnitType targetUnitType =
-                ParseEnum<NpcBehaviourTargetUnitType>(
-                    Get(row, columnIndex, "targetUnitType"),
-                    rowNumber,
-                    assetId,
-                    "targetUnitType",
-                    errors);
-
             int weight =
                 ParseInt(
                     Get(row, columnIndex, "weight"),
@@ -489,24 +449,11 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                     $"Weights CSV row {rowNumber} / {assetId}: weight должен быть 0..1000, получено {weight}.");
             }
 
-            ValidateTargetFields(
-                rowNumber,
-                assetId,
-                behaviorType,
-                targetStationType,
-                targetUnitSide,
-                targetUnitType,
-                errors,
-                warnings);
-
             result.Add(
                 new ParsedWeightRow(
                     assetId,
                     weightOrder,
                     behaviorType,
-                    targetStationType,
-                    targetUnitSide,
-                    targetUnitType,
                     Mathf.Clamp(weight, 0, 1000),
                     rowNumber));
         }
@@ -606,60 +553,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                 errors.Add(
                     $"Weights CSV: assetId={assetId} отсутствует в Asset CSV.");
             }
-        }
-    }
-
-    private static void ValidateTargetFields(
-        int rowNumber,
-        string assetId,
-        SystemNpcBehaviorType behaviorType,
-        NpcBehaviourTargetStationType targetStationType,
-        NpcBehaviourTargetUnitSide targetUnitSide,
-        NpcBehaviourTargetUnitType targetUnitType,
-        ICollection<string> errors,
-        ICollection<string> warnings)
-    {
-        bool stationAttack =
-            behaviorType == SystemNpcBehaviorType.AttackMilitaryStation ||
-            behaviorType == SystemNpcBehaviorType.AttackRangerBaseStation ||
-            behaviorType == SystemNpcBehaviorType.AttackTradeStation ||
-            behaviorType == SystemNpcBehaviorType.AttackScienceStation ||
-            behaviorType == SystemNpcBehaviorType.AttackMedicalStation;
-
-        bool unitAttack =
-            behaviorType == SystemNpcBehaviorType.AttackMilitaryAlly ||
-            behaviorType == SystemNpcBehaviorType.AttackRangerAlly ||
-            behaviorType == SystemNpcBehaviorType.AttackTraderAlly ||
-            behaviorType == SystemNpcBehaviorType.AttackScienceAlly ||
-            behaviorType == SystemNpcBehaviorType.AttackMedicAlly ||
-            behaviorType == SystemNpcBehaviorType.EngageEnemies;
-
-        if (stationAttack &&
-            targetStationType == NpcBehaviourTargetStationType.None)
-        {
-            errors.Add(
-                $"Weights CSV row {rowNumber} / {assetId}: {behaviorType} требует targetStationType.");
-        }
-
-        if (!stationAttack &&
-            targetStationType != NpcBehaviourTargetStationType.None)
-        {
-            warnings.Add(
-                $"Weights CSV row {rowNumber} / {assetId}: {behaviorType} обычно не использует targetStationType={targetStationType}.");
-        }
-
-        if (unitAttack &&
-            targetUnitSide == NpcBehaviourTargetUnitSide.None)
-        {
-            warnings.Add(
-                $"Weights CSV row {rowNumber} / {assetId}: {behaviorType} обычно требует targetUnitSide.");
-        }
-
-        if (targetUnitSide == NpcBehaviourTargetUnitSide.None &&
-            targetUnitType != NpcBehaviourTargetUnitType.None)
-        {
-            errors.Add(
-                $"Weights CSV row {rowNumber} / {assetId}: targetUnitType заполнен, но targetUnitSide=None.");
         }
     }
 
@@ -824,11 +717,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             "description",
             assetRow.Description);
 
-        SetFloat(
-            serialized,
-            "engageEnemiesWeight",
-            assetRow.EngageEnemiesWeight);
-
         SerializedProperty weightsProperty =
             serialized.FindProperty("behaviorWeights");
 
@@ -853,21 +741,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
                 item,
                 "behaviorType",
                 row.BehaviorType);
-
-            SetEnum(
-                item,
-                "targetStationType",
-                row.TargetStationType);
-
-            SetEnum(
-                item,
-                "targetUnitSide",
-                row.TargetUnitSide);
-
-            SetEnum(
-                item,
-                "targetUnitType",
-                row.TargetUnitType);
 
             SetInt(
                 item,
@@ -1101,27 +974,7 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         return 0;
     }
 
-    private static float ParseFloat(
-        string value,
-        int rowNumber,
-        string id,
-        string columnName,
-        ICollection<string> errors)
-    {
-        if (float.TryParse(
-                value,
-                NumberStyles.Float,
-                CultureInfo.InvariantCulture,
-                out float result))
-        {
-            return result;
-        }
 
-        errors.Add(
-            $"Row {rowNumber} / {id}: колонка {columnName} должна быть float, значение='{value}'.");
-
-        return 0f;
-    }
 
     private static void SetString(
         SerializedObject serialized,
@@ -1277,14 +1130,12 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             string assetId,
             string displayName,
             string description,
-            float engageEnemiesWeight,
             string assetPath,
             int rowNumber)
         {
             AssetId = assetId;
             DisplayName = displayName;
             Description = description;
-            EngageEnemiesWeight = engageEnemiesWeight;
             AssetPath = assetPath;
             RowNumber = rowNumber;
         }
@@ -1292,7 +1143,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         public string AssetId { get; }
         public string DisplayName { get; }
         public string Description { get; }
-        public float EngageEnemiesWeight { get; }
         public string AssetPath { get; }
         public int RowNumber { get; }
     }
@@ -1303,18 +1153,12 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
             string assetId,
             int weightOrder,
             SystemNpcBehaviorType behaviorType,
-            NpcBehaviourTargetStationType targetStationType,
-            NpcBehaviourTargetUnitSide targetUnitSide,
-            NpcBehaviourTargetUnitType targetUnitType,
             int weight,
             int rowNumber)
         {
             AssetId = assetId;
             WeightOrder = weightOrder;
             BehaviorType = behaviorType;
-            TargetStationType = targetStationType;
-            TargetUnitSide = targetUnitSide;
-            TargetUnitType = targetUnitType;
             Weight = weight;
             RowNumber = rowNumber;
         }
@@ -1322,9 +1166,6 @@ public static class NpcBehaviourScenarioConfigAssetGenerator
         public string AssetId { get; }
         public int WeightOrder { get; }
         public SystemNpcBehaviorType BehaviorType { get; }
-        public NpcBehaviourTargetStationType TargetStationType { get; }
-        public NpcBehaviourTargetUnitSide TargetUnitSide { get; }
-        public NpcBehaviourTargetUnitType TargetUnitType { get; }
         public int Weight { get; }
         public int RowNumber { get; }
     }

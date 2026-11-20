@@ -22,19 +22,8 @@ MonoBehaviour:
     \u0432\u0437\u0440\u044B\u0432\u043D\u043E\u0435 \u043E\u0440\u0443\u0436\u0438\u0435.
     Strict-level: 4; weapon count: 2; enemy baseline tier: Silver."
   icon: {fileID: 0}
-  level: 4
-  groupKind: 10
-  allyType: 0
   enemyFaction: 20
-  strengthRank: 0
-  strengthOrder: Enemy faction; not part of ally order
-  weaponOwner: Ancients
-  weaponOwnerKey: ancient
-  variant: 3
   weaponCount: 2
-  powerScore: 406
-  tierPattern: Silver + Silver
-  familyPattern: singularity + orb
   weaponConfigs:
   - {fileID: 11400000, guid: 600e515d7f84e4118b573949b7aaad05, type: 2}
   - {fileID: 11400000, guid: 1e22b4f54ff0f4377842f33a4944ff67, type: 2}

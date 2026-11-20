@@ -19,8 +19,8 @@ public sealed class MarketEconomyBalanceConfig : BaseConfig
     [Min(1)] public int FuelUnitPrice = 10;
     public System.Collections.Generic.List<MarketEquipmentRule> EquipmentCatalog = new System.Collections.Generic.List<MarketEquipmentRule>();
     public System.Collections.Generic.List<MarketHullRule> HullCatalog = new System.Collections.Generic.List<MarketHullRule>();
-    public ResearchUpgrade WarProtectionResearch = ResearchUpgrade.EconomyWarProtection;
-    public ResearchUpgrade EquipmentBuyoutResearch = ResearchUpgrade.EquipmentBuyout;
+    public ResearchUpgrade WarProtectionResearch = ResearchUpgrade.None;
+    public ResearchUpgrade EquipmentBuyoutResearch = ResearchUpgrade.None;
     [Tooltip("0 — без исследования. Проценты записываются долями: 0.1 = 10%.")]
     public MarketResearchEffect[] ResearchLevels = Array.Empty<MarketResearchEffect>();
     public MarketResearchEffect GetEffect(int level)

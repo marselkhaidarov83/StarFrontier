@@ -30,7 +30,32 @@ public sealed class ResearchTreeAndServiceEditModeTests
     };
     [Test] public void Tree_WithTenLevelsIsValid() => Assert.That(ResearchRules.Errors(_tree), Is.Empty);
     [Test] public void MissingLevel_IsRejected()
-    { _node.Levels = _node.Levels.Take(9).ToArray(); Assert.That(ResearchRules.Errors(_tree), Does.Contain("TenLevelsRequired")); }
+    { _node.Levels = _node.Levels.Take(9).ToArray(); Assert.That(ResearchRules.Errors(_tree), Does.Contain("InvalidResearchLevels")); }
+    [TestCase(5)] [TestCase(7)]
+    public void ShortResearch_StopsAtItsConfiguredMaximum(int maximum)
+    {
+        _node.MaxLevel = maximum; _node.Levels = _node.Levels.Take(maximum).ToArray();
+        Assert.That(ResearchRules.Errors(_tree), Is.Empty);
+        var state = new ResearchRuntimeState();
+        state.Levels.Add(new ResearchUpgradeLevel { Upgrade = _node.Upgrade, Level = maximum });
+        Assert.That(ResearchRules.TryQuote(_tree, state, _node.Upgrade, "pay", out _, out _), Is.False);
+    }
+    [Test] public void MissingEconomy_DoesNotCreateAFreeResearchQuote()
+    {
+        _node.Levels[0].PaymentOptions = Array.Empty<StationPaymentOption>();
+        Assert.That(ResearchRules.TryQuote(_tree, new ResearchRuntimeState(), _node.Upgrade, "pay", out var quote, out string reason), Is.False);
+        Assert.That(quote, Is.Null); Assert.That(reason, Is.EqualTo("ResearchEconomyNotConfigured"));
+    }
+    [Test] public void StartingLevels_AreInitializedForEveryResearchNode()
+    {
+        _node.StartingLevel = 2;
+        var second = Node(ResearchUpgrade.TradeSuperiority); second.StartingLevel = 1;
+        _branch.Nodes = new[] { _node, second };
+        var service = Service(new Session(), new SimpleEventBus(), new Infrastructure());
+        var snapshot = service.GetSnapshot();
+        Assert.That(snapshot.GetLevel(_node.Upgrade), Is.EqualTo(2));
+        Assert.That(snapshot.GetLevel(second.Upgrade), Is.EqualTo(1));
+    }
     [Test] public void DuplicateUpgrade_IsRejected()
     { _branch.Nodes = new[] { _node, Node(_node.Upgrade) }; Assert.That(ResearchRules.Errors(_tree), Does.Contain("DuplicateUpgrade")); }
     [Test] public void CrossBranchDependency_IsRejected()
@@ -250,18 +275,22 @@ public sealed class ResearchTreeAndServiceEditModeTests
         Assert.That(ResearchRules.TryQuote(_tree, state, next.Upgrade, "pay", out _, out string reason, 2), Is.False);
         Assert.That(reason, Is.EqualTo("GalaxyLevelRequired"));
     }
-    [Test] public void ProductionResearchTree_HasSixBranchesAndDedicatedMarketImprovementResearch()
+    [Test] public void ProductionResearchTree_HasFiveBranchesAndFortyEightResearchNodes()
     {
         var tree = UnityEditor.AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>(
             "Assets/_Project/Content/Configs/Research/research_tree_galaxy.asset");
         Assert.That(tree, Is.Not.Null); Assert.That(ResearchRules.Errors(tree), Is.Empty);
-        Assert.That(tree.Branches.Length, Is.EqualTo(6));
+        Assert.That(tree.Branches.Length, Is.EqualTo(5));
+        var counts = new Dictionary<string, int> { ["research_branch_science"] = 12, ["research_branch_trade"] = 9,
+            ["research_branch_military"] = 10, ["research_branch_ranger_base"] = 9, ["research_branch_missions"] = 8 };
+        Assert.That(tree.Branches.Sum(b => b.Nodes.Length), Is.EqualTo(48));
         foreach (var branch in tree.Branches)
         {
-            Assert.That(branch.Nodes.Length, Is.EqualTo(branch.Id == "research_branch_trade" ? 11 : 10));
+            Assert.That(branch.Nodes.Length, Is.EqualTo(counts[branch.Id]));
             for (int i = 0; i < branch.Nodes.Length; i++)
             {
-                Assert.That(branch.Nodes[i].Levels.Length, Is.EqualTo(10));
+                Assert.That(branch.Nodes[i].Levels.Length, Is.EqualTo(branch.Nodes[i].MaxLevel));
+                Assert.That(branch.Nodes[i].Levels.All(l => l.PaymentOptions.Length == 0), Is.True);
                 foreach (var level in branch.Nodes[i].Levels)
                 {
                     Assert.That(level, Is.Not.Null);
@@ -404,16 +433,16 @@ public sealed class ResearchTreeAndServiceEditModeTests
         }
         finally { UnityEngine.Object.DestroyImmediate(root); }
     }
-    [Test] public void RangerResearchBranch_IsFifthWithTenLevelsAndLinearDependencies()
+    [Test] public void RangerResearchBranch_UsesTheNewContentsAndFiveLevelThreatAssessment()
     {
         var tree = UnityEditor.AssetDatabase.LoadAssetAtPath<ResearchTreeConfig>(
             "Assets/_Project/Content/Configs/Research/research_tree_galaxy.asset");
-        var ranger = tree.Branches[4];
+        var ranger = tree.Branches.Single(b => b.Id == "research_branch_ranger_base");
         Assert.That(ranger.DisplayName, Is.EqualTo("Подготовка рейнджеров"));
         Assert.That(ranger.Nodes.Take(3).Select(n => n.Upgrade), Is.EqualTo(new[] {
-            ResearchUpgrade.RangerTraining, ResearchUpgrade.RangerPatrols, ResearchUpgrade.RangerMastery }));
-        Assert.That(ResearchRules.VisibleNodes(ranger, 1).Intersect(ranger.Nodes.Take(3)), Is.Empty);
-        Assert.That(ResearchRules.VisibleNodes(ranger, 2).Intersect(ranger.Nodes.Take(3)).Count(), Is.EqualTo(1));
+            ResearchUpgrade.RangerCombatTraining, ResearchUpgrade.RangerDefensiveSystems, ResearchUpgrade.RangerHullReinforcement }));
+        Assert.That(ResearchRules.VisibleNodes(ranger, 1).Intersect(ranger.Nodes.Take(3)).Count(), Is.EqualTo(3));
+        Assert.That(ranger.Nodes.Single(n => n.Upgrade == ResearchUpgrade.RangerThreatAssessment).MaxLevel, Is.EqualTo(5));
         Assert.That(ResearchRules.Errors(tree), Is.Empty);
     }
 

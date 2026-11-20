@@ -254,7 +254,7 @@ public sealed partial class DebugController2A : CustomMonoBehaviour
         if (!TryPickRandomInvasionCandidate(
                 targetSystem,
                 galaxyLevel,
-                out EnemyGroupSpawnRuleConfig invasionRule,
+                out EnemyInvasionGroupSpawnRuleConfig invasionRule,
                 out string factionId))
         {
             LogWarDebug(
@@ -800,7 +800,7 @@ public sealed partial class DebugController2A : CustomMonoBehaviour
     private bool TryPickRandomInvasionCandidate(
         StarSystemConfig targetSystem,
         int galaxyLevel,
-        out EnemyGroupSpawnRuleConfig selectedRule,
+        out EnemyInvasionGroupSpawnRuleConfig selectedRule,
         out string selectedFactionId)
     {
         selectedRule = null;
@@ -851,7 +851,7 @@ public sealed partial class DebugController2A : CustomMonoBehaviour
                 continue;
             }
 
-            EnemyGroupSpawnRuleConfig rule = entry.EnemyGroupSpawnRule;
+            EnemyInvasionGroupSpawnRuleConfig rule = entry.EnemyGroupSpawnRule;
 
             if (rule == null)
             {
@@ -898,7 +898,7 @@ public sealed partial class DebugController2A : CustomMonoBehaviour
 
     private void AddFactionCandidates(
         List<WarInvasionDebugCandidate> candidates,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         int galaxyLevel)
     {
         IReadOnlyList<EnemyGroupEntryConfig> enemies =
@@ -1035,20 +1035,12 @@ public sealed partial class DebugController2A : CustomMonoBehaviour
         if (targetSystem == null)
             return null;
 
-        if (targetSystem.LinkedSystems != null)
+        if (targetSystem.Routes != null)
         {
-            for (int i = 0; i < targetSystem.LinkedSystems.Length; i++)
+            foreach (RouteConfig route in targetSystem.Routes)
             {
-                StarSystemLink link = targetSystem.LinkedSystems[i];
-
-                if (link == null ||
-                    link.LinkedSystem == null ||
-                    link.LinkedSystem.Id == targetSystem.Id)
-                {
-                    continue;
-                }
-
-                return link.LinkedSystem;
+                StarSystemConfig source = route?.GetOtherSystem(targetSystem.Id);
+                if (source != null && source.Id != targetSystem.Id) return source;
             }
         }
 
@@ -1831,7 +1823,7 @@ public sealed partial class DebugController2A : CustomMonoBehaviour
 
     private struct WarInvasionDebugCandidate
     {
-        public EnemyGroupSpawnRuleConfig Rule;
+        public EnemyInvasionGroupSpawnRuleConfig Rule;
         public string FactionId;
     }
 

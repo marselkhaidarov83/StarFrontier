@@ -38,7 +38,6 @@ public sealed class StationMilitaryRestoreEditModeTests
         public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig => null;
         public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig => null;
         public IReadOnlyList<SectorConfig> GetAllSectors() => Sectors;
-        public StarSystemLink GetCurrentStarSystemLink(string targetSystemId) => null;
         public bool ContainsStarSystem(string systemId) => false;
         public IReadOnlyList<StarSystemConfig> GetAllStarSystems() => null;
         public bool TryGetStarSystem(string systemId, out StarSystemConfig config) { config = null; return false; }

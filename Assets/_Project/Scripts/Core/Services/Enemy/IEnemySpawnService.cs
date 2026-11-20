@@ -4,20 +4,20 @@ public interface IEnemySpawnService
 {
     bool TrySpawnSystemGuardGroup(
         StarSystemConfig starSystem,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         out EnemyGroupState enemyGroupState);
 
     bool TrySpawnInvasionGroup(
         StarSystemConfig ownerSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         string invasionId,
         out EnemyGroupState enemyGroupState);
 
     bool TrySpawnInvasionGroup(
         StarSystemConfig ownerSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig rule,
+        EnemyInvasionGroupSpawnRuleConfig rule,
         string invasionId,
         string factionId,
         out EnemyGroupState enemyGroupState);

@@ -21,30 +21,7 @@ MonoBehaviour:
     \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
     \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
   icon: {fileID: 21300000, guid: 03422772af242424aa6284c53fa5f828, type: 3}
-  baseHullMin: 75
-  baseHullMax: 90
-  baseShieldMin: 35
-  baseShieldMax: 45
-  baseEnergyMin: 70
-  baseEnergyMax: 85
-  baseEnergyRegen: 6
-  baseAccelerationMin: 4
-  baseAccelerationMax: 4.5
-  baseTurnRateMin: 95
-  baseTurnRateMax: 105
-  turnRadius: 300
-  baseCargoCapacityMin: 132
-  baseCargoCapacityMax: 140
-  moduleSlotCount: 0
   level: 0
-  defaultComponents:
-  - {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
-  - {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-  - {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-  - {fileID: 11400000, guid: 57e185a2da3b44198c09e3730e2c6bc2, type: 2}
-  - {fileID: 11400000, guid: 3889b5d253f245ac9e9e079e5d313e7c, type: 2}
-  - {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
-  - {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
   role: 0
   namePool: {fileID: 11400000, guid: 9a60b2cb449c5430b80aa4d69d0d508b, type: 2}
   behaviorScenarios:
@@ -56,9 +33,6 @@ MonoBehaviour:
     behaviorConfig: {fileID: 11400000, guid: ad0b3eb116bba4ea89abcdea8ef7c8d3, type: 2}
   avoidEnemyOwnedTravelDestinations: 0
   lootTable: {fileID: 11400000, guid: 64cbab7a04c94587b1bf14fe9d81feb6, type: 2}
-  grabber: {fileID: 11400000, guid: 829b619b1da8434db51c6f90526a9159, type: 2}
+  hullGroup: {fileID: 11400000, guid: f3d7e79ac1164a7597c88250f8437461, type: 2}
+  equipmentGroup: {fileID: 11400000, guid: 5c13c6f9a06c4b57947fffff2718345b, type: 2}
   weaponGroups: []
-  mapSprite: {fileID: 21300000, guid: 03422772af242424aa6284c53fa5f828, type: 3}
-  combatSprite: {fileID: 21300000, guid: 03422772af242424aa6284c53fa5f828, type: 3}
-  visualSize: 15
-  hullConfig: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c247b39fe8de493796fb0e1fc3ce5c5a, type: 3}
+  m_Name: equipment_group_enemy_ancients_L03_01
+  m_EditorClassIdentifier:
+  id: "equipment_group_enemy_ancients_L03_01"
+  displayName: "Оборудование: Древние, уровень 3"
+  description: "Внутренние группы по видам компонентов. Для каждого разрешённого корпусом слота независимо выбирается один вариант. Характеристики экземпляра определяются по диапазонам выбранного оборудования."
+  icon: {fileID: 0}
+  Level: 3
+  slotGroups:
+  - Slot: 0
+    Equipment:
+    - {fileID: 11400000, guid: c5b6a29152b846d28533b1c1299dcfcc, type: 2}
+  - Slot: 1
+    Equipment:
+    - {fileID: 11400000, guid: c3ff6592aebe48f69ef967dccba9087b, type: 2}
+  - Slot: 2
+    Equipment:
+    - {fileID: 11400000, guid: 186c818246b54f7da3bae8c021003fbe, type: 2}
+  - Slot: 3
+    Equipment:
+    - {fileID: 11400000, guid: 553659c63ff54812ac8c25d3ceaeabf1, type: 2}
+  - Slot: 4
+    Equipment:
+    - {fileID: 11400000, guid: 5684f3d23c2047c0a5e27362c7fc6a02, type: 2}
+  - Slot: 5
+    Equipment:
+    - {fileID: 11400000, guid: 48f9b3877ed84db7bc4112a1c5c54b38, type: 2}
+  - Slot: 6
+    Equipment:
+    - {fileID: 11400000, guid: c653c1221a1b453892dffb8502f641a7, type: 2}

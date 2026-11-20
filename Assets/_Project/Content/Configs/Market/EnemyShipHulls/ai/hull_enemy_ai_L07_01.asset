@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: "hull_enemy_ai_L07_01"
+  m_EditorClassIdentifier: 
+  id: "hull_enemy_ai_L07_01"
+  displayName: "Машинный корпус «Императив»"
+  description: "Корпус фракции ИИ с полным набором узлов корабля. Просторные отсеки защищены многослойной оболочкой, а конструкция рассчитана на установку всех видов оборудования."
+  icon: {fileID: 21300000, guid: 91bbefda054c44125a2aaf67a5745ab4, type: 3}
+  Hull: {fileID: 0}
+  Level: 7
+  MaximumHullMin: 187
+  MaximumHullMax: 229
+  CargoCapacityMin: 132
+  CargoCapacityMax: 140
+  WeaponSlotCount: 4
+  AvailableComponentSlots: 127
+  EnemyHull: {fileID: 11400000, guid: 6b0f6db7f17f2457fb2a09175199b3f0, type: 2}
+  AccelerationMin: 0
+  AccelerationMax: 0
+  TurnRadius: 300
+  VisualSize: 33

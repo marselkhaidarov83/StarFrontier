@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c247b39fe8de493796fb0e1fc3ce5c5a, type: 3}
+  m_Name: equipment_group_enemy_infected_L09_01
+  m_EditorClassIdentifier:
+  id: "equipment_group_enemy_infected_L09_01"
+  displayName: "Оборудование: Заражённые, уровень 9"
+  description: "Внутренние группы по видам компонентов. Для каждого разрешённого корпусом слота независимо выбирается один вариант. Характеристики экземпляра определяются по диапазонам выбранного оборудования."
+  icon: {fileID: 0}
+  Level: 9
+  slotGroups:
+  - Slot: 0
+    Equipment:
+    - {fileID: 11400000, guid: 45cc23663f6648f9b1c467d5dd259db2, type: 2}
+  - Slot: 1
+    Equipment:
+    - {fileID: 11400000, guid: 586c0700fc1545bd8a5d9ee4aa9a47b5, type: 2}
+  - Slot: 2
+    Equipment:
+    - {fileID: 11400000, guid: f3cce5fe035d474cab7fed6cd842598f, type: 2}
+  - Slot: 3
+    Equipment:
+    - {fileID: 11400000, guid: cbb45b2d519848a1b142e23cadb6a186, type: 2}
+  - Slot: 4
+    Equipment:
+    - {fileID: 11400000, guid: 6031a0b0d7e145a4bce872e8c68834c9, type: 2}
+  - Slot: 5
+    Equipment:
+    - {fileID: 11400000, guid: 105e81ce0b7e41b894f3dc6193ff9a3b, type: 2}
+  - Slot: 6
+    Equipment:
+    - {fileID: 11400000, guid: 63a055a50d78421fbff17e940a371e02, type: 2}

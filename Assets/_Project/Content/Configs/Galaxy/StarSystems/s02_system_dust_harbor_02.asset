@@ -24,19 +24,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 05f40323e5c1b4c9bb430f301c0bc7b5, type: 2}
   - {fileID: 11400000, guid: 1c5a4041e97704ca7a3be356ef97a57b, type: 2}
   - {fileID: 11400000, guid: 3bd6c9756af11420d883919150830b68, type: 2}
-  linkedSystems:
-  - linkedSystem: {fileID: 11400000, guid: 75405d83c44a84536b8c5d1c0f15fb1d, type: 2}
-    parsecDistance: 14
-    exitPoint: {x: 0, y: 0, z: 0}
-    entryPoint: {x: 0, y: 0, z: 0}
-    sprite: {fileID: 0}
-    size: 0
-  - linkedSystem: {fileID: 11400000, guid: b48830c982d2747d9aab27df7d43d85e, type: 2}
-    parsecDistance: 16
-    exitPoint: {x: 0, y: 0, z: 0}
-    entryPoint: {x: 0, y: 0, z: 0}
-    sprite: {fileID: 0}
-    size: 0
   station: {fileID: 11400000, guid: 3ba51f919d25e4e518a351341abb6cf8, type: 2}
   mapPosition: {x: 0.2, y: -5.2}
   systemPopulationRule: {fileID: 11400000, guid: ac0963563de2d4e5ebef42c264cfdfb0, type: 2}

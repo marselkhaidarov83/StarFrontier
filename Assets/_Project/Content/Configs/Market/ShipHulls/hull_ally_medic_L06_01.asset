@@ -24,3 +24,7 @@ MonoBehaviour:
   CargoCapacityMax: 172
   WeaponSlotCount: 3
   AvailableComponentSlots: 71
+  AccelerationMin: 5.25
+  AccelerationMax: 5.75
+  TurnRadius: 300
+  VisualSize: 32

@@ -33,8 +33,8 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
     private GameRuntimeState State => _session.State;
     private MarketEconomyBalanceConfig Balance => _config.MarketEconomy;
     private int? _marketLevelOverride;
-    private int MarketLevel => _marketLevelOverride ?? Math.Max(1, Math.Min(10, ResearchLevel(ResearchUpgrade.TradeMarketImprovement)));
-    private int ResearchLevel(ResearchUpgrade upgrade) => State?.Galaxy?.Research?.GetLevel(upgrade) ?? 0;
+    private int MarketLevel => _marketLevelOverride ?? Math.Max(1, Math.Min(10, ResearchLevel(ResearchUpgrade.TradeNewGoods)));
+    private int ResearchLevel(ResearchUpgrade upgrade) => upgrade == ResearchUpgrade.None ? 0 : State?.Galaxy?.Research?.GetLevel(upgrade) ?? 0;
     private MarketResearchEffect WarEffect => _completingProtection ? _completionWarEffect : Balance?.GetEffect(ResearchLevel(Balance.WarProtectionResearch));
     private float MinimumBuyout => Balance?.GetEffect(ResearchLevel(Balance.EquipmentBuyoutResearch))?.MinimumEquipmentBuyoutPercent ?? 0.1f;
     private ShipRuntimeData Ship => State?.Player?.PlayerShipState?.GetActiveShip();
@@ -104,6 +104,10 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         market.PersonalEquipment ??= new List<SystemNpcWeaponRuntimeState>();
         market.PersonalHulls ??= new List<HullEquipmentRuntimeState>();
         market.Hulls ??= new List<MarketHullListing>();
+        int removedEnemyOffers = market.Equipment.RemoveAll(x => x?.Equipment != null && IsEnemyEquipment(x.Equipment));
+        removedEnemyOffers += market.Hulls.RemoveAll(x => x?.Hull != null &&
+            FindHullConfig(profile, x.Hull.ConfigId)?.MarketAvailable != true);
+        if (removedEnemyOffers > 0) market.Revision++;
         var level = profile.GetLevel(MarketLevel);
         int applied = level?.GalaxyLevel ?? 0;
         bool changed = created || market.AppliedGalaxyLevel != applied || market.AppliedProfileId != profile.Id;
@@ -167,7 +171,8 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
     }
     public MarketRuntimeData CurrentMarket => Current(out var market, out _) ? market : null;
     private bool IsItemUnlocked(ItemConfig item) =>
-        item.MarketDevelopmentLevel <= Math.Max(1, ResearchLevel(ResearchUpgrade.TradeNewGoods));
+        (!(item is ShipEquipmentConfig equipment) || !equipment.EnemyOnly) &&
+        item.MarketDevelopmentLevel <= MarketLevel;
 
     private MarketItemEntry Entry(MarketProfileConfig profile, string id) =>
         profile.GetLevel(MarketLevel)?.Items?.Find(x => x?.ItemConfig != null && x.ItemConfig.Id == id && IsItemUnlocked(x.ItemConfig));
@@ -361,7 +366,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
     private void OnResearchCompleted(ResearchCompletedEvent completed)
     {
         if (completed == null || _advancing || _committing) return;
-        if (completed.Upgrade == ResearchUpgrade.TradeMarketImprovement)
+        if (completed.Upgrade == ResearchUpgrade.TradeNewGoods)
         {
             InitializeSession();
             if (State?.Galaxy == null) return;
@@ -376,10 +381,6 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
             }
             finally { _marketLevelOverride = null; _advancing = false; }
             PublishChanges();
-            return;
-        }
-        if (completed.Upgrade == ResearchUpgrade.TradeNewGoods)
-        {
             var current = CurrentMarket;
             if (current != null)
                 _events?.PublishSafely(new MarketStateChangedEvent(current.SystemId, current.PlanetId), _ => { });
@@ -484,7 +485,13 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
 
     private static bool ValidEquipmentRule(MarketEquipmentRule rule, int marketLevel) =>
         !string.IsNullOrEmpty(rule?.EquipmentId) && rule.NewPrice > 0 &&
+        (rule.Component != null ? !rule.Component.EnemyOnly : !rule.Weapon.EnemyOnly) &&
         (rule.Component != null ? rule.Component.Level : rule.Weapon.Level) <= marketLevel;
+
+    private bool IsEnemyEquipment(SystemNpcWeaponRuntimeState item) =>
+        item != null && ((item.HasLootOrigin && item.LootOriginNpcType == SystemNpcType.Enemy) ||
+        (item.IsComponent ? (_config.GetItemConfigById(item.ComponentConfigId) as ShipEquipmentConfig)?.EnemyOnly == true
+            : _config.GetWeaponConfigById(item.WeaponConfigId)?.EnemyOnly == true));
 
     private MarketEquipmentRule EquipmentRule(MarketProfileConfig profile, SystemNpcWeaponRuntimeState item) =>
         profile.GetLevel(MarketLevel)?.Equipment?.Find(x => x?.Matches(item) == true)
@@ -520,7 +527,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         var equipment = buy ? listing?.Equipment : owned.Find(x => x != null && x.InstanceId == instanceId);
         if (equipment == null || (buy && (!listing.Allied || owned.Any(x => x?.InstanceId == instanceId)))) return false;
         var rule = EquipmentRule(profile, equipment);
-        if (buy && !ValidEquipmentRule(rule, MarketLevel)) return false;
+        if (buy && (IsEnemyEquipment(equipment) || !ValidEquipmentRule(rule, MarketLevel))) return false;
         int basePrice = buy ? listing.NewPrice : EquipmentBasePrice(profile, equipment);
         int price = MarketEconomyRules.EquipmentSellPrice(basePrice, equipment.CurrentDurability, equipment.MaximumDurability, MinimumBuyout);
         if (!HasEquipmentConfig(equipment) || price <= 0) return false;
@@ -534,8 +541,8 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
             else
             {
                 owned.Remove(equipment);
-                bool allied = equipment.IsComponent || (rule?.Allied == true &&
-                    (!equipment.HasLootOrigin || equipment.LootOriginNpcType == SystemNpcType.Ally));
+                bool allied = !IsEnemyEquipment(equipment) && (equipment.IsComponent || (rule?.Allied == true &&
+                    (!equipment.HasLootOrigin || equipment.LootOriginNpcType == SystemNpcType.Ally)));
                 if (allied && ValidEquipmentRule(rule, MarketLevel)) market.Equipment.Add(new MarketEquipmentListing { Equipment = equipment, Allied = true,
                     NewPrice = basePrice, ExpiresAtSeconds = NextOfferExpiry(market, profile) });
             }
@@ -567,7 +574,7 @@ public sealed partial class PlanetMarketService : IPlanetMarketService
         var listing = buy ? market.Equipment.Find(x => x?.Equipment?.InstanceId == id && x.Allied && x.ExpiresAtSeconds > market.ElapsedSeconds) : null;
         var item = buy ? listing?.Equipment : owned?.Find(x => x?.InstanceId == id);
         if (item == null || !HasEquipmentConfig(item)) return false;
-        if (buy && !ValidEquipmentRule(EquipmentRule(profile, item), MarketLevel)) return false;
+        if (buy && (IsEnemyEquipment(item) || !ValidEquipmentRule(EquipmentRule(profile, item), MarketLevel))) return false;
         int price = EquipmentPrice(item, buy);
         if (price <= 0) return false;
         return buy ? State.Player.Credits >= price && (warehouse || CanCarryEquipment(item))

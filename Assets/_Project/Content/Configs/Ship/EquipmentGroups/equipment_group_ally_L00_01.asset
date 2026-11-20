@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c247b39fe8de493796fb0e1fc3ce5c5a, type: 3}
+  m_Name: equipment_group_ally_L00_01
+  m_EditorClassIdentifier:
+  id: "equipment_group_ally_L00_01"
+  displayName: "Оборудование: союзники, уровень 0"
+  description: "Внутренние группы по видам компонентов. Для каждого разрешённого корпусом слота независимо выбирается один вариант. Характеристики экземпляра определяются по диапазонам выбранного оборудования."
+  icon: {fileID: 0}
+  Level: 0
+  slotGroups:
+  - Slot: 0
+    Equipment:
+    - {fileID: 11400000, guid: f4305e99bb9f4437a932ce3f615ace54, type: 2}
+    - {fileID: 11400000, guid: b70dc513c469464699c05a4ee43a19ac, type: 2}
+    - {fileID: 11400000, guid: 5a22430dca694c008aebf359696dc0cc, type: 2}

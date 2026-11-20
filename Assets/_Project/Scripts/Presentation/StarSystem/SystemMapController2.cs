@@ -249,54 +249,6 @@ public class SystemMapController2 : CustomMonoBehaviour
                 $"planets builded");
     }
 
-    // private void SpawnExits(StarSystemConfig starSystem)
-    // {
-    //     if (starSystem == null)
-    //     {
-    //         if (IsDebug())
-    //             Debug.LogError($"[SystemMapController2] starSystem is null");
-    //         return;
-    //     }
-
-    //     if (starSystem.LinkedSystems == null)
-    //     {
-    //         if (IsDebug())
-    //             Debug.LogError($"[SystemMapController2] starSystem.LinkedSystems is null");
-    //         return;
-    //     }
-
-    //     Vector2 center = Vector2.zero;
-    //     if (starSystem.Sun != null)
-    //         center = starSystem.Sun.LocalOffset;
-
-    //     if (IsDebug())
-    //         Debug.Log($"[SystemMapController2] LinkedSystems.Count: " + starSystem.LinkedSystems.Length);
-
-    //     foreach (StarSystemLink systemLink in starSystem.LinkedSystems)
-    //     {
-    //         if (systemLink == null)
-    //         {
-    //             if (IsDebug())
-    //                 Debug.LogError($"[SystemMapController2] systemLink is null");
-    //             continue;
-    //         }
-
-    //         GameObject instance = Instantiate(systemMapExitPrefab, exitContainer);
-    //         instance.transform.SetSiblingIndex(0);
-    //         _spawnedExits.Add(instance);
-
-    //         if (IsDebug())
-    //             Debug.Log("[SystemMapController2] SpawnExits.systemLink = " + systemLink.LinkedSystem.DisplayName);
-    //         instance.GetComponent<SystemExitNodeView2A>().Initialize(
-    //             systemLink,
-    //             center
-    //         );
-    //     }
-
-    //     if (IsDebug())
-    //         Debug.Log($"[SystemMapController2] exits builded");
-    // }
-
     private void SpawnExits2(StarSystemConfig starSystem)
     {
         if (starSystem == null)
@@ -462,41 +414,13 @@ public class SystemMapController2 : CustomMonoBehaviour
 
     private List<RouteConfig> GetRoutesForSystem(string systemId)
     {
-        List<RouteConfig> result = new();
-        HashSet<string> addedRouteIds = new();
-
-        if (configService == null)
-            return result;
-
-        IReadOnlyList<StarSystemConfig> systems = configService.GetAllStarSystems();
-
-        if (systems == null)
-            return result;
-
-        foreach (StarSystemConfig systemConfig in systems)
-        {
-            if (systemConfig == null || systemConfig.Routes == null)
-                continue;
-
-            foreach (RouteConfig routeConfig in systemConfig.Routes)
-            {
-                if (routeConfig == null)
-                    continue;
-
-                if (string.IsNullOrWhiteSpace(routeConfig.Id))
-                    continue;
-
-                if (!routeConfig.ContainsSystem(systemId))
-                    continue;
-
-                if (addedRouteIds.Contains(routeConfig.Id))
-                    continue;
-
-                addedRouteIds.Add(routeConfig.Id);
-                result.Add(routeConfig);
-            }
-        }
-
+        var result = new List<RouteConfig>();
+        var added = new HashSet<string>();
+        StarSystemConfig system = configService?.GetStarSystemConfigById(systemId);
+        if (system?.Routes == null) return result;
+        foreach (RouteConfig route in system.Routes)
+            if (route != null && !string.IsNullOrWhiteSpace(route.Id) &&
+                route.ContainsSystem(systemId) && added.Add(route.Id)) result.Add(route);
         return result;
     }
 
@@ -511,10 +435,7 @@ public class SystemMapController2 : CustomMonoBehaviour
         IRouteService routeService =
             Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
 
-        return routeService.HasUnlockedRoute(
-            routeConfig.FromSystem.Id,
-            routeConfig.ToSystem.Id
-        );
+        return routeService.IsRouteUnlocked(routeConfig.Id);
     }
 
     private void ClearMap()

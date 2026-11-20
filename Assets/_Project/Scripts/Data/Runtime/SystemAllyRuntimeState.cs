@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
     [Serializable]
@@ -12,6 +13,10 @@ using UnityEngine;
         public string SystemId;
 
         public Vector3 Position;
+
+        public HullEquipmentRuntimeState InstalledHull;
+        public List<SystemNpcWeaponRuntimeState> InstalledComponents = new();
+        public HullConfig HullConfig => AllyConfig?.HullGroup?.Resolve(InstalledHull?.ConfigId);
 
         public int CurrentHull;
         public int CurrentShield;

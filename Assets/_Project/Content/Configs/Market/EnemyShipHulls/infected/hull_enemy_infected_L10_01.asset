@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53011a6d0e24187b8cfc68b1f400061, type: 3}
+  m_Name: "hull_enemy_infected_L10_01"
+  m_EditorClassIdentifier: 
+  id: "hull_enemy_infected_L10_01"
+  displayName: "Живой корпус «Левиафан»"
+  description: "Корпус фракции Заражённых с полным набором узлов корабля. Просторные отсеки защищены многослойной оболочкой, а конструкция рассчитана на установку всех видов оборудования."
+  icon: {fileID: 21300000, guid: fb76671d390c74196904968f2c110209, type: 3}
+  Hull: {fileID: 0}
+  Level: 10
+  MaximumHullMin: 314
+  MaximumHullMax: 368
+  CargoCapacityMin: 144
+  CargoCapacityMax: 152
+  WeaponSlotCount: 5
+  AvailableComponentSlots: 127
+  EnemyHull: {fileID: 11400000, guid: c2bd551ac4ee6485e9896755600d35d9, type: 2}
+  AccelerationMin: 0
+  AccelerationMax: 0
+  TurnRadius: 300
+  VisualSize: 36

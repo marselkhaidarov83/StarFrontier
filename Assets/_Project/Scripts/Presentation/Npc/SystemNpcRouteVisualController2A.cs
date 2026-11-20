@@ -1019,7 +1019,7 @@ SystemEnemyRuntimeState enemy)
         {
             Speed = Mathf.Max(0.01f, enemy != null ? enemy.Speed : 0f),
             TurnRadius = enemy != null && enemy.EnemyConfig != null
-                ? Mathf.Max(0f, enemy.EnemyConfig.TurnRadius)
+                ? Mathf.Max(0f, (enemy.HullConfig != null ? enemy.HullConfig.TurnRadius : 0f))
                 : 0f,
             ArrivalDistanceThreshold = ArrivalDistanceThreshold,
             SunAvoidanceSafetyMargin = SunAvoidanceSafetyMargin,
@@ -1081,7 +1081,7 @@ SystemEnemyRuntimeState enemy)
 
         float turnRadius =
             enemy.EnemyConfig != null
-                ? Mathf.Max(0f, enemy.EnemyConfig.TurnRadius)
+                ? Mathf.Max(0f, (enemy.HullConfig != null ? enemy.HullConfig.TurnRadius : 0f))
                 : 0f;
 
         SystemTravelSunAvoidancePath2A.BuildPath(

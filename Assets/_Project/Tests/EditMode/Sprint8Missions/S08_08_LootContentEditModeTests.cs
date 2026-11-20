@@ -50,10 +50,8 @@ public sealed class S08_08_LootContentEditModeTests
     }
 
     [Test]
-    public void EveryEnemyRollsOneToTwoDiamondsOnlyOnDeath()
+    public void EveryEnemyUsesFiveGrowingTiersAndRollsDiamondsOnlyOnDestruction()
     {
-        var diamonds = AssetDatabase.LoadAssetAtPath<ItemConfig>(
-            Content + "Items/item_diamonds_01.asset");
         int enemyCount = 0;
         foreach (string guid in AssetDatabase.FindAssets("t:EnemyConfig",
                      new[] { Content + "Population/Enemies" }))
@@ -63,20 +61,31 @@ public sealed class S08_08_LootContentEditModeTests
             if (enemy == null) continue;
             enemyCount++;
             Assert.That(enemy.LootTable, Is.Not.Null, enemy.name);
+            Assert.That(enemy.LootTable.GetValidationErrors(), Is.Empty, enemy.name);
+            Assert.That(enemy.LootTable.Rules.Length, Is.EqualTo(5), enemy.name);
 
             int deathDiamondEntries = 0;
+            int tier = 0, previousMin = 0, previousMax = 0;
             foreach (NpcLootTriggerRule rule in enemy.LootTable.Rules)
             {
+                Assert.That(rule.DamageThresholdPercent, Is.EqualTo(++tier * 20), enemy.name);
+                if (!rule.IsDeath) Assert.That(rule.Equipment, Is.Empty, enemy.name);
                 if (rule?.Generated == null) continue;
                 foreach (NpcLootGeneratedEntry entry in rule.Generated)
                 {
+                    if (entry.Kind == NpcLootGeneratedKind.Astralite)
+                    {
+                        Assert.That(entry.MinAmount, Is.GreaterThan(previousMin), enemy.name);
+                        Assert.That(entry.MaxAmount, Is.GreaterThan(previousMax), enemy.name);
+                        previousMin = entry.MinAmount; previousMax = entry.MaxAmount;
+                    }
                     if (entry == null || entry.Kind != NpcLootGeneratedKind.Diamonds)
                         continue;
                     Assert.That(rule.IsDeath, Is.True, enemy.name);
-                    Assert.That(entry.Item, Is.SameAs(diamonds), enemy.name);
-                    Assert.That(entry.MinAmount, Is.EqualTo(1), enemy.name);
-                    Assert.That(entry.MaxAmount, Is.EqualTo(2), enemy.name);
-                    Assert.That(entry.ChancePercent, Is.EqualTo(50f), enemy.name);
+                    Assert.That(entry.Item, Is.Null, "Валютная добыча не требует ссылки на товар.");
+                    Assert.That(entry.MinAmount, Is.GreaterThan(0), enemy.name);
+                    Assert.That(entry.MaxAmount, Is.GreaterThanOrEqualTo(entry.MinAmount), enemy.name);
+                    Assert.That(entry.ChancePercent, Is.InRange(1f, 100f), enemy.name);
                     deathDiamondEntries++;
                 }
             }

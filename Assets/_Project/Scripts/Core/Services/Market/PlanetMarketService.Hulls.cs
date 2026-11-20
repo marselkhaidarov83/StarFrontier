@@ -11,8 +11,18 @@ public sealed partial class PlanetMarketService
     public HullConfig GetHullConfig(string id)
     {
         if (!Current(out _, out var profile)) return null;
-        return Balance?.HullCatalog?.Find(rule => rule?.Hull != null && rule.Hull.Id == id)?.Hull
+        return FindHullConfig(profile, id);
+    }
+    private HullConfig FindHullConfig(MarketProfileConfig profile, string id)
+    {
+        HullConfig result = Balance?.HullCatalog?.Find(rule => rule?.Hull != null && rule.Hull.Id == id)?.Hull
             ?? HullRule(profile, id)?.Hull;
+        if (result != null) return result;
+        foreach (AllyConfig actor in _config.GetAllAllies())
+            if (actor?.HullGroup?.HullConfigs != null)
+                foreach (HullConfig hull in actor.HullGroup.HullConfigs)
+                    if (hull != null && hull.Id == id) return hull;
+        return null;
     }
     public int HullPrice(HullEquipmentRuntimeState hull, bool buy)
     {
@@ -41,7 +51,7 @@ public sealed partial class PlanetMarketService
         if (_committing || !warehouse || Ship == null || !Current(out var market, out var profile)) return false;
         var listing = market.Hulls.Find(x => x?.Hull?.InstanceId == id && x.ExpiresAtSeconds > market.ElapsedSeconds);
         var hull = buy ? listing?.Hull : market.PersonalHulls.Find(x => x?.InstanceId == id);
-        if (hull == null || HullRule(profile, hull.ConfigId)?.Hull == null) return false;
+        if (hull == null || HullRule(profile, hull.ConfigId)?.Hull == null || FindHullConfig(profile, hull.ConfigId)?.MarketAvailable != true) return false;
         if (buy && GetHullConfig(hull.ConfigId).Level > MarketLevel) return false;
         int price = HullPrice(hull, buy);
         return price > 0 && (buy ? State.Player.Credits >= price && !market.PersonalHulls.Any(x => x?.InstanceId == id)
@@ -87,5 +97,5 @@ public sealed partial class PlanetMarketService
         finally { _committing = false; }
     }
     private static bool ValidHullRule(MarketHullRule rule, int marketLevel) =>
-        rule?.Hull != null && rule.Hull.Level <= marketLevel && rule.NewPrice > 0;
+        rule?.Hull != null && rule.Hull.MarketAvailable && rule.Hull.Level <= marketLevel && rule.NewPrice > 0;
 }

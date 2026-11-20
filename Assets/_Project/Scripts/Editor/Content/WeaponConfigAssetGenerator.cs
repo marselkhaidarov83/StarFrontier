@@ -450,24 +450,11 @@ public static class WeaponConfigAssetGenerator
         string rowId,
         List<string> warnings)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return;
-
-        bool applied =
-            SetOptionalEnum(serializedObject, "weaponOwner", value, rowId, warnings, false);
-
-        if (applied)
-            return;
-
-        applied =
-            SetOptionalEnum(serializedObject, "ownerProfile2A", value, rowId, warnings, false);
-
-        if (!applied)
-        {
-            warnings.Add(
-                RowPrefix(rowId) +
-                "weaponOwner was not written. Add serialized field 'weaponOwner' or use existing 'ownerProfile2A' in WeaponConfig.");
-        }
+        SerializedProperty enemyOnly = serializedObject.FindProperty("enemyOnly");
+        if (enemyOnly == null)
+            throw new InvalidOperationException("WeaponConfig.enemyOnly field was not found.");
+        enemyOnly.boolValue =
+            GetOutputFolderForWeaponOwner(value, rowId, warnings) != OutputFolderCommon;
     }
 
     private static CsvValidationResult ValidateCsv(string csvText)

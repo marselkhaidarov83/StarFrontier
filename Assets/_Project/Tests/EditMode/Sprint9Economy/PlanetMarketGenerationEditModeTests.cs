@@ -43,8 +43,8 @@ public sealed partial class PlanetMarketEconomyTests
         });
         _session.State.Galaxy.Sectors.Add(new SectorRuntimeState { SectorId = "another-sector", IsUnlocked = true });
         Assert.AreEqual(1, Market.AppliedGalaxyLevel);
-        _session.State.Galaxy.Research.Levels.Find(x => x.Upgrade == ResearchUpgrade.TradeMarketImprovement).Level = 2;
-        _events.PublishSafely(new ResearchCompletedEvent(ResearchUpgrade.TradeMarketImprovement, 2), _ => { });
+        _session.State.Galaxy.Research.Levels.Find(x => x.Upgrade == ResearchUpgrade.TradeNewGoods).Level = 2;
+        _events.PublishSafely(new ResearchCompletedEvent(ResearchUpgrade.TradeNewGoods, 2), _ => { });
         Assert.AreEqual(2, Market.AppliedGalaxyLevel);
         Assert.AreEqual(3, Market.Equipment.Count);
     }
@@ -66,8 +66,8 @@ public sealed partial class PlanetMarketEconomyTests
                 new MarketEquipmentRule { Weapon = disabled, NewPrice = 200, Weight = 0 }
             }
         });
-        _session.State.Galaxy.Research.Levels.Find(x => x.Upgrade == ResearchUpgrade.TradeMarketImprovement).Level = 10;
-        _events.PublishSafely(new ResearchCompletedEvent(ResearchUpgrade.TradeMarketImprovement, 10), _ => { });
+        _session.State.Galaxy.Research.Levels.Find(x => x.Upgrade == ResearchUpgrade.TradeNewGoods).Level = 10;
+        _events.PublishSafely(new ResearchCompletedEvent(ResearchUpgrade.TradeNewGoods, 10), _ => { });
         var items = Market.Equipment;
         Assert.AreEqual(10000, items.Count);
         Assert.IsTrue(items.All(x => x.Equipment.WeaponConfigId == _weapon.Id || x.Equipment.WeaponConfigId == higher.Id));

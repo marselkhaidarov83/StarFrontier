@@ -13,6 +13,21 @@ public static class ShipLoadoutRules
     public const int FirstComponentSlot = 1;
     public const int FirstWeaponSlot = FirstComponentSlot + ComponentSlots;
     public const int TotalSlots = FirstWeaponSlot + WeaponSlots;
+    public const int ModuleSlots = 0;
+
+    public static HullConfig SelectedHull(AllyConfig config, ShipRuntimeData ship) =>
+        config?.HullGroup?.Resolve(ship?.InstalledHull?.ConfigId);
+
+    public static SystemNpcWeaponRuntimeState Component(SystemNpcRuntimeState npc, ShipComponentSlot slot) =>
+        npc?.InstalledComponents?.Find(component => component != null && component.SlotIndex == (int)slot);
+
+    public static ShipEquipmentRuntimeStats ComponentStats(SystemNpcRuntimeState npc, ShipComponentSlot slot,
+        Func<string, ItemConfig> resolve)
+    {
+        var item = Component(npc, slot);
+        var config = item != null ? resolve(item.ComponentConfigId) as ShipEquipmentConfig : null;
+        return config != null && config.Slot == slot ? item.GetComponentStats(config) : null;
+    }
 
     public static int AvailableWeapons(AllyConfig hull, HullConfig selected = null) =>
         Mathf.Clamp(selected != null ? selected.WeaponSlotCount : hull != null ? hull.WeaponSlotCount : 0, 0, WeaponSlots);
@@ -51,6 +66,7 @@ public static class ShipLoadoutRules
             InstanceId = HullEquipmentRuntimeState.IsEmptyPlaceholder(installed) ? "installed-hull:" + ship.ShipId : installed.InstanceId,
             MaximumDurability = maximum,
             CargoCapacity = installed != null && installed.CargoCapacity > 0 ? installed.CargoCapacity : ship.CargoCapacity,
+            Acceleration = installed?.Acceleration ?? config.BaseAccelerationMin,
             CurrentDurability = Mathf.Clamp(ship.CurrentHull, 0, maximum)
         };
     }
@@ -59,9 +75,15 @@ public static class ShipLoadoutRules
     {
         if (ship == null || hull == null || ship.HasModularLoadout) return;
 
+        selected ??= hull.HullGroup?.PickRandom();
+        if (selected == null) throw new InvalidOperationException("Ship has no hull group: " + hull.Id);
+        if (HullEquipmentRuntimeState.IsEmptyPlaceholder(ship.InstalledHull))
+            ship.InstalledHull = selected.CreateRuntimeState("installed-hull:" + ship.ShipId);
+        ship.HullCapacity = ship.InstalledHull.MaximumDurability;
+        ship.CargoCapacity = ship.InstalledHull.CargoCapacity;
         ship.InstalledComponents = new List<SystemNpcWeaponRuntimeState>();
-        if (hull.DefaultComponents != null)
-            foreach (var component in hull.DefaultComponents)
+        if (hull.EquipmentGroup != null)
+            foreach (var component in hull.EquipmentGroup.PickComponents(selected.AvailableComponentSlots))
                 if (component != null && Supports(hull, component.Slot, selected))
                     ship.InstalledComponents.Add(SystemNpcWeaponRuntimeState.NewComponent(component,
                         "installed-component:" + ship.ShipId + ":" + (int)component.Slot, (int)component.Slot));

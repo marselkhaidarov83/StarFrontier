@@ -14,7 +14,7 @@ public interface IInvasionService
     bool TryStartInvasion(
         StarSystemConfig sourceSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig invasionSpawnRule,
+        EnemyInvasionGroupSpawnRuleConfig invasionSpawnRule,
         string factionId,
         int resolveAfterTicks,
         out InvasionState invasionState);
@@ -22,7 +22,7 @@ public interface IInvasionService
     bool TryStartInvasion(
         StarSystemConfig sourceSystem,
         StarSystemConfig targetSystem,
-        EnemyGroupSpawnRuleConfig invasionSpawnRule,
+        EnemyInvasionGroupSpawnRuleConfig invasionSpawnRule,
         string factionId,
         int resolveAfterTicks,
         int maxActiveInvasions,

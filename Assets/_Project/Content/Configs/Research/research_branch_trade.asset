@@ -14,1425 +14,1214 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::ResearchBranchConfig
   id: research_branch_trade
   displayName: "Торговля и экономика"
-  description: "Исследования торговой логистики, межзвёздного снабжения, галактической экономики, защиты торговли во время войны и оценки оборудования."
+  description: "Девять исследований открытия товаров и уровней оборудования, снабжения рынков, складов и торговых услуг."
   icon: {fileID: 0}
   StationType: 2
   Nodes:
-  - Upgrade: 2
-    Title: "\u0422\u043e\u0440\u0433\u043e\u0432\u0430\u044f \u043b\u043e\u0433\u0438\u0441\u0442\u0438\u043a\u0430"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 0, y: 0}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 2
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 2
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 3
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 3
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 6
-    Title: "\u041c\u0435\u0436\u0437\u0432\u0451\u0437\u0434\u043d\u043e\u0435 \u0441\u043d\u0430\u0431\u0436\u0435\u043d\u0438\u0435"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 3
-    TreePosition: {x: 0, y: 1}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 3
-      Dependencies:
-      - Upgrade: 2
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 3
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 7
-    Title: "\u0413\u0430\u043b\u0430\u043a\u0442\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u044d\u043a\u043e\u043d\u043e\u043c\u0438\u043a\u0430"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 5
-    TreePosition: {x: 0, y: 2}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 5
-      Dependencies:
-      - Upgrade: 6
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 17
-    Title: "\u0417\u0430\u0449\u0438\u0442\u0430 \u044d\u043a\u043e\u043d\u043e\u043c\u0438\u043a\u0438 \u043e\u0442 \u0432\u043e\u0439\u043d\u044b"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 0, y: 3}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 2
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 2
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 3
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 3
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 18
-    Title: "\u041e\u0446\u0435\u043d\u043a\u0430 \u043e\u0431\u043e\u0440\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u044f"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 0, y: 4}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 2
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 2
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 3
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 3
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
   - Upgrade: 25
-    Title: "Новые товары"
+    Title: Расширение рынка
+    Description: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+      один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+      Товары открываются для производства, потребления и торговли.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 5, y: 0}
     StartingLevel: 1
-    Description: "Открывает торговые товары по уровню развития рынка. На первом уровне доступны продовольствие, руда и промышленные детали, на уровнях 2–10 открывается по одному новому товару."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 3 товаров; Доступный уровень оборудования:
+        1 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 3
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 1
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 4 товаров; Доступный уровень оборудования:
+        2 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 4
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 2
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 5 товаров; Доступный уровень оборудования:
+        3 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 5
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 3
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 6 товаров; Доступный уровень оборудования:
+        4 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 6
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 4
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 7 товаров; Доступный уровень оборудования:
+        5 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 7
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 5
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 8 товаров; Доступный уровень оборудования:
+        6 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 8
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 6
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 9 товаров; Доступный уровень оборудования:
+        7 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 9
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 7
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 10 товаров; Доступный уровень оборудования:
+        8 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 10
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 8
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Расширение рынка: 11 товаров; Доступный уровень оборудования:
+        9 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 11
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 9
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 26
-    Title: "Оптовая торговля"
+      EffectDescription: 'Расширение рынка: 12 товаров; Доступный уровень оборудования:
+        10 уровень рынка'
+      Effects:
+      - Parameter: AvailableTradeGoodsCount
+        Value: 12
+        Unit: товаров
+        Details: На уровне 1 открыты 3 торговых товара; каждый следующий уровень добавляет
+          один, до всех 12. Также задаёт доступный уровень корпусов, оружия и оборудования.
+          Товары открываются для производства, потребления и торговли.
+      - Parameter: AvailableEquipmentMarketLevel
+        Value: 10
+        Unit: уровень рынка
+        Details: Корпуса, оружие и оборудование уровней не выше уровня исследования.
+  - Upgrade: 101
+    Title: Межзвёздное снабжение
+    Description: Увеличивает базовую скорость пополнения товарных запасов рынков на
+      5% за уровень, до 50%. Не увеличивает предельный запас.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 6, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 5 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 5
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 10 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 15 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 4
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 20 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 5
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 25 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 25
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 6
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 30 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 7
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 35 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 35
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 8
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 40 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 40
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 9
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 45 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 45
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 10
+      PaymentOptions: []
+      EffectDescription: 'Межзвёздное снабжение: 50 %'
+      Effects:
+      - Parameter: MarketSupplySpeedBonus
+        Value: 50
+        Unit: "%"
+        Details: Увеличивает базовую скорость пополнения товарных запасов рынков на
+          5% за уровень, до 50%. Не увеличивает предельный запас.
+  - Upgrade: 102
+    Title: Складские резервы
+    Description: Добавляет по одной ячейке на каждом личном складе планет и станций
+      за каждые два уровня, до пяти ячеек.
+    DesignNotes: ''
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 0 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 0
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 1 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 1
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 1 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 1
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 2 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 2
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 2 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 2
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 3 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 3
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 3 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 3
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 4 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 4
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Складские резервы: 4 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 4
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 27
-    Title: "Складские резервы"
+      EffectDescription: 'Складские резервы: 5 ячеек'
+      Effects:
+      - Parameter: PersonalWarehouseAdditionalSlots
+        Value: 5
+        Unit: ячеек
+        Details: Добавляет по одной ячейке на каждом личном складе планет и станций
+          за каждые два уровня, до пяти ячеек.
+  - Upgrade: 103
+    Title: Торговая аналитика
+    Description: Открывает актуальную информацию о рынках ближайших планет без посещения.
+      На уровне 10 охват составляет 20% планет.
+    DesignNotes: Охват уровней 1–9, округление и определение ближайших планет не согласованы.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 7, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 4
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 5
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 6
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 7
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 8
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 9
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 25
+        RequiredLevel: 10
       PaymentOptions: []
-  - Upgrade: 28
-    Title: "Страхование грузов"
+      EffectDescription: 'Охват ближайших планет: 20 % планет'
+      Effects:
+      - Parameter: NearestPlanetInformationCoverage
+        Value: 20
+        Unit: "% планет"
+        Details: Правила выбора и округления не согласованы.
+  - Upgrade: 104
+    Title: Топливное чудо
+    Description: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+      топлива на перелёт.
+    DesignNotes: Округление стоимости и минимальная цена не согласованы.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 8, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 5 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 5
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 10 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 10
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 15 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 15
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 4
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 20 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 20
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 5
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 25 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 25
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 6
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 30 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 30
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 7
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 35 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 35
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 8
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 40 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 40
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 9
       PaymentOptions: []
+      EffectDescription: 'Топливное чудо: 45 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 45
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 10
       PaymentOptions: []
-  - Upgrade: 29
-    Title: "Удешевление перелётов"
+      EffectDescription: 'Топливное чудо: 50 %'
+      Effects:
+      - Parameter: FuelPriceReduction
+        Value: 50
+        Unit: "%"
+        Details: Снижает базовую цену топлива на 5% за уровень, до 50%. Не снижает расход
+          топлива на перелёт.
+  - Upgrade: 105
+    Title: Ремонтное чудо
+    Description: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+      восстанавливаемую прочность.
+    DesignNotes: Округление стоимости и минимальная цена не согласованы.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 9, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 2 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 2
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 4 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 4
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 6 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 6
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 4
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 8 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 8
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 5
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 10 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 10
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 6
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 12 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 12
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 7
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 14 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 14
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 8
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 16 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 16
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 9
       PaymentOptions: []
+      EffectDescription: 'Ремонтное чудо: 18 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 18
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 102
+        RequiredLevel: 10
       PaymentOptions: []
-  - Upgrade: 61
-    Title: "Улучшение рынка"
+      EffectDescription: 'Ремонтное чудо: 20 %'
+      Effects:
+      - Parameter: RepairPriceReduction
+        Value: 20
+        Unit: "%"
+        Details: Снижает базовую стоимость ремонта на 2% за уровень, до 20%. Не увеличивает
+          восстанавливаемую прочность.
+  - Upgrade: 106
+    Title: Обновление ассортимента
+    Description: Сокращает базовый интервал обновления предложений корпусов, оружия
+      и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не меняет
+      уже купленные предметы или личные склады. Не вызывает мгновенную смену ассортимента.
+    DesignNotes: Правило применения новой длительности к уже идущему таймеру не согласовано.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 10, y: 0}
-    StartingLevel: 1
-    Description: "Расширяет ассортимент корпусов, оружия и оборудования и открывает модели соответствующего уровня. Повышает количество предложений во всех профилях рынка."
+    StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 250
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 1
-        DurationSeconds: 30
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 10
-        DurationSeconds: 30
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 5 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 5
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 1
-        DurationSeconds: 60
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 20
-        DurationSeconds: 60
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 10 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 10
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2250
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 1
-        DurationSeconds: 90
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 30
-        DurationSeconds: 90
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 15 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 15
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 120
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 40
-        DurationSeconds: 120
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 4
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 20 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 20
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 6250
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 150
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 150
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 5
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 25 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 25
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 9000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 180
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 60
-        DurationSeconds: 180
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 6
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 30 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 30
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 12250
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 3
-        DurationSeconds: 210
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 70
-        DurationSeconds: 210
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 7
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 35 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 35
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 16000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 3
-        DurationSeconds: 240
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 80
-        DurationSeconds: 240
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 8
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 40 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 40
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 20250
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 3
-        DurationSeconds: 270
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 90
-        DurationSeconds: 270
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 9
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 45 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 45
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 25000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 300
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 10
+      PaymentOptions: []
+      EffectDescription: 'Обновление ассортимента: 50 %'
+      Effects:
+      - Parameter: EquipmentRefreshIntervalReduction
+        Value: 50
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений корпусов, оружия
+          и оборудования на 5% за уровень, до 50%. Не пополняет торговые товары и не
+          меняет уже купленные предметы или личные склады. Не вызывает мгновенную смену
+          ассортимента.
+  - Upgrade: 107
+    Title: Рыночные резервы
+    Description: Увеличивает максимальное количество торговых товаров в запасах рынка
+      на 5% за уровень, до 50%. Не ускоряет пополнение.
+    DesignNotes: Правило округления запасов до целых единиц не согласовано.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 5 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 5
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 10 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 15 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 4
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 20 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 5
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 25 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 25
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 6
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 30 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 7
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 35 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 35
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 8
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 40 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 40
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 9
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 45 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 45
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 101
+        RequiredLevel: 10
+      PaymentOptions: []
+      EffectDescription: 'Рыночные резервы: 50 %'
+      Effects:
+      - Parameter: MarketStockCapacityBonus
+        Value: 50
+        Unit: "%"
+        Details: Увеличивает максимальное количество торговых товаров в запасах рынка
+          на 5% за уровень, до 50%. Не ускоряет пополнение.
+  - Upgrade: 108
+    Title: Особые предложения
+    Description: Повышает веса более высоких доступных уровней корпусов, оружия и оборудования.
+      Не открывает недоступные уровни, не даёт скидку и не увеличивает количество карточек.
+    DesignNotes: Формула перераспределения весов, пределы усиления и базовые веса не
+      согласованы.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 4
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 5
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 6
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 7
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 8
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 9
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 106
+        RequiredLevel: 10
+      PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []

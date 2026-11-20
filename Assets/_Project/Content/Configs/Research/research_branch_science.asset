@@ -14,928 +14,1604 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::ResearchBranchConfig
   id: research_branch_science
   displayName: "Наука и освоение космоса"
-  description: "Исследования вычислительных систем, квантовых лабораторий и дальнего космоса."
+  description: "Двенадцать исследований научной инфраструктуры, прогнозирования вторжений, топливных зондов и вражеских технологий."
   icon: {fileID: 0}
   StationType: 3
   Nodes:
-  - Upgrade: 8
-    Title: "\u0412\u044b\u0447\u0438\u0441\u043b\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0441\u0438\u0441\u0442\u0435\u043c\u044b"
+  - Upgrade: 62
+    Title: Научные лаборатории
+    Description: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+      1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
+    DesignNotes: ''
     Icon: {fileID: 0}
-    RequiredGalaxyLevel: 2
-    TreePosition: {x: 0, y: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 1
     Levels:
     - Level: 1
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 1 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 1
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 2
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 1 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 1
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 3
-      RequiredGalaxyLevel: 3
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 2 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 2
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 4
-      RequiredGalaxyLevel: 3
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 2 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 2
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 5
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 3 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 3
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 6
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 3 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 3
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 7
-      RequiredGalaxyLevel: 5
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 4 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 4
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 8
-      RequiredGalaxyLevel: 5
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 4 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 4
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 9
-      RequiredGalaxyLevel: 6
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 5 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 5
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
     - Level: 10
-      RequiredGalaxyLevel: 6
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 9
-    Title: "\u041a\u0432\u0430\u043d\u0442\u043e\u0432\u044b\u0435 \u043b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u0438\u0438"
+      PaymentOptions: []
+      EffectDescription: 'Научные лаборатории: 5 исследований'
+      Effects:
+      - Parameter: ConcurrentResearchSlots
+        Value: 5
+        Unit: исследований
+        Details: 'Открывает дополнительные слоты одновременно выполняемых исследований:
+          1 на уровнях 1–2, затем по одному каждые два уровня, до 5.'
+  - Upgrade: 63
+    Title: Ускорение исследований
+    Description: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+      Это уменьшение времени, а не увеличение скорости.
+    DesignNotes: ''
     Icon: {fileID: 0}
-    RequiredGalaxyLevel: 4
-    TreePosition: {x: 0, y: 1}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
     Levels:
     - Level: 1
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 8
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 5 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 5
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 2
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 10
-    Title: "\u0414\u0430\u043b\u044c\u043d\u0438\u0435 \u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u0438\u044f"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 6
-    TreePosition: {x: 0, y: 2}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 6
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 9
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 10 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 10
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 3
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 15 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 15
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 4
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 20 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 20
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 5
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 25 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 25
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 6
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 30 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 30
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 7
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 35 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 35
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 8
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 40 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 40
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 9
-      RequiredGalaxyLevel: 10
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 45 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 45
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
     - Level: 10
-      RequiredGalaxyLevel: 10
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 30
-    Title: "Спектральный анализ"
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Ускорение исследований: 50 %'
+      Effects:
+      - Parameter: ResearchDurationReduction
+        Value: 50
+        Unit: "%"
+        Details: Сокращает базовую длительность исследований на 5% за уровень, до 50%.
+          Это уменьшение времени, а не увеличение скорости.
+  - Upgrade: 64
+    Title: Оптимизация затрат
+    Description: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+      30%. Не меняет затраты остальных ресурсов.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 3, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 3 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 3
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 6 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 6
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 9 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 9
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 12 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 12
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 15 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 15
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 18 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 18
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 21 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 21
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 24 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 24
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 27 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 27
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 62
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Оптимизация затрат: 30 %'
+      Effects:
+      - Parameter: ResearchEnergyCoreCostReduction
+        Value: 30
+        Unit: "%"
+        Details: Уменьшает стоимость исследований в Energy Cores на 3% за уровень, до
+          30%. Не меняет затраты остальных ресурсов.
+  - Upgrade: 65
+    Title: Прогноз вторжений
+    Description: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+      за уровень, до 10. Не гарантирует достоверность прогноза.
+    DesignNotes: Точка отсчёта ближайших систем и правила достоверности прогноза не
+      определены.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 1 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 1
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 2 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 2
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 3 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 3
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 4 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 4
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 5 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 5
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 6 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 6
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 7 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 7
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 8 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 8
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Прогноз вторжений: 9 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 9
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 31
-    Title: "Планетарное картографирование"
+      EffectDescription: 'Прогноз вторжений: 10 систем'
+      Effects:
+      - Parameter: ForecastSystemCount
+        Value: 10
+        Unit: систем
+        Details: Расширяет прогноз возможных будущих вторжений на одну ближайшую систему
+          за уровень, до 10. Не гарантирует достоверность прогноза.
+  - Upgrade: 66
+    Title: Топливные зонды
+    Description: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+      1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    DesignNotes: Базовая скорость добычи, вместимость зонда, место хранения и доставка
+      топлива не определены. Мгновенная передача на корабль не утверждена.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 4, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 0 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 0
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 1 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 1
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 1 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 1
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 2 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 2
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 2 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 2
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 3 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 3
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 3 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 3
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 4 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 4
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 4 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 4
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 67
+        RequiredLevel: 1
+      PaymentOptions: []
+      EffectDescription: 'Топливные зонды: 5 зондов'
+      Effects:
+      - Parameter: ActiveFuelProbeCount
+        Value: 5
+        Unit: зондов
+        Details: Открывает автономную добычу топлива на необитаемых планетах. Уровни
+          1/2/4/6/8/10 дают 0/1/2/3/4/5 работающих зондов.
+  - Upgrade: 67
+    Title: Топливная геология
+    Description: Показывает наличие топлива и богатство месторождений на одной ближайшей
+      необитаемой планете за уровень, до 10.
+    DesignNotes: Точка отсчёта ближайших планет не определена.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 1 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 1
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 2 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 2
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 3 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 3
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 4 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 4
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 5 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 5
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 6 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 6
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 7 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 7
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 8 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 8
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Топливная геология: 9 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 9
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 32
-    Title: "Изучение аномалий"
+      EffectDescription: 'Топливная геология: 10 планет'
+      Effects:
+      - Parameter: FuelGeologyPlanetCount
+        Value: 10
+        Unit: планет
+        Details: Показывает наличие топлива и богатство месторождений на одной ближайшей
+          необитаемой планете за уровень, до 10.
+  - Upgrade: 68
+    Title: Форсированная добыча
+    Description: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+      50%; не увеличивает вместимость.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 5, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 5 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 5
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 10 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 10
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 15 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 15
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 20 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 20
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 25 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 25
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 30 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 30
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 35 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 35
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 40 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 40
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 45 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 45
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Форсированная добыча: 50 %'
+      Effects:
+      - Parameter: FuelProbeExtractionBonus
+        Value: 50
+        Unit: "%"
+        Details: Ускоряет добычу топлива каждым активным зондом на 5% за уровень, до
+          50%; не увеличивает вместимость.
+  - Upgrade: 69
+    Title: Топливные контейнеры
+    Description: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+      уровень, до 50%; не влияет на скорость добычи и личные склады.
+    DesignNotes: ''
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 5 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 5
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 10 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 15 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 20 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 25 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 25
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 30 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 35 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 35
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 40 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 40
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 45 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 45
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 66
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Топливные контейнеры: 50 %'
+      Effects:
+      - Parameter: FuelProbeCapacityBonus
+        Value: 50
+        Unit: "%"
+        Details: Увеличивает вместимость топливного контейнера каждого зонда на 5% за
+          уровень, до 50%; не влияет на скорость добычи и личные склады.
+  - Upgrade: 70
+    Title: Исследование ИИ
+    Description: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+      ИИ сокращает оставшееся время этого исследования.
+    DesignNotes: Область действия сопротивления (игрок или также союзники), сокращение
+      времени за предмет и предел ускорения не согласованы. Сданный предмет расходуется.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 2 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 2
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 4 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 4
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 6 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 6
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 8 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 8
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 10 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 10
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 12 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 12
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 14 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 14
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 16 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 16
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование ИИ: 18 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 18
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 33
-    Title: "Энергетические материалы"
+      EffectDescription: 'Исследование ИИ: 20 %'
+      Effects:
+      - Parameter: AiDamageReduction
+        Value: 20
+        Unit: "%"
+        Details: Снижает получаемый урон от ИИ на 2% за уровень, до 20%. Сдача оборудования
+          ИИ сокращает оставшееся время этого исследования.
+  - Upgrade: 71
+    Title: Исследование Древних
+    Description: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+      оборудования Древних сокращает оставшееся время этого исследования.
+    DesignNotes: Область действия сопротивления, сокращение времени за предмет и предел
+      ускорения не согласованы. Сданный предмет расходуется.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 6, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 2 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 2
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 4 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 4
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 6 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 6
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 8 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 8
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 10 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 10
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 12 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 12
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 14 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 14
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 16 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 16
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Древних: 18 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 18
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 34
-    Title: "Экспериментальные двигатели"
+      EffectDescription: 'Исследование Древних: 20 %'
+      Effects:
+      - Parameter: AncientsDamageReduction
+        Value: 20
+        Unit: "%"
+        Details: Снижает получаемый урон от Древних на 2% за уровень, до 20%. Сдача
+          оборудования Древних сокращает оставшееся время этого исследования.
+  - Upgrade: 72
+    Title: Исследование Заражённых
+    Description: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+      оборудования Заражённых сокращает оставшееся время этого исследования.
+    DesignNotes: Область действия сопротивления, сокращение времени за предмет и предел
+      ускорения не согласованы. Сданный предмет расходуется.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 7, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 2 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 2
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 4 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 4
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 6 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 6
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 8 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 8
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 10 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 10
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 12 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 12
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 14 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 14
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 16 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 16
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Исследование Заражённых: 18 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 18
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 35
-    Title: "Автоматизация лабораторий"
+      EffectDescription: 'Исследование Заражённых: 20 %'
+      Effects:
+      - Parameter: InfectedDamageReduction
+        Value: 20
+        Unit: "%"
+        Details: Снижает получаемый урон от Заражённых на 2% за уровень, до 20%. Сдача
+          оборудования Заражённых сокращает оставшееся время этого исследования.
+  - Upgrade: 73
+    Title: Утилизация трофеев
+    Description: С первого уровня позволяет перерабатывать вражеское оборудование в
+      Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+      либо для изучения фракции, либо для утилизации.
+    DesignNotes: Базовый выход Energy Cores, зависимость от типа и уровня оборудования
+      не определены.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 8, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 5 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 5
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 10 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 10
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 15 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 15
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 20 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 20
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 25 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 25
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 30 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 30
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 35 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 35
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 40 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 40
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 45 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 45
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 36
-    Title: "Сеть обсерваторий"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 9, y: 0}
-    StartingLevel: 0
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
+      EffectDescription: 'Утилизация трофеев: 50 %; Утилизация доступна: 1 да/нет'
+      Effects:
+      - Parameter: RecyclingEnergyCoreYieldBonus
+        Value: 50
+        Unit: "%"
+        Details: С первого уровня позволяет перерабатывать вражеское оборудование в
+          Energy Cores. Выход увеличивается на 5% за уровень, до 50%. Предмет используется
+          либо для изучения фракции, либо для утилизации.
+      - Parameter: EnemyEquipmentRecyclingUnlocked
+        Value: 1
+        Unit: да/нет
+        Details: Разрешена утилизация вражеского оборудования.

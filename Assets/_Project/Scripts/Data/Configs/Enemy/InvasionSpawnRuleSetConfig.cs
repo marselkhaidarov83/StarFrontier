@@ -9,7 +9,7 @@ public sealed class InvasionSpawnRuleSetConfig : BaseConfig
 
     public SystemPopulationEnemyGroupRuleEntry[] Entries => entries;
 
-    public bool ContainsRule(EnemyGroupSpawnRuleConfig rule)
+    public bool ContainsRule(EnemyInvasionGroupSpawnRuleConfig rule)
     {
         if (rule == null || entries == null)
             return false;

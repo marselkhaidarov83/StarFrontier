@@ -104,6 +104,10 @@ public sealed class SystemNpcRuntimeState
     [Header("Weapons")]
     public List<SystemNpcWeaponRuntimeState> Weapons = new();
 
+    // Installed equipment is distinct from weapons and loose cargo. Loot rules are configured separately.
+    public HullEquipmentRuntimeState InstalledHull;
+    public List<SystemNpcWeaponRuntimeState> InstalledComponents = new();
+
     [Header("Loot inventory (regenerated from config on load)")]
     public int CargoCapacity;
     public List<NpcCargoBatchRuntimeState> CargoBatches = new();

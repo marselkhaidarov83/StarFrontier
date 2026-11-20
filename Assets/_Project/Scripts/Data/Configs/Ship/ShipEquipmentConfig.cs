@@ -39,6 +39,9 @@ public sealed class ShipEquipmentRuntimeStats
 [CreateAssetMenu(menuName = "StarFrontier/Configs/Ship/Equipment")]
 public sealed class ShipEquipmentConfig : ItemConfig
 {
+    [SerializeField, Tooltip("Оборудование врагов. Не попадает в предложения рынка и обратный выкуп.")]
+    private bool enemyOnly;
+    public bool EnemyOnly => enemyOnly;
     [Range(1, 10)] public int Level = 1;
     public ShipEquipmentVariant Variant;
     public ShipComponentSlot Slot;

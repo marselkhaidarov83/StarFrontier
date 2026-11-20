@@ -2,7 +2,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-// Конфиг описывает звёздную систему: звезду, планеты, соседние системы, станцию и население.
+// Конфиг описывает звёздную систему: звезду, планеты, маршруты, станцию и население.
 [CreateAssetMenu(fileName = "StarSystemConfig", menuName = "StarFrontier/Configs/System/Star System")]
 public class StarSystemConfig : BaseConfig
 {
@@ -11,8 +11,6 @@ public class StarSystemConfig : BaseConfig
     [SerializeField] private SunConfig sun;
     [Tooltip("Список планет системы.")]
     [SerializeField] private PlanetConfig[] planetRefs;
-    [Tooltip("Связи с соседними системами.")]
-    [SerializeField] private StarSystemLink[] linkedSystems;
     [Tooltip("Станция системы.")]
     [SerializeField] private StationConfig station;
 
@@ -36,13 +34,12 @@ public class StarSystemConfig : BaseConfig
     [SerializeField] private bool isStartSystem;
 
     [Header("Routes")]
-    [Tooltip("Список routes. Используется связанными игровыми системами этого конфига.")]
+    [Tooltip("Маршруты системы. Каждый маршрут прикреплён к обеим своим системам; открытость хранится в RouteRuntimeState.")]
     [SerializeField] private System.Collections.Generic.List<RouteConfig> routes = new();
 
     public SunConfig Sun => sun;
     public PlanetConfig[] PlanetRefs => planetRefs;
     public PlanetConfig[] PlanetInhabited() { return planetRefs.Where(p => p.IsInhabited).ToArray(); }
-    public StarSystemLink[] LinkedSystems => linkedSystems;
 
     public Vector3 MapPosition => mapPosition;
     public PopulationConfig Population => systemPopulationRule;

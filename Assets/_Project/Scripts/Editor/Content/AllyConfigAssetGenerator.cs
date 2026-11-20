@@ -196,19 +196,15 @@ public static class AllyConfigAssetGenerator
                 config.BaseHullMax < config.BaseHullMin ||
                 config.BaseShieldMin < 0 ||
                 config.BaseShieldMax < config.BaseShieldMin ||
-                config.BaseEnergyMin < 0 ||
-                config.BaseEnergyMax < config.BaseEnergyMin ||
+
                 config.DefaultEngine == null ||
                 !(config.DefaultEngine.Speed > 0f) ||
-                config.BaseEnergyRegen < 0f ||
                 config.BaseAccelerationMin <= 0f ||
                 config.BaseAccelerationMax < config.BaseAccelerationMin ||
-                config.BaseTurnRateMin <= 0f ||
-                config.BaseTurnRateMax < config.BaseTurnRateMin ||
+
                 config.BaseCargoCapacityMin < 0 ||
                 config.BaseCargoCapacityMax < config.BaseCargoCapacityMin ||
-                config.WeaponSlotCount < 0 ||
-                config.ModuleSlotCount < 0)
+                config.WeaponSlotCount < 0)
             {
                 errors++;
                 AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: invalid stat range at {path}");
@@ -273,28 +269,17 @@ public static class AllyConfigAssetGenerator
                 AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: name pool has less than 100 names at {path}");
             }
 
-            SerializedObject serializedConfig =
-                new SerializedObject(config);
-
-            SerializedProperty mapSpriteProperty =
-                serializedConfig.FindProperty("mapSprite");
-
-            if (mapSpriteProperty == null ||
-                mapSpriteProperty.objectReferenceValue == null)
+            if (config.HullGroup?.HullConfigs == null || config.HullGroup.HullConfigs.Count == 0)
             {
                 errors++;
-                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: mapSprite is not assigned at {path}");
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: hull group is not assigned at {path}");
             }
-
-            SerializedProperty combatSpriteProperty =
-                serializedConfig.FindProperty("combatSprite");
-
-            if (combatSpriteProperty == null ||
-                combatSpriteProperty.objectReferenceValue == null)
-            {
-                errors++;
-                AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: combatSprite is not assigned at {path}");
-            }
+            else foreach (HullConfig hull in config.HullGroup.HullConfigs)
+                if (hull == null || hull.Icon == null)
+                {
+                    errors++;
+                    AppLog.Error(DebugLogChannel.EditorGenerators, $"AllyConfig validation: hull icon is not assigned at {path}");
+                }
         }
 
         EditorUtility.DisplayDialog(
@@ -351,7 +336,8 @@ public static class AllyConfigAssetGenerator
             AssetDatabase.CreateAsset(table, path);
             SerializedObject serializedTable = new SerializedObject(table);
             SetString(serializedTable, "id", npcConfigId + "_loot");
-            SetString(serializedTable, "displayName", npcConfigId + " loot");
+            SetString(serializedTable, "displayName", "Добыча союзного корабля");
+            SetString(serializedTable, "description", "Таблица добычи союзного корабля для пяти порогов суммарного урона по корпусу и щиту.");
             serializedTable.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(table);
         }
@@ -378,20 +364,6 @@ public static class AllyConfigAssetGenerator
         SetString(serializedObject, "displayName", BuildDisplayName(role, level));
         SetString(serializedObject, "description", BuildDescription(role, level));
 
-        SetInt(serializedObject, "baseHullMin", stats.HullMin);
-        SetInt(serializedObject, "baseHullMax", stats.HullMax);
-        SetInt(serializedObject, "baseShieldMin", stats.ShieldMin);
-        SetInt(serializedObject, "baseShieldMax", stats.ShieldMax);
-        SetInt(serializedObject, "baseEnergyMin", stats.EnergyMin);
-        SetInt(serializedObject, "baseEnergyMax", stats.EnergyMax);
-        SetFloat(serializedObject, "baseEnergyRegen", stats.EnergyRegen);
-        SetDefaultEngine(serializedObject, level);
-        SetFloat(serializedObject, "baseAccelerationMin", stats.AccelerationMin);
-        SetFloat(serializedObject, "baseAccelerationMax", stats.AccelerationMax);
-        SetFloat(serializedObject, "baseTurnRateMin", stats.TurnRateMin);
-        SetFloat(serializedObject, "baseTurnRateMax", stats.TurnRateMax);
-        SetInt(serializedObject, "baseCargoCapacityMin", stats.CargoCapacityMin);
-        SetInt(serializedObject, "baseCargoCapacityMax", stats.CargoCapacityMax);
         string hullPath = "Assets/_Project/Content/Configs/Market/ShipHulls/hull_" + id + ".asset";
         var hullConfig = AssetDatabase.LoadAssetAtPath<HullConfig>(hullPath);
         if (hullConfig == null)
@@ -409,34 +381,32 @@ public static class AllyConfigAssetGenerator
         SetObject(hullVisual, "icon", mapSprite);
         hullVisual.ApplyModifiedPropertiesWithoutUndo();
         hullConfig.Hull = asset;
-        hullConfig.Level = Mathf.Clamp(level, 1, 10);
+        hullConfig.Level = Mathf.Clamp(level, 0, 10);
+        hullConfig.AccelerationMin = stats.AccelerationMin;
+        hullConfig.AccelerationMax = stats.AccelerationMax;
+        hullConfig.VisualSize = CalculateGeneratedVisualSize(role, level);
+        hullConfig.TurnRadius = 300f;
         hullConfig.WeaponSlotCount = (hullConfig.Level + 1) / 2;
         hullConfig.AvailableComponentSlots = ShipComponentSlots.Engine | ShipComponentSlots.FuelTank |
             ShipComponentSlots.Radar | ShipComponentSlots.ShieldGenerator;
         if (role == AllyRole2A.Ranger || role == AllyRole2A.Military)
             hullConfig.AvailableComponentSlots |= ShipComponentSlots.Scanner | ShipComponentSlots.RepairDroid;
         if (role == AllyRole2A.Ranger) hullConfig.AvailableComponentSlots |= ShipComponentSlots.Grabber;
+        if (level == 0) hullConfig.AvailableComponentSlots = ShipComponentSlots.Engine;
         EditorUtility.SetDirty(hullConfig);
-        SetObject(serializedObject, "hullConfig", hullConfig);
-        SetInt(serializedObject, "moduleSlotCount", stats.ModuleSlotCount);
+        SetObject(serializedObject, "hullGroup", AssetDatabase.LoadAssetAtPath<HullGroupConfig>(
+            "Assets/_Project/Content/Configs/Ship/HullGroups/hull_group_" + id + ".asset"));
+        SetObject(serializedObject, "equipmentGroup", AssetDatabase.LoadAssetAtPath<EquipmentGroupConfig>(
+            $"Assets/_Project/Content/Configs/Ship/EquipmentGroups/equipment_group_ally_L{level:00}_01.asset"));
         SetInt(serializedObject, "level", level);
         SetEnum(serializedObject, "role", (int)role);
-        if (asset.LootTable == null)
-            SetObject(serializedObject, "lootTable", GetOrCreateLootTable(id));
-        if (role == AllyRole2A.Ranger)
-            SetObject(serializedObject, "grabber",
-                AssetDatabase.LoadAssetAtPath<ShipEquipmentConfig>(
-                    "Assets/_Project/Content/Configs/Market/ShipEquipment/ship_grabber_industrial_L01_01.asset"));
-        if (role != AllyRole2A.Ranger) SetObject(serializedObject, "grabber", null);
+        if (asset.LootTable == null) SetObject(serializedObject, "lootTable", GetOrCreateLootTable(id));
         SetBool(
             serializedObject,
             "avoidEnemyOwnedTravelDestinations",
             role != AllyRole2A.Ranger);
 
-        SetObject(serializedObject, "mapSprite", mapSprite);
-        SetObject(serializedObject, "combatSprite", mapSprite);
         SetObject(serializedObject, "namePool", namePool);
-        SetFloat(serializedObject, "visualSize", CalculateGeneratedVisualSize(role, level));
 
         WriteScenarioEntries(
             serializedObject,
@@ -444,36 +414,13 @@ public static class AllyConfigAssetGenerator
             level,
             scenarios);
 
-        WriteWeaponGroups(
-            serializedObject,
-            weaponGroups);
+        WriteWeaponGroups(serializedObject, level == 0 ? new List<WeaponGroupConfig>() : weaponGroups);
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
         asset.name = id;
     }
 
-    private static void SetDefaultEngine(SerializedObject hull, int level)
-    {
-        const string folder = "Assets/_Project/Content/Configs/Items/ShipEquipment";
-        string id = level <= 1 ? "ship_engine_industrial_L01_01" : $"ship_engine_tier_{level:D2}_01";
-        var engine = AssetDatabase.LoadAssetAtPath<ShipEquipmentConfig>($"{folder}/{id}.asset");
-        if (engine == null)
-            throw new InvalidOperationException($"Missing engine asset: {id}");
 
-        var components = hull.FindProperty("defaultComponents");
-        for (int i = 0; i < components.arraySize; i++)
-        {
-            var entry = components.GetArrayElementAtIndex(i);
-            if (entry.objectReferenceValue is not ShipEquipmentConfig component || component.Slot != ShipComponentSlot.Engine)
-                continue;
-            entry.objectReferenceValue = engine;
-            return;
-        }
-
-        int index = components.arraySize;
-        components.arraySize++;
-        components.GetArrayElementAtIndex(index).objectReferenceValue = engine;
-    }
 
     private static void SetBool(
         SerializedObject serializedObject,
@@ -1071,8 +1018,6 @@ public static class AllyConfigAssetGenerator
         string[] guids =
             AssetDatabase.FindAssets("t:WeaponGroupConfig", new[] { WeaponGroupsRoot });
 
-        WeaponGroupAllyType expectedType =
-            ToWeaponGroupAllyType(role);
 
         for (int i = 0; i < guids.Length; i++)
         {
@@ -1088,7 +1033,6 @@ public static class AllyConfigAssetGenerator
             if (!IsMatchingWeaponGroup(
                     config,
                     path,
-                    expectedType,
                     role,
                     level))
             {
@@ -1098,17 +1042,7 @@ public static class AllyConfigAssetGenerator
             result.Add(config);
         }
 
-        result.Sort(
-            (left, right) =>
-            {
-                int rankCompare =
-                    left.StrengthRank.CompareTo(right.StrengthRank);
-
-                if (rankCompare != 0)
-                    return rankCompare;
-
-                return string.CompareOrdinal(left.Id, right.Id);
-            });
+        result.Sort((left, right) => string.CompareOrdinal(left.Id, right.Id));
 
         return result;
     }
@@ -1168,7 +1102,6 @@ public static class AllyConfigAssetGenerator
             ShieldMax = shieldMin + Mathf.RoundToInt(8 + level * 2),
             EnergyMin = energyMin,
             EnergyMax = energyMin + Mathf.RoundToInt(10 + level * 2),
-            EnergyRegen = Round(baseStats.EnergyRegen + 0.2f * (level - 1)),
             AccelerationMin = Round(acceleration),
             AccelerationMax = Round(acceleration + 0.5f),
             TurnRateMin = Round(turnRate),
@@ -1189,7 +1122,6 @@ public static class AllyConfigAssetGenerator
             ShieldMax = 45,
             EnergyMin = 70,
             EnergyMax = 85,
-            EnergyRegen = 6f,
             AccelerationMin = 4f,
             AccelerationMax = 4.5f,
             TurnRateMin = 95f,
@@ -1211,7 +1143,6 @@ public static class AllyConfigAssetGenerator
                     HullMin = 140,
                     ShieldMin = 100,
                     EnergyMin = 120,
-                    EnergyRegen = 8f,
                     Acceleration = 5f,
                     TurnRate = 90f,
                     CargoCapacity = 24,
@@ -1225,7 +1156,6 @@ public static class AllyConfigAssetGenerator
                     HullMin = 110,
                     ShieldMin = 80,
                     EnergyMin = 110,
-                    EnergyRegen = 10f,
                     Acceleration = 6f,
                     TurnRate = 120f,
                     CargoCapacity = 30,
@@ -1239,7 +1169,6 @@ public static class AllyConfigAssetGenerator
                     HullMin = 90,
                     ShieldMin = 50,
                     EnergyMin = 100,
-                    EnergyRegen = 7f,
                     Acceleration = 3.5f,
                     TurnRate = 65f,
                     CargoCapacity = 90,
@@ -1253,7 +1182,6 @@ public static class AllyConfigAssetGenerator
                     HullMin = 85,
                     ShieldMin = 55,
                     EnergyMin = 130,
-                    EnergyRegen = 9f,
                     Acceleration = 4f,
                     TurnRate = 75f,
                     CargoCapacity = 45,
@@ -1268,7 +1196,6 @@ public static class AllyConfigAssetGenerator
                     HullMin = 75,
                     ShieldMin = 45,
                     EnergyMin = 90,
-                    EnergyRegen = 8f,
                     Acceleration = 4.5f,
                     TurnRate = 85f,
                     CargoCapacity = 35,
@@ -1282,7 +1209,6 @@ public static class AllyConfigAssetGenerator
                     HullMin = 80,
                     ShieldMin = 40,
                     EnergyMin = 80,
-                    EnergyRegen = 6f,
                     Acceleration = 4f,
                     TurnRate = 80f,
                     CargoCapacity = 20,
@@ -1539,19 +1465,12 @@ public static class AllyConfigAssetGenerator
     private static bool IsMatchingWeaponGroup(
         WeaponGroupConfig config,
         string path,
-        WeaponGroupAllyType expectedType,
         AllyRole2A role,
         int level)
     {
         if (config == null)
             return false;
 
-        if (config.GroupKind == WeaponGroupKind.Ally &&
-            config.AllyType == expectedType &&
-            config.Level == level)
-        {
-            return true;
-        }
 
         if (string.IsNullOrWhiteSpace(path))
             return false;
@@ -1588,30 +1507,7 @@ public static class AllyConfigAssetGenerator
         return $"generic|{scenario}";
     }
 
-    private static WeaponGroupAllyType ToWeaponGroupAllyType(AllyRole2A role)
-    {
-        switch (role)
-        {
-            case AllyRole2A.Military:
-                return WeaponGroupAllyType.Military;
 
-            case AllyRole2A.Ranger:
-                return WeaponGroupAllyType.Ranger;
-
-            case AllyRole2A.Trader:
-                return WeaponGroupAllyType.Trader;
-
-            case AllyRole2A.Science:
-                return WeaponGroupAllyType.Science;
-
-
-            case AllyRole2A.Medic:
-                return WeaponGroupAllyType.Medic;
-
-            default:
-                return WeaponGroupAllyType.None;
-        }
-    }
 
     private static string GetRoleKey(AllyRole2A role)
     {
@@ -1802,7 +1698,6 @@ public static class AllyConfigAssetGenerator
         public int ShieldMax;
         public int EnergyMin;
         public int EnergyMax;
-        public float EnergyRegen;
         public float Acceleration;
         public float TurnRate;
         public int CargoCapacity;

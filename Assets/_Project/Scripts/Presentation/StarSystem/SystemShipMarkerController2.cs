@@ -158,8 +158,8 @@ public sealed class SystemShipMarkerController2 :
         if (activeShipData == null)
             return;
 
-        Sprite activeShipSprite =
-            activeShipData.CombatSprite;
+        var activeShipState = _hangarService.GetActiveShipState();
+        Sprite activeShipSprite = ShipLoadoutRules.SelectedHull(activeShipData, activeShipState)?.Icon;
 
         if (force ||
             _lastActiveShipData != activeShipData ||
@@ -181,7 +181,7 @@ public sealed class SystemShipMarkerController2 :
             float worldSize =
                 _configService
                     .GameVisualConfig
-                    .GetAllyWorldSize(activeShipData);
+                    .GetAllyWorldSize(activeShipData, activeShipState?.InstalledHull);
 
             if (!force &&
                 Mathf.Approximately(

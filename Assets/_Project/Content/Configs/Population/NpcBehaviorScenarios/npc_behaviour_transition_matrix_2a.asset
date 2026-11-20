@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: npc_behaviour_transition_matrix_2a
   m_EditorClassIdentifier: Data::NpcBehaviourTransitionMatrixConfig
   id: npc_behaviour_transition_matrix_2a
-  displayName: NPC Behaviour Transition Matrix 2A
-  description: Allowed next NPC behavior matrix for Stage 2A.
+  displayName: "Матрица переходов поведения NPC"
+  description: "Определяет разрешённые переходы между действиями неигровых кораблей. Для каждого предыдущего действия задаёт список допустимых следующих действий."
   icon: {fileID: 0}
   rules:
   - previousBehavior: 10

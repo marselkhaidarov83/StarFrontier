@@ -5,7 +5,6 @@ public class RouteService : CustomService, IRouteService
     private GalaxyRuntimeState _galaxyRuntimeState;
     private readonly SimpleEventBus _eventBus;
     private readonly IConfigService _configService;
-    private const double PerfLogThresholdMs = 2.0;
 
     public RouteService()
     {
@@ -34,18 +33,10 @@ public class RouteService : CustomService, IRouteService
 
     public bool HasUnlockedRoute(string fromSystemId, string toSystemId)
     {
-        if (string.IsNullOrWhiteSpace(fromSystemId))
-            return false;
-
-        if (string.IsNullOrWhiteSpace(toSystemId))
-            return false;
-
-        RouteConfig routeConfig = FindRouteConfig(fromSystemId, toSystemId);
-
-        if (routeConfig == null)
-            return false;
-
-        return IsRouteAvailable(routeConfig);
+        if (string.IsNullOrWhiteSpace(fromSystemId) || string.IsNullOrWhiteSpace(toSystemId)) return false;
+        StarSystemConfig source = _configService.GetStarSystemConfigById(fromSystemId);
+        return source?.Routes != null && source.Routes.Any(route => route != null &&
+            route.ConnectsSystems(fromSystemId, toSystemId) && IsRouteAvailable(route));
     }
 
     private bool IsRouteAvailable(RouteConfig routeConfig)
@@ -72,12 +63,7 @@ public class RouteService : CustomService, IRouteService
     {
         GalaxyRuntimeStateUpdate();
 
-        RouteRuntimeState routeState = FindRouteState(routeConfig.Id);
-
-        if (routeState != null)
-            return routeState.IsUnlocked;
-
-        return routeConfig.IsLockedAtStart == false;
+        return routeConfig.IsUnlocked(_galaxyRuntimeState);
     }
 
     private bool IsSystemSectorUnlocked(string systemId)
@@ -113,83 +99,17 @@ public class RouteService : CustomService, IRouteService
 
     private RouteConfig FindRouteConfig(string fromSystemId, string toSystemId)
     {
-        long startedAt = BeginPerfMeasure();
-
-        int sectorCount = 0;
-        int systemCount = 0;
-        int routeCount = 0;
-
-        foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
-        {
-            sectorCount++;
-
-            if (sectorConfig == null || sectorConfig.Systems == null)
-                continue;
-
-            foreach (StarSystemConfig systemConfig in sectorConfig.Systems)
-            {
-                systemCount++;
-
-                if (systemConfig == null || systemConfig.Routes == null)
-                    continue;
-
-                foreach (RouteConfig routeConfig in systemConfig.Routes)
-                {
-                    routeCount++;
-
-                    if (routeConfig == null)
-                        continue;
-
-                    if (routeConfig.ConnectsSystems(fromSystemId, toSystemId))
-                    {
-                        LogRoutePerf(
-                            EndPerfMeasureMs(startedAt),
-                            "FindRouteConfig OK" +
-                            " | From=" + fromSystemId +
-                            " | To=" + toSystemId +
-                            " | Sectors=" + sectorCount +
-                            " | Systems=" + systemCount +
-                            " | Routes=" + routeCount);
-
-                        return routeConfig;
-                    }
-                }
-            }
-        }
-
-        LogRoutePerf(
-            EndPerfMeasureMs(startedAt),
-            "FindRouteConfig FAILED" +
-            " | From=" + fromSystemId +
-            " | To=" + toSystemId +
-            " | Sectors=" + sectorCount +
-            " | Systems=" + systemCount +
-            " | Routes=" + routeCount);
-
-        return null;
+        StarSystemConfig source = _configService.GetStarSystemConfigById(fromSystemId);
+        return source?.Routes?.FirstOrDefault(route => route != null && route.ConnectsSystems(fromSystemId, toSystemId));
     }
 
     private RouteConfig FindRouteConfigById(string routeId)
     {
-        foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
+        foreach (StarSystemConfig system in _configService.GetAllStarSystems())
         {
-            if (sectorConfig == null || sectorConfig.Systems == null)
-                continue;
-
-            foreach (StarSystemConfig systemConfig in sectorConfig.Systems)
-            {
-                if (systemConfig == null || systemConfig.Routes == null)
-                    continue;
-
-                foreach (RouteConfig routeConfig in systemConfig.Routes)
-                {
-                    if (routeConfig == null)
-                        continue;
-
-                    if (routeConfig.Id == routeId)
-                        return routeConfig;
-                }
-            }
+            if (system?.Routes == null) continue;
+            foreach (RouteConfig route in system.Routes)
+                if (route != null && route.Id == routeId && route.ContainsSystem(system.Id)) return route;
         }
 
         return null;
@@ -197,75 +117,8 @@ public class RouteService : CustomService, IRouteService
 
     public string FindRouteId(string fromSystemId, string toSystemId)
     {
-        long startedAt = BeginPerfMeasure();
-
-        if (_configService.GalaxyConfig == null ||
-            _configService.GetAllSectors() == null)
-        {
-            return string.Empty;
-        }
-
-        int sectorCount = 0;
-        int systemCount = 0;
-        int routeCount = 0;
-
-        foreach (SectorConfig sectorConfig in _configService.GetAllSectors())
-        {
-            sectorCount++;
-
-            if (sectorConfig == null || sectorConfig.Systems == null)
-                continue;
-
-            foreach (StarSystemConfig systemConfig in sectorConfig.Systems)
-            {
-                systemCount++;
-
-                if (systemConfig == null || systemConfig.Routes == null)
-                    continue;
-
-                foreach (RouteConfig routeConfig in systemConfig.Routes)
-                {
-                    routeCount++;
-
-                    if (routeConfig == null)
-                        continue;
-
-                    bool directRoute =
-                        routeConfig.FromSystem.Id == fromSystemId &&
-                        routeConfig.ToSystem.Id == toSystemId;
-
-                    bool reverseRoute =
-                        routeConfig.FromSystem.Id == toSystemId &&
-                        routeConfig.ToSystem.Id == fromSystemId;
-
-                    if (directRoute || reverseRoute)
-                    {
-                        LogRoutePerf(
-                            EndPerfMeasureMs(startedAt),
-                            "FindRouteId OK" +
-                            " | From=" + fromSystemId +
-                            " | To=" + toSystemId +
-                            " | RouteId=" + routeConfig.Id +
-                            " | Sectors=" + sectorCount +
-                            " | Systems=" + systemCount +
-                            " | Routes=" + routeCount);
-
-                        return routeConfig.Id;
-                    }
-                }
-            }
-        }
-
-        LogRoutePerf(
-            EndPerfMeasureMs(startedAt),
-            "FindRouteId FAILED" +
-            " | From=" + fromSystemId +
-            " | To=" + toSystemId +
-            " | Sectors=" + sectorCount +
-            " | Systems=" + systemCount +
-            " | Routes=" + routeCount);
-
-        return string.Empty;
+        if (string.IsNullOrWhiteSpace(fromSystemId) || string.IsNullOrWhiteSpace(toSystemId)) return string.Empty;
+        return FindRouteConfig(fromSystemId, toSystemId)?.Id ?? string.Empty;
     }
 
     public void UnlockRoute(string routeId)
@@ -296,37 +149,8 @@ public class RouteService : CustomService, IRouteService
             return null;
 
         return _galaxyRuntimeState.Routes.FirstOrDefault(
-            route => route.RouteId == routeId
+            route => route != null && route.RouteId == routeId
         );
     }
 
-    private static long BeginPerfMeasure()
-    {
-        return System.Diagnostics.Stopwatch.GetTimestamp();
-    }
-
-    private static double EndPerfMeasureMs(long startedAt)
-    {
-        long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - startedAt;
-        return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
-    }
-
-    private void LogRoutePerf(double elapsedMs, string message)
-    {
-        if (elapsedMs < PerfLogThresholdMs)
-            return;
-
-        if (Bootstrapper.Instance == null ||
-            !Bootstrapper.Instance.IsPerformanceLogEnabled(DebugLogPerformanceArea.GalaxyRoute))
-        {
-            return;
-        }
-
-        Bootstrapper.Instance.LogPerformance(
-            DebugLogPerformanceArea.GalaxyRoute,
-            "[RouteService] " +
-            message +
-            " | Ms=" +
-            elapsedMs.ToString("F2"));
-    }
 }

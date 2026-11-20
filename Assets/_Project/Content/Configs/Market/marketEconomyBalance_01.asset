@@ -19,8 +19,8 @@ MonoBehaviour:
   HullRepairUnitPrice: 2
   EquipmentRepairUnitPrice: 2
   FuelUnitPrice: 10
-  WarProtectionResearch: 17
-  EquipmentBuyoutResearch: 18
+  WarProtectionResearch: 0
+  EquipmentBuyoutResearch: 0
   ResearchLevels:
   - Level: 0
     WarProductionLoss: 0.5
@@ -1364,9 +1364,6 @@ MonoBehaviour:
   - Hull: {fileID: 11400000, guid: 68bc3d3c4e6a4ec49a947b91cc7bb8ae, type: 2}
     Weight: 82
     NewPrice: 2210
-  - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-    Weight: 100
-    NewPrice: 875
   - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
     Weight: 100
     NewPrice: 1050
@@ -1457,6 +1454,3 @@ MonoBehaviour:
   - Hull: {fileID: 11400000, guid: 00644c5f2758417d95922452098e669b, type: 2}
     Weight: 82
     NewPrice: 1600
-  - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-    Weight: 100
-    NewPrice: 1000

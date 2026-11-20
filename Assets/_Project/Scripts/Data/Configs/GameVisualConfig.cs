@@ -95,20 +95,16 @@ public sealed class GameVisualConfig : BaseConfig
         return UnitsToWorldSize(units);
     }
 
-    public float GetAllyWorldSize(AllyConfig ally)
+    public float GetAllyWorldSize(AllyConfig ally, HullEquipmentRuntimeState selected = null)
     {
-        float units = ally != null
-            ? ally.VisualSize
-            : 0f;
+        float units = ally?.HullGroup?.Resolve(selected?.ConfigId)?.VisualSize ?? 0f;
 
         return UnitsToWorldSize(units);
     }
 
-    public float GetEnemyWorldSize(EnemyConfig enemy)
+    public float GetEnemyWorldSize(EnemyConfig enemy, HullEquipmentRuntimeState selected = null)
     {
-        float units = enemy != null
-            ? enemy.VisualSize
-            : 0f;
+        float units = enemy?.HullGroup?.Resolve(selected?.ConfigId)?.VisualSize ?? 0f;
 
         return UnitsToWorldSize(units);
     }

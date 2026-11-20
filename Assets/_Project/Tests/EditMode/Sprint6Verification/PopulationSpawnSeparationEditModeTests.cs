@@ -34,10 +34,6 @@ public sealed class PopulationSpawnSeparationEditModeTests
                 continue;
             var profile = AssetDatabase.LoadAssetAtPath<PopulationConfig>(path);
             Assert.That(profile.AllySpawnRules.Any(rule => rule != null), Is.True, path);
-            var legacy = (SystemPopulationEnemyGroupRuleEntry[])typeof(PopulationConfig)
-                .GetField("enemyGroupSpawnRuleEntries", BindingFlags.NonPublic | BindingFlags.Instance)
-                .GetValue(profile);
-            Assert.That(legacy, Is.Empty, path);
             if (path.Contains("no_enemies"))
                 Assert.That(profile.InvasionSpawnRuleSet, Is.Null, path);
             else

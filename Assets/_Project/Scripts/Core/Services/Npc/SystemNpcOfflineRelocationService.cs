@@ -104,6 +104,7 @@ public sealed class SystemNpcOfflineRelocationService :
             if (!TryPickDestinationSystemFromCandidates(
                     npc,
                     destinationCandidates,
+                    state,
                     out StarSystemConfig destinationSystem))
             {
                 continue;
@@ -204,53 +205,11 @@ public sealed class SystemNpcOfflineRelocationService :
         return false;
     }
 
-    private bool TryPickDestinationSystem(
-        SystemNpcRuntimeState npc,
-        GameRuntimeState state,
-        HashSet<string> blockedSystemIds,
-        out StarSystemConfig destinationSystem)
+    private bool TryPickDestinationSystem(SystemNpcRuntimeState npc, GameRuntimeState state,
+        HashSet<string> blockedSystemIds, out StarSystemConfig destinationSystem)
     {
-        destinationSystem = null;
-
-        IReadOnlyList<StarSystemConfig> allSystems =
-            _configService.GetAllStarSystems();
-
-        if (allSystems == null || allSystems.Count == 0)
-            return false;
-
-        List<StarSystemConfig> candidates =
-            new List<StarSystemConfig>();
-
-        for (int i = 0; i < allSystems.Count; i++)
-        {
-            StarSystemConfig system =
-                allSystems[i];
-
-            if (system == null)
-                continue;
-
-            if (system.Id == npc.CurrentSystemId)
-                continue;
-
-            if (blockedSystemIds.Contains(system.Id))
-                continue;
-
-            if (!IsSystemOpen(system, state))
-                continue;
-
-            candidates.Add(system);
-        }
-
-        if (candidates.Count == 0)
-            return false;
-
-        int index =
-            UnityEngine.Random.Range(0, candidates.Count);
-
-        destinationSystem =
-            candidates[index];
-
-        return destinationSystem != null;
+        return TryPickDestinationSystemFromCandidates(npc,
+            BuildOfflineDestinationCandidates(state, blockedSystemIds), state, out destinationSystem);
     }
 
     private bool IsSystemOpen(
@@ -890,10 +849,7 @@ public sealed class SystemNpcOfflineRelocationService :
             if (targetSystem == null)
                 continue;
 
-            if (_routeService != null &&
-                !_routeService.HasUnlockedRoute(
-                    currentSystem.Id,
-                    targetSystem.Id))
+            if (_routeService == null || !_routeService.IsRouteUnlocked(route.Id))
                 continue;
 
             routes.Add(route);
@@ -1111,6 +1067,7 @@ public sealed class SystemNpcOfflineRelocationService :
             if (TryPickDestinationSystemFromCandidates(
                     npc,
                     destinationCandidates,
+                    state,
                     out StarSystemConfig destinationSystem))
             {
                 ApplyOfflineRelocation(
@@ -1367,71 +1324,34 @@ public sealed class SystemNpcOfflineRelocationService :
         return candidates;
     }
 
-    private bool TryPickDestinationSystemFromCandidates(
-        SystemNpcRuntimeState npc,
-        IReadOnlyList<StarSystemConfig> candidates,
-        out StarSystemConfig destinationSystem)
+    private bool TryPickDestinationSystemFromCandidates(SystemNpcRuntimeState npc,
+        IReadOnlyList<StarSystemConfig> candidates, GameRuntimeState state, out StarSystemConfig destinationSystem)
     {
         destinationSystem = null;
-
-        if (npc == null ||
-            candidates == null ||
-            candidates.Count == 0)
+        if (npc == null || candidates == null || state?.Galaxy == null) return false;
+        var allowed = new HashSet<string>();
+        foreach (StarSystemConfig system in candidates)
+            if (system != null && !string.IsNullOrWhiteSpace(system.Id)) allowed.Add(system.Id);
+        var reachable = new HashSet<string> { npc.CurrentSystemId };
+        var queue = new Queue<string>();
+        queue.Enqueue(npc.CurrentSystemId);
+        while (queue.Count > 0)
         {
-            return false;
-        }
-
-        if (candidates.Count == 1)
-        {
-            StarSystemConfig onlyCandidate =
-                candidates[0];
-
-            if (onlyCandidate == null ||
-                onlyCandidate.Id == npc.CurrentSystemId)
+            StarSystemConfig system = _configService.GetStarSystemConfigById(queue.Dequeue());
+            if (system?.Routes == null) continue;
+            foreach (RouteConfig route in system.Routes)
             {
-                return false;
+                StarSystemConfig other = route?.GetOtherSystem(system.Id);
+                if (other != null && allowed.Contains(other.Id) && route.IsUnlocked(state.Galaxy) &&
+                    reachable.Add(other.Id)) queue.Enqueue(other.Id);
             }
-
-            destinationSystem = onlyCandidate;
-            return true;
         }
-
-        const int RandomAttempts = 8;
-
-        for (int i = 0; i < RandomAttempts; i++)
-        {
-            StarSystemConfig candidate =
-                candidates[
-                    UnityEngine.Random.Range(
-                        0,
-                        candidates.Count)];
-
-            if (candidate == null)
-                continue;
-
-            if (candidate.Id == npc.CurrentSystemId)
-                continue;
-
-            destinationSystem = candidate;
-            return true;
-        }
-
-        for (int i = 0; i < candidates.Count; i++)
-        {
-            StarSystemConfig candidate =
-                candidates[i];
-
-            if (candidate == null)
-                continue;
-
-            if (candidate.Id == npc.CurrentSystemId)
-                continue;
-
-            destinationSystem = candidate;
-            return true;
-        }
-
-        return false;
+        var available = new List<StarSystemConfig>();
+        foreach (StarSystemConfig candidate in candidates)
+            if (candidate != null && candidate.Id != npc.CurrentSystemId && reachable.Contains(candidate.Id)) available.Add(candidate);
+        if (available.Count == 0) return false;
+        destinationSystem = available[UnityEngine.Random.Range(0, available.Count)];
+        return true;
     }
 
     private static bool ShouldYieldOfflineRelocationSlice(

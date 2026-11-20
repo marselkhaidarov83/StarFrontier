@@ -23,18 +23,7 @@ MonoBehaviour:
     \u0437\u0430\u043B\u043F. Tier-mix intentionally avoids mono-tier groups when
     weaponCount > 1."
   icon: {fileID: 0}
-  level: 1
-  groupKind: 0
-  allyType: 20
   enemyFaction: 0
-  strengthRank: 4
-  strengthOrder: "2 \u2014 after Military"
-  weaponOwner: PlayerAndRangers
-  weaponOwnerKey: common
-  variant: 4
   weaponCount: 1
-  powerScore: 203
-  tierPattern: Silver
-  familyPattern: plasma
   weaponConfigs:
   - {fileID: 11400000, guid: d40c22f1432d9466db958fb41723181a, type: 2}

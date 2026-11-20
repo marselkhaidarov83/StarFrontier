@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d1d231f51b49198e5e666e13e859ab, type: 3}
+  m_Name: "enemy_equipment_ancients_scanner_L08_01"
+  m_EditorClassIdentifier: Data::ShipEquipmentConfig
+  id: "enemy_equipment_ancients_scanner_L08_01"
+  displayName: "Линза истины «Светоч»"
+  description: "Линза истины фракции Древних изучает строение и свойства выбранной цели. Конструкция хранит характерные следы технологий своих создателей."
+  icon: {fileID: 21300000, guid: d75be5c3bb6c471e885af9e83ce77a58, type: 3}
+  lootHealth: 1
+  itemCategory: 10
+  basePrice: 12800
+  marketDevelopmentLevel: 8
+  cargoSize: 8
+  isLegal: 1
+  Level: 8
+  Variant: 0
+  Slot: 3
+  MaximumDurability: 275
+  CargoSizeMin: 8
+  CargoSizeMax: 9
+  SpeedMin: 0
+  SpeedMax: 0
+  EngineRangeMin: 0
+  EngineRangeMax: 0
+  FuelCapacityMin: 0
+  FuelCapacityMax: 0
+  RadarRangeMin: 0
+  RadarRangeMax: 0
+  ScannerRangeMin: 2050
+  ScannerRangeMax: 2150
+  RepairPerCycleMin: 0
+  RepairPerCycleMax: 0
+  GrabberStrengthMin: 0
+  GrabberStrengthMax: 0
+  GrabberRangeMin: 0
+  GrabberRangeMax: 0
+  ShieldMin: 0
+  ShieldMax: 0
+  enemyOnly: 1

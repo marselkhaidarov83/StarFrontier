@@ -190,7 +190,7 @@ public sealed class SystemSpaceLootService : CustomService
     }
 
     private ShipEquipmentRuntimeStats NpcGrabber(SystemNpcRuntimeState npc) =>
-        RollGrabber(_configService.GetAllyConfigById(npc.ConfigId)?.Grabber, "npc:" + npc.RuntimeNpcId);
+        WithPullSpeed(ShipLoadoutRules.ComponentStats(npc, ShipComponentSlot.Grabber, _configService.GetItemConfigById));
 
     private ShipEquipmentRuntimeStats RollGrabber(ShipEquipmentConfig config, string identity)
     {

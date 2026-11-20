@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c247b39fe8de493796fb0e1fc3ce5c5a, type: 3}
+  m_Name: equipment_group_enemy_ai_L01_01
+  m_EditorClassIdentifier:
+  id: "equipment_group_enemy_ai_L01_01"
+  displayName: "Оборудование: ИИ, уровень 1"
+  description: "Внутренние группы по видам компонентов. Для каждого разрешённого корпусом слота независимо выбирается один вариант. Характеристики экземпляра определяются по диапазонам выбранного оборудования."
+  icon: {fileID: 0}
+  Level: 1
+  slotGroups:
+  - Slot: 0
+    Equipment:
+    - {fileID: 11400000, guid: adb053bf9f394d76bc719a9d5ac82ce1, type: 2}
+  - Slot: 1
+    Equipment:
+    - {fileID: 11400000, guid: 385cb8d0c33d4c2fa50ee8e24a18fa30, type: 2}
+  - Slot: 2
+    Equipment:
+    - {fileID: 11400000, guid: 4a8c5527460c4f39b37ccdcead805f59, type: 2}
+  - Slot: 3
+    Equipment:
+    - {fileID: 11400000, guid: 8aef40f34b2e464cac438ae7347bf3de, type: 2}
+  - Slot: 4
+    Equipment:
+    - {fileID: 11400000, guid: 7fc04d21915544f5ad2ce1391f3b9283, type: 2}
+  - Slot: 5
+    Equipment:
+    - {fileID: 11400000, guid: eb8720b5b8974a21a7e794c8f95cf299, type: 2}
+  - Slot: 6
+    Equipment:
+    - {fileID: 11400000, guid: 6bcee2ff5f0448d39ceed3b73a11f1f0, type: 2}

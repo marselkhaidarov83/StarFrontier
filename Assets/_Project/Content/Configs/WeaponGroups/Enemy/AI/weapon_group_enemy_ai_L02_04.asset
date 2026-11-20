@@ -21,18 +21,7 @@ MonoBehaviour:
     \u043E\u0433\u043E\u043D\u044C. Strict-level: 2; weapon count: 1; enemy baseline
     tier: Silver."
   icon: {fileID: 0}
-  level: 2
-  groupKind: 10
-  allyType: 0
   enemyFaction: 10
-  strengthRank: 0
-  strengthOrder: Enemy faction; not part of ally order
-  weaponOwner: AI
-  weaponOwnerKey: ai
-  variant: 4
   weaponCount: 1
-  powerScore: 205
-  tierPattern: Silver
-  familyPattern: swarm_missile
   weaponConfigs:
   - {fileID: 11400000, guid: 85bdbacd96c7444318d3398455f5f064, type: 2}

@@ -57,7 +57,6 @@ namespace StarFrontier.Tests.Sprint1
         public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig => null;
         public TestConfigService(SaveConfig saveConfig) { SaveConfig = saveConfig; }
         public IReadOnlyList<SectorConfig> GetAllSectors() => new List<SectorConfig>();
-        public StarSystemLink GetCurrentStarSystemLink(string id) => null;
         public bool ContainsStarSystem(string id) => false;
         public IReadOnlyList<StarSystemConfig> GetAllStarSystems() => new List<StarSystemConfig>();
         public bool TryGetStarSystem(string id, out StarSystemConfig config) { config = null; return false; }

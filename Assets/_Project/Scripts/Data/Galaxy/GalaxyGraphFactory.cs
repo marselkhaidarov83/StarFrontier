@@ -1,51 +1,26 @@
 using System;
 using System.Collections.Generic;
 
-    /// <summary>
-    /// Создает GalaxyGraphModel из списка StarSystemConfig.
-    /// Это отдельный класс, чтобы не смешивать:
-    /// - данные конфигов
-    /// - доменную модель карты
-    /// </summary>
-    public static class GalaxyGraphFactory
+public static class GalaxyGraphFactory
+{
+    public static GalaxyGraphModel CreateFromConfigs(
+        IEnumerable<StarSystemConfig> systemConfigs, GalaxyRuntimeState runtimeState)
     {
-        public static GalaxyGraphModel CreateFromConfigs(
-            IEnumerable<StarSystemConfig> systemConfigs)
+        if (systemConfigs == null) throw new ArgumentNullException(nameof(systemConfigs));
+        var nodes = new List<GalaxyNodeData>();
+        foreach (StarSystemConfig config in systemConfigs)
         {
-            if (systemConfigs == null)
-                throw new ArgumentNullException(nameof(systemConfigs));
-
-            var nodes = new List<GalaxyNodeData>();
-
-            foreach (var config in systemConfigs)
-            {
-                if (config == null)
-                    continue;
-
-                var node = CreateNodeFromConfig(config);
-
-                if (node != null)
-                    nodes.Add(node);
-            }
-
-            return new GalaxyGraphModel(nodes);
+            if (config == null || string.IsNullOrWhiteSpace(config.Id)) continue;
+            var neighbors = new List<string>();
+            if (config.Routes != null)
+                foreach (RouteConfig route in config.Routes)
+                {
+                    StarSystemConfig other = route?.GetOtherSystem(config.Id);
+                    if (other != null && !string.IsNullOrWhiteSpace(other.Id) && route.IsUnlocked(runtimeState))
+                        neighbors.Add(other.Id);
+                }
+            nodes.Add(new GalaxyNodeData(config.Id, config.DisplayName, neighbors));
         }
-
-        private static GalaxyNodeData CreateNodeFromConfig(
-            StarSystemConfig config)
-        {
-            if (string.IsNullOrWhiteSpace(config.Id))
-            {
-                AppLog.Warning(DebugLogChannel.DataValidation,
-                    "GalaxyGraphFactory: StarSystemConfig has empty Id.");
-                return null;
-            }
-
-            return new GalaxyNodeData(
-                systemId: config.Id,
-                displayName: config.DisplayName,
-                // neighborSystemIds: config.NeighborSystemIds,
-                linkedSystems: config.LinkedSystems
-            );
-        }
+        return new GalaxyGraphModel(nodes);
     }
+}

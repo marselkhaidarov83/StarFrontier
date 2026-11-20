@@ -25,7 +25,7 @@ public static class SystemEncounterProductionRules2A
         ShipRuntimeData activeShip,
         bool hasActiveEncounter,
         StarSystemConfig starSystem,
-        EnemyGroupSpawnRuleConfig spawnRule,
+        EnemyInvasionGroupSpawnRuleConfig spawnRule,
         out SystemEncounterStartFailReason2A failReason)
     {
         if (string.IsNullOrWhiteSpace(systemId))
@@ -132,15 +132,11 @@ public static class SystemEncounterProductionRules2A
             starSystem.Routes.Count > 0)
             return true;
 
-        if (starSystem.LinkedSystems != null &&
-            starSystem.LinkedSystems.Length > 0)
-            return true;
-
         return false;
     }
 
     public static bool HasValidEnemyEntries(
-        EnemyGroupSpawnRuleConfig spawnRule)
+        EnemyInvasionGroupSpawnRuleConfig spawnRule)
     {
         if (spawnRule == null)
             return false;
@@ -149,7 +145,7 @@ public static class SystemEncounterProductionRules2A
     }
 
     public static int CountEnemiesToSpawn(
-        EnemyGroupSpawnRuleConfig spawnRule)
+        EnemyInvasionGroupSpawnRuleConfig spawnRule)
     {
         if (spawnRule == null)
             return 0;

@@ -11,57 +11,23 @@ public class EnemyConfig : BaseConfig
     private static readonly WeaponConfig[] EmptyWeaponConfigs =
         new WeaponConfig[0];
 
-    [Header("Base Stats Range")]
-    [FormerlySerializedAs("baseHull")]
-    [SerializeField]
-    [Tooltip("Минимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
-    private int baseHullMin = 1;
+    [SerializeField, Range(0, 10)] private int level = 1;
+    [Header("Loadout Groups")]
+    [SerializeField] private HullGroupConfig hullGroup;
+    [SerializeField] private EquipmentGroupConfig equipmentGroup;
+    public HullGroupConfig HullGroup => hullGroup;
+    public EquipmentGroupConfig EquipmentGroup => equipmentGroup;
 
-    [SerializeField]
-    [Tooltip("Максимальная базовая прочность корпуса. Используется при создании корабля для случайного выбора значения.")]
-    private int baseHullMax = 1;
-
-    [FormerlySerializedAs("baseShield")]
-    [SerializeField]
-    [Tooltip("Минимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
-    private int baseShieldMin = 0;
-
-    [SerializeField]
-    [Tooltip("Максимальный базовый запас щита. Используется при создании корабля для случайного выбора значения.")]
-    private int baseShieldMax = 0;
-
-    [FormerlySerializedAs("baseEnergy")]
-    [SerializeField]
-    [Tooltip("Минимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
-    private int baseEnergyMin = 0;
-
-    [SerializeField]
-    [Tooltip("Максимальный базовый запас энергии. Используется при создании корабля для случайного выбора значения.")]
-    private int baseEnergyMax = 0;
-
-    [FormerlySerializedAs("baseSpeed")]
-    [SerializeField]
-    [Tooltip("Минимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
-    private int baseSpeedMin = 0;
-
-    [SerializeField]
-    [Tooltip("Максимальная базовая скорость. Используется при создании корабля для случайного выбора значения.")]
-    private int baseSpeedMax = 0;
-
-    [Header("Movement")]
-    [SerializeField]
-    [Min(0f)]
-    [Tooltip("Радиус поворота корабля. Используется при движении и построении плавного маршрута.")]
-    private float turnRadius = 60f;
-
-    [SerializeField]
-    [Range(1, 10)]
-    [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]
-    private int level = 1;
-
-    // [Header("Combat Role")]
-    // [SerializeField]
-    // private EnemyArchetype archetype;
+    // Preview values are only for config inspection and legacy adapters.
+    // Spawning selects and rolls one actual hull and one component per available slot.
+    public HullConfig HullConfig => hullGroup != null ? hullGroup.PreviewHull : null;
+    public ShipComponentSlots AvailableComponentSlots => HullConfig != null ? HullConfig.AvailableComponentSlots : ShipComponentSlots.None;
+    public int WeaponSlotCount => HullConfig != null ? HullConfig.WeaponSlotCount : 0;
+    public IReadOnlyList<ShipEquipmentConfig> DefaultComponents => equipmentGroup != null
+        ? equipmentGroup.PreviewComponents(AvailableComponentSlots) : new ShipEquipmentConfig[0];
+    public ShipEquipmentConfig DefaultEngine => Component(ShipComponentSlot.Engine);
+    private ShipEquipmentConfig Component(ShipComponentSlot slot) =>
+        (AvailableComponentSlots & (ShipComponentSlots)(1 << (int)slot)) != 0 ? equipmentGroup?.PreviewComponent(slot) : null;
 
     [Header("Runtime Names")]
     [SerializeField]
@@ -75,7 +41,6 @@ public class EnemyConfig : BaseConfig
         new NpcBehaviourScenarioEntry[0];
 
     [Header("Cargo and Loot")]
-    [SerializeField, Min(0)] private int baseCargoCapacity;
     [SerializeField] private EnemyFaction2A lootSpecies = EnemyFaction2A.AI;
     [SerializeField] private NpcLootTableConfig lootTable;
 
@@ -85,65 +50,25 @@ public class EnemyConfig : BaseConfig
     private WeaponGroupConfig[] weaponGroups =
         new WeaponGroupConfig[0];
 
-    [Header("Legacy Weapons - Migration Fallback")]
-    [FormerlySerializedAs("weaponConfigs")]
-    [SerializeField]
-    [HideInInspector]
-    [Tooltip("Старый список оружия. Используется как запасной вариант совместимости.")]
-    private WeaponConfig[] legacyWeaponConfigs =
-        new WeaponConfig[0];
 
-    [Header("Rewards Range")]
-    [FormerlySerializedAs("creditReward")]
-    [SerializeField]
-    [Tooltip("Минимальное значение параметра creditRewardMin. Используется как нижняя граница диапазона.")]
-    private int creditRewardMin = 0;
 
-    [SerializeField]
-    [Tooltip("Максимальное значение параметра creditRewardMax. Используется как верхняя граница диапазона.")]
-    private int creditRewardMax = 0;
-
-    [FormerlySerializedAs("xpReward")]
-    [SerializeField]
-    [Tooltip("Минимальное значение параметра xpRewardMin. Используется как нижняя граница диапазона.")]
-    private int xpRewardMin = 0;
-
-    [SerializeField]
-    [Tooltip("Максимальное значение параметра xpRewardMax. Используется как верхняя граница диапазона.")]
-    private int xpRewardMax = 0;
-
-    [SerializeField]
-    [Range(1, 5)]
-    [Tooltip("Параметр dangerTier. Используется связанными игровыми системами этого конфига.")]
-    private int dangerTier = 1;
-
-    [Header("Visuals")]
-    [SerializeField]
-    [Tooltip("Спрайт корабля в боевой визуализации.")]
-    private Sprite combatSprite;
-
-    [SerializeField]
-    [Min(0f)]
-    [Tooltip("Визуальный размер объекта на сцене.")]
-    private float visualSize = 48f;
-
-    public int BaseHullMin => baseHullMin;
-    public int BaseHullMax => baseHullMax;
-    public int BaseShieldMin => baseShieldMin;
-    public int BaseShieldMax => baseShieldMax;
-    public int BaseEnergyMin => baseEnergyMin;
-    public int BaseEnergyMax => baseEnergyMax;
-    public int BaseSpeedMin => baseSpeedMin;
-    public int BaseSpeedMax => baseSpeedMax;
-    public float TurnRadius => turnRadius;
-
-    public int BaseHull => baseHullMin;
-    public int BaseShield => baseShieldMin;
-    public int BaseEnergy => baseEnergyMin;
-    public int BaseSpeed => baseSpeedMin;
-
+    public int BaseHullMin => HullConfig != null ? HullConfig.MaximumHullMin : 1;
+    public int BaseHullMax => HullConfig != null ? HullConfig.MaximumHullMax : 1;
+    public int BaseShieldMin => Component(ShipComponentSlot.ShieldGenerator)?.ShieldMin ?? 0;
+    public int BaseShieldMax => Component(ShipComponentSlot.ShieldGenerator)?.ShieldMax ?? 0;
+    public int BaseHull => BaseHullMin;
+    public int BaseShield => BaseShieldMin;
+    public int BaseSpeedMin => DefaultEngine?.SpeedMin ?? 0;
+    public int BaseSpeedMax => DefaultEngine?.SpeedMax ?? 0;
+    public int BaseSpeed => BaseSpeedMin;
+    public float TurnRadius => HullConfig != null ? HullConfig.TurnRadius : 0f;
+    public int BaseCargoCapacityMin => HullConfig != null ? HullConfig.CargoCapacityMin : 0;
+    public int BaseCargoCapacityMax => HullConfig != null ? HullConfig.CargoCapacityMax : 0;
+    public int BaseCargoCapacity => BaseCargoCapacityMin;
+    public float BaseAccelerationMin => HullConfig != null ? HullConfig.AccelerationMin : 0f;
+    public float BaseAccelerationMax => HullConfig != null ? HullConfig.AccelerationMax : 0f;
+    public float BaseAcceleration => BaseAccelerationMin;
     public int Level => level;
-    public int BaseCargoCapacity => baseCargoCapacity;
     public EnemyFaction2A LootSpecies => lootSpecies;
     public NpcLootTableConfig LootTable => lootTable;
     // public EnemyArchetype AiArchetype => archetype;
@@ -156,7 +81,7 @@ public class EnemyConfig : BaseConfig
         weaponGroups;
 
     public IReadOnlyList<WeaponConfig> WeaponConfigs =>
-        GetFirstValidWeaponGroupWeaponsOrLegacy();
+        GetFirstValidWeaponGroupWeapons();
 
     [Tooltip("Параметр WeaponConfig. Используется связанными игровыми системами этого конфига.")]
     public WeaponConfig WeaponConfig
@@ -164,7 +89,7 @@ public class EnemyConfig : BaseConfig
         get
         {
             IReadOnlyList<WeaponConfig> weapons =
-                GetFirstValidWeaponGroupWeaponsOrLegacy();
+                GetFirstValidWeaponGroupWeapons();
 
             if (weapons == null)
                 return null;
@@ -182,16 +107,9 @@ public class EnemyConfig : BaseConfig
         }
     }
 
-    public int CreditRewardMin => creditRewardMin;
-    public int CreditRewardMax => creditRewardMax;
-    public int XpRewardMin => xpRewardMin;
-    public int XpRewardMax => xpRewardMax;
 
-    public int CreditReward => creditRewardMin;
-    public int XpReward => xpRewardMin;
-    public int DangerTier => dangerTier;
-    public Sprite CombatSprite => combatSprite;
-    public float VisualSize => visualSize;
+    public Sprite CombatSprite => HullConfig != null ? HullConfig.Icon : Icon;
+    public float VisualSize => HullConfig != null ? HullConfig.VisualSize : 0f;
 
     public string PickRuntimeDisplayName(string runtimeNpcId)
     {
@@ -340,24 +258,12 @@ public class EnemyConfig : BaseConfig
                 }
             }
 
-            if (count > 0)
-                return count;
-
-            if (legacyWeaponConfigs == null)
-                return 0;
-
-            for (int i = 0; i < legacyWeaponConfigs.Length; i++)
-            {
-                if (legacyWeaponConfigs[i] != null)
-                    count++;
-            }
-
             return count;
         }
     }
 
     private IReadOnlyList<WeaponConfig>
-        GetFirstValidWeaponGroupWeaponsOrLegacy()
+        GetFirstValidWeaponGroupWeapons()
     {
         if (weaponGroups != null)
         {
@@ -376,52 +282,15 @@ public class EnemyConfig : BaseConfig
             }
         }
 
-        if (legacyWeaponConfigs != null)
-            return legacyWeaponConfigs;
-
         return EmptyWeaponConfigs;
     }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (behaviorScenarios == null)
-            behaviorScenarios = new NpcBehaviourScenarioEntry[0];
-
-        for (int i = 0; i < behaviorScenarios.Length; i++)
-        {
-            if (behaviorScenarios[i] == null)
-                behaviorScenarios[i] = new NpcBehaviourScenarioEntry();
-        }
-
-        if (weaponGroups == null)
-            weaponGroups = new WeaponGroupConfig[0];
-
-        if (legacyWeaponConfigs == null)
-            legacyWeaponConfigs = new WeaponConfig[0];
-
-        baseHullMin = Mathf.Max(1, baseHullMin);
-        baseHullMax = Mathf.Max(baseHullMin, baseHullMax);
-
-        baseShieldMin = Mathf.Max(0, baseShieldMin);
-        baseShieldMax = Mathf.Max(baseShieldMin, baseShieldMax);
-
-        baseEnergyMin = Mathf.Max(0, baseEnergyMin);
-        baseEnergyMax = Mathf.Max(baseEnergyMin, baseEnergyMax);
-
-        baseSpeedMin = Mathf.Max(0, baseSpeedMin);
-        baseSpeedMax = Mathf.Max(baseSpeedMin, baseSpeedMax);
-
+        behaviorScenarios ??= new NpcBehaviourScenarioEntry[0];
+        weaponGroups ??= new WeaponGroupConfig[0];
         level = Mathf.Clamp(level, 1, 10);
-        baseCargoCapacity = Mathf.Max(0, baseCargoCapacity);
-
-        creditRewardMin = Mathf.Max(0, creditRewardMin);
-        creditRewardMax = Mathf.Max(creditRewardMin, creditRewardMax);
-
-        xpRewardMin = Mathf.Max(0, xpRewardMin);
-        xpRewardMax = Mathf.Max(xpRewardMin, xpRewardMax);
-
-        dangerTier = Mathf.Clamp(dangerTier, 1, 5);
     }
 #endif
 }

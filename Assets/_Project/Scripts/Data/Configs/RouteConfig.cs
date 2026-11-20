@@ -29,6 +29,16 @@ public class RouteConfig : BaseConfig
     [SerializeField] private System.Collections.Generic.List<int> fuelByDevelopmentLevel = new();
     public System.Collections.Generic.IReadOnlyList<int> FuelByDevelopmentLevel => fuelByDevelopmentLevel;
 
+    public bool IsUnlocked(GalaxyRuntimeState galaxy)
+    {
+        if (string.IsNullOrWhiteSpace(Id) || galaxy?.Routes == null)
+            return false;
+        foreach (RouteRuntimeState route in galaxy.Routes)
+            if (route != null && route.RouteId == Id)
+                return route.IsUnlocked;
+        return false;
+    }
+
     public int GetFuelCost(int level)
     {
         if (fuelByDevelopmentLevel == null || fuelByDevelopmentLevel.Count == 0)

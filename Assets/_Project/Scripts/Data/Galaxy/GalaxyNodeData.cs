@@ -11,11 +11,7 @@ public sealed class GalaxyNodeData
     public IReadOnlyList<string> NeighborIds => _neighborIds;
     private readonly List<string> _neighborIds;
 
-    public GalaxyNodeData(
-        string systemId,
-        string displayName,
-        // IEnumerable<string> neighborSystemIds,
-        IEnumerable<StarSystemLink> linkedSystems)
+    public GalaxyNodeData(string systemId, string displayName, IEnumerable<string> neighborSystemIds)
     {
         if (string.IsNullOrWhiteSpace(systemId))
             throw new ArgumentException("GalaxyNodeData: systemId cannot be null or empty.", nameof(systemId));
@@ -24,35 +20,13 @@ public sealed class GalaxyNodeData
         DisplayName = string.IsNullOrWhiteSpace(displayName) ? SystemId : displayName.Trim();
 
         _neighborIds = new List<string>();
-
-        // if (neighborSystemIds == null)
-        //     return;
-        if (linkedSystems == null)
-            return;
-
         var uniqueIds = new HashSet<string>(StringComparer.Ordinal);
-
-        // foreach (var neighborId in neighborSystemIds)
-        foreach (var linkedSystem in linkedSystems)
+        if (neighborSystemIds == null) return;
+        foreach (string neighborId in neighborSystemIds)
         {
-            if (linkedSystem == null || linkedSystem.LinkedSystem == null)
-                continue;
-
-            if (string.IsNullOrWhiteSpace(linkedSystem.LinkedSystem.Id))
-                continue;
-            // if (string.IsNullOrWhiteSpace(neighborId))
-            //     continue;
-
-            // var normalizedId = neighborId.Trim();
-            var normalizedId = linkedSystem.LinkedSystem.Id.Trim();
-
-            // Не даем системе ссылаться самой на себя.
-            if (string.Equals(normalizedId, SystemId, StringComparison.Ordinal))
-                continue;
-
-            // Убираем дубликаты соседей.
-            if (uniqueIds.Add(normalizedId))
-                _neighborIds.Add(normalizedId);
+            if (string.IsNullOrWhiteSpace(neighborId)) continue;
+            string id = neighborId.Trim();
+            if (id != SystemId && uniqueIds.Add(id)) _neighborIds.Add(id);
         }
     }
 

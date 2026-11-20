@@ -33,7 +33,7 @@ public sealed class ResearchPaymentCardService2A : IStationCardService
             !_research.TryEnterStation(_systemId, out _)) return false;
         var state = _research.GetSnapshot(); var node = ResearchRules.Find(_research.Tree, _upgrade);
         var branch = _research.Tree?.Branches?.FirstOrDefault(b => b != null && (b.Nodes ?? Array.Empty<ResearchNode>()).Contains(node));
-        return state != null && node != null && state.Active == null && state.GetLevel(_upgrade) == _level && _level < 10 &&
+        return state != null && node != null && state.Active == null && state.GetLevel(_upgrade) == _level && _level < node.MaxLevel &&
             card.GalaxyLevel >= ResearchRules.RequiredGalaxyLevel(node, _level + 1) &&
             ResearchRules.VisibleNodes(branch, card.GalaxyLevel).Contains(node) &&
             ResearchRules.CanAccessUpgrade(_research.Tree, card.Station.StationType, _upgrade);

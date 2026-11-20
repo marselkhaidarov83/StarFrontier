@@ -15,8 +15,8 @@ public readonly struct SystemTravelCompletedEvent
     public readonly string TargetSystemId;
     /// <summary>Конфигурация целевой звёздной системы.</summary>
     public readonly StarSystemConfig TargetSystemConfig;
-    /// <summary>Ссылка на связанную систему.</summary>
-    public readonly StarSystemLink SystemLink;
+    /// <summary>Маршрут к системе назначения.</summary>
+    public readonly RouteConfig RouteConfig;
 
     public SystemTravelCompletedEvent(
         TravelDestinationType destinationType,
@@ -24,13 +24,13 @@ public readonly struct SystemTravelCompletedEvent
         string planetId,
         string targetSystemId,
         StarSystemConfig targetSystemConfig,
-        StarSystemLink systemLink)
+        RouteConfig routeConfig)
     {
         DestinationType = destinationType;
         FinalPosition = finalPosition;
         PlanetId = planetId;
         TargetSystemId = targetSystemId;
         TargetSystemConfig = targetSystemConfig;
-        SystemLink = systemLink;
+        RouteConfig = routeConfig;
     }
 }

@@ -103,9 +103,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -115,9 +112,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     Equipment:
     - Component: {fileID: 11400000, guid: 5a22430dca694c008aebf359696dc0cc, type: 2}
       Allied: 1
@@ -348,9 +342,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -360,9 +351,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -752,9 +740,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -764,9 +749,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -1315,9 +1297,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -1327,9 +1306,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -2037,9 +2013,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -2049,9 +2022,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -2918,9 +2888,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -2930,9 +2897,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -3958,9 +3922,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -3970,9 +3931,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -5157,9 +5115,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -5169,9 +5124,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -6515,9 +6467,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -6527,9 +6476,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935
@@ -8032,9 +7978,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 17d553efae634c7197ee948b66af2e86, type: 2}
       Weight: 100
       NewPrice: 1200
-    - Hull: {fileID: 11400000, guid: 5a57fe92979143d1a60272589ee79e3e, type: 2}
-      Weight: 100
-      NewPrice: 875
     - Hull: {fileID: 11400000, guid: 6de2b8a61b8e44ed9d72719b7f155c8d, type: 2}
       Weight: 100
       NewPrice: 1050
@@ -8044,9 +7987,6 @@ MonoBehaviour:
     - Hull: {fileID: 11400000, guid: 51a632f1e3ec4100a1e4f0a673188d26, type: 2}
       Weight: 100
       NewPrice: 950
-    - Hull: {fileID: 11400000, guid: 07dd985c4f3b47cebc210e46f0253c37, type: 2}
-      Weight: 100
-      NewPrice: 1000
     - Hull: {fileID: 11400000, guid: 3abe7ca085244f42a9f819af2dea3cbe, type: 2}
       Weight: 98
       NewPrice: 935

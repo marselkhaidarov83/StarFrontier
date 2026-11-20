@@ -17,10 +17,14 @@ MonoBehaviour:
   description: "Манёвренный корпус для тех, кто прокладывает путь через неизведанные системы. Продуманная компоновка оставляет место для добычи и дальних экспедиций."
   icon: {fileID: 21300000, guid: 03422772af242424aa6284c53fa5f828, type: 3}
   Hull: {fileID: 11400000, guid: b38c585c5d5da4b4bbdb9c161074da22, type: 2}
-  Level: 1
+  Level: 0
   MaximumHullMin: 75
   MaximumHullMax: 90
   CargoCapacityMin: 132
   CargoCapacityMax: 140
-  WeaponSlotCount: 1
-  AvailableComponentSlots: 127
+  WeaponSlotCount: 0
+  AvailableComponentSlots: 1
+  AccelerationMin: 4
+  AccelerationMax: 4.5
+  TurnRadius: 300
+  VisualSize: 15

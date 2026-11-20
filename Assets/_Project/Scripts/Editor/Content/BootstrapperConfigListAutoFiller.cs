@@ -44,8 +44,8 @@ public static class BootstrapperConfigListAutoFiller
         List<AllySpawnRuleConfig> allySpawnRuleConfigs =
             LoadAssetsSortedById<AllySpawnRuleConfig>();
 
-        List<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules =
-            LoadAssetsSortedById<EnemyGroupSpawnRuleConfig>();
+        List<EnemyInvasionGroupSpawnRuleConfig> enemyGroupSpawnRules =
+            LoadAssetsSortedById<EnemyInvasionGroupSpawnRuleConfig>();
 
         List<PopulationConfig> systemPopulationRules =
             LoadAssetsSortedById<PopulationConfig>();
@@ -191,7 +191,7 @@ public static class BootstrapperConfigListAutoFiller
         IReadOnlyList<EnemyConfig> enemies,
         IReadOnlyList<AllyConfig> allies,
         IReadOnlyList<AllySpawnRuleConfig> allySpawnRuleConfigs,
-        IReadOnlyList<EnemyGroupSpawnRuleConfig> enemyGroupSpawnRules,
+        IReadOnlyList<EnemyInvasionGroupSpawnRuleConfig> enemyGroupSpawnRules,
         IReadOnlyList<PopulationConfig> systemPopulationRules)
     {
         Undo.RecordObject(

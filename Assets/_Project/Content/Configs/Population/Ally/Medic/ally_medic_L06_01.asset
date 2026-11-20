@@ -21,21 +21,6 @@ MonoBehaviour:
     \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
     \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
   icon: {fileID: 21300000, guid: bb501432dfcda41e8b2fb1d33754d338, type: 3}
-  baseHullMin: 135
-  baseHullMax: 165
-  baseShieldMin: 81
-  baseShieldMax: 101
-  baseEnergyMin: 162
-  baseEnergyMax: 184
-  baseEnergyRegen: 9
-  baseAccelerationMin: 5.25
-  baseAccelerationMax: 5.75
-  baseTurnRateMin: 92.5
-  baseTurnRateMax: 102.5
-  turnRadius: 300
-  baseCargoCapacityMin: 160
-  baseCargoCapacityMax: 172
-  moduleSlotCount: 2
   level: 6
   role: 40
   namePool: {fileID: 11400000, guid: 93175c2ff076542a384dc8fb723c02a7, type: 2}
@@ -51,13 +36,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 723fcb76314734e25af7043b306426f4, type: 2}
   - {fileID: 11400000, guid: d375ee087422e4e2583dfbb0d57ff5cd, type: 2}
   - {fileID: 11400000, guid: 5adead5f78e464397bcfab917e749245, type: 2}
-  mapSprite: {fileID: 21300000, guid: a6099a393bc99460ebc38fbbab414afc, type: 3}
-  combatSprite: {fileID: 21300000, guid: a6099a393bc99460ebc38fbbab414afc, type: 3}
-  visualSize: 32
   lootTable: {fileID: 11400000, guid: a5d94123b8c548b1b63de944b43bfad2, type: 2}
-  defaultComponents:
-  - {fileID: 11400000, guid: da3feaff21c8592a894d573b4134bb2c, type: 2}
-  - {fileID: 11400000, guid: 79446054fbd54a109c0040f30cd42cf7, type: 2}
-  - {fileID: 11400000, guid: 9e2f2101ea964db98275e1e6c490c3a4, type: 2}
-  - {fileID: 11400000, guid: 8cc199d15bad400e92a208dad6c51e2d, type: 2}
-  hullConfig: {fileID: 11400000, guid: ee59a6311f5b44a2ad119fbeaefe4db9, type: 2}
+  hullGroup: {fileID: 11400000, guid: 3d59f60b32554fa4a1655e0b44cda53b, type: 2}
+  equipmentGroup: {fileID: 11400000, guid: 34942d11d6174d07b2028eaafdb5439b, type: 2}

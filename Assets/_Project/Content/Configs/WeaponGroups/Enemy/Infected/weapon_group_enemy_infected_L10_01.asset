@@ -22,19 +22,8 @@ MonoBehaviour:
     \u043E\u0433\u043E\u043D\u044C. Strict-level: 10; weapon count: 5; enemy baseline
     tier: Silver."
   icon: {fileID: 0}
-  level: 10
-  groupKind: 10
-  allyType: 0
   enemyFaction: 30
-  strengthRank: 0
-  strengthOrder: Enemy faction; not part of ally order
-  weaponOwner: Infected
-  weaponOwnerKey: infected
-  variant: 1
   weaponCount: 5
-  powerScore: 1015
-  tierPattern: Silver + Silver + Silver + Silver + Silver
-  familyPattern: spore + swarm + burst + acid + tendril
   weaponConfigs:
   - {fileID: 11400000, guid: c0e447486103e46c2baead2e8240d74b, type: 2}
   - {fileID: 11400000, guid: d02efd6bedd064bc0bd8c18df645857f, type: 2}

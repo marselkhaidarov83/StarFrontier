@@ -89,9 +89,9 @@ public sealed class ConfigService : IConfigService
         BuildIndex(sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
         BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
-        BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));
         BuildIndex(enemies, out _enemies, out _enemiesById, nameof(EnemyConfig));
         BuildIndex(allies, out _allies, out _alliesById, nameof(AllyConfig));
+        BuildIndex(WithGroupedEquipment(items, _allies, _enemies), out _items, out _itemsById, nameof(ItemConfig));
         BuildIndex(allySpawnRules, out _allySpawnRules, out _allySpawnRulesById, nameof(AllySpawnRuleConfig));
         BuildIndex(pirates, out _pirates, out _piratesById, nameof(PirateConfig));
         BuildIndex(pirateGroupSpawnRules, out _pirateGroupSpawnRules, out _pirateGroupSpawnRulesById, nameof(PirateGroupSpawnRuleConfig));
@@ -164,9 +164,9 @@ public sealed class ConfigService : IConfigService
         BuildIndex(galaxyConfig.Sectors, out _sectors, out _sectorsById, nameof(SectorConfig));
         BuildIndex(starSystems, out _starSystems, out _starSystemsById, nameof(StarSystemConfig));
         BuildIndex(planets, out _planets, out _planetsById, nameof(PlanetConfig));
-        BuildIndex(items, out _items, out _itemsById, nameof(ItemConfig));
         BuildIndex(enemies, out _enemies, out _enemiesById, nameof(EnemyConfig));
         BuildIndex(allies, out _allies, out _alliesById, nameof(AllyConfig));
+        BuildIndex(WithGroupedEquipment(items, _allies, _enemies), out _items, out _itemsById, nameof(ItemConfig));
         BuildIndex(allySpawnRules, out _allySpawnRules, out _allySpawnRulesById, nameof(AllySpawnRuleConfig));
         BuildIndex(pirates, out _pirates, out _piratesById, nameof(PirateConfig));
         BuildIndex(pirateGroupSpawnRules, out _pirateGroupSpawnRules, out _pirateGroupSpawnRulesById, nameof(PirateGroupSpawnRuleConfig));
@@ -176,14 +176,24 @@ public sealed class ConfigService : IConfigService
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
     }
 
-    public StarSystemLink GetCurrentStarSystemLink(string targetSystemId)
+    private static IEnumerable<ItemConfig> WithGroupedEquipment(IEnumerable<ItemConfig> items,
+        IReadOnlyList<AllyConfig> allies, IReadOnlyList<EnemyConfig> enemies)
     {
-        StarSystemConfig starSystemConfig = GetCurrentSystemConfig();
-        foreach (StarSystemLink link in starSystemConfig.LinkedSystems)
-            if (link.LinkedSystem.Id == targetSystemId)
-                return link;
-
-        return null;
+        var seen = new HashSet<ItemConfig>();
+        if (items != null)
+            foreach (ItemConfig item in items)
+                if (item != null && seen.Add(item)) yield return item;
+        var groups = new List<EquipmentGroupConfig>();
+        if (allies != null) foreach (AllyConfig actor in allies) if (actor?.EquipmentGroup != null) groups.Add(actor.EquipmentGroup);
+        if (enemies != null) foreach (EnemyConfig actor in enemies) if (actor?.EquipmentGroup != null) groups.Add(actor.EquipmentGroup);
+        foreach (EquipmentGroupConfig group in groups)
+        {
+            if (group.SlotGroups == null) continue;
+            foreach (EquipmentSlotGroup slot in group.SlotGroups)
+                if (slot?.Equipment != null)
+                    foreach (ShipEquipmentConfig item in slot.Equipment)
+                        if (item != null && seen.Add(item)) yield return item;
+        }
     }
 
     private void BuildIndex<TConfig>(

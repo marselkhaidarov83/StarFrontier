@@ -24,7 +24,6 @@ public interface IConfigService
 
     IReadOnlyList<SectorConfig> GetAllSectors();
 
-    StarSystemLink GetCurrentStarSystemLink(string targetSystemId);
     bool ContainsStarSystem(string systemId);
     IReadOnlyList<StarSystemConfig> GetAllStarSystems();
     bool TryGetStarSystem(string systemId, out StarSystemConfig config);

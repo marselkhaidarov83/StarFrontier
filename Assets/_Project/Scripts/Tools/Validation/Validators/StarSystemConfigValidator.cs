@@ -1,34 +1,25 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 public class StarSystemConfigValidator : IConfigValidator<StarSystemConfig>
 {
     public List<ValidationIssue> Validate(StarSystemConfig config)
     {
         var issues = new List<ValidationIssue>();
-
-        // if (config.NeighborSystemIds == null || config.NeighborSystemIds.Length == 0)
-        if (config.LinkedSystems == null || config.LinkedSystems.Length == 0)
+        if (config == null) return issues;
+        if (config.Routes == null || config.Routes.Count == 0)
         {
-            issues.Add(new ValidationIssue(
-            ValidationSeverity.Warning,
-            "NeighborSystemIds is empty.",
-            config));
+            issues.Add(new ValidationIssue(ValidationSeverity.Warning, "System has no routes.", config));
+            return issues;
         }
-        else
+        var ids = new HashSet<string>();
+        foreach (RouteConfig route in config.Routes)
         {
-            // foreach (var neighborId in config.NeighborSystemIds)
-            foreach (var linkedSystem in config.LinkedSystems)
-            {
-                // if (string.IsNullOrWhiteSpace(neighborId))
-                if (string.IsNullOrWhiteSpace(linkedSystem.LinkedSystem.Id))
-                {
-                    issues.Add(new ValidationIssue(
-                    ValidationSeverity.Error,
-                    "NeighborSystemIds contains an empty value.",
-                    config));
-                }
-            }
+            StarSystemConfig other = route?.GetOtherSystem(config.Id);
+            if (route == null || string.IsNullOrWhiteSpace(route.Id) || other == null ||
+                string.IsNullOrWhiteSpace(other.Id) || other.Id == config.Id)
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, "System contains an invalid route or route endpoint.", config));
+            else if (!ids.Add(route.Id))
+                issues.Add(new ValidationIssue(ValidationSeverity.Error, $"Duplicate route: {route.Id}.", config));
         }
 
 

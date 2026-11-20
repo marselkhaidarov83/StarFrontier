@@ -14,1082 +14,1389 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::ResearchBranchConfig
   id: research_branch_military
   displayName: "Военные технологии"
-  description: "Исследования оружейных и защитных систем, военного производства и крейсеров нового поколения."
+  description: "Десять исследований оружия и защиты корабля игрока, боевой разведки, доктрин и военных трофеев."
   icon: {fileID: 0}
   StationType: 0
   Nodes:
-  - Upgrade: 1
-    Title: "\u041E\u0440\u0443\u0436\u0435\u0439\u043D\u044B\u0435 \u0441\u0438\u0441\u0442\u0435\u043C\u044B"
+  - Upgrade: 83
+    Title: Огневая мощь
+    Description: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 0, y: 0}
+    StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 2 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 2
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 4 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 3
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 6 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 4
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 8 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 5
-      RequiredGalaxyLevel: 3
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 10 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 6
-      RequiredGalaxyLevel: 3
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 12 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 7
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 14 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 8
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 16 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 9
-      RequiredGalaxyLevel: 5
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 18 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
     - Level: 10
-      RequiredGalaxyLevel: 5
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 3
-    Title: "\u0417\u0430\u0449\u0438\u0442\u043D\u044B\u0435 \u0442\u0435\u0445\u043D\u043E\u043B\u043E\u0433\u0438\u0438"
+      PaymentOptions: []
+      EffectDescription: 'Огневая мощь: 20 %'
+      Effects:
+      - Parameter: PlayerWeaponDamageBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает урон всего оружия корабля игрока на 2% за уровень, до 20%.
+  - Upgrade: 84
+    Title: Дальнобойность
+    Description: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+      уровень, до 20%.
+    DesignNotes: ''
     Icon: {fileID: 0}
-    RequiredGalaxyLevel: 2
-    TreePosition: {x: 0, y: 1}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
     Levels:
     - Level: 1
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 1
+      - Upgrade: 83
         RequiredLevel: 2
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 2 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 2
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 1
+      - Upgrade: 83
         RequiredLevel: 2
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 4 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 3
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 4
-    Title: "\u0412\u043E\u0435\u043D\u043D\u043E\u0435 \u043F\u0440\u043E\u0438\u0437\u0432\u043E\u0434\u0441\u0442\u0432\u043E"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 4
-    TreePosition: {x: 0, y: 2}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 3
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 6 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 4
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 5
-    Title: "\u041A\u0440\u0435\u0439\u0441\u0435\u0440\u044B \u043D\u043E\u0432\u043E\u0433\u043E
-      \u043F\u043E\u043A\u043E\u043B\u0435\u043D\u0438\u044F"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 6
-    TreePosition: {x: 0, y: 3}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 6
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 4
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 8 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 5
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 10 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 6
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 12 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 7
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 14 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 8
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 16 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 9
-      RequiredGalaxyLevel: 10
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 18 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
     - Level: 10
-      RequiredGalaxyLevel: 10
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 19
-    Title: "Управление огнём"
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: 'Дальнобойность: 20 %'
+      Effects:
+      - Parameter: PlayerWeaponRangeBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает максимальную дальность стрельбы оружия игрока на 2% за
+          уровень, до 20%.
+  - Upgrade: 85
+    Title: Щитопробитие
+    Description: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+      щиты и не переносит урон напрямую на корпус.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 4, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 2 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 4 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 6 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 8 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 10 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 12 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 14 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 16 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 18 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 83
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Щитопробитие: 20 %'
+      Effects:
+      - Parameter: PlayerDamageToShieldBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает урон игрока по щитам на 2% за уровень, до 20%. Не игнорирует
+          щиты и не переносит урон напрямую на корпус.
+  - Upgrade: 86
+    Title: Усиление корпуса
+    Description: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+      до 30%.
+    DesignNotes: ''
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 3 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 3
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 6 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 9 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 9
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 12 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 15 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 18 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 21 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 21
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 24 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 24
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление корпуса: 27 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 27
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 20
-    Title: "Боеприпасы и перезарядка"
+      EffectDescription: 'Усиление корпуса: 30 %'
+      Effects:
+      - Parameter: PlayerHullBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает максимальную прочность корпуса игрока на 3% за уровень,
+          до 30%.
+  - Upgrade: 87
+    Title: Аварийная броня
+    Description: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+      2% за уровень, до 20%. Не восстанавливает корпус.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 5, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 2 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 2
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 4 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 4
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 6 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 6
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 8 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 8
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 10 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 10
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 12 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 12
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 14 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 14
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 16 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 16
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 18 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 18
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 86
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Аварийная броня: 20 %; Порог прочности корпуса: 30 % прочности'
+      Effects:
+      - Parameter: PlayerCriticalHullDamageReduction
+        Value: 20
+        Unit: "%"
+        Details: При прочности корпуса ниже 30% снижает входящий урон по корпусу на
+          2% за уровень, до 20%. Не восстанавливает корпус.
+      - Parameter: CriticalHullThreshold
+        Value: 30
+        Unit: "% прочности"
+        Details: Бонус действует строго ниже 30% текущей прочности от максимума.
+  - Upgrade: 88
+    Title: Усиление щитов
+    Description: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+      30%. Не добавляет автоматическую регенерацию.
+    DesignNotes: ''
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 3 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 3
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 6 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 9 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 9
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 12 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 15 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 18 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 21 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 21
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 24 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 24
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Усиление щитов: 27 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 27
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 21
-    Title: "Энергоснабжение боевых систем"
+      EffectDescription: 'Усиление щитов: 30 %'
+      Effects:
+      - Parameter: PlayerShieldBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов игрока на 3% за уровень, до
+          30%. Не добавляет автоматическую регенерацию.
+  - Upgrade: 89
+    Title: Боевая разведка
+    Description: Последовательно раскрывает корпус, щиты, типы оружия, установленное
+      оборудование и оценку боевой опасности врага.
+    DesignNotes: Формула оценки боевой опасности не определена.
     Icon: {fileID: 0}
+    MaxLevel: 5
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 6, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Прочность корпуса; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 1
+        Unit: ступень
+        Details: Прочность корпуса; ранее открытые ступени сохраняются.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Состояние щитов; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 2
+        Unit: ступень
+        Details: Состояние щитов; ранее открытые ступени сохраняются.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Типы установленного оружия; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 3
+        Unit: ступень
+        Details: Типы установленного оружия; ранее открытые ступени сохраняются.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Установленное оборудование; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 4
+        Unit: ступень
+        Details: Установленное оборудование; ранее открытые ступени сохраняются.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Оценка боевой опасности; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 5
+        Unit: ступень
+        Details: Оценка боевой опасности; ранее открытые ступени сохраняются.
+  - Upgrade: 90
+    Title: Оборонительная доктрина
+    Description: Увеличивает урон игрока при обороне дружественной системы от вторжения
+      на 2% за уровень, до 20%.
+    DesignNotes: ''
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 2 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 4 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 6 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 8 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 10 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 12 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 14 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 16 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Оборонительная доктрина: 18 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
       PaymentOptions: []
-  - Upgrade: 22
-    Title: "Противоракетная оборона"
+      EffectDescription: 'Оборонительная доктрина: 20 %'
+      Effects:
+      - Parameter: PlayerSystemDefenceDamageBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает урон игрока при обороне дружественной системы от вторжения
+          на 2% за уровень, до 20%.
+  - Upgrade: 91
+    Title: Штурмовая доктрина
+    Description: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+      до 20%.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 7, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 2 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 4 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 6 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 8 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 10 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 12 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 14 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 16 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 18 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 89
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Штурмовая доктрина: 20 %'
+      Effects:
+      - Parameter: PlayerEnemySystemAssaultDamageBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает урон игрока при атаке вражеской системы на 2% за уровень,
+          до 20%.
+  - Upgrade: 92
+    Title: Военные трофеи
+    Description: Открывает таблицы лута в порядке 100 → 60 → 80 → 40 → 20% на уровнях
+      1, 3, 5, 7, 9. Не повышает вероятность внутри таблиц.
+    DesignNotes: Смысл порога урона, момент розыгрыша и возможность отдельных розыгрышей
+      по нескольким таблицам не согласованы.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона; Открытая таблица добычи: 80 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 80
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона; Открытая таблица добычи: 80 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 80
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона; Открытая таблица добычи: 80 % урона; Открытая таблица добычи: 40
+        % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 80
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 40
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона; Открытая таблица добычи: 80 % урона; Открытая таблица добычи: 40
+        % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 80
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 40
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона; Открытая таблица добычи: 80 % урона; Открытая таблица добычи: 40
+        % урона; Открытая таблица добычи: 20 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 80
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 40
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 20
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 23
-    Title: "Радиоэлектронная борьба"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 8, y: 0}
-    StartingLevel: 0
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-  - Upgrade: 24
-    Title: "Координация союзного флота"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 9, y: 0}
-    StartingLevel: 0
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
+      EffectDescription: 'Открытая таблица добычи: 100 % урона; Открытая таблица добычи:
+        60 % урона; Открытая таблица добычи: 80 % урона; Открытая таблица добычи: 40
+        % урона; Открытая таблица добычи: 20 % урона'
+      Effects:
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 100
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 60
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 80
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 40
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.
+      - Parameter: UnlockedLootDamageThreshold
+        Value: 20
+        Unit: "% урона"
+        Details: Открытая таблица; порядок открытия сохранён. Условия розыгрыша требуют
+          согласования.

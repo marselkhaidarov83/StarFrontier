@@ -160,6 +160,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             return default;
 
         int hullBefore = npc.CurrentHull;
+        int shieldBefore = npc.CurrentShield;
         CombatDamageResult2A result = _damageService.ApplyDamage(
             npc.CurrentShield,
             npc.CurrentHull,
@@ -178,7 +179,7 @@ public sealed class SystemNpcRuntimeService : CustomService, ISystemNpcRuntimeSe
             result.CurrentHull);
 
         if (Bootstrapper.Instance.ServiceRegistry.TryGet<SystemSpaceLootService>(out var spaceLoot))
-            NpcLootProcessor.ProcessDamage(npc, hullBefore, GetCurrentQuantTick(),
+            NpcLootProcessor.ProcessDamage(npc, hullBefore, shieldBefore, GetCurrentQuantTick(),
                 Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>(), spaceLoot);
 
         if (killedByPlayer || damagedByPlayer)

@@ -7,7 +7,7 @@ public sealed class S05_03_T08_NpcActivityVerificationTests
     public void NpcBehaviorTypes_ContainRoutePatrolThreatAndCombatBehaviors()
     {
         string text = ReadProjectFile(
-            "Assets/_Project/Scripts/Data/Configs/Npc/SystemNpcBehaviorType.cs");
+            "Assets/_Project/Scripts/Data/Enums/Npc/SystemNpcBehaviorType.cs");
 
         Assert.That(text, Does.Contain("TravelToAnotherSystem"));
         Assert.That(text, Does.Contain("PatrolSystem"));

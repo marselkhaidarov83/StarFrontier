@@ -203,8 +203,7 @@ public static class EnemyConfigAssetGenerator
                 config.BaseHullMax < config.BaseHullMin ||
                 config.BaseShieldMin < 0 ||
                 config.BaseShieldMax < config.BaseShieldMin ||
-                config.BaseEnergyMin < 0 ||
-                config.BaseEnergyMax < config.BaseEnergyMin ||
+
                 config.BaseSpeedMin <= 0 ||
                 config.BaseSpeedMax < config.BaseSpeedMin)
             {
@@ -212,16 +211,7 @@ public static class EnemyConfigAssetGenerator
                 AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: invalid stat range at {path}");
             }
 
-            if (config.CreditRewardMin < 0 ||
-                config.CreditRewardMax < config.CreditRewardMin ||
-                config.XpRewardMin < 0 ||
-                config.XpRewardMax < config.XpRewardMin ||
-                config.DangerTier < 1 ||
-                config.DangerTier > 5)
-            {
-                errors++;
-                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: invalid reward range at {path}");
-            }
+
 
             if (config.HasDuplicateBehaviorScenarios())
             {
@@ -281,18 +271,17 @@ public static class EnemyConfigAssetGenerator
                 AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: name pool has less than 100 names at {path}");
             }
 
-            SerializedObject serializedConfig =
-                new SerializedObject(config);
-
-            SerializedProperty combatSpriteProperty =
-                serializedConfig.FindProperty("combatSprite");
-
-            if (combatSpriteProperty == null ||
-                combatSpriteProperty.objectReferenceValue == null)
+            if (config.HullGroup?.HullConfigs == null || config.HullGroup.HullConfigs.Count == 0)
             {
                 errors++;
-                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: combatSprite is not assigned at {path}");
+                AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: hull group is not assigned at {path}");
             }
+            else foreach (HullConfig hull in config.HullGroup.HullConfigs)
+                if (hull == null || hull.Icon == null)
+                {
+                    errors++;
+                    AppLog.Error(DebugLogChannel.EditorGenerators, $"EnemyConfig validation: hull icon is not assigned at {path}");
+                }
         }
 
         EditorUtility.DisplayDialog(
@@ -349,7 +338,8 @@ public static class EnemyConfigAssetGenerator
             AssetDatabase.CreateAsset(table, path);
             SerializedObject serializedTable = new SerializedObject(table);
             SetString(serializedTable, "id", npcConfigId + "_loot");
-            SetString(serializedTable, "displayName", npcConfigId + " loot");
+            SetString(serializedTable, "displayName", "Добыча вражеского корабля");
+            SetString(serializedTable, "description", "Таблица добычи вражеского корабля для пяти порогов суммарного урона по корпусу и щиту.");
             serializedTable.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(table);
         }
@@ -379,7 +369,7 @@ public static class EnemyConfigAssetGenerator
 
         if (deathRule == null)
         {
-            deathRule = new NpcLootTriggerRule { IsDeath = true };
+            deathRule = new NpcLootTriggerRule { DamageThresholdPercent = 100 };
             var rules = new List<NpcLootTriggerRule>(table.Rules ?? Array.Empty<NpcLootTriggerRule>());
             rules.Add(deathRule);
             table.Rules = rules.ToArray();
@@ -435,23 +425,18 @@ public static class EnemyConfigAssetGenerator
         SetString(serializedObject, "displayName", BuildDisplayName(faction, level));
         SetString(serializedObject, "description", BuildDescription(faction, level));
 
-        SetInt(serializedObject, "baseHullMin", stats.HullMin);
-        SetInt(serializedObject, "baseHullMax", stats.HullMax);
-        SetInt(serializedObject, "baseShieldMin", stats.ShieldMin);
-        SetInt(serializedObject, "baseShieldMax", stats.ShieldMax);
-        SetInt(serializedObject, "baseEnergyMin", stats.EnergyMin);
-        SetInt(serializedObject, "baseEnergyMax", stats.EnergyMax);
-        SetInt(serializedObject, "baseSpeedMin", stats.SpeedMin);
-        SetInt(serializedObject, "baseSpeedMax", stats.SpeedMax);
-        SetInt(serializedObject, "baseCargoCapacity", 60 + 10 * (Mathf.Clamp(level, 1, 10) - 1));
         SetInt(serializedObject, "level", level);
+        string equipmentFaction = faction == WeaponGroupEnemyFaction.Ancients ? "ancients"
+            : faction == WeaponGroupEnemyFaction.Infected ? "infected" : "ai";
+        SetObject(serializedObject, "hullGroup", AssetDatabase.LoadAssetAtPath<HullGroupConfig>(
+            "Assets/_Project/Content/Configs/Ship/HullGroups/hull_group_" + id + ".asset"));
+        SetObject(serializedObject, "equipmentGroup", AssetDatabase.LoadAssetAtPath<EquipmentGroupConfig>(
+            $"Assets/_Project/Content/Configs/Ship/EquipmentGroups/equipment_group_enemy_{equipmentFaction}_L{level:00}_01.asset"));
         SetEnum(serializedObject, "lootSpecies", GetLootSpecies(faction));
         if (asset.LootTable == null)
             SetObject(serializedObject, "lootTable", GetOrCreateLootTable(id));
         // SetEnum(serializedObject, "archetype", BuildArchetype(faction));
-        SetObject(serializedObject, "combatSprite", combatSprite);
         SetObject(serializedObject, "namePool", namePool);
-        SetFloat(serializedObject, "visualSize", CalculateGeneratedVisualSize(level));
 
         int boundScenarios =
             WriteScenarioEntries(
@@ -464,11 +449,6 @@ public static class EnemyConfigAssetGenerator
             serializedObject,
             weaponGroups);
 
-        SetInt(serializedObject, "creditRewardMin", stats.CreditRewardMin);
-        SetInt(serializedObject, "creditRewardMax", stats.CreditRewardMax);
-        SetInt(serializedObject, "xpRewardMin", stats.XpRewardMin);
-        SetInt(serializedObject, "xpRewardMax", stats.XpRewardMax);
-        SetInt(serializedObject, "dangerTier", stats.DangerTier);
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
         asset.name = id;
@@ -931,17 +911,7 @@ public static class EnemyConfigAssetGenerator
             result.Add(config);
         }
 
-        result.Sort(
-            (left, right) =>
-            {
-                int rankCompare =
-                    left.StrengthRank.CompareTo(right.StrengthRank);
-
-                if (rankCompare != 0)
-                    return rankCompare;
-
-                return string.CompareOrdinal(left.Id, right.Id);
-            });
+        result.Sort((left, right) => string.CompareOrdinal(left.Id, right.Id));
 
         return result;
     }
@@ -1306,12 +1276,6 @@ public static class EnemyConfigAssetGenerator
         if (config == null)
             return false;
 
-        if (config.GroupKind == WeaponGroupKind.Enemy &&
-            config.EnemyFaction == faction &&
-            config.Level == level)
-        {
-            return true;
-        }
 
         if (string.IsNullOrWhiteSpace(path))
             return false;

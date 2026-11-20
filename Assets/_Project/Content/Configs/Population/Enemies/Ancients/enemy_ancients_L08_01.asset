@@ -21,15 +21,6 @@ MonoBehaviour:
     \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0433\u0440\u0443\u043F\u043F\u044B
     \u043E\u0440\u0443\u0436\u0438\u044F \u0438 \u043F\u0443\u043B \u0438\u043C\u0451\u043D."
   icon: {fileID: 21300000, guid: c6574dc5c246448f1bbdd4341fa15e78, type: 3}
-  baseHullMin: 294
-  baseHullMax: 340
-  baseShieldMin: 316
-  baseShieldMax: 350
-  baseEnergyMin: 339
-  baseEnergyMax: 375
-  baseSpeedMin: 380
-  baseSpeedMax: 420
-  turnRadius: 300
   level: 8
   namePool: {fileID: 11400000, guid: 3b50da2a003c3480d8d4587afa52d475, type: 2}
   behaviorScenarios:
@@ -45,14 +36,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 356adda347305447a977b9a2bb246730, type: 2}
   - {fileID: 11400000, guid: b97b550be10ef4cbe8345f637a5343c9, type: 2}
   - {fileID: 11400000, guid: 346c4f69c05e64c4ca57e4c0d8b4a5c9, type: 2}
-  legacyWeaponConfigs: []
-  creditRewardMin: 497
-  creditRewardMax: 737
-  xpRewardMin: 68
-  xpRewardMax: 98
-  dangerTier: 4
-  combatSprite: {fileID: 21300000, guid: 1ef93e07bd3b74d6eb2a58000d42a9a8, type: 3}
-  visualSize: 34
   lootTable: {fileID: 11400000, guid: b1fe152a23134ea0afc75eac16251135, type: 2}
   lootSpecies: 10
-  baseCargoCapacity: 130
+  hullGroup: {fileID: 11400000, guid: 66391a3760ca4d34b5dbffe4b5c648bd, type: 2}
+  equipmentGroup: {fileID: 11400000, guid: 06ed8295d98c4d839a4f202d4990cc05, type: 2}

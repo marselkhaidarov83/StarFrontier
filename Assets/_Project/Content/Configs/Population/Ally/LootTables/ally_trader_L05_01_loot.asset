@@ -13,52 +13,155 @@ MonoBehaviour:
   m_Name: ally_trader_L05_01_loot
   m_EditorClassIdentifier: Data::NpcLootTableConfig
   id: ally_trader_L05_01_loot
-  displayName: ally_trader_L05_01_loot
-  description: Настраиваемая таблица лута для ally_trader_L05_01.
-  icon: {fileID: 0}
+  displayName: 'Добыча торговца: уровень 5'
+  description: 'Добыча торговца. Пять порогов потери суммарного запаса корпуса и щита:
+    20, 40, 60, 80 и 100%. Каждый порог разыгрывается один раз. Оружие и установленные
+    компоненты выпадают только при уничтожении. Награды возрастают с уровнем корабля
+    и полученным уроном.'
+  icon:
+    fileID: 0
   InitialCargo:
-  - Item: {fileID: 11400000, guid: 03007b53fda4544a8ad4c6fcfeaa20a7, type: 2}
-    Quantity: 5
-  - Item: {fileID: 11400000, guid: a006717fb8e04459b994235b87140afa, type: 2}
-    Quantity: 5
+  - Item:
+      fileID: 11400000
+      guid: 03007b53fda4544a8ad4c6fcfeaa20a7
+      type: 2
+    Quantity: 6
+  - Item:
+      fileID: 11400000
+      guid: a006717fb8e04459b994235b87140afa
+      type: 2
+    Quantity: 6
+  - Item:
+      fileID: 11400000
+      guid: 03007b53fda4544a8ad4c6fcfeaa20a7
+      type: 2
+    Quantity: 7
+  - Item:
+      fileID: 11400000
+      guid: a006717fb8e04459b994235b87140afa
+      type: 2
+    Quantity: 7
+  - Item:
+      fileID: 11400000
+      guid: 03007b53fda4544a8ad4c6fcfeaa20a7
+      type: 2
+    Quantity: 8
+  - Item:
+      fileID: 11400000
+      guid: a006717fb8e04459b994235b87140afa
+      type: 2
+    Quantity: 8
+  - Item:
+      fileID: 11400000
+      guid: 03007b53fda4544a8ad4c6fcfeaa20a7
+      type: 2
+    Quantity: 9
+  - Item:
+      fileID: 11400000
+      guid: a006717fb8e04459b994235b87140afa
+      type: 2
+    Quantity: 9
+  - Item:
+      fileID: 11400000
+      guid: 03007b53fda4544a8ad4c6fcfeaa20a7
+      type: 2
+    Quantity: 10
+  - Item:
+      fileID: 11400000
+      guid: a006717fb8e04459b994235b87140afa
+      type: 2
+    Quantity: 10
   initialEquipmentDurability: -1
   Rules:
-  - IsDeath: 0
-    HullThresholdPercent: 50
+  - DamageThresholdPercent: 20
     CargoBatches:
     - BatchNumber: 1
+      ChancePercent: 20
+    - BatchNumber: 2
+      ChancePercent: 20
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 60
+      MaxAmount: 90
+      ChancePercent: 43
+  - DamageThresholdPercent: 40
+    CargoBatches:
+    - BatchNumber: 3
       ChancePercent: 30
-    - BatchNumber: 2
-      ChancePercent: 20
-    Equipment:
-    - SlotIndex: 0
-      ChancePercent: 20
-    - SlotIndex: 1
-      ChancePercent: 20
-    - SlotIndex: 2
-      ChancePercent: 20
-    - SlotIndex: 3
-      ChancePercent: 20
-    - SlotIndex: 4
-      ChancePercent: 20
-    Generated: []
-  - IsDeath: 1
-    HullThresholdPercent: 50
+    - BatchNumber: 4
+      ChancePercent: 30
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 120
+      MaxAmount: 180
+      ChancePercent: 51
+  - DamageThresholdPercent: 60
     CargoBatches:
-    - BatchNumber: 1
-      ChancePercent: 60
-    - BatchNumber: 2
+    - BatchNumber: 5
+      ChancePercent: 40
+    - BatchNumber: 6
+      ChancePercent: 40
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 180
+      MaxAmount: 270
+      ChancePercent: 59
+  - DamageThresholdPercent: 80
+    CargoBatches:
+    - BatchNumber: 7
       ChancePercent: 50
+    - BatchNumber: 8
+      ChancePercent: 50
+    Equipment: []
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 240
+      MaxAmount: 360
+      ChancePercent: 67
+  - DamageThresholdPercent: 100
+    CargoBatches:
+    - BatchNumber: 9
+      ChancePercent: 60
+    - BatchNumber: 10
+      ChancePercent: 60
     Equipment:
-    - SlotIndex: 0
-      ChancePercent: 40
-    - SlotIndex: 1
-      ChancePercent: 40
-    - SlotIndex: 2
-      ChancePercent: 40
-    - SlotIndex: 3
-      ChancePercent: 40
-    - SlotIndex: 4
-      ChancePercent: 40
-    Generated: []
+    - IsComponent: 0
+      SlotIndex: 0
+      ChancePercent: 35
+    - IsComponent: 0
+      SlotIndex: 1
+      ChancePercent: 35
+    - IsComponent: 0
+      SlotIndex: 2
+      ChancePercent: 35
+    - IsComponent: 1
+      SlotIndex: 0
+      ChancePercent: 35
+    - IsComponent: 1
+      SlotIndex: 1
+      ChancePercent: 35
+    - IsComponent: 1
+      SlotIndex: 2
+      ChancePercent: 35
+    - IsComponent: 1
+      SlotIndex: 6
+      ChancePercent: 35
+    Generated:
+    - Kind: 20
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 300
+      MaxAmount: 450
+      ChancePercent: 75
   AstraliteCatalog: {fileID: 0}

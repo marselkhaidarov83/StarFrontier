@@ -14,488 +14,983 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::ResearchBranchConfig
   id: research_branch_missions
   displayName: "Миссии"
-  description: "Десять направлений развития миссий: от доставки и защиты до разведки, спасения и перехвата."
+  description: "Восемь исследований разнообразия миссий, предложений, наград, лимита активных заданий и дальности назначения."
   icon: {fileID: 0}
   StationType: 3
   ScienceOnly: 1
   Nodes:
-  - Upgrade: 51
-    Title: "Доставка"
+  - Upgrade: 93
+    Title: Разнообразие миссий
+    Description: 'Последовательно открывает семь видов миссий: доставка, защита, освобождение,
+      новый маршрут, улучшение маршрута, разведка, возврат потерянного груза.'
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 7
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 0, y: 0}
     StartingLevel: 1
-    Description: "Масса груза, дальность доставки и награда за рейс."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Доставка товаров; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedMissionType
+        Value: 1
+        Unit: ступень
+        Details: Доставка товаров; ранее открытые ступени сохраняются.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Защита; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedMissionType
+        Value: 2
+        Unit: ступень
+        Details: Защита; ранее открытые ступени сохраняются.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Освобождение; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedMissionType
+        Value: 3
+        Unit: ступень
+        Details: Освобождение; ранее открытые ступени сохраняются.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Открытие нового маршрута; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedMissionType
+        Value: 4
+        Unit: ступень
+        Details: Открытие нового маршрута; ранее открытые ступени сохраняются.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Улучшение маршрута; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedMissionType
+        Value: 5
+        Unit: ступень
+        Details: Улучшение маршрута; ранее открытые ступени сохраняются.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: Разведка; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedMissionType
+        Value: 6
+        Unit: ступень
+        Details: Разведка; ранее открытые ступени сохраняются.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-  - Upgrade: 52
-    Title: "Защита"
+      EffectDescription: Возврат потерянного груза; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedMissionType
+        Value: 7
+        Unit: ступень
+        Details: Возврат потерянного груза; ранее открытые ступени сохраняются.
+  - Upgrade: 94
+    Title: Расширение предложений
+    Description: Добавляет одно предложение миссии на планете или станции за каждые
+      два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
+    DesignNotes: Базовое число предложений не определено.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 1, y: 0}
-    StartingLevel: 1
-    Description: "Награда за лично уничтоженных врагов при отражении вторжения."
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-  - Upgrade: 53
-    Title: "Освобождение"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 2, y: 0}
-    StartingLevel: 1
-    Description: "Награда за личный вклад в освобождение захваченной системы."
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-  - Upgrade: 54
-    Title: "Открытие нового маршрута"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 3, y: 0}
     StartingLevel: 0
-    Description: "Доступ к обследованию более удалённых и опасных переходов."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 0 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 0
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 1 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 1
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 1 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 1
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 2 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 2
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 2 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 2
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 3 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 3
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 3 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 3
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 4 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 4
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Расширение предложений: 4 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 4
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
-  - Upgrade: 55
-    Title: "Улучшение маршрута"
+      EffectDescription: 'Расширение предложений: 5 предложений'
+      Effects:
+      - Parameter: AdditionalMissionOffers
+        Value: 5
+        Unit: предложений
+        Details: Добавляет одно предложение миссии на планете или станции за каждые
+          два уровня, до пяти дополнительных предложений. Не меняет лимит активных заданий.
+  - Upgrade: 95
+    Title: Обновление миссий
+    Description: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+      до 50%.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 4, y: 0}
     StartingLevel: 0
-    Description: "Максимальный уровень улучшения маршрута через задания. Рост уровня маршрута снижает расход топлива."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 5 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 5
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 10 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 10
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 15 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 15
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 20 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 20
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 25 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 25
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 30 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 30
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 35 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 35
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 40 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 40
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Обновление миссий: 45 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 45
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 94
+        RequiredLevel: 2
       PaymentOptions: []
-  - Upgrade: 56
-    Title: "Разведка"
+      EffectDescription: 'Обновление миссий: 50 %'
+      Effects:
+      - Parameter: MissionRefreshIntervalReduction
+        Value: 50
+        Unit: "%"
+        Details: Сокращает базовый интервал обновления предложений миссий на 5% за уровень,
+          до 50%.
+  - Upgrade: 96
+    Title: Параллельные миссии
+    Description: 'Лимит одновременно принятых активных миссий равен числу полных пар
+      уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 5, y: 0}
-    StartingLevel: 0
-    Description: "Дальность проникновения на вражескую территорию и сложность целей наблюдения."
+    StartingLevel: 2
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 0 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 0
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 1 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 1
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 1 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 1
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 2 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 2
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 2 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 2
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 3 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 3
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 3 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 3
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 4 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 4
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Параллельные миссии: 4 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 4
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 57
-    Title: "Сопровождение"
+      EffectDescription: 'Параллельные миссии: 5 миссий'
+      Effects:
+      - Parameter: ActiveMissionLimit
+        Value: 5
+        Unit: миссий
+        Details: 'Лимит одновременно принятых активных миссий равен числу полных пар
+          уровней: от одной миссии на уровне 2 до пяти на уровне 10.'
+  - Upgrade: 97
+    Title: Вознаграждение
+    Description: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+      30%. Не меняет репутацию, опыт и предметные награды.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 6, y: 0}
     StartingLevel: 0
-    Description: "Защита союзного транспорта. С уровнем растут длина маршрута и сложность нападений."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 3 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 3
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 6 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 9 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 9
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 12 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 15 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 18 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 21 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 21
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 24 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 24
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
+      EffectDescription: 'Вознаграждение: 27 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 27
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 93
+        RequiredLevel: 1
       PaymentOptions: []
-  - Upgrade: 58
-    Title: "Спасение экипажа"
+      EffectDescription: 'Вознаграждение: 30 %'
+      Effects:
+      - Parameter: MissionCreditRewardBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает денежную награду за успешную миссию на 3% за уровень, до
+          30%. Не меняет репутацию, опыт и предметные награды.
+  - Upgrade: 98
+    Title: География миссий
+    Description: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+      два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 7, y: 0}
-    StartingLevel: 0
-    Description: "Поиск спасательной капсулы и эвакуация экипажа. С уровнем растёт дальность операций."
+    StartingLevel: 2
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 0 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 0
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 1 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 1
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 1 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 1
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 2 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 2
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 2 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 2
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 3 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 3
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 3 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 3
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 4 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 4
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'География миссий: 4 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 4
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 59
-    Title: "Возврат потерянного груза"
+      EffectDescription: 'География миссий: 5 переходов'
+      Effects:
+      - Parameter: MissionDestinationMaxHops
+        Value: 5
+        Unit: переходов
+        Details: 'Увеличивает дальность назначения миссий: один переход на уровне 2,
+          два на уровне 4, три на уровне 6, четыре на уровне 8, пять на уровне 10.'
+  - Upgrade: 99
+    Title: Авансовая оплата
+    Description: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+      50%. Остаток выдаётся при успешном выполнении.
+    DesignNotes: Правило возврата аванса при отмене или провале не согласовано.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 8, y: 0}
     StartingLevel: 0
-    Description: "Поиск груза в обломках. С уровнем растут размер зоны поиска и ценность находок."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 5 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 5
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 10 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 10
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 15 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 15
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 20 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 20
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 25 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 25
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 30 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 30
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 35 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 35
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 40 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 40
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
+      EffectDescription: 'Авансовая оплата: 45 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 45
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 97
+        RequiredLevel: 3
       PaymentOptions: []
-  - Upgrade: 60
-    Title: "Перехват"
+      EffectDescription: 'Авансовая оплата: 50 %'
+      Effects:
+      - Parameter: MissionAdvanceRewardShare
+        Value: 50
+        Unit: "%"
+        Details: Выплачивает при принятии миссии 5% денежной награды за уровень, до
+          50%. Остаток выдаётся при успешном выполнении.
+  - Upgrade: 100
+    Title: Галактическая доска заданий
+    Description: Позволяет удалённо смотреть предложения миссий ближайших планет. На
+      уровне 10 охват составляет 20% планет. Не даёт удалённого принятия миссий.
+    DesignNotes: Охват уровней 1–9, округление и определение ближайших планет не согласованы.
+      Ограничение ранее посещёнными планетами не вводится.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 9, y: 0}
     StartingLevel: 0
-    Description: "Уничтожение вражеского корабля до его ухода из системы. С уровнем растёт сложность цели и её охраны."
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: Числовая формула не согласована.
+      Effects: []
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 98
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Охват ближайших планет: 20 % планет'
+      Effects:
+      - Parameter: NearestPlanetInformationCoverage
+        Value: 20
+        Unit: "% планет"
+        Details: Правила выбора и округления не согласованы.

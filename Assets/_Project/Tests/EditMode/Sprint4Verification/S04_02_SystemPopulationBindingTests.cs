@@ -116,7 +116,7 @@ public sealed class S04_02_SystemPopulationBindingTests
 
             Assert.NotNull(
                 system,
-                "No StarSystemConfig references EnemyGroupSpawnRuleConfig " +
+                "No StarSystemConfig references EnemyInvasionGroupSpawnRuleConfig " +
                 "through PopulationConfig: " + ruleId);
         }
     }
@@ -189,7 +189,7 @@ public sealed class S04_02_SystemPopulationBindingTests
 
         for (int i = 0; i < populationRule.EnemyGroupSpawnRules.Length; i++)
         {
-            EnemyGroupSpawnRuleConfig rule =
+            EnemyInvasionGroupSpawnRuleConfig rule =
                 populationRule.EnemyGroupSpawnRules[i];
 
             if (rule == null)

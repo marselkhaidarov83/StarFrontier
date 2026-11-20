@@ -7,7 +7,6 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
 {
     private const float DefaultAttackCooldownSeconds = 2.5f;
     private const float DefaultAttackRange = 12f;
-    private const int DefaultAttackDamage = 8;
 
     private readonly List<SystemEnemyRuntimeState> _enemies = new();
 
@@ -40,9 +39,12 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
         if (string.IsNullOrWhiteSpace(systemId))
             throw new ArgumentException("SystemId is empty.", nameof(systemId));
 
+        SystemNpcRuntimeState loadout = SystemNpcRuntimeFactory.CreateEnemy(enemyConfig, systemId, systemId, position);
+        SystemNpcWeaponRuntimeState firstWeapon = loadout.Weapons.Count > 0 ? loadout.Weapons[0] : null;
+
         var enemy = new SystemEnemyRuntimeState
         {
-            RuntimeEnemyId = Guid.NewGuid().ToString("N"),
+            RuntimeEnemyId = loadout.RuntimeNpcId,
 
             EnemyConfigId = enemyConfig.Id,
             EnemyConfig = enemyConfig,
@@ -50,10 +52,12 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
             SystemId = systemId,
             Position = position,
 
-            CurrentHull = RandomInt(enemyConfig.BaseHullMin, enemyConfig.BaseHullMax),
-            CurrentShield = RandomInt(enemyConfig.BaseShieldMin, enemyConfig.BaseShieldMax),
-            CurrentEnergy = RandomInt(enemyConfig.BaseEnergyMin, enemyConfig.BaseEnergyMax),
-            Speed = RandomInt(enemyConfig.BaseSpeedMin, enemyConfig.BaseSpeedMax),
+            CurrentHull = loadout.CurrentHull,
+            InstalledHull = loadout.InstalledHull,
+            InstalledComponents = loadout.InstalledComponents,
+            CurrentShield = loadout.CurrentShield,
+            CurrentEnergy = 0,
+            Speed = loadout.Speed,
 
             IsAlive = true,
             WasKilledByPlayer = false,
@@ -66,9 +70,7 @@ public sealed class SystemEnemyService : CustomService, ISystemEnemyService
                 0.25f,
                 DefaultAttackCooldownSeconds),
 
-            BaseAttackDamage = Mathf.Max(
-                DefaultAttackDamage,
-                enemyConfig.DangerTier * DefaultAttackDamage),
+            BaseAttackDamage = Mathf.Max(0, firstWeapon?.RolledStats.Damage ?? 0),
 
             AttackRange = DefaultAttackRange
         };

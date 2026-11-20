@@ -29,6 +29,7 @@ public static class GalaxyRuntimeStateFactory
             return state;
 
         var systemIds = new HashSet<string>(System.StringComparer.Ordinal);
+        var routeIds = new HashSet<string>(System.StringComparer.Ordinal);
         var capturedSystemIds = new List<string>();
         var orderedSectors = new List<SectorConfig>();
         foreach (SectorConfig sector in config.Sectors)
@@ -102,7 +103,8 @@ public static class GalaxyRuntimeStateFactory
 
                 foreach (RouteConfig routeConfig in systemConfig.Routes)
                 {
-                    if (routeConfig == null)
+                    if (routeConfig == null || string.IsNullOrWhiteSpace(routeConfig.Id) ||
+                        !routeConfig.ContainsSystem(systemConfig.Id) || !routeIds.Add(routeConfig.Id))
                         continue;
 
                     RouteRuntimeState routeState = new RouteRuntimeState

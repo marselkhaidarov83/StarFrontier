@@ -22,18 +22,7 @@ MonoBehaviour:
     \u0432\u0437\u0440\u044B\u0432\u043D\u043E\u0435 \u043E\u0440\u0443\u0436\u0438\u0435.
     Strict-level: 1; weapon count: 1; enemy baseline tier: Silver."
   icon: {fileID: 0}
-  level: 1
-  groupKind: 10
-  allyType: 0
   enemyFaction: 20
-  strengthRank: 0
-  strengthOrder: Enemy faction; not part of ally order
-  weaponOwner: Ancients
-  weaponOwnerKey: ancient
-  variant: 4
   weaponCount: 1
-  powerScore: 202
-  tierPattern: Silver
-  familyPattern: shard_volley
   weaponConfigs:
   - {fileID: 11400000, guid: 03539f26f78084125b07063d4a1b7b27, type: 2}

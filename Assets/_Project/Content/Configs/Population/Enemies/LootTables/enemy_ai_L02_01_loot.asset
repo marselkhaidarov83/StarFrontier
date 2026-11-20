@@ -13,58 +13,94 @@ MonoBehaviour:
   m_Name: enemy_ai_L02_01_loot
   m_EditorClassIdentifier: Data::NpcLootTableConfig
   id: enemy_ai_L02_01_loot
-  displayName: enemy_ai_L02_01_loot
-  description: Настраиваемая таблица лута для enemy_ai_L02_01.
-  icon: {fileID: 0}
+  displayName: 'Добыча корабля ИИ: уровень 2'
+  description: 'Добыча корабля ИИ. Пять порогов потери суммарного запаса корпуса и щита:
+    20, 40, 60, 80 и 100%. Каждый порог разыгрывается один раз. Оружие и установленные
+    компоненты выпадают только при уничтожении. Награды возрастают с уровнем корабля
+    и полученным уроном.'
+  icon:
+    fileID: 0
   InitialCargo: []
   initialEquipmentDurability: -1
   Rules:
-  - IsDeath: 0
-    HullThresholdPercent: 50
+  - DamageThresholdPercent: 20
     CargoBatches: []
-    Equipment:
-    - SlotIndex: 0
-      ChancePercent: 20
-    - SlotIndex: 1
-      ChancePercent: 20
-    - SlotIndex: 2
-      ChancePercent: 20
-    - SlotIndex: 3
-      ChancePercent: 20
-    - SlotIndex: 4
-      ChancePercent: 20
+    Equipment: []
     Generated:
     - Kind: 40
       Item: {fileID: 0}
       EquipmentConfig: {fileID: 0}
-      MinAmount: 1
-      MaxAmount: 1
-      ChancePercent: 30
-  - IsDeath: 1
-    HullThresholdPercent: 50
+      MinAmount: 2
+      MaxAmount: 3
+      ChancePercent: 32
+  - DamageThresholdPercent: 40
     CargoBatches: []
-    Equipment:
-    - SlotIndex: 0
-      ChancePercent: 40
-    - SlotIndex: 1
-      ChancePercent: 40
-    - SlotIndex: 2
-      ChancePercent: 40
-    - SlotIndex: 3
-      ChancePercent: 40
-    - SlotIndex: 4
-      ChancePercent: 40
+    Equipment: []
     Generated:
     - Kind: 40
       Item: {fileID: 0}
       EquipmentConfig: {fileID: 0}
-      MinAmount: 1
-      MaxAmount: 1
-      ChancePercent: 10
+      MinAmount: 4
+      MaxAmount: 6
+      ChancePercent: 42
+  - DamageThresholdPercent: 60
+    CargoBatches: []
+    Equipment: []
+    Generated:
+    - Kind: 40
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 6
+      MaxAmount: 9
+      ChancePercent: 52
+  - DamageThresholdPercent: 80
+    CargoBatches: []
+    Equipment: []
+    Generated:
+    - Kind: 40
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 8
+      MaxAmount: 12
+      ChancePercent: 62
+  - DamageThresholdPercent: 100
+    CargoBatches: []
+    Equipment:
+    - IsComponent: 0
+      SlotIndex: 0
+      ChancePercent: 23
+    - IsComponent: 1
+      SlotIndex: 0
+      ChancePercent: 23
+    - IsComponent: 1
+      SlotIndex: 1
+      ChancePercent: 23
+    - IsComponent: 1
+      SlotIndex: 2
+      ChancePercent: 23
+    - IsComponent: 1
+      SlotIndex: 3
+      ChancePercent: 23
+    - IsComponent: 1
+      SlotIndex: 4
+      ChancePercent: 23
+    - IsComponent: 1
+      SlotIndex: 5
+      ChancePercent: 23
+    - IsComponent: 1
+      SlotIndex: 6
+      ChancePercent: 23
+    Generated:
+    - Kind: 40
+      Item: {fileID: 0}
+      EquipmentConfig: {fileID: 0}
+      MinAmount: 10
+      MaxAmount: 15
+      ChancePercent: 72
     - Kind: 30
-      Item: {fileID: 11400000, guid: db116ffdb5564ec8ac80158911e62cfa, type: 2}
+      Item: {fileID: 0}
       EquipmentConfig: {fileID: 0}
       MinAmount: 1
       MaxAmount: 2
-      ChancePercent: 50
+      ChancePercent: 43
   AstraliteCatalog: {fileID: 11400000, guid: f23b19bfa54b4359948cd9b79124708f, type: 2}

@@ -6,6 +6,9 @@ using UnityEngine;
 [Serializable]
 public class WeaponConfig : SpaceLootCombatConfig
 {
+    [SerializeField, Tooltip("Оружие врагов. Не попадает в предложения рынка и обратный выкуп.")]
+    private bool enemyOnly;
+    public bool EnemyOnly => enemyOnly;
     [Header("Progression")]
     [Tooltip("Уровень конфигурации. Используется для баланса, генерации и подбора подходящих записей.")]
     [SerializeField][Min(1)] private int level = 1;

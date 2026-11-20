@@ -155,8 +155,8 @@ using UnityEngine;
                         enemyConfig.BaseShieldMax),
                     CurrentEnergy = ValidateIntRange(
                         enemySave.CurrentEnergy,
-                        enemyConfig.BaseEnergyMin,
-                        enemyConfig.BaseEnergyMax),
+                        0,
+                        0),
                     Speed = ValidateIntRange(
                         enemySave.Speed,
                         enemyConfig.BaseSpeedMin,
@@ -197,8 +197,8 @@ using UnityEngine;
                         allyConfig.BaseShieldMax),
                     CurrentEnergy = ValidateIntRange(
                         allySave.CurrentEnergy,
-                        allyConfig.BaseEnergyMin,
-                        allyConfig.BaseEnergyMax),
+                        0,
+                        0),
                     Speed = Mathf.RoundToInt(allyConfig.DefaultEngine?.Speed ?? 0f),
                     Acceleration = ValidateFloatRange(
                         allySave.Acceleration,
@@ -206,8 +206,8 @@ using UnityEngine;
                         allyConfig.BaseAccelerationMax),
                     TurnRate = ValidateFloatRange(
                         allySave.TurnRate,
-                        allyConfig.BaseTurnRateMin,
-                        allyConfig.BaseTurnRateMax),
+                        0f,
+                        0f),
                     CargoCapacity = ValidateIntRange(
                         allySave.CargoCapacity,
                         allyConfig.BaseCargoCapacityMin,

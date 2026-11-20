@@ -30,9 +30,6 @@ public class GalaxyMapPathFinder
         if (string.IsNullOrWhiteSpace(targetSystemId))
             return new List<string>();
 
-        if (startSystemId == targetSystemId)
-            return new List<string> { startSystemId };
-
         Dictionary<string, List<Neighbor>> graph = BuildGraph(systems, runtimeState);
 
         if (!graph.ContainsKey(startSystemId))
@@ -41,13 +38,15 @@ public class GalaxyMapPathFinder
         if (!graph.ContainsKey(targetSystemId))
             return new List<string>();
 
-        Dictionary<string, int> distances = new();
+        if (startSystemId == targetSystemId) return new List<string> { startSystemId };
+
+        Dictionary<string, long> distances = new();
         Dictionary<string, string> previous = new();
         HashSet<string> unvisited = new();
 
         foreach (string systemId in graph.Keys)
         {
-            distances[systemId] = int.MaxValue;
+            distances[systemId] = long.MaxValue;
             unvisited.Add(systemId);
         }
 
@@ -70,12 +69,12 @@ public class GalaxyMapPathFinder
                 if (!unvisited.Contains(neighbor.SystemId))
                     continue;
 
-                int currentDistance = distances[currentSystemId];
+                long currentDistance = distances[currentSystemId];
 
-                if (currentDistance == int.MaxValue)
+                if (currentDistance == long.MaxValue)
                     continue;
 
-                int newDistance = currentDistance + neighbor.Cost;
+                long newDistance = currentDistance + neighbor.Cost;
 
                 if (newDistance < distances[neighbor.SystemId])
                 {
@@ -88,70 +87,38 @@ public class GalaxyMapPathFinder
         return RestorePath(previous, startSystemId, targetSystemId);
     }
 
-    public int CalculatePathCost(
-        IReadOnlyList<StarSystemConfig> systems,
-        List<string> path)
+    // int.MaxValue обозначает недоступный путь; нулевой расход допустим только без переходов.
+    public int CalculatePathCost(IReadOnlyList<StarSystemConfig> systems,
+        GalaxyRuntimeState runtimeState, List<string> path)
     {
-        if (systems == null || path == null || path.Count < 2)
-            return 0;
-
-        int totalCost = 0;
-
-        for (int i = 0; i < path.Count - 1; i++)
+        if (systems == null || path == null || path.Count == 0) return int.MaxValue;
+        var graph = BuildGraph(systems, runtimeState);
+        if (path.Any(id => string.IsNullOrWhiteSpace(id) || !graph.ContainsKey(id))) return int.MaxValue;
+        long total = 0;
+        for (int i = 0; i + 1 < path.Count; i++)
         {
-            StarSystemConfig fromSystem = systems.FirstOrDefault(system => system.Id == path[i]);
-
-            if (fromSystem == null || fromSystem.LinkedSystems == null)
-                continue;
-
-            StarSystemLink link = fromSystem.LinkedSystems.FirstOrDefault(
-                systemLink =>
-                    systemLink != null &&
-                    systemLink.LinkedSystem != null &&
-                    systemLink.LinkedSystem.Id == path[i + 1]
-            );
-
-            if (link != null)
-                totalCost += link.ParsecDistance;
+            Neighbor edge = graph[path[i]].FirstOrDefault(n => n.SystemId == path[i + 1]);
+            if (edge == null) return int.MaxValue;
+            total += edge.Cost;
         }
-
-        return totalCost;
+        return (int)System.Math.Min(int.MaxValue, total);
     }
 
     private Dictionary<string, List<Neighbor>> BuildGraph(
-        IReadOnlyList<StarSystemConfig> systems,
-        GalaxyRuntimeState runtimeState)
+        IReadOnlyList<StarSystemConfig> systems, GalaxyRuntimeState runtimeState)
     {
-        Dictionary<string, List<Neighbor>> graph = new();
-
-        foreach (StarSystemConfig systemConfig in systems)
+        var graph = new Dictionary<string, List<Neighbor>>();
+        foreach (StarSystemConfig system in systems)
+            if (system != null && !string.IsNullOrWhiteSpace(system.Id) && CanUseSystem(runtimeState, system.Id))
+                graph[system.Id] = new List<Neighbor>();
+        foreach (StarSystemConfig system in systems)
         {
-            if (systemConfig == null)
-                continue;
-
-            if (!CanUseSystem(runtimeState, systemConfig.Id))
-                continue;
-
-            if (!graph.ContainsKey(systemConfig.Id))
-                graph[systemConfig.Id] = new List<Neighbor>();
-
-            if (systemConfig.LinkedSystems == null)
-                continue;
-
-            foreach (StarSystemLink link in systemConfig.LinkedSystems)
+            if (system?.Routes == null || !graph.ContainsKey(system.Id)) continue;
+            foreach (RouteConfig route in system.Routes)
             {
-                if (link == null || link.LinkedSystem == null)
-                    continue;
-
-                string linkedSystemId = link.LinkedSystem.Id;
-
-                if (!CanUseSystem(runtimeState, linkedSystemId))
-                    continue;
-
-                int cost = link.ParsecDistance <= 0 ? 1 : link.ParsecDistance;
-
-                AddNeighbor(graph, systemConfig.Id, linkedSystemId, cost);
-                AddNeighbor(graph, linkedSystemId, systemConfig.Id, cost);
+                StarSystemConfig other = route?.GetOtherSystem(system.Id);
+                if (other == null || !graph.ContainsKey(other.Id) || !route.IsUnlocked(runtimeState)) continue;
+                AddNeighbor(graph, system.Id, other.Id, route.GetFuelCost(runtimeState));
             }
         }
 
@@ -182,11 +149,10 @@ public class GalaxyMapPathFinder
 
     private bool CanUseSystem(GalaxyRuntimeState runtimeState, string systemId)
     {
-        if (runtimeState == null || runtimeState.Systems == null)
-            return true;
+        if (runtimeState?.Systems == null) return false;
 
         StarSystemRuntimeState state = runtimeState.Systems.FirstOrDefault(
-            system => system.SystemId == systemId
+            system => system != null && system.SystemId == systemId
         );
 
         return state != null && state.IsDiscovered;
@@ -194,14 +160,14 @@ public class GalaxyMapPathFinder
 
     private string GetClosestUnvisited(
         HashSet<string> unvisited,
-        Dictionary<string, int> distances)
+        Dictionary<string, long> distances)
     {
         string closestSystemId = null;
-        int closestDistance = int.MaxValue;
+        long closestDistance = long.MaxValue;
 
         foreach (string systemId in unvisited)
         {
-            int distance = distances[systemId];
+            long distance = distances[systemId];
 
             if (distance < closestDistance)
             {

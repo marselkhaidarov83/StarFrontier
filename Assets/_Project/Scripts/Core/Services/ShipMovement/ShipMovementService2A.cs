@@ -333,26 +333,20 @@ public sealed class ShipMovementService2A : IShipMovementService
 
     private float GetAcceleration()
     {
-        if (_shipStats != null)
-            return Mathf.Max(0f, _shipStats.Acceleration);
-
+        ShipRuntimeData ship = _session?.State?.Player?.GetActiveShip();
+        if (ship?.InstalledHull != null) return Mathf.Max(0f, ship.InstalledHull.Acceleration);
+        if (_shipStats != null) return Mathf.Max(0f, _shipStats.Acceleration);
         return Mathf.Max(0f, _shipMovementConfig.Acceleration);
     }
 
-    private float GetTurnRate()
-    {
-        if (_shipStats != null)
-            return Mathf.Max(0f, _shipStats.TurnRate);
 
-        return Mathf.Max(0f, _shipMovementConfig.TurnSpeedDegrees);
-    }
 
     private float GetTurnRadius()
     {
-        if (_shipStats != null)
-            return Mathf.Max(0f, _shipStats.TurnRadius);
-
-        return 0f;
+        ShipRuntimeData ship = _session?.State?.Player?.GetActiveShip();
+        HullConfig hull = ShipLoadoutRules.SelectedHull(_configService?.GetAllyConfigById(ship?.AllyConfigId), ship);
+        if (hull != null) return Mathf.Max(0f, hull.TurnRadius);
+        return _shipStats != null ? Mathf.Max(0f, _shipStats.TurnRadius) : 0f;
     }
 
     private float GetDeceleration()

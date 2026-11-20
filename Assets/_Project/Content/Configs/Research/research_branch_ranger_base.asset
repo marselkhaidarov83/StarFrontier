@@ -14,928 +14,1108 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::ResearchBranchConfig
   id: research_branch_ranger_base
   displayName: "Подготовка рейнджеров"
-  description: "Исследования подготовки рейнджеров, координации патрулей и обучения элитных подразделений."
+  description: "Девять исследований усиления союзных рейнджеров и военных NPC, дозора и защиты станций."
   icon: {fileID: 0}
   StationType: 1
   Nodes:
-  - Upgrade: 14
-    Title: "\u0420\u0435\u0439\u043d\u0434\u0436\u0435\u0440\u0441\u043a\u0430\u044f \u043f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430"
+  - Upgrade: 74
+    Title: Боевая подготовка
+    Description: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+      до 20%. Не действует на корабль игрока.
+    DesignNotes: ''
     Icon: {fileID: 0}
-    RequiredGalaxyLevel: 2
-    TreePosition: {x: 0, y: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
     Levels:
     - Level: 1
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 2 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 2
-      RequiredGalaxyLevel: 2
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 4 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 3
-      RequiredGalaxyLevel: 3
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 6 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 4
-      RequiredGalaxyLevel: 3
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 8 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 5
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 10 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 6
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 12 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 7
-      RequiredGalaxyLevel: 5
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 14 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 8
-      RequiredGalaxyLevel: 5
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 16 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 9
-      RequiredGalaxyLevel: 6
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 18 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
     - Level: 10
-      RequiredGalaxyLevel: 6
+      RequiredGalaxyLevel: 1
       Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 15
-    Title: "\u041a\u043e\u043e\u0440\u0434\u0438\u043d\u0430\u0446\u0438\u044f \u043f\u0430\u0442\u0440\u0443\u043b\u0435\u0439"
+      PaymentOptions: []
+      EffectDescription: 'Боевая подготовка: 20 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryDamageBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC на 2% за уровень,
+          до 20%. Не действует на корабль игрока.
+  - Upgrade: 75
+    Title: Защитные системы
+    Description: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+      NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    DesignNotes: ''
     Icon: {fileID: 0}
-    RequiredGalaxyLevel: 4
-    TreePosition: {x: 0, y: 1}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
     Levels:
     - Level: 1
-      RequiredGalaxyLevel: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 3 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 3
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 6 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 9 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 9
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 12 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 15 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 18 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 21 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 21
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 24 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 24
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 27 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 27
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Защитные системы: 30 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryShieldBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает максимальную ёмкость щитов союзных рейнджеров и военных
+          NPC на 3% за уровень, до 30%. Не добавляет регенерацию.
+  - Upgrade: 76
+    Title: Усиление корпусов
+    Description: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+      на 3% за уровень, до 30%. Не действует на корабль игрока.
+    DesignNotes: ''
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 3 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 3
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 6 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 9 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 9
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 12 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 15 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 18 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 21 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 21
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 24 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 24
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 27 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 27
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies: []
+      PaymentOptions: []
+      EffectDescription: 'Усиление корпусов: 30 %'
+      Effects:
+      - Parameter: AlliedRangerMilitaryHullBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает максимальную прочность союзных рейнджеров и военных NPC
+          на 3% за уровень, до 30%. Не действует на корабль игрока.
+  - Upgrade: 77
+    Title: Противовторженческая подготовка
+    Description: Увеличивает урон союзных рейнджеров и военных NPC против участников
+      вторжения на 2% за уровень, до 20%.
+    DesignNotes: ''
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 14
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 2 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 2
-      RequiredGalaxyLevel: 4
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
-    - Level: 3
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
-    - Level: 4
-      RequiredGalaxyLevel: 5
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
-    - Level: 5
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
-    - Level: 6
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
-    - Level: 7
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
-    - Level: 8
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
-    - Level: 9
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
-    - Level: 10
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 16
-    Title: "\u042d\u043b\u0438\u0442\u043d\u044b\u0435 \u0440\u0435\u0439\u043d\u0434\u0436\u0435\u0440\u044b"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 6
-    TreePosition: {x: 0, y: 2}
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 6
+      RequiredGalaxyLevel: 1
       Dependencies:
-      - Upgrade: 15
-        RequiredLevel: 10
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 2
-        DurationSeconds: 10
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 25
-        DurationSeconds: 10
-    - Level: 2
-      RequiredGalaxyLevel: 6
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 4
-        DurationSeconds: 300
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 50
-        DurationSeconds: 300
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 4 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 3
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 1500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 6
-        DurationSeconds: 12
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 75
-        DurationSeconds: 12
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 6 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 4
-      RequiredGalaxyLevel: 7
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 8
-        DurationSeconds: 13
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 100
-        DurationSeconds: 13
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 8 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 5
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 2500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 10
-        DurationSeconds: 14
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 125
-        DurationSeconds: 14
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 10 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 6
-      RequiredGalaxyLevel: 8
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 12
-        DurationSeconds: 15
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 150
-        DurationSeconds: 15
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 12 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 7
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 3500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 14
-        DurationSeconds: 16
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 175
-        DurationSeconds: 16
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 14 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 8
-      RequiredGalaxyLevel: 9
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 16
-        DurationSeconds: 17
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 200
-        DurationSeconds: 17
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 16 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 9
-      RequiredGalaxyLevel: 10
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 4500
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 18
-        DurationSeconds: 18
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 225
-        DurationSeconds: 18
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 18 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
     - Level: 10
-      RequiredGalaxyLevel: 10
-      Dependencies: []
-      PaymentOptions:
-      - Id: credits_astralites
-        Costs:
-        - Resource: 0
-          Item: {fileID: 0}
-          Amount: 5000
-        - Resource: 1
-          Item: {fileID: 11400000, guid: ccee6e78e3194e1792e9587da1c61229, type: 2}
-          Amount: 20
-        DurationSeconds: 19
-      - Id: diamonds
-        Costs:
-        - Resource: 2
-          Item: {fileID: 0}
-          Amount: 250
-        DurationSeconds: 19
-  - Upgrade: 44
-    Title: "Пограничные дозоры"
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 74
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Противовторженческая подготовка: 20 %'
+      Effects:
+      - Parameter: AlliedAntiInvasionDamageBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает урон союзных рейнджеров и военных NPC против участников
+          вторжения на 2% за уровень, до 20%.
+  - Upgrade: 78
+    Title: Дальний дозор
+    Description: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+      за уровень, до 10. Не предсказывает будущие вторжения.
+    DesignNotes: Точка отсчёта ближайших систем не определена.
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 3, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 1 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 1
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 2 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 2
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 3 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 3
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 4 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 4
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 5 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 5
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 6 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 6
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 7 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 7
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 8 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 8
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Дальний дозор: 9 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 9
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 45
-    Title: "Быстрое реагирование"
+      EffectDescription: 'Дальний дозор: 10 систем'
+      Effects:
+      - Parameter: DetectedThreatSystemCount
+        Value: 10
+        Unit: систем
+        Details: Даёт сведения об уже обнаруженных врагах в одной ближайшей системе
+          за уровень, до 10. Не предсказывает будущие вторжения.
+  - Upgrade: 79
+    Title: Оценка угроз
+    Description: Последовательно раскрывает количество врагов, типы кораблей, уровень
+      силы, состояние корпусов и щитов, общую оценку силы группировки.
+    DesignNotes: Формула общей оценки силы группировки не определена.
     Icon: {fileID: 0}
+    MaxLevel: 5
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 4, y: 0}
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: Количество вражеских кораблей; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 1
+        Unit: ступень
+        Details: Количество вражеских кораблей; ранее открытые ступени сохраняются.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: Типы кораблей; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 2
+        Unit: ступень
+        Details: Типы кораблей; ранее открытые ступени сохраняются.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: Уровень силы противников; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 3
+        Unit: ступень
+        Details: Уровень силы противников; ранее открытые ступени сохраняются.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: Состояние корпусов и щитов; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 4
+        Unit: ступень
+        Details: Состояние корпусов и щитов; ранее открытые ступени сохраняются.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 2
+      PaymentOptions: []
+      EffectDescription: Общая оценка силы группировки; ранее открытые ступени сохраняются.
+      Effects:
+      - Parameter: UnlockedInformationTier
+        Value: 5
+        Unit: ступень
+        Details: Общая оценка силы группировки; ранее открытые ступени сохраняются.
+  - Upgrade: 80
+    Title: Приоритет обороны
+    Description: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+      в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не процентные
+      пункты. Не распространяется автоматически на военных NPC.
+    DesignNotes: Базовая вероятность и правила перенаправления не определены.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
+    StartingLevel: 0
+    Levels:
+    - Level: 1
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 5 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 5
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 2
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 10 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 3
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 15 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 4
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 20 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 5
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 25 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 25
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 6
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 30 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 7
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 35 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 35
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 8
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 40 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 40
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 9
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 45 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 45
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+    - Level: 10
+      RequiredGalaxyLevel: 1
+      Dependencies:
+      - Upgrade: 78
+        RequiredLevel: 3
+      PaymentOptions: []
+      EffectDescription: 'Приоритет обороны: 50 %'
+      Effects:
+      - Parameter: RangerRedirectionProbabilityBonus
+        Value: 50
+        Unit: "%"
+        Details: Увеличивает базовую вероятность перенаправления рейнджерского патруля
+          в атакованную систему на 5% за уровень, до 50%. Это относительный бонус, не
+          процентные пункты. Не распространяется автоматически на военных NPC.
+  - Upgrade: 81
+    Title: Укрепление станций
+    Description: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+      уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
+    DesignNotes: Порядок пересчёта текущей прочности при изменении максимума не определён.
+    Icon: {fileID: 0}
+    MaxLevel: 10
+    RequiredGalaxyLevel: 1
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 3 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 3
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 2
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 6 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 3
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 9 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 9
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 4
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 12 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 5
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 15 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 15
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 6
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 18 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 7
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 21 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 21
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 8
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 24 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 24
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 9
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
+      EffectDescription: 'Укрепление станций: 27 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 27
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
     - Level: 10
       RequiredGalaxyLevel: 1
       Dependencies: []
       PaymentOptions: []
-  - Upgrade: 46
-    Title: "Тактика малых групп"
+      EffectDescription: 'Укрепление станций: 30 %'
+      Effects:
+      - Parameter: AllStationHullBonus
+        Value: 30
+        Unit: "%"
+        Details: Увеличивает максимальную прочность станций всех пяти типов на 3% за
+          уровень, до 30%. Не восстанавливает автоматически полученные повреждения.
+  - Upgrade: 82
+    Title: Оборона инфраструктуры
+    Description: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+      станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
+    DesignNotes: ''
     Icon: {fileID: 0}
+    MaxLevel: 10
     RequiredGalaxyLevel: 1
-    TreePosition: {x: 5, y: 0}
     StartingLevel: 0
     Levels:
     - Level: 1
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 2 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 2
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 2
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 4 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 4
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 3
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 6 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 6
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 4
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 8 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 8
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 5
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 10 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 10
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 6
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 12 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 12
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 7
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 14 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 14
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 8
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 16 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 16
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 9
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 18 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 18
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.
     - Level: 10
       RequiredGalaxyLevel: 1
-      Dependencies: []
+      Dependencies:
+      - Upgrade: 81
+        RequiredLevel: 2
       PaymentOptions: []
-  - Upgrade: 47
-    Title: "Автономность патрулей"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 6, y: 0}
-    StartingLevel: 0
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-  - Upgrade: 48
-    Title: "Полевой ремонт"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 7, y: 0}
-    StartingLevel: 0
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-  - Upgrade: 49
-    Title: "Поисково-спасательные операции"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 8, y: 0}
-    StartingLevel: 0
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-  - Upgrade: 50
-    Title: "Сеть рейнджерских баз"
-    Icon: {fileID: 0}
-    RequiredGalaxyLevel: 1
-    TreePosition: {x: 9, y: 0}
-    StartingLevel: 0
-    Levels:
-    - Level: 1
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 2
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 3
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 4
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 5
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 6
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 7
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 8
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 9
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
-    - Level: 10
-      RequiredGalaxyLevel: 1
-      Dependencies: []
-      PaymentOptions: []
+      EffectDescription: 'Оборона инфраструктуры: 20 %'
+      Effects:
+      - Parameter: AlliedStationDefenceDamageBonus
+        Value: 20
+        Unit: "%"
+        Details: Увеличивает урон рейнджеров и военных NPC при защите дружественной
+          станции любого типа на 2% за уровень, до 20%. Не действует на корабль игрока.

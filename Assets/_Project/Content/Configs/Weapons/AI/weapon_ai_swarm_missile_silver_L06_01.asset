@@ -36,3 +36,4 @@ MonoBehaviour:
   maxAmmoChargesMin: 42
   maxAmmoChargesMax: 58
   maximumDurability: 225
+  enemyOnly: 1

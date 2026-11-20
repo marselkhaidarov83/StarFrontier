@@ -153,7 +153,7 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
         {
             if (runtimeEnemy.EnemyConfig != null)
             {
-                spriteRenderer.sprite = runtimeEnemy.EnemyConfig.CombatSprite;
+                spriteRenderer.sprite = runtimeEnemy.HullConfig?.Icon;
 
                 if (_configService != null &&
                     _configService.GameVisualConfig != null)
@@ -162,7 +162,7 @@ public sealed class EnemySystemMapEntity : CustomMonoBehaviour, IPointerClickHan
                         _configService
                             .GameVisualConfig
                             .GetEnemyWorldSize(
-                                runtimeEnemy.EnemyConfig);
+                                runtimeEnemy.EnemyConfig, runtimeEnemy.InstalledHull);
 
                     if (worldSize > 0f)
                     {

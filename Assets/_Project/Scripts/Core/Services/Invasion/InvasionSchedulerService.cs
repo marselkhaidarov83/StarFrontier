@@ -11,8 +11,6 @@ public sealed class InvasionSchedulerService :
     private readonly IConfigService _configService;
     private readonly IGameSessionService _gameSessionService;
     private readonly IInvasionService _invasionService;
-    private readonly ISystemSecurityService _systemSecurityService;
-    private readonly IEnemyFactionService _enemyFactionService;
 
     private float _elapsedSeconds;
     private bool _missingConfigLogged;
@@ -30,11 +28,7 @@ public sealed class InvasionSchedulerService :
         _invasionService =
             Bootstrapper.Instance.ServiceRegistry.Get<IInvasionService>();
 
-        _systemSecurityService =
-            Bootstrapper.Instance.ServiceRegistry.Get<ISystemSecurityService>();
 
-        _enemyFactionService =
-            Bootstrapper.Instance.ServiceRegistry.Get<IEnemyFactionService>();
     }
 
     public void Tick(float deltaTime, int currentQuantTick)
@@ -134,9 +128,11 @@ public sealed class InvasionSchedulerService :
             return false;
         }
 
+        string factionId = PickRandomFactionId();
         if (!TryPickTargetSystem(
             maxActiveInvasions,
             galaxyLevel,
+            factionId,
             out StarSystemConfig targetSystem))
         {
             Log(
@@ -150,31 +146,16 @@ public sealed class InvasionSchedulerService :
             return false;
         }
 
-        if (!TryPickSourceSystemAndFaction(
-                targetSystem,
-                out StarSystemConfig sourceSystem,
-                out string factionId))
-        {
-            Log(
-                "Scheduled invasion skipped: no enemy-owned source system. " +
-                "Target=" + targetSystem.Id +
-                ", GalaxyLevel=" + galaxyLevel +
-                ", Tick=" + currentQuantTick);
-
-            return false;
-        }
-
         if (!TryPickInvasionRule(
                 targetSystem,
                 galaxyLevel,
                 factionId,
-                out EnemyGroupSpawnRuleConfig invasionRule))
+                out EnemyInvasionGroupSpawnRuleConfig invasionRule))
         {
             Log(
                 "Scheduled invasion skipped: no valid invasion rule. " +
                 "Target=" + targetSystem.Id +
-                ", Source=" + sourceSystem.Id +
-                ", Faction=" + factionId +
+                    ", Faction=" + factionId +
                 ", GalaxyLevel=" + galaxyLevel +
                 ", Tick=" + currentQuantTick);
 
@@ -183,7 +164,7 @@ public sealed class InvasionSchedulerService :
 
         bool started =
             _invasionService.TryStartInvasion(
-                sourceSystem,
+                null,
                 targetSystem,
                 invasionRule,
                 factionId,
@@ -196,7 +177,6 @@ public sealed class InvasionSchedulerService :
             "Started=" + started +
             ", InvasionId=" +
             (invasionState != null ? invasionState.InvasionId : string.Empty) +
-            ", Source=" + sourceSystem.Id +
             ", Target=" + targetSystem.Id +
             ", Faction=" + factionId +
             ", Rule=" + invasionRule.Id +
@@ -255,6 +235,7 @@ public sealed class InvasionSchedulerService :
     private bool TryPickTargetSystem(
         int maxActiveInvasions,
         int galaxyLevel,
+        string factionId,
         out StarSystemConfig targetSystem)
     {
         targetSystem = null;
@@ -285,9 +266,10 @@ public sealed class InvasionSchedulerService :
                 continue;
             }
 
-            if (!HasAnyValidInvasionRuleForEnemySource(
+            if (!HasValidInvasionRuleForFaction(
                     system,
-                    galaxyLevel))
+                    galaxyLevel,
+                    factionId))
             {
                 continue;
             }
@@ -304,93 +286,19 @@ public sealed class InvasionSchedulerService :
         return targetSystem != null;
     }
 
-    private bool TryPickSourceSystemAndFaction(
-        StarSystemConfig targetSystem,
-        out StarSystemConfig sourceSystem,
-        out string factionId)
+    // Exactly three equiprobable factions; territories and routes do not participate.
+    public static string PickRandomFactionId() => Random.Range(0, 3) switch
     {
-        sourceSystem = null;
-        factionId = string.Empty;
-
-        List<InvasionSourceCandidate> linkedCandidates = new();
-        List<InvasionSourceCandidate> fallbackCandidates = new();
-
-        IReadOnlyList<EnemyFactionState> factions =
-            _enemyFactionService.GetFactions();
-
-        if (factions == null || factions.Count == 0)
-            return false;
-
-        for (int factionIndex = 0; factionIndex < factions.Count; factionIndex++)
-        {
-            EnemyFactionState faction =
-                factions[factionIndex];
-
-            if (faction == null ||
-                string.IsNullOrWhiteSpace(faction.FactionId))
-            {
-                continue;
-            }
-
-            faction.EnsureWarTerritoryLists();
-
-            for (int systemIndex = 0;
-                 systemIndex < faction.OwnedSystemIds.Count;
-                 systemIndex++)
-            {
-                string ownedSystemId =
-                    faction.OwnedSystemIds[systemIndex];
-
-                if (string.IsNullOrWhiteSpace(ownedSystemId))
-                    continue;
-
-                if (!_configService.TryGetStarSystem(
-                        ownedSystemId,
-                        out StarSystemConfig ownedSystem))
-                {
-                    continue;
-                }
-
-                if (!IsCapturedSystem(ownedSystem.Id))
-                    continue;
-
-                InvasionSourceCandidate candidate =
-                    new InvasionSourceCandidate
-                    {
-                        System = ownedSystem,
-                        FactionId = faction.FactionId
-                    };
-
-                fallbackCandidates.Add(candidate);
-
-                if (IsLinkedToTarget(ownedSystem, targetSystem))
-                    linkedCandidates.Add(candidate);
-            }
-        }
-
-        List<InvasionSourceCandidate> candidates =
-            linkedCandidates.Count > 0
-                ? linkedCandidates
-                : fallbackCandidates;
-
-        if (candidates.Count == 0)
-            return false;
-
-        InvasionSourceCandidate selected =
-            candidates[Random.Range(0, candidates.Count)];
-
-        sourceSystem = selected.System;
-        factionId = selected.FactionId;
-
-        return sourceSystem != null &&
-               !string.IsNullOrWhiteSpace(factionId);
-    }
+        0 => "ai",
+        1 => "ancients",
+        _ => "infected"
+    };
 
     private bool TryPickInvasionRule(
         StarSystemConfig targetSystem,
         int galaxyLevel,
         string factionId,
-        out EnemyGroupSpawnRuleConfig selectedRule)
+        out EnemyInvasionGroupSpawnRuleConfig selectedRule)
     {
         selectedRule = null;
 
@@ -422,7 +330,7 @@ public sealed class InvasionSchedulerService :
             if (entry == null || !entry.IsValid())
                 continue;
 
-            EnemyGroupSpawnRuleConfig rule =
+            EnemyInvasionGroupSpawnRuleConfig rule =
                 entry.EnemyGroupSpawnRule;
 
             if (rule == null)
@@ -468,49 +376,9 @@ public sealed class InvasionSchedulerService :
         return selectedRule != null;
     }
 
-    private bool IsCapturedSystem(string systemId)
-    {
-        if (string.IsNullOrWhiteSpace(systemId))
-            return false;
 
-        if (!_systemSecurityService.TryGetSystemStatus(
-                systemId,
-                out StarSystemStatus status))
-        {
-            return false;
-        }
 
-        return status == StarSystemStatus.Captured;
-    }
 
-    private static bool IsLinkedToTarget(
-        StarSystemConfig sourceSystem,
-        StarSystemConfig targetSystem)
-    {
-        if (sourceSystem == null ||
-            targetSystem == null ||
-            sourceSystem.LinkedSystems == null)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < sourceSystem.LinkedSystems.Length; i++)
-        {
-            StarSystemLink link =
-                sourceSystem.LinkedSystems[i];
-
-            if (link == null ||
-                link.LinkedSystem == null)
-            {
-                continue;
-            }
-
-            if (link.LinkedSystem.Id == targetSystem.Id)
-                return true;
-        }
-
-        return false;
-    }
 
     private int GetCurrentGalaxyLevel()
     {
@@ -591,144 +459,22 @@ public sealed class InvasionSchedulerService :
             "[InvasionSchedulerService] " + message);
     }
 
-    private sealed class InvasionSourceCandidate
+
+
+    private static bool HasValidInvasionRuleForFaction(StarSystemConfig target, int level, string factionId)
     {
-        public StarSystemConfig System;
-        public string FactionId;
-    }
-
-    private bool HasAnyValidInvasionRuleForEnemySource(
-    StarSystemConfig targetSystem,
-    int galaxyLevel)
-    {
-        if (targetSystem == null)
+        if (!TryConvertFactionId(factionId, out EnemyFaction2A faction) || target?.InvasionSpawnRuleSet?.Entries == null)
             return false;
-
-        if (targetSystem.InvasionSpawnRuleSet == null ||
-            targetSystem.InvasionSpawnRuleSet.Entries == null)
+        foreach (var entry in target.InvasionSpawnRuleSet.Entries)
         {
-            return false;
+            if (entry == null || !entry.IsValid()) continue;
+            var groups = entry.EnemyGroupSpawnRule?.GetEntryForGalaxyLevel(level)?.EnemyGroups;
+            if (groups != null && groups.Any(group => group != null && group.Faction == faction &&
+                group.Enemies != null && group.Enemies.Count > 0 && group.Enemies.All(member => member != null && member.IsValid())))
+                return true;
         }
-
-        SystemPopulationEnemyGroupRuleEntry[] entries =
-            targetSystem.InvasionSpawnRuleSet.Entries;
-
-        if (entries.Length == 0)
-            return false;
-
-        IReadOnlyList<EnemyFactionState> factions =
-            _enemyFactionService.GetFactions();
-
-        if (factions == null || factions.Count == 0)
-            return false;
-
-        for (int factionIndex = 0; factionIndex < factions.Count; factionIndex++)
-        {
-            EnemyFactionState faction =
-                factions[factionIndex];
-
-            if (faction == null ||
-                string.IsNullOrWhiteSpace(faction.FactionId))
-            {
-                continue;
-            }
-
-            if (!TryConvertFactionId(
-                    faction.FactionId,
-                    out EnemyFaction2A enemyFaction))
-            {
-                continue;
-            }
-
-            if (!HasEnemyOwnedSourceForFaction(
-                    faction,
-                    targetSystem))
-            {
-                continue;
-            }
-
-            for (int entryIndex = 0; entryIndex < entries.Length; entryIndex++)
-            {
-                SystemPopulationEnemyGroupRuleEntry entry =
-                    entries[entryIndex];
-
-                if (entry == null || !entry.IsValid())
-                    continue;
-
-                EnemyGroupSpawnRuleConfig rule =
-                    entry.EnemyGroupSpawnRule;
-
-                if (rule == null)
-                    continue;
-
-                IReadOnlyList<EnemyGroupEntryConfig> enemies =
-                    rule.PickEnemiesForGalaxyLevel(
-                        galaxyLevel,
-                        enemyFaction);
-
-                if (enemies != null && enemies.Count > 0)
-                    return true;
-            }
-        }
-
         return false;
     }
 
-    private bool HasEnemyOwnedSourceForFaction(
-        EnemyFactionState faction,
-        StarSystemConfig targetSystem)
-    {
-        if (faction == null ||
-            targetSystem == null ||
-            faction.OwnedSystemIds == null ||
-            faction.OwnedSystemIds.Count == 0)
-        {
-            return false;
-        }
 
-        faction.EnsureWarTerritoryLists();
-
-        for (int i = 0; i < faction.OwnedSystemIds.Count; i++)
-        {
-            string ownedSystemId =
-                faction.OwnedSystemIds[i];
-
-            if (string.IsNullOrWhiteSpace(ownedSystemId))
-                continue;
-
-            if (!_configService.TryGetStarSystem(
-                    ownedSystemId,
-                    out StarSystemConfig ownedSystem))
-            {
-                continue;
-            }
-
-            if (!IsCapturedSystem(ownedSystem.Id))
-                continue;
-
-            if (IsLinkedToTarget(ownedSystem, targetSystem))
-                return true;
-        }
-
-        for (int i = 0; i < faction.OwnedSystemIds.Count; i++)
-        {
-            string ownedSystemId =
-                faction.OwnedSystemIds[i];
-
-            if (string.IsNullOrWhiteSpace(ownedSystemId))
-                continue;
-
-            if (!_configService.TryGetStarSystem(
-                    ownedSystemId,
-                    out StarSystemConfig ownedSystem))
-            {
-                continue;
-            }
-
-            if (IsCapturedSystem(ownedSystem.Id))
-                return true;
-        }
-
-        return false;
-    }
 }

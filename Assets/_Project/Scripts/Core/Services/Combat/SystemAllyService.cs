@@ -34,9 +34,11 @@ public sealed class SystemAllyService : ISystemAllyService
         if (string.IsNullOrWhiteSpace(systemId))
             throw new ArgumentException("SystemId is empty.", nameof(systemId));
 
+        SystemNpcRuntimeState loadout = SystemNpcRuntimeFactory.CreateAlly(allyConfig, systemId, systemId, null, position);
+
         var ally = new SystemAllyRuntimeState
         {
-            RuntimeAllyId = Guid.NewGuid().ToString("N"),
+            RuntimeAllyId = loadout.RuntimeNpcId,
 
             AllyConfigId = allyConfig.Id,
             AllyConfig = allyConfig,
@@ -44,13 +46,15 @@ public sealed class SystemAllyService : ISystemAllyService
             SystemId = systemId,
             Position = position,
 
-            CurrentHull = RandomInt(allyConfig.BaseHullMin, allyConfig.BaseHullMax),
-            CurrentShield = RandomInt(allyConfig.BaseShieldMin, allyConfig.BaseShieldMax),
-            CurrentEnergy = RandomInt(allyConfig.BaseEnergyMin, allyConfig.BaseEnergyMax),
-            Speed = Mathf.RoundToInt(allyConfig.DefaultEngine?.Speed ?? 0f),
-            Acceleration = RandomFloat(allyConfig.BaseAccelerationMin, allyConfig.BaseAccelerationMax),
-            TurnRate = RandomFloat(allyConfig.BaseTurnRateMin, allyConfig.BaseTurnRateMax),
-            CargoCapacity = RandomInt(allyConfig.BaseCargoCapacityMin, allyConfig.BaseCargoCapacityMax),
+            CurrentHull = loadout.CurrentHull,
+            InstalledHull = loadout.InstalledHull,
+            InstalledComponents = loadout.InstalledComponents,
+            CurrentShield = loadout.CurrentShield,
+            CurrentEnergy = 0,
+            Speed = loadout.Speed,
+            Acceleration = loadout.InstalledHull.Acceleration,
+            TurnRate = 0f,
+            CargoCapacity = loadout.CargoCapacity,
 
             IsAlive = true
         };

@@ -43,15 +43,17 @@ public static class ResearchRules
                 if (node.RequiredGalaxyLevel < 1 || node.RequiredGalaxyLevel > 10 ||
                     (node.Levels ?? Array.Empty<ResearchNodeLevel>()).Any(x => x != null && (x.RequiredGalaxyLevel < 1 || x.RequiredGalaxyLevel > 10)))
                     yield return "InvalidResearchGalaxyLevel";
-                if (node.Levels == null || node.Levels.Length != 10 ||
-                    Enumerable.Range(1, 10).Any(level => node.Levels.Count(x => x != null && x.Level == level) != 1))
-                    yield return "TenLevelsRequired";
+                if (node.MaxLevel < 1 || node.MaxLevel > 10 || node.StartingLevel < 0 || node.StartingLevel > node.MaxLevel ||
+                    node.Levels == null || node.Levels.Length != node.MaxLevel ||
+                    Enumerable.Range(1, Math.Max(0, node.MaxLevel)).Any(level => node.Levels.Count(x => x != null && x.Level == level) != 1))
+                    yield return "InvalidResearchLevels";
                 foreach (var level in node.Levels ?? Array.Empty<ResearchNodeLevel>())
                 {
                     if (level == null) continue;
                     foreach (var dep in DependenciesFor(node, level.Level))
-                        if (dep == null || dep.RequiredLevel < 1 || dep.RequiredLevel > 10 ||
-                            !nodes.Any(x => x != null && x.Upgrade == dep.Upgrade)) yield return "DependencyOutsideBranch";
+                        if (dep == null || dep.RequiredLevel < 1 ||
+                            !nodes.Any(x => x != null && x.Upgrade == dep.Upgrade && dep.RequiredLevel <= x.MaxLevel))
+                            yield return "DependencyOutsideBranch";
                     if (Cycle(node, level.Level, nodes, new HashSet<string>(), new HashSet<string>()))
                         yield return "ResearchCycle";
                 }
@@ -123,13 +125,14 @@ public static class ResearchRules
         if (state.Active != null) { reason = "ResearchAlreadyRunning"; return false; }
         var node = Find(tree, upgrade);
         int level = state.GetLevel(upgrade);
-        if (node == null || level < 0 || level >= 10) return false;
+        if (node == null || level < 0 || level >= node.MaxLevel) return false;
         var branch = tree.Branches.FirstOrDefault(b => b != null && (b.Nodes ?? Array.Empty<ResearchNode>()).Contains(node));
         if (!IsLevelVisible(branch, node, level + 1, galaxyLevel))
         { reason = "GalaxyLevelRequired"; return false; }
         if (DependenciesFor(node, level + 1).Any(x => x == null || state.GetLevel(x.Upgrade) < x.RequiredLevel))
         { reason = "DependenciesNotMet"; return false; }
         var options = node.Levels.Single(x => x.Level == level + 1).PaymentOptions;
+        if (options == null || options.Length == 0) { reason = "ResearchEconomyNotConfigured"; return false; }
         var choices = options?.Where(x => x != null && x.Id == optionId).ToArray();
         if (choices == null || choices.Length != 1 || !choices[0].TryCreateSnapshot(StationOperationKind.Upgrade, level + 1, out quote))
         { reason = "InvalidPaymentOption"; return false; }

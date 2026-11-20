@@ -31,7 +31,7 @@ public class ShipStatCalculator
         {
             MaxHull = shipData.BaseHull,
             MaxShield = shipData.BaseShield,
-            MaxEnergy = shipData.BaseEnergy,
+            MaxEnergy = 0,
             Speed = Mathf.Max(0f, shipData.DefaultEngine?.Speed ?? 0f),
             CargoCapacity = shipData.BaseCargoCapacity
         };

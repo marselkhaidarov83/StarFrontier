@@ -8,8 +8,6 @@ public sealed class TravelService2A :
 {
     private const int DefaultFuelCostPerJump = 99;
 
-    private readonly GalaxyGraphModel _galaxyGraph;
-
     private readonly IGameSessionService
         _gameSessionService;
 
@@ -59,39 +57,17 @@ public sealed class TravelService2A :
 
         ReinitializeGalaxyState();
 
-        /*
-         * Сохраняется для совместимости
-         * со старым кодом GalaxyGraph().
-         *
-         * Основная проверка перелёта выполняется
-         * через RouteConfig и RouteRuntimeState.
-         */
-        _galaxyGraph =
-            GalaxyGraphFactory.CreateFromConfigs(
-                _configService
-                    .GetAllStarSystems());
     }
 
     public GalaxyGraphModel GalaxyGraph()
     {
-        return _galaxyGraph;
+        return GalaxyGraphFactory.CreateFromConfigs(_configService.GetAllStarSystems(),
+            _gameSessionService.State?.Galaxy);
     }
 
     private void ReinitializeGalaxyState()
     {
-        if (_galaxyRuntimeState != null)
-            return;
-
-        if (_gameSessionService == null)
-            return;
-
-        if (_gameSessionService.State == null)
-            return;
-
-        _galaxyRuntimeState =
-            _gameSessionService
-                .State
-                .Galaxy;
+        _galaxyRuntimeState = _gameSessionService?.State?.Galaxy;
     }
 
     public bool CanTravel(
@@ -522,97 +498,17 @@ public sealed class TravelService2A :
                 system.Id == systemId);
     }
 
-    private RouteConfig FindRouteConfig(
-        string fromSystemId,
-        string toSystemId)
+    private RouteConfig FindRouteConfig(string fromSystemId, string toSystemId)
     {
-        if (string.IsNullOrWhiteSpace(
-                fromSystemId))
-        {
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(
-                toSystemId))
-        {
-            return null;
-        }
-
-        IReadOnlyList<StarSystemConfig> systems =
-            _configService
-                .GetAllStarSystems();
-
-        if (systems == null)
-            return null;
-
-        foreach (
-            StarSystemConfig systemConfig
-            in systems)
-        {
-            if (systemConfig == null)
-                continue;
-
-            if (systemConfig.Routes == null)
-                continue;
-
-            foreach (
-                RouteConfig routeConfig
-                in systemConfig.Routes)
-            {
-                if (routeConfig == null)
-                    continue;
-
-                if (IsRouteBetweenSystems(
-                        routeConfig,
-                        fromSystemId,
-                        toSystemId))
-                {
-                    return routeConfig;
-                }
-            }
-        }
-
+        if (string.IsNullOrWhiteSpace(fromSystemId) || string.IsNullOrWhiteSpace(toSystemId)) return null;
+        StarSystemConfig source = _configService.GetStarSystemConfigById(fromSystemId);
+        if (source?.Routes == null) return null;
+        foreach (RouteConfig route in source.Routes)
+            if (route != null && route.ConnectsSystems(fromSystemId, toSystemId)) return route;
         return null;
     }
 
-    private bool IsRouteBetweenSystems(
-        RouteConfig routeConfig,
-        string firstSystemId,
-        string secondSystemId)
-    {
-        if (routeConfig == null)
-            return false;
 
-        if (routeConfig.FromSystem == null)
-            return false;
-
-        if (routeConfig.ToSystem == null)
-            return false;
-
-        string routeFromSystemId =
-            routeConfig
-                .FromSystem
-                .Id;
-
-        string routeToSystemId =
-            routeConfig
-                .ToSystem
-                .Id;
-
-        bool direct =
-            routeFromSystemId ==
-                firstSystemId &&
-            routeToSystemId ==
-                secondSystemId;
-
-        bool reverse =
-            routeFromSystemId ==
-                secondSystemId &&
-            routeToSystemId ==
-                firstSystemId;
-
-        return direct || reverse;
-    }
 
     private bool IsRouteUnlocked(RouteConfig routeConfig)
     {
@@ -625,10 +521,7 @@ public sealed class TravelService2A :
         IRouteService routeService =
             Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>();
 
-        return routeService.HasUnlockedRoute(
-            routeConfig.FromSystem.Id,
-            routeConfig.ToSystem.Id
-        );
+        return routeService.IsRouteUnlocked(routeConfig.Id);
     }
 
     private RouteRuntimeState

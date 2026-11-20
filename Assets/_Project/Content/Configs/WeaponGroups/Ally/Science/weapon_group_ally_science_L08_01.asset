@@ -24,19 +24,8 @@ MonoBehaviour:
     Strict-level: 8; weapon count: 4; primary focus: \u0442\u043E\u0447\u043D\u043E\u0441\u0442\u044C.
     Tier-mix intentionally avoids mono-tier groups when weaponCount > 1."
   icon: {fileID: 0}
-  level: 8
-  groupKind: 0
-  allyType: 40
   enemyFaction: 0
-  strengthRank: 2
-  strengthOrder: "4 \u2014 after Medic"
-  weaponOwner: PlayerAndRangers
-  weaponOwnerKey: common
-  variant: 1
   weaponCount: 4
-  powerScore: 510
-  tierPattern: Silver + Bronze + Bronze + Bronze
-  familyPattern: laser + pulse + plasma + wave_cannon
   weaponConfigs:
   - {fileID: 11400000, guid: 9894c255f3062485da7416fdd7480a12, type: 2}
   - {fileID: 11400000, guid: dc412007f93f54cebb4b45af597b4545, type: 2}

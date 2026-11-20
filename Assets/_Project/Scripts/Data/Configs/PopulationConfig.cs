@@ -7,8 +7,8 @@ using UnityEngine;
     menuName = "StarFrontier/Configs/Galaxy/Population")]
 public sealed class PopulationConfig : BaseConfig
 {
-    private static readonly EnemyGroupSpawnRuleConfig[] EmptyEnemyGroupSpawnRules =
-        new EnemyGroupSpawnRuleConfig[0];
+    private static readonly EnemyInvasionGroupSpawnRuleConfig[] EmptyEnemyGroupSpawnRules =
+        new EnemyInvasionGroupSpawnRuleConfig[0];
 
     [Header("Allies")]
     [Tooltip("Параметр allySpawnRules. Используется связанными игровыми системами этого конфига.")]
@@ -19,11 +19,6 @@ public sealed class PopulationConfig : BaseConfig
     [SerializeField] private InvasionSpawnRuleSetConfig invasionSpawnRuleSet;
     public InvasionSpawnRuleSetConfig InvasionSpawnRuleSet =>
         StationLevels != null && StationLevels.Length > 0 ? null : invasionSpawnRuleSet;
-
-    [HideInInspector]
-    [Tooltip("Параметр enemyGroupSpawnRuleEntries. Используется связанными игровыми системами этого конфига.")]
-    [SerializeField] private SystemPopulationEnemyGroupRuleEntry[] enemyGroupSpawnRuleEntries =
-        new SystemPopulationEnemyGroupRuleEntry[0];
 
     [Header("Уровни станции")]
     [Tooltip("Правила появления союзников по уровням станции. Для систем список пуст.")]
@@ -42,7 +37,7 @@ public sealed class PopulationConfig : BaseConfig
         return Array.Empty<AllySpawnRuleConfig>();
     }
 
-    public EnemyGroupSpawnRuleConfig[] EnemyGroupSpawnRules =>
+    public EnemyInvasionGroupSpawnRuleConfig[] EnemyGroupSpawnRules =>
         BuildEnemyGroupSpawnRulesSnapshot();
 
     // Compatibility accessors for older editor tools; production uses InvasionSpawnRuleSet directly.
@@ -94,7 +89,7 @@ public sealed class PopulationConfig : BaseConfig
         return false;
     }
 
-    private EnemyGroupSpawnRuleConfig[] BuildEnemyGroupSpawnRulesSnapshot()
+    private EnemyInvasionGroupSpawnRuleConfig[] BuildEnemyGroupSpawnRulesSnapshot()
     {
         if (EnemyGroupSpawnRuleEntries == null ||
             EnemyGroupSpawnRuleEntries.Length == 0)
@@ -116,8 +111,8 @@ public sealed class PopulationConfig : BaseConfig
         if (count <= 0)
             return EmptyEnemyGroupSpawnRules;
 
-        EnemyGroupSpawnRuleConfig[] result =
-            new EnemyGroupSpawnRuleConfig[count];
+        EnemyInvasionGroupSpawnRuleConfig[] result =
+            new EnemyInvasionGroupSpawnRuleConfig[count];
 
         int index = 0;
 
@@ -126,7 +121,7 @@ public sealed class PopulationConfig : BaseConfig
             if (EnemyGroupSpawnRuleEntries[i] == null)
                 continue;
 
-            EnemyGroupSpawnRuleConfig rule =
+            EnemyInvasionGroupSpawnRuleConfig rule =
                 EnemyGroupSpawnRuleEntries[i].EnemyGroupSpawnRule;
 
             if (rule == null)
@@ -145,16 +140,6 @@ public sealed class PopulationConfig : BaseConfig
         if (allySpawnRules == null)
             allySpawnRules = new AllySpawnRuleConfig[0];
 
-        if (enemyGroupSpawnRuleEntries == null)
-            enemyGroupSpawnRuleEntries = new SystemPopulationEnemyGroupRuleEntry[0];
-
-        for (int i = 0; i < enemyGroupSpawnRuleEntries.Length; i++)
-        {
-            if (enemyGroupSpawnRuleEntries[i] == null)
-                enemyGroupSpawnRuleEntries[i] = new SystemPopulationEnemyGroupRuleEntry();
-
-            enemyGroupSpawnRuleEntries[i].Validate();
-        }
     }
 #endif
 }
@@ -163,11 +148,11 @@ public sealed class PopulationConfig : BaseConfig
 public sealed class SystemPopulationEnemyGroupRuleEntry
 {
     [Tooltip("Параметр enemyGroupSpawnRule. Используется связанными игровыми системами этого конфига.")]
-    [SerializeField] private EnemyGroupSpawnRuleConfig enemyGroupSpawnRule;
+    [SerializeField] private EnemyInvasionGroupSpawnRuleConfig enemyGroupSpawnRule;
     [Tooltip("Относительный вес выбора этой записи. Чем больше значение, тем чаще запись выбирается среди других подходящих.")]
     [SerializeField] [Min(1)] private int weight = 1;
 
-    public EnemyGroupSpawnRuleConfig EnemyGroupSpawnRule => enemyGroupSpawnRule;
+    public EnemyInvasionGroupSpawnRuleConfig EnemyGroupSpawnRule => enemyGroupSpawnRule;
 
     public int Weight => weight;
 

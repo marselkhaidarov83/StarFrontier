@@ -211,15 +211,25 @@ public sealed class S08_07_LootContentAndSaveEditModeTests
         Assert.That(NpcLootProcessor.ComputeEjectionPosition(origin, 0f, 1f), Is.EqualTo(origin));
     }
 
-    [TestCase(51, 50, 100, 50, true)]
-    [TestCase(50, 49, 100, 50, false)]
-    [TestCase(49, 0, 100, 50, false)]
-    [TestCase(100, 0, 100, 50, true)]
-    [TestCase(100, 99, 100, 50, false)]
-    public void HullThresholdRequiresCrossingFromAbove(
-        int before, int after, int max, int thresholdPercent, bool expected)
+    [TestCase(100, 100, 100, 60, 100, 100, 20, true)]
+    [TestCase(100, 100, 100, 61, 100, 100, 20, false)]
+    [TestCase(100, 60, 100, 59, 100, 100, 20, false)]
+    [TestCase(100, 0, 80, 0, 100, 100, 60, true)]
+    [TestCase(100, 0, 81, 0, 100, 100, 60, false)]
+    [TestCase(100, 100, 0, 0, 100, 100, 100, true)]
+    [TestCase(100, 0, 80, 0, 100, 0, 20, true)]
+    [TestCase(50, 0, 90, 0, 100, 0, 20, false)]
+    public void CombinedDamageThresholdRequiresCrossing(
+        int hullBefore, int shieldBefore, int hullAfter, int shieldAfter,
+        int maxHull, int maxShield, int thresholdPercent, bool expected)
     {
-        Assert.That(NpcLootProcessor.CrossedThreshold(
-            before, after, max, thresholdPercent), Is.EqualTo(expected));
+        Assert.That(NpcLootProcessor.CrossedDamageThreshold(
+            hullBefore, shieldBefore, hullAfter, shieldAfter, maxHull, maxShield, thresholdPercent), Is.EqualTo(expected));
+    }
+
+    [Test] public void LethalHitCrossesAllFiveDamageTiers()
+    {
+        foreach (int threshold in new[] { 20, 40, 60, 80, 100 })
+            Assert.That(NpcLootProcessor.CrossedDamageThreshold(100, 100, 0, 0, 100, 100, threshold), Is.True);
     }
 }

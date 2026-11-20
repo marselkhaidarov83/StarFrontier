@@ -909,7 +909,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return;
 
         AllyConfig allyConfig = _configService.GetAllyConfigById(npc.ConfigId);
-        ShipEquipmentConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
+        ShipEquipmentRuntimeStats grabber = ShipLoadoutRules.ComponentStats(npc, ShipComponentSlot.Grabber, _configService.GetItemConfigById);
         SpaceLootRuntimeState loot = FindCollectibleLoot(npc.LootTargetId);
         if (grabber == null || grabber.Range <= 0f ||
             LootPullSpeedPerTick <= 0f || loot == null ||
@@ -969,7 +969,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
     {
         AllyConfig allyConfig = npc != null && npc.IsAlly
             ? _configService.GetAllyConfigById(npc.ConfigId) : null;
-        ShipEquipmentConfig grabber = allyConfig != null ? allyConfig.Grabber : null;
+        ShipEquipmentRuntimeStats grabber = ShipLoadoutRules.ComponentStats(npc, ShipComponentSlot.Grabber, _configService.GetItemConfigById);
         if (npc == null || npc.AllyRole != AllyRole2A.Ranger || grabber == null ||
             grabber.Range <= 0f || LootPullSpeedPerTick <= 0f)
         {
@@ -2205,7 +2205,7 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             if (!CanNpcTravelToSystem(npc, targetSystem, destinationKind))
                 continue;
 
-            if (!routeService.HasUnlockedRoute(currentSystem.Id, targetSystem.Id))
+            if (!routeService.IsRouteUnlocked(route.Id))
                 continue;
 
             availableRoutes.Add(route);
@@ -2215,80 +2215,6 @@ public sealed class SystemNpcBehaviorService : CustomService, ISystemNpcBehavior
             return null;
 
         return availableRoutes[UnityEngine.Random.Range(0, availableRoutes.Count)];
-    }
-
-    private void SetupLinkedSystemTravel(SystemNpcRuntimeState npc)
-    {
-        SyncNpcPositionWithCurrentPlanet(
-            npc,
-            true);
-
-        ClearMovementTargets(npc);
-
-        StarSystemConfig starSystem =
-            _configService.GetStarSystemConfigById(npc.CurrentSystemId);
-
-        StarSystemLink[] starSystemLinks =
-            starSystem != null ? starSystem.LinkedSystems : null;
-
-        List<StarSystemLink> availableLinks = new();
-
-        if (starSystemLinks != null)
-        {
-            for (int i = 0; i < starSystemLinks.Length; i++)
-            {
-                StarSystemLink candidateLink =
-                    starSystemLinks[i];
-
-                StarSystemConfig targetSystem =
-                    candidateLink?.LinkedSystem;
-
-                if (targetSystem == null ||
-                    string.IsNullOrWhiteSpace(targetSystem.Id))
-                {
-                    continue;
-                }
-
-                if (!CanNpcTravelToSystem(
-                        npc,
-                        targetSystem,
-                        SystemTravelDestinationKind.Allied))
-                {
-                    continue;
-                }
-
-                if (IsInvalidRoutePoint(starSystem, candidateLink.ExitPoint) ||
-                    IsInvalidRoutePoint(targetSystem, candidateLink.EntryPoint))
-                {
-                    continue;
-                }
-
-                availableLinks.Add(candidateLink);
-            }
-        }
-
-        StarSystemLink link =
-            availableLinks.Count > 0
-                ? availableLinks[UnityEngine.Random.Range(0, availableLinks.Count)]
-                : null;
-
-        if (link == null)
-        {
-            npc.CurrentBehavior = SystemNpcBehaviorType.PatrolSystem;
-            SetupPatrolSystem(npc);
-            return;
-        }
-
-        npc.TravelState = SystemNpcTravelState.TravelingToAnotherSystem;
-        npc.IsOnPlanet = false;
-
-        npc.TargetSystemId = link.LinkedSystem.Id;
-        npc.TargetSystemExitPoint = link.ExitPoint;
-        npc.TargetSystemEntryPoint = link.EntryPoint;
-
-        npc.StartPosition = npc.CurrentPosition;
-        npc.TargetPosition = Vector3.zero;
-        npc.TravelProgress01 = 0f;
     }
 
     private RouteConfig PickUnlockedRouteFromSystem(string currentSystemId)

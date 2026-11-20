@@ -58,6 +58,16 @@ public sealed class SystemVisualSizeGridEditModeTests
         RouteEndpointConfig endpoint =
             ScriptableObject.CreateInstance<RouteEndpointConfig>();
 
+        var allyHull = ScriptableObject.CreateInstance<HullConfig>();
+        var enemyHull = ScriptableObject.CreateInstance<HullConfig>();
+        var allyGroup = ScriptableObject.CreateInstance<HullGroupConfig>();
+        var enemyGroup = ScriptableObject.CreateInstance<HullGroupConfig>();
+        typeof(BaseConfig).GetField("id", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(allyHull, "test_ally_hull");
+        typeof(BaseConfig).GetField("id", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(enemyHull, "test_enemy_hull");
+        SetPrivateField(allyGroup, "hullConfigs", new System.Collections.Generic.List<HullConfig> { allyHull });
+        SetPrivateField(enemyGroup, "hullConfigs", new System.Collections.Generic.List<HullConfig> { enemyHull });
+        SetPrivateField(ally, "hullGroup", allyGroup);
+        SetPrivateField(enemy, "hullGroup", enemyGroup);
         try
         {
             SetPrivateField(visualConfig, "sizeUnitPixels", 2f);
@@ -66,8 +76,8 @@ public sealed class SystemVisualSizeGridEditModeTests
             SetPrivateField(planet, "visualSize", 42f);
             SetPrivateField(visualConfig, "stationVisualSize", 88f);
             SetPrivateField(station, "stationTypeConfig", stationType);
-            SetPrivateField(ally, "visualSize", 24f);
-            SetPrivateField(enemy, "visualSize", 36f);
+            allyHull.VisualSize = 24f;
+            enemyHull.VisualSize = 36f;
             SetPrivateField(pirate, "visualSize", 34f);
             SetPrivateField(visualConfig, "systemExitVisualSize", 18f);
 
@@ -101,6 +111,10 @@ public sealed class SystemVisualSizeGridEditModeTests
         }
         finally
         {
+            Object.DestroyImmediate(allyGroup);
+            Object.DestroyImmediate(enemyGroup);
+            Object.DestroyImmediate(allyHull);
+            Object.DestroyImmediate(enemyHull);
             Object.DestroyImmediate(endpoint);
             Object.DestroyImmediate(pirate);
             Object.DestroyImmediate(enemy);

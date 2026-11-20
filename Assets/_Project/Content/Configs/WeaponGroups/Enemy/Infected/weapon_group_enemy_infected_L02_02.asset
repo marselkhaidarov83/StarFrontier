@@ -22,18 +22,7 @@ MonoBehaviour:
     \u043E\u0433\u043E\u043D\u044C. Strict-level: 2; weapon count: 1; enemy baseline
     tier: Silver."
   icon: {fileID: 0}
-  level: 2
-  groupKind: 10
-  allyType: 0
   enemyFaction: 30
-  strengthRank: 0
-  strengthOrder: Enemy faction; not part of ally order
-  weaponOwner: Infected
-  weaponOwnerKey: infected
-  variant: 2
   weaponCount: 1
-  powerScore: 203
-  tierPattern: Silver
-  familyPattern: acid
   weaponConfigs:
   - {fileID: 11400000, guid: 9413f43bfdc644b6096848fd36dc7521, type: 2}

@@ -6801,7 +6801,8 @@ public sealed class SystemNpcMovementService : CustomService, ISystemNpcMovement
 
         if (!string.IsNullOrWhiteSpace(npc.TargetSystemId))
         {
-            if (!CanNpcTravelToSystem(npc, _configService.GetStarSystemConfigById(npc.TargetSystemId)))
+            if (!Bootstrapper.Instance.ServiceRegistry.Get<IRouteService>().HasUnlockedRoute(npc.CurrentSystemId, npc.TargetSystemId) ||
+                !CanNpcTravelToSystem(npc, _configService.GetStarSystemConfigById(npc.TargetSystemId)))
             {
                 npc.TargetSystemId = null;
                 npc.TravelState = SystemNpcTravelState.Idle;

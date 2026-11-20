@@ -21,19 +21,8 @@ MonoBehaviour:
     \u043E\u0433\u043E\u043D\u044C. Strict-level: 6; weapon count: 3; enemy baseline
     tier: Silver."
   icon: {fileID: 0}
-  level: 6
-  groupKind: 10
-  allyType: 0
   enemyFaction: 10
-  strengthRank: 0
-  strengthOrder: Enemy faction; not part of ally order
-  weaponOwner: AI
-  weaponOwnerKey: ai
-  variant: 3
   weaponCount: 3
-  powerScore: 608
-  tierPattern: Silver + Silver + Silver
-  familyPattern: pulse + disruptor + core_bolt
   weaponConfigs:
   - {fileID: 11400000, guid: b4ad2524fe9d64b09a0491d62626fb93, type: 2}
   - {fileID: 11400000, guid: dfcb6e15cfc5147e5a8eeb0616336928, type: 2}

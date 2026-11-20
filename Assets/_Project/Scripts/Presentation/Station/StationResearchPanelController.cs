@@ -131,7 +131,7 @@ public sealed class StationResearchPanelController : MonoBehaviour
     {
         int level = _snapshot.GetLevel(node.Upgrade);
         bool running = _snapshot.Active != null && _snapshot.ActiveUpgrade == node.Upgrade;
-        var model = new ResearchCardData2A { Title = node.Title, Level = level, Completed = level >= 10,
+        var model = new ResearchCardData2A { Title = node.Title, Level = level, Completed = level >= node.MaxLevel,
             Running = running, Icon = node.Icon != null ? node.Icon : branch?.Icon };
         if (model.Completed) { model.Condition = "Завершено"; return model; }
         if (running)

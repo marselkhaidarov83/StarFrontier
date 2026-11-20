@@ -3,10 +3,10 @@
 /// </summary>
 public sealed class ExitMapChangedEvent
 {
-    /// <summary>Ссылка на связанную звёздную систему.</summary>
-    public StarSystemLink StarSystemLink;
-    public ExitMapChangedEvent(StarSystemLink starSystemLink)
+    /// <summary>Маршрут выбранного выхода.</summary>
+    public RouteConfig RouteConfig;
+    public ExitMapChangedEvent(RouteConfig routeConfig)
     {
-        StarSystemLink = starSystemLink;
+        RouteConfig = routeConfig;
     }
 }

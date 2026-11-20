@@ -393,7 +393,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
             EnemyConfig enemyConfig = _configService.GetEnemyConfigById(npc.ConfigId);
 
             if (enemyConfig != null)
-                return enemyConfig.CombatSprite;
+                return enemyConfig.HullGroup?.Resolve(npc.InstalledHull?.ConfigId)?.Icon;
         }
 
         if (npc.NpcType == SystemNpcType.Ally)
@@ -401,7 +401,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
             AllyConfig allyConfig = _configService.GetAllyConfigById(npc.ConfigId);
 
             if (allyConfig != null)
-                return allyConfig.MapSprite;
+                return allyConfig.HullGroup?.Resolve(npc.InstalledHull?.ConfigId)?.Icon;
         }
 
         if (npc.NpcType == SystemNpcType.Pirate)
@@ -431,7 +431,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
 
             return _configService
                 .GameVisualConfig
-                .GetEnemyWorldSize(enemyConfig);
+                .GetEnemyWorldSize(enemyConfig, npc.InstalledHull);
         }
 
         if (npc.NpcType == SystemNpcType.Ally)
@@ -441,7 +441,7 @@ public sealed class SystemNpcViewBinder : CustomMonoBehaviour
 
             return _configService
                 .GameVisualConfig
-                .GetAllyWorldSize(allyConfig);
+                .GetAllyWorldSize(allyConfig, npc.InstalledHull);
         }
 
         if (npc.NpcType == SystemNpcType.Pirate)

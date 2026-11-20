@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c247b39fe8de493796fb0e1fc3ce5c5a, type: 3}
+  m_Name: equipment_group_ally_L05_01
+  m_EditorClassIdentifier:
+  id: "equipment_group_ally_L05_01"
+  displayName: "Оборудование: союзники, уровень 5"
+  description: "Внутренние группы по видам компонентов. Для каждого разрешённого корпусом слота независимо выбирается один вариант. Характеристики экземпляра определяются по диапазонам выбранного оборудования."
+  icon: {fileID: 0}
+  Level: 5
+  slotGroups:
+  - Slot: 0
+    Equipment:
+    - {fileID: 11400000, guid: 0736a8316a4b5b678710da5be4b420c9, type: 2}
+    - {fileID: 11400000, guid: d7111e5d25e84bdd8e54011d0de365e6, type: 2}
+    - {fileID: 11400000, guid: f2858835cba24fd0ad1f7dc21e270028, type: 2}
+  - Slot: 1
+    Equipment:
+    - {fileID: 11400000, guid: 1b529366a0224b62ab740599fd084cdb, type: 2}
+    - {fileID: 11400000, guid: 6a304dcced544e61b27120e4e22e8080, type: 2}
+    - {fileID: 11400000, guid: c28c5ca575ff4157b43574021c1b0da8, type: 2}
+  - Slot: 2
+    Equipment:
+    - {fileID: 11400000, guid: 7e3f292e53ce411cbd11d3abdd3b73ed, type: 2}
+    - {fileID: 11400000, guid: 71d875a749e74e56bac837f41d10486d, type: 2}
+    - {fileID: 11400000, guid: 12f9953c83b2401d9a2e63c5d1c5c41f, type: 2}
+  - Slot: 3
+    Equipment:
+    - {fileID: 11400000, guid: 0b7e2654f97743eabb15b682af2dec62, type: 2}
+    - {fileID: 11400000, guid: a3fe64cc9c1f476d8906cebf71153b42, type: 2}
+    - {fileID: 11400000, guid: d7077da38d7641f8be6d8d499f2f901a, type: 2}
+  - Slot: 4
+    Equipment:
+    - {fileID: 11400000, guid: 1170c31b667345e9ac0f83dc1d235ec4, type: 2}
+    - {fileID: 11400000, guid: c1632b6cc98e44549867c3a634eeebfb, type: 2}
+    - {fileID: 11400000, guid: 52aa960394e44682be79aae5cd3b6212, type: 2}
+  - Slot: 5
+    Equipment:
+    - {fileID: 11400000, guid: b83e4614496d46d1a8d365854f3c57db, type: 2}
+    - {fileID: 11400000, guid: 3b442e3e6bb14d829332208275142101, type: 2}
+    - {fileID: 11400000, guid: 8cd9146d25ad4ac4bd80bdeb7b3197db, type: 2}
+  - Slot: 6
+    Equipment:
+    - {fileID: 11400000, guid: e1bbe5fa63664421a820d18c19a0c6a7, type: 2}
+    - {fileID: 11400000, guid: 210f51ec9b924a27b92552e91ae2d9c0, type: 2}
+    - {fileID: 11400000, guid: 0506db641e9d424a8ee097426dcf5fe6, type: 2}

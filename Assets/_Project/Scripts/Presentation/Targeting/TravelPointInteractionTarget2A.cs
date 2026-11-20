@@ -80,28 +80,6 @@ public sealed class
     }
 
     /// <summary>
-    /// Инициализация через StarSystemLink.
-    /// Оставлена для совместимости
-    /// с существующими системными выходами.
-    /// </summary>
-    public void Initialize(
-        StarSystemLink link)
-    {
-        if (link == null ||
-            link.LinkedSystem == null)
-        {
-            AppLog.Warning(DebugLogChannel.Targeting,
-                typeof(TravelPointInteractionTarget2A),
-                "StarSystemLink or LinkedSystem is null.");
-
-            return;
-        }
-
-        BindDestination(
-            link.LinkedSystem.Id);
-    }
-
-    /// <summary>
     /// Инициализация через событие изменения
     /// точки выхода маршрута.
     /// </summary>

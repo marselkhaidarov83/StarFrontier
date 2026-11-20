@@ -381,11 +381,11 @@ public static class SystemPopulationRuleAssetGenerator
         return null;
     }
 
-    private static EnemyGroupSpawnRuleConfig FindEnemyGroupSpawnRule(
+    private static EnemyInvasionGroupSpawnRuleConfig FindEnemyGroupSpawnRule(
         string id)
     {
         string[] guids =
-            AssetDatabase.FindAssets("t:EnemyGroupSpawnRuleConfig", new[] { EnemyGroupSpawnRuleRoot });
+            AssetDatabase.FindAssets("t:EnemyInvasionGroupSpawnRuleConfig", new[] { EnemyGroupSpawnRuleRoot });
 
         for (int i = 0; i < guids.Length; i++)
         {
@@ -395,8 +395,8 @@ public static class SystemPopulationRuleAssetGenerator
             if (!PathOrFileNameContainsId(path, id))
                 continue;
 
-            EnemyGroupSpawnRuleConfig rule =
-                AssetDatabase.LoadAssetAtPath<EnemyGroupSpawnRuleConfig>(path);
+            EnemyInvasionGroupSpawnRuleConfig rule =
+                AssetDatabase.LoadAssetAtPath<EnemyInvasionGroupSpawnRuleConfig>(path);
 
             if (rule != null)
                 return rule;

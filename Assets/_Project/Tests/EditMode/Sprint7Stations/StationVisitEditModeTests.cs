@@ -67,7 +67,6 @@ public sealed class StationVisitEditModeTests
         public void SetStationDestination(StationConfig config) { }
         public void SetMapPointDestination(Vector3 point) { }
         public void SetNpcDestination(string id) { }
-        public void SetSystemExitDestination(StarSystemLink link) { }
         public void SetSystemExitDestination(RouteExitMapChangedEvent evt) { }
         public void StartTravel() { }
         public void CancelTravel() { CancelCalls++; }

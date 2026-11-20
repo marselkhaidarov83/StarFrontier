@@ -50,6 +50,7 @@ public sealed partial class PlanetMarketEconomyTests
     {
         Set(_item, "marketDevelopmentLevel", requiredLevel);
         _session.State.Galaxy.Research ??= new ResearchRuntimeState();
+        _session.State.Galaxy.Research.Levels.RemoveAll(x => x.Upgrade == ResearchUpgrade.TradeNewGoods);
         _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel
         {
             Upgrade = ResearchUpgrade.TradeNewGoods,
@@ -81,6 +82,9 @@ public sealed partial class PlanetMarketEconomyTests
         var two = Asset<PlanetConfig>("two"); Set(two, "planetTypeConfig", planetType);
         var system = Asset<StarSystemConfig>("system"); Set(system, "planetRefs", new[] { one, two });
         _balance = Asset<MarketEconomyBalanceConfig>("balance");
+        // These tests exercise optional balance hooks independently of the production tree.
+        _balance.WarProtectionResearch = ResearchUpgrade.EconomyWarProtection;
+        _balance.EquipmentBuyoutResearch = ResearchUpgrade.EquipmentBuyout;
         _balance.ResearchLevels = new[] {
             new MarketResearchEffect { Level = 0, WarProductionLoss = 0.5f, WarConsumptionIncrease = 0.5f, MinimumEquipmentBuyoutPercent = 0.1f },
             new MarketResearchEffect { Level = 1, WarProductionLoss = 0, WarConsumptionIncrease = 0, MinimumEquipmentBuyoutPercent = 0.5f } };
@@ -88,7 +92,7 @@ public sealed partial class PlanetMarketEconomyTests
         _events = new SimpleEventBus(); _inventory = new InventoryService(_session, _config, _events);
         _market = new PlanetMarketService(_session, _config, _inventory, _events); _market.InitializeSession();
         _session.State.Galaxy.Research.Normalize();
-        _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel { Upgrade = ResearchUpgrade.TradeMarketImprovement, Level = 1 });
+        _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel { Upgrade = ResearchUpgrade.TradeNewGoods, Level = 1 });
         // Transaction fixtures begin with an empty shelf; the first periodic batch has one weapon.
         _profile.GalaxyLevels[0].WeaponOfferCount = 1;
     }
@@ -113,7 +117,7 @@ public sealed partial class PlanetMarketEconomyTests
         Stock.Quantity = 130;
         _profile.GalaxyLevels.Add(new MarketGalaxyLevelSettings { GalaxyLevel = 2, IntervalSeconds = 5,
             Items = new List<MarketItemEntry> { new MarketItemEntry { ItemConfig = _item, Quantity = 1, StockChange = -10, MaximumStock = 80, BasePrice = 20, MaximumPrice = 60 } } });
-        _session.State.Galaxy.Research.Levels.Find(x => x.Upgrade == ResearchUpgrade.TradeMarketImprovement).Level = 2;
+        _session.State.Galaxy.Research.Levels.Find(x => x.Upgrade == ResearchUpgrade.TradeNewGoods).Level = 2;
         Assert.That(_market.GetPrice(_item.Id, true), Is.EqualTo(20)); Assert.That(Stock.Quantity, Is.EqualTo(130));
         _market.AdvanceTime(5); Assert.That(Stock.Quantity, Is.EqualTo(120));
     }
@@ -282,10 +286,20 @@ public sealed partial class PlanetMarketEconomyTests
         var hull = Asset<AllyConfig>(id);
         var settings = Asset<HullConfig>("hull_" + id);
         settings.Hull = hull; settings.WeaponSlotCount = weaponSlots; settings.AvailableComponentSlots = utility;
-        Set(hull, "hullConfig", settings);
-        Set(hull, "baseCargoCapacityMin", cargo);
+        settings.CargoCapacityMin = settings.CargoCapacityMax = cargo;
+        var group = Asset<HullGroupConfig>("group_" + id);
+        Set(group, "hullConfigs", new List<HullConfig> { settings });
+        Set(hull, "hullGroup", group);
         _config.Hulls.Add(hull);
         return hull;
+    }
+
+    private void SetComponents(AllyConfig actor, ShipEquipmentConfig[] components)
+    {
+        var group = Asset<EquipmentGroupConfig>("equipment_" + actor.Id);
+        var slots = components.GroupBy(x => x.Slot).Select(g => new EquipmentSlotGroup { Slot = g.Key, Equipment = g.ToList() }).ToList();
+        Set(group, "slotGroups", slots);
+        Set(actor, "equipmentGroup", group);
     }
 
     private HangarService ConfigureLoadout(AllyConfig hull)
@@ -324,7 +338,7 @@ public sealed partial class PlanetMarketEconomyTests
         Set(tank, "cargoSize", 3);
         _config.Components.Add(tank);
         var hull = ConfigureHull("bulk-remove-hull", 1, 1000);
-        Set(hull, "defaultComponents", new[] { tank });
+        SetComponents(hull, new[] { tank });
         var hangar = ConfigureLoadout(hull);
         var weapon = CargoWeapon(false, 37);
         Assert.That(hangar.TryChangeLoadout(ShipLoadoutRules.FirstWeaponSlot, weapon.InstanceId, false, out var reason), Is.True, reason);
@@ -410,8 +424,8 @@ public sealed partial class PlanetMarketEconomyTests
 
         var originalHull = ConfigureHull("speed-test-original", 1, 1000);
         var otherHull = ConfigureHull("speed-test-other", 1, 1000);
-        Set(originalHull, "defaultComponents", new[] { standard });
-        Set(otherHull, "defaultComponents", new[] { standard });
+        SetComponents(originalHull, new[] { standard });
+        SetComponents(otherHull, new[] { standard });
         var hangar = ConfigureLoadout(originalHull);
         Assert.That(hangar.GetActiveShipStats().Speed, Is.EqualTo(100));
 
@@ -446,7 +460,7 @@ public sealed partial class PlanetMarketEconomyTests
         next.Slot = ShipComponentSlot.FuelTank; next.FuelCapacity = 160; Set(next, "cargoSize", 5);
         _config.Components.Add(tank); _config.Components.Add(next);
         var hull = ConfigureHull("ship-with-tank", 1, 1000);
-        Set(hull, "defaultComponents", new[] { tank });
+        SetComponents(hull, new[] { tank });
         var hangar = ConfigureLoadout(hull);
         var spare = SystemNpcWeaponRuntimeState.NewComponent(next, "larger-tank");
         spare.CurrentDurability = 67;
@@ -1232,7 +1246,6 @@ public sealed partial class PlanetMarketEconomyTests
         public InvasionScheduleConfig InvasionScheduleConfig => null; public CombatDamagePopupVisualConfig2A CombatDamagePopupVisualConfig => null;
         public NpcBehaviourTransitionMatrixConfig NpcBehaviourTransitionMatrixConfig => null;
         public IReadOnlyList<SectorConfig> GetAllSectors() => Array.Empty<SectorConfig>();
-        public StarSystemLink GetCurrentStarSystemLink(string id) => null;
         public bool ContainsStarSystem(string id) => id == System.Id;
         public IReadOnlyList<StarSystemConfig> GetAllStarSystems() { SystemListReads++; return Systems ?? new[] { System }; }
         public bool TryGetStarSystem(string id, out StarSystemConfig value) { value = GetStarSystemConfigById(id); return value != null; }
