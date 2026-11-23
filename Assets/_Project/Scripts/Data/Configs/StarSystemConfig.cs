@@ -19,15 +19,13 @@ public class StarSystemConfig : BaseConfig
     [SerializeField] private Vector2 mapPosition;
 
     [Header("Npc")]
-    [Tooltip("Правила союзной популяции. Группы вторжения назначаются отдельным набором в профиле.")]
+    [Tooltip("Правила союзной и вражеской популяции. Группы вторжения назначаются отдельным набором в профиле.")]
     [SerializeField] private PopulationConfig systemPopulationRule;
 
     [Header("Спавн врагов")]
     [FormerlySerializedAs("npcSpawnPoints")]
     [Tooltip("Конфиг базовых точек спавна врагов и радиуса разброса в этой системе.")]
     [SerializeField] private SystemEnemySpawnPointConfig enemySpawnPoints;
-    [Tooltip("Набор правил спавна врагов для вражеской системы. Выбор конкретного правила зависит от фракции-владельца системы.")]
-    [SerializeField] private EnemySpawnRuleSetConfig enemySpawnRuleSet;
 
     [Header("AtStart")]
     [Tooltip("Отмечает стартовую систему игрока.")]
@@ -47,7 +45,6 @@ public class StarSystemConfig : BaseConfig
     public bool IsStartSystem => isStartSystem;
     public System.Collections.Generic.List<RouteConfig> Routes => routes;
     public StationConfig Station => station;
-    public EnemySpawnRuleSetConfig EnemySpawnRuleSet => enemySpawnRuleSet;
     public InvasionSpawnRuleSetConfig InvasionSpawnRuleSet =>
         systemPopulationRule != null ? systemPopulationRule.InvasionSpawnRuleSet : null;
 }

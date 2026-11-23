@@ -30,7 +30,6 @@ MonoBehaviour:
   systemPopulationRule: {fileID: 11400000, guid: 66c62cc24edfc4f1dbb54807b1cd44e5, type: 2}
   enemySystemPopulationRule: {fileID: 0}
   enemySpawnPoints: {fileID: 11400000, guid: 96ce7fdeb2984492dabf71320674678f, type: 2}
-  enemySpawnRuleSet: {fileID: 11400000, guid: 6f6130b840715453e9cdea168632e6fa, type: 2}
   isStartSystem: 0
   routes:
   - {fileID: 11400000, guid: 1a48a1a325707495795962e46c824f89, type: 2}

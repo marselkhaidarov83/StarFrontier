@@ -30,7 +30,7 @@ public sealed class EnemySpawnService :
     public bool TrySpawnSystemGuardGroup(
         StarSystemConfig starSystem, EnemyInvasionGroupSpawnRuleConfig rule, out EnemyGroupState enemyGroupState)
     {
-        // Legacy API: regular population must use EnemySpawnRuleSetConfig instead.
+        // Legacy API: regular population uses EnemySpawnRuleConfig from PopulationConfig.
         enemyGroupState = null;
         return false;
     }

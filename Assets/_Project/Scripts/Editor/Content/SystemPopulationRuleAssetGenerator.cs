@@ -186,7 +186,9 @@ public static class SystemPopulationRuleAssetGenerator
             "allySpawnRules",
             new[] { allyRule });
 
-        SetPrivateField(asset, "enemyGroupSpawnRuleEntries", Array.Empty<SystemPopulationEnemyGroupRuleEntry>());
+        SetPrivateField(asset, "enemySpawnRules", profile.HasEnemies
+            ? EnemySpawnRuleAssetGenerator.LoadFactionRules()
+            : Array.Empty<EnemySpawnRuleConfig>());
         InvasionSpawnRuleSetConfig invasionRules = profile.HasEnemies
             ? AssetDatabase.LoadAssetAtPath<InvasionSpawnRuleSetConfig>(
                 "Assets/_Project/Content/Configs/Population/invasionSpawnRules_01.asset")

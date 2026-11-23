@@ -48,3 +48,4 @@ MonoBehaviour:
   - Level: 10
     AllySpawnRules:
     - {fileID: 11400000, guid: 42349282b336526a92725227fe72e8ae, type: 2}
+  enemySpawnRules: []

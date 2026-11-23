@@ -15,6 +15,22 @@ public sealed class PopulationConfig : BaseConfig
     [SerializeField] private AllySpawnRuleConfig[] allySpawnRules =
         new AllySpawnRuleConfig[0];
 
+    [Header("Вражеская популяция системы")]
+    [Tooltip("Правила обычной популяции врагов. Фракция берётся из самого правила. Для станций список пуст.")]
+    [SerializeField] private EnemySpawnRuleConfig[] enemySpawnRules = Array.Empty<EnemySpawnRuleConfig>();
+
+    public EnemySpawnRuleConfig[] EnemySpawnRules => enemySpawnRules;
+
+    public EnemySpawnRuleConfig GetEnemySpawnRule(EnemyFaction2A faction)
+    {
+        foreach (var rule in enemySpawnRules ?? Array.Empty<EnemySpawnRuleConfig>())
+        {
+            if (rule != null && rule.Faction == faction)
+                return rule;
+        }
+        return null;
+    }
+
     [Header("Invasion Rules")]
     [SerializeField] private InvasionSpawnRuleSetConfig invasionSpawnRuleSet;
     public InvasionSpawnRuleSetConfig InvasionSpawnRuleSet =>
@@ -47,6 +63,9 @@ public sealed class PopulationConfig : BaseConfig
     public bool HasAnySpawnRule()
     {
         if (HasAnyAllySpawnRule())
+            return true;
+
+        if (Array.Exists(enemySpawnRules ?? Array.Empty<EnemySpawnRuleConfig>(), rule => rule != null))
             return true;
 
         if (HasAnyEnemyGroupSpawnRule())

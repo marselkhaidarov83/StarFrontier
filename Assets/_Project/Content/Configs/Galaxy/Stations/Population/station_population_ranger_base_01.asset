@@ -38,3 +38,4 @@ MonoBehaviour:
     AllySpawnRules: []
   - Level: 10
     AllySpawnRules: []
+  enemySpawnRules: []

@@ -25,3 +25,4 @@ MonoBehaviour:
   allySpawnRules:
   - {fileID: 11400000, guid: a61a1bd8b35364996aef8e67439de709, type: 2}
   invasionSpawnRuleSet: {fileID: 0}
+  enemySpawnRules: []

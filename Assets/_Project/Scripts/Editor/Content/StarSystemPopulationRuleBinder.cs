@@ -10,14 +10,8 @@ public static class StarSystemPopulationRuleBinder
     private const string PopulationRuleRoot =
         "Assets/_Project/Content/Configs/Population/SystemPopulationRules";
 
-    private const string EnemySpawnRuleRoot =
-        "Assets/_Project/Content/Configs/Population/EnemySpawnRules";
-
     private const string SectorRoot =
         "Assets/_Project/Content/Configs/Galaxy/Sectors";
-
-    private const string EnemySpawnRuleSetId =
-        "enemy_spawn_rule_factions_01";
 
     [MenuItem("STAR FRONTIER/Content/09. System Population Rules/Bind rules to StarSystemConfig by station")]
     public static void BindRulesToStarSystemsByStation()
@@ -52,22 +46,9 @@ public static class StarSystemPopulationRuleBinder
             return;
         }
 
-        EnemySpawnRuleSetConfig enemyRuleSet =
-            FindEnemySpawnRuleSet(EnemySpawnRuleSetId);
-
-        if (enemyRuleSet == null)
-        {
-            EditorUtility.DisplayDialog(
-                "PopulationConfig binder",
-                "Required EnemySpawnRuleSetConfig was not found: " +
-                EnemySpawnRuleSetId +
-                ". Run Create generated EnemySpawnRule assets first.",
-                "OK");
-            return;
-        }
+        EnemySpawnRuleAssetGenerator.BindPopulationRules(onlyMissing);
 
         int populationUpdated = 0;
-        int enemyUpdated = 0;
         int unchanged = 0;
         int warnings = 0;
 
@@ -134,45 +115,6 @@ public static class StarSystemPopulationRuleBinder
                     starSystem.Id);
             }
 
-            if (ShouldBindEnemySpawnRuleSet(starSystem))
-            {
-                string enemyError = string.Empty;
-                bool enemyChanged = false;
-
-                if (TryBindObjectReference(
-                        serializedObject,
-                        "enemySpawnRuleSet",
-                        enemyRuleSet,
-                        onlyMissing,
-                        out enemyChanged,
-                        out enemyError))
-                {
-                    if (enemyChanged)
-                    {
-                        enemyUpdated++;
-                        changed = true;
-
-                        AppLog.Info(
-                            DebugLogChannel.DataValidation,
-                            "StarSystemPopulationRuleBinder: bound " +
-                            enemyRuleSet.Id +
-                            " to enemySpawnRuleSet of " +
-                            starSystem.Id);
-                    }
-                }
-
-                if (!string.IsNullOrWhiteSpace(enemyError))
-                {
-                    warnings++;
-                    AppLog.Warning(
-                        DebugLogChannel.DataValidation,
-                        "StarSystemPopulationRuleBinder: " +
-                        enemyError +
-                        " System: " +
-                        starSystem.Id);
-                }
-            }
-
             if (changed)
             {
                 serializedObject.ApplyModifiedPropertiesWithoutUndo();
@@ -191,7 +133,6 @@ public static class StarSystemPopulationRuleBinder
             "PopulationConfig binder",
             "Done. " +
             $"Population updated: {populationUpdated}. " +
-            $"Enemy updated: {enemyUpdated}. " +
             $"Unchanged: {unchanged}. " +
             $"Warnings: {warnings}.",
             "OK");
@@ -211,8 +152,7 @@ public static class StarSystemPopulationRuleBinder
         RuleSet rules =
             LoadRules();
 
-        EnemySpawnRuleSetConfig enemyRuleSet =
-            FindEnemySpawnRuleSet(EnemySpawnRuleSetId);
+        EnemySpawnRuleAssetGenerator.BindPopulationRules(onlyMissing: true);
 
         string[] guids =
             AssetDatabase.FindAssets("t:StarSystemConfig", new[] { StarSystemRoot });
@@ -268,57 +208,22 @@ public static class StarSystemPopulationRuleBinder
                 }
             }
 
-            if (!ShouldBindEnemySpawnRuleSet(starSystem))
-                continue;
-
-            if (enemyRuleSet == null)
+            if (!IsFirstSectorSystem(starSystem) && starSystem.Population != null)
             {
-                errors++;
-
-                AppLog.Error(
-                    DebugLogChannel.DataValidation,
-                    "StarSystemPopulationRule validation: missing EnemySpawnRuleSetConfig asset " +
-                    EnemySpawnRuleSetId +
-                    ". Run EnemySpawnRuleAssetGenerator first.");
-                continue;
-            }
-
-            if (starSystem.EnemySpawnRuleSet != null)
-                continue;
-
-            string enemyAssignError = string.Empty;
-
-            if (TryAssignEnemySpawnRuleSet(
-                    starSystem,
-                    enemyRuleSet,
-                    out enemyAssignError))
-            {
-                repaired++;
-
-                AppLog.Info(
-                    DebugLogChannel.DataValidation,
-                    "StarSystemPopulationRule validation: repaired missing EnemySpawnRuleSet at " +
-                    path + " (" + starSystem.Id + "). Assigned: " +
-                    enemyRuleSet.Id + ".");
-            }
-            else
-            {
-                errors++;
-
-                AppLog.Error(
-                    DebugLogChannel.DataValidation,
-                    "StarSystemPopulationRule validation: missing EnemySpawnRuleSet at " +
-                    path + " (" + starSystem.Id + "). Expected: " +
-                    enemyRuleSet.Id +
-                    ". AssignError: " + enemyAssignError);
+                foreach (var faction in new[] { EnemyFaction2A.AI, EnemyFaction2A.Ancients, EnemyFaction2A.Infected })
+                {
+                    if (starSystem.Population.GetEnemySpawnRule(faction) == null)
+                    {
+                        errors++;
+                        AppLog.Error(DebugLogChannel.DataValidation,
+                            $"Missing enemy population rule for {faction} in {starSystem.Id}.");
+                    }
+                }
             }
         }
 
-        if (repaired > 0)
-        {
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog(
             "StarSystemConfig population rule validation",
@@ -358,43 +263,6 @@ public static class StarSystemPopulationRuleBinder
         }
 
         ruleProperty.objectReferenceValue = rule;
-        serializedObject.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(starSystem);
-        return true;
-    }
-
-    private static bool TryAssignEnemySpawnRuleSet(
-        StarSystemConfig starSystem,
-        EnemySpawnRuleSetConfig ruleSet,
-        out string error)
-    {
-        error = string.Empty;
-
-        if (starSystem == null)
-        {
-            error = "StarSystemConfig is null.";
-            return false;
-        }
-
-        if (ruleSet == null)
-        {
-            error = "EnemySpawnRuleSetConfig is null.";
-            return false;
-        }
-
-        SerializedObject serializedObject =
-            new SerializedObject(starSystem);
-
-        SerializedProperty ruleProperty =
-            serializedObject.FindProperty("enemySpawnRuleSet");
-
-        if (ruleProperty == null)
-        {
-            error = "StarSystemConfig.enemySpawnRuleSet field was not found.";
-            return false;
-        }
-
-        ruleProperty.objectReferenceValue = ruleSet;
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(starSystem);
         return true;
@@ -550,12 +418,6 @@ public static class StarSystemPopulationRuleBinder
         return regularRule;
     }
 
-    private static bool ShouldBindEnemySpawnRuleSet(
-        StarSystemConfig starSystem)
-    {
-        return GetSectorOrderForSystem(starSystem) >= 2;
-    }
-
     private static bool IsFirstSectorSystem(
         StarSystemConfig starSystem)
     {
@@ -617,35 +479,6 @@ public static class StarSystemPopulationRuleBinder
 
             if (rule != null)
                 return rule;
-        }
-
-        return null;
-    }
-
-    private static EnemySpawnRuleSetConfig FindEnemySpawnRuleSet(
-        string id)
-    {
-        string[] guids =
-            AssetDatabase.FindAssets("t:EnemySpawnRuleSetConfig", new[] { EnemySpawnRuleRoot });
-
-        for (int i = 0; i < guids.Length; i++)
-        {
-            string path =
-                AssetDatabase.GUIDToAssetPath(guids[i]);
-
-            EnemySpawnRuleSetConfig ruleSet =
-                AssetDatabase.LoadAssetAtPath<EnemySpawnRuleSetConfig>(path);
-
-            if (ruleSet == null)
-                continue;
-
-            if (string.Equals(
-                    ruleSet.Id,
-                    id,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return ruleSet;
-            }
         }
 
         return null;

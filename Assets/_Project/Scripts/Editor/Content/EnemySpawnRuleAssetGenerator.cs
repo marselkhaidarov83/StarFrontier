@@ -12,9 +12,6 @@ public static class EnemySpawnRuleAssetGenerator
     private const string EnemyConfigRoot =
         "Assets/_Project/Content/Configs/Population/Enemies";
 
-    private const string RuleSetId =
-        "enemy_spawn_rule_factions_01";
-
     [MenuItem("STAR FRONTIER/Content/06b. Enemy Spawn Rules/Create generated EnemySpawnRule assets")]
     public static void CreateGeneratedEnemySpawnRules()
     {
@@ -30,9 +27,6 @@ public static class EnemySpawnRuleAssetGenerator
         int updated = 0;
         int warnings = 0;
         int errors = 0;
-
-        EnemySpawnRuleConfig[] generatedRules =
-            new EnemySpawnRuleConfig[profiles.Length];
 
         AssetDatabase.StartAssetEditing();
 
@@ -77,45 +71,14 @@ public static class EnemySpawnRuleAssetGenerator
 
                 if (!ValidateEnemySpawnRuleInMemory(asset, path))
                     errors++;
-
-                generatedRules[i] = asset;
             }
-
-            string ruleSetPath =
-                $"{OutputRoot}/{RuleSetId}.asset";
-
-            EnemySpawnRuleSetConfig ruleSet =
-                FindExistingEnemySpawnRuleSet(
-                    RuleSetId,
-                    ruleSetPath);
-
-            if (ruleSet == null)
-            {
-                ruleSet =
-                    ScriptableObject.CreateInstance<EnemySpawnRuleSetConfig>();
-
-                AssetDatabase.CreateAsset(ruleSet, ruleSetPath);
-                created++;
-            }
-            else
-            {
-                updated++;
-            }
-
-            WriteEnemySpawnRuleSet(
-                ruleSet,
-                generatedRules);
-
-            EditorUtility.SetDirty(ruleSet);
-
-            if (!ValidateEnemySpawnRuleSetInMemory(ruleSet, ruleSetPath))
-                errors++;
         }
         finally
         {
             AssetDatabase.StopAssetEditing();
         }
 
+        BindPopulationRules(onlyMissing: true);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
@@ -152,17 +115,6 @@ public static class EnemySpawnRuleAssetGenerator
             if (!ValidateEnemySpawnRuleInMemory(rule, path))
                 errors++;
         }
-
-        string ruleSetPath =
-            $"{OutputRoot}/{RuleSetId}.asset";
-
-        EnemySpawnRuleSetConfig ruleSet =
-            AssetDatabase.LoadAssetAtPath<EnemySpawnRuleSetConfig>(ruleSetPath);
-
-        checkedAssets++;
-
-        if (!ValidateEnemySpawnRuleSetInMemory(ruleSet, ruleSetPath))
-            errors++;
 
         EditorUtility.DisplayDialog(
             "EnemySpawnRule validation",
@@ -201,15 +153,6 @@ public static class EnemySpawnRuleAssetGenerator
                 deleted++;
         }
 
-        string ruleSetPath =
-            $"{OutputRoot}/{RuleSetId}.asset";
-
-        if (AssetDatabase.LoadAssetAtPath<EnemySpawnRuleSetConfig>(ruleSetPath) != null &&
-            AssetDatabase.DeleteAsset(ruleSetPath))
-        {
-            deleted++;
-        }
-
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
@@ -217,6 +160,46 @@ public static class EnemySpawnRuleAssetGenerator
             "EnemySpawnRule generator",
             $"Deleted: {deleted}.",
             "OK");
+    }
+
+    public static EnemySpawnRuleConfig[] LoadFactionRules()
+    {
+        var factions = GetFactions();
+        var rules = new EnemySpawnRuleConfig[factions.Length];
+        for (int i = 0; i < factions.Length; i++)
+        {
+            string id = BuildRuleId(factions[i]);
+            rules[i] = FindExistingEnemySpawnRule(id, $"{OutputRoot}/{id}.asset");
+            if (rules[i] == null || rules[i].Faction != factions[i])
+                throw new InvalidOperationException($"Missing or mismatched enemy population rule: {id}");
+        }
+        return rules;
+    }
+
+    public static void BindPopulationRules(bool onlyMissing)
+    {
+        var rules = LoadFactionRules();
+        foreach (string guid in AssetDatabase.FindAssets("t:PopulationConfig",
+            new[] { "Assets/_Project/Content/Configs/Population/SystemPopulationRules" }))
+        {
+            var population = AssetDatabase.LoadAssetAtPath<PopulationConfig>(AssetDatabase.GUIDToAssetPath(guid));
+            if (population == null)
+                continue;
+            if (!string.IsNullOrEmpty(population.Id) &&
+                population.Id.IndexOf("_no_enemies_", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                if (population.EnemySpawnRules == null || population.EnemySpawnRules.Length == 0)
+                    continue;
+                SetPrivateField(population, "enemySpawnRules", Array.Empty<EnemySpawnRuleConfig>());
+            }
+            else
+            {
+                if (onlyMissing && population.EnemySpawnRules != null && population.EnemySpawnRules.Length > 0)
+                    continue;
+                SetPrivateField(population, "enemySpawnRules", rules);
+            }
+            EditorUtility.SetDirty(population);
+        }
     }
 
     private static int WriteEnemySpawnRule(
@@ -258,37 +241,6 @@ public static class EnemySpawnRuleAssetGenerator
         SetPrivateField(asset, "levelEntries", levelEntries);
 
         return warnings;
-    }
-
-    private static void WriteEnemySpawnRuleSet(
-        EnemySpawnRuleSetConfig ruleSet,
-        EnemySpawnRuleConfig[] rules)
-    {
-        SetPrivateField(ruleSet, "id", RuleSetId);
-        SetPrivateField(ruleSet, "displayName", "Правила спавна врагов по фракциям");
-        SetPrivateField(
-            ruleSet,
-            "description",
-            "Агрегирующий ассет для вражеских систем. Содержит отдельные правила спавна AI, Ancients и Infected.");
-
-        EnemySpawnRuleSetEntry[] entries =
-            new EnemySpawnRuleSetEntry[3];
-
-        EnemyFaction2A[] factions =
-            GetFactions();
-
-        for (int i = 0; i < factions.Length; i++)
-        {
-            EnemySpawnRuleSetEntry entry =
-                new EnemySpawnRuleSetEntry();
-
-            SetPrivateField(entry, "faction", factions[i]);
-            SetPrivateField(entry, "spawnRule", FindRuleForFaction(rules, factions[i]));
-
-            entries[i] = entry;
-        }
-
-        SetPrivateField(ruleSet, "factionRules", entries);
     }
 
     private static EnemyGroupEntryConfig[] BuildEnemyEntries(
@@ -572,52 +524,6 @@ public static class EnemySpawnRuleAssetGenerator
         return isValid;
     }
 
-    private static bool ValidateEnemySpawnRuleSetInMemory(
-        EnemySpawnRuleSetConfig ruleSet,
-        string path)
-    {
-        if (ruleSet == null)
-        {
-            AppLog.Error(DebugLogChannel.EditorGenerators,
-                "EnemySpawnRuleSet validation: missing rule set at " + path);
-            return false;
-        }
-
-        bool isValid = true;
-
-        EnemyFaction2A[] factions =
-            GetFactions();
-
-        for (int i = 0; i < factions.Length; i++)
-        {
-            EnemySpawnRuleConfig rule =
-                ruleSet.GetRuleForFaction(factions[i]);
-
-            if (rule == null)
-            {
-                AppLog.Error(DebugLogChannel.EditorGenerators,
-                    "EnemySpawnRuleSet validation: missing rule for faction " +
-                    factions[i] +
-                    " at " +
-                    path);
-                isValid = false;
-                continue;
-            }
-
-            if (rule.Faction != factions[i])
-            {
-                AppLog.Error(DebugLogChannel.EditorGenerators,
-                    "EnemySpawnRuleSet validation: rule faction mismatch for " +
-                    factions[i] +
-                    " at " +
-                    path);
-                isValid = false;
-            }
-        }
-
-        return isValid;
-    }
-
     private static EnemySpawnRuleConfig FindExistingEnemySpawnRule(
         string id,
         string path)
@@ -651,66 +557,6 @@ public static class EnemySpawnRuleAssetGenerator
             {
                 return candidate;
             }
-        }
-
-        return null;
-    }
-
-    private static EnemySpawnRuleSetConfig FindExistingEnemySpawnRuleSet(
-        string id,
-        string path)
-    {
-        EnemySpawnRuleSetConfig asset =
-            AssetDatabase.LoadAssetAtPath<EnemySpawnRuleSetConfig>(path);
-
-        if (asset != null)
-            return asset;
-
-        string[] guids =
-            AssetDatabase.FindAssets(
-                "t:EnemySpawnRuleSetConfig",
-                new[] { OutputRoot });
-
-        for (int i = 0; i < guids.Length; i++)
-        {
-            string candidatePath =
-                AssetDatabase.GUIDToAssetPath(guids[i]);
-
-            EnemySpawnRuleSetConfig candidate =
-                AssetDatabase.LoadAssetAtPath<EnemySpawnRuleSetConfig>(candidatePath);
-
-            if (candidate == null)
-                continue;
-
-            if (string.Equals(
-                    candidate.Id,
-                    id,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return candidate;
-            }
-        }
-
-        return null;
-    }
-
-    private static EnemySpawnRuleConfig FindRuleForFaction(
-        EnemySpawnRuleConfig[] rules,
-        EnemyFaction2A faction)
-    {
-        if (rules == null)
-            return null;
-
-        for (int i = 0; i < rules.Length; i++)
-        {
-            EnemySpawnRuleConfig rule =
-                rules[i];
-
-            if (rule == null)
-                continue;
-
-            if (rule.Faction == faction)
-                return rule;
         }
 
         return null;

@@ -113,14 +113,14 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
         if (starSystem == null)
             return;
 
-        EnemySpawnRuleSetConfig ruleSet =
-            starSystem.EnemySpawnRuleSet;
+        PopulationConfig population =
+            starSystem.Population;
 
-        if (ruleSet == null)
+        if (population == null)
         {
             LogEnemyPopulationDecision(
                 starSystem,
-                "SKIP_NO_ENEMY_RULE_SET");
+                "SKIP_NO_POPULATION_CONFIG");
             return;
         }
 
@@ -132,19 +132,19 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             LogEnemyPopulationDecision(
                 starSystem,
                 "SKIP_NO_OWNER_FACTION",
-                "EnemyRuleSet=" + ruleSet.Id);
+                "Population=" + population.Id);
             return;
         }
 
         EnemySpawnRuleConfig rule =
-            ruleSet.GetRuleForFaction(faction.Value);
+            population.GetEnemySpawnRule(faction.Value);
 
         if (rule == null)
         {
             LogEnemyPopulationDecision(
                 starSystem,
                 "SKIP_NO_RULE_FOR_FACTION",
-                "EnemyRuleSet=" + ruleSet.Id +
+                "Population=" + population.Id +
                 ", Faction=" + faction.Value);
             return;
         }
@@ -157,7 +157,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             LogEnemyPopulationDecision(
                 starSystem,
                 "SKIP_NO_VALID_ENEMIES_FOR_LEVEL",
-                "EnemyRuleSet=" + ruleSet.Id +
+                "Population=" + population.Id +
                 ", Rule=" + rule.Id +
                 ", Faction=" + faction.Value +
                 ", GalaxyLevel=" + currentGalaxyLevel);
@@ -172,7 +172,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             LogEnemyPopulationDecision(
                 starSystem,
                 "SKIP_NO_ENEMY_ENTRIES",
-                "EnemyRuleSet=" + ruleSet.Id +
+                "Population=" + population.Id +
                 ", Rule=" + rule.Id +
                 ", Faction=" + faction.Value +
                 ", GalaxyLevel=" + currentGalaxyLevel);
@@ -211,7 +211,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
                 reason,
                 details),
             (entry, enemyConfig, aliveCount) =>
-                "EnemyRuleSet=" + ruleSet.Id +
+                "Population=" + population.Id +
                 ", Rule=" + rule.Id +
                 ", Faction=" + faction.Value +
                 ", Config=" + enemyConfig.Id +
@@ -1579,10 +1579,10 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
     private EnemySpawnRuleConfig ResolveEnemyPopulationRule(StarSystemConfig system)
     {
-        if (!CanSpawnEnemyPopulation(system) || system.EnemySpawnRuleSet == null)
+        if (!CanSpawnEnemyPopulation(system) || system.Population == null)
             return null;
         EnemyFaction2A? faction = ResolveEnemyFactionForSystem(system);
-        return faction.HasValue ? system.EnemySpawnRuleSet.GetRuleForFaction(faction.Value) : null;
+        return faction.HasValue ? system.Population.GetEnemySpawnRule(faction.Value) : null;
     }
 
     private bool IsEnemySystem(
@@ -1806,7 +1806,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
 
         if (starSystem != null &&
             CanSpawnEnemyPopulation(starSystem) &&
-            starSystem.EnemySpawnRuleSet != null)
+            starSystem.Population != null)
         {
             EnemyFaction2A? faction =
                 ResolveEnemyFactionForSystem(starSystem);
@@ -1814,7 +1814,7 @@ public sealed class SystemNpcPopulationService : CustomService, ISystemNpcPopula
             if (faction.HasValue)
             {
                 EnemySpawnRuleConfig enemyPopulationRule =
-                    starSystem.EnemySpawnRuleSet.GetRuleForFaction(
+                    starSystem.Population.GetEnemySpawnRule(
                         faction.Value);
 
                 if (enemyPopulationRule != null &&
