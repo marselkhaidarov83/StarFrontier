@@ -19,7 +19,8 @@ public sealed class StationMilitaryRestoreEditModeTests
     private sealed class Config : IConfigService
     {
         public SectorConfig[] Sectors;
-        public MarketEconomyBalanceConfig MarketEconomy => null;
+        public IReadOnlyList<MarketEquipmentCatalogEntry> EquipmentCatalog { get; } = new List<MarketEquipmentCatalogEntry>();
+        public IReadOnlyList<MarketHullCatalogEntry> HullCatalog { get; } = new List<MarketHullCatalogEntry>();
         public MissionGameplayConfig MissionGameplay => null;
         public GameTimeConfig GameTimeConfig => null;
         public DebugSettings DebugSettings => null;

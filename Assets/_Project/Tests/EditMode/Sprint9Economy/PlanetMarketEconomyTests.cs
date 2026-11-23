@@ -17,7 +17,6 @@ public sealed partial class PlanetMarketEconomyTests
     private MarketProfileConfig _profile;
     private ItemConfig _item;
     private WeaponConfig _weapon;
-    private MarketEconomyBalanceConfig _balance;
     private ShipRuntimeData Ship => _session.State.Player.GetActiveShip();
     private MarketRuntimeData Market => _market.CurrentMarket;
     private MarketRuntimeItemState Stock => Market.Items.Single(x => x.ItemId == _item.Id);
@@ -81,14 +80,16 @@ public sealed partial class PlanetMarketEconomyTests
         var one = Asset<PlanetConfig>("one"); Set(one, "planetTypeConfig", planetType);
         var two = Asset<PlanetConfig>("two"); Set(two, "planetTypeConfig", planetType);
         var system = Asset<StarSystemConfig>("system"); Set(system, "planetRefs", new[] { one, two });
-        _balance = Asset<MarketEconomyBalanceConfig>("balance");
-        // These tests exercise optional balance hooks independently of the production tree.
-        _balance.WarProtectionResearch = ResearchUpgrade.EconomyWarProtection;
-        _balance.EquipmentBuyoutResearch = ResearchUpgrade.EquipmentBuyout;
-        _balance.ResearchLevels = new[] {
-            new MarketResearchEffect { Level = 0, WarProductionLoss = 0.5f, WarConsumptionIncrease = 0.5f, MinimumEquipmentBuyoutPercent = 0.1f },
-            new MarketResearchEffect { Level = 1, WarProductionLoss = 0, WarConsumptionIncrease = 0, MinimumEquipmentBuyoutPercent = 0.5f } };
-        _config = new Configs { MarketEconomy = _balance, System = system, Item = _item, Weapon = _weapon, Planets = new[] { one, two } };
+        _config = new Configs { System = system, Item = _item, Weapon = _weapon, Planets = new[] { one, two } };
+        var repairIds = new List<string> { LocationServicePrices.HullRepairItemId, LocationServicePrices.WeaponRepairItemId };
+        foreach (ShipComponentSlot slot in Enum.GetValues(typeof(ShipComponentSlot)))
+            repairIds.Add(LocationServicePrices.ComponentRepairItemId(slot));
+        foreach (string id in repairIds)
+        {
+            var repairItem = Asset<ItemConfig>(id);
+            Set(repairItem, "basePrice", id == LocationServicePrices.ComponentRepairItemId(ShipComponentSlot.Engine) ? 3 : 2);
+            _config.ServiceItems.Add(repairItem);
+        }
         _events = new SimpleEventBus(); _inventory = new InventoryService(_session, _config, _events);
         _market = new PlanetMarketService(_session, _config, _inventory, _events); _market.InitializeSession();
         _session.State.Galaxy.Research.Normalize();
@@ -121,16 +122,16 @@ public sealed partial class PlanetMarketEconomyTests
         Assert.That(_market.GetPrice(_item.Id, true), Is.EqualTo(20)); Assert.That(Stock.Quantity, Is.EqualTo(130));
         _market.AdvanceTime(5); Assert.That(Stock.Quantity, Is.EqualTo(120));
     }
-    [TestCase(7, 53)] [TestCase(-7, 39)] [TestCase(0, 50)]
-    public void WarChangesSignedRate(int rate, int expected)
+    [TestCase(7, 57)] [TestCase(-7, 43)] [TestCase(0, 50)]
+    public void WarDoesNotChangeSignedRate(int rate, int expected)
     { Entry.StockChange = rate; _session.State.Galaxy.Systems[0].SystemStatus = StarSystemStatus.Invasion;
       _market.AdvanceTime(10); Assert.That(Stock.Quantity, Is.EqualTo(expected)); }
     [TestCase(7, 57)] [TestCase(-7, 43)]
-    public void ProtectionResearch_ReducesBothWarEffects(int rate, int expected)
+    public void UnlinkedProtectionResearch_DoesNotChangeStockRate(int rate, int expected)
     { Entry.StockChange = rate; _session.State.Galaxy.Systems[0].SystemStatus = StarSystemStatus.Invasion;
       _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel { Upgrade = ResearchUpgrade.EconomyWarProtection, Level = 1 });
       _market.AdvanceTime(10); Assert.That(Stock.Quantity, Is.EqualTo(expected)); }
-    [Test] public void FractionalWarRate_IsIndependentOfFrameGrouping()
+    [Test] public void StockRate_IsIndependentOfFrameGroupingDuringWar()
     {
         Entry.StockChange = 1; _session.State.Galaxy.Systems[0].SystemStatus = StarSystemStatus.Invasion;
         string initial = JsonUtility.ToJson(_session.State); _market.AdvanceTime(30);
@@ -438,7 +439,7 @@ public sealed partial class PlanetMarketEconomyTests
         var hullItem = Asset<HullConfig>("speed-test-hull-item");
         hullItem.Hull = otherHull;
         hullItem.WeaponSlotCount = otherHull.WeaponSlotCount; hullItem.AvailableComponentSlots = otherHull.AvailableComponentSlots;
-        _balance.HullCatalog.Add(new MarketHullRule { Hull = hullItem, NewPrice = 800 });
+        _config.HullCatalog.Add(new MarketHullRule { Hull = hullItem, NewPrice = 800 });
         var spare = new HullEquipmentRuntimeState
         {
             InstanceId = "speed-spare-hull", ConfigId = hullItem.Id, CargoCapacity = 1000,
@@ -486,7 +487,7 @@ public sealed partial class PlanetMarketEconomyTests
         Assert.That(hangar.TryChangeLoadout(ShipLoadoutRules.FirstWeaponSlot + 2, weapon.InstanceId, false, out _), Is.True);
         var equipment = Asset<HullConfig>("small-hull-item"); equipment.Hull = target;
         equipment.WeaponSlotCount = target.WeaponSlotCount; equipment.AvailableComponentSlots = target.AvailableComponentSlots;
-        _balance.HullCatalog.Add(new MarketHullRule { Hull = equipment, NewPrice = 800 });
+        _config.HullCatalog.Add(new MarketHullRule { Hull = equipment, NewPrice = 800 });
         var spare = new HullEquipmentRuntimeState
             { InstanceId = "spare", ConfigId = equipment.Id, CargoCapacity = 15, MaximumDurability = 120, CurrentDurability = 72 };
         Market.PersonalHulls.Add(spare);
@@ -598,8 +599,8 @@ public sealed partial class PlanetMarketEconomyTests
         Assert.That(hangar.TryDebugDamageSelection(slot, null, false, out _), Is.True);
         Assert.That(engine.CurrentDurability, Is.EqualTo(130));
         Assert.That(Ship.CargoEquipment.Single().CurrentDurability, Is.EqualTo(140));
-        Assert.That(hangar.GetRepairPrice(HangarRepairScope.Installed, slot), Is.EqualTo(20));
-        Assert.That(hangar.GetRepairPrice(HangarRepairScope.FullShip, slot), Is.EqualTo(120));
+        Assert.That(hangar.GetRepairPrice(HangarRepairScope.Installed, slot), Is.EqualTo(30));
+        Assert.That(hangar.GetRepairPrice(HangarRepairScope.FullShip, slot), Is.EqualTo(130));
         Assert.That(hangar.TryChangeLoadout(slot, null, true, out _), Is.True);
         Assert.That(Market.PersonalEquipment.Single(), Is.SameAs(engine));
         Assert.That(_market.Transfer(engine.InstanceId, true, false, 1, "move-engine", -1, out _), Is.True);
@@ -633,7 +634,7 @@ public sealed partial class PlanetMarketEconomyTests
     {
         var config = Asset<HullConfig>("hull_test"); config.MaximumHullMin = config.MaximumHullMax = 120;
         var rule = new MarketHullRule { Hull = config, NewPrice = 200 };
-        _profile.GalaxyLevels[0].Hulls.Add(rule); _balance.HullCatalog.Add(rule);
+        _profile.GalaxyLevels[0].Hulls.Add(rule); _config.HullCatalog.Add(rule);
         _profile.GalaxyLevels[0].HullOfferCount = 1;
         var station = Asset<StationConfig>("station");
         var stationType = Asset<StationTypeConfig>("station_type");
@@ -772,10 +773,16 @@ public sealed partial class PlanetMarketEconomyTests
         _session.State.Player.CurrentStationId = ""; _session.State.Player.CurrentPlanetId = "one";
         Assert.That(Market.Hulls, Is.Empty);
     }
-    [Test] public void ProductionHullAssets_AreBoundToEveryLevelAndBalanceCatalog()
+    [Test] public void ProductionHullAssets_AreBoundToEveryLevelAndBootstrapCatalog()
     {
-        var balance = AssetDatabase.LoadAssetAtPath<MarketEconomyBalanceConfig>("Assets/_Project/Content/Configs/Market/marketEconomyBalance_01.asset");
-        Assert.That(balance.HullCatalog.Any(x => x.Hull != null && x.NewPrice > 0), Is.True);
+        var scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene(
+            "Assets/_Project/Scenes/BootstrapScene.unity", UnityEditor.SceneManagement.OpenSceneMode.Additive);
+        try
+        {
+            var bootstrap = scene.GetRootGameObjects().SelectMany(x => x.GetComponentsInChildren<Bootstrapper>(true)).Single();
+            Assert.That(bootstrap.HullCatalog.Any(x => x.Hull != null && x.NewPrice > 0), Is.True);
+        }
+        finally { UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene, true); }
         foreach (var name in new[] { "hub", "mining", "industrial", "frontier" })
         {
             var profile = AssetDatabase.LoadAssetAtPath<MarketProfileConfig>("Assets/_Project/Content/Configs/Market/MarketProfiles/mMarketProfile_" + name + "_01.asset");
@@ -789,10 +796,10 @@ public sealed partial class PlanetMarketEconomyTests
         CurrentDurability = durability, MaximumDurability = 100, RolledStats = new WeaponRuntimeStats { WeaponConfigId = _weapon.Id, CargoSize = 2, Damage = 19 },
         HasLootOrigin = true, LootOriginNpcType = enemy ? SystemNpcType.Enemy : SystemNpcType.Ally };
       Ship.CargoEquipment.Add(item); return item; }
-    [Test] public void EquipmentWearAndResearchFloor_AreAppliedToSpecificInstance()
-    { var item = CargoWeapon(); Assert.That(_market.EquipmentPrice(item, false), Is.EqualTo(10));
+    [Test] public void EquipmentWear_UsesDurabilityWithoutResearchFloor()
+    { var item = CargoWeapon(); Assert.That(_market.EquipmentPrice(item, false), Is.EqualTo(1));
       _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel { Upgrade = ResearchUpgrade.EquipmentBuyout, Level = 1 });
-      Assert.That(_market.EquipmentPrice(item, false), Is.EqualTo(50)); item.CurrentDurability = 80; Assert.That(_market.EquipmentPrice(item, false), Is.EqualTo(80)); }
+      Assert.That(_market.EquipmentPrice(item, false), Is.EqualTo(1)); item.CurrentDurability = 80; Assert.That(_market.EquipmentPrice(item, false), Is.EqualTo(80)); }
     [Test] public void AlliedEquipment_BuybackPreservesIdentityRollsAndWear_AndCannotSellTwice()
     {
         var item = CargoWeapon(false, 35); int credits = _session.State.Player.Credits;
@@ -915,8 +922,6 @@ public sealed partial class PlanetMarketEconomyTests
       Assert.That(logs.IsEnabled(DebugLogChannel.Market), Is.False); Assert.That(logs.IsEnabled(DebugLogChannel.Economy), Is.False); }
     [Test] public void ProductionAssets_AreBoundToTenLevelProfilesAndTwoResearchNodes()
     {
-        var balance = AssetDatabase.LoadAssetAtPath<MarketEconomyBalanceConfig>("Assets/_Project/Content/Configs/Market/marketEconomyBalance_01.asset");
-        Assert.That(balance, Is.Not.Null); Assert.That(balance.ResearchLevels.Length, Is.EqualTo(11));
         foreach (string id in AssetDatabase.FindAssets("t:MarketProfileConfig", new[] { "Assets/_Project/Content/Configs/Market/MarketProfiles" })) {
             var profile = AssetDatabase.LoadAssetAtPath<MarketProfileConfig>(AssetDatabase.GUIDToAssetPath(id));
             Assert.That(profile.GalaxyLevels.Count, Is.EqualTo(10));
@@ -964,7 +969,7 @@ public sealed partial class PlanetMarketEconomyTests
         Assert.That(inhabited, Is.GreaterThan(0), "No inhabited production planets were checked.");
     }
 
-    [Test] public void OfflineCoordinator_AppliesProtectionOnlyAfterResearchCompletion()
+    [Test] public void OfflineCoordinator_ResearchCompletionDoesNotChangeMarketStockRate()
     {
         Entry.StockChange = 10;
         _session.State.Galaxy.Systems[0].SystemStatus = StarSystemStatus.Invasion;
@@ -978,7 +983,7 @@ public sealed partial class PlanetMarketEconomyTests
         var stations = new StationService(_session, _config.GetStarSystemConfigById, _events,
             infrastructure: infrastructure, research: research, market: _market);
         stations.ProcessOffline(_session.State, from + 20 * TimeSpan.TicksPerSecond);
-        Assert.That(Stock.Quantity, Is.EqualTo(65), "First interval +5 during war; second interval +10 after protection");
+        Assert.That(Stock.Quantity, Is.EqualTo(70), "Both intervals use the profile rate regardless of war and research.");
         Assert.That(_session.State.Galaxy.Research.GetLevel(ResearchUpgrade.EconomyWarProtection), Is.EqualTo(1));
         string once = JsonUtility.ToJson(_session.State);
         stations.ProcessOffline(_session.State, from + 20 * TimeSpan.TicksPerSecond);
@@ -1081,16 +1086,16 @@ public sealed partial class PlanetMarketEconomyTests
         Assert.That(Stock.Quantity, Is.EqualTo(57)); Assert.That(Market.ElapsedSeconds, Is.EqualTo(10));
         Assert.That(_market.LastScheduledSystemCount, Is.EqualTo(1));
     }
-    [Test] public void DeferredProtectionCompletion_SettlesOldRateBeforeNewEffect()
+    [Test] public void UnlinkedProtectionCompletion_DoesNotAdvanceDeferredMarketOrChangeRate()
     {
         AddDeferredSystem(); Entry.StockChange = 10;
         _session.State.Galaxy.Systems.Single(x => x.SystemId == "remote").SystemStatus = StarSystemStatus.Invasion;
         _market.AdvanceScheduledTime(10, 1, new Schedule { Current = _config.System });
         _session.State.Galaxy.Research.Levels.Add(new ResearchUpgradeLevel { Upgrade = ResearchUpgrade.EconomyWarProtection, Level = 1 });
         _events.Publish(new ResearchCompletedEvent(ResearchUpgrade.EconomyWarProtection, 1));
-        Assert.That(RemoteMarket.Items[0].Quantity, Is.EqualTo(55));
+        Assert.That(RemoteMarket.Items[0].Quantity, Is.EqualTo(50));
         _market.AdvanceTime(10);
-        Assert.That(RemoteMarket.Items[0].Quantity, Is.EqualTo(65));
+        Assert.That(RemoteMarket.Items[0].Quantity, Is.EqualTo(70));
     }
     private sealed class Schedule : IGalaxyNpcSimulationScheduleService
     {
@@ -1233,11 +1238,15 @@ public sealed partial class PlanetMarketEconomyTests
     { public bool IsRefuelAvailable() => true; }
     private sealed class Configs : IConfigService
     {
-        public MarketEconomyBalanceConfig MarketEconomy { get; set; }
+        public List<MarketEquipmentCatalogEntry> EquipmentCatalog { get; } = new List<MarketEquipmentCatalogEntry>();
+        public List<MarketHullCatalogEntry> HullCatalog { get; } = new List<MarketHullCatalogEntry>();
+        IReadOnlyList<MarketEquipmentCatalogEntry> IConfigService.EquipmentCatalog => EquipmentCatalog;
+        IReadOnlyList<MarketHullCatalogEntry> IConfigService.HullCatalog => HullCatalog;
         public MissionGameplayConfig MissionGameplay => null;
         public GameTimeConfig GameTimeConfig => null;
         public readonly List<AllyConfig> Hulls = new List<AllyConfig>();
         public readonly List<ShipEquipmentConfig> Components = new List<ShipEquipmentConfig>();
+        public readonly List<ItemConfig> ServiceItems = new List<ItemConfig>();
         public StarSystemConfig System; public StarSystemConfig[] Systems; public int SystemListReads; public ItemConfig Item; public WeaponConfig Weapon; public PlanetConfig[] Planets;
         public DebugSettings DebugSettings => null; public SaveConfig SaveConfig => null; public GalaxyConfig GalaxyConfig => null; public NewGameConfig NewGameConfig => null;
         public PlayerControlConfig PlayerControlConfig => null; public ShipMovementConfig ShipMovementConfig => null; public SystemCameraConfig SystemCameraConfig => null;
@@ -1255,7 +1264,7 @@ public sealed partial class PlanetMarketEconomyTests
         public PlanetConfig GetPlanetConfigById(string id) => Planets.FirstOrDefault(x => x.Id == id);
         public PlanetConfig GetCurrentPlanetConfig() => Planets[0];
         public IReadOnlyList<ItemConfig> GetAllItems() => new[] { Item };
-        public ItemConfig GetItemConfigById(string id) => id == Item.Id ? Item : Components.Find(x => x.Id == id);
+        public ItemConfig GetItemConfigById(string id) => id == Item.Id ? Item : (ItemConfig)Components.Find(x => x.Id == id) ?? ServiceItems.Find(x => x.Id == id);
         public IReadOnlyList<AllyConfig> GetAllAllies() => Array.Empty<AllyConfig>();
         public EnemyConfig GetEnemyConfigById(string id) => null; public AllyConfig GetAllyConfigById(string id) => Hulls.Find(x => x.Id == id); public PirateConfig GetPirateConfigById(string id) => null;
         public AllySpawnRuleConfig GetAllySpawnRuleConfigById(string id) => null;

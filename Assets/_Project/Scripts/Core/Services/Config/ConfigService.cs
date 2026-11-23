@@ -6,7 +6,8 @@ using UnityEngine;
 
 public sealed class ConfigService : IConfigService
 {
-    public MarketEconomyBalanceConfig MarketEconomy { get; }
+    public IReadOnlyList<MarketEquipmentCatalogEntry> EquipmentCatalog { get; }
+    public IReadOnlyList<MarketHullCatalogEntry> HullCatalog { get; }
     public MissionGameplayConfig MissionGameplay { get; }
     public GameTimeConfig GameTimeConfig { get; }
     public DebugSettings DebugSettings { get; }
@@ -51,8 +52,7 @@ public sealed class ConfigService : IConfigService
 
     private readonly IGameSessionService gameSessionService;
 
-    public ConfigService(MarketEconomyBalanceConfig marketEconomy,
-                MissionGameplayConfig missionGameplay,
+    public ConfigService(MissionGameplayConfig missionGameplay,
                 DebugSettings debugSettings,
                 SaveConfig saveConfig,
                 GalaxyConfig galaxyConfig,
@@ -72,9 +72,12 @@ public sealed class ConfigService : IConfigService
                 CombatFxVisualConfig combatFxVisualConfig = null,
                 CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
                 NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null,
-                GameTimeConfig gameTimeConfig = null)
+                GameTimeConfig gameTimeConfig = null,
+                IEnumerable<MarketEquipmentCatalogEntry> equipmentCatalog = null,
+                IEnumerable<MarketHullCatalogEntry> hullCatalog = null)
     {
-        MarketEconomy = marketEconomy;
+        EquipmentCatalog = equipmentCatalog != null ? new List<MarketEquipmentCatalogEntry>(equipmentCatalog) : new List<MarketEquipmentCatalogEntry>();
+        HullCatalog = hullCatalog != null ? new List<MarketHullCatalogEntry>(hullCatalog) : new List<MarketHullCatalogEntry>();
         MissionGameplay = missionGameplay;
         GameTimeConfig = gameTimeConfig;
         DebugSettings = debugSettings;
@@ -101,8 +104,7 @@ public sealed class ConfigService : IConfigService
         gameSessionService = Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>();
     }
 
-    public ConfigService(MarketEconomyBalanceConfig marketEconomy,
-                MissionGameplayConfig missionGameplay,
+    public ConfigService(MissionGameplayConfig missionGameplay,
                 DebugSettings debugSettings,
                 SaveConfig saveConfig,
                 GalaxyConfig galaxyConfig,
@@ -126,9 +128,12 @@ public sealed class ConfigService : IConfigService
                 CombatFxVisualConfig combatFxVisualConfig = null,
                 CombatDamagePopupVisualConfig2A combatDamagePopupVisualConfig = null,
                 NpcBehaviourTransitionMatrixConfig npcBehaviourTransitionMatrixConfig = null,
-                GameTimeConfig gameTimeConfig = null)
+                GameTimeConfig gameTimeConfig = null,
+                IEnumerable<MarketEquipmentCatalogEntry> equipmentCatalog = null,
+                IEnumerable<MarketHullCatalogEntry> hullCatalog = null)
     {
-        MarketEconomy = marketEconomy;
+        EquipmentCatalog = equipmentCatalog != null ? new List<MarketEquipmentCatalogEntry>(equipmentCatalog) : new List<MarketEquipmentCatalogEntry>();
+        HullCatalog = hullCatalog != null ? new List<MarketHullCatalogEntry>(hullCatalog) : new List<MarketHullCatalogEntry>();
         MissionGameplay = missionGameplay;
         GameTimeConfig = gameTimeConfig;
         DebugSettings = debugSettings;

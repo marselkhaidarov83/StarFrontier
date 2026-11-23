@@ -65,8 +65,8 @@ public partial class HangarService
     private RepairPlan BuildRepairPlan(ShipRuntimeData ship, MarketRuntimeData market, HangarRepairScope scope,
         int slot, string itemId, bool warehouse)
     {
-        var prices = _configService.MarketEconomy;
-        if (ship?.HasModularLoadout != true || market == null || prices == null) return null;
+        if (ship?.HasModularLoadout != true || market == null) return null;
+        int hullPrice = LocationServicePrices.Price(_configService, LocationServicePrices.HullRepairItemId);
 
         var plan = new RepairPlan();
         bool hullSelected = slot == ShipLoadoutRules.HullSlot;
@@ -75,23 +75,22 @@ public partial class HangarService
             long missing = (long)ship.HullCapacity - Math.Max(0, ship.CurrentHull);
             if (missing > 0)
             {
-                if (prices.HullRepairUnitPrice <= 0) return null;
+                if (hullPrice <= 0) return null;
                 plan.RepairActiveHull = true;
-                plan.Price = missing * prices.HullRepairUnitPrice;
+                plan.Price = missing * hullPrice;
             }
         }
 
-        int equipmentPrice = prices.EquipmentRepairUnitPrice;
         if (scope == HangarRepairScope.FullShip)
         {
             foreach (var item in ship.InstalledWeapons)
-                if (!AddEquipmentRepair(plan, item, equipmentPrice)) return null;
+                if (!AddEquipmentRepair(plan, item)) return null;
             foreach (var item in ship.InstalledComponents)
-                if (!AddEquipmentRepair(plan, item, equipmentPrice)) return null;
+                if (!AddEquipmentRepair(plan, item)) return null;
         }
         else if (scope == HangarRepairScope.Installed && !hullSelected)
         {
-            if (!AddEquipmentRepair(plan, SelectedEquipment(ship, market, slot, null, false), equipmentPrice)) return null;
+            if (!AddEquipmentRepair(plan, SelectedEquipment(ship, market, slot, null, false))) return null;
         }
         else if (scope == HangarRepairScope.Inventory && !string.IsNullOrEmpty(itemId))
         {
@@ -102,20 +101,25 @@ public partial class HangarService
                 int missing = hull.MaximumDurability - hull.CurrentDurability;
                 if (missing > 0)
                 {
-                    if (prices.HullRepairUnitPrice <= 0) return null;
+                    if (hullPrice <= 0) return null;
                     plan.StoredHull = hull;
-                    plan.Price = (long)missing * prices.HullRepairUnitPrice;
+                    plan.Price = (long)missing * hullPrice;
                 }
             }
-            else if (!AddEquipmentRepair(plan, SelectedEquipment(ship, market, slot, itemId, warehouse), equipmentPrice))
+            else if (!AddEquipmentRepair(plan, SelectedEquipment(ship, market, slot, itemId, warehouse)))
                 return null;
         }
         return plan;
     }
 
-    private static bool AddEquipmentRepair(RepairPlan plan, SystemNpcWeaponRuntimeState item, int unitPrice)
+    private bool AddEquipmentRepair(RepairPlan plan, SystemNpcWeaponRuntimeState item)
     {
         if (item == null || item.CurrentDurability >= item.MaximumDurability) return true;
+        var component = item.IsComponent ? GetComponent(item.ComponentConfigId) : null;
+        string priceItemId = item.IsComponent
+            ? (component != null ? LocationServicePrices.ComponentRepairItemId(component.Slot) : null)
+            : LocationServicePrices.WeaponRepairItemId;
+        int unitPrice = LocationServicePrices.Price(_configService, priceItemId);
         if (unitPrice <= 0) return false;
         long missing = (long)item.MaximumDurability - Math.Max(0, item.CurrentDurability);
         long cost = missing * unitPrice;

@@ -10,7 +10,6 @@ public class Bootstrapper : CustomMonoBehaviour
     [Header("Game")]
     [Range(30, 120)]
     [SerializeField] private int targetFrameRate = 60;
-    [SerializeField] private MarketEconomyBalanceConfig marketEconomy;
     [SerializeField] private MissionGameplayConfig missionGameplay;
     [SerializeField] private GameTimeConfig gameTimeConfig;
     [SerializeField] private SaveConfig saveConfig;
@@ -53,6 +52,10 @@ public class Bootstrapper : CustomMonoBehaviour
     [SerializeField] private List<PirateGroupSpawnRuleConfig> pirateGroupSpawnRules;
     [SerializeField] private List<ModuleConfig> modules;
     [SerializeField] private List<WeaponConfig> weapons;
+    [SerializeField] private List<MarketEquipmentCatalogEntry> equipmentCatalog = new();
+    [SerializeField] private List<MarketHullCatalogEntry> hullCatalog = new();
+    public IReadOnlyList<MarketEquipmentCatalogEntry> EquipmentCatalog => equipmentCatalog;
+    public IReadOnlyList<MarketHullCatalogEntry> HullCatalog => hullCatalog;
     [SerializeField] private List<ItemConfig> items;
 
     [SerializeField] public int MaxAcceptedMissionCount = 3;
@@ -286,7 +289,6 @@ public class Bootstrapper : CustomMonoBehaviour
 
         RegisterService<IConfigService>(
             new ConfigService(
-                marketEconomy,
                 missionGameplay,
                 NpcPopulationDebugSettings,
                 saveConfig,
@@ -311,7 +313,9 @@ public class Bootstrapper : CustomMonoBehaviour
                 combatFxVisualConfig,
                 combatDamagePopupVisualConfig,
                 npcBehaviourTransitionMatrixConfig,
-                gameTimeConfig));
+                gameTimeConfig,
+                equipmentCatalog,
+                hullCatalog));
 
         RegisterService<IStationPaymentGateway>(new StationResourcePaymentGateway(ServiceRegistry.Get<IGameSessionService>()));
         RegisterService<IStationService, StationService>();

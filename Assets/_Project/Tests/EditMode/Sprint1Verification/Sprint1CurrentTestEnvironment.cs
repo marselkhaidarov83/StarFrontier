@@ -38,7 +38,8 @@ namespace StarFrontier.Tests.Sprint1
     internal sealed class TestConfigService : IConfigService
     {
         public InvasionScheduleConfig InvasionScheduleConfig => null;
-        public MarketEconomyBalanceConfig MarketEconomy => null;
+        public IReadOnlyList<MarketEquipmentCatalogEntry> EquipmentCatalog { get; } = new List<MarketEquipmentCatalogEntry>();
+        public IReadOnlyList<MarketHullCatalogEntry> HullCatalog { get; } = new List<MarketHullCatalogEntry>();
         public MissionGameplayConfig MissionGameplay => null;
         public GameTimeConfig GameTimeConfig => null;
         public DebugSettings DebugSettings => null;

@@ -153,7 +153,6 @@ namespace StarFrontier.Tests.Sprint1
                 null,
                 null,
                 null,
-                null,
                 Array.Empty<SectorConfig>(),
                 Array.Empty<StarSystemConfig>(),
                 Array.Empty<PlanetConfig>(),

@@ -35,7 +35,7 @@ public static class MarketScreenRules2A
     public static (string Range, string Damage, string Shots, string Cargo) WeaponDetails(float range, int damage, int shots, int cargo) =>
         ("Дальность: " + range.ToString("0.##"), "Урон: " + damage, "Кол-во выстрелов: " + shots, "Занимает в трюме: " + cargo);
 
-    public static void CollectAlliedWeaponTypes(IEnumerable<MarketEquipmentRule> catalog, List<WeaponType> result)
+    public static void CollectAlliedWeaponTypes(IEnumerable<MarketEquipmentCatalogEntry> catalog, List<WeaponType> result)
     {
         result.Clear();
         if (catalog != null)

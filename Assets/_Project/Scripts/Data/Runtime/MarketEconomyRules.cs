@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 // Pure calculations shared by online progress, offline progress and quotes.
 public static class MarketEconomyRules
@@ -45,12 +44,10 @@ public static class MarketEconomyRules
         }
     }
     public static void AdvanceStock(MarketRuntimeItemState state, MarketItemEntry entry,
-        double intervals, bool war, MarketResearchEffect effect)
+        double intervals)
     {
         if (intervals <= 0 || double.IsNaN(intervals) || double.IsInfinity(intervals)) return;
         double change = entry.StockChange;
-        if (war && effect != null)
-            change *= change > 0 ? 1 - Mathf.Clamp01(effect.WarProductionLoss) : 1 + Math.Max(0, effect.WarConsumptionIncrease);
         if (change == 0) return;
         // Production must never destroy a player's over-cap sale.
         if (change > 0 && state.Quantity >= entry.MaximumStock) { state.FractionalStock = 0; return; }
@@ -60,10 +57,10 @@ public static class MarketEconomyRules
         state.Quantity = (int)Math.Floor(next + 1e-9);
         state.FractionalStock = Math.Max(0, next - state.Quantity);
     }
-    public static int EquipmentSellPrice(int newPrice, int currentDurability, int maximumDurability, float minimumPercent)
+    public static int EquipmentSellPrice(int newPrice, int currentDurability, int maximumDurability)
     {
         if (newPrice <= 0) return 0;
-        double fraction = Math.Max(Math.Max(0, Math.Min(1, minimumPercent)), maximumDurability > 0 ? Math.Max(0, Math.Min(maximumDurability, currentDurability)) / (double)maximumDurability : 0);
+        double fraction = maximumDurability > 0 ? Math.Max(0, Math.Min(maximumDurability, currentDurability)) / (double)maximumDurability : 0;
         return (int)Math.Max(1, Math.Min(newPrice, Math.Round(newPrice * fraction, MidpointRounding.AwayFromZero)));
     }
 }

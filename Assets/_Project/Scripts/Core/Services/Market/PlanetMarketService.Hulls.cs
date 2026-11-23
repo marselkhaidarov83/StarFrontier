@@ -5,9 +5,9 @@ using System.Linq;
 public sealed partial class PlanetMarketService
 {
     private static bool IsStationMarket(MarketRuntimeData market) => market?.PlanetId?.StartsWith("station:", StringComparison.Ordinal) == true;
-    private MarketHullRule HullRule(MarketProfileConfig profile, string id) =>
-        profile?.GetLevel(MarketLevel)?.Hulls?.Find(x => x?.Hull != null && x.Hull.Id == id)
-        ?? Balance?.HullCatalog?.Find(x => x?.Hull != null && x.Hull.Id == id);
+    private MarketHullCatalogEntry HullRule(MarketProfileConfig profile, string id) =>
+        (MarketHullCatalogEntry)profile?.GetLevel(MarketLevel)?.Hulls?.Find(x => x?.Hull != null && x.Hull.Id == id)
+        ?? _config.HullCatalog?.FirstOrDefault(x => x?.Hull != null && x.Hull.Id == id);
     public HullConfig GetHullConfig(string id)
     {
         if (!Current(out _, out var profile)) return null;
@@ -15,7 +15,7 @@ public sealed partial class PlanetMarketService
     }
     private HullConfig FindHullConfig(MarketProfileConfig profile, string id)
     {
-        HullConfig result = Balance?.HullCatalog?.Find(rule => rule?.Hull != null && rule.Hull.Id == id)?.Hull
+        HullConfig result = _config.HullCatalog?.FirstOrDefault(rule => rule?.Hull != null && rule.Hull.Id == id)?.Hull
             ?? HullRule(profile, id)?.Hull;
         if (result != null) return result;
         foreach (AllyConfig actor in _config.GetAllAllies())
@@ -29,7 +29,7 @@ public sealed partial class PlanetMarketService
         if (hull == null || !Current(out var market, out var profile)) return 0;
         int price = market.Hulls.Find(x => x?.Hull?.InstanceId == hull.InstanceId)?.NewPrice
             ?? HullRule(profile, hull.ConfigId)?.NewPrice ?? 0;
-        return MarketEconomyRules.EquipmentSellPrice(price, hull.CurrentDurability, hull.MaximumDurability, MinimumBuyout);
+        return MarketEconomyRules.EquipmentSellPrice(price, hull.CurrentDurability, hull.MaximumDurability);
     }
     private bool CanSellStoredHull(MarketRuntimeData market, string id)
     {
@@ -96,6 +96,6 @@ public sealed partial class PlanetMarketService
         }
         finally { _committing = false; }
     }
-    private static bool ValidHullRule(MarketHullRule rule, int marketLevel) =>
+    private static bool ValidHullRule(MarketHullCatalogEntry rule, int marketLevel) =>
         rule?.Hull != null && rule.Hull.MarketAvailable && rule.Hull.Level <= marketLevel && rule.NewPrice > 0;
 }

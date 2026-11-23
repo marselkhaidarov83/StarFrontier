@@ -37,7 +37,7 @@ public class MarketScreenController : CustomMonoBehaviour
         var registry = Bootstrapper.Instance.ServiceRegistry;
         _market = registry.Get<IPlanetMarketService>(); _session = registry.Get<IGameSessionService>();
         _config = registry.Get<IConfigService>(); _events = registry.Get<SimpleEventBus>();
-        MarketScreenRules2A.CollectAlliedWeaponTypes(_config.MarketEconomy?.EquipmentCatalog, _alliedWeaponTypes);
+        MarketScreenRules2A.CollectAlliedWeaponTypes(_config.EquipmentCatalog, _alliedWeaponTypes);
         TMP_Text template = cargoText != null ? cargoText : GetComponentInChildren<TMP_Text>(true);
         if (template == null && marketItemRowPrefab != null) template = marketItemRowPrefab.GetComponentInChildren<TMP_Text>(true);
         if (template == null && transform.parent != null) template = transform.parent.GetComponentInChildren<TMP_Text>(true);
@@ -120,7 +120,7 @@ public class MarketScreenController : CustomMonoBehaviour
     }
     private static bool IsVisibleMarketGoods(ItemConfig item) =>
         item != null && item.ItemCategory != ItemCategory.Fuel &&
-        item.Id != "item_fuel_cells_01" && item.Id != "item_repair_01";
+        !LocationServicePrices.IsServiceItem(item.Id);
 
     private void BuildOffers()
     {

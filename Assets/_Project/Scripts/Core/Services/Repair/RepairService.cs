@@ -7,7 +7,7 @@ public class RepairService : IPartialRepairService
     private readonly SimpleEventBus _events;
     private bool _busy;
     public RepairService() : this(Bootstrapper.Instance.ServiceRegistry.Get<IGameSessionService>(),
-        () => Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>().MarketEconomy?.HullRepairUnitPrice ?? 0,
+        () => LocationServicePrices.Price(Bootstrapper.Instance.ServiceRegistry.Get<IConfigService>(), LocationServicePrices.HullRepairItemId),
         Bootstrapper.Instance.ServiceRegistry.Get<SimpleEventBus>()) { }
     public RepairService(IGameSessionService session, Func<int> unitPrice, SimpleEventBus events)
     { _session = session; _unitPrice = unitPrice; _events = events; }

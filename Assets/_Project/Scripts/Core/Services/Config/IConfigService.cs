@@ -2,7 +2,8 @@ using System.Collections.Generic;
 
 public interface IConfigService
 {
-    MarketEconomyBalanceConfig MarketEconomy { get; }
+    IReadOnlyList<MarketEquipmentCatalogEntry> EquipmentCatalog { get; }
+    IReadOnlyList<MarketHullCatalogEntry> HullCatalog { get; }
     MissionGameplayConfig MissionGameplay { get; }
     GameTimeConfig GameTimeConfig { get; }
     DebugSettings DebugSettings { get; }
