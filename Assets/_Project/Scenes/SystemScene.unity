@@ -4211,6 +4211,7 @@ MonoBehaviour:
   applyHorizontal: 1
   applyVertical: 1
   resetOffsetsAfterApply: 1
+  fillBottomUnsafeArea: 1
   simulateSafeAreaInEditor: 0
   simulatedInsetsPixels: {x: 0, y: 0, z: 0, w: 0}
   logChanges: 0
