@@ -1,0 +1,48 @@
+{
+  "friendlyName": "SF 03 | Pixel 3 XL [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1440,
+      "height": 2960,
+      "dpi": 522.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 2780
+          },
+          "cutouts": [
+            {
+              "serializedVersion": "2",
+              "x": 475,
+              "y": 2780,
+              "width": 490,
+              "height": 180
+            }
+          ]
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_03_Pixel_3_XL.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 65
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Pixel_3_XL"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "friendlyName": "SF 15 | Extreme Safe Area [stress]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1080,
+      "height": 2400,
+      "dpi": 395.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 72,
+            "width": 1080,
+            "height": 2184
+          },
+          "cutouts": []
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_15_Extreme_Safe_Area.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 0
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "SF synthetic"
+  }
+}

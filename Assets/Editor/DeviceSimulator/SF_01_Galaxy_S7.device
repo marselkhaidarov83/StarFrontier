@@ -1,0 +1,40 @@
+{
+  "friendlyName": "SF 01 | Galaxy S7 [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1440,
+      "height": 2560,
+      "dpi": 576.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 2560
+          },
+          "cutouts": []
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_01_Galaxy_S7.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 0
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Galaxy_S7"
+  }
+}

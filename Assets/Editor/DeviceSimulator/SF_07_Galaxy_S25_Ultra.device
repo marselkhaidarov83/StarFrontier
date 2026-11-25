@@ -1,0 +1,48 @@
+{
+  "friendlyName": "SF 07 | Galaxy S25 Ultra [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1440,
+      "height": 3120,
+      "dpi": 498.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 3020
+          },
+          "cutouts": [
+            {
+              "serializedVersion": "2",
+              "x": 698,
+              "y": 3030,
+              "width": 44,
+              "height": 44
+            }
+          ]
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_07_Galaxy_S25_Ultra.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 45
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Galaxy_S25_Ultra"
+  }
+}

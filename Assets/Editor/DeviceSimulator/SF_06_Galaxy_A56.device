@@ -1,0 +1,48 @@
+{
+  "friendlyName": "SF 06 | Galaxy A56 [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1080,
+      "height": 2340,
+      "dpi": 385.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1080,
+            "height": 2265
+          },
+          "cutouts": [
+            {
+              "serializedVersion": "2",
+              "x": 518,
+              "y": 2275,
+              "width": 44,
+              "height": 44
+            }
+          ]
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_06_Galaxy_A56.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 50
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Galaxy_A56"
+  }
+}

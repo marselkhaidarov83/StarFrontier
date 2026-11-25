@@ -1,0 +1,40 @@
+{
+  "friendlyName": "SF 02 | Galaxy S9 [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1440,
+      "height": 2960,
+      "dpi": 568.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 2960
+          },
+          "cutouts": []
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_02_Galaxy_S9.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 65
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Galaxy_S9"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "friendlyName": "SF 10 | Fold6 External [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 968,
+      "height": 2376,
+      "dpi": 407.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 968,
+            "height": 2306
+          },
+          "cutouts": [
+            {
+              "serializedVersion": "2",
+              "x": 467,
+              "y": 2316,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_10_Fold6_External.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 30
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Fold6_External"
+  }
+}

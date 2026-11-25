@@ -1,0 +1,48 @@
+{
+  "friendlyName": "SF 08 | Galaxy S10 [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1440,
+      "height": 3040,
+      "dpi": 551.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 2930
+          },
+          "cutouts": [
+            {
+              "serializedVersion": "2",
+              "x": 1348,
+              "y": 2940,
+              "width": 44,
+              "height": 44
+            }
+          ]
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_08_Galaxy_S10.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 65
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Galaxy_S10"
+  }
+}

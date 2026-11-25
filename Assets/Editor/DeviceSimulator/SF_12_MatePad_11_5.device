@@ -1,0 +1,40 @@
+{
+  "friendlyName": "SF 12 | MatePad 11 5 [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1440,
+      "height": 2200,
+      "dpi": 229.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 2200
+          },
+          "cutouts": []
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_12_MatePad_11_5.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 25
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "MatePad_11_5"
+  }
+}

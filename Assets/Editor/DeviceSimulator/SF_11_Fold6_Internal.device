@@ -1,0 +1,40 @@
+{
+  "friendlyName": "SF 11 | Fold6 Internal [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1856,
+      "height": 2160,
+      "dpi": 375.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 1856,
+            "height": 2160
+          },
+          "cutouts": []
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_11_Fold6_Internal.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 35
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Fold6_Internal"
+  }
+}

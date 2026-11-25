@@ -1,0 +1,48 @@
+{
+  "friendlyName": "SF 04 | Redmi A5 [approx]",
+  "version": 1,
+  "screens": [
+    {
+      "width": 720,
+      "height": 1640,
+      "dpi": 260.0,
+      "navigationBarHeight": 0,
+      "orientations": [
+        {
+          "orientation": 1,
+          "safeArea": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 720,
+            "height": 1590
+          },
+          "cutouts": [
+            {
+              "serializedVersion": "2",
+              "x": 330,
+              "y": 1590,
+              "width": 60,
+              "height": 50
+            }
+          ]
+        }
+      ],
+      "presentation": {
+        "overlayPath": "Overlays/SF_04_Redmi_A5.png",
+        "borderSize": {
+          "x": 24,
+          "y": 24,
+          "z": 24,
+          "w": 24
+        },
+        "cornerRadius": 24
+      }
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android",
+    "deviceType": 1,
+    "deviceModel": "Redmi_A5"
+  }
+}
