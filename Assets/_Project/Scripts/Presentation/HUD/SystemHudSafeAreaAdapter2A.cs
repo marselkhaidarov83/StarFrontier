@@ -40,9 +40,11 @@ public sealed class SystemHudSafeAreaAdapter2A :
     [SerializeField]
     private bool fillBottomUnsafeArea;
 
-    private Image _hudBackground;
-    private Image _extendedBackground;
-    private Color _originalBackgroundColor;
+    private readonly RectTransform[] _insetCaps = new RectTransform[3];
+    private RectTransform _leftCap;
+    private RectTransform _rightCap;
+    private static readonly Color CapBase = new Color(0.035f, 0.075f, 0.13f, 1f);
+    private static readonly Color CapTrim = new Color(0.12f, 0.28f, 0.42f, 1f);
 
     [Header("Editor simulation")]
 
@@ -399,58 +401,106 @@ public sealed class SystemHudSafeAreaAdapter2A :
         }
     }
 
-    // Extend only the artwork; the existing HUD RectTransforms, hit targets
-    // and their children remain inside the original Safe Area.
+    // Three independent decorative caps. Only their flat center stretches;
+    // the original HUD sprite and all of its children are never resized.
     private void UpdateHudDecoration(Rect safeArea, int screenWidth, int screenHeight)
     {
-        if (!fillTopUnsafeArea && !fillBottomUnsafeArea)
-            return;
-
-        if (_hudBackground == null)
+        if (!fillTopUnsafeArea && !fillBottomUnsafeArea) return;
+        if (_insetCaps[0] == null)
         {
-            Transform source = fillTopUnsafeArea
-                ? transform.Find("PF_HudTopRoot/BackgroundImage")
-                : transform.Find("PF_SystemHudBottomRoot");
-            if (source == null || !source.TryGetComponent(out _hudBackground))
-                return;
-
-            _originalBackgroundColor = _hudBackground.color;
-            var artwork = new GameObject("SafeAreaExtendedHudArtwork",
-                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            artwork.layer = source.gameObject.layer;
-            artwork.transform.SetParent(source, false);
-            artwork.transform.SetAsFirstSibling();
-            _extendedBackground = artwork.GetComponent<Image>();
-            _extendedBackground.sprite = _hudBackground.sprite;
-            _extendedBackground.material = _hudBackground.material;
-            _extendedBackground.color = _originalBackgroundColor;
-            _extendedBackground.raycastTarget = false;
-            _extendedBackground.type = _hudBackground.type;
-            _extendedBackground.preserveAspect = false;
+            string edge = fillTopUnsafeArea ? "Top" : "Bottom";
+            _insetCaps[0] = CreateCap(edge + "UnsafeAreaBackdropCompact", 0);
+            _insetCaps[1] = CreateCap(edge + "UnsafeAreaBackdropMedium", 1);
+            _insetCaps[2] = CreateCap(edge + "UnsafeAreaBackdropExtended", 2);
+            _leftCap = CreateDecoration(edge + "LeftInset", _rectTransform, CapBase);
+            _rightCap = CreateDecoration(edge + "RightInset", _rectTransform, CapBase);
+            _leftCap.SetAsFirstSibling();
+            _rightCap.SetAsFirstSibling();
+        }
+        float safeHeight = Mathf.Max(1f, safeArea.height);
+        float safeWidth = Mathf.Max(1f, safeArea.width);
+        float pixels = applyVertical ? (fillTopUnsafeArea
+            ? screenHeight - safeArea.yMax : safeArea.yMin) : 0f;
+        float left = applyHorizontal ? safeArea.xMin / safeWidth : 0f;
+        float right = applyHorizontal ? (screenWidth - safeArea.xMax) / safeWidth : 0f;
+        float fraction = pixels / safeHeight;
+        // Thresholds are fractions of the physical screen, independent of DPI.
+        float ratio = pixels / Mathf.Max(1f, screenHeight);
+        int variant = ratio <= 0.035f ? 0 : ratio <= 0.075f ? 1 : 2;
+        for (int i = 0; i < _insetCaps.Length; i++)
+        {
+            var cap = _insetCaps[i];
+            bool show = pixels > 0.5f && i == variant;
+            cap.gameObject.SetActive(show);
+            if (!show) continue;
+            cap.anchorMin = new Vector2(-left, fillTopUnsafeArea ? 1f : -fraction);
+            cap.anchorMax = new Vector2(1f + right, fillTopUnsafeArea ? 1f + fraction : 0f);
+            cap.offsetMin = cap.offsetMax = Vector2.zero;
         }
 
-        var canvas = _hudBackground.canvas;
-        if (canvas == null) return;
-        float unitsPerPixel = 1f / Mathf.Max(0.0001f, canvas.scaleFactor);
-        float top = fillTopUnsafeArea && applyVertical
-            ? (screenHeight - safeArea.yMax) * unitsPerPixel : 0f;
-        float bottom = fillBottomUnsafeArea && applyVertical
-            ? safeArea.yMin * unitsPerPixel : 0f;
-        float left = applyHorizontal ? safeArea.xMin * unitsPerPixel : 0f;
-        float right = applyHorizontal ? (screenWidth - safeArea.xMax) * unitsPerPixel : 0f;
+        // Side caps cover only the vertical HUD band, not the gameplay viewport.
+        Transform hud = transform.Find(fillTopUnsafeArea ? "PF_HudTopRoot" : "PF_SystemHudBottomRoot");
+        float hudHeight = hud is RectTransform hudRect ? hudRect.rect.height : 0f;
+        LayoutSideCap(_leftCap, -left, 0f, hudHeight, left > 0f);
+        LayoutSideCap(_rightCap, 1f, 1f + right, hudHeight, right > 0f);
+    }
 
-        var rect = _extendedBackground.rectTransform;
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = new Vector2(-left, -bottom);
-        rect.offsetMax = new Vector2(right, top);
-        bool extended = top > 0.01f || bottom > 0.01f || left > 0.01f || right > 0.01f;
-        _extendedBackground.gameObject.SetActive(extended);
-        // Retain the original Image and its raycast behaviour without drawing
-        // a second frame over the extended artwork.
-        Color color = _originalBackgroundColor;
-        if (extended) color.a = 0f;
-        _hudBackground.color = color;
+    private RectTransform CreateCap(string capName, int variant)
+    {
+        var cap = CreateDecoration(capName, _rectTransform, CapBase);
+        cap.SetAsFirstSibling();
+        bool top = fillTopUnsafeArea;
+        // Fixed-height trim is anchored to the outer edge; no HUD frame is stretched.
+        AddCapLine(cap, "OuterTrim", top, 0f, 3f, CapTrim);
+        if (variant >= 1)
+            AddCapLine(cap, "InnerTrim", top, 7f, 2f, new Color(0.08f, 0.18f, 0.28f, 1f));
+        if (variant >= 2)
+        {
+            AddCapLine(cap, "PanelSeam", top, 16f, 2f, CapTrim);
+            var center = CreateDecoration("CenterPanel", cap, new Color(0.045f, 0.095f, 0.16f, 1f));
+            center.anchorMin = new Vector2(0.14f, 0.25f);
+            center.anchorMax = new Vector2(0.86f, 0.75f);
+            center.offsetMin = center.offsetMax = Vector2.zero;
+            center.SetAsFirstSibling();
+        }
+        return cap;
+    }
+
+    private void AddCapLine(RectTransform parent, string lineName, bool top,
+        float inset, float thickness, Color color)
+    {
+        var line = CreateDecoration(lineName, parent, color);
+        float edge = top ? 1f : 0f;
+        line.anchorMin = new Vector2(0f, edge);
+        line.anchorMax = new Vector2(1f, edge);
+        line.pivot = new Vector2(0.5f, edge);
+        line.sizeDelta = new Vector2(0f, thickness);
+        line.anchoredPosition = new Vector2(0f, top ? -inset : inset);
+    }
+
+    private RectTransform CreateDecoration(string decorationName, Transform parent, Color color)
+    {
+        var go = new GameObject(decorationName, typeof(RectTransform),
+            typeof(CanvasRenderer), typeof(Image));
+        go.layer = gameObject.layer;
+        var rect = go.GetComponent<RectTransform>();
+        rect.SetParent(parent, false);
+        var image = go.GetComponent<Image>();
+        image.color = color;
+        image.raycastTarget = false;
+        return rect;
+    }
+
+    private void LayoutSideCap(RectTransform cap, float minX, float maxX,
+        float height, bool visible)
+    {
+        float edge = fillTopUnsafeArea ? 1f : 0f;
+        cap.anchorMin = new Vector2(minX, edge);
+        cap.anchorMax = new Vector2(maxX, edge);
+        cap.pivot = new Vector2(0.5f, edge);
+        cap.anchoredPosition = Vector2.zero;
+        cap.sizeDelta = new Vector2(0f, height);
+        cap.gameObject.SetActive(visible && height > 0f);
     }
 
     private Rect GetEffectiveSafeArea(

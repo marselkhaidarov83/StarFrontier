@@ -68,7 +68,6 @@ public class MissionCardView : MonoBehaviour
             progressText.text = rewardHere
                 ? MissionUiText.RewardStepOnPlanet(missionData, config)
                 : MissionUiText.NextStep(missionData, config, player);
-        LayoutMissionBody(((RectTransform)transform).rect.width);
         if (statusText != null) statusText.gameObject.SetActive(false);
 
         bool offered = missionData != null && missionData.Status == MissionStatus.Available;
@@ -117,6 +116,7 @@ public class MissionCardView : MonoBehaviour
                 else _onFly?.Invoke(_missionData);
             });
         }
+        LayoutMissionBody(((RectTransform)transform).rect.width);
         if (selectButton != null)
         {
             selectButton.onClick.RemoveAllListeners();
@@ -145,16 +145,18 @@ public class MissionCardView : MonoBehaviour
     {
         EnsureCardFrame();
         LayoutElement layout = GetComponent<LayoutElement>();
-        if (layout != null) layout.preferredHeight = 280f;
+        if (layout != null) layout.preferredHeight = 310f;
         LayoutText(titleText, 18f, 64f, 100f, 0.98f);
         if (titleText != null)
         {
+            titleText.enableAutoSizing = false;
             titleText.fontSize = 34f;
             titleText.alignment = TextAlignmentOptions.Left;
         }
         foreach (TMP_Text bodyText in new[] { shortDescriptionText, rewardText, progressText })
         {
             if (bodyText == null) continue;
+            bodyText.enableAutoSizing = false;
             bodyText.fontSize = 25f;
             bodyText.textWrappingMode = TextWrappingModes.Normal;
         }
@@ -165,7 +167,7 @@ public class MissionCardView : MonoBehaviour
             rect.anchorMin = new Vector2(1f, 0f);
             rect.anchorMax = new Vector2(1f, 0f);
             rect.pivot = new Vector2(1f, 0f);
-            rect.anchoredPosition = new Vector2(-22f, 20f);
+            rect.anchoredPosition = new Vector2(-22f, 24f);
             rect.sizeDelta = new Vector2(260f, 66f);
             stateBadgeText.alignment = TextAlignmentOptions.Center;
             stateBadgeText.textWrappingMode = TextWrappingModes.Normal;
@@ -178,7 +180,7 @@ public class MissionCardView : MonoBehaviour
             rect.anchorMin = new Vector2(1f, 0f);
             rect.anchorMax = new Vector2(1f, 0f);
             rect.pivot = new Vector2(1f, 0f);
-            rect.anchoredPosition = new Vector2(-22f, 20f);
+            rect.anchoredPosition = new Vector2(-22f, 24f);
             rect.sizeDelta = new Vector2(260f, 66f);
         }
         if (missionTypeIcon != null)
@@ -197,21 +199,29 @@ public class MissionCardView : MonoBehaviour
         if (width <= 0f || shortDescriptionText == null || rewardText == null || progressText == null)
             return;
         _lastBodyWidth = width;
-        float descriptionHeight = PreferredHeight(shortDescriptionText, width * 0.96f - 28f);
-        float rewardHeight = PreferredHeight(rewardText, width * 0.72f - 28f);
-        float stepHeight = PreferredHeight(progressText, width * 0.72f - 28f);
-        const float descriptionTop = 94f;
-        float rewardTop = descriptionTop + descriptionHeight + 6f;
-        float stepTop = rewardTop + rewardHeight + 5f;
-        LayoutText(shortDescriptionText, descriptionTop, descriptionHeight, 28f, 0.96f);
-        LayoutText(rewardText, rewardTop, rewardHeight, 28f, 0.72f);
-        LayoutText(progressText, stepTop, stepHeight, 28f, 0.72f);
+        const float left = 28f, right = 24f, bottom = 28f;
+        float textWidth = Mathf.Max(1f, width - left - right);
+        float titleHeight = titleText == null ? 64f :
+            Mathf.Max(64f, PreferredHeight(titleText, width - 100f - right));
+        float descriptionTop = 18f + titleHeight + 12f;
+        float descriptionHeight = PreferredHeight(shortDescriptionText, textWidth);
+        float rewardHeight = PreferredHeight(rewardText, textWidth);
+        float stepHeight = PreferredHeight(progressText, textWidth);
+        float rewardTop = descriptionTop + descriptionHeight + 8f;
+        float stepTop = rewardTop + rewardHeight + 8f;
+        LayoutText(titleText, 18f, titleHeight, 100f, 1f);
+        LayoutText(shortDescriptionText, descriptionTop, descriptionHeight, left, 1f);
+        LayoutText(rewardText, rewardTop, rewardHeight, left, 1f);
+        LayoutText(progressText, stepTop, stepHeight, left, 1f);
+        // Reserve a separate action row so multiline text cannot overlap it.
+        float actionRow = doneButton != null && doneButton.gameObject.activeSelf ? 78f : 0f;
         LayoutElement layout = GetComponent<LayoutElement>();
-        if (layout != null) layout.preferredHeight = Mathf.Max(280f, stepTop + stepHeight + 18f);
+        if (layout != null)
+            layout.preferredHeight = Mathf.Max(310f, stepTop + stepHeight + actionRow + bottom);
     }
 
     private static float PreferredHeight(TMP_Text text, float width) =>
-        Mathf.Max(40f, text.GetPreferredValues(text.text, Mathf.Max(100f, width), Mathf.Infinity).y + 8f);
+        Mathf.Max(40f, text.GetPreferredValues(text.text, Mathf.Max(1f, width), Mathf.Infinity).y + 12f);
 
     private static void LayoutText(TMP_Text text, float top, float height, float left, float widthFraction)
     {
@@ -221,7 +231,7 @@ public class MissionCardView : MonoBehaviour
         rect.anchorMax = new Vector2(widthFraction, 1f);
         rect.pivot = new Vector2(0f, 1f);
         rect.anchoredPosition = new Vector2(left, -top);
-        rect.sizeDelta = new Vector2(-left, height);
+        rect.sizeDelta = new Vector2(-left - 24f, height);
         text.textWrappingMode = TextWrappingModes.Normal;
         text.overflowMode = TextOverflowModes.Ellipsis;
         text.alignment = TextAlignmentOptions.TopLeft;
