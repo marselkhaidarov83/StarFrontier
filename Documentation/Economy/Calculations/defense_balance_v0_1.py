@@ -153,7 +153,8 @@ def report_defense(sheets, ships, tick, repair_price, loot, recon_rates, liberat
         trophy_rate = mean(trophies * 60 / elapsed for trophies, elapsed in zip(receipts, durations))
         payout_rate = mean(PERSONAL_SHARE * count * payouts[level] * 60 / elapsed
                            for count, elapsed in zip(counts, durations))
-        cash_flows[level] = (income - trophy_rate, trophy_rate, payout_rate)
+        cash_flows[level] = (income - trophy_rate, trophy_rate, payout_rate,
+                             mean(60 / elapsed for elapsed in durations), payouts[level])
         previous_duration = duration
         previous_income = income
 

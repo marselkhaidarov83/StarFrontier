@@ -3,7 +3,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, replace
 from itertools import permutations
-from math import ceil, cos, dist, radians, sin
+from math import ceil, cos, dist, hypot, radians, sin
 from pathlib import Path
 from statistics import mean, median
 from xml.etree import ElementTree
@@ -83,6 +83,9 @@ class Ship:
     defense: float
     damage_per_tick: float
     speed: float
+    weapon_range: float = 0
+    shortest_weapon_range: float = 0
+    loadouts: tuple = ()
 
 
 def build_ships(sheets):
@@ -111,8 +114,12 @@ def build_ships(sheets):
                     loadout = weapon_groups[group][:int(number(hull, "M"))]
                     # Total weapon damage is split across its shots in the game.
                     salvo = sum(midpoint(weapons[weapon], "H", "I") for weapon in loadout)
-                    samples.append((defense, salvo))
-            ships[key] = Ship(median(d for d, _ in samples), median(s for _, s in samples), speed)
+                    ranges = [midpoint(weapons[weapon], 'J', 'K') for weapon in loadout]
+                    guns = tuple((midpoint(weapons[weapon], 'H', 'I'), reach) for weapon, reach in zip(loadout, ranges))
+                    samples.append((defense, salvo, max(ranges), min(ranges), guns))
+            ships[key] = Ship(median(row[0] for row in samples), median(row[1] for row in samples), speed,
+                              median(row[2] for row in samples), median(row[3] for row in samples),
+                              tuple(row[4] for row in samples))
     return ships
 
 
@@ -180,7 +187,7 @@ def reference_trios(ships, level, faction):
     return [[ships[f"enemy_{faction}_L{rank:02}_01"] for rank in trio] for trio in ranks]
 
 
-def longer_battles(ships, scenarios, tick_seconds, *, display=True):
+def longer_battles(ships, scenarios, tick_seconds, *, display=True, movement=None):
     """Trial curve: retain the opening anchor and add one firing tick per level."""
     first_ship = ships["ally_ranger_L01_01"]
     first_target = max(
@@ -225,7 +232,121 @@ def longer_battles(ships, scenarios, tick_seconds, *, display=True):
             gaps.append(f"{max(minimum_surviving_stagger(player, trio, incoming_factor)[0] for trio in trios) * tick_seconds:g}")
         print(f"| {level} | {target_ticks * tick_seconds:g} | {min(duels):g}–{max(duels):g} "
               f"| {min(all_fire_seconds):g}–{max(all_fire_seconds):g} | " + " / ".join(gaps) + " |")
+    print("\n| Ур. | Эффективный урон за тик | Номинальный урон при 90% / 75% реализации | Разрыв для остатка ≥10%, с | Доля прочности при таком разрыве | Полное время тройки, с |")
+    print("|---:|---:|---|---:|---|---|")
+    for level, _, player, _, _, runs in rows:
+        outcomes = [(trio, target * high) for trios, _, high in runs for trio in trios]
+        gaps = []
+        for trio, damage_factor in outcomes:
+            limit = max(ceil(enemy.defense / player.damage_per_tick) for enemy in trio)
+            gap = next(offset for offset in range(limit + 1)
+                       if staggered_fight(player, trio, offset, damage_factor)[0] <= .90)
+            gaps.append(gap)
+        hardest_gap = max(gaps)
+        simulations = [staggered_fight(player, trio, hardest_gap, factor) for trio, factor in outcomes]
+        health = [1 - pressure for pressure, _ in simulations]
+        durations = [elapsed * tick_seconds for _, elapsed in simulations]
+        assert min(health) >= .10 - 1e-10
+        print(f"| {level} | {player.damage_per_tick:.1f} | {ceil(player.damage_per_tick / .90)} / "
+              f"{ceil(player.damage_per_tick / .75)} | {hardest_gap * tick_seconds:g} | "
+              f"{min(health):.1%}–{max(health):.1%} | {min(durations):g}–{max(durations):g} |")
+    if movement is not None:
+        report_contact_geometry(rows, tick_seconds, target, movement)
+        report_distance_fire(rows, tick_seconds, target)
     return maximum_firing_time
+
+
+def active_fire_share(loadout, distance):
+    return sum(damage for damage, reach in loadout if reach >= distance) / sum(damage for damage, _ in loadout)
+
+
+def ranged_fire(ship, distance):
+    share = median(active_fire_share(loadout, distance) for loadout in ship.loadouts)
+    return replace(ship, damage_per_tick=ship.damage_per_tick * share), share
+
+
+def report_distance_fire(rows, tick_seconds, target):
+    points = (80, 150, 250, 300)
+    print('\n| Ур. | Доля урона на 80 / 150 / 250 / 300 | Огонь по тройке на 80 / 150 / 250 / 300, с |')
+    print('|---:|---|---|')
+    for level, _, player, _, _, groups in rows:
+        shares = []
+        times = []
+        for distance in points:
+            ranged_player, share = ranged_fire(player, distance)
+            shares.append(f'{share:.0%}')
+            if share == 0:
+                times.append('—')
+                continue
+            fights = [sum(ceil(enemy.defense / ranged_player.damage_per_tick) for enemy in trio) * tick_seconds
+                      for trios, _, _ in groups for trio in trios]
+            times.append(f'{min(fights):g}–{max(fights):g}')
+        print(f'| {level} | {" / ".join(shares)} | {" / ".join(times)} |')
+
+    _, _, late_ship, _, _, late_groups = rows[-1]
+    print('\n| Дистанция, ур. 10 | Доля урона комплектов, мин.–макс. | Нулевой урон | Остаток прочности при интервале 14 с |')
+    print('|---:|---|---|---|')
+    for distance in points:
+        loadout_shares = [active_fire_share(loadout, distance) for loadout in late_ship.loadouts]
+        ranged_player, share = ranged_fire(late_ship, distance)
+        residual = '—'
+        if share:
+            stagger = ceil(14 / tick_seconds)
+            health = [1 - staggered_fight(ranged_player, [ranged_fire(enemy, distance)[0] for enemy in trio],
+                                        stagger, target * high)[0]
+                      for trios, _, high in late_groups for trio in trios]
+            residual = f'{min(health):.1%}–{max(health):.1%}'
+        print(f'| {distance} | {min(loadout_shares):.0%}–{max(loadout_shares):.0%} | '
+              f'{loadout_shares.count(0)}/{len(loadout_shares)} | {residual} |')
+
+
+def report_contact_geometry(rows, tick_seconds, target, movement):
+    """Bound the spacing from straight-line closure at stock and trial speeds."""
+    spawn_path = WORKBOOK.parents[3] / 'Assets/_Project/Content/Configs/Population/SystemNpcSpawnPoints'
+    radii = defaultdict(list)
+    for asset in spawn_path.glob('system_npc_spawn_points_s??_*.asset'):
+        level = int(asset.name.split('_')[4][1:])
+        radius = next(float(line.split(':', 1)[1]) for line in asset.read_text().splitlines()
+                      if line.startswith('  enemyRandomRadius:'))
+        radii[level].append(radius)
+
+    speed_multiplier = float(movement['speedMultiplier'])
+    max_distance = 2 * float(movement['boundaryProtectionRadiusWorld'])
+    print('\n| Ур. | Разброс группы макс., ед. | Разброс дальности врагов, ед. | Скорость врагов исходная / пробная | Нужный разрыв, с | Сближение не быстрее, ед./тик | Верхняя оценка между первым и третьим без манёвра, с: исходная / пробная |')
+    print('|---:|---:|---:|---|---:|---:|---|')
+    for level, _, player, _, _, runs in rows:
+        radius = max(radii[level])
+        span = hypot(2 * radius, radius * .25)
+        outcomes = [(trio, target * high) for trios, _, high in runs for trio in trios]
+        required = 0
+        ranges = []
+        stock = []
+        for trio, factor in outcomes:
+            limit = max(ceil(enemy.defense / player.damage_per_tick) for enemy in trio)
+            required = max(required, next(gap for gap in range(limit + 1)
+                                          if staggered_fight(player, trio, gap, factor)[0] <= .90))
+            ranges.append(max(enemy.weapon_range for enemy in trio) - min(enemy.weapon_range for enemy in trio))
+            stock.extend(enemy.speed for enemy in trio)
+        trial = [110 - 5 * (rank - 1) for rank in range(max(1, level - 2), level + 1)]
+        closure_distance_span = span + max(ranges)
+        closing_ceiling = closure_distance_span / (2 * required)
+        windows = []
+        for speeds in (stock, trial):
+            slow = min(speeds) * speed_multiplier
+            fast = max(speeds) * speed_multiplier
+            window = (closure_distance_span / slow + max_distance * (1 / slow - 1 / fast)) * tick_seconds
+            windows.append(window)
+        print(f'| {level} | {span:.0f} | {max(ranges):.0f} | {min(stock):g}–{max(stock):g} / '
+              f'{min(trial)}–{max(trial)} | {required * tick_seconds:g} | {closing_ceiling:.1f} | '
+              f'{windows[0]:.1f} / {windows[1]:.1f} |')
+
+    print('\n| Ур. | Дальность полного залпа игрока / первого выстрела | Враг: первый выстрел | Враг: удержание дистанции |')
+    print('|---:|---|---|---|')
+    for level, _, player, _, _, runs in rows:
+        enemies = [enemy for trios, _, _ in runs for trio in trios for enemy in trio]
+        print(f'| {level} | {player.shortest_weapon_range:.0f} / {player.weapon_range:.0f} | '
+              f'{min(e.weapon_range for e in enemies):.0f}–{max(e.weapon_range for e in enemies):.0f} | '
+              f'{min(.9 * e.shortest_weapon_range for e in enemies):.0f}–{max(.9 * e.shortest_weapon_range for e in enemies):.0f} |')
 
 
 def linked_row(sheet, cell):
@@ -457,7 +578,8 @@ def main():
     print("|---:|---:|---:|---:|")
     for level, maneuvers in maneuver_results:
         print(f"| {level} | " + " | ".join(f"{gap:g}" for gap in maneuvers) + " |")
-    combat_by_level = longer_battles(ships, combat_scenarios, tick)
+    movement = {row.get('B'): row.get('D') for row in sheets['ShipMovementConfig']}
+    combat_by_level = longer_battles(ships, combat_scenarios, tick, movement=movement)
     if combat_by_level is not None:
         repair_route(sheets, ships, tick, combat_by_level[10])
         survey_repair_routes(sheets, ships, tick, combat_by_level)

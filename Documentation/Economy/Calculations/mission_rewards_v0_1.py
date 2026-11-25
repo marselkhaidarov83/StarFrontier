@@ -3,16 +3,19 @@
 from collections import defaultdict
 from dataclasses import replace
 from heapq import heappop, heappush
+from itertools import product
 from math import ceil, floor
+from pathlib import Path
+import re
 from statistics import median
 
 from activity_income_v0_1 import available_corridors, one_cargo, trade_corridors
 from combat_balance_v0_1 import (
     FACTIONS, SHEETS, build_ships, clearance_kills, linked_row, longer_battles,
-    midpoint, number, read_sheets, records, reference_trios, repair_route_scenarios, spawn_rows,
+    group_members, midpoint, number, read_sheets, records, reference_trios, repair_route_scenarios, spawn_rows,
 )
 from early_credit_balance_v0_1 import fit_trophy_curve, liberation_costs
-from defense_balance_v0_1 import report_defense
+from defense_balance_v0_1 import invasion_groups, report_defense
 from progression_economy_v0_1 import EXTRA_SHEETS
 
 
@@ -532,7 +535,7 @@ def report_updated_combat(sheets, ships, tick, costs, loot, battle_seconds, batt
         minutes = (travel + 75) / 60
         recon_expense = 2 * bases[level] * price + ceil(repair * .2)
         recon_payout = reward(recon_expense, minutes, revised[level][1], .9)
-        mission_net, trophies, payout = defense_flows[level]
+        mission_net, trophies, payout = defense_flows[level][:3]
         rates = []
         recon_by_level[level] = []
         for bonus in (0, .10):
@@ -554,7 +557,7 @@ def report_updated_combat(sheets, ships, tick, costs, loot, battle_seconds, batt
         previous = 0
         for level, (trials, expense, per_kill) in trials_by_level.items():
             ranks = costs[level][0]
-            mission_net, trophies, payout = defense_flows[level]
+            mission_net, trophies, payout = defense_flows[level][:3]
             if .5 * scale * sum(loot[rank] for rank in ranks) <= expense:
                 losses.append(level)
             for index, bonus in enumerate((0, .10)):
@@ -641,6 +644,236 @@ def report_sector_four_routes(sheets, ships, tick, costs, loot, battle_seconds, 
                              for cash, elapsed, _, kills in trials) for bonus in (0, .10))
         print(f'Все 9 направлений с равным весом, обслуживание {service} с: '
               f'{rates[0]:.0f} / {rates[1]:.0f} кр./мин.')
+
+
+def report_equipment_repair(sheets, costs, loot, battles, bases, price, battle_seconds, defense_flows, revised):
+    prices_path = Path(__file__).resolve().parents[3] / 'Assets/_Project/Content/Configs/Market/Items'
+    slots = ('engine', 'fuel_tank', 'radar', 'scanner', 'repair_droid', 'grabber', 'shield_generator')
+    unit_prices = {}
+    for name in ('weapon', *slots):
+        asset = (prices_path / f'item_repair_{name}_01.asset').read_text()
+        unit_prices[name] = int(re.search(r'^  basePrice: (\d+)$', asset, re.M).group(1))
+
+    hulls = records(sheets['HullConfig'])
+    equipment = records(sheets['ShipEquipmentConfig'])
+    allies = records(sheets['AllyConfig'])
+    groups = group_members(sheets['EquipmentGroupConfig'], 'Внутренние группы по типам / Варианты оборудования', 'D')
+    def loadout_repair(ship_level):
+        profile = f'ally_ranger_L{ship_level:02}_01'
+        hull = hulls[f'hull_{profile}']
+        shield = max(int(number(equipment[key], 'AI')) for key in groups[allies[profile]['H']]
+                     if equipment[key]['N'].startswith('6 ·'))
+        assert hull['X'] == 'Да'
+        wear = int(number(hull, 'M')) * unit_prices['weapon']
+        wear += sum(unit_prices[name] for column, name in zip('RSTUVWX', slots) if hull[column] == 'Да')
+        return shield, wear
+
+    print('\n| Сектор | Щит: макс. очков | Тарифный ремонт 1 ед. каждого предмета | Полные расходы при цене щита 1 / 2 / 3 | Прибыль отхода при цене 1 / 2 / 3 | Награда за цель при цене 1 |')
+    print('|---:|---:|---:|---|---|---:|')
+    installments = {}
+    for level, (ranks, _, _) in costs.items():
+        shield, wear = loadout_repair(1 if level == 2 else level)
+        base = int(2 * bases[level] * price + battles[level][2])
+        full_costs = [base + wear + shield * shield_price for shield_price in (1, 2, 3)]
+        receipts = .5 * sum(loot[rank] for rank in ranks)
+        profits = [round(receipts - cost) for cost in full_costs]
+        capacities = [count for faction in FACTIONS
+                      for _, minimum, maximum in (spawn_rows(sheets['EnemySpawnRuleConfig'], faction, level),)
+                      for count in range(minimum, maximum + 1)]
+        payout = ceil(full_costs[0] / ceil(.30 * median(capacities)))
+        installments[level] = (full_costs[0], payout)
+        print(f'| {level} | {shield} | {wear} | {" / ".join(map(str, full_costs))} | '
+              f'{" / ".join(map(str, profits))} | {payout} |')
+
+    print('\n| Сектор | Оборона / освобождение без бонуса | Оборона / освобождение с +10% | Порядок с разведкой |')
+    print('|---:|---|---|---|')
+    groups_by_level = invasion_groups(sheets)
+    hull_price = next(number(row, 'G') for row in sheets['ItemConfig'] if row.get('A') == 'item_repair_01')
+    repaired_cycles = {}
+    for level, (expense, per_kill) in installments.items():
+        # Defense uses a same-level ship, unlike the first liberation sortie in sector 2.
+        extra = sum(loadout_repair(level))
+        repair_budget = ceil(midpoint(hulls[f'hull_ally_ranger_L{level:02}_01'], 'N', 'O') * .5) * hull_price
+        invaders = [sum(count for _, count in group) for group in groups_by_level[level]]
+        defense_payout = ceil((repair_budget + extra) / ceil(.30 * median(invaders)))
+        mission_net, trophy_rate, payout_rate, cycles_per_minute, previous_payout = defense_flows[level]
+        adjusted_payout_rate = payout_rate * defense_payout / previous_payout
+        defense_net = mission_net + trophy_rate + adjusted_payout_rate - payout_rate - extra * cycles_per_minute
+        travel = battles[level][4]
+        recon_minutes = (travel + 75) / 60
+        recon_expense = 2 * bases[level] * price + ceil(battles[level][2] * .2)
+        recon_payout = reward(recon_expense, recon_minutes, revised[level][1], .9)
+        trials = liberation_cycles(sheets, level, list(costs[level][0]), battle_seconds[level], travel, expense,
+                                   loot, credits_per_kill=per_kill, service_seconds=39 if level == 4 else 45)
+        numbers = []
+        thresholds = []
+        for bonus in (0, .10):
+            defense = defense_net + bonus * adjusted_payout_rate
+            liberation = median((cash + bonus * kills * per_kill) * 60 / elapsed
+                                for cash, elapsed, _, kills in trials)
+            recon = (.9 * recon_payout * (1 + bonus) - recon_expense) / recon_minutes
+            numbers.append((f'{defense:.0f} / {liberation:.0f}', recon < defense < liberation))
+            thresholds.append((recon, defense))
+        repaired_cycles[level] = (expense, per_kill, trials, thresholds, trophy_rate)
+        print(f'| {level} | {numbers[0][0]} | {numbers[1][0]} | {"да" if all(passed for _, passed in numbers) else "нет"} |')
+
+    report_liberation_trophy_calibration(costs, loot, repaired_cycles, groups_by_level)
+    report_liberation_service_calibration(sheets, costs, loot, battles, battle_seconds, repaired_cycles)
+
+
+def liberation_rates(trials, payout):
+    return tuple(median((cash + bonus * kills * payout) * 60 / elapsed
+                        for cash, elapsed, _, kills in trials) for bonus in (0, .10))
+
+
+def liberation_weighted_rates(trials, payout):
+    elapsed = sum(seconds for _, seconds, _, _ in trials)
+    return tuple(sum(cash + bonus * kills * payout for cash, _, _, kills in trials) * 60 / elapsed
+                 for bonus in (0, .10))
+
+
+def report_liberation_service_calibration(sheets, costs, loot, battles, battle_seconds, cycles):
+    baseline = {3: 45, 4: 39, 5: 45}
+    choices = {}
+    weighted = {}
+    for level, original in baseline.items():
+        expense, payout, _, thresholds, _ = cycles[level]
+        choices[level] = []
+        weighted[level] = {}
+        for service in range(30, 61):
+            trials = liberation_cycles(sheets, level, list(costs[level][0]), battle_seconds[level],
+                                       battles[level][4], expense, loot, credits_per_kill=payout,
+                                       service_seconds=service)
+            rates = liberation_rates(trials, payout)
+            weighted[level][service] = liberation_weighted_rates(trials, payout)
+            if all(rate > defense for rate, (_, defense) in zip(rates, thresholds)):
+                choices[level].append((abs(service - original), service, rates))
+
+    lower = liberation_rates(cycles[2][2], cycles[2][1])
+    upper = liberation_rates(cycles[6][2], cycles[6][1])
+    feasible = []
+    for combination in product(*choices.values()):
+        sequences = list(zip(lower, *(row[2] for row in combination), upper))
+        if all(all(a < b for a, b in zip(sequence, sequence[1:])) for sequence in sequences):
+            feasible.append(combination)
+    print(f'\nСектор 3–5: {len(feasible)} сочетаний времени обслуживания сохраняют рост в обоих режимах.')
+    if feasible:
+        best = min(feasible, key=lambda rows: (sum(row[0] for row in rows), max(row[0] for row in rows), rows))
+        print('| Сектор | Обслуживание было → стало, с | Освобождение без бонуса / с +10%, кр./мин |')
+        print('|---:|---|---|')
+        for (level, original), (_, service, rates) in zip(baseline.items(), best):
+            print(f'| {level} | {original} → {service} | {rates[0]:.0f} / {rates[1]:.0f} |')
+        lookup = {level: {row[1]: row[2] for row in options} for level, options in choices.items()}
+        print('\n| Независимый разброс обслуживания, с | Устойчивых сочетаний из номинально годных |')
+        print('|---:|---:|')
+        for tolerance in (1, 2, 3):
+            stable = 0
+            for combination in feasible:
+                rate_windows = [[lower], *[
+                    [lookup[level][second] for second in range(row[1] - tolerance, row[1] + tolerance + 1)
+                     if second in lookup[level]]
+                    for level, row in zip(baseline, combination)
+                ], [upper]]
+                if any(len(window) != 2 * tolerance + 1 for window in rate_windows[1:-1]):
+                    continue
+                if all(max(pair[mode] for pair in left) < min(pair[mode] for pair in right)
+                       for left, right in zip(rate_windows, rate_windows[1:]) for mode in (0, 1)):
+                    stable += 1
+            print(f'| ±{tolerance} | {stable}/{len(feasible)} |')
+
+        print('\n| Сектор | Кредитов за минуту суммарного времени без бонуса / с +10% |')
+        print('|---:|---|')
+        selected_seconds = {level: option[1] for level, option in zip(baseline, best)}
+        comparison = {}
+        for level, (expense, payout, trials, _, _) in cycles.items():
+            rates = weighted[level][selected_seconds[level]] if level in selected_seconds else liberation_weighted_rates(trials, payout)
+            comparison[level] = rates
+            print(f'| {level} | {rates[0]:.0f} / {rates[1]:.0f} |')
+        for tolerance in (1, 2, 3):
+            windows = [[comparison[2]], *[
+                [weighted[level][time] for time in range(selected - tolerance, selected + tolerance + 1)]
+                for level, selected in selected_seconds.items()
+            ], [comparison[6]]]
+            stable = all(max(pair[mode] for pair in left) < min(pair[mode] for pair in right)
+                         for left, right in zip(windows, windows[1:]) for mode in (0, 1))
+            print(f'Суммарный темп, сектора 2–6, ±{tolerance} с: {"устойчив" if stable else "неустойчив"}.')
+        expense, payout, _, _, _ = cycles[8]
+        for service in range(45, 29, -1):
+            trials = liberation_cycles(sheets, 8, list(costs[8][0]), battle_seconds[8], battles[8][4],
+                                       expense, loot, credits_per_kill=payout, service_seconds=service)
+            rates = liberation_weighted_rates(trials, payout)
+            if all(low < rate < high for low, rate, high in zip(comparison[7], rates, comparison[9])):
+                print(f'Суммарный темп, сектор 8: {service} с обслуживания, {rates[0]:.0f} / {rates[1]:.0f} кр./мин.')
+                break
+
+
+def report_liberation_trophy_calibration(costs, loot, cycles, invasion_compositions):
+    """Adjust mid-level trophy value, keeping the other calibration inputs fixed."""
+    adjustable = (2, 3, 4, 5)
+    # The median depends only on sortie length, count and final kills. Keep their frequencies.
+    grouped_cycles = {}
+    invasion_ranks = {}
+    for level, (_, _, trials, _, _) in cycles.items():
+        frequencies = defaultdict(int)
+        for trial in trials:
+            frequencies[trial] += 1
+        grouped_cycles[level] = frequencies
+        invasion_ranks[level] = {int(enemy.split('_')[-2][1:]) for group in invasion_compositions[level]
+                                 for enemy, _ in group}
+
+    def evaluate(candidate):
+        previous = (0, 0)
+        result = {}
+        for level, (expense, rate, _, thresholds, defense_trophies) in cycles.items():
+            ranks = list(costs[level][0])
+            proceeds = .5 * sum(candidate[rank] for rank in ranks)
+            if proceeds < 1.2 * expense:
+                return None
+            changes = [.5 * (candidate[rank] - loot[rank]) for rank in ranks]
+            frequencies = grouped_cycles[level]
+            bounds = [candidate[rank] / loot[rank] for rank in invasion_ranks[level]]
+            incomes = []
+            for index, bonus in enumerate((0, .10)):
+                values = []
+                for (cash, elapsed, sorties, kills), frequency in frequencies.items():
+                    change = (sorties - 1) * sum(changes) + sum(changes[:kills])
+                    income = (cash + change + bonus * kills * rate) * 60 / elapsed
+                    values.extend([income] * frequency)
+                income = median(values)
+                recon, defense = thresholds[index]
+                low = defense + (min(bounds) - 1) * defense_trophies
+                high = defense + (max(bounds) - 1) * defense_trophies
+                if income <= previous[index] or not recon < low <= high < income:
+                    return None
+                incomes.append(income)
+            previous = incomes
+            result[level] = (proceeds - expense, *incomes)
+        return result
+
+    winner = None
+    for changes in product(range(-400, 401, 50), repeat=len(adjustable)):
+        magnitude = sum(abs(change) for change in changes)
+        if winner and magnitude >= winner[0]:
+            continue
+        candidate = dict(loot)
+        for rank, change in zip(adjustable, changes):
+            candidate[rank] += change
+        if any(candidate[rank] >= candidate[rank + 1] for rank in range(1, 10)):
+            continue
+        result = evaluate(candidate)
+        if result:
+            winner = magnitude, candidate, result
+
+    if winner is None:
+        print('Локальный подбор стоимости трофеев: в проверенной сетке решения нет.')
+        return
+    _, candidate, result = winner
+    print('\nСтупени выкупа после перекалибровки: '
+          + ', '.join(f'{rank}: {loot[rank]} → {candidate[rank]}' for rank in adjustable))
+    print('| Сектор | Отход, кр. | Освобождение без бонуса / с +10%, кр./мин |')
+    print('|---:|---:|---|')
+    for level, (retreat, base, enhanced) in result.items():
+        print(f'| {level} | {retreat:.0f} | {base:.0f} / {enhanced:.0f} |')
 
 
 def main():
@@ -774,6 +1007,7 @@ def main():
     bases, price = report_fuel_and_tanks(sheets, ships, tick, items, costs, loot, battles, revised,
                                          revised_first_level, jump_seconds)
     report_updated_combat(sheets, ships, tick, costs, loot, battle_seconds, battles, defense_flows, revised, bases, price)
+    report_equipment_repair(sheets, costs, loot, battles, bases, price, battle_seconds, defense_flows, revised)
 
 
 if __name__ == '__main__':
