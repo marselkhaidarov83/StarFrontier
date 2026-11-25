@@ -142,6 +142,7 @@ public sealed class RefuelPanelView2A : MonoBehaviour
         if (width <= 0 || height <= 0) return;
         _lastSize = _screen.rect.size; _lastHeader = Header.sprite;
         float heroHeight = Header.sprite != null ? width * Header.sprite.rect.height / Header.sprite.rect.width : 0;
+        heroHeight = Mathf.Max(300f, heroHeight);
         Place(Header.rectTransform, 0, TopHud, width, heroHeight);
         _work.anchorMin = Vector2.zero; _work.anchorMax = Vector2.one;
         _work.offsetMin = new Vector2(0, BottomHud); _work.offsetMax = new Vector2(0, -TopHud - heroHeight);

@@ -19,6 +19,7 @@ public sealed class StationResearchPanelView2A : MonoBehaviour
     public Button Upgrade { get; private set; }
     public bool IsReady => _hero != null && _work != null && _info != null && Upgrade != null;
     public int VisibleCardCount => _cards.Count;
+    public RectTransform ActionMenuArea => _hero != null ? _hero.rectTransform : null;
     public static void AttachToLocation(RectTransform research, Transform locationRoot, Transform government, Transform background)
     {
         if (research == null) return;
@@ -146,6 +147,7 @@ public sealed class StationResearchPanelView2A : MonoBehaviour
         var root = (RectTransform)transform; _lastSize = root.rect.size;
         float width = root.rect.width;
         float hero = _hero.sprite != null && _hero.sprite.rect.width > 0 ? width * _hero.sprite.rect.height / _hero.sprite.rect.width : width * 4f / 9f;
+        hero = Mathf.Max(300f, hero);
         ResearchPanelUi2A.Place(_hero.rectTransform, 0, 194, width, hero);
         ResearchPanelUi2A.Place(_work.rectTransform, 0, 194 + hero, width, root.rect.height - 194 - hero - 142);
         float w = Mathf.Max(0, width - 36);

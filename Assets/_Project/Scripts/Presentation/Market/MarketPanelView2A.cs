@@ -378,6 +378,7 @@ public sealed class MarketPanelView2A : MonoBehaviour
         float width = _lastSize.x, height = _lastSize.y;
         if (width <= 0 || height <= 0) return;
         float hero = Header.sprite != null && Header.sprite.rect.width > 0 ? width * Header.sprite.rect.height / Header.sprite.rect.width : width * 4f / 9f;
+        hero = Mathf.Max(300f, hero);
         ResearchPanelUi2A.Place(Header.rectTransform, 0, 194, width, hero);
         ResearchPanelUi2A.Place(_work, 0, 194 + hero, width, Mathf.Max(0, height - 194 - hero - 142));
         float workHeight = Mathf.Max(0, height - 194 - hero - 142);

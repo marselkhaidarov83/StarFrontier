@@ -34,6 +34,11 @@ public sealed class SystemHudSafeAreaAdapter2A :
     [SerializeField]
     private bool resetOffsetsAfterApply = true;
 
+    [SerializeField]
+    private bool fillTopUnsafeArea;
+
+    private RectTransform _topInsetFill;
+
     [Header("Editor simulation")]
 
     [Tooltip(
@@ -347,6 +352,8 @@ public sealed class SystemHudSafeAreaAdapter2A :
                 Vector2.zero;
         }
 
+        UpdateTopInsetFill(normalizedMaxY, normalizedMinY);
+
         _isApplying = false;
 
         _cachedSafeArea =
@@ -385,6 +392,34 @@ public sealed class SystemHudSafeAreaAdapter2A :
                 gameObject.name +
                 ".");
         }
+    }
+
+    // Decorative only: never move or enlarge the interactive HUD into a cutout.
+    private void UpdateTopInsetFill(float safeTop, float safeBottom)
+    {
+        if (!fillTopUnsafeArea || !applyVertical)
+            return;
+
+        if (_topInsetFill == null)
+        {
+            var fill = new GameObject("TopUnsafeAreaFill", typeof(RectTransform),
+                typeof(CanvasRenderer), typeof(Image));
+            fill.layer = gameObject.layer;
+            _topInsetFill = fill.GetComponent<RectTransform>();
+            _topInsetFill.SetParent(_rectTransform, false);
+            _topInsetFill.SetAsFirstSibling();
+            var image = fill.GetComponent<Image>();
+            image.color = new Color(0.035f, 0.075f, 0.12f, 1f);
+            image.raycastTarget = false;
+        }
+
+        // Relative anchors reach the physical screen edge at every Canvas scale.
+        float extension = (1f - safeTop) / Mathf.Max(0.0001f, safeTop - safeBottom);
+        _topInsetFill.anchorMin = new Vector2(0f, 1f);
+        _topInsetFill.anchorMax = new Vector2(1f, 1f + extension);
+        _topInsetFill.offsetMin = Vector2.zero;
+        _topInsetFill.offsetMax = Vector2.zero;
+        _topInsetFill.gameObject.SetActive(extension > 0.0001f);
     }
 
     private Rect GetEffectiveSafeArea(

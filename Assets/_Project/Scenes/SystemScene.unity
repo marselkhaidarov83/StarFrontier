@@ -4840,6 +4840,7 @@ MonoBehaviour:
   applyHorizontal: 1
   applyVertical: 1
   resetOffsetsAfterApply: 1
+  fillTopUnsafeArea: 1
   simulateSafeAreaInEditor: 0
   simulatedInsetsPixels: {x: 0, y: 0, z: 0, w: 0}
   logChanges: 0
@@ -12434,6 +12435,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1256647065}
   - component: {fileID: 1256647066}
+  - component: {fileID: 1256647069}
   m_Layer: 5
   m_Name: PlanetRoot
   m_TagString: MainCamera
@@ -12441,6 +12443,34 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!114 &1256647069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1256647064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc882d9d8f5ff4ece961ef68c2615d2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Presentation::SystemHudSafeAreaAdapter2A
+  applyHorizontal: 1
+  applyVertical: 1
+  resetOffsetsAfterApply: 1
+  simulateSafeAreaInEditor: 0
+  simulatedInsetsPixels: {x: 0, y: 0, z: 0, w: 0}
+  logChanges: 0
+  lastAppliedSafeAreaPixels:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+  lastAppliedAnchorMin: {x: 0, y: 0}
+  lastAppliedAnchorMax: {x: 0, y: 0}
+  lastScreenWidth: 0
+  lastScreenHeight: 0
 --- !u!224 &1256647065
 RectTransform:
   m_ObjectHideFlags: 0

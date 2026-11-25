@@ -24,6 +24,7 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
     private MissionScreenController _missionScreen;
     private Sprite _currentSprite;
     public Sprite CurrentLocationIllustration => _currentSprite;
+    public RectTransform ActionMenuArea => _heroFrame;
     private float _lastLayoutWidth = -1f;
     // Slightly underlap the HUD artwork so the illustration meets its lower trim.
     private const float TopHudHeight = 194f;
@@ -62,7 +63,7 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 
     private void LateUpdate()
     {
-        if (_heroFrame == null || _currentSprite == null) return;
+        if (_heroFrame == null) return;
         float width = ((RectTransform)transform).rect.width;
         if (Mathf.Abs(width - _lastLayoutWidth) > 0.5f)
             UpdateHeroLayout();
@@ -131,9 +132,8 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
             _heroOverlayImage.sprite = null;
             _heroOverlayImage.enabled = false;
         }
-        if (_heroFrame != null) _heroFrame.gameObject.SetActive(sprite != null);
-        if (sprite != null) UpdateHeroLayout();
-        else _missionScreen?.SetListTopInset(TopHudHeight);
+        if (_heroFrame != null) _heroFrame.gameObject.SetActive(true);
+        UpdateHeroLayout();
         AppLog.Info(DebugLogChannel.StationInterface, typeof(PlanetGovernmentMissionPresenter),
             "Station mission illustration | Station=" + station?.Id + " | Sprite=" + sprite?.name);
     }
@@ -283,12 +283,13 @@ public class PlanetGovernmentMissionPresenter : CustomMonoBehaviour
 
     private void UpdateHeroLayout()
     {
-        if (_heroFrame == null || _currentSprite == null) return;
+        if (_heroFrame == null) return;
         float width = ((RectTransform)transform).rect.width;
         if (width <= 0f) return;
         _lastLayoutWidth = width;
-        float aspect = _currentSprite.rect.width / _currentSprite.rect.height;
-        float height = width / aspect;
+        float height = _currentSprite != null && _currentSprite.rect.width > 0f
+            ? width * _currentSprite.rect.height / _currentSprite.rect.width : 300f;
+        height = Mathf.Max(300f, height);
         _heroFrame.sizeDelta = new Vector2(0f, height);
         if (_missionScreen != null)
             _missionScreen.SetListTopInset(TopHudHeight + height);
