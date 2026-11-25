@@ -12,6 +12,7 @@ public sealed partial class HangarPanelView2A : MonoBehaviour
     private const float ServiceMenuInset = 136;
     private bool _stacked;
     public Image Header { get; private set; }
+    public RectTransform ActionMenuArea => _stacked ? _left : Header?.rectTransform;
     public bool IsReady => _screen != null && _work != null && (_stacked || Header != null) && _left != null && _right != null;
     private void BuildFrame()
     {
@@ -90,7 +91,11 @@ public sealed partial class HangarPanelView2A : MonoBehaviour
         const float bottomBar = 142;
         float hero = _lastSprite != null && _lastSprite.rect.width > 0
             ? width * _lastSprite.rect.height / _lastSprite.rect.width : 0;
-        if (Header != null) ResearchPanelUi2A.Place(Header.rectTransform, 0, topBar, width, hero);
+        if (Header != null)
+        {
+            hero = Mathf.Max(300f, hero);
+            ResearchPanelUi2A.Place(Header.rectTransform, 0, topBar, width, hero);
+        }
 
         _work.anchorMin = Vector2.zero; _work.anchorMax = Vector2.one;
         _work.offsetMin = new Vector2(0, bottomBar); _work.offsetMax = new Vector2(0, -topBar - hero);
@@ -99,7 +104,7 @@ public sealed partial class HangarPanelView2A : MonoBehaviour
         if (_stacked)
         {
             float availableHeight = Mathf.Max(0, workHeight - gap);
-            float inventoryHeight = Mathf.Min(StackedInventoryHeight, availableHeight);
+            float inventoryHeight = Mathf.Min(StackedInventoryHeight, Mathf.Max(0f, availableHeight - 300f));
             float shipHeight = availableHeight - inventoryHeight;
             float menuInset = Mathf.Min(ServiceMenuInset, width * .2f);
             float shipWidth = width - 2 * menuInset;

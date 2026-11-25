@@ -117,18 +117,81 @@ public class PlanetController : CustomMonoBehaviour
             StationLocationRules.IsInside(gameSessionService.State, system));
         _researchButton.transform.SetAsLastSibling();
     }
+    private GameObject _menuAreaHost;
+    private RectTransform _menuArea;
+    private readonly Vector3[] _menuAreaCorners = new Vector3[4];
+
+    // A single owner for the landed service menu. The panel views expose their
+    // actual illustration (or the stacked hangar's side-menu band).
     private void LateUpdate()
     {
-        if (_researchButton == null || !_researchButton.gameObject.activeInHierarchy || openSystemButton == null || planetRoot == null) return;
+        if (openSystemButton == null || planetRoot == null || !planetRoot.activeInHierarchy) return;
         var root = planetRoot.transform as RectTransform;
         var source = openSystemButton.transform as RectTransform;
-        if (root == null || source == null) return;
-        var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, source);
-        // Mirror only the research entry. The serialized takeoff button stays in its original right-hand position.
-        float margin = Mathf.Max(10, root.rect.xMax - bounds.max.x);
-        float top = Mathf.Max(0, root.rect.yMax - bounds.max.y);
-        ResearchPanelUi2A.Place(_researchButton.GetComponent<RectTransform>(), margin, top,
-            Mathf.Clamp(bounds.size.x, 56, 160), Mathf.Clamp(bounds.size.y, 56, 160));
+        var group = source != null ? source.parent as RectTransform : null;
+        if (root == null || group == null) return;
+
+        GameObject host = null;
+        if (_researchBlock != null && _researchBlock.activeInHierarchy) host = _researchBlock;
+        else if (governmentBlock != null && governmentBlock.activeInHierarchy) host = governmentBlock;
+        else if (marketBlock != null && marketBlock.activeInHierarchy) host = marketBlock;
+        else if (hangarBlock != null && hangarBlock.activeInHierarchy) host = hangarBlock;
+        else if (fuelBlock != null && fuelBlock.activeInHierarchy) host = fuelBlock;
+
+        if (host != _menuAreaHost || _menuArea == null || !_menuArea.gameObject.activeInHierarchy)
+        {
+            _menuAreaHost = host;
+            _menuArea = null;
+            if (host == governmentBlock && host != null)
+                _menuArea = host.GetComponentInChildren<PlanetGovernmentMissionPresenter>(true)?.ActionMenuArea;
+            else if (host == marketBlock && host != null)
+                _menuArea = host.GetComponentInChildren<MarketPanelView2A>(true)?.Header?.rectTransform;
+            else if (host == hangarBlock && host != null)
+            {
+                foreach (var view in host.GetComponentsInChildren<HangarPanelView2A>(true))
+                    if (view.isActiveAndEnabled && view.ActionMenuArea != null &&
+                        view.ActionMenuArea.gameObject.activeInHierarchy)
+                    { _menuArea = view.ActionMenuArea; break; }
+            }
+            else if (host == fuelBlock && host != null)
+                _menuArea = host.GetComponentInChildren<RefuelPanelView2A>(true)?.Header?.rectTransform;
+            else if (host == _researchBlock && host != null)
+                _menuArea = host.GetComponentInChildren<StationResearchPanelView2A>(true)?.ActionMenuArea;
+        }
+
+        // The root and the HUD share the same Safe Area. Preserve the original
+        // 10-unit gap below the 200-unit HUD, then fit before the panel content.
+        const float top = 210f, margin = 35f, gap = 8f;
+        float bottom = Mathf.Min(root.rect.height - 142f, top + 470f + gap);
+        if (_menuArea != null && _menuArea.gameObject.activeInHierarchy)
+        {
+            _menuArea.GetWorldCorners(_menuAreaCorners);
+            bottom = Mathf.Min(bottom,
+                root.rect.yMax - root.InverseTransformPoint(_menuAreaCorners[0]).y);
+        }
+        else if (host != null)
+            bottom = Mathf.Min(bottom, 194f + 300f);
+
+        int count = 0;
+        foreach (Transform child in group)
+            if (child.gameObject.activeSelf) count++;
+        float preferredHeight = Mathf.Max(90f, count * 90f + Mathf.Max(0, count - 1) * 5f);
+        float maxWidth = Mathf.Max(0f, Mathf.Min(90f, root.rect.width * .2f - margin));
+        float scale = Mathf.Clamp01(Mathf.Min(maxWidth / 90f,
+            (bottom - top - gap) / preferredHeight));
+        Vector3 targetScale = new Vector3(scale, scale, 1f);
+        if (group.localScale != targetScale) group.localScale = targetScale;
+        var position = new Vector2(-margin, -top);
+        if (group.anchoredPosition != position) group.anchoredPosition = position;
+
+        if (_researchButton != null && _researchButton.gameObject.activeInHierarchy)
+        {
+            var rect = _researchButton.GetComponent<RectTransform>();
+            float size = 90f * scale;
+            if (rect.anchoredPosition != new Vector2(margin, -top) ||
+                rect.sizeDelta != new Vector2(size, size))
+                ResearchPanelUi2A.Place(rect, margin, top, size, size);
+        }
     }
 
     public void Initialize()
