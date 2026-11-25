@@ -37,7 +37,12 @@ public sealed class SystemHudSafeAreaAdapter2A :
     [SerializeField]
     private bool fillTopUnsafeArea;
 
-    private RectTransform _topInsetFill;
+    [SerializeField]
+    private bool fillBottomUnsafeArea;
+
+    private Image _hudBackground;
+    private Image _extendedBackground;
+    private Color _originalBackgroundColor;
 
     [Header("Editor simulation")]
 
@@ -352,7 +357,7 @@ public sealed class SystemHudSafeAreaAdapter2A :
                 Vector2.zero;
         }
 
-        UpdateTopInsetFill(normalizedMaxY, normalizedMinY);
+        UpdateHudDecoration(effectiveSafeArea, screenWidth, screenHeight);
 
         _isApplying = false;
 
@@ -394,32 +399,58 @@ public sealed class SystemHudSafeAreaAdapter2A :
         }
     }
 
-    // Decorative only: never move or enlarge the interactive HUD into a cutout.
-    private void UpdateTopInsetFill(float safeTop, float safeBottom)
+    // Extend only the artwork; the existing HUD RectTransforms, hit targets
+    // and their children remain inside the original Safe Area.
+    private void UpdateHudDecoration(Rect safeArea, int screenWidth, int screenHeight)
     {
-        if (!fillTopUnsafeArea || !applyVertical)
+        if (!fillTopUnsafeArea && !fillBottomUnsafeArea)
             return;
 
-        if (_topInsetFill == null)
+        if (_hudBackground == null)
         {
-            var fill = new GameObject("TopUnsafeAreaFill", typeof(RectTransform),
-                typeof(CanvasRenderer), typeof(Image));
-            fill.layer = gameObject.layer;
-            _topInsetFill = fill.GetComponent<RectTransform>();
-            _topInsetFill.SetParent(_rectTransform, false);
-            _topInsetFill.SetAsFirstSibling();
-            var image = fill.GetComponent<Image>();
-            image.color = new Color(0.035f, 0.075f, 0.12f, 1f);
-            image.raycastTarget = false;
+            Transform source = fillTopUnsafeArea
+                ? transform.Find("PF_HudTopRoot/BackgroundImage")
+                : transform.Find("PF_SystemHudBottomRoot");
+            if (source == null || !source.TryGetComponent(out _hudBackground))
+                return;
+
+            _originalBackgroundColor = _hudBackground.color;
+            var artwork = new GameObject("SafeAreaExtendedHudArtwork",
+                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            artwork.layer = source.gameObject.layer;
+            artwork.transform.SetParent(source, false);
+            artwork.transform.SetAsFirstSibling();
+            _extendedBackground = artwork.GetComponent<Image>();
+            _extendedBackground.sprite = _hudBackground.sprite;
+            _extendedBackground.material = _hudBackground.material;
+            _extendedBackground.color = _originalBackgroundColor;
+            _extendedBackground.raycastTarget = false;
+            _extendedBackground.type = _hudBackground.type;
+            _extendedBackground.preserveAspect = false;
         }
 
-        // Relative anchors reach the physical screen edge at every Canvas scale.
-        float extension = (1f - safeTop) / Mathf.Max(0.0001f, safeTop - safeBottom);
-        _topInsetFill.anchorMin = new Vector2(0f, 1f);
-        _topInsetFill.anchorMax = new Vector2(1f, 1f + extension);
-        _topInsetFill.offsetMin = Vector2.zero;
-        _topInsetFill.offsetMax = Vector2.zero;
-        _topInsetFill.gameObject.SetActive(extension > 0.0001f);
+        var canvas = _hudBackground.canvas;
+        if (canvas == null) return;
+        float unitsPerPixel = 1f / Mathf.Max(0.0001f, canvas.scaleFactor);
+        float top = fillTopUnsafeArea && applyVertical
+            ? (screenHeight - safeArea.yMax) * unitsPerPixel : 0f;
+        float bottom = fillBottomUnsafeArea && applyVertical
+            ? safeArea.yMin * unitsPerPixel : 0f;
+        float left = applyHorizontal ? safeArea.xMin * unitsPerPixel : 0f;
+        float right = applyHorizontal ? (screenWidth - safeArea.xMax) * unitsPerPixel : 0f;
+
+        var rect = _extendedBackground.rectTransform;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = new Vector2(-left, -bottom);
+        rect.offsetMax = new Vector2(right, top);
+        bool extended = top > 0.01f || bottom > 0.01f || left > 0.01f || right > 0.01f;
+        _extendedBackground.gameObject.SetActive(extended);
+        // Retain the original Image and its raycast behaviour without drawing
+        // a second frame over the extended artwork.
+        Color color = _originalBackgroundColor;
+        if (extended) color.a = 0f;
+        _hudBackground.color = color;
     }
 
     private Rect GetEffectiveSafeArea(
