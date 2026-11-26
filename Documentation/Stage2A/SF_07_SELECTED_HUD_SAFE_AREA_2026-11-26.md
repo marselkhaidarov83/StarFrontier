@@ -6,3 +6,7 @@ Scope based on owner screenshots: SF05,06,07,08,10,14,15 top; SF15,16 bottom. SF
 - GalaxyScene: PF_GalaxyHudBottomRoot moved into existing SafeAreaRoot_BottomHud; reviewedBottomProfilesOnly preserves full-screen geometry for other profiles. Top adapter uses expanded reviewed profile set. New decorative images do not receive raycasts.
 - GalaxyMapViewFitter detects transitions between selected layout profiles, including same-resolution stress profiles.
 - No changes to shared prefabs, Config, State, Save, mission or camera zoom logic. Reused sprites may need minor visual adjustment depending on exact proportions. Compile, manual, Android, regression and UA pending. No main integration or production status changes.
+
+## FPS display hidden (owner request, 2026-11-26)
+- PF_HudTopRoot.prefab: child FPS/FPSText (GameObject 1632476899426312200) inactive by default. Shared upper HUD in SystemScene (planet/station/system) and GalaxyScene. No scene overrides for this object found.
+- FpsCounter.cs remains unchanged; FPS parent and diagnostic Update/aggregate logging remain enabled in Editor/development builds; re-enable FPSText for visual debugging if needed. Safe area, artwork, layout and gameplay unchanged. Compile and manual regression pending; no production status change.
