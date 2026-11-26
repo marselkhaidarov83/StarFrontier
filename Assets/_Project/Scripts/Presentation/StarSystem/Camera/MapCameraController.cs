@@ -291,19 +291,26 @@ public class MapCameraController : MonoBehaviour
         if (Mathf.Abs(scroll) <= 0.01f)
             return;
 
-        BeginManualZoom();
-
-        /*
-         * Стандартное колесо Input System часто возвращает шаг 120.
-         * Нормализация предотвращает слишком резкий скачок.
-         */
-        float normalizedScroll = scroll / 120f;
-
-        targetZoom -=
-            normalizedScroll * mouseZoomSpeed;
-
-        targetZoom = ClampZoom(targetZoom);
+        // Standard Input System wheel step is 120.
+        ApplyManualZoomSteps(scroll / 120f);
     }
+
+    private void ApplyManualZoomSteps(float steps)
+    {
+        BeginManualZoom();
+        targetZoom = ClampZoom(targetZoom - steps * mouseZoomSpeed);
+    }
+
+#if UNITY_EDITOR
+    public void EditorZoomStep(bool zoomIn)
+    {
+        if (!isActiveAndEnabled || !handleZoom || cam == null ||
+            !IsSystemCameraControllingPosition()) return;
+
+        // Use the same target, bounds and smoothing as the mouse wheel.
+        ApplyManualZoomSteps(zoomIn ? 1f : -1f);
+    }
+#endif
 
     private void HandleTouchDrag()
     {

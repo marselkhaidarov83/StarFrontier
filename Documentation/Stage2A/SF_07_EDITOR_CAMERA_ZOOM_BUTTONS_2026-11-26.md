@@ -1,0 +1,3 @@
+# SF_07 — Editor camera zoom buttons
+Base: stage-2a-prereliz @ 96f8bb69f48c753c700acaa4942db0406c9ba581.
+SystemScene.unity: Canvas/SafeAreaRoot_BottomHud/SystemMapRightBottomHUD/ActionButtonsBlock (426864318); SystemCameraActionButtonsThreatPanelOffset2A (426864321), existing scene binding to primary button background. Editor-only runtime buttons, 90x90 layout inherited from ReturnToShipButton. Existing threat-panel offset preserved. MapCameraController.EditorZoomStep shares ApplyManualZoomSteps with mouse wheel; existing bounds, smoothing and manual zoom mode transitions preserved. SystemEditorZoomGlyph2A draws plus/minus magnifier. No Config, State, Save changes. Formal production mapping pending Navigator. Compile, tests, manual, Android and main integration pending.
