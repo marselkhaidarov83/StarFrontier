@@ -307,8 +307,13 @@ public class MapCameraController : MonoBehaviour
         if (!isActiveAndEnabled || !handleZoom || cam == null ||
             !IsSystemCameraControllingPosition()) return;
 
-        // Use the same target, bounds and smoothing as the mouse wheel.
-        ApplyManualZoomSteps(zoomIn ? 1f : -1f);
+        // Smaller proportional steps for the simulator, including close zoom.
+        // Keep the wheel and touch sensitivity unchanged.
+        BeginManualZoom();
+        const float editorZoomFactor = 1.10f;
+        targetZoom = ClampZoom(targetZoom * (zoomIn
+            ? 1f / editorZoomFactor
+            : editorZoomFactor));
     }
 #endif
 
