@@ -40,14 +40,16 @@ public sealed class SystemHudSafeAreaAdapter2A :
     [SerializeField]
     private bool fillBottomUnsafeArea;
 
-    // SF 03 prototype only. The galaxy adapter retains its old full-screen
-    // placement for every other profile until their layouts are reviewed.
-    [SerializeField] private bool sf03Only;
+    // The galaxy adapter retains its old full-screen placement for profiles
+    // whose top HUD has not yet been reviewed.
+    [UnityEngine.Serialization.FormerlySerializedAs("sf03Only")]
+    [SerializeField] private bool reviewedTopProfilesOnly;
     [SerializeField] private Sprite sf03TallTopArtwork;
-    private Image _sf03OriginalArtwork;
-    private Image _sf03TallImage;
-    private Color _sf03OriginalColor;
-    private bool _sf03ArtworkActive;
+    [SerializeField] private Sprite sf04TallTopArtwork;
+    private Image _originalTopArtwork;
+    private Image _reviewedTopImage;
+    private Color _originalTopColor;
+    private bool _reviewedTopArtworkActive;
 
     private readonly RectTransform[] _insetCaps = new RectTransform[3];
     private RectTransform _leftCap;
@@ -333,8 +335,8 @@ public sealed class SystemHudSafeAreaAdapter2A :
             effectiveSafeArea.yMax /
             screenHeight;
 
-        bool sf03 = IsSf03Profile(effectiveSafeArea, screenWidth, screenHeight);
-        if (sf03Only && !sf03)
+        int topProfile = GetReviewedTopProfile(effectiveSafeArea, screenWidth, screenHeight);
+        if (reviewedTopProfilesOnly && topProfile == 0)
         {
             normalizedMinX = normalizedMinY = 0f;
             normalizedMaxX = normalizedMaxY = 1f;
@@ -375,8 +377,10 @@ public sealed class SystemHudSafeAreaAdapter2A :
                 Vector2.zero;
         }
 
-        bool tallArtwork = UpdateSf03TopArtwork(sf03, effectiveSafeArea, screenHeight);
-        if (!tallArtwork && (!sf03Only || sf03))
+        Sprite topArtwork = topProfile == 3 ? sf03TallTopArtwork :
+            topProfile == 4 ? sf04TallTopArtwork : null;
+        bool tallArtwork = UpdateReviewedTopArtwork(topArtwork, effectiveSafeArea, screenHeight);
+        if (!tallArtwork && (!reviewedTopProfilesOnly || topProfile != 0))
             UpdateHudDecoration(effectiveSafeArea, screenWidth, screenHeight);
         else
             HideInsetCaps();
@@ -430,56 +434,70 @@ public sealed class SystemHudSafeAreaAdapter2A :
             Mathf.Abs(area.width - 1440f) < 1f && Mathf.Abs(area.height - 2780f) < 1f;
     }
 
-    private bool UpdateSf03TopArtwork(bool sf03, Rect area, int screenHeight)
+    public static bool IsSf04Profile(Rect area, int width, int height)
     {
-        bool show = sf03 && sf03TallTopArtwork != null;
+        return width == 720 && height == 1640 &&
+            Mathf.Abs(area.xMin) < 1f && Mathf.Abs(area.yMin) < 1f &&
+            Mathf.Abs(area.width - 720f) < 1f && Mathf.Abs(area.height - 1590f) < 1f;
+    }
+
+    public static int GetReviewedTopProfile(Rect area, int width, int height)
+    {
+        if (IsSf03Profile(area, width, height)) return 3;
+        if (IsSf04Profile(area, width, height)) return 4;
+        return 0;
+    }
+
+    private bool UpdateReviewedTopArtwork(Sprite sprite, Rect area, int screenHeight)
+    {
+        bool show = sprite != null;
         if (!show)
         {
-            if (_sf03ArtworkActive && _sf03OriginalArtwork != null)
-                _sf03OriginalArtwork.color = _sf03OriginalColor;
-            if (_sf03TallImage != null)
-                _sf03TallImage.gameObject.SetActive(false);
-            _sf03ArtworkActive = false;
+            if (_reviewedTopArtworkActive && _originalTopArtwork != null)
+                _originalTopArtwork.color = _originalTopColor;
+            if (_reviewedTopImage != null)
+                _reviewedTopImage.gameObject.SetActive(false);
+            _reviewedTopArtworkActive = false;
             return false;
         }
 
         var hud = transform.Find("PF_HudTopRoot") as RectTransform;
         if (hud == null) return false;
-        if (_sf03OriginalArtwork == null)
+        if (_originalTopArtwork == null)
         {
             var background = hud.Find("BackgroundImage");
-            if (background == null || !background.TryGetComponent(out _sf03OriginalArtwork))
+            if (background == null || !background.TryGetComponent(out _originalTopArtwork))
                 return false;
-            _sf03OriginalColor = _sf03OriginalArtwork.color;
+            _originalTopColor = _originalTopArtwork.color;
         }
-        if (_sf03TallImage == null)
+        if (_reviewedTopImage == null)
         {
-            var artwork = new GameObject("SF03_TallHudArtwork", typeof(RectTransform),
+            var artwork = new GameObject("ReviewedProfile_TallHudArtwork", typeof(RectTransform),
                 typeof(CanvasRenderer), typeof(Image));
             artwork.layer = gameObject.layer;
             var rt = artwork.GetComponent<RectTransform>();
             rt.SetParent(_rectTransform, false);
             rt.SetAsFirstSibling();
-            _sf03TallImage = artwork.GetComponent<Image>();
-            _sf03TallImage.sprite = sf03TallTopArtwork;
-            _sf03TallImage.material = _sf03OriginalArtwork.material;
-            _sf03TallImage.color = _sf03OriginalColor;
-            _sf03TallImage.raycastTarget = false;
-            _sf03TallImage.preserveAspect = false;
+            _reviewedTopImage = artwork.GetComponent<Image>();
+            _reviewedTopImage.material = _originalTopArtwork.material;
+            _reviewedTopImage.color = _originalTopColor;
+            _reviewedTopImage.raycastTarget = false;
+            _reviewedTopImage.preserveAspect = false;
         }
 
+        _reviewedTopImage.sprite = sprite;
         // The safe HUD retains its 200-unit rectangle. The new sprite
         // runs from its original bottom edge up to the physical screen top.
-        var rect = _sf03TallImage.rectTransform;
+        var rect = _reviewedTopImage.rectTransform;
         rect.anchorMin = new Vector2(0f, 1f);
         rect.anchorMax = new Vector2(1f, 1f + (screenHeight - area.yMax) / Mathf.Max(1f, area.height));
         rect.offsetMin = new Vector2(0f, -hud.rect.height);
         rect.offsetMax = Vector2.zero;
-        _sf03TallImage.gameObject.SetActive(true);
-        var color = _sf03OriginalColor;
+        _reviewedTopImage.gameObject.SetActive(true);
+        var color = _originalTopColor;
         color.a = 0f;
-        _sf03OriginalArtwork.color = color;
-        _sf03ArtworkActive = true;
+        _originalTopArtwork.color = color;
+        _reviewedTopArtworkActive = true;
         return true;
     }
 

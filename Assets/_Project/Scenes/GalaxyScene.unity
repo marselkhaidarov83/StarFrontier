@@ -171,8 +171,9 @@ MonoBehaviour:
   applyHorizontal: 1
   applyVertical: 1
   resetOffsetsAfterApply: 1
-  sf03Only: 1
+  reviewedTopProfilesOnly: 1
   sf03TallTopArtwork: {fileID: 21300000, guid: 8be52c4f179a4b699391ae065d36f038, type: 3}
+  sf04TallTopArtwork: {fileID: 21300000, guid: 60c8da2f2bd844719686c1d606a629f2, type: 3}
   simulateSafeAreaInEditor: 0
   simulatedInsetsPixels: {x: 0, y: 0, z: 0, w: 0}
   logChanges: 0
