@@ -37,6 +37,7 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
     private Coroutine _fitCoroutine;
     private int _lastScreenWidth;
     private int _lastScreenHeight;
+    private bool _lastSf03Profile;
 
     public float FitOrthographicSize { get; private set; }
     public Bounds ContentBounds { get; private set; }
@@ -58,8 +59,9 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
         if (!recalculateOnResolutionChange)
             return;
 
+        bool sf03 = SystemHudSafeAreaAdapter2A.IsSf03Profile(Screen.safeArea, Screen.width, Screen.height);
         if (_lastScreenWidth == Screen.width &&
-            _lastScreenHeight == Screen.height)
+            _lastScreenHeight == Screen.height && _lastSf03Profile == sf03)
         {
             return;
         }
@@ -84,7 +86,10 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
         // и TextMeshPro построит геометрию текстов.
         yield return new WaitForEndOfFrame();
 
+        bool previousSf03 = _lastSf03Profile;
         FitNow();
+        if (previousSf03 != _lastSf03Profile)
+            GetComponent<GalaxySectorVisualFitter2A>()?.FitNow();
 
         _fitCoroutine = null;
     }
@@ -160,6 +165,7 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
 
         _lastScreenWidth = Screen.width;
         _lastScreenHeight = Screen.height;
+        _lastSf03Profile = SystemHudSafeAreaAdapter2A.IsSf03Profile(Screen.safeArea, Screen.width, Screen.height);
 
         return FitOrthographicSize;
     }

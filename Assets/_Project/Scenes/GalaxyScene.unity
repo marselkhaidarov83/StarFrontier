@@ -147,7 +147,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 174899926}
   m_Father: {fileID: 691586607}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -170,6 +171,8 @@ MonoBehaviour:
   applyHorizontal: 1
   applyVertical: 1
   resetOffsetsAfterApply: 1
+  sf03Only: 1
+  sf03TallTopArtwork: {fileID: 21300000, guid: 8be52c4f179a4b699391ae065d36f038, type: 3}
   simulateSafeAreaInEditor: 0
   simulatedInsetsPixels: {x: 0, y: 0, z: 0, w: 0}
   logChanges: 0
@@ -889,9 +892,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 174899926}
-  - {fileID: 15177284}
   - {fileID: 5688391}
+  - {fileID: 15177284}
   - {fileID: 1118958437}
   - {fileID: 562178307}
   m_Father: {fileID: 0}
@@ -1393,7 +1395,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 691586607}
+    m_TransformParent: {fileID: 5688391}
     m_Modifications:
     - target: {fileID: 4451064579014983664, guid: 2054ff7dd17c24125b50f19f81f0e061, type: 3}
       propertyPath: m_Name
