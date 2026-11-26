@@ -4447,6 +4447,7 @@ MonoBehaviour:
   actionButtonsRoot: {fileID: 426864318}
   threatPanel: {fileID: 0}
   panelGap: 18
+  editorZoomButtonBackground: {fileID: 21300000, guid: b336dd815725343d6a8b8a190aa42323, type: 3}
 --- !u!1 &466383054
 GameObject:
   m_ObjectHideFlags: 0
