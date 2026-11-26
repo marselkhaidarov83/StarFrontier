@@ -46,6 +46,9 @@ public sealed class SystemHudSafeAreaAdapter2A :
     [SerializeField] private bool reviewedTopProfilesOnly;
     [SerializeField] private Sprite sf03TallTopArtwork;
     [SerializeField] private Sprite sf04TallTopArtwork;
+    [SerializeField] private bool reviewedBottomProfilesOnly;
+    [SerializeField] private Sprite sf15BottomArtwork;
+    [SerializeField] private Sprite sf16BottomArtwork;
     private Image _originalTopArtwork;
     private Image _reviewedTopImage;
     private Color _originalTopColor;
@@ -336,7 +339,10 @@ public sealed class SystemHudSafeAreaAdapter2A :
             screenHeight;
 
         int topProfile = GetReviewedTopProfile(effectiveSafeArea, screenWidth, screenHeight);
-        if (reviewedTopProfilesOnly && topProfile == 0)
+        int bottomProfile = GetReviewedBottomProfile(effectiveSafeArea, screenWidth, screenHeight);
+        bool legacyFullScreen = (reviewedTopProfilesOnly && topProfile == 0) ||
+            (reviewedBottomProfilesOnly && bottomProfile == 0);
+        if (legacyFullScreen)
         {
             normalizedMinX = normalizedMinY = 0f;
             normalizedMaxX = normalizedMaxY = 1f;
@@ -377,10 +383,14 @@ public sealed class SystemHudSafeAreaAdapter2A :
                 Vector2.zero;
         }
 
-        Sprite topArtwork = topProfile == 3 ? sf03TallTopArtwork :
-            topProfile == 4 ? sf04TallTopArtwork : null;
-        bool tallArtwork = UpdateReviewedTopArtwork(topArtwork, effectiveSafeArea, screenHeight);
-        if (!tallArtwork && (!reviewedTopProfilesOnly || topProfile != 0))
+        Sprite topArtwork = topProfile == 3 || topProfile == 15 ? sf03TallTopArtwork :
+            topProfile != 0 ? sf04TallTopArtwork : null;
+        Sprite bottomArtwork = bottomProfile == 15 ? sf15BottomArtwork :
+            bottomProfile == 16 ? sf16BottomArtwork : null;
+        bool useBottomArtwork = bottomArtwork != null;
+        bool tallArtwork = UpdateReviewedArtwork(useBottomArtwork ? bottomArtwork : topArtwork,
+            useBottomArtwork, effectiveSafeArea, screenHeight);
+        if (!tallArtwork && !legacyFullScreen)
             UpdateHudDecoration(effectiveSafeArea, screenWidth, screenHeight);
         else
             HideInsetCaps();
@@ -445,10 +455,39 @@ public sealed class SystemHudSafeAreaAdapter2A :
     {
         if (IsSf03Profile(area, width, height)) return 3;
         if (IsSf04Profile(area, width, height)) return 4;
+        if (MatchesProfile(area, width, height, 1080, 2400, 75, 0)) return 5;
+        if (MatchesProfile(area, width, height, 1080, 2340, 75, 0)) return 6;
+        if (MatchesProfile(area, width, height, 1440, 3120, 100, 0)) return 7;
+        if (MatchesProfile(area, width, height, 1440, 3040, 110, 0)) return 8;
+        if (MatchesProfile(area, width, height, 968, 2376, 70, 0)) return 10;
+        if (MatchesProfile(area, width, height, 1080, 2400, 72, 0)) return 14;
+        if (MatchesProfile(area, width, height, 1080, 2400, 144, 72)) return 15;
         return 0;
     }
 
-    private bool UpdateReviewedTopArtwork(Sprite sprite, Rect area, int screenHeight)
+    public static int GetReviewedBottomProfile(Rect area, int width, int height)
+    {
+        if (MatchesProfile(area, width, height, 1080, 2400, 144, 72)) return 15;
+        if (MatchesProfile(area, width, height, 1080, 2400, 0, 120)) return 16;
+        return 0;
+    }
+
+    public static int GetReviewedLayoutProfile(Rect area, int width, int height)
+    {
+        int top = GetReviewedTopProfile(area, width, height);
+        return top != 0 ? top : GetReviewedBottomProfile(area, width, height);
+    }
+
+    private static bool MatchesProfile(Rect area, int width, int height,
+        int profileWidth, int profileHeight, int topInset, int bottomInset)
+    {
+        return width == profileWidth && height == profileHeight &&
+            Mathf.Abs(area.xMin) < 1f && Mathf.Abs(area.width - profileWidth) < 1f &&
+            Mathf.Abs(area.yMin - bottomInset) < 1f &&
+            Mathf.Abs(area.yMax - (profileHeight - topInset)) < 1f;
+    }
+
+    private bool UpdateReviewedArtwork(Sprite sprite, bool bottom, Rect area, int screenHeight)
     {
         bool show = sprite != null;
         if (!show)
@@ -461,11 +500,13 @@ public sealed class SystemHudSafeAreaAdapter2A :
             return false;
         }
 
-        var hud = transform.Find("PF_HudTopRoot") as RectTransform;
+        var hud = bottom
+            ? (transform.Find("PF_SystemHudBottomRoot") ?? transform.Find("PF_GalaxyHudBottomRoot")) as RectTransform
+            : transform.Find("PF_HudTopRoot") as RectTransform;
         if (hud == null) return false;
         if (_originalTopArtwork == null)
         {
-            var background = hud.Find("BackgroundImage");
+            var background = bottom ? hud : hud.Find("BackgroundImage");
             if (background == null || !background.TryGetComponent(out _originalTopArtwork))
                 return false;
             _originalTopColor = _originalTopArtwork.color;
@@ -486,13 +527,23 @@ public sealed class SystemHudSafeAreaAdapter2A :
         }
 
         _reviewedTopImage.sprite = sprite;
-        // The safe HUD retains its 200-unit rectangle. The new sprite
-        // runs from its original bottom edge up to the physical screen top.
+        // Keep the safe HUD content rectangle and its hit targets unchanged.
+        // Only the decorative image extends to the physical screen edge.
         var rect = _reviewedTopImage.rectTransform;
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f + (screenHeight - area.yMax) / Mathf.Max(1f, area.height));
-        rect.offsetMin = new Vector2(0f, -hud.rect.height);
-        rect.offsetMax = Vector2.zero;
+        if (bottom)
+        {
+            rect.anchorMin = new Vector2(0f, -area.yMin / Mathf.Max(1f, area.height));
+            rect.anchorMax = new Vector2(1f, 0f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = new Vector2(0f, hud.rect.height);
+        }
+        else
+        {
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f + (screenHeight - area.yMax) / Mathf.Max(1f, area.height));
+            rect.offsetMin = new Vector2(0f, -hud.rect.height);
+            rect.offsetMax = Vector2.zero;
+        }
         _reviewedTopImage.gameObject.SetActive(true);
         var color = _originalTopColor;
         color.a = 0f;

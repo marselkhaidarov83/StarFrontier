@@ -37,7 +37,7 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
     private Coroutine _fitCoroutine;
     private int _lastScreenWidth;
     private int _lastScreenHeight;
-    private int _lastReviewedTopProfile;
+    private int _lastReviewedLayoutProfile;
 
     public float FitOrthographicSize { get; private set; }
     public Bounds ContentBounds { get; private set; }
@@ -59,9 +59,9 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
         if (!recalculateOnResolutionChange)
             return;
 
-        int topProfile = SystemHudSafeAreaAdapter2A.GetReviewedTopProfile(Screen.safeArea, Screen.width, Screen.height);
+        int layoutProfile = SystemHudSafeAreaAdapter2A.GetReviewedLayoutProfile(Screen.safeArea, Screen.width, Screen.height);
         if (_lastScreenWidth == Screen.width &&
-            _lastScreenHeight == Screen.height && _lastReviewedTopProfile == topProfile)
+            _lastScreenHeight == Screen.height && _lastReviewedLayoutProfile == layoutProfile)
         {
             return;
         }
@@ -86,9 +86,9 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
         // и TextMeshPro построит геометрию текстов.
         yield return new WaitForEndOfFrame();
 
-        int previousTopProfile = _lastReviewedTopProfile;
+        int previousLayoutProfile = _lastReviewedLayoutProfile;
         FitNow();
-        if (previousTopProfile != _lastReviewedTopProfile)
+        if (previousLayoutProfile != _lastReviewedLayoutProfile)
             GetComponent<GalaxySectorVisualFitter2A>()?.FitNow();
 
         _fitCoroutine = null;
@@ -165,7 +165,7 @@ public sealed class GalaxyMapViewFitter : MonoBehaviour
 
         _lastScreenWidth = Screen.width;
         _lastScreenHeight = Screen.height;
-        _lastReviewedTopProfile = SystemHudSafeAreaAdapter2A.GetReviewedTopProfile(Screen.safeArea, Screen.width, Screen.height);
+        _lastReviewedLayoutProfile = SystemHudSafeAreaAdapter2A.GetReviewedLayoutProfile(Screen.safeArea, Screen.width, Screen.height);
 
         return FitOrthographicSize;
     }

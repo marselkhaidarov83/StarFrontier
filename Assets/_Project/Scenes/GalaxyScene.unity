@@ -894,7 +894,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5688391}
-  - {fileID: 15177284}
   - {fileID: 1118958437}
   - {fileID: 562178307}
   m_Father: {fileID: 0}
@@ -932,7 +931,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 15177284}
   m_Father: {fileID: 691586607}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -955,6 +955,9 @@ MonoBehaviour:
   applyHorizontal: 1
   applyVertical: 1
   resetOffsetsAfterApply: 1
+  reviewedBottomProfilesOnly: 1
+  sf15BottomArtwork: {fileID: 21300000, guid: 60c8da2f2bd844719686c1d606a629f2, type: 3}
+  sf16BottomArtwork: {fileID: 21300000, guid: 8be52c4f179a4b699391ae065d36f038, type: 3}
   simulateSafeAreaInEditor: 0
   simulatedInsetsPixels: {x: 0, y: 0, z: 0, w: 0}
   logChanges: 0
@@ -1299,7 +1302,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 691586607}
+    m_TransformParent: {fileID: 1118958437}
     m_Modifications:
     - target: {fileID: 1266221940247533280, guid: 201aaec0b901f4833807a676432467fb, type: 3}
       propertyPath: m_Name
